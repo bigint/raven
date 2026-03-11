@@ -4,6 +4,7 @@ import {
   getDateRange,
   getGranularity,
 } from '@/components/shared/date-range-picker'
+import { EmptyState } from '@/components/shared/empty-state'
 import { StatCard } from '@/components/shared/stat-card'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -34,47 +35,47 @@ export default function OverviewPage() {
     : []
 
   return (
-    <div className="space-y-6">
-      {/* Header with title and date range picker */}
+    <div className="space-y-8">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Overview</h1>
-          <p className="text-sm text-neutral-500 mt-1">
+          <h1 className="text-2xl font-bold text-white">Overview</h1>
+          <p className="text-sm text-zinc-500 mt-1">
             Gateway performance at a glance
           </p>
         </div>
         <DateRangePicker value={range} onChange={setRange} />
       </div>
 
-      {/* 4 stat cards - always visible, show 0 if no data */}
+      {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Total Requests"
           value={formatNumber(usage?.total_requests ?? 0)}
           icon={<Activity className="h-5 w-5" />}
           sparklineData={usage?.timeseries}
-          sparklineColor="#4338CA"
+          sparklineColor="#6366f1"
         />
         <StatCard
           label="Total Cost"
           value={formatCurrency(cost?.total_cost ?? 0)}
           icon={<DollarSign className="h-5 w-5" />}
           sparklineData={cost?.timeseries}
-          sparklineColor="#F59E0B"
+          sparklineColor="#f59e0b"
         />
         <StatCard
           label="Cache Hit Rate"
           value={formatPercent(cache?.hit_rate ?? 0)}
           icon={<Zap className="h-5 w-5" />}
           sparklineData={cache?.timeseries}
-          sparklineColor="#22C55E"
+          sparklineColor="#22c55e"
         />
         <StatCard
           label="Avg Latency"
           value={formatLatency(latency?.avg_latency_ms ?? 0)}
           icon={<Timer className="h-5 w-5" />}
           sparklineData={latency?.timeseries}
-          sparklineColor="#6366F1"
+          sparklineColor="#818cf8"
         />
       </div>
 
@@ -89,13 +90,11 @@ export default function OverviewPage() {
             {topModels.length > 0 ? (
               <BarChart data={topModels} height={220} valueFormatter={formatNumber} />
             ) : (
-              <div className="flex flex-col items-center justify-center h-[200px] text-center">
-                <Activity className="h-8 w-8 text-neutral-600 mb-3" />
-                <p className="text-sm text-neutral-500">No requests yet</p>
-                <p className="text-xs text-neutral-600 mt-1">
-                  Send your first request to see model usage
-                </p>
-              </div>
+              <EmptyState
+                title="No requests yet"
+                description="Send your first request to see model usage"
+                icon={<Activity className="h-8 w-8 text-zinc-600" />}
+              />
             )}
           </CardContent>
         </Card>
@@ -107,19 +106,21 @@ export default function OverviewPage() {
           </CardHeader>
           <CardContent>
             {providers && providers.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-1">
                 {providers.map((provider) => (
                   <div
                     key={provider.id}
-                    className="flex items-center justify-between py-2 border-b border-white/10 last:border-0"
+                    className="flex items-center justify-between py-3 px-3 rounded-lg hover:bg-white/[3%] transition-colors duration-150"
                   >
                     <div className="flex items-center gap-3">
-                      <Server className="h-4 w-4 text-neutral-500" />
+                      <div className="rounded-lg bg-white/[4%] p-2">
+                        <Server className="h-4 w-4 text-zinc-500" />
+                      </div>
                       <div>
-                        <p className="text-sm font-medium text-neutral-100">
+                        <p className="text-sm font-medium text-zinc-100">
                           {provider.display_name}
                         </p>
-                        <p className="text-xs text-neutral-500">
+                        <p className="text-xs text-zinc-600">
                           {provider.models.length} models
                         </p>
                       </div>
@@ -132,6 +133,7 @@ export default function OverviewPage() {
                             ? 'warning'
                             : 'error'
                       }
+                      dot
                     >
                       {provider.status}
                     </Badge>
@@ -139,13 +141,11 @@ export default function OverviewPage() {
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center h-[200px] text-center">
-                <Server className="h-8 w-8 text-neutral-600 mb-3" />
-                <p className="text-sm text-neutral-500">No providers configured</p>
-                <p className="text-xs text-neutral-600 mt-1">
-                  Go to Providers to add your API keys
-                </p>
-              </div>
+              <EmptyState
+                title="No providers configured"
+                description="Go to Providers to add your API keys"
+                icon={<Server className="h-8 w-8 text-zinc-600" />}
+              />
             )}
           </CardContent>
         </Card>
