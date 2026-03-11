@@ -44,9 +44,9 @@ function ProviderCard({
   provider: Provider
   onConfigure: (provider: Provider, isEditing: boolean) => void
 }) {
-  const { data: health } = useProviderHealth(provider.id)
-  const isConfigured = provider.status !== 'down' || provider.enabled
-  const hasModels = provider.models.length > 0
+  const { data: health } = useProviderHealth(provider.name)
+  const isConfigured = provider.configured || provider.enabled
+  const status = provider.healthy ? 'healthy' : provider.configured ? 'degraded' : 'down'
 
   return (
     <Card className="hover:border-white/[0.10]">
@@ -56,16 +56,16 @@ function ProviderCard({
             <div className="flex items-center gap-2">
               <span
                 className={`h-2 w-2 rounded-full ${
-                  provider.status === 'healthy'
+                  status === 'healthy'
                     ? 'bg-[#22c55e]'
-                    : provider.status === 'degraded'
+                    : status === 'degraded'
                       ? 'bg-[#f59e0b]'
                       : 'bg-[#ef4444]'
                 }`}
               />
               <h3 className="text-[13px] font-medium text-[#fafafa]">{provider.display_name}</h3>
             </div>
-            <p className="mt-0.5 text-[11px] text-[#525252]">{provider.status}</p>
+            <p className="mt-0.5 text-[11px] text-[#525252]">{status}</p>
           </div>
         </div>
 
@@ -87,15 +87,8 @@ function ProviderCard({
         )}
 
         <div className="mb-3">
-          {hasModels ? (
-            <div className="flex flex-wrap gap-1">
-              {provider.models.slice(0, 4).map((model) => (
-                <span key={model} className="text-[11px] text-[#525252]">{model}</span>
-              ))}
-              {provider.models.length > 4 && (
-                <span className="text-[11px] text-[#525252]">+{provider.models.length - 4} more</span>
-              )}
-            </div>
+          {provider.models > 0 ? (
+            <p className="text-[11px] text-[#525252]">{provider.models} model{provider.models !== 1 ? 's' : ''} available</p>
           ) : (
             <p className="text-[11px] text-[#525252]">No models available</p>
           )}
@@ -339,8 +332,8 @@ export default function ProvidersPage() {
 
   const sortedProviders = useMemo(() => {
     if (!providers) return []
-    const configured = providers.filter((p) => p.status !== 'down' || p.enabled)
-    const unconfigured = providers.filter((p) => p.status === 'down' && !p.enabled)
+    const configured = providers.filter((p) => p.configured || p.enabled)
+    const unconfigured = providers.filter((p) => !p.configured && !p.enabled)
     return [...configured, ...unconfigured]
   }, [providers])
 
@@ -363,7 +356,7 @@ export default function ProvidersPage() {
       ) : sortedProviders.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {sortedProviders.map((provider) => (
-            <ProviderCard key={provider.id} provider={provider} onConfigure={handleConfigure} />
+            <ProviderCard key={provider.name} provider={provider} onConfigure={handleConfigure} />
           ))}
         </div>
       ) : (

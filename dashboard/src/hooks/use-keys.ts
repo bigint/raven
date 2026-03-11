@@ -19,16 +19,6 @@ export function useCreateKey() {
   })
 }
 
-export function useRotateKey() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (id: string) => apiClient.rotateKey(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['keys'] })
-    },
-  })
-}
-
 export function useDeleteKey() {
   const queryClient = useQueryClient()
   return useMutation({

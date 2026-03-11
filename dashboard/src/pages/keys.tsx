@@ -8,12 +8,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { DropdownItem, DropdownMenu, DropdownSeparator } from '@/components/ui/dropdown-menu'
+import { DropdownItem, DropdownMenu } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
-import { useCreateKey, useDeleteKey, useKeys, useRotateKey } from '@/hooks/use-keys'
+import { useCreateKey, useDeleteKey, useKeys } from '@/hooks/use-keys'
 import type { VirtualKey } from '@/lib/types'
 import { formatDistanceToNow } from 'date-fns'
-import { Copy, MoreVertical, Plus, RotateCw, Trash2 } from 'lucide-react'
+import { Copy, MoreVertical, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
 function relativeTime(dateStr: string | undefined): string {
@@ -34,7 +34,6 @@ export default function KeysPage() {
 
   const { data, isLoading } = useKeys({ page, per_page: 20, search })
   const createKey = useCreateKey()
-  const rotateKey = useRotateKey()
   const deleteKey = useDeleteKey()
 
   const handleCreate = async () => {
@@ -118,11 +117,6 @@ export default function KeysPage() {
             </button>
           }
         >
-          <DropdownItem onClick={() => rotateKey.mutate(item.id)}>
-            <RotateCw className="h-3.5 w-3.5" />
-            Rotate Key
-          </DropdownItem>
-          <DropdownSeparator />
           <DropdownItem danger onClick={() => deleteKey.mutate(item.id)}>
             <Trash2 className="h-3.5 w-3.5" />
             Delete Key

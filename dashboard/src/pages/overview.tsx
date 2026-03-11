@@ -90,25 +90,28 @@ export default function OverviewPage() {
           <CardContent>
             {providers && providers.length > 0 ? (
               <div>
-                {providers.map((provider) => (
-                  <div
-                    key={provider.id}
-                    className="flex items-center justify-between h-9 px-3 hover:bg-white/[0.02]"
-                  >
-                    <span className="text-xs text-[#a3a3a3]">{provider.display_name}</span>
-                    <Badge
-                      variant={
-                        provider.status === 'healthy'
-                          ? 'success'
-                          : provider.status === 'degraded'
-                            ? 'warning'
-                            : 'error'
-                      }
+                {providers.map((provider) => {
+                  const status = provider.healthy ? 'healthy' : provider.configured ? 'degraded' : 'down'
+                  return (
+                    <div
+                      key={provider.name}
+                      className="flex items-center justify-between h-9 px-3 hover:bg-white/[0.02]"
                     >
-                      {provider.status}
-                    </Badge>
-                  </div>
-                ))}
+                      <span className="text-xs text-[#a3a3a3]">{provider.display_name}</span>
+                      <Badge
+                        variant={
+                          status === 'healthy'
+                            ? 'success'
+                            : status === 'degraded'
+                              ? 'warning'
+                              : 'error'
+                        }
+                      >
+                        {status}
+                      </Badge>
+                    </div>
+                  )
+                })}
               </div>
             ) : (
               <EmptyState

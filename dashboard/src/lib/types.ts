@@ -86,13 +86,13 @@ export interface CreateKeyInput {
 }
 
 export interface Provider {
-  id: string
   name: string
   display_name: string
-  enabled: boolean
-  models: string[]
-  status: 'healthy' | 'degraded' | 'down'
   base_url: string
+  healthy: boolean
+  models: number
+  configured: boolean
+  enabled: boolean
 }
 
 export interface ProviderHealth {
@@ -236,6 +236,8 @@ export interface AnalyticsOpts {
 }
 
 export interface LogQueryOpts extends ListOpts {
+  cursor?: string
+  limit?: number
   provider?: string
   model?: string
   status?: number
@@ -260,7 +262,7 @@ export interface BudgetConfig {
 
 export interface GatewaySettings {
   version: string
-  uptime: string
+  uptime?: string
   cache_enabled: boolean
   guardrails_enabled: boolean
   rate_limiting_enabled: boolean

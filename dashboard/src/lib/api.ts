@@ -49,6 +49,18 @@ function buildQuery(params: object): string {
   return `?${searchParams.toString()}`
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function toPaginated<T>(res: any): PaginatedResponse<T> {
+  return {
+    data: res.data ?? [],
+    total: res.meta?.total ?? 0,
+    page: res.meta?.page ?? 1,
+    per_page: res.meta?.per_page ?? 20,
+    has_more: (res.meta?.page ?? 1) * (res.meta?.per_page ?? 20) < (res.meta?.total ?? 0),
+  }
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
 export class ApiClient {
   private baseUrl: string
 
@@ -77,7 +89,8 @@ export class ApiClient {
 
   // Orgs
   async listOrgs(opts?: ListOpts): Promise<PaginatedResponse<Org>> {
-    return this.request(`/admin/v1/orgs${buildQuery(opts ?? {})}`)
+    const res = await this.request<any>(`/admin/v1/orgs${buildQuery(opts ?? {})}`)
+    return toPaginated<Org>(res)
   }
 
   async createOrg(data: CreateOrgInput): Promise<Org> {
@@ -93,7 +106,7 @@ export class ApiClient {
 
   async updateOrg(id: string, data: UpdateOrgInput): Promise<Org> {
     return this.request(`/admin/v1/orgs/${id}`, {
-      method: 'PATCH',
+      method: 'PUT',
       body: JSON.stringify(data),
     })
   }
@@ -104,19 +117,21 @@ export class ApiClient {
 
   // Teams
   async listTeams(orgId: string, opts?: ListOpts): Promise<PaginatedResponse<Team>> {
-    return this.request(`/admin/v1/orgs/${orgId}/teams${buildQuery(opts ?? {})}`)
+    const res = await this.request<any>(`/admin/v1/teams${buildQuery({ org_id: orgId, ...(opts ?? {}) })}`)
+    return toPaginated<Team>(res)
   }
 
   async createTeam(orgId: string, data: CreateTeamInput): Promise<Team> {
-    return this.request(`/admin/v1/orgs/${orgId}/teams`, {
+    return this.request('/admin/v1/teams', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify({ ...data, org_id: orgId }),
     })
   }
 
   // Users
   async listUsers(opts?: ListOpts): Promise<PaginatedResponse<User>> {
-    return this.request(`/admin/v1/users${buildQuery(opts ?? {})}`)
+    const res = await this.request<any>(`/admin/v1/users${buildQuery(opts ?? {})}`)
+    return toPaginated<User>(res)
   }
 
   async createUser(data: CreateUserInput): Promise<User> {
@@ -128,7 +143,8 @@ export class ApiClient {
 
   // Keys
   async listKeys(opts?: ListOpts): Promise<PaginatedResponse<VirtualKey>> {
-    return this.request(`/admin/v1/keys${buildQuery(opts ?? {})}`)
+    const res = await this.request<any>(`/admin/v1/keys${buildQuery(opts ?? {})}`)
+    return toPaginated<VirtualKey>(res)
   }
 
   async createKey(data: CreateKeyInput): Promise<VirtualKey> {
@@ -138,25 +154,22 @@ export class ApiClient {
     })
   }
 
-  async rotateKey(id: string): Promise<VirtualKey> {
-    return this.request(`/admin/v1/keys/${id}/rotate`, { method: 'POST' })
-  }
-
   async deleteKey(id: string): Promise<void> {
     return this.request(`/admin/v1/keys/${id}`, { method: 'DELETE' })
   }
 
   // Providers
   async listProviders(): Promise<Provider[]> {
-    return this.request('/admin/v1/providers')
+    const res = await this.request<any>('/admin/v1/providers')
+    return Array.isArray(res) ? res : res.data ?? []
   }
 
-  async getProviderHealth(id: string): Promise<ProviderHealth> {
-    return this.request(`/admin/v1/providers/${id}/health`)
+  async getProviderHealth(name: string): Promise<ProviderHealth> {
+    return this.request(`/admin/v1/providers/${name}/health`)
   }
 
   async createProviderConfig(data: CreateProviderConfigInput): Promise<ProviderConfig> {
-    return this.request('/admin/v1/providers/config', {
+    return this.request('/admin/v1/providers', {
       method: 'POST',
       body: JSON.stringify(data),
     })
@@ -166,14 +179,14 @@ export class ApiClient {
     name: string,
     data: UpdateProviderConfigInput,
   ): Promise<ProviderConfig> {
-    return this.request(`/admin/v1/providers/config/${name}`, {
+    return this.request(`/admin/v1/providers/${name}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     })
   }
 
   async deleteProviderConfig(name: string): Promise<void> {
-    return this.request(`/admin/v1/providers/config/${name}`, { method: 'DELETE' })
+    return this.request(`/admin/v1/providers/${name}`, { method: 'DELETE' })
   }
 
   // Analytics
@@ -195,7 +208,8 @@ export class ApiClient {
 
   // Logs
   async listLogs(opts: LogQueryOpts): Promise<PaginatedResponse<RequestLog>> {
-    return this.request(`/admin/v1/logs${buildQuery(opts)}`)
+    const res = await this.request<any>(`/admin/v1/logs${buildQuery(opts)}`)
+    return toPaginated<RequestLog>(res)
   }
 
   async getLog(id: string): Promise<RequestLog> {
@@ -204,12 +218,14 @@ export class ApiClient {
 
   // Models
   async listModels(): Promise<Model[]> {
-    return this.request('/admin/v1/models')
+    const res = await this.request<any>('/admin/v1/models')
+    return Array.isArray(res) ? res : res.data ?? []
   }
 
   // Budgets
   async listBudgets(): Promise<BudgetConfig[]> {
-    return this.request('/admin/v1/budgets')
+    const res = await this.request<any>('/admin/v1/budgets')
+    return Array.isArray(res) ? res : res.data ?? []
   }
 
   async createBudget(data: Partial<BudgetConfig>): Promise<BudgetConfig> {
