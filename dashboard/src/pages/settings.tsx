@@ -9,15 +9,14 @@ export default function SettingsPage() {
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings'],
     queryFn: () => apiClient.getSettings(),
-    retry: false,
   })
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div>
-          <h1 className="text-xl font-semibold text-white">Settings</h1>
-          <p className="text-sm text-neutral-500 mt-1">Gateway configuration</p>
+          <h1 className="text-2xl font-bold text-white">Settings</h1>
+          <p className="text-sm text-zinc-500 mt-1">Gateway configuration</p>
         </div>
         <SkeletonCard />
       </div>
@@ -25,10 +24,10 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-xl font-semibold text-white">Settings</h1>
-        <p className="text-sm text-neutral-500 mt-1">Gateway configuration and status</p>
+        <h1 className="text-2xl font-bold text-white">Settings</h1>
+        <p className="text-sm text-zinc-500 mt-1">Gateway configuration and status</p>
       </div>
 
       <Card>
@@ -44,7 +43,7 @@ export default function SettingsPage() {
             <SettingRow
               label="Cache"
               value={
-                <Badge variant={settings?.cache_enabled ? 'success' : 'default'}>
+                <Badge variant={settings?.cache_enabled ? 'success' : 'default'} dot>
                   {settings?.cache_enabled ? 'Enabled' : 'Disabled'}
                 </Badge>
               }
@@ -53,7 +52,7 @@ export default function SettingsPage() {
             <SettingRow
               label="Guardrails"
               value={
-                <Badge variant={settings?.guardrails_enabled ? 'success' : 'default'}>
+                <Badge variant={settings?.guardrails_enabled ? 'success' : 'default'} dot>
                   {settings?.guardrails_enabled ? 'Enabled' : 'Disabled'}
                 </Badge>
               }
@@ -62,7 +61,7 @@ export default function SettingsPage() {
             <SettingRow
               label="Rate Limiting"
               value={
-                <Badge variant={settings?.rate_limiting_enabled ? 'success' : 'default'}>
+                <Badge variant={settings?.rate_limiting_enabled ? 'success' : 'default'} dot>
                   {settings?.rate_limiting_enabled ? 'Enabled' : 'Disabled'}
                 </Badge>
               }
@@ -76,7 +75,7 @@ export default function SettingsPage() {
                     <Badge key={p} variant="info">
                       {p}
                     </Badge>
-                  )) ?? <span className="text-neutral-500">None</span>}
+                  )) ?? <span className="text-zinc-600">None</span>}
                 </div>
               }
             />
@@ -89,9 +88,9 @@ export default function SettingsPage() {
 
 function SettingRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between">
-      <span className="text-sm text-neutral-500">{label}</span>
-      <span className="text-sm font-medium text-neutral-100">{value}</span>
+    <div className="flex items-center justify-between py-1">
+      <span className="text-sm text-zinc-500">{label}</span>
+      <span className="text-sm font-medium text-zinc-200">{value}</span>
     </div>
   )
 }

@@ -57,10 +57,14 @@ export function Sidebar() {
       {/* Mobile toggle */}
       <button
         type="button"
-        className="fixed top-4 left-4 z-50 rounded-xl bg-zinc-900 border border-white/10 p-2.5 lg:hidden hover:bg-white/5 transition-all duration-200"
+        className="fixed top-4 left-4 z-50 rounded-xl bg-zinc-900 border border-white/[8%] p-2.5 lg:hidden hover:bg-white/[5%] transition-all duration-200"
         onClick={() => setMobileOpen(!mobileOpen)}
       >
-        {mobileOpen ? <X className="h-5 w-5 text-zinc-300" /> : <Menu className="h-5 w-5 text-zinc-300" />}
+        {mobileOpen ? (
+          <X className="h-5 w-5 text-zinc-300" />
+        ) : (
+          <Menu className="h-5 w-5 text-zinc-300" />
+        )}
       </button>
 
       {/* Mobile overlay */}
@@ -139,9 +143,7 @@ export function Sidebar() {
         {/* Footer */}
         <div className="border-t border-white/[6%] px-6 py-4">
           <div className="flex items-center justify-between">
-            <p className="text-[10px] text-zinc-700 uppercase tracking-wider">
-              Raven Gateway
-            </p>
+            <p className="text-[10px] text-zinc-700 uppercase tracking-wider">Raven Gateway</p>
             <span className="text-[10px] font-mono text-zinc-700 bg-white/[3%] px-1.5 py-0.5 rounded">
               v0.1.0
             </span>

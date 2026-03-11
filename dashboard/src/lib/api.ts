@@ -236,8 +236,7 @@ export class ApiClient {
 }
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  (typeof window !== 'undefined' ? window.location.origin : '')
+  import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : '')
 const API_KEY = import.meta.env.VITE_API_KEY || import.meta.env.VITE_RAVEN_ADMIN_KEY || ''
 
 export const apiClient = new ApiClient(API_BASE_URL, API_KEY)

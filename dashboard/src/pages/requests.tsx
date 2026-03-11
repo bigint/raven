@@ -31,7 +31,6 @@ export default function RequestsPage() {
         status: statusFilter ? Number(statusFilter) : undefined,
         provider: providerFilter || undefined,
       }),
-    retry: false,
   })
 
   const handleSort = (key: string) => {
@@ -49,7 +48,7 @@ export default function RequestsPage() {
       header: 'Time',
       sortable: true,
       render: (item: RequestLog) => (
-        <span className="text-xs text-neutral-500">
+        <span className="text-xs text-zinc-500">
           {format(new Date(item.timestamp), 'MMM d, HH:mm:ss')}
         </span>
       ),
@@ -58,20 +57,24 @@ export default function RequestsPage() {
       key: 'provider',
       header: 'Provider',
       sortable: true,
-      render: (item: RequestLog) => <span className="text-sm font-medium">{item.provider}</span>,
+      render: (item: RequestLog) => (
+        <span className="text-sm font-medium text-zinc-200">{item.provider}</span>
+      ),
     },
     {
       key: 'model',
       header: 'Model',
       sortable: true,
-      render: (item: RequestLog) => <span className="text-sm text-neutral-100">{item.model}</span>,
+      render: (item: RequestLog) => <span className="text-sm text-zinc-300">{item.model}</span>,
     },
     {
       key: 'status_code',
       header: 'Status',
       sortable: true,
       render: (item: RequestLog) => (
-        <Badge variant={item.status_code < 400 ? 'success' : 'error'}>{item.status_code}</Badge>
+        <Badge variant={item.status_code < 400 ? 'success' : 'error'} dot>
+          {item.status_code}
+        </Badge>
       ),
     },
     {
@@ -79,7 +82,7 @@ export default function RequestsPage() {
       header: 'Latency',
       sortable: true,
       render: (item: RequestLog) => (
-        <span className="text-sm">{formatLatency(item.latency_ms)}</span>
+        <span className="text-sm text-zinc-300">{formatLatency(item.latency_ms)}</span>
       ),
     },
     {
@@ -87,16 +90,16 @@ export default function RequestsPage() {
       header: 'Tokens',
       sortable: true,
       render: (item: RequestLog) => (
-        <span className="text-sm text-neutral-500">
-          {item.total_tokens.toLocaleString()}
-        </span>
+        <span className="text-sm text-zinc-500">{item.total_tokens.toLocaleString()}</span>
       ),
     },
     {
       key: 'cost',
       header: 'Cost',
       sortable: true,
-      render: (item: RequestLog) => <span className="text-sm">{formatCurrency(item.cost)}</span>,
+      render: (item: RequestLog) => (
+        <span className="text-sm text-zinc-300">{formatCurrency(item.cost)}</span>
+      ),
     },
     {
       key: 'cache_hit',
@@ -110,10 +113,10 @@ export default function RequestsPage() {
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-xl font-semibold text-white">Requests</h1>
-        <p className="text-sm text-neutral-500 mt-1">Browse and filter request logs</p>
+        <h1 className="text-2xl font-bold text-white">Requests</h1>
+        <p className="text-sm text-zinc-500 mt-1">Browse and filter request logs</p>
       </div>
 
       {/* Filters */}
@@ -174,45 +177,49 @@ export default function RequestsPage() {
           <div className="space-y-4 text-sm">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-neutral-500 text-xs">Request ID</p>
-                <p className="font-mono text-xs mt-1">{selected.id}</p>
+                <p className="text-zinc-500 text-xs uppercase tracking-wider">Request ID</p>
+                <p className="font-mono text-xs mt-1 text-zinc-300">{selected.id}</p>
               </div>
               <div>
-                <p className="text-neutral-500 text-xs">Timestamp</p>
-                <p className="mt-1">{format(new Date(selected.timestamp), 'PPpp')}</p>
+                <p className="text-zinc-500 text-xs uppercase tracking-wider">Timestamp</p>
+                <p className="mt-1 text-zinc-300">{format(new Date(selected.timestamp), 'PPpp')}</p>
               </div>
               <div>
-                <p className="text-neutral-500 text-xs">Provider</p>
-                <p className="mt-1 font-medium">{selected.provider}</p>
+                <p className="text-zinc-500 text-xs uppercase tracking-wider">Provider</p>
+                <p className="mt-1 font-medium text-zinc-200">{selected.provider}</p>
               </div>
               <div>
-                <p className="text-neutral-500 text-xs">Model</p>
-                <p className="mt-1">{selected.model}</p>
+                <p className="text-zinc-500 text-xs uppercase tracking-wider">Model</p>
+                <p className="mt-1 text-zinc-300">{selected.model}</p>
               </div>
               <div>
-                <p className="text-neutral-500 text-xs">Status</p>
-                <Badge variant={selected.status_code < 400 ? 'success' : 'error'} className="mt-1">
+                <p className="text-zinc-500 text-xs uppercase tracking-wider">Status</p>
+                <Badge
+                  variant={selected.status_code < 400 ? 'success' : 'error'}
+                  dot
+                  className="mt-1"
+                >
                   {selected.status_code}
                 </Badge>
               </div>
               <div>
-                <p className="text-neutral-500 text-xs">Latency</p>
-                <p className="mt-1">{formatLatency(selected.latency_ms)}</p>
+                <p className="text-zinc-500 text-xs uppercase tracking-wider">Latency</p>
+                <p className="mt-1 text-zinc-300">{formatLatency(selected.latency_ms)}</p>
               </div>
               <div>
-                <p className="text-neutral-500 text-xs">Input Tokens</p>
-                <p className="mt-1">{selected.input_tokens.toLocaleString()}</p>
+                <p className="text-zinc-500 text-xs uppercase tracking-wider">Input Tokens</p>
+                <p className="mt-1 text-zinc-300">{selected.input_tokens.toLocaleString()}</p>
               </div>
               <div>
-                <p className="text-neutral-500 text-xs">Output Tokens</p>
-                <p className="mt-1">{selected.output_tokens.toLocaleString()}</p>
+                <p className="text-zinc-500 text-xs uppercase tracking-wider">Output Tokens</p>
+                <p className="mt-1 text-zinc-300">{selected.output_tokens.toLocaleString()}</p>
               </div>
               <div>
-                <p className="text-neutral-500 text-xs">Cost</p>
-                <p className="mt-1">{formatCurrency(selected.cost)}</p>
+                <p className="text-zinc-500 text-xs uppercase tracking-wider">Cost</p>
+                <p className="mt-1 text-zinc-300">{formatCurrency(selected.cost)}</p>
               </div>
               <div>
-                <p className="text-neutral-500 text-xs">Cache</p>
+                <p className="text-zinc-500 text-xs uppercase tracking-wider">Cache</p>
                 <Badge variant={selected.cache_hit ? 'success' : 'default'} className="mt-1">
                   {selected.cache_hit ? 'HIT' : 'MISS'}
                 </Badge>
@@ -220,8 +227,8 @@ export default function RequestsPage() {
             </div>
             {selected.error && (
               <div>
-                <p className="text-neutral-500 text-xs mb-1">Error</p>
-                <pre className="rounded-lg bg-neutral-800 p-3 text-xs text-error overflow-x-auto">
+                <p className="text-zinc-500 text-xs uppercase tracking-wider mb-1">Error</p>
+                <pre className="rounded-lg bg-white/[3%] border border-white/[6%] p-3 text-xs text-red-400 overflow-x-auto">
                   {selected.error}
                 </pre>
               </div>

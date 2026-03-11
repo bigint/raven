@@ -40,9 +40,7 @@ export default function OverviewPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Overview</h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            Gateway performance at a glance
-          </p>
+          <p className="text-sm text-zinc-500 mt-1">Gateway performance at a glance</p>
         </div>
         <DateRangePicker value={range} onChange={setRange} />
       </div>
@@ -117,12 +115,8 @@ export default function OverviewPage() {
                         <Server className="h-4 w-4 text-zinc-500" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-zinc-100">
-                          {provider.display_name}
-                        </p>
-                        <p className="text-xs text-zinc-600">
-                          {provider.models.length} models
-                        </p>
+                        <p className="text-sm font-medium text-zinc-100">{provider.display_name}</p>
+                        <p className="text-xs text-zinc-600">{provider.models.length} models</p>
                       </div>
                     </div>
                     <Badge

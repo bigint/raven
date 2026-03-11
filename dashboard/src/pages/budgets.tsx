@@ -38,20 +38,22 @@ export default function BudgetsPage() {
       key: 'entity_id',
       header: 'Entity',
       render: (item: BudgetConfig) => (
-        <code className="text-xs font-mono text-neutral-400">{item.entity_id}</code>
+        <code className="text-xs font-mono text-zinc-500">{item.entity_id}</code>
       ),
     },
     {
       key: 'limit',
       header: 'Limit',
       render: (item: BudgetConfig) => (
-        <span className="font-medium">{formatCurrency(item.limit)}</span>
+        <span className="font-medium text-zinc-200">{formatCurrency(item.limit)}</span>
       ),
     },
     {
       key: 'period',
       header: 'Period',
-      render: (item: BudgetConfig) => <span className="text-sm capitalize">{item.period}</span>,
+      render: (item: BudgetConfig) => (
+        <span className="text-sm capitalize text-zinc-300">{item.period}</span>
+      ),
     },
     {
       key: 'usage',
@@ -60,15 +62,15 @@ export default function BudgetsPage() {
         const pct = item.limit > 0 ? item.current_usage / item.limit : 0
         return (
           <div className="flex items-center gap-3 min-w-[120px]">
-            <div className="flex-1 h-2 rounded-full bg-white/10">
+            <div className="flex-1 h-1.5 rounded-full bg-white/[6%]">
               <div
-                className={`h-full rounded-full ${
-                  pct > 0.9 ? 'bg-error' : pct > 0.7 ? 'bg-warning' : 'bg-primary'
+                className={`h-full rounded-full transition-all duration-500 ${
+                  pct > 0.9 ? 'bg-red-400' : pct > 0.7 ? 'bg-amber-400' : 'bg-indigo-400'
                 }`}
                 style={{ width: `${Math.min(pct * 100, 100)}%` }}
               />
             </div>
-            <span className="text-xs text-neutral-500">{formatPercent(pct)}</span>
+            <span className="text-xs text-zinc-500 tabular-nums">{formatPercent(pct)}</span>
           </div>
         )
       },
@@ -77,26 +79,24 @@ export default function BudgetsPage() {
       key: 'current_usage',
       header: 'Current',
       render: (item: BudgetConfig) => (
-        <span className="text-sm">{formatCurrency(item.current_usage)}</span>
+        <span className="text-sm text-zinc-300">{formatCurrency(item.current_usage)}</span>
       ),
     },
     {
       key: 'alert_threshold',
       header: 'Alert At',
       render: (item: BudgetConfig) => (
-        <span className="text-sm text-neutral-500">
-          {formatPercent(item.alert_threshold)}
-        </span>
+        <span className="text-sm text-zinc-500">{formatPercent(item.alert_threshold)}</span>
       ),
     },
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-white">Budgets</h1>
-          <p className="text-sm text-neutral-500 mt-1">
+          <h1 className="text-2xl font-bold text-white">Budgets</h1>
+          <p className="text-sm text-zinc-500 mt-1">
             Configure spending limits per organization, team, or key
           </p>
         </div>

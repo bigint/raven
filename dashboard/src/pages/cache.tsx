@@ -4,6 +4,7 @@ import {
   getDateRange,
   getGranularity,
 } from '@/components/shared/date-range-picker'
+import { EmptyState } from '@/components/shared/empty-state'
 import { StatCard } from '@/components/shared/stat-card'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCacheStats } from '@/hooks/use-analytics'
@@ -26,18 +27,16 @@ export default function CachePage() {
   const { data: cache } = useCacheStats({ start, end, granularity })
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-white">Cache</h1>
-          <p className="text-sm text-neutral-500 mt-1">
-            Semantic cache performance metrics
-          </p>
+          <h1 className="text-2xl font-bold text-white">Cache</h1>
+          <p className="text-sm text-zinc-500 mt-1">Semantic cache performance metrics</p>
         </div>
         <DateRangePicker value={range} onChange={setRange} />
       </div>
 
-      {/* Stats - always visible */}
+      {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Hit Rate"
@@ -69,18 +68,16 @@ export default function CachePage() {
           {cache?.timeseries && cache.timeseries.length > 0 ? (
             <AreaChart
               data={cache.timeseries}
-              color="#22C55E"
+              color="#22c55e"
               gradientId="cacheGradient"
               valueFormatter={(v) => formatPercent(v)}
             />
           ) : (
-            <div className="flex flex-col items-center justify-center h-[300px] text-center">
-              <Zap className="h-8 w-8 text-neutral-600 mb-3" />
-              <p className="text-sm text-neutral-500">No cache data yet</p>
-              <p className="text-xs text-neutral-600 mt-1">
-                Cache metrics will appear once requests are processed
-              </p>
-            </div>
+            <EmptyState
+              title="No cache data yet"
+              description="Cache metrics will appear once requests are processed"
+              icon={<Zap className="h-8 w-8 text-zinc-600" />}
+            />
           )}
         </CardContent>
       </Card>

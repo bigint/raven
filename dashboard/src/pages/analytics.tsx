@@ -5,6 +5,7 @@ import {
   getDateRange,
   getGranularity,
 } from '@/components/shared/date-range-picker'
+import { EmptyState } from '@/components/shared/empty-state'
 import { StatCard } from '@/components/shared/stat-card'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -39,16 +40,16 @@ export default function AnalyticsPage() {
     : []
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-white">Analytics</h1>
-          <p className="text-sm text-neutral-500 mt-1">Cost and usage analytics</p>
+          <h1 className="text-2xl font-bold text-white">Analytics</h1>
+          <p className="text-sm text-zinc-500 mt-1">Cost and usage analytics</p>
         </div>
         <DateRangePicker value={range} onChange={setRange} />
       </div>
 
-      {/* Stats - always visible */}
+      {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Total Cost"
@@ -95,18 +96,16 @@ export default function AnalyticsPage() {
               {cost?.timeseries && cost.timeseries.length > 0 ? (
                 <AreaChart
                   data={cost.timeseries}
-                  color="#F59E0B"
+                  color="#f59e0b"
                   gradientId="costGradient"
                   valueFormatter={(v) => formatCurrency(v)}
                 />
               ) : (
-                <div className="flex flex-col items-center justify-center h-[300px] text-center">
-                  <DollarSign className="h-8 w-8 text-neutral-600 mb-3" />
-                  <p className="text-sm text-neutral-500">No cost data yet</p>
-                  <p className="text-xs text-neutral-600 mt-1">
-                    Cost data will appear once requests are processed
-                  </p>
-                </div>
+                <EmptyState
+                  title="No cost data yet"
+                  description="Cost data will appear once requests are processed"
+                  icon={<DollarSign className="h-8 w-8 text-zinc-600" />}
+                />
               )}
             </CardContent>
           </Card>
@@ -121,17 +120,15 @@ export default function AnalyticsPage() {
               {costByTeam.length > 0 ? (
                 <BarChart
                   data={costByTeam}
-                  color="#4338CA"
+                  color="#6366f1"
                   valueFormatter={(v) => formatCurrency(v)}
                 />
               ) : (
-                <div className="flex flex-col items-center justify-center h-[300px] text-center">
-                  <DollarSign className="h-8 w-8 text-neutral-600 mb-3" />
-                  <p className="text-sm text-neutral-500">No team cost data yet</p>
-                  <p className="text-xs text-neutral-600 mt-1">
-                    Create teams and route requests to see cost breakdowns
-                  </p>
-                </div>
+                <EmptyState
+                  title="No team cost data yet"
+                  description="Create teams and route requests to see cost breakdowns"
+                  icon={<DollarSign className="h-8 w-8 text-zinc-600" />}
+                />
               )}
             </CardContent>
           </Card>
@@ -146,17 +143,15 @@ export default function AnalyticsPage() {
               {costByModel.length > 0 ? (
                 <BarChart
                   data={costByModel}
-                  color="#6366F1"
+                  color="#818cf8"
                   valueFormatter={(v) => formatCurrency(v)}
                 />
               ) : (
-                <div className="flex flex-col items-center justify-center h-[300px] text-center">
-                  <DollarSign className="h-8 w-8 text-neutral-600 mb-3" />
-                  <p className="text-sm text-neutral-500">No model cost data yet</p>
-                  <p className="text-xs text-neutral-600 mt-1">
-                    Send requests through the gateway to see model-level costs
-                  </p>
-                </div>
+                <EmptyState
+                  title="No model cost data yet"
+                  description="Send requests through the gateway to see model-level costs"
+                  icon={<DollarSign className="h-8 w-8 text-zinc-600" />}
+                />
               )}
             </CardContent>
           </Card>

@@ -51,8 +51,8 @@ export default function KeysPage() {
       sortable: true,
       render: (item: VirtualKey) => (
         <div className="flex items-center gap-2">
-          <Key className="h-4 w-4 text-neutral-500" />
-          <span className="font-medium text-neutral-100">{item.name}</span>
+          <Key className="h-4 w-4 text-zinc-600" />
+          <span className="font-medium text-zinc-100">{item.name}</span>
         </div>
       ),
     },
@@ -60,7 +60,7 @@ export default function KeysPage() {
       key: 'key_prefix',
       header: 'Key',
       render: (item: VirtualKey) => (
-        <code className="text-xs font-mono bg-neutral-800 px-2 py-1 rounded">
+        <code className="text-xs font-mono bg-white/[4%] border border-white/[6%] px-2 py-1 rounded-md text-zinc-400">
           {item.key_prefix}...
         </code>
       ),
@@ -69,14 +69,16 @@ export default function KeysPage() {
       key: 'budget_limit',
       header: 'Budget',
       render: (item: VirtualKey) => (
-        <span className="text-sm">{item.budget_limit ? `$${item.budget_limit}` : 'Unlimited'}</span>
+        <span className="text-sm text-zinc-300">
+          {item.budget_limit ? `$${item.budget_limit}` : 'Unlimited'}
+        </span>
       ),
     },
     {
       key: 'rate_limit',
       header: 'Rate Limit',
       render: (item: VirtualKey) => (
-        <span className="text-sm">
+        <span className="text-sm text-zinc-300">
           {item.rate_limit ? `${item.rate_limit}/${item.rate_limit_window}` : 'None'}
         </span>
       ),
@@ -85,7 +87,7 @@ export default function KeysPage() {
       key: 'last_used_at',
       header: 'Last Used',
       render: (item: VirtualKey) => (
-        <span className="text-xs text-neutral-500">
+        <span className="text-xs text-zinc-500">
           {item.last_used_at ? format(new Date(item.last_used_at), 'MMM d, HH:mm') : 'Never'}
         </span>
       ),
@@ -94,7 +96,7 @@ export default function KeysPage() {
       key: 'expires_at',
       header: 'Expires',
       render: (item: VirtualKey) => (
-        <span className="text-xs text-neutral-500">
+        <span className="text-xs text-zinc-500">
           {item.expires_at ? format(new Date(item.expires_at), 'MMM d, yyyy') : 'Never'}
         </span>
       ),
@@ -106,8 +108,11 @@ export default function KeysPage() {
       render: (item: VirtualKey) => (
         <DropdownMenu
           trigger={
-            <button type="button" className="rounded-md p-1 hover:bg-white/10 transition-colors">
-              <MoreVertical className="h-4 w-4 text-neutral-500" />
+            <button
+              type="button"
+              className="rounded-lg p-1.5 hover:bg-white/[6%] transition-all duration-200"
+            >
+              <MoreVertical className="h-4 w-4 text-zinc-500" />
             </button>
           }
         >
@@ -126,13 +131,11 @@ export default function KeysPage() {
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-white">Virtual Keys</h1>
-          <p className="text-sm text-neutral-500 mt-1">
-            Manage API keys for accessing the gateway
-          </p>
+          <h1 className="text-2xl font-bold text-white">Virtual Keys</h1>
+          <p className="text-sm text-zinc-500 mt-1">Manage API keys for accessing the gateway</p>
         </div>
         <Button onClick={() => setCreateOpen(true)}>
           <Plus className="h-4 w-4" />
@@ -194,7 +197,7 @@ export default function KeysPage() {
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center gap-2 mt-2">
-          <code className="flex-1 rounded-lg bg-neutral-800 px-3 py-2 text-sm font-mono text-neutral-100 break-all">
+          <code className="flex-1 rounded-lg bg-white/[3%] border border-white/[6%] px-3 py-2 text-sm font-mono text-zinc-200 break-all">
             {createdKey}
           </code>
           <Button

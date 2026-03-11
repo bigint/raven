@@ -15,8 +15,6 @@ export default function ModelsPage() {
   const { data: models, isLoading } = useQuery({
     queryKey: ['models'],
     queryFn: () => apiClient.listModels(),
-    retry: false,
-    placeholderData: [],
   })
 
   const handleSort = (key: string) => {
@@ -42,8 +40,8 @@ export default function ModelsPage() {
       sortable: true,
       render: (item: Model) => (
         <div>
-          <p className="font-medium text-neutral-100">{item.name}</p>
-          <p className="text-xs text-neutral-500">{item.id}</p>
+          <p className="font-medium text-zinc-100">{item.name}</p>
+          <p className="text-xs text-zinc-600">{item.id}</p>
         </div>
       ),
     },
@@ -58,7 +56,9 @@ export default function ModelsPage() {
       header: 'Input Price',
       sortable: true,
       render: (item: Model) => (
-        <span className="text-sm">{formatCurrency(item.input_price_per_token * 1_000_000)}/M</span>
+        <span className="text-sm text-zinc-300">
+          {formatCurrency(item.input_price_per_token * 1_000_000)}/M
+        </span>
       ),
     },
     {
@@ -66,7 +66,9 @@ export default function ModelsPage() {
       header: 'Output Price',
       sortable: true,
       render: (item: Model) => (
-        <span className="text-sm">{formatCurrency(item.output_price_per_token * 1_000_000)}/M</span>
+        <span className="text-sm text-zinc-300">
+          {formatCurrency(item.output_price_per_token * 1_000_000)}/M
+        </span>
       ),
     },
     {
@@ -74,7 +76,7 @@ export default function ModelsPage() {
       header: 'Context',
       sortable: true,
       render: (item: Model) => (
-        <span className="text-sm">{(item.context_window / 1000).toFixed(0)}K</span>
+        <span className="text-sm text-zinc-300">{(item.context_window / 1000).toFixed(0)}K</span>
       ),
     },
     {
@@ -91,10 +93,10 @@ export default function ModelsPage() {
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-xl font-semibold text-white">Models</h1>
-        <p className="text-sm text-neutral-500 mt-1">Available models and pricing</p>
+        <h1 className="text-2xl font-bold text-white">Models</h1>
+        <p className="text-sm text-zinc-500 mt-1">Available models and pricing</p>
       </div>
 
       <Card>

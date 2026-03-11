@@ -19,8 +19,8 @@ import {
   useProviders,
   useUpdateProviderConfig,
 } from '@/hooks/use-providers'
-import { formatLatency, formatPercent } from '@/lib/utils'
 import type { Provider } from '@/lib/types'
+import { formatLatency, formatPercent } from '@/lib/utils'
 import {
   Activity,
   Check,
@@ -43,9 +43,24 @@ interface ConfigDialogState {
 }
 
 function HealthBadge({ status }: { status: string }) {
-  if (status === 'healthy') return <Badge variant="success">Healthy</Badge>
-  if (status === 'degraded') return <Badge variant="warning">Degraded</Badge>
-  if (status === 'down') return <Badge variant="error">Down</Badge>
+  if (status === 'healthy')
+    return (
+      <Badge variant="success" dot>
+        Healthy
+      </Badge>
+    )
+  if (status === 'degraded')
+    return (
+      <Badge variant="warning" dot>
+        Degraded
+      </Badge>
+    )
+  if (status === 'down')
+    return (
+      <Badge variant="error" dot>
+        Down
+      </Badge>
+    )
   return <Badge variant="default">Unconfigured</Badge>
 }
 
@@ -61,21 +76,23 @@ function ProviderCard({
   const hasModels = provider.models.length > 0
 
   return (
-    <Card>
+    <Card className="group hover:bg-white/[5%] hover:-translate-y-0.5">
       <CardContent>
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-white/5 p-2.5">
-              <Server className="h-5 w-5 text-neutral-500" />
+            <div className="rounded-lg bg-white/[4%] p-2.5 group-hover:bg-white/[6%] transition-colors duration-200">
+              <Server className="h-5 w-5 text-zinc-500" />
             </div>
             <div>
-              <h3 className="font-medium text-neutral-100">{provider.display_name}</h3>
-              <p className="text-xs text-neutral-500">{provider.name}</p>
+              <h3 className="font-medium text-zinc-100">{provider.display_name}</h3>
+              <p className="text-xs text-zinc-600">{provider.name}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {isConfigured ? (
-              <Badge variant="success">Configured</Badge>
+              <Badge variant="success" dot>
+                Configured
+              </Badge>
             ) : (
               <Badge variant="default">Not configured</Badge>
             )}
@@ -85,13 +102,13 @@ function ProviderCard({
         {isConfigured && (
           <>
             <div className="mb-4 flex items-center gap-2">
-              <Key className="h-3.5 w-3.5 text-neutral-500" />
-              <span className="text-xs text-neutral-500 font-mono">
+              <Key className="h-3.5 w-3.5 text-zinc-600" />
+              <span className="text-xs text-zinc-500 font-mono">
                 {provider.base_url ? `${provider.base_url.slice(0, 30)}...` : 'Default URL'}
               </span>
             </div>
 
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-2 mb-4">
               <HealthBadge status={provider.status} />
               {provider.enabled ? (
                 <Badge variant="success">
@@ -108,14 +125,14 @@ function ProviderCard({
 
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <p className="text-xs text-neutral-500">Latency</p>
-                <p className="text-sm font-medium mt-1">
+                <p className="text-[11px] text-zinc-600 uppercase tracking-wider">Latency</p>
+                <p className="text-sm font-medium text-zinc-200 mt-1">
                   {health ? formatLatency(health.latency_ms) : '--'}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-neutral-500">Error Rate</p>
-                <p className="text-sm font-medium mt-1">
+                <p className="text-[11px] text-zinc-600 uppercase tracking-wider">Error Rate</p>
+                <p className="text-sm font-medium text-zinc-200 mt-1">
                   {health ? formatPercent(health.error_rate) : '--'}
                 </p>
               </div>
@@ -124,7 +141,7 @@ function ProviderCard({
         )}
 
         <div className="mb-4">
-          <p className="text-xs text-neutral-500 mb-2">
+          <p className="text-[11px] text-zinc-600 uppercase tracking-wider mb-2">
             Models ({provider.models.length})
           </p>
           {hasModels ? (
@@ -139,7 +156,7 @@ function ProviderCard({
               )}
             </div>
           ) : (
-            <p className="text-xs text-neutral-600">No models available</p>
+            <p className="text-xs text-zinc-700">No models available</p>
           )}
         </div>
 
@@ -193,7 +210,6 @@ function ConfigureProviderDialog({
     setError(null)
   }, [state.provider])
 
-  // Reset form when dialog opens
   const handleClose = useCallback(() => {
     resetForm()
     onClose()
@@ -265,13 +281,13 @@ function ConfigureProviderDialog({
       </DialogHeader>
 
       <div className="space-y-4">
-        <div className="flex items-center gap-2 rounded-lg bg-white/5 px-3 py-2">
-          <Server className="h-4 w-4 text-neutral-500" />
-          <span className="text-sm text-neutral-100">{state.provider.name}</span>
+        <div className="flex items-center gap-2 rounded-lg bg-white/[3%] border border-white/[6%] px-3 py-2">
+          <Server className="h-4 w-4 text-zinc-500" />
+          <span className="text-sm text-zinc-200">{state.provider.name}</span>
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="provider-api-key" className="text-sm font-medium text-neutral-400">
+          <label htmlFor="provider-api-key" className="text-sm font-medium text-zinc-400">
             API Key {state.isEditing && '(leave blank to keep current)'}
           </label>
           <div className="relative">
@@ -281,12 +297,12 @@ function ConfigureProviderDialog({
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder={state.isEditing ? 'Enter new key to update...' : 'Enter API key...'}
-              className="h-9 w-full rounded-lg border border-white/10 bg-neutral-800 px-3 pr-10 text-sm text-neutral-100 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors font-mono"
+              className="h-9 w-full rounded-lg border border-white/[8%] bg-white/[3%] px-3 pr-10 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500/40 transition-all duration-200 font-mono"
             />
             <button
               type="button"
               onClick={() => setShowKey((prev) => !prev)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-neutral-500 hover:text-neutral-100 transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-zinc-600 hover:text-zinc-300 transition-colors duration-200"
             >
               {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -300,22 +316,22 @@ function ConfigureProviderDialog({
           placeholder={state.provider.base_url || 'https://api.provider.com/v1'}
         />
 
-        <div className="flex items-center justify-between rounded-lg border border-white/10 bg-neutral-800 px-3 py-2.5">
+        <div className="flex items-center justify-between rounded-lg border border-white/[8%] bg-white/[3%] px-3 py-2.5">
           <div>
-            <p className="text-sm text-neutral-100">Enable Provider</p>
-            <p className="text-xs text-neutral-500 mt-0.5">
+            <p className="text-sm text-zinc-200">Enable Provider</p>
+            <p className="text-xs text-zinc-500 mt-0.5">
               Route requests to this provider when enabled
             </p>
           </div>
           <button
             type="button"
             onClick={() => setEnabled((prev) => !prev)}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              enabled ? 'bg-primary' : 'bg-white/20'
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 cursor-pointer ${
+              enabled ? 'bg-indigo-500' : 'bg-white/10'
             }`}
           >
             <span
-              className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+              className={`inline-block h-4 w-4 rounded-full bg-white transition-transform duration-200 ${
                 enabled ? 'translate-x-6' : 'translate-x-1'
               }`}
             />
@@ -323,18 +339,18 @@ function ConfigureProviderDialog({
         </div>
 
         {error && (
-          <div className="rounded-lg bg-error/10 border border-error/20 px-3 py-2">
-            <p className="text-sm text-error">{error}</p>
+          <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2">
+            <p className="text-sm text-red-400">{error}</p>
           </div>
         )}
       </div>
 
       {state.isEditing && !showDeleteConfirm && (
-        <div className="mt-4 pt-4 border-t border-white/10">
+        <div className="mt-4 pt-4 border-t border-white/[6%]">
           <Button
             variant="ghost"
             size="sm"
-            className="text-error hover:text-error hover:bg-error/10"
+            className="text-red-400 hover:text-red-400 hover:bg-red-500/10"
             onClick={() => setShowDeleteConfirm(true)}
             disabled={isDeleting}
           >
@@ -345,12 +361,12 @@ function ConfigureProviderDialog({
       )}
 
       {showDeleteConfirm && (
-        <div className="mt-4 pt-4 border-t border-white/10">
-          <div className="rounded-lg bg-error/10 border border-error/20 p-3">
-            <p className="text-sm text-error font-medium mb-2">
+        <div className="mt-4 pt-4 border-t border-white/[6%]">
+          <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3">
+            <p className="text-sm text-red-400 font-medium mb-2">
               Are you sure you want to remove this configuration?
             </p>
-            <p className="text-xs text-neutral-500 mb-3">
+            <p className="text-xs text-zinc-500 mb-3">
               This will delete the API key and disable the provider. This action cannot be undone.
             </p>
             <div className="flex gap-2">
@@ -414,26 +430,22 @@ export default function ProvidersPage() {
 
   const sortedProviders = useMemo(() => {
     if (!providers) return []
-    const configured = providers.filter(
-      (p) => p.status !== 'down' || p.enabled,
-    )
-    const unconfigured = providers.filter(
-      (p) => p.status === 'down' && !p.enabled,
-    )
+    const configured = providers.filter((p) => p.status !== 'down' || p.enabled)
+    const unconfigured = providers.filter((p) => p.status === 'down' && !p.enabled)
     return [...configured, ...unconfigured]
   }, [providers])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-white">Providers</h1>
-          <p className="text-sm text-neutral-500 mt-1">
+          <h1 className="text-2xl font-bold text-white">Providers</h1>
+          <p className="text-sm text-zinc-500 mt-1">
             Configure your AI provider API keys below. Keys are stored securely in the gateway
             database.
           </p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-neutral-500">
+        <div className="flex items-center gap-2 text-xs text-zinc-600">
           <Activity className="h-3.5 w-3.5" />
           Auto-refreshes every 30s
         </div>
@@ -448,18 +460,14 @@ export default function ProvidersPage() {
       ) : sortedProviders.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {sortedProviders.map((provider) => (
-            <ProviderCard
-              key={provider.id}
-              provider={provider}
-              onConfigure={handleConfigure}
-            />
+            <ProviderCard key={provider.id} provider={provider} onConfigure={handleConfigure} />
           ))}
         </div>
       ) : (
         <EmptyState
           title="No providers available"
           description="No AI providers are registered in the gateway."
-          icon={<Wifi className="h-8 w-8 text-neutral-500" />}
+          icon={<Wifi className="h-8 w-8 text-zinc-600" />}
         />
       )}
 
