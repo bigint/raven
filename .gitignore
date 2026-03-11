@@ -56,3 +56,6 @@ htmlcov/
 
 # Binary
 raven
+
+# Superpowers
+.superpowers/
