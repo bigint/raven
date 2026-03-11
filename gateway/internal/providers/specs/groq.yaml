@@ -1,0 +1,34 @@
+name: groq
+display_name: Groq
+base_url: https://api.groq.com/openai/v1
+auth_type: bearer
+compatible_with: openai
+models:
+  - id: llama-3.3-70b-versatile
+    context_window: 128000
+    input_price_per_1m: 0.59
+    output_price_per_1m: 0.79
+    supports_streaming: true
+    supports_tools: true
+  - id: llama-3.1-8b-instant
+    context_window: 128000
+    input_price_per_1m: 0.05
+    output_price_per_1m: 0.08
+    supports_streaming: true
+    supports_tools: true
+  - id: mixtral-8x7b-32768
+    context_window: 32768
+    input_price_per_1m: 0.24
+    output_price_per_1m: 0.24
+    supports_streaming: true
+    supports_tools: true
+  - id: gemma2-9b-it
+    context_window: 8192
+    input_price_per_1m: 0.20
+    output_price_per_1m: 0.20
+    supports_streaming: true
+  - id: deepseek-r1-distill-llama-70b
+    context_window: 128000
+    input_price_per_1m: 0.75
+    output_price_per_1m: 0.99
+    supports_streaming: true

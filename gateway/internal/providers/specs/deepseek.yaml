@@ -1,0 +1,24 @@
+name: deepseek
+display_name: DeepSeek
+base_url: https://api.deepseek.com/v1
+auth_type: bearer
+compatible_with: openai
+models:
+  - id: deepseek-chat
+    context_window: 64000
+    input_price_per_1m: 0.14
+    output_price_per_1m: 0.28
+    supports_streaming: true
+    supports_tools: true
+  - id: deepseek-reasoner
+    context_window: 64000
+    input_price_per_1m: 0.55
+    output_price_per_1m: 2.19
+    supports_streaming: true
+    supports_tools: true
+  - id: deepseek-coder
+    context_window: 64000
+    input_price_per_1m: 0.14
+    output_price_per_1m: 0.28
+    supports_streaming: true
+    supports_tools: true
