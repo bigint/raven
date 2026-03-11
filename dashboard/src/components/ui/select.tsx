@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 import { ChevronDown } from 'lucide-react'
-import { type SelectHTMLAttributes, forwardRef } from 'react'
+import { forwardRef, type SelectHTMLAttributes } from 'react'
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string
@@ -9,37 +9,34 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, label, options, placeholder, id, ...props }, ref) => {
-    const selectId = id || label?.toLowerCase().replace(/\s+/g, '-')
+  ({ label, options, placeholder, className, ...props }, ref) => {
     return (
-      <div className="flex flex-col gap-1.5">
+      <div>
         {label && (
-          <label htmlFor={selectId} className="text-[11px] font-normal text-[#525252]">
-            {label}
-          </label>
+          <label className="block text-[11px] text-[#525252] mb-1">{label}</label>
         )}
         <div className="relative">
           <select
             ref={ref}
-            id={selectId}
             className={cn(
-              'h-9 w-full appearance-none rounded-lg border border-white/[0.08] bg-transparent px-3 pr-8 text-sm text-[#fafafa] focus:outline-none focus:ring-2 focus:ring-white/15 focus:border-white/15 transition-colors duration-150',
+              'h-8 w-full appearance-none rounded-md border border-white/[0.06] bg-transparent px-2.5 pr-7 text-[13px] text-[#fafafa]',
+              'focus:outline-none focus:border-white/[0.15] focus:ring-1 focus:ring-white/[0.10]',
               className,
             )}
             {...props}
           >
             {placeholder && (
-              <option value="" disabled>
+              <option value="" className="bg-[#111] text-[#333]">
                 {placeholder}
               </option>
             )}
             {options.map((opt) => (
-              <option key={opt.value} value={opt.value}>
+              <option key={opt.value} value={opt.value} className="bg-[#111] text-[#fafafa]">
                 {opt.label}
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#525252] pointer-events-none" />
+          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-[#333]" />
         </div>
       </div>
     )

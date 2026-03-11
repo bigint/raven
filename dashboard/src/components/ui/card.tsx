@@ -8,10 +8,7 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 export function Card({ className, children, ...props }: CardProps) {
   return (
     <div
-      className={cn(
-        'rounded-[10px] border border-white/[0.08] bg-transparent p-5',
-        className,
-      )}
+      className={cn('rounded-lg border border-white/[0.06] bg-white/[0.02] p-4', className)}
       {...props}
     >
       {children}
@@ -21,7 +18,7 @@ export function Card({ className, children, ...props }: CardProps) {
 
 export function CardHeader({ className, children, ...props }: CardProps) {
   return (
-    <div className={cn('mb-4 flex items-center justify-between', className)} {...props}>
+    <div className={cn('mb-3 flex items-center justify-between', className)} {...props}>
       {children}
     </div>
   )
@@ -29,7 +26,10 @@ export function CardHeader({ className, children, ...props }: CardProps) {
 
 export function CardTitle({ className, children, ...props }: CardProps) {
   return (
-    <h3 className={cn('text-[11px] font-normal text-[#525252] uppercase tracking-[0.02em]', className)} {...props}>
+    <h3
+      className={cn('text-[9px] font-medium text-[#333] uppercase tracking-[1px]', className)}
+      {...props}
+    >
       {children}
     </h3>
   )

@@ -1,25 +1,14 @@
 import { cn } from '@/lib/utils'
 import type { ReactNode } from 'react'
 
-interface TabsProps {
-  value: string
-  onValueChange: (value: string) => void
-  children: ReactNode
-  className?: string
-}
-
-export function Tabs({ children, className }: TabsProps) {
-  return <div className={cn('', className)}>{children}</div>
-}
-
-interface TabsListProps {
-  children: ReactNode
-  className?: string
-}
-
-export function TabsList({ children, className }: TabsListProps) {
+export function TabsList({ className, children }: { className?: string; children: ReactNode }) {
   return (
-    <div className={cn('inline-flex items-center gap-1 rounded-lg p-1', className)}>
+    <div
+      className={cn(
+        'inline-flex rounded-md border border-white/[0.06] bg-white/[0.02] p-0.5',
+        className,
+      )}
+    >
       {children}
     </div>
   )
@@ -38,14 +27,12 @@ export function TabsTrigger({ value, activeValue, onSelect, children, className 
   return (
     <button
       type="button"
+      onClick={() => onSelect(value)}
       className={cn(
-        'px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-150 cursor-pointer',
-        isActive
-          ? 'bg-white/[0.06] text-[#fafafa]'
-          : 'text-[#525252] hover:text-[#a3a3a3] hover:bg-white/[0.04]',
+        'px-3 py-1 text-[11px] font-medium rounded-[5px]',
+        isActive ? 'bg-white/[0.08] text-[#fafafa]' : 'text-[#525252] hover:text-[#a3a3a3]',
         className,
       )}
-      onClick={() => onSelect(value)}
     >
       {children}
     </button>
@@ -61,5 +48,5 @@ interface TabsContentProps {
 
 export function TabsContent({ value, activeValue, children, className }: TabsContentProps) {
   if (value !== activeValue) return null
-  return <div className={cn('mt-4 animate-fade-in', className)}>{children}</div>
+  return <div className={cn('mt-3', className)}>{children}</div>
 }

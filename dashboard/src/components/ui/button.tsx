@@ -1,46 +1,36 @@
 import { cn } from '@/lib/utils'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
-type ButtonSize = 'sm' | 'md' | 'lg' | 'icon'
-
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ButtonVariant
-  size?: ButtonSize
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
+  size?: 'sm' | 'md' | 'icon'
   children: ReactNode
 }
 
-const variantStyles: Record<ButtonVariant, string> = {
-  primary: 'bg-[#fafafa] text-[#0a0a0a] hover:bg-[#e5e5e5] active:bg-[#d4d4d4]',
-  secondary: 'bg-transparent text-[#a3a3a3] border border-white/[0.08] hover:bg-white/[0.04]',
-  ghost: 'text-[#a3a3a3] hover:text-[#fafafa] hover:bg-white/[0.04]',
-  danger: 'bg-transparent text-[#ef4444] border border-[rgba(239,68,68,0.1)] hover:bg-[rgba(239,68,68,0.06)]',
+const variants = {
+  primary: 'bg-[#fafafa] text-[#09090b] hover:bg-[#e5e5e5]',
+  secondary: 'bg-transparent text-[#a3a3a3] border border-white/[0.06] hover:bg-white/[0.05]',
+  ghost: 'bg-transparent text-[#a3a3a3] hover:bg-white/[0.05]',
+  danger: 'bg-transparent text-[#ef4444] border border-red-500/20 hover:bg-red-500/[0.08]',
 }
 
-const sizeStyles: Record<ButtonSize, string> = {
-  sm: 'px-3 py-1.5 text-xs',
-  md: 'px-[14px] py-[7px] text-[13px]',
-  lg: 'px-5 py-2.5 text-[13px]',
-  icon: 'p-2',
+const sizes = {
+  sm: 'h-6 px-2 text-[10px]',
+  md: 'h-7 px-2.5 text-xs',
+  icon: 'h-7 w-7 p-0 justify-center',
 }
 
-export function Button({
-  variant = 'primary',
-  size = 'md',
-  className,
-  children,
-  disabled,
-  ...props
-}: ButtonProps) {
+export function Button({ variant = 'secondary', size = 'md', className, children, ...props }: ButtonProps) {
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/15 disabled:opacity-40 disabled:pointer-events-none cursor-pointer',
-        variantStyles[variant],
-        sizeStyles[size],
+        'inline-flex items-center gap-1.5 rounded-md font-medium',
+        'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/20 focus-visible:ring-offset-1 focus-visible:ring-offset-[#09090b]',
+        'disabled:opacity-40 disabled:cursor-not-allowed',
+        variants[variant],
+        sizes[size],
         className,
       )}
-      disabled={disabled}
       {...props}
     >
       {children}

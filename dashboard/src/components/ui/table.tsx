@@ -2,104 +2,70 @@ import { cn } from '@/lib/utils'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import type { HTMLAttributes, ReactNode, ThHTMLAttributes } from 'react'
 
-export function Table({
-  className,
-  children,
-  ...props
-}: HTMLAttributes<HTMLTableElement> & { children: ReactNode }) {
+export function Table({ className, children, ...props }: HTMLAttributes<HTMLTableElement>) {
   return (
     <div className="w-full overflow-x-auto">
-      <table className={cn('w-full text-sm', className)} {...props}>
+      <table className={cn('w-full', className)} {...props}>
         {children}
       </table>
     </div>
   )
 }
 
-export function TableHeader({
-  className,
-  children,
-  ...props
-}: HTMLAttributes<HTMLTableSectionElement> & { children: ReactNode }) {
+export function TableHeader({ className, children, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
   return (
-    <thead className={cn('border-b border-white/[0.08]', className)} {...props}>
+    <thead className={cn('', className)} {...props}>
       {children}
     </thead>
   )
 }
 
-export function TableBody({
-  className,
-  children,
-  ...props
-}: HTMLAttributes<HTMLTableSectionElement> & { children: ReactNode }) {
+export function TableBody({ className, children, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
   return (
-    <tbody className={cn('divide-y divide-white/[0.04]', className)} {...props}>
+    <tbody className={cn('', className)} {...props}>
       {children}
     </tbody>
   )
 }
 
-export function TableRow({
-  className,
-  children,
-  ...props
-}: HTMLAttributes<HTMLTableRowElement> & { children: ReactNode }) {
+export function TableRow({ className, children, ...props }: HTMLAttributes<HTMLTableRowElement>) {
   return (
-    <tr className={cn('hover:bg-white/[0.04] transition-colors duration-150', className)} {...props}>
+    <tr
+      className={cn('h-9 border-b border-white/[0.04] hover:bg-white/[0.02]', className)}
+      {...props}
+    >
       {children}
     </tr>
   )
 }
 
-interface SortableThProps extends ThHTMLAttributes<HTMLTableCellElement> {
-  children: ReactNode
+interface TableHeadProps extends ThHTMLAttributes<HTMLTableCellElement> {
   sortKey?: string
   currentSort?: string
   sortOrder?: 'asc' | 'desc'
   onSort?: (key: string) => void
+  children: ReactNode
 }
 
-export function TableHead({
-  className,
-  children,
-  sortKey,
-  currentSort,
-  sortOrder,
-  onSort,
-  ...props
-}: SortableThProps) {
+export function TableHead({ sortKey, currentSort, sortOrder, onSort, className, children, ...props }: TableHeadProps) {
   const isSorted = sortKey && currentSort === sortKey
-  const handleClick = () => {
-    if (sortKey && onSort) onSort(sortKey)
-  }
-
   return (
     <th
       className={cn(
-        'px-4 py-3 text-left text-[11px] font-medium text-[#525252] uppercase tracking-[0.05em]',
-        sortKey && 'cursor-pointer select-none hover:text-[#a3a3a3] transition-colors duration-200',
+        'h-8 px-3 text-left text-[10px] font-medium uppercase tracking-[0.5px] text-[#333]',
+        'border-b border-white/[0.06]',
+        sortKey && 'cursor-pointer select-none',
         className,
       )}
-      onClick={handleClick}
+      onClick={() => sortKey && onSort?.(sortKey)}
       {...props}
     >
       <div className="flex items-center gap-1">
         {children}
         {sortKey && (
           <span className="inline-flex flex-col">
-            <ChevronUp
-              className={cn(
-                'h-3 w-3 -mb-1',
-                isSorted && sortOrder === 'asc' ? 'text-[#a3a3a3]' : 'text-[#525252]/30',
-              )}
-            />
-            <ChevronDown
-              className={cn(
-                'h-3 w-3',
-                isSorted && sortOrder === 'desc' ? 'text-[#a3a3a3]' : 'text-[#525252]/30',
-              )}
-            />
+            <ChevronUp className={cn('h-2 w-2', isSorted && sortOrder === 'asc' ? 'text-[#fafafa]' : 'text-[#333]')} />
+            <ChevronDown className={cn('h-2 w-2 -mt-0.5', isSorted && sortOrder === 'desc' ? 'text-[#fafafa]' : 'text-[#333]')} />
           </span>
         )}
       </div>
@@ -107,13 +73,9 @@ export function TableHead({
   )
 }
 
-export function TableCell({
-  className,
-  children,
-  ...props
-}: HTMLAttributes<HTMLTableCellElement> & { children?: ReactNode }) {
+export function TableCell({ className, children, ...props }: HTMLAttributes<HTMLTableCellElement>) {
   return (
-    <td className={cn('px-4 py-3 text-sm text-[#a3a3a3]', className)} {...props}>
+    <td className={cn('px-3 text-xs text-[#a3a3a3]', className)} {...props}>
       {children}
     </td>
   )

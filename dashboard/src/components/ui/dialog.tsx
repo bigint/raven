@@ -11,69 +11,72 @@ interface DialogProps {
 
 export function Dialog({ open, onClose, children, className }: DialogProps) {
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-    return () => { document.body.style.overflow = '' }
-  }, [open])
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
+    if (!open) return
+    const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
     }
-    if (open) document.addEventListener('keydown', handleEscape)
-    return () => document.removeEventListener('keydown', handleEscape)
+    document.addEventListener('keydown', handler)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', handler)
+      document.body.style.overflow = ''
+    }
   }, [open, onClose])
 
   if (!open) return null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
-        className="fixed inset-0 bg-black/70 backdrop-blur-sm"
-        onClick={onClose}
-        onKeyDown={(e) => { if (e.key === 'Escape') onClose() }}
-        role="button"
-        tabIndex={0}
-      />
+      <div className="fixed inset-0 bg-black/60" onClick={onClose} />
       <div
         className={cn(
-          'relative z-10 w-full max-w-lg rounded-xl border border-white/[0.08] bg-[#0a0a0a] p-6 shadow-2xl animate-fade-in',
+          'relative z-10 w-full max-w-[480px] rounded-lg border border-white/[0.08] bg-[#111] p-5',
           className,
         )}
       >
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 text-[#333] hover:text-[#a3a3a3]"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
         {children}
       </div>
     </div>
   )
 }
 
-export function DialogHeader({ children, className }: { children: ReactNode; className?: string }) {
+export function DialogHeader({ className, children }: { className?: string; children: ReactNode }) {
   return <div className={cn('mb-4', className)}>{children}</div>
 }
 
-export function DialogTitle({ children, className }: { children: ReactNode; className?: string }) {
-  return <h2 className={cn('text-base font-semibold text-[#fafafa]', className)}>{children}</h2>
-}
-
-export function DialogDescription({ children, className }: { children: ReactNode; className?: string }) {
-  return <p className={cn('text-[13px] text-[#a3a3a3] mt-1', className)}>{children}</p>
-}
-
-export function DialogClose({ onClose, className }: { onClose: () => void; className?: string }) {
+export function DialogTitle({ className, children }: { className?: string; children: ReactNode }) {
   return (
-    <button
-      type="button"
-      onClick={onClose}
-      className={cn('absolute right-4 top-4 rounded-md p-1 text-[#525252] hover:text-[#a3a3a3] hover:bg-white/[0.04] transition-colors', className)}
-    >
-      <X className="h-4 w-4" />
+    <h2 className={cn('text-[13px] font-semibold text-[#fafafa]', className)}>{children}</h2>
+  )
+}
+
+export function DialogDescription({ className, children }: { className?: string; children: ReactNode }) {
+  return (
+    <p className={cn('mt-1 text-xs text-[#525252]', className)}>{children}</p>
+  )
+}
+
+export function DialogClose({ onClick, children }: { onClick: () => void; children: ReactNode }) {
+  return (
+    <button type="button" onClick={onClick} className="text-[#a3a3a3] hover:text-[#fafafa]">
+      {children}
     </button>
   )
 }
 
-export function DialogFooter({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('mt-6 flex items-center justify-end gap-3', className)}>{children}</div>
+export function DialogFooter({ className, children }: { className?: string; children: ReactNode }) {
+  return (
+    <div
+      className={cn('mt-4 flex justify-end gap-2 border-t border-white/[0.06] pt-3', className)}
+    >
+      {children}
+    </div>
+  )
 }

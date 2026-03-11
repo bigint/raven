@@ -8,28 +8,23 @@ interface TooltipProps {
   className?: string
 }
 
-const sideStyles = {
-  top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
-  bottom: 'top-full left-1/2 -translate-x-1/2 mt-2',
-  left: 'right-full top-1/2 -translate-y-1/2 mr-2',
-  right: 'left-full top-1/2 -translate-y-1/2 ml-2',
+const positions = {
+  top: 'bottom-full left-1/2 -translate-x-1/2 mb-1.5',
+  bottom: 'top-full left-1/2 -translate-x-1/2 mt-1.5',
+  left: 'right-full top-1/2 -translate-y-1/2 mr-1.5',
+  right: 'left-full top-1/2 -translate-y-1/2 ml-1.5',
 }
 
 export function Tooltip({ content, children, side = 'top', className }: TooltipProps) {
-  const [visible, setVisible] = useState(false)
-
+  const [show, setShow] = useState(false)
   return (
-    <div
-      className="relative inline-flex"
-      onMouseEnter={() => setVisible(true)}
-      onMouseLeave={() => setVisible(false)}
-    >
+    <div className="relative inline-flex" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
       {children}
-      {visible && (
+      {show && (
         <div
           className={cn(
-            'absolute z-50 whitespace-nowrap rounded-lg bg-[#141414] border border-white/[0.08] px-2.5 py-1.5 text-xs text-[#a3a3a3] shadow-[0_4px_12px_rgba(0,0,0,0.4)] pointer-events-none animate-slide-in',
-            sideStyles[side],
+            'absolute z-50 whitespace-nowrap rounded-[4px] border border-white/[0.08] bg-[#1a1a1a] px-2 py-1 text-[11px] text-[#a3a3a3]',
+            positions[side],
             className,
           )}
         >
