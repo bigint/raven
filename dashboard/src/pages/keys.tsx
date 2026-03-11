@@ -106,7 +106,7 @@ export default function KeysPage() {
       render: (item: VirtualKey) => (
         <DropdownMenu
           trigger={
-            <button className="rounded-md p-1 hover:bg-white/10 transition-colors">
+            <button type="button" className="rounded-md p-1 hover:bg-white/10 transition-colors">
               <MoreVertical className="h-4 w-4 text-text-dark-secondary" />
             </button>
           }

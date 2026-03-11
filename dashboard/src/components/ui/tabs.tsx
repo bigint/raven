@@ -45,6 +45,7 @@ export function TabsTrigger({
   const isActive = value === activeValue
   return (
     <button
+      type="button"
       className={cn(
         'px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
         isActive

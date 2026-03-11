@@ -24,7 +24,13 @@ export function DropdownMenu({ trigger, children, align = 'right', className }: 
 
   return (
     <div ref={ref} className="relative inline-block">
-      <div onClick={() => setOpen(!open)}>{trigger}</div>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="appearance-none bg-transparent border-none p-0 m-0 cursor-pointer"
+      >
+        {trigger}
+      </button>
       {open && (
         <div
           className={cn(
@@ -57,6 +63,7 @@ export function DropdownItem({
 }: DropdownItemProps) {
   return (
     <button
+      type="button"
       className={cn(
         'w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors',
         danger ? 'text-error hover:bg-error/10' : 'text-text-dark hover:bg-white/10',

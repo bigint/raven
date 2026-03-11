@@ -42,6 +42,7 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
       <Calendar className="h-4 w-4 text-text-dark-secondary mr-1" />
       {presets.map((preset) => (
         <button
+          type="button"
           key={preset.value}
           onClick={() => handlePresetClick(preset.value)}
           className={cn(
@@ -70,6 +71,7 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
             className="h-7 rounded-md border border-border-dark bg-bg-dark-tertiary px-2 text-xs text-text-dark"
           />
           <button
+            type="button"
             onClick={handleCustomApply}
             className="px-2.5 py-1 text-xs font-medium rounded-md bg-primary text-white hover:bg-primary-hover"
           >

@@ -35,7 +35,15 @@ export function Dialog({ open, onClose, children, className }: DialogProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') onClose()
+        }}
+        role="button"
+        tabIndex={0}
+      />
       <div
         className={cn(
           'relative z-10 w-full max-w-lg rounded-xl border border-border-dark bg-bg-dark-secondary p-6 shadow-xl animate-in fade-in',
@@ -66,6 +74,7 @@ export function DialogDescription({
 export function DialogClose({ onClose, className }: { onClose: () => void; className?: string }) {
   return (
     <button
+      type="button"
       onClick={onClose}
       className={cn(
         'absolute right-4 top-4 rounded-md p-1 text-text-dark-secondary hover:text-text-dark hover:bg-white/10 transition-colors',
