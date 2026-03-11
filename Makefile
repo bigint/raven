@@ -29,19 +29,38 @@ build-sdks:
 	cd sdks/python && pip install -e .
 	cd sdks/go && go build ./...
 
-# Dev
+# Dev — one command to start everything
 dev:
-	@echo "Starting development environment..."
-	pnpm dev
+	@echo "Starting Postgres + Redis..."
+	docker compose -f docker-compose.dev.yml up -d --wait
+	@echo "Starting gateway + dashboard..."
+	@trap 'kill 0' EXIT; \
+	(cd gateway && \
+		RAVEN_STORE_DRIVER=postgres \
+		DATABASE_URL='postgres://raven:raven@localhost:5432/raven?sslmode=disable' \
+		REDIS_URL='redis://localhost:6379' \
+		go run . serve) & \
+	(cd dashboard && pnpm dev) & \
+	wait
 
 dev-gateway:
-	cd gateway && go run . serve
+	cd gateway && \
+		RAVEN_STORE_DRIVER=postgres \
+		DATABASE_URL='postgres://raven:raven@localhost:5432/raven?sslmode=disable' \
+		REDIS_URL='redis://localhost:6379' \
+		go run . serve
 
 dev-dashboard:
 	cd dashboard && pnpm dev
 
 dev-website:
 	cd website && pnpm dev
+
+dev-infra:
+	docker compose -f docker-compose.dev.yml up -d --wait
+
+dev-stop:
+	docker compose -f docker-compose.dev.yml down
 
 # Test
 test: test-gateway test-dashboard test-sdks
