@@ -11,20 +11,17 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary:
-    'bg-teal-500 text-white hover:bg-teal-400 shadow-sm shadow-teal-500/20 active:bg-teal-600',
-  secondary:
-    'bg-white/[5%] text-zinc-100 hover:bg-white/[10%] border border-white/[8%] hover:border-white/[12%] active:bg-white/[6%]',
-  ghost: 'text-zinc-400 hover:text-zinc-100 hover:bg-white/[6%] active:bg-white/[4%]',
-  danger: 'bg-red-500/90 text-white hover:bg-red-500 shadow-sm shadow-red-500/20 active:bg-red-600',
-  outline:
-    'border border-white/[8%] text-zinc-100 hover:bg-white/[5%] hover:border-white/[12%] active:bg-white/[3%]',
+  primary: 'bg-teal-600 text-white hover:bg-teal-500 active:bg-teal-700',
+  secondary: 'bg-zinc-800 text-zinc-200 hover:bg-zinc-700 border border-zinc-700',
+  ghost: 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60',
+  danger: 'bg-red-600 text-white hover:bg-red-500 active:bg-red-700',
+  outline: 'border border-zinc-700 text-zinc-200 hover:bg-zinc-800',
 }
 
 const sizeStyles: Record<ButtonSize, string> = {
   sm: 'px-3 py-1.5 text-xs',
   md: 'px-4 py-2 text-sm',
-  lg: 'px-6 py-2.5 text-sm',
+  lg: 'px-5 py-2.5 text-sm',
   icon: 'p-2',
 }
 
@@ -39,7 +36,7 @@ export function Button({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a] disabled:opacity-40 disabled:pointer-events-none cursor-pointer',
+        'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50 disabled:opacity-40 disabled:pointer-events-none cursor-pointer',
         variantStyles[variant],
         sizeStyles[size],
         className,

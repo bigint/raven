@@ -19,12 +19,7 @@ interface TabsListProps {
 
 export function TabsList({ children, className }: TabsListProps) {
   return (
-    <div
-      className={cn(
-        'inline-flex items-center gap-1 rounded-lg border border-white/[6%] bg-white/[2%] p-1',
-        className,
-      )}
-    >
+    <div className={cn('inline-flex items-center gap-1 rounded-lg border border-zinc-800 bg-zinc-900/80 p-1', className)}>
       {children}
     </div>
   )
@@ -38,22 +33,16 @@ interface TabsTriggerProps {
   className?: string
 }
 
-export function TabsTrigger({
-  value,
-  activeValue,
-  onSelect,
-  children,
-  className,
-}: TabsTriggerProps) {
+export function TabsTrigger({ value, activeValue, onSelect, children, className }: TabsTriggerProps) {
   const isActive = value === activeValue
   return (
     <button
       type="button"
       className={cn(
-        'px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200 cursor-pointer',
+        'px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-150 cursor-pointer',
         isActive
-          ? 'bg-teal-500/10 text-teal-300 shadow-sm'
-          : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/[4%]',
+          ? 'bg-teal-500/15 text-teal-300'
+          : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/60',
         className,
       )}
       onClick={() => onSelect(value)}

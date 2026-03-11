@@ -14,9 +14,7 @@ export function DropdownMenu({ trigger, children, align = 'right', className }: 
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
@@ -34,7 +32,7 @@ export function DropdownMenu({ trigger, children, align = 'right', className }: 
       {open && (
         <div
           className={cn(
-            'absolute z-50 mt-1.5 min-w-[180px] rounded-xl border border-white/[6%] bg-[#0f0f0f] py-1 shadow-2xl shadow-black/40 animate-slide-in',
+            'absolute z-50 mt-1.5 min-w-[180px] rounded-xl border border-zinc-800 bg-zinc-900 py-1 shadow-2xl shadow-black/40 animate-slide-in',
             align === 'right' ? 'right-0' : 'left-0',
             className,
           )}
@@ -54,21 +52,13 @@ interface DropdownItemProps {
   className?: string
 }
 
-export function DropdownItem({
-  children,
-  onClick,
-  disabled,
-  danger,
-  className,
-}: DropdownItemProps) {
+export function DropdownItem({ children, onClick, disabled, danger, className }: DropdownItemProps) {
   return (
     <button
       type="button"
       className={cn(
         'w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors duration-150',
-        danger
-          ? 'text-red-400 hover:bg-red-500/10'
-          : 'text-zinc-300 hover:bg-white/[5%] hover:text-white',
+        danger ? 'text-red-400 hover:bg-red-500/10' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white',
         disabled && 'opacity-40 pointer-events-none',
         className,
       )}
@@ -81,5 +71,5 @@ export function DropdownItem({
 }
 
 export function DropdownSeparator() {
-  return <div className="my-1 border-t border-white/[6%]" />
+  return <div className="my-1 border-t border-zinc-800" />
 }
