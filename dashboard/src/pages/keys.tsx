@@ -60,7 +60,7 @@ export default function KeysPage() {
       key: 'key_prefix',
       header: 'Key',
       render: (item: VirtualKey) => (
-        <code className="text-xs font-mono bg-white/[4%] border border-white/[6%] px-2 py-1 rounded-md text-zinc-400">
+        <code className="text-xs font-mono bg-zinc-800/60 border border-zinc-700/60 px-2 py-1 rounded-md text-zinc-400">
           {item.key_prefix}...
         </code>
       ),
@@ -110,7 +110,7 @@ export default function KeysPage() {
           trigger={
             <button
               type="button"
-              className="rounded-lg p-1.5 hover:bg-white/[6%] transition-all duration-200"
+              className="rounded-lg p-1.5 hover:bg-zinc-800/60 transition-all duration-200"
             >
               <MoreVertical className="h-4 w-4 text-zinc-500" />
             </button>
@@ -197,7 +197,7 @@ export default function KeysPage() {
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center gap-2 mt-2">
-          <code className="flex-1 rounded-lg bg-white/[3%] border border-white/[6%] px-3 py-2 text-sm font-mono text-zinc-200 break-all">
+          <code className="flex-1 rounded-lg bg-zinc-900 border border-zinc-800 px-3 py-2 text-sm font-mono text-zinc-200 break-all">
             {createdKey}
           </code>
           <Button

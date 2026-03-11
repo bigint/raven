@@ -62,7 +62,7 @@ export default function BudgetsPage() {
         const pct = item.limit > 0 ? item.current_usage / item.limit : 0
         return (
           <div className="flex items-center gap-3 min-w-[120px]">
-            <div className="flex-1 h-1.5 rounded-full bg-white/[6%]">
+            <div className="flex-1 h-1.5 rounded-full bg-zinc-800/60">
               <div
                 className={`h-full rounded-full transition-all duration-500 ${
                   pct > 0.9 ? 'bg-red-400' : pct > 0.7 ? 'bg-amber-400' : 'bg-teal-400'

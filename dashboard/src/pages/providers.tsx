@@ -80,7 +80,7 @@ function ProviderCard({
       <CardContent>
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-white/[4%] p-2.5">
+            <div className="rounded-lg bg-zinc-800/60 p-2.5">
               <Server className="h-5 w-5 text-zinc-500" />
             </div>
             <div>
@@ -281,7 +281,7 @@ function ConfigureProviderDialog({
       </DialogHeader>
 
       <div className="space-y-4">
-        <div className="flex items-center gap-2 rounded-lg bg-white/[3%] border border-white/[6%] px-3 py-2">
+        <div className="flex items-center gap-2 rounded-lg bg-zinc-900 border border-zinc-800 px-3 py-2">
           <Server className="h-4 w-4 text-zinc-500" />
           <span className="text-sm text-zinc-200">{state.provider.name}</span>
         </div>
@@ -297,7 +297,7 @@ function ConfigureProviderDialog({
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder={state.isEditing ? 'Enter new key to update...' : 'Enter API key...'}
-              className="h-9 w-full rounded-lg border border-white/[6%] bg-[#0f0f0f] px-3 pr-10 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-teal-500/40 focus:border-teal-500/40 transition-all duration-200 font-mono"
+              className="h-9 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 pr-10 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-teal-500/40 focus:border-teal-500/40 transition-all duration-200 font-mono"
             />
             <button
               type="button"
@@ -316,7 +316,7 @@ function ConfigureProviderDialog({
           placeholder={state.provider.base_url || 'https://api.provider.com/v1'}
         />
 
-        <div className="flex items-center justify-between rounded-lg border border-white/[6%] bg-white/[3%] px-3 py-2.5">
+        <div className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5">
           <div>
             <p className="text-sm text-zinc-200">Enable Provider</p>
             <p className="text-xs text-zinc-500 mt-0.5">
@@ -346,7 +346,7 @@ function ConfigureProviderDialog({
       </div>
 
       {state.isEditing && !showDeleteConfirm && (
-        <div className="mt-4 pt-4 border-t border-white/[6%]">
+        <div className="mt-4 pt-4 border-t border-zinc-800">
           <Button
             variant="ghost"
             size="sm"
@@ -361,7 +361,7 @@ function ConfigureProviderDialog({
       )}
 
       {showDeleteConfirm && (
-        <div className="mt-4 pt-4 border-t border-white/[6%]">
+        <div className="mt-4 pt-4 border-t border-zinc-800">
           <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3">
             <p className="text-sm text-red-400 font-medium mb-2">
               Are you sure you want to remove this configuration?

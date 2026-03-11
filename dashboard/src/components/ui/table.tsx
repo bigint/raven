@@ -22,7 +22,7 @@ export function TableHeader({
   ...props
 }: HTMLAttributes<HTMLTableSectionElement> & { children: ReactNode }) {
   return (
-    <thead className={cn('border-b border-white/[6%]', className)} {...props}>
+    <thead className={cn('border-b border-zinc-800', className)} {...props}>
       {children}
     </thead>
   )
@@ -34,7 +34,7 @@ export function TableBody({
   ...props
 }: HTMLAttributes<HTMLTableSectionElement> & { children: ReactNode }) {
   return (
-    <tbody className={cn('divide-y divide-white/[4%]', className)} {...props}>
+    <tbody className={cn('divide-y divide-zinc-800/60', className)} {...props}>
       {children}
     </tbody>
   )
@@ -46,7 +46,7 @@ export function TableRow({
   ...props
 }: HTMLAttributes<HTMLTableRowElement> & { children: ReactNode }) {
   return (
-    <tr className={cn('hover:bg-white/[3%] transition-colors duration-150', className)} {...props}>
+    <tr className={cn('hover:bg-zinc-800/40 transition-colors duration-150', className)} {...props}>
       {children}
     </tr>
   )

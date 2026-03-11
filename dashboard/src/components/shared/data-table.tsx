@@ -162,7 +162,7 @@ export function DataTable<T>({
                         'h-8 w-8 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer',
                         p === page
                           ? 'bg-teal-500/10 text-teal-300'
-                          : 'text-zinc-500 hover:bg-white/[4%] hover:text-zinc-300',
+                          : 'text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300',
                       )}
                     >
                       {p}

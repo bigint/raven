@@ -96,8 +96,8 @@ export function BarChart({
         />
         <Tooltip
           contentStyle={{
-            backgroundColor: '#0f0f0f',
-            border: '1px solid rgba(255,255,255,0.06)',
+            backgroundColor: '#18181b',
+            border: '1px solid #27272a',
             borderRadius: '10px',
             fontSize: '12px',
             color: '#e4e4e7',

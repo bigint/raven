@@ -228,7 +228,7 @@ export default function RequestsPage() {
             {selected.error && (
               <div>
                 <p className="text-zinc-500 text-xs uppercase tracking-wider mb-1">Error</p>
-                <pre className="rounded-lg bg-white/[3%] border border-white/[6%] p-3 text-xs text-red-400 overflow-x-auto">
+                <pre className="rounded-lg bg-zinc-900 border border-zinc-800 p-3 text-xs text-red-400 overflow-x-auto">
                   {selected.error}
                 </pre>
               </div>
