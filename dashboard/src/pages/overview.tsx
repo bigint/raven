@@ -35,15 +35,13 @@ export default function OverviewPage() {
     : []
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-base font-semibold text-[#fafafa]">Overview</h1>
-        </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-[13px] font-semibold text-[#fafafa]">Overview</h1>
         <DateRangePicker value={range} onChange={setRange} />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard
           label="Total Requests"
           value={formatNumber(usage?.total_requests ?? 0)}
@@ -66,19 +64,19 @@ export default function OverviewPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         <Card>
           <CardHeader>
             <CardTitle>Top Models</CardTitle>
           </CardHeader>
           <CardContent>
             {topModels.length > 0 ? (
-              <BarChart data={topModels} height={200} valueFormatter={formatNumber} />
+              <BarChart data={topModels} height={200} layout="horizontal" valueFormatter={formatNumber} />
             ) : (
               <EmptyState
                 title="No requests yet"
                 description="Send your first request to see model usage"
-                icon={<Server className="h-6 w-6 text-[#525252]" />}
+                icon={<Server className="h-5 w-5" />}
               />
             )}
           </CardContent>
@@ -90,21 +88,13 @@ export default function OverviewPage() {
           </CardHeader>
           <CardContent>
             {providers && providers.length > 0 ? (
-              <div className="space-y-1">
+              <div>
                 {providers.map((provider) => (
                   <div
                     key={provider.id}
-                    className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-white/[0.04] transition-colors duration-150"
+                    className="flex items-center justify-between h-9 px-3 hover:bg-white/[0.02]"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="p-1.5">
-                        <Server className="h-3.5 w-3.5 text-[#525252]" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-[#fafafa]">{provider.display_name}</p>
-                        <p className="text-[11px] text-[#525252]">{provider.models.length} models</p>
-                      </div>
-                    </div>
+                    <span className="text-xs text-[#a3a3a3]">{provider.display_name}</span>
                     <Badge
                       variant={
                         provider.status === 'healthy'
@@ -113,7 +103,6 @@ export default function OverviewPage() {
                             ? 'warning'
                             : 'error'
                       }
-                      dot
                     >
                       {provider.status}
                     </Badge>
@@ -124,7 +113,7 @@ export default function OverviewPage() {
               <EmptyState
                 title="No providers configured"
                 description="Go to Providers to add your API keys"
-                icon={<Server className="h-6 w-6 text-[#525252]" />}
+                icon={<Server className="h-5 w-5" />}
               />
             )}
           </CardContent>

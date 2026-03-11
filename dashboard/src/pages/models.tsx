@@ -1,6 +1,4 @@
 import { DataTable } from '@/components/shared/data-table'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
 import { apiClient } from '@/lib/api'
 import type { Model } from '@/lib/types'
 import { formatCurrency } from '@/lib/utils'
@@ -39,34 +37,33 @@ export default function ModelsPage() {
       header: 'Model',
       sortable: true,
       render: (item: Model) => (
-        <div>
-          <p className="font-medium text-[#fafafa]">{item.name}</p>
-          <p className="text-xs text-[#525252]">{item.id}</p>
-        </div>
+        <span className="text-xs font-medium text-[#fafafa]">{item.name}</span>
       ),
     },
     {
       key: 'provider',
       header: 'Provider',
       sortable: true,
-      render: (item: Model) => <Badge variant="default">{item.provider}</Badge>,
+      render: (item: Model) => (
+        <span className="text-xs text-[#a3a3a3]">{item.provider}</span>
+      ),
     },
     {
       key: 'input_price_per_token',
-      header: 'Input Price',
+      header: 'Input $/M',
       sortable: true,
       render: (item: Model) => (
-        <span className="text-sm text-[#a3a3a3]">
+        <span className="font-mono text-xs font-medium text-[#fafafa] text-right">
           {formatCurrency(item.input_price_per_token * 1_000_000)}/M
         </span>
       ),
     },
     {
       key: 'output_price_per_token',
-      header: 'Output Price',
+      header: 'Output $/M',
       sortable: true,
       render: (item: Model) => (
-        <span className="text-sm text-[#a3a3a3]">
+        <span className="font-mono text-xs font-medium text-[#fafafa] text-right">
           {formatCurrency(item.output_price_per_token * 1_000_000)}/M
         </span>
       ),
@@ -76,46 +73,44 @@ export default function ModelsPage() {
       header: 'Context',
       sortable: true,
       render: (item: Model) => (
-        <span className="text-sm text-[#a3a3a3]">{(item.context_window / 1000).toFixed(0)}K</span>
+        <span className="font-mono text-xs font-medium text-[#fafafa]">
+          {(item.context_window / 1000).toFixed(0)}K
+        </span>
       ),
     },
     {
       key: 'features',
       header: 'Features',
       render: (item: Model) => (
-        <div className="flex gap-1">
-          {item.supports_streaming && <Badge variant="default">Stream</Badge>}
-          {item.supports_vision && <Badge variant="default">Vision</Badge>}
-          {item.supports_function_calling && <Badge variant="default">Tools</Badge>}
+        <div className="flex gap-1.5 font-mono text-xs">
+          <span className={item.supports_streaming ? 'text-[#fafafa]' : 'text-[#333]'}>S</span>
+          <span className={item.supports_vision ? 'text-[#fafafa]' : 'text-[#333]'}>V</span>
+          <span className={item.supports_function_calling ? 'text-[#fafafa]' : 'text-[#333]'}>T</span>
         </div>
       ),
     },
   ]
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-base font-semibold text-[#fafafa]">Models</h1>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-[13px] font-semibold text-[#fafafa]">Models</h1>
       </div>
 
-      <Card>
-        <CardContent>
-          <DataTable
-            columns={columns}
-            data={filteredModels}
-            total={filteredModels.length}
-            onSearch={setSearch}
-            onSort={handleSort}
-            sortBy={sortBy}
-            sortOrder={sortOrder}
-            isLoading={isLoading}
-            searchPlaceholder="Search models..."
-            emptyTitle="No models available"
-            emptyDescription="Models will appear once providers are configured."
-            getRowKey={(item) => item.id}
-          />
-        </CardContent>
-      </Card>
+      <DataTable
+        columns={columns}
+        data={filteredModels}
+        total={filteredModels.length}
+        onSearch={setSearch}
+        onSort={handleSort}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+        isLoading={isLoading}
+        searchPlaceholder="Search models..."
+        emptyTitle="No models available"
+        emptyDescription="Models will appear once providers are configured."
+        getRowKey={(item) => item.id}
+      />
     </div>
   )
 }

@@ -40,16 +40,13 @@ export default function AnalyticsPage() {
     : []
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-base font-semibold text-[#fafafa]">Analytics</h1>
-        </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-[13px] font-semibold text-[#fafafa]">Analytics</h1>
         <DateRangePicker value={range} onChange={setRange} />
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard
           label="Total Cost"
           value={formatCurrency(cost?.total_cost ?? 0)}
@@ -68,7 +65,6 @@ export default function AnalyticsPage() {
         />
       </div>
 
-      {/* Tabs */}
       <div>
         <TabsList>
           <TabsTrigger value="cost" activeValue={tab} onSelect={setTab}>
@@ -92,13 +88,14 @@ export default function AnalyticsPage() {
                 <AreaChart
                   data={cost.timeseries}
                   gradientId="costGradient"
+                  height={240}
                   valueFormatter={(v) => formatCurrency(v)}
                 />
               ) : (
                 <EmptyState
                   title="No cost data yet"
                   description="Cost data will appear once requests are processed"
-                  icon={<DollarSign className="h-8 w-8 text-[#525252]" />}
+                  icon={<DollarSign className="h-5 w-5" />}
                 />
               )}
             </CardContent>
@@ -114,13 +111,14 @@ export default function AnalyticsPage() {
               {costByTeam.length > 0 ? (
                 <BarChart
                   data={costByTeam}
+                  layout="horizontal"
                   valueFormatter={(v) => formatCurrency(v)}
                 />
               ) : (
                 <EmptyState
                   title="No team cost data yet"
                   description="Create teams and route requests to see cost breakdowns"
-                  icon={<DollarSign className="h-8 w-8 text-[#525252]" />}
+                  icon={<DollarSign className="h-5 w-5" />}
                 />
               )}
             </CardContent>
@@ -136,13 +134,14 @@ export default function AnalyticsPage() {
               {costByModel.length > 0 ? (
                 <BarChart
                   data={costByModel}
+                  layout="horizontal"
                   valueFormatter={(v) => formatCurrency(v)}
                 />
               ) : (
                 <EmptyState
                   title="No model cost data yet"
                   description="Send requests through the gateway to see model-level costs"
-                  icon={<DollarSign className="h-8 w-8 text-[#525252]" />}
+                  icon={<DollarSign className="h-5 w-5" />}
                 />
               )}
             </CardContent>

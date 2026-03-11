@@ -8,16 +8,9 @@ import { EmptyState } from '@/components/shared/empty-state'
 import { StatCard } from '@/components/shared/stat-card'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCacheStats } from '@/hooks/use-analytics'
-import { formatCurrency, formatNumber, formatPercent } from '@/lib/utils'
+import { formatBytes, formatCurrency, formatNumber, formatPercent } from '@/lib/utils'
 import { Zap } from 'lucide-react'
 import { useState } from 'react'
-
-function formatBytes(bytes: number): string {
-  if (bytes >= 1_073_741_824) return `${(bytes / 1_073_741_824).toFixed(1)} GB`
-  if (bytes >= 1_048_576) return `${(bytes / 1_048_576).toFixed(1)} MB`
-  if (bytes >= 1_024) return `${(bytes / 1_024).toFixed(1)} KB`
-  return `${bytes} B`
-}
 
 export default function CachePage() {
   const [range, setRange] = useState('24h')
@@ -27,26 +20,25 @@ export default function CachePage() {
   const { data: cache } = useCacheStats({ start, end, granularity })
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-base font-semibold text-[#fafafa]">Cache</h1>
-        </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-[13px] font-semibold text-[#fafafa]">Cache</h1>
         <DateRangePicker value={range} onChange={setRange} />
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard
           label="Hit Rate"
           value={formatPercent(cache?.hit_rate ?? 0)}
+          sparklineData={cache?.timeseries}
         />
         <StatCard
           label="Total Hits"
           value={formatNumber(cache?.total_hits ?? 0)}
+          sparklineData={cache?.timeseries}
         />
         <StatCard
-          label="Storage Used"
+          label="Storage"
           value={formatBytes(cache?.storage_bytes ?? 0)}
         />
         <StatCard
@@ -57,20 +49,21 @@ export default function CachePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Cache Hit Rate Over Time</CardTitle>
+          <CardTitle>Cache Performance</CardTitle>
         </CardHeader>
         <CardContent>
           {cache?.timeseries && cache.timeseries.length > 0 ? (
             <AreaChart
               data={cache.timeseries}
               gradientId="cacheGradient"
+              height={240}
               valueFormatter={(v) => formatPercent(v)}
             />
           ) : (
             <EmptyState
               title="No cache data yet"
               description="Cache metrics will appear once requests are processed"
-              icon={<Zap className="h-8 w-8 text-[#525252]" />}
+              icon={<Zap className="h-5 w-5" />}
             />
           )}
         </CardContent>

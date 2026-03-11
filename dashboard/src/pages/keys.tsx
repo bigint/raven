@@ -1,10 +1,8 @@
 import { DataTable } from '@/components/shared/data-table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import {
   Dialog,
-  DialogClose,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -14,9 +12,18 @@ import { DropdownItem, DropdownMenu, DropdownSeparator } from '@/components/ui/d
 import { Input } from '@/components/ui/input'
 import { useCreateKey, useDeleteKey, useKeys, useRotateKey } from '@/hooks/use-keys'
 import type { VirtualKey } from '@/lib/types'
-import { format } from 'date-fns'
-import { Copy, Key, MoreVertical, Plus, RotateCw, Trash2 } from 'lucide-react'
+import { formatDistanceToNow } from 'date-fns'
+import { Copy, MoreVertical, Plus, RotateCw, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+
+function relativeTime(dateStr: string | undefined): string {
+  if (!dateStr) return 'Never'
+  try {
+    return formatDistanceToNow(new Date(dateStr), { addSuffix: false }) + ' ago'
+  } catch {
+    return '--'
+  }
+}
 
 export default function KeysPage() {
   const [page, setPage] = useState(1)
@@ -50,27 +57,22 @@ export default function KeysPage() {
       header: 'Name',
       sortable: true,
       render: (item: VirtualKey) => (
-        <div className="flex items-center gap-2">
-          <Key className="h-4 w-4 text-[#525252]" />
-          <span className="font-medium text-[#fafafa]">{item.name}</span>
-        </div>
+        <span className="text-xs font-medium text-[#fafafa]">{item.name}</span>
       ),
     },
     {
       key: 'key_prefix',
       header: 'Key',
       render: (item: VirtualKey) => (
-        <code className="text-xs font-mono bg-transparent border border-white/[0.08] px-2 py-1 rounded-md text-[#a3a3a3]">
-          {item.key_prefix}...
-        </code>
+        <span className="font-mono text-[11px] text-[#525252]">{item.key_prefix}...</span>
       ),
     },
     {
       key: 'budget_limit',
       header: 'Budget',
       render: (item: VirtualKey) => (
-        <span className="text-sm text-[#a3a3a3]">
-          {item.budget_limit ? `$${item.budget_limit}` : 'Unlimited'}
+        <span className="font-mono text-xs text-[#a3a3a3]">
+          {item.budget_limit ? `$${item.budget_limit}` : 'unlimited'}
         </span>
       ),
     },
@@ -78,8 +80,8 @@ export default function KeysPage() {
       key: 'rate_limit',
       header: 'Rate Limit',
       render: (item: VirtualKey) => (
-        <span className="text-sm text-[#a3a3a3]">
-          {item.rate_limit ? `${item.rate_limit}/${item.rate_limit_window}` : 'None'}
+        <span className="font-mono text-xs text-[#a3a3a3]">
+          {item.rate_limit ? `${item.rate_limit}/${item.rate_limit_window}` : 'unlimited'}
         </span>
       ),
     },
@@ -87,8 +89,8 @@ export default function KeysPage() {
       key: 'last_used_at',
       header: 'Last Used',
       render: (item: VirtualKey) => (
-        <span className="text-xs text-[#525252]">
-          {item.last_used_at ? format(new Date(item.last_used_at), 'MMM d, HH:mm') : 'Never'}
+        <span className="font-mono text-xs text-[#525252]">
+          {relativeTime(item.last_used_at)}
         </span>
       ),
     },
@@ -96,8 +98,8 @@ export default function KeysPage() {
       key: 'expires_at',
       header: 'Expires',
       render: (item: VirtualKey) => (
-        <span className="text-xs text-[#525252]">
-          {item.expires_at ? format(new Date(item.expires_at), 'MMM d, yyyy') : 'Never'}
+        <span className="font-mono text-xs text-[#525252]">
+          {item.expires_at ? relativeTime(item.expires_at) : 'never'}
         </span>
       ),
     },
@@ -110,9 +112,9 @@ export default function KeysPage() {
           trigger={
             <button
               type="button"
-              className="rounded-lg p-1.5 hover:bg-white/[0.04] transition-all duration-200"
+              className="rounded-md p-1 hover:bg-white/[0.05]"
             >
-              <MoreVertical className="h-4 w-4 text-[#525252]" />
+              <MoreVertical className="h-3.5 w-3.5 text-[#525252]" />
             </button>
           }
         >
@@ -131,39 +133,31 @@ export default function KeysPage() {
   ]
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-base font-semibold text-[#fafafa]">Virtual Keys</h1>
-        </div>
-        <Button onClick={() => setCreateOpen(true)}>
-          <Plus className="h-4 w-4" />
+    <div className="space-y-4">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-[13px] font-semibold text-[#fafafa]">Keys</h1>
+        <Button variant="primary" onClick={() => setCreateOpen(true)}>
+          <Plus className="h-3.5 w-3.5" />
           Create Key
         </Button>
       </div>
 
-      <Card>
-        <CardContent>
-          <DataTable
-            columns={columns}
-            data={data?.data ?? []}
-            total={data?.total ?? 0}
-            page={page}
-            perPage={20}
-            onPageChange={setPage}
-            onSearch={setSearch}
-            isLoading={isLoading}
-            searchPlaceholder="Search keys..."
-            emptyTitle="No virtual keys"
-            emptyDescription="Create your first virtual key to start using the gateway."
-            getRowKey={(item) => item.id}
-          />
-        </CardContent>
-      </Card>
+      <DataTable
+        columns={columns}
+        data={data?.data ?? []}
+        total={data?.total ?? 0}
+        page={page}
+        perPage={20}
+        onPageChange={setPage}
+        onSearch={setSearch}
+        isLoading={isLoading}
+        searchPlaceholder="Search keys..."
+        emptyTitle="No virtual keys"
+        emptyDescription="Create your first virtual key to start using the gateway."
+        getRowKey={(item) => item.id}
+      />
 
-      {/* Create dialog */}
       <Dialog open={createOpen} onClose={() => setCreateOpen(false)}>
-        <DialogClose onClose={() => setCreateOpen(false)} />
         <DialogHeader>
           <DialogTitle>Create Virtual Key</DialogTitle>
           <DialogDescription>Create a new API key for accessing the gateway.</DialogDescription>
@@ -177,26 +171,24 @@ export default function KeysPage() {
           />
         </div>
         <DialogFooter>
-          <Button variant="secondary" onClick={() => setCreateOpen(false)}>
+          <Button variant="ghost" onClick={() => setCreateOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={handleCreate} disabled={createKey.isPending}>
+          <Button variant="primary" onClick={handleCreate} disabled={createKey.isPending}>
             {createKey.isPending ? 'Creating...' : 'Create Key'}
           </Button>
         </DialogFooter>
       </Dialog>
 
-      {/* Created key display */}
       <Dialog open={!!createdKey} onClose={() => setCreatedKey(null)}>
-        <DialogClose onClose={() => setCreatedKey(null)} />
         <DialogHeader>
           <DialogTitle>Key Created</DialogTitle>
           <DialogDescription>
-            Copy this key now. You will not be able to see it again.
+            This is the only time you'll see this key. Copy it now.
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center gap-2 mt-2">
-          <code className="flex-1 rounded-lg bg-transparent border border-white/[0.08] px-3 py-2 text-sm font-mono text-[#fafafa] break-all">
+          <code className="flex-1 rounded-md border border-white/[0.06] bg-white/[0.02] px-3 py-2 font-mono text-[11px] text-[#fafafa] break-all">
             {createdKey}
           </code>
           <Button
@@ -204,7 +196,7 @@ export default function KeysPage() {
             size="icon"
             onClick={() => createdKey && handleCopyKey(createdKey)}
           >
-            <Copy className="h-4 w-4" />
+            <Copy className="h-3.5 w-3.5" />
           </Button>
         </div>
         <div className="mt-3">
