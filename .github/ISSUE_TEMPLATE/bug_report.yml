@@ -1,0 +1,53 @@
+name: Bug Report
+description: Report a bug in Raven
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for reporting a bug! Please fill out the information below.
+  - type: input
+    id: version
+    attributes:
+      label: Raven Version
+      placeholder: v0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - Gateway
+        - Dashboard
+        - TypeScript SDK
+        - Python SDK
+        - Go SDK
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened? What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Provide step-by-step instructions
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: Configuration
+      description: Relevant raven.yaml config (redact secrets)
+      render: yaml
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Relevant log output
+      render: shell

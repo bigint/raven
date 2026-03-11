@@ -1,0 +1,34 @@
+name: New Provider Request
+description: Request support for a new AI provider
+labels: [provider]
+body:
+  - type: input
+    id: provider_name
+    attributes:
+      label: Provider Name
+      placeholder: e.g., Mistral AI
+    validations:
+      required: true
+  - type: input
+    id: api_docs
+    attributes:
+      label: API Documentation URL
+    validations:
+      required: true
+  - type: dropdown
+    id: compatibility
+    attributes:
+      label: API Compatibility
+      options:
+        - OpenAI-compatible
+        - Custom API
+        - Partially compatible
+    validations:
+      required: true
+  - type: textarea
+    id: models
+    attributes:
+      label: Models
+      description: List the models this provider offers
+    validations:
+      required: true
