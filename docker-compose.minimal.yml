@@ -1,0 +1,13 @@
+services:
+  gateway:
+    build: .
+    ports:
+      - '8080:8080'
+    environment:
+      - RAVEN_ADMIN_KEY=${RAVEN_ADMIN_KEY:-raven-admin-key}
+    volumes:
+      - raven_data:/data
+      - ./raven.yaml:/etc/raven/raven.yaml:ro
+
+volumes:
+  raven_data:
