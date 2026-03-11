@@ -34,8 +34,8 @@ class ApiError extends Error {
   }
 }
 
-function buildQuery(params: Record<string, unknown>): string {
-  const entries = Object.entries(params).filter(
+function buildQuery(params: object): string {
+  const entries = Object.entries(params as Record<string, unknown>).filter(
     ([, v]) => v !== undefined && v !== null && v !== '',
   )
   if (entries.length === 0) return ''
@@ -157,26 +157,26 @@ export class ApiClient {
 
   // Analytics
   async getUsage(opts: AnalyticsOpts): Promise<UsageData> {
-    return this.request(`/admin/v1/analytics/usage${buildQuery(opts as Record<string, unknown>)}`)
+    return this.request(`/admin/v1/analytics/usage${buildQuery(opts)}`)
   }
 
   async getCost(opts: AnalyticsOpts): Promise<CostData> {
-    return this.request(`/admin/v1/analytics/cost${buildQuery(opts as Record<string, unknown>)}`)
+    return this.request(`/admin/v1/analytics/cost${buildQuery(opts)}`)
   }
 
   async getLatency(opts: AnalyticsOpts): Promise<LatencyData> {
     return this.request(
-      `/admin/v1/analytics/latency${buildQuery(opts as Record<string, unknown>)}`,
+      `/admin/v1/analytics/latency${buildQuery(opts)}`,
     )
   }
 
   async getCacheStats(opts: AnalyticsOpts): Promise<CacheData> {
-    return this.request(`/admin/v1/analytics/cache${buildQuery(opts as Record<string, unknown>)}`)
+    return this.request(`/admin/v1/analytics/cache${buildQuery(opts)}`)
   }
 
   // Logs
   async listLogs(opts: LogQueryOpts): Promise<PaginatedResponse<RequestLog>> {
-    return this.request(`/admin/v1/logs${buildQuery(opts as Record<string, unknown>)}`)
+    return this.request(`/admin/v1/logs${buildQuery(opts)}`)
   }
 
   async getLog(id: string): Promise<RequestLog> {

@@ -474,7 +474,14 @@ describe('Raven', () => {
       })
 
       mockFetch.mockImplementation(
-        () => new Promise((resolve) => setTimeout(resolve, 1000)),
+        (_url: string, init: RequestInit) =>
+          new Promise((resolve, reject) => {
+            const timer = setTimeout(() => resolve(jsonResponse({ object: 'list', data: [] })), 5000)
+            init.signal?.addEventListener('abort', () => {
+              clearTimeout(timer)
+              reject(new DOMException('The operation was aborted', 'AbortError'))
+            })
+          }),
       )
 
       try {

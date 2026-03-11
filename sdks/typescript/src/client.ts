@@ -223,7 +223,7 @@ export class Raven {
         throw error
       }
 
-      if (error instanceof DOMException && error.name === 'AbortError') {
+      if (controller.signal.aborted) {
         throw new RavenError(
           `Request timed out after ${this.timeout}ms`,
           0,
@@ -316,7 +316,7 @@ export class Raven {
         throw error
       }
 
-      if (error instanceof DOMException && error.name === 'AbortError') {
+      if (controller.signal.aborted) {
         throw new RavenError(
           `Request timed out after ${this.timeout}ms`,
           0,
@@ -395,6 +395,10 @@ export class Raven {
     return this.request<ModelListResponse>('/v1/models')
   }
 
+  private toRecord(params: object): Record<string, unknown> {
+    return Object.fromEntries(Object.entries(params))
+  }
+
   private buildQueryString(params: Record<string, unknown>): string {
     const searchParams = new URLSearchParams()
     for (const [key, value] of Object.entries(params)) {
@@ -409,7 +413,7 @@ export class Raven {
   private buildCrudClient<T, TCreate>(basePath: string): CrudClient<T, TCreate> {
     return {
       list: (params?: PaginationParams) => {
-        const qs = this.buildQueryString(params ?? {})
+        const qs = this.buildQueryString(this.toRecord(params ?? {}))
         return this.request<PaginatedResponse<T>>(`${basePath}${qs}`)
       },
       get: (id: string) => {
@@ -439,7 +443,7 @@ export class Raven {
     const basePath = '/admin/keys'
     return {
       list: (params?: PaginationParams) => {
-        const qs = this.buildQueryString(params ?? {})
+        const qs = this.buildQueryString(this.toRecord(params ?? {}))
         return this.request<PaginatedResponse<VirtualKey>>(`${basePath}${qs}`)
       },
       get: (id: string) => {
@@ -490,7 +494,7 @@ export class Raven {
   private buildAnalyticsClient(): AnalyticsClient {
     return {
       query: (params: AnalyticsQuery) => {
-        const qs = this.buildQueryString(params as unknown as Record<string, unknown>)
+        const qs = this.buildQueryString(this.toRecord(params))
         return this.request<ApiResponse<AnalyticsResponse>>(`/admin/analytics${qs}`)
       },
     }
@@ -500,7 +504,7 @@ export class Raven {
     const basePath = '/admin/logs'
     return {
       list: (params?: LogsQuery) => {
-        const qs = this.buildQueryString((params ?? {}) as Record<string, unknown>)
+        const qs = this.buildQueryString(this.toRecord(params ?? {}))
         return this.request<PaginatedResponse<RequestLog>>(`${basePath}${qs}`)
       },
       get: (id: string) => {
