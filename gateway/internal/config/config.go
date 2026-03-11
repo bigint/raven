@@ -45,7 +45,8 @@ type AdminConfig struct {
 
 // DashboardConfig holds dashboard settings.
 type DashboardConfig struct {
-	Enabled bool `mapstructure:"enabled"`
+	Enabled bool   `mapstructure:"enabled"`
+	Dir     string `mapstructure:"dir"`
 }
 
 // StoreConfig holds database settings.
@@ -296,6 +297,9 @@ func applyEnvOverrides(cfg *Config) {
 	}
 	if v := envStr("RAVEN_LOG_LEVEL"); v != "" {
 		cfg.Observability.Logs.Level = v
+	}
+	if v := envStr("RAVEN_DASHBOARD_DIR"); v != "" {
+		cfg.Admin.Dashboard.Dir = v
 	}
 }
 

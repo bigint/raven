@@ -4,10 +4,13 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"io/fs"
 	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -247,5 +250,45 @@ func (s *Server) buildRouter() chi.Router {
 		r.Mount("/admin/v1", adminRouter.Routes())
 	})
 
+	// Dashboard SPA (serve static files with index.html fallback).
+	if s.cfg.Admin.Dashboard.Enabled && s.cfg.Admin.Dashboard.Dir != "" {
+		dashDir := s.cfg.Admin.Dashboard.Dir
+		if info, err := os.Stat(dashDir); err == nil && info.IsDir() {
+			slog.Info("serving dashboard", "dir", dashDir)
+			r.Get("/*", spaHandler(dashDir))
+		} else {
+			slog.Warn("dashboard directory not found, skipping", "dir", dashDir)
+		}
+	}
+
 	return r
+}
+
+// spaHandler serves static files and falls back to index.html for SPA routing.
+func spaHandler(dir string) http.HandlerFunc {
+	fsys := os.DirFS(dir)
+	fileServer := http.FileServer(http.FS(fsys))
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Strip leading slash for fs.Stat.
+		path := strings.TrimPrefix(r.URL.Path, "/")
+		if path == "" {
+			path = "index.html"
+		}
+
+		// Check if the file exists.
+		if _, err := fs.Stat(fsys, path); err == nil {
+			// Serve static assets with cache headers.
+			ext := filepath.Ext(path)
+			if ext == ".js" || ext == ".css" || ext == ".woff2" || ext == ".woff" || ext == ".png" || ext == ".svg" || ext == ".ico" {
+				w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+			}
+			fileServer.ServeHTTP(w, r)
+			return
+		}
+
+		// Fallback to index.html for SPA routes.
+		r.URL.Path = "/"
+		fileServer.ServeHTTP(w, r)
+	}
 }

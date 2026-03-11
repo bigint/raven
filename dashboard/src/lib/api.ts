@@ -58,6 +58,10 @@ export class ApiClient {
     this.apiKey = apiKey
   }
 
+  setKey(key: string) {
+    this.apiKey = key
+  }
+
   private async request<T>(path: string, init?: RequestInit): Promise<T> {
     const url = `${this.baseUrl}${path}`
     const res = await fetch(url, {
@@ -237,6 +241,27 @@ export class ApiClient {
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : '')
-const API_KEY = import.meta.env.VITE_API_KEY || import.meta.env.VITE_RAVEN_ADMIN_KEY || ''
 
-export const apiClient = new ApiClient(API_BASE_URL, API_KEY)
+function getApiKey(): string {
+  return (
+    import.meta.env.VITE_API_KEY ||
+    import.meta.env.VITE_RAVEN_ADMIN_KEY ||
+    localStorage.getItem('raven_admin_key') ||
+    ''
+  )
+}
+
+export function setApiKey(key: string) {
+  localStorage.setItem('raven_admin_key', key)
+  apiClient.setKey(key)
+}
+
+export function clearApiKey() {
+  localStorage.removeItem('raven_admin_key')
+}
+
+export function hasApiKey(): boolean {
+  return getApiKey() !== ''
+}
+
+export const apiClient = new ApiClient(API_BASE_URL, getApiKey())
