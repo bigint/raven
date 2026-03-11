@@ -3,13 +3,15 @@ FROM node:22-alpine AS dashboard-builder
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-WORKDIR /app/dashboard
+WORKDIR /app
 
-COPY dashboard/package.json dashboard/pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY dashboard/package.json ./dashboard/
 
-COPY dashboard/ ./
-RUN pnpm build
+RUN pnpm install --frozen-lockfile --filter dashboard
+
+COPY dashboard/ ./dashboard/
+RUN pnpm --filter dashboard build
 
 # Stage 2: Build gateway
 FROM golang:1.24-alpine AS gateway-builder
