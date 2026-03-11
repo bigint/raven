@@ -5,43 +5,24 @@ import { cn } from '@/lib/utils'
 interface StatCardProps {
   label: string
   value: string
-  trend?: number
-  trendLabel?: string
-  icon?: React.ReactNode
   sparklineData?: TimeseriesPoint[]
-  sparklineColor?: string
   className?: string
 }
 
-export function StatCard({
-  label,
-  value,
-  trend,
-  trendLabel,
-  sparklineData,
-  className,
-}: StatCardProps) {
+export function StatCard({ label, value, sparklineData, className }: StatCardProps) {
   return (
     <div
       className={cn(
-        'relative flex justify-between rounded-[10px] border border-white/[0.08] p-4',
+        'flex justify-between rounded-lg border border-white/[0.06] bg-white/[0.02] px-3.5 py-3 hover:border-white/[0.10]',
         className,
       )}
     >
       <div className="flex flex-col min-w-0">
-        <p className="text-[11px] text-[#525252] uppercase tracking-[0.02em]">
-          {label}
-        </p>
-        <p className="mt-2 text-2xl font-semibold text-[#fafafa] tracking-tight">{value}</p>
-        {trend !== undefined && (
-          <p className="mt-1.5 text-[11px] text-[#a3a3a3]">
-            {trend > 0 ? '+' : ''}{trend.toFixed(1)}%
-            {trendLabel && <span className="text-[#525252] ml-1">{trendLabel}</span>}
-          </p>
-        )}
+        <p className="text-[10px] text-[#525252] uppercase tracking-[0.5px]">{label}</p>
+        <p className="mt-2 text-[22px] font-semibold text-[#fafafa] tracking-[-0.5px]">{value}</p>
       </div>
       {sparklineData && sparklineData.length > 0 && (
-        <div className="shrink-0 mt-1">
+        <div className="shrink-0 self-end">
           <Sparkline data={sparklineData} />
         </div>
       )}

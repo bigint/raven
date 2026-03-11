@@ -2,7 +2,6 @@ import type { TimeseriesPoint } from '@/lib/types'
 import { format } from 'date-fns'
 import {
   Area,
-  CartesianGrid,
   AreaChart as RechartsAreaChart,
   ResponsiveContainer,
   Tooltip,
@@ -12,65 +11,64 @@ import {
 
 interface AreaChartProps {
   data: TimeseriesPoint[]
-  color?: string
   gradientId?: string
   height?: number
   valueFormatter?: (value: number) => string
-  xAxisFormatter?: (value: string) => string
+  xAxisFormatter?: (timestamp: string) => string
+}
+
+function ChartTooltip({ active, payload, valueFormatter }: any) {
+  if (!active || !payload?.length) return null
+  return (
+    <div className="rounded-[4px] border border-white/[0.08] bg-[#1a1a1a] px-2 py-1">
+      <p className="text-[11px] text-[#a3a3a3]">
+        {valueFormatter ? valueFormatter(payload[0].value) : payload[0].value}
+      </p>
+    </div>
+  )
 }
 
 export function AreaChart({
   data,
-  color = 'rgba(255,255,255,0.3)',
-  gradientId = 'areaGradient',
-  height = 300,
-  valueFormatter = (v) => v.toLocaleString(),
-  xAxisFormatter = (v) => format(new Date(v), 'HH:mm'),
+  gradientId = 'areaGrad',
+  height = 240,
+  valueFormatter,
+  xAxisFormatter,
 }: AreaChartProps) {
+  const formatX = xAxisFormatter ?? ((ts: string) => format(new Date(ts), 'MMM d'))
+
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <RechartsAreaChart data={data} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
+      <RechartsAreaChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor={color} stopOpacity={0.06} />
-            <stop offset="95%" stopColor={color} stopOpacity={0} />
+            <stop offset="0%" stopColor="#fff" stopOpacity={0.08} />
+            <stop offset="100%" stopColor="#fff" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
         <XAxis
           dataKey="timestamp"
-          tickFormatter={xAxisFormatter}
-          stroke="rgba(255,255,255,0.04)"
-          tick={{ fill: '#525252', fontSize: 11 }}
-          axisLine={false}
+          tickFormatter={formatX}
+          axisLine={{ stroke: 'rgba(255,255,255,0.04)' }}
           tickLine={false}
+          tick={{ fontSize: 10, fill: '#333', fontFamily: 'var(--font-mono)' }}
         />
         <YAxis
-          tickFormatter={valueFormatter}
-          stroke="rgba(255,255,255,0.04)"
-          tick={{ fill: '#525252', fontSize: 11 }}
-          axisLine={false}
+          axisLine={{ stroke: 'rgba(255,255,255,0.04)' }}
           tickLine={false}
-          width={60}
+          tick={{ fontSize: 10, fill: '#333', fontFamily: 'var(--font-mono)' }}
+          tickFormatter={valueFormatter}
         />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: '#141414',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: '8px',
-            fontSize: '12px',
-            color: '#fafafa',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
-          }}
-          formatter={(value: number) => [valueFormatter(value), 'Value']}
-          labelFormatter={(label: string) => format(new Date(label), 'MMM d, HH:mm')}
-        />
+        <Tooltip cursor={false} content={<ChartTooltip valueFormatter={valueFormatter} />} />
         <Area
           type="monotone"
           dataKey="value"
-          stroke={color}
-          strokeWidth={2}
+          stroke="rgba(255,255,255,0.25)"
+          strokeWidth={1.5}
           fill={`url(#${gradientId})`}
+          dot={false}
+          activeDot={{ r: 3, fill: '#fff', stroke: 'none' }}
+          isAnimationActive={false}
         />
       </RechartsAreaChart>
     </ResponsiveContainer>

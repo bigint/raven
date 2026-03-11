@@ -1,69 +1,58 @@
 import {
   Bar,
-  CartesianGrid,
   BarChart as RechartsBarChart,
+  Cell,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts'
 
-interface BarChartDataPoint {
-  name: string
-  value: number
-}
-
 interface BarChartProps {
-  data: BarChartDataPoint[]
-  color?: string
+  data: { name: string; value: number }[]
   height?: number
   valueFormatter?: (value: number) => string
   layout?: 'vertical' | 'horizontal'
 }
 
-export function BarChart({
-  data,
-  color = 'rgba(255,255,255,0.15)',
-  height = 300,
-  valueFormatter = (v) => v.toLocaleString(),
-  layout = 'vertical',
-}: BarChartProps) {
+function ChartTooltip({ active, payload, valueFormatter }: any) {
+  if (!active || !payload?.length) return null
+  return (
+    <div className="rounded-[4px] border border-white/[0.08] bg-[#1a1a1a] px-2 py-1">
+      <p className="text-[11px] text-[#a3a3a3]">
+        {payload[0].payload.name}: {valueFormatter ? valueFormatter(payload[0].value) : payload[0].value}
+      </p>
+    </div>
+  )
+}
+
+function getBarOpacity(value: number, max: number): number {
+  if (max === 0) return 0.04
+  return 0.04 + (value / max) * 0.12
+}
+
+export function BarChart({ data, height = 200, valueFormatter, layout = 'vertical' }: BarChartProps) {
+  const max = Math.max(...data.map((d) => d.value), 0)
+
   if (layout === 'horizontal') {
     return (
       <ResponsiveContainer width="100%" height={height}>
-        <RechartsBarChart
-          data={data}
-          layout="horizontal"
-          margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-          <XAxis
-            dataKey="name"
-            stroke="rgba(255,255,255,0.04)"
-            tick={{ fill: '#525252', fontSize: 11 }}
-            axisLine={false}
-            tickLine={false}
-          />
+        <RechartsBarChart data={data} layout="vertical" margin={{ top: 0, right: 4, bottom: 0, left: 0 }}>
+          <XAxis type="number" hide />
           <YAxis
-            tickFormatter={valueFormatter}
-            stroke="rgba(255,255,255,0.04)"
-            tick={{ fill: '#525252', fontSize: 11 }}
+            type="category"
+            dataKey="name"
             axisLine={false}
             tickLine={false}
-            width={60}
+            tick={{ fontSize: 10, fill: '#333' }}
+            width={80}
           />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: '#141414',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: '8px',
-              fontSize: '12px',
-              color: '#fafafa',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
-            }}
-            formatter={(value: number) => [valueFormatter(value), 'Value']}
-          />
-          <Bar dataKey="value" fill={color} radius={[4, 4, 0, 0]} fillOpacity={1} />
+          <Tooltip cursor={false} content={<ChartTooltip valueFormatter={valueFormatter} />} />
+          <Bar dataKey="value" radius={[0, 2, 2, 0]} barSize={16} isAnimationActive={false}>
+            {data.map((entry, i) => (
+              <Cell key={i} fill={`rgba(255,255,255,${getBarOpacity(entry.value, max)})`} />
+            ))}
+          </Bar>
         </RechartsBarChart>
       </ResponsiveContainer>
     )
@@ -71,41 +60,25 @@ export function BarChart({
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <RechartsBarChart
-        data={data}
-        layout="vertical"
-        margin={{ top: 5, right: 20, bottom: 5, left: 5 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={false} />
+      <RechartsBarChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
         <XAxis
-          type="number"
-          tickFormatter={valueFormatter}
-          stroke="rgba(255,255,255,0.04)"
-          tick={{ fill: '#525252', fontSize: 11 }}
-          axisLine={false}
+          dataKey="name"
+          axisLine={{ stroke: 'rgba(255,255,255,0.04)' }}
           tickLine={false}
+          tick={{ fontSize: 10, fill: '#333' }}
         />
         <YAxis
-          type="category"
-          dataKey="name"
-          stroke="rgba(255,255,255,0.04)"
-          tick={{ fill: '#525252', fontSize: 11 }}
-          axisLine={false}
+          axisLine={{ stroke: 'rgba(255,255,255,0.04)' }}
           tickLine={false}
-          width={120}
+          tick={{ fontSize: 10, fill: '#333', fontFamily: 'var(--font-mono)' }}
+          tickFormatter={valueFormatter}
         />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: '#141414',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: '8px',
-            fontSize: '12px',
-            color: '#fafafa',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
-          }}
-          formatter={(value: number) => [valueFormatter(value), 'Requests']}
-        />
-        <Bar dataKey="value" fill={color} radius={[0, 4, 4, 0]} barSize={20} fillOpacity={1} />
+        <Tooltip cursor={false} content={<ChartTooltip valueFormatter={valueFormatter} />} />
+        <Bar dataKey="value" radius={[2, 2, 0, 0]} barSize={20} isAnimationActive={false}>
+          {data.map((entry, i) => (
+            <Cell key={i} fill={`rgba(255,255,255,${getBarOpacity(entry.value, max)})`} />
+          ))}
+        </Bar>
       </RechartsBarChart>
     </ResponsiveContainer>
   )

@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils'
 import { Calendar } from 'lucide-react'
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
 
 interface DateRangePickerProps {
   value: string
@@ -8,124 +9,101 @@ interface DateRangePickerProps {
   className?: string
 }
 
-const presets = [
-  { value: '1h', label: '1h' },
-  { value: '24h', label: '24h' },
-  { value: '7d', label: '7d' },
-  { value: '30d', label: '30d' },
-  { value: 'custom', label: 'Custom' },
-]
+const presets = ['1h', '24h', '7d', '30d']
 
 export function DateRangePicker({ value, onChange, className }: DateRangePickerProps) {
   const [showCustom, setShowCustom] = useState(false)
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
+  const [customStart, setCustomStart] = useState('')
+  const [customEnd, setCustomEnd] = useState('')
 
-  const handlePresetClick = (preset: string) => {
-    if (preset === 'custom') {
-      setShowCustom(!showCustom)
-    } else {
-      setShowCustom(false)
-      onChange(preset)
-    }
-  }
-
-  const handleCustomApply = () => {
-    if (startDate && endDate) {
-      onChange(`${startDate}|${endDate}`)
-      setShowCustom(false)
-    }
+  const handlePreset = (preset: string) => {
+    setShowCustom(false)
+    onChange(preset)
   }
 
   return (
-    <div className={cn('flex items-center gap-1', className)}>
-      <Calendar className="h-3.5 w-3.5 text-[#525252] mr-1" />
-      <div className="inline-flex items-center gap-0.5 rounded-lg p-0.5">
+    <div className={cn('flex items-center gap-2', className)}>
+      <Calendar className="h-3.5 w-3.5 text-[#333]" />
+      <div className="inline-flex rounded-md border border-white/[0.06] bg-white/[0.02] p-0.5">
         {presets.map((preset) => (
           <button
+            key={preset}
             type="button"
-            key={preset.value}
-            onClick={() => handlePresetClick(preset.value)}
+            onClick={() => handlePreset(preset)}
             className={cn(
-              'px-2.5 py-1 text-[11px] font-medium rounded-md transition-colors duration-150 cursor-pointer',
-              value === preset.value || (preset.value === 'custom' && value.includes('|'))
-                ? 'bg-white/[0.06] text-[#fafafa]'
-                : 'text-[#525252] hover:text-[#a3a3a3] hover:bg-white/[0.04]',
+              'px-3 py-1 text-[11px] font-medium rounded-[5px]',
+              value === preset && !showCustom
+                ? 'bg-white/[0.08] text-[#fafafa]'
+                : 'text-[#525252] hover:text-[#a3a3a3]',
             )}
           >
-            {preset.label}
+            {preset}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={() => setShowCustom(!showCustom)}
+          className={cn(
+            'px-3 py-1 text-[11px] font-medium rounded-[5px]',
+            showCustom ? 'bg-white/[0.08] text-[#fafafa]' : 'text-[#525252] hover:text-[#a3a3a3]',
+          )}
+        >
+          Custom
+        </button>
       </div>
       {showCustom && (
-        <div className="flex items-center gap-2 ml-2 animate-slide-in">
+        <div className="flex items-center gap-2">
           <input
             type="datetime-local"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="h-7 rounded-lg border border-white/[0.08] bg-transparent px-2 text-xs text-[#fafafa] focus:outline-none focus:ring-2 focus:ring-white/15"
+            value={customStart}
+            onChange={(e) => setCustomStart(e.target.value)}
+            className="h-8 rounded-md border border-white/[0.06] bg-transparent px-2 text-[11px] text-[#fafafa] focus:outline-none focus:border-white/[0.15]"
           />
-          <span className="text-[#525252] text-xs">to</span>
+          <span className="text-[11px] text-[#333]">to</span>
           <input
             type="datetime-local"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="h-7 rounded-lg border border-white/[0.08] bg-transparent px-2 text-xs text-[#fafafa] focus:outline-none focus:ring-2 focus:ring-white/15"
+            value={customEnd}
+            onChange={(e) => setCustomEnd(e.target.value)}
+            className="h-8 rounded-md border border-white/[0.06] bg-transparent px-2 text-[11px] text-[#fafafa] focus:outline-none focus:border-white/[0.15]"
           />
-          <button
-            type="button"
-            onClick={handleCustomApply}
-            className="px-2.5 py-1 text-xs font-medium rounded-lg bg-[#fafafa] text-[#0a0a0a] hover:bg-[#e5e5e5] transition-colors duration-150 cursor-pointer"
+          <Button
+            size="sm"
+            onClick={() => {
+              if (customStart && customEnd) onChange(`${customStart}|${customEnd}`)
+            }}
           >
             Apply
-          </button>
+          </Button>
         </div>
       )}
     </div>
   )
 }
 
-export function getDateRange(value: string): { start: string; end: string } {
-  if (value.includes('|')) {
-    const [start, end] = value.split('|')
-    return { start: start ?? '', end: end ?? '' }
+export function getDateRange(range: string): { start: string; end: string } {
+  if (range.includes('|')) {
+    const [start, end] = range.split('|')
+    return { start, end }
   }
-
   const now = new Date()
   const end = now.toISOString()
-  let start: Date
-
-  switch (value) {
-    case '1h':
-      start = new Date(now.getTime() - 60 * 60 * 1000)
-      break
-    case '24h':
-      start = new Date(now.getTime() - 24 * 60 * 60 * 1000)
-      break
-    case '7d':
-      start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-      break
-    case '30d':
-      start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-      break
-    default:
-      start = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+  const ms: Record<string, number> = {
+    '1h': 3600000,
+    '24h': 86400000,
+    '7d': 604800000,
+    '30d': 2592000000,
   }
-
-  return { start: start.toISOString(), end }
+  const start = new Date(now.getTime() - (ms[range] ?? 86400000)).toISOString()
+  return { start, end }
 }
 
-export function getGranularity(value: string): 'minute' | 'hour' | 'day' | 'week' | 'month' {
-  switch (value) {
-    case '1h':
-      return 'minute'
-    case '24h':
-      return 'hour'
-    case '7d':
-      return 'day'
-    case '30d':
-      return 'day'
-    default:
-      return 'hour'
+export function getGranularity(range: string): string {
+  if (range.includes('|')) return 'hour'
+  const map: Record<string, string> = {
+    '1h': 'minute',
+    '24h': 'hour',
+    '7d': 'hour',
+    '30d': 'day',
   }
+  return map[range] ?? 'hour'
 }

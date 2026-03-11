@@ -1,24 +1,14 @@
 import { EmptyState } from '@/components/shared/empty-state'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { SkeletonTable } from '@/components/ui/skeleton'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
-import { type ReactNode, useState } from 'react'
+import type { ReactNode } from 'react'
 
 interface Column<T> {
   key: string
   header: string
   sortable?: boolean
-  render?: (item: T) => ReactNode
+  render?: (row: T) => ReactNode
   className?: string
 }
 
@@ -38,14 +28,16 @@ interface DataTableProps<T> {
   emptyTitle?: string
   emptyDescription?: string
   actions?: ReactNode
-  onRowClick?: (item: T) => void
-  getRowKey: (item: T) => string
+  onRowClick?: (row: T) => void
+  getRowKey: (row: T) => string
+  expandedRow?: string | null
+  renderExpandedRow?: (row: T) => ReactNode
 }
 
 export function DataTable<T>({
   columns,
   data,
-  total = 0,
+  total,
   page = 1,
   perPage = 20,
   onPageChange,
@@ -53,49 +45,40 @@ export function DataTable<T>({
   onSort,
   sortBy,
   sortOrder,
-  isLoading,
   searchPlaceholder = 'Search...',
-  emptyTitle = 'No results found',
+  emptyTitle = 'No results',
   emptyDescription,
   actions,
   onRowClick,
   getRowKey,
+  expandedRow,
+  renderExpandedRow,
 }: DataTableProps<T>) {
-  const [search, setSearch] = useState('')
-  const totalPages = Math.ceil(total / perPage)
+  const totalItems = total ?? data.length
+  const totalPages = Math.ceil(totalItems / perPage)
+  const start = (page - 1) * perPage + 1
+  const end = Math.min(page * perPage, totalItems)
 
-  const handleSearch = (value: string) => {
-    setSearch(value)
-    onSearch?.(value)
+  const pageNumbers = []
+  for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+    pageNumbers.push(i)
   }
-
-  const handleSort = (key: string) => {
-    onSort?.(key)
-  }
-
-  if (isLoading) {
-    return <SkeletonTable />
-  }
-
-  const startPage = Math.max(1, page - 2)
-  const endPage = Math.min(totalPages, startPage + 4)
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        {onSearch && (
-          <div className="relative max-w-sm flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#525252]" />
-            <Input
-              value={search}
-              onChange={(e) => handleSearch(e.target.value)}
-              placeholder={searchPlaceholder}
-              className="pl-9"
-            />
-          </div>
-        )}
-        {actions && <div className="flex items-center gap-2">{actions}</div>}
-      </div>
+    <div>
+      {(onSearch || actions) && (
+        <div className="flex items-center gap-3 mb-3">
+          {onSearch && (
+            <div className="flex-1">
+              <Input
+                placeholder={searchPlaceholder}
+                onChange={(e) => onSearch(e.target.value)}
+              />
+            </div>
+          )}
+          {actions && <div className="shrink-0">{actions}</div>}
+        </div>
+      )}
 
       {data.length === 0 ? (
         <EmptyState title={emptyTitle} description={emptyDescription} />
@@ -103,80 +86,86 @@ export function DataTable<T>({
         <>
           <Table>
             <TableHeader>
-              <TableRow>
+              <tr>
                 {columns.map((col) => (
                   <TableHead
                     key={col.key}
                     sortKey={col.sortable ? col.key : undefined}
                     currentSort={sortBy}
                     sortOrder={sortOrder}
-                    onSort={handleSort}
+                    onSort={onSort}
                     className={col.className}
                   >
                     {col.header}
                   </TableHead>
                 ))}
-              </TableRow>
+              </tr>
             </TableHeader>
             <TableBody>
-              {data.map((item) => (
-                <TableRow
-                  key={getRowKey(item)}
-                  className={cn(onRowClick && 'cursor-pointer')}
-                  onClick={() => onRowClick?.(item)}
-                >
-                  {columns.map((col) => (
-                    <TableCell key={col.key} className={col.className}>
-                      {col.render
-                        ? col.render(item)
-                        : String((item as Record<string, unknown>)[col.key] ?? '')}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
+              {data.map((row) => {
+                const key = getRowKey(row)
+                const isExpanded = expandedRow === key
+                return (
+                  <>
+                    <TableRow
+                      key={key}
+                      onClick={() => onRowClick?.(row)}
+                      className={cn(onRowClick && 'cursor-pointer')}
+                    >
+                      {columns.map((col) => (
+                        <TableCell key={col.key} className={col.className}>
+                          {col.render ? col.render(row) : (row as any)[col.key]}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                    {isExpanded && renderExpandedRow && (
+                      <tr key={`${key}-expanded`}>
+                        <td colSpan={columns.length} className="bg-white/[0.01] border-b border-white/[0.06] p-0">
+                          {renderExpandedRow(row)}
+                        </td>
+                      </tr>
+                    )}
+                  </>
+                )
+              })}
             </TableBody>
           </Table>
 
-          {totalPages > 1 && onPageChange && (
-            <div className="flex items-center justify-between pt-2">
-              <p className="text-xs text-[#525252]">
-                Showing {(page - 1) * perPage + 1} to {Math.min(page * perPage, total)} of {total}{' '}
-                results
-              </p>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onPageChange(page - 1)}
+          {onPageChange && totalPages > 1 && (
+            <div className="mt-3 flex items-center justify-between">
+              <span className="text-[11px] text-[#525252]">
+                {start}–{end} of {totalItems} results
+              </span>
+              <div className="flex gap-1">
+                <button
+                  type="button"
                   disabled={page <= 1}
+                  onClick={() => onPageChange(page - 1)}
+                  className="h-6 w-6 rounded-[5px] text-[11px] text-[#a3a3a3] hover:bg-white/[0.05] disabled:opacity-40"
                 >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map(
-                  (p) => (
-                    <button
-                      type="button"
-                      key={p}
-                      onClick={() => onPageChange(p)}
-                      className={cn(
-                        'h-8 w-8 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer',
-                        p === page
-                          ? 'bg-white/[0.06] text-[#fafafa]'
-                          : 'text-[#525252] hover:bg-white/[0.04] hover:text-[#a3a3a3]',
-                      )}
-                    >
-                      {p}
-                    </button>
-                  ),
-                )}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onPageChange(page + 1)}
+                  ‹
+                </button>
+                {pageNumbers.map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => onPageChange(p)}
+                    className={cn(
+                      'h-6 w-6 rounded-[5px] text-[11px]',
+                      p === page ? 'bg-white/[0.08] text-[#fafafa]' : 'text-[#525252] hover:bg-white/[0.05]',
+                    )}
+                  >
+                    {p}
+                  </button>
+                ))}
+                <button
+                  type="button"
                   disabled={page >= totalPages}
+                  onClick={() => onPageChange(page + 1)}
+                  className="h-6 w-6 rounded-[5px] text-[11px] text-[#a3a3a3] hover:bg-white/[0.05] disabled:opacity-40"
                 >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+                  ›
+                </button>
               </div>
             </div>
           )}
