@@ -39,7 +39,7 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
 
   return (
     <div className={cn('flex items-center gap-1', className)}>
-      <Calendar className="h-4 w-4 text-text-dark-secondary mr-1" />
+      <Calendar className="h-4 w-4 text-neutral-500 mr-1" />
       {presets.map((preset) => (
         <button
           type="button"
@@ -49,7 +49,7 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
             'px-2.5 py-1 text-xs font-medium rounded-md transition-colors',
             value === preset.value || (preset.value === 'custom' && value.includes('|'))
               ? 'bg-primary text-white'
-              : 'text-text-dark-secondary hover:text-text-dark hover:bg-white/10',
+              : 'text-neutral-400 hover:text-neutral-100 hover:bg-white/10',
           )}
         >
           {preset.label}
@@ -61,14 +61,14 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
             type="datetime-local"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="h-7 rounded-md border border-border-dark bg-bg-dark-tertiary px-2 text-xs text-text-dark"
+            className="h-7 rounded-md border border-white/10 bg-neutral-800 px-2 text-xs text-neutral-100"
           />
-          <span className="text-text-dark-secondary text-xs">to</span>
+          <span className="text-neutral-500 text-xs">to</span>
           <input
             type="datetime-local"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="h-7 rounded-md border border-border-dark bg-bg-dark-tertiary px-2 text-xs text-text-dark"
+            className="h-7 rounded-md border border-white/10 bg-neutral-800 px-2 text-xs text-neutral-100"
           />
           <button
             type="button"

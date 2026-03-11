@@ -7,6 +7,8 @@ export function useProviders() {
     queryKey: ['providers'],
     queryFn: () => apiClient.listProviders(),
     refetchInterval: 30_000,
+    retry: false,
+    placeholderData: [],
   })
 }
 

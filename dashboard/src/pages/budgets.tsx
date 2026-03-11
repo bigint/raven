@@ -12,6 +12,8 @@ export default function BudgetsPage() {
   const { data: budgets, isLoading } = useQuery({
     queryKey: ['budgets'],
     queryFn: () => apiClient.listBudgets(),
+    retry: false,
+    placeholderData: [],
   })
 
   const columns = [
@@ -36,7 +38,7 @@ export default function BudgetsPage() {
       key: 'entity_id',
       header: 'Entity',
       render: (item: BudgetConfig) => (
-        <code className="text-xs font-mono text-text-dark-secondary">{item.entity_id}</code>
+        <code className="text-xs font-mono text-neutral-400">{item.entity_id}</code>
       ),
     },
     {
@@ -66,7 +68,7 @@ export default function BudgetsPage() {
                 style={{ width: `${Math.min(pct * 100, 100)}%` }}
               />
             </div>
-            <span className="text-xs text-text-dark-secondary">{formatPercent(pct)}</span>
+            <span className="text-xs text-neutral-500">{formatPercent(pct)}</span>
           </div>
         )
       },
@@ -82,7 +84,7 @@ export default function BudgetsPage() {
       key: 'alert_threshold',
       header: 'Alert At',
       render: (item: BudgetConfig) => (
-        <span className="text-sm text-text-dark-secondary">
+        <span className="text-sm text-neutral-500">
           {formatPercent(item.alert_threshold)}
         </span>
       ),
@@ -93,8 +95,8 @@ export default function BudgetsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-text-dark">Budgets</h1>
-          <p className="text-sm text-text-dark-secondary mt-1">
+          <h1 className="text-xl font-semibold text-white">Budgets</h1>
+          <p className="text-sm text-neutral-500 mt-1">
             Configure spending limits per organization, team, or key
           </p>
         </div>

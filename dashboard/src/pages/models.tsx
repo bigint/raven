@@ -15,6 +15,8 @@ export default function ModelsPage() {
   const { data: models, isLoading } = useQuery({
     queryKey: ['models'],
     queryFn: () => apiClient.listModels(),
+    retry: false,
+    placeholderData: [],
   })
 
   const handleSort = (key: string) => {
@@ -40,8 +42,8 @@ export default function ModelsPage() {
       sortable: true,
       render: (item: Model) => (
         <div>
-          <p className="font-medium text-text-dark">{item.name}</p>
-          <p className="text-xs text-text-dark-secondary">{item.id}</p>
+          <p className="font-medium text-neutral-100">{item.name}</p>
+          <p className="text-xs text-neutral-500">{item.id}</p>
         </div>
       ),
     },
@@ -91,8 +93,8 @@ export default function ModelsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-text-dark">Models</h1>
-        <p className="text-sm text-text-dark-secondary mt-1">Available models and pricing</p>
+        <h1 className="text-xl font-semibold text-white">Models</h1>
+        <p className="text-sm text-neutral-500 mt-1">Available models and pricing</p>
       </div>
 
       <Card>

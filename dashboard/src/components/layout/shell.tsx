@@ -8,11 +8,11 @@ interface ShellProps {
 
 export function Shell({ children }: ShellProps) {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#09090b]">
       <Sidebar />
-      <div className="lg:ml-56">
+      <div className="lg:ml-60 transition-all duration-300">
         <Header />
-        <main className="p-6">{children}</main>
+        <main className="px-6 py-8 lg:px-8">{children}</main>
       </div>
     </div>
   )

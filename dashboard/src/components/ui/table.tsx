@@ -22,7 +22,7 @@ export function TableHeader({
   ...props
 }: HTMLAttributes<HTMLTableSectionElement> & { children: ReactNode }) {
   return (
-    <thead className={cn('border-b border-border-dark', className)} {...props}>
+    <thead className={cn('border-b border-white/10', className)} {...props}>
       {children}
     </thead>
   )
@@ -34,7 +34,7 @@ export function TableBody({
   ...props
 }: HTMLAttributes<HTMLTableSectionElement> & { children: ReactNode }) {
   return (
-    <tbody className={cn('divide-y divide-border-dark', className)} {...props}>
+    <tbody className={cn('divide-y divide-white/10', className)} {...props}>
       {children}
     </tbody>
   )
@@ -77,8 +77,8 @@ export function TableHead({
   return (
     <th
       className={cn(
-        'px-4 py-3 text-left text-xs font-medium text-text-dark-secondary uppercase tracking-wider',
-        sortKey && 'cursor-pointer select-none hover:text-text-dark',
+        'px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider',
+        sortKey && 'cursor-pointer select-none hover:text-neutral-100',
         className,
       )}
       onClick={handleClick}
@@ -91,13 +91,13 @@ export function TableHead({
             <ChevronUp
               className={cn(
                 'h-3 w-3 -mb-1',
-                isSorted && sortOrder === 'asc' ? 'text-primary' : 'text-text-dark-secondary/30',
+                isSorted && sortOrder === 'asc' ? 'text-primary' : 'text-neutral-700',
               )}
             />
             <ChevronDown
               className={cn(
                 'h-3 w-3',
-                isSorted && sortOrder === 'desc' ? 'text-primary' : 'text-text-dark-secondary/30',
+                isSorted && sortOrder === 'desc' ? 'text-primary' : 'text-neutral-700',
               )}
             />
           </span>

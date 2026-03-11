@@ -1,23 +1,28 @@
 import { cn } from '@/lib/utils'
-import { Moon, Settings, Sun } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Command, Settings } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+
+const pageTitles: Record<string, string> = {
+  '/': 'Overview',
+  '/requests': 'Requests',
+  '/analytics': 'Analytics',
+  '/providers': 'Providers',
+  '/models': 'Models',
+  '/keys': 'Virtual Keys',
+  '/teams': 'Teams & Users',
+  '/budgets': 'Budgets',
+  '/cache': 'Cache',
+  '/guardrails': 'Guardrails',
+  '/plugins': 'Plugins',
+  '/settings': 'Settings',
+}
 
 export function Header() {
-  const [dark, setDark] = useState(true)
+  const location = useLocation()
   const [gatewayStatus, setGatewayStatus] = useState<'connected' | 'disconnected'>('connected')
 
-  const toggleTheme = useCallback(() => {
-    setDark((prev) => {
-      const next = !prev
-      if (next) {
-        document.body.classList.remove('light')
-      } else {
-        document.body.classList.add('light')
-      }
-      return next
-    })
-  }, [])
+  const currentTitle = pageTitles[location.pathname] ?? 'Dashboard'
 
   // Check gateway health
   useEffect(() => {
@@ -35,32 +40,35 @@ export function Header() {
   }, [])
 
   return (
-    <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border-dark bg-bg-dark-secondary/80 backdrop-blur-sm px-6">
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <span
-            className={cn(
-              'inline-block h-2 w-2 rounded-full',
-              gatewayStatus === 'connected' ? 'bg-success' : 'bg-error',
-            )}
-          />
-          <span className="text-xs text-text-dark-secondary">
-            Gateway {gatewayStatus === 'connected' ? 'Connected' : 'Disconnected'}
-          </span>
+    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-white/[6%] bg-[#09090b]/80 backdrop-blur-xl px-6 lg:px-8">
+      <div className="flex items-center gap-4">
+        <h1 className="text-sm font-semibold text-white">{currentTitle}</h1>
+        <div className="hidden sm:flex items-center gap-2">
+          <div className="flex items-center gap-2 rounded-lg border border-white/[6%] bg-white/[2%] px-2.5 py-1.5">
+            <span
+              className={cn(
+                'inline-block h-1.5 w-1.5 rounded-full',
+                gatewayStatus === 'connected'
+                  ? 'bg-emerald-400 animate-status-pulse'
+                  : 'bg-red-400 animate-status-pulse',
+              )}
+            />
+            <span className="text-[11px] text-zinc-500">
+              {gatewayStatus === 'connected' ? 'Connected' : 'Disconnected'}
+            </span>
+          </div>
         </div>
       </div>
 
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={toggleTheme}
-          className="rounded-lg p-2 text-text-dark-secondary hover:text-text-dark hover:bg-white/10 transition-colors"
-        >
-          {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-        </button>
+        {/* Command palette hint */}
+        <div className="hidden md:flex items-center gap-1.5 rounded-lg border border-white/[6%] bg-white/[2%] px-3 py-1.5 text-zinc-600 cursor-default">
+          <Command className="h-3 w-3" />
+          <span className="text-[11px]">K</span>
+        </div>
         <Link
           to="/settings"
-          className="rounded-lg p-2 text-text-dark-secondary hover:text-text-dark hover:bg-white/10 transition-colors"
+          className="rounded-lg p-2 text-zinc-600 hover:text-zinc-300 hover:bg-white/[5%] transition-all duration-200"
         >
           <Settings className="h-4 w-4" />
         </Link>

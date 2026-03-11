@@ -34,7 +34,7 @@ export function DropdownMenu({ trigger, children, align = 'right', className }: 
       {open && (
         <div
           className={cn(
-            'absolute z-50 mt-1 min-w-[180px] rounded-lg border border-border-dark bg-bg-dark-secondary py-1 shadow-xl',
+            'absolute z-50 mt-1 min-w-[180px] rounded-lg border border-white/10 bg-neutral-900 py-1 shadow-xl',
             align === 'right' ? 'right-0' : 'left-0',
             className,
           )}
@@ -66,7 +66,7 @@ export function DropdownItem({
       type="button"
       className={cn(
         'w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors',
-        danger ? 'text-error hover:bg-error/10' : 'text-text-dark hover:bg-white/10',
+        danger ? 'text-error hover:bg-error/10' : 'text-neutral-100 hover:bg-white/10',
         disabled && 'opacity-50 pointer-events-none',
         className,
       )}
@@ -79,5 +79,5 @@ export function DropdownItem({
 }
 
 export function DropdownSeparator() {
-  return <div className="my-1 border-t border-border-dark" />
+  return <div className="my-1 border-t border-white/10" />
 }

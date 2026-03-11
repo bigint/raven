@@ -81,7 +81,7 @@ export function DataTable<T>({
       <div className="flex items-center justify-between gap-4">
         {onSearch && (
           <div className="relative max-w-sm flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-dark-secondary" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
             <Input
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
@@ -135,7 +135,7 @@ export function DataTable<T>({
 
           {totalPages > 1 && onPageChange && (
             <div className="flex items-center justify-between">
-              <p className="text-xs text-text-dark-secondary">
+              <p className="text-xs text-neutral-500">
                 Showing {(page - 1) * perPage + 1} to {Math.min(page * perPage, total)} of {total}{' '}
                 results
               </p>
@@ -148,7 +148,7 @@ export function DataTable<T>({
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <span className="px-2 text-sm text-text-dark-secondary">
+                <span className="px-2 text-sm text-neutral-500">
                   {page} / {totalPages}
                 </span>
                 <Button

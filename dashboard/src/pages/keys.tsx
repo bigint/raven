@@ -51,8 +51,8 @@ export default function KeysPage() {
       sortable: true,
       render: (item: VirtualKey) => (
         <div className="flex items-center gap-2">
-          <Key className="h-4 w-4 text-text-dark-secondary" />
-          <span className="font-medium text-text-dark">{item.name}</span>
+          <Key className="h-4 w-4 text-neutral-500" />
+          <span className="font-medium text-neutral-100">{item.name}</span>
         </div>
       ),
     },
@@ -60,7 +60,7 @@ export default function KeysPage() {
       key: 'key_prefix',
       header: 'Key',
       render: (item: VirtualKey) => (
-        <code className="text-xs font-mono bg-bg-dark-tertiary px-2 py-1 rounded">
+        <code className="text-xs font-mono bg-neutral-800 px-2 py-1 rounded">
           {item.key_prefix}...
         </code>
       ),
@@ -85,7 +85,7 @@ export default function KeysPage() {
       key: 'last_used_at',
       header: 'Last Used',
       render: (item: VirtualKey) => (
-        <span className="text-xs text-text-dark-secondary">
+        <span className="text-xs text-neutral-500">
           {item.last_used_at ? format(new Date(item.last_used_at), 'MMM d, HH:mm') : 'Never'}
         </span>
       ),
@@ -94,7 +94,7 @@ export default function KeysPage() {
       key: 'expires_at',
       header: 'Expires',
       render: (item: VirtualKey) => (
-        <span className="text-xs text-text-dark-secondary">
+        <span className="text-xs text-neutral-500">
           {item.expires_at ? format(new Date(item.expires_at), 'MMM d, yyyy') : 'Never'}
         </span>
       ),
@@ -107,7 +107,7 @@ export default function KeysPage() {
         <DropdownMenu
           trigger={
             <button type="button" className="rounded-md p-1 hover:bg-white/10 transition-colors">
-              <MoreVertical className="h-4 w-4 text-text-dark-secondary" />
+              <MoreVertical className="h-4 w-4 text-neutral-500" />
             </button>
           }
         >
@@ -129,8 +129,8 @@ export default function KeysPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-text-dark">Virtual Keys</h1>
-          <p className="text-sm text-text-dark-secondary mt-1">
+          <h1 className="text-xl font-semibold text-white">Virtual Keys</h1>
+          <p className="text-sm text-neutral-500 mt-1">
             Manage API keys for accessing the gateway
           </p>
         </div>
@@ -194,7 +194,7 @@ export default function KeysPage() {
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center gap-2 mt-2">
-          <code className="flex-1 rounded-lg bg-bg-dark-tertiary px-3 py-2 text-sm font-mono text-text-dark break-all">
+          <code className="flex-1 rounded-lg bg-neutral-800 px-3 py-2 text-sm font-mono text-neutral-100 break-all">
             {createdKey}
           </code>
           <Button

@@ -10,7 +10,7 @@ export function Skeleton({ className }: SkeletonProps) {
 
 export function SkeletonCard() {
   return (
-    <div className="rounded-xl border border-border-dark bg-bg-dark-secondary p-6">
+    <div className="rounded-xl border border-white/10 bg-neutral-900 p-6">
       <Skeleton className="h-4 w-24 mb-3" />
       <Skeleton className="h-8 w-32 mb-2" />
       <Skeleton className="h-3 w-20" />

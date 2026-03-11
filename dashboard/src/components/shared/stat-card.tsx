@@ -33,21 +33,21 @@ export function StatCard({
     <Card className={cn('flex flex-col justify-between', className)}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-medium text-text-dark-secondary uppercase tracking-wider">
+          <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
             {label}
           </p>
-          <p className="mt-2 text-2xl font-semibold text-text-dark">{value}</p>
+          <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
         </div>
-        {icon && <div className="text-text-dark-secondary">{icon}</div>}
+        {icon && <div className="text-neutral-500">{icon}</div>}
       </div>
       <div className="mt-3 flex items-center justify-between">
         {trend !== undefined && (
           <div
             className={cn(
               'flex items-center gap-1 text-xs font-medium',
-              trendUp && 'text-success',
-              trendDown && 'text-error',
-              !trendUp && !trendDown && 'text-text-dark-secondary',
+              trendUp && 'text-emerald-400',
+              trendDown && 'text-red-400',
+              !trendUp && !trendDown && 'text-neutral-500',
             )}
           >
             {trendUp && <TrendingUp className="h-3 w-3" />}
@@ -56,7 +56,7 @@ export function StatCard({
               {trendUp ? '+' : ''}
               {trend.toFixed(1)}%
             </span>
-            {trendLabel && <span className="text-text-dark-secondary ml-1">{trendLabel}</span>}
+            {trendLabel && <span className="text-neutral-500 ml-1">{trendLabel}</span>}
           </div>
         )}
         {sparklineData && sparklineData.length > 0 && (

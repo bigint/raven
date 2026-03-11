@@ -20,7 +20,7 @@ interface TabsListProps {
 export function TabsList({ children, className }: TabsListProps) {
   return (
     <div
-      className={cn('inline-flex items-center gap-1 rounded-lg bg-bg-dark-tertiary p-1', className)}
+      className={cn('inline-flex items-center gap-1 rounded-lg bg-neutral-800 p-1', className)}
     >
       {children}
     </div>
@@ -50,7 +50,7 @@ export function TabsTrigger({
         'px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
         isActive
           ? 'bg-primary text-white shadow-sm'
-          : 'text-text-dark-secondary hover:text-text-dark',
+          : 'text-neutral-400 hover:text-neutral-100',
         className,
       )}
       onClick={() => onSelect(value)}

@@ -7,11 +7,10 @@ import {
 } from '@/components/shared/date-range-picker'
 import { StatCard } from '@/components/shared/stat-card'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { SkeletonCard } from '@/components/ui/skeleton'
 import { TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useCacheStats, useCost, useUsage } from '@/hooks/use-analytics'
 import { formatCurrency, formatNumber } from '@/lib/utils'
-import { DollarSign, TrendingUp, Zap } from 'lucide-react'
+import { Activity, DollarSign, TrendingUp, Zap } from 'lucide-react'
 import { useState } from 'react'
 
 export default function AnalyticsPage() {
@@ -22,11 +21,9 @@ export default function AnalyticsPage() {
 
   const analyticsOpts = { start, end, granularity }
 
-  const { data: cost, isLoading: costLoading } = useCost(analyticsOpts)
-  const { data: usage, isLoading: usageLoading } = useUsage(analyticsOpts)
-  const { data: cache, isLoading: cacheLoading } = useCacheStats(analyticsOpts)
-
-  const isLoading = costLoading || usageLoading || cacheLoading
+  const { data: cost } = useCost(analyticsOpts)
+  const { data: usage } = useUsage(analyticsOpts)
+  const { data: cache } = useCacheStats(analyticsOpts)
 
   const costByTeam = cost?.cost_by_team
     ? Object.entries(cost.cost_by_team)
@@ -45,39 +42,35 @@ export default function AnalyticsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-text-dark">Analytics</h1>
-          <p className="text-sm text-text-dark-secondary mt-1">Cost and usage analytics</p>
+          <h1 className="text-xl font-semibold text-white">Analytics</h1>
+          <p className="text-sm text-neutral-500 mt-1">Cost and usage analytics</p>
         </div>
         <DateRangePicker value={range} onChange={setRange} />
       </div>
 
-      {/* Stats */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <SkeletonCard key={`skel-${i}`} />
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            label="Total Cost"
-            value={formatCurrency(cost?.total_cost ?? 0)}
-            icon={<DollarSign className="h-5 w-5" />}
-          />
-          <StatCard
-            label="Projected Monthly"
-            value={formatCurrency(cost?.projected_monthly ?? 0)}
-            icon={<TrendingUp className="h-5 w-5" />}
-          />
-          <StatCard
-            label="Cache Savings"
-            value={formatCurrency(cache?.savings ?? 0)}
-            icon={<Zap className="h-5 w-5" />}
-          />
-          <StatCard label="Total Requests" value={formatNumber(usage?.total_requests ?? 0)} />
-        </div>
-      )}
+      {/* Stats - always visible */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          label="Total Cost"
+          value={formatCurrency(cost?.total_cost ?? 0)}
+          icon={<DollarSign className="h-5 w-5" />}
+        />
+        <StatCard
+          label="Projected Monthly"
+          value={formatCurrency(cost?.projected_monthly ?? 0)}
+          icon={<TrendingUp className="h-5 w-5" />}
+        />
+        <StatCard
+          label="Cache Savings"
+          value={formatCurrency(cache?.savings ?? 0)}
+          icon={<Zap className="h-5 w-5" />}
+        />
+        <StatCard
+          label="Total Requests"
+          value={formatNumber(usage?.total_requests ?? 0)}
+          icon={<Activity className="h-5 w-5" />}
+        />
+      </div>
 
       {/* Tabs */}
       <div>
@@ -107,8 +100,12 @@ export default function AnalyticsPage() {
                   valueFormatter={(v) => formatCurrency(v)}
                 />
               ) : (
-                <div className="flex items-center justify-center h-[300px] text-sm text-text-dark-secondary">
-                  No cost data available
+                <div className="flex flex-col items-center justify-center h-[300px] text-center">
+                  <DollarSign className="h-8 w-8 text-neutral-600 mb-3" />
+                  <p className="text-sm text-neutral-500">No cost data yet</p>
+                  <p className="text-xs text-neutral-600 mt-1">
+                    Cost data will appear once requests are processed
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -128,8 +125,12 @@ export default function AnalyticsPage() {
                   valueFormatter={(v) => formatCurrency(v)}
                 />
               ) : (
-                <div className="flex items-center justify-center h-[300px] text-sm text-text-dark-secondary">
-                  No team cost data available
+                <div className="flex flex-col items-center justify-center h-[300px] text-center">
+                  <DollarSign className="h-8 w-8 text-neutral-600 mb-3" />
+                  <p className="text-sm text-neutral-500">No team cost data yet</p>
+                  <p className="text-xs text-neutral-600 mt-1">
+                    Create teams and route requests to see cost breakdowns
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -149,8 +150,12 @@ export default function AnalyticsPage() {
                   valueFormatter={(v) => formatCurrency(v)}
                 />
               ) : (
-                <div className="flex items-center justify-center h-[300px] text-sm text-text-dark-secondary">
-                  No model cost data available
+                <div className="flex flex-col items-center justify-center h-[300px] text-center">
+                  <DollarSign className="h-8 w-8 text-neutral-600 mb-3" />
+                  <p className="text-sm text-neutral-500">No model cost data yet</p>
+                  <p className="text-xs text-neutral-600 mt-1">
+                    Send requests through the gateway to see model-level costs
+                  </p>
                 </div>
               )}
             </CardContent>
