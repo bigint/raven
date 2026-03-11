@@ -104,16 +104,8 @@ func (r *Registry) loadSpecs() error {
 func (r *Registry) registerDefaultAdapters() {
 	for name, spec := range r.specs {
 		switch spec.CompatibleWith {
-		case "openai":
-			r.adapters[name] = NewOpenAIAdapter(name, spec)
 		case "anthropic":
 			r.adapters[name] = NewAnthropicAdapter(spec)
-		case "google":
-			r.adapters[name] = NewGeminiAdapter(spec)
-		case "cohere":
-			r.adapters[name] = NewCohereAdapter(spec)
-		case "azure-openai":
-			r.adapters[name] = NewAzureOpenAIAdapter(spec)
 		default:
 			r.adapters[name] = NewOpenAIAdapter(name, spec)
 		}
