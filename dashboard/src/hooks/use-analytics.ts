@@ -44,7 +44,7 @@ export function useUsage(opts: AnalyticsOpts) {
   return useQuery({
     queryKey: ['analytics', 'usage', opts],
     queryFn: () => apiClient.getUsage(opts),
-    refetchInterval: 30_000,
+    refetchInterval: (query) => (query.state.status === 'error' ? false : 30_000),
     retry: false,
     placeholderData: emptyUsage,
   })
@@ -54,7 +54,7 @@ export function useCost(opts: AnalyticsOpts) {
   return useQuery({
     queryKey: ['analytics', 'cost', opts],
     queryFn: () => apiClient.getCost(opts),
-    refetchInterval: 30_000,
+    refetchInterval: (query) => (query.state.status === 'error' ? false : 30_000),
     retry: false,
     placeholderData: emptyCost,
   })
@@ -64,7 +64,7 @@ export function useLatency(opts: AnalyticsOpts) {
   return useQuery({
     queryKey: ['analytics', 'latency', opts],
     queryFn: () => apiClient.getLatency(opts),
-    refetchInterval: 30_000,
+    refetchInterval: (query) => (query.state.status === 'error' ? false : 30_000),
     retry: false,
     placeholderData: emptyLatency,
   })
@@ -74,7 +74,7 @@ export function useCacheStats(opts: AnalyticsOpts) {
   return useQuery({
     queryKey: ['analytics', 'cache', opts],
     queryFn: () => apiClient.getCacheStats(opts),
-    refetchInterval: 30_000,
+    refetchInterval: (query) => (query.state.status === 'error' ? false : 30_000),
     retry: false,
     placeholderData: emptyCache,
   })

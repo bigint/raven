@@ -6,7 +6,7 @@ export function useProviders() {
   return useQuery({
     queryKey: ['providers'],
     queryFn: () => apiClient.listProviders(),
-    refetchInterval: 30_000,
+    refetchInterval: (query) => (query.state.status === 'error' ? false : 30_000),
     retry: false,
     placeholderData: [],
   })
@@ -16,7 +16,7 @@ export function useProviderHealth(id: string) {
   return useQuery({
     queryKey: ['providers', id, 'health'],
     queryFn: () => apiClient.getProviderHealth(id),
-    refetchInterval: 15_000,
+    refetchInterval: (query) => (query.state.status === 'error' ? false : 15_000),
     enabled: !!id,
   })
 }

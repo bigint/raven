@@ -12,15 +12,16 @@ import { TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useCacheStats, useCost, useUsage } from '@/hooks/use-analytics'
 import { formatCurrency, formatNumber } from '@/lib/utils'
 import { DollarSign } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 export default function AnalyticsPage() {
   const [range, setRange] = useState('7d')
   const [tab, setTab] = useState('cost')
-  const { start, end } = getDateRange(range)
-  const granularity = getGranularity(range)
-
-  const analyticsOpts = { start, end, granularity }
+  const analyticsOpts = useMemo(() => {
+    const { start, end } = getDateRange(range)
+    const granularity = getGranularity(range)
+    return { start, end, granularity }
+  }, [range])
 
   const { data: cost } = useCost(analyticsOpts)
   const { data: usage } = useUsage(analyticsOpts)

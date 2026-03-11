@@ -10,14 +10,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCacheStats } from '@/hooks/use-analytics'
 import { formatBytes, formatCurrency, formatNumber, formatPercent } from '@/lib/utils'
 import { Zap } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 export default function CachePage() {
   const [range, setRange] = useState('24h')
-  const { start, end } = getDateRange(range)
-  const granularity = getGranularity(range)
+  const analyticsOpts = useMemo(() => {
+    const { start, end } = getDateRange(range)
+    const granularity = getGranularity(range)
+    return { start, end, granularity }
+  }, [range])
 
-  const { data: cache } = useCacheStats({ start, end, granularity })
+  const { data: cache } = useCacheStats(analyticsOpts)
 
   return (
     <div className="space-y-4">

@@ -12,14 +12,15 @@ import { useCacheStats, useCost, useLatency, useUsage } from '@/hooks/use-analyt
 import { useProviders } from '@/hooks/use-providers'
 import { formatCurrency, formatLatency, formatNumber, formatPercent } from '@/lib/utils'
 import { Server } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 export default function OverviewPage() {
   const [range, setRange] = useState('24h')
-  const { start, end } = getDateRange(range)
-  const granularity = getGranularity(range)
-
-  const analyticsOpts = { start, end, granularity }
+  const analyticsOpts = useMemo(() => {
+    const { start, end } = getDateRange(range)
+    const granularity = getGranularity(range)
+    return { start, end, granularity }
+  }, [range])
 
   const { data: usage } = useUsage(analyticsOpts)
   const { data: cost } = useCost(analyticsOpts)
