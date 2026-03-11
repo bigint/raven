@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { cn } from '@/lib/utils'
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import { type ReactNode, useState } from 'react'
 
@@ -76,12 +77,15 @@ export function DataTable<T>({
     return <SkeletonTable />
   }
 
+  const startPage = Math.max(1, page - 2)
+  const endPage = Math.min(totalPages, startPage + 4)
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
         {onSearch && (
           <div className="relative max-w-sm flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600" />
             <Input
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
@@ -118,7 +122,7 @@ export function DataTable<T>({
               {data.map((item) => (
                 <TableRow
                   key={getRowKey(item)}
-                  className={onRowClick ? 'cursor-pointer' : ''}
+                  className={cn(onRowClick && 'cursor-pointer')}
                   onClick={() => onRowClick?.(item)}
                 >
                   {columns.map((col) => (
@@ -134,8 +138,8 @@ export function DataTable<T>({
           </Table>
 
           {totalPages > 1 && onPageChange && (
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-neutral-500">
+            <div className="flex items-center justify-between pt-2">
+              <p className="text-xs text-zinc-600">
                 Showing {(page - 1) * perPage + 1} to {Math.min(page * perPage, total)} of {total}{' '}
                 results
               </p>
@@ -148,9 +152,23 @@ export function DataTable<T>({
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <span className="px-2 text-sm text-neutral-500">
-                  {page} / {totalPages}
-                </span>
+                {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map(
+                  (p) => (
+                    <button
+                      type="button"
+                      key={p}
+                      onClick={() => onPageChange(p)}
+                      className={cn(
+                        'h-8 w-8 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer',
+                        p === page
+                          ? 'bg-white/[8%] text-white'
+                          : 'text-zinc-500 hover:bg-white/[4%] hover:text-zinc-300',
+                      )}
+                    >
+                      {p}
+                    </button>
+                  ),
+                )}
                 <Button
                   variant="ghost"
                   size="icon"

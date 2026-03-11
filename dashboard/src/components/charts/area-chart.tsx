@@ -21,7 +21,7 @@ interface AreaChartProps {
 
 export function AreaChart({
   data,
-  color = '#4338CA',
+  color = '#6366f1',
   gradientId = 'areaGradient',
   height = 300,
   valueFormatter = (v) => v.toLocaleString(),
@@ -32,34 +32,35 @@ export function AreaChart({
       <RechartsAreaChart data={data} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor={color} stopOpacity={0.3} />
+            <stop offset="5%" stopColor={color} stopOpacity={0.2} />
             <stop offset="95%" stopColor={color} stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
         <XAxis
           dataKey="timestamp"
           tickFormatter={xAxisFormatter}
-          stroke="rgba(255,255,255,0.2)"
-          tick={{ fill: '#A3A3A3', fontSize: 11 }}
+          stroke="rgba(255,255,255,0.1)"
+          tick={{ fill: '#71717a', fontSize: 11 }}
           axisLine={false}
           tickLine={false}
         />
         <YAxis
           tickFormatter={valueFormatter}
-          stroke="rgba(255,255,255,0.2)"
-          tick={{ fill: '#A3A3A3', fontSize: 11 }}
+          stroke="rgba(255,255,255,0.1)"
+          tick={{ fill: '#71717a', fontSize: 11 }}
           axisLine={false}
           tickLine={false}
           width={60}
         />
         <Tooltip
           contentStyle={{
-            backgroundColor: '#1E1E1E',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '8px',
+            backgroundColor: '#0f0f14',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '10px',
             fontSize: '12px',
-            color: '#F5F5F5',
+            color: '#e4e4e7',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
           }}
           formatter={(value: number) => [valueFormatter(value), 'Value']}
           labelFormatter={(label: string) => format(new Date(label), 'MMM d, HH:mm')}
