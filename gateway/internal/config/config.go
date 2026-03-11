@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/spf13/viper"
@@ -187,19 +186,6 @@ func Load(path string) (*Config, error) {
 		v.AddConfigPath("$HOME/.raven")
 	}
 
-	v.SetEnvPrefix("RAVEN")
-	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	v.AutomaticEnv()
-
-	// Explicit env bindings for nested keys (AutomaticEnv + Unmarshal is unreliable).
-	v.BindEnv("server.host", "RAVEN_SERVER_HOST")
-	v.BindEnv("server.port", "RAVEN_SERVER_PORT")
-	v.BindEnv("admin.api_key", "RAVEN_ADMIN_KEY", "RAVEN_ADMIN_API_KEY")
-	v.BindEnv("store.driver", "RAVEN_STORE_DRIVER")
-	v.BindEnv("store.sqlite.path", "RAVEN_STORE_SQLITE_PATH")
-	v.BindEnv("store.postgres.url", "RAVEN_STORE_POSTGRES_URL", "DATABASE_URL")
-	v.BindEnv("observability.logs.level", "RAVEN_LOG_LEVEL")
-
 	if err := v.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 			return nil, fmt.Errorf("reading config: %w", err)
@@ -211,8 +197,8 @@ func Load(path string) (*Config, error) {
 		return nil, fmt.Errorf("unmarshalling config: %w", err)
 	}
 
-	// Expand environment variables in string fields.
-	expandEnvVars(cfg)
+	// Apply environment variable overrides directly (Viper nested key binding is unreliable).
+	applyEnvOverrides(cfg)
 
 	return cfg, nil
 }
@@ -268,23 +254,48 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("privacy.anonymize_logs_after", DefaultAnonymizeAfter)
 }
 
-// expandEnvVars expands ${VAR} references in config string values.
-func expandEnvVars(cfg *Config) {
+// applyEnvOverrides applies environment variable overrides directly.
+// This bypasses Viper's unreliable nested key env binding.
+func applyEnvOverrides(cfg *Config) {
+	// Expand ${VAR} references in string values from config file.
 	cfg.Admin.APIKey = os.ExpandEnv(cfg.Admin.APIKey)
 	cfg.Store.Postgres.URL = os.ExpandEnv(cfg.Store.Postgres.URL)
 
-	// Support DATABASE_URL as a standard alias for store.postgres.url.
-	if cfg.Store.Postgres.URL == "" {
-		if dbURL := os.Getenv("DATABASE_URL"); dbURL != "" {
-			cfg.Store.Postgres.URL = dbURL
+	// Direct env var overrides.
+	envStr := func(key string, aliases ...string) string {
+		if v := os.Getenv(key); v != "" {
+			return v
 		}
+		for _, a := range aliases {
+			if v := os.Getenv(a); v != "" {
+				return v
+			}
+		}
+		return ""
 	}
 
-	// Support RAVEN_ADMIN_KEY as alias for admin.api_key.
-	if cfg.Admin.APIKey == "" {
-		if key := os.Getenv("RAVEN_ADMIN_KEY"); key != "" {
-			cfg.Admin.APIKey = key
+	if v := envStr("RAVEN_SERVER_HOST"); v != "" {
+		cfg.Server.Host = v
+	}
+	if v := envStr("RAVEN_SERVER_PORT"); v != "" {
+		if p, err := fmt.Sscanf(v, "%d", &cfg.Server.Port); p != 1 || err != nil {
+			_ = err
 		}
+	}
+	if v := envStr("RAVEN_ADMIN_KEY", "RAVEN_ADMIN_API_KEY"); v != "" {
+		cfg.Admin.APIKey = v
+	}
+	if v := envStr("RAVEN_STORE_DRIVER"); v != "" {
+		cfg.Store.Driver = v
+	}
+	if v := envStr("RAVEN_STORE_SQLITE_PATH"); v != "" {
+		cfg.Store.SQLite.Path = v
+	}
+	if v := envStr("RAVEN_STORE_POSTGRES_URL", "DATABASE_URL"); v != "" {
+		cfg.Store.Postgres.URL = v
+	}
+	if v := envStr("RAVEN_LOG_LEVEL"); v != "" {
+		cfg.Observability.Logs.Level = v
 	}
 }
 
