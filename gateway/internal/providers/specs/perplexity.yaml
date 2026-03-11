@@ -1,0 +1,26 @@
+name: perplexity
+display_name: Perplexity
+base_url: https://api.perplexity.ai
+auth_type: bearer
+compatible_with: openai
+models:
+  - id: sonar-pro
+    context_window: 200000
+    input_price_per_1m: 3.00
+    output_price_per_1m: 15.00
+    supports_streaming: true
+  - id: sonar
+    context_window: 128000
+    input_price_per_1m: 1.00
+    output_price_per_1m: 1.00
+    supports_streaming: true
+  - id: sonar-reasoning-pro
+    context_window: 128000
+    input_price_per_1m: 2.00
+    output_price_per_1m: 8.00
+    supports_streaming: true
+  - id: sonar-reasoning
+    context_window: 128000
+    input_price_per_1m: 1.00
+    output_price_per_1m: 5.00
+    supports_streaming: true

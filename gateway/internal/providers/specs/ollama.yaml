@@ -1,0 +1,34 @@
+name: ollama
+display_name: Ollama
+base_url: http://localhost:11434/v1
+auth_type: none
+compatible_with: openai
+models:
+  - id: llama3.3
+    context_window: 128000
+    input_price_per_1m: 0
+    output_price_per_1m: 0
+    supports_streaming: true
+    supports_tools: true
+  - id: llama3.1
+    context_window: 128000
+    input_price_per_1m: 0
+    output_price_per_1m: 0
+    supports_streaming: true
+    supports_tools: true
+  - id: mistral
+    context_window: 32768
+    input_price_per_1m: 0
+    output_price_per_1m: 0
+    supports_streaming: true
+  - id: qwen2.5
+    context_window: 32768
+    input_price_per_1m: 0
+    output_price_per_1m: 0
+    supports_streaming: true
+    supports_tools: true
+  - id: deepseek-r1
+    context_window: 64000
+    input_price_per_1m: 0
+    output_price_per_1m: 0
+    supports_streaming: true
