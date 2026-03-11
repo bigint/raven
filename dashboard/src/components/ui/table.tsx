@@ -22,7 +22,7 @@ export function TableHeader({
   ...props
 }: HTMLAttributes<HTMLTableSectionElement> & { children: ReactNode }) {
   return (
-    <thead className={cn('border-b border-white/10', className)} {...props}>
+    <thead className={cn('border-b border-white/[6%]', className)} {...props}>
       {children}
     </thead>
   )
@@ -34,7 +34,7 @@ export function TableBody({
   ...props
 }: HTMLAttributes<HTMLTableSectionElement> & { children: ReactNode }) {
   return (
-    <tbody className={cn('divide-y divide-white/10', className)} {...props}>
+    <tbody className={cn('divide-y divide-white/[4%]', className)} {...props}>
       {children}
     </tbody>
   )
@@ -46,7 +46,7 @@ export function TableRow({
   ...props
 }: HTMLAttributes<HTMLTableRowElement> & { children: ReactNode }) {
   return (
-    <tr className={cn('hover:bg-white/5 transition-colors', className)} {...props}>
+    <tr className={cn('hover:bg-white/[3%] transition-colors duration-150', className)} {...props}>
       {children}
     </tr>
   )
@@ -77,8 +77,8 @@ export function TableHead({
   return (
     <th
       className={cn(
-        'px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider',
-        sortKey && 'cursor-pointer select-none hover:text-neutral-100',
+        'px-4 py-3 text-left text-[11px] font-semibold text-zinc-500 uppercase tracking-wider',
+        sortKey && 'cursor-pointer select-none hover:text-zinc-300 transition-colors duration-200',
         className,
       )}
       onClick={handleClick}
@@ -91,13 +91,13 @@ export function TableHead({
             <ChevronUp
               className={cn(
                 'h-3 w-3 -mb-1',
-                isSorted && sortOrder === 'asc' ? 'text-primary' : 'text-neutral-700',
+                isSorted && sortOrder === 'asc' ? 'text-indigo-400' : 'text-zinc-800',
               )}
             />
             <ChevronDown
               className={cn(
                 'h-3 w-3',
-                isSorted && sortOrder === 'desc' ? 'text-primary' : 'text-neutral-700',
+                isSorted && sortOrder === 'desc' ? 'text-indigo-400' : 'text-zinc-800',
               )}
             />
           </span>
@@ -113,7 +113,7 @@ export function TableCell({
   ...props
 }: HTMLAttributes<HTMLTableCellElement> & { children?: ReactNode }) {
   return (
-    <td className={cn('px-4 py-3 text-sm', className)} {...props}>
+    <td className={cn('px-4 py-3 text-sm text-zinc-300', className)} {...props}>
       {children}
     </td>
   )

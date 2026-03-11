@@ -9,14 +9,15 @@ export default function SettingsPage() {
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings'],
     queryFn: () => apiClient.getSettings(),
+    retry: false,
   })
 
   if (isLoading) {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-xl font-semibold text-text-dark">Settings</h1>
-          <p className="text-sm text-text-dark-secondary mt-1">Gateway configuration</p>
+          <h1 className="text-xl font-semibold text-white">Settings</h1>
+          <p className="text-sm text-neutral-500 mt-1">Gateway configuration</p>
         </div>
         <SkeletonCard />
       </div>
@@ -26,8 +27,8 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-text-dark">Settings</h1>
-        <p className="text-sm text-text-dark-secondary mt-1">Gateway configuration and status</p>
+        <h1 className="text-xl font-semibold text-white">Settings</h1>
+        <p className="text-sm text-neutral-500 mt-1">Gateway configuration and status</p>
       </div>
 
       <Card>
@@ -75,7 +76,7 @@ export default function SettingsPage() {
                     <Badge key={p} variant="info">
                       {p}
                     </Badge>
-                  )) ?? <span className="text-text-dark-secondary">None</span>}
+                  )) ?? <span className="text-neutral-500">None</span>}
                 </div>
               }
             />
@@ -89,8 +90,8 @@ export default function SettingsPage() {
 function SettingRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-sm text-text-dark-secondary">{label}</span>
-      <span className="text-sm font-medium text-text-dark">{value}</span>
+      <span className="text-sm text-neutral-500">{label}</span>
+      <span className="text-sm font-medium text-neutral-100">{value}</span>
     </div>
   )
 }

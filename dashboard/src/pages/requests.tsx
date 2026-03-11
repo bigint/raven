@@ -31,6 +31,7 @@ export default function RequestsPage() {
         status: statusFilter ? Number(statusFilter) : undefined,
         provider: providerFilter || undefined,
       }),
+    retry: false,
   })
 
   const handleSort = (key: string) => {
@@ -48,7 +49,7 @@ export default function RequestsPage() {
       header: 'Time',
       sortable: true,
       render: (item: RequestLog) => (
-        <span className="text-xs text-text-dark-secondary">
+        <span className="text-xs text-neutral-500">
           {format(new Date(item.timestamp), 'MMM d, HH:mm:ss')}
         </span>
       ),
@@ -63,7 +64,7 @@ export default function RequestsPage() {
       key: 'model',
       header: 'Model',
       sortable: true,
-      render: (item: RequestLog) => <span className="text-sm text-text-dark">{item.model}</span>,
+      render: (item: RequestLog) => <span className="text-sm text-neutral-100">{item.model}</span>,
     },
     {
       key: 'status_code',
@@ -86,7 +87,7 @@ export default function RequestsPage() {
       header: 'Tokens',
       sortable: true,
       render: (item: RequestLog) => (
-        <span className="text-sm text-text-dark-secondary">
+        <span className="text-sm text-neutral-500">
           {item.total_tokens.toLocaleString()}
         </span>
       ),
@@ -111,8 +112,8 @@ export default function RequestsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-text-dark">Requests</h1>
-        <p className="text-sm text-text-dark-secondary mt-1">Browse and filter request logs</p>
+        <h1 className="text-xl font-semibold text-white">Requests</h1>
+        <p className="text-sm text-neutral-500 mt-1">Browse and filter request logs</p>
       </div>
 
       {/* Filters */}
@@ -173,45 +174,45 @@ export default function RequestsPage() {
           <div className="space-y-4 text-sm">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-text-dark-secondary text-xs">Request ID</p>
+                <p className="text-neutral-500 text-xs">Request ID</p>
                 <p className="font-mono text-xs mt-1">{selected.id}</p>
               </div>
               <div>
-                <p className="text-text-dark-secondary text-xs">Timestamp</p>
+                <p className="text-neutral-500 text-xs">Timestamp</p>
                 <p className="mt-1">{format(new Date(selected.timestamp), 'PPpp')}</p>
               </div>
               <div>
-                <p className="text-text-dark-secondary text-xs">Provider</p>
+                <p className="text-neutral-500 text-xs">Provider</p>
                 <p className="mt-1 font-medium">{selected.provider}</p>
               </div>
               <div>
-                <p className="text-text-dark-secondary text-xs">Model</p>
+                <p className="text-neutral-500 text-xs">Model</p>
                 <p className="mt-1">{selected.model}</p>
               </div>
               <div>
-                <p className="text-text-dark-secondary text-xs">Status</p>
+                <p className="text-neutral-500 text-xs">Status</p>
                 <Badge variant={selected.status_code < 400 ? 'success' : 'error'} className="mt-1">
                   {selected.status_code}
                 </Badge>
               </div>
               <div>
-                <p className="text-text-dark-secondary text-xs">Latency</p>
+                <p className="text-neutral-500 text-xs">Latency</p>
                 <p className="mt-1">{formatLatency(selected.latency_ms)}</p>
               </div>
               <div>
-                <p className="text-text-dark-secondary text-xs">Input Tokens</p>
+                <p className="text-neutral-500 text-xs">Input Tokens</p>
                 <p className="mt-1">{selected.input_tokens.toLocaleString()}</p>
               </div>
               <div>
-                <p className="text-text-dark-secondary text-xs">Output Tokens</p>
+                <p className="text-neutral-500 text-xs">Output Tokens</p>
                 <p className="mt-1">{selected.output_tokens.toLocaleString()}</p>
               </div>
               <div>
-                <p className="text-text-dark-secondary text-xs">Cost</p>
+                <p className="text-neutral-500 text-xs">Cost</p>
                 <p className="mt-1">{formatCurrency(selected.cost)}</p>
               </div>
               <div>
-                <p className="text-text-dark-secondary text-xs">Cache</p>
+                <p className="text-neutral-500 text-xs">Cache</p>
                 <Badge variant={selected.cache_hit ? 'success' : 'default'} className="mt-1">
                   {selected.cache_hit ? 'HIT' : 'MISS'}
                 </Badge>
@@ -219,8 +220,8 @@ export default function RequestsPage() {
             </div>
             {selected.error && (
               <div>
-                <p className="text-text-dark-secondary text-xs mb-1">Error</p>
-                <pre className="rounded-lg bg-bg-dark-tertiary p-3 text-xs text-error overflow-x-auto">
+                <p className="text-neutral-500 text-xs mb-1">Error</p>
+                <pre className="rounded-lg bg-neutral-800 p-3 text-xs text-error overflow-x-auto">
                   {selected.error}
                 </pre>
               </div>

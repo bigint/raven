@@ -29,11 +29,13 @@ export default function TeamsPage() {
   const { data: orgs, isLoading: orgsLoading } = useQuery({
     queryKey: ['orgs'],
     queryFn: () => apiClient.listOrgs(),
+    retry: false,
   })
 
   const { data: users, isLoading: usersLoading } = useQuery({
     queryKey: ['users'],
     queryFn: () => apiClient.listUsers(),
+    retry: false,
   })
 
   const createOrg = useMutation({
@@ -51,27 +53,27 @@ export default function TeamsPage() {
       key: 'name',
       header: 'Name',
       sortable: true,
-      render: (item: Org) => <span className="font-medium text-text-dark">{item.name}</span>,
+      render: (item: Org) => <span className="font-medium text-neutral-100">{item.name}</span>,
     },
     {
       key: 'slug',
       header: 'Slug',
       render: (item: Org) => (
-        <code className="text-xs font-mono text-text-dark-secondary">{item.slug}</code>
+        <code className="text-xs font-mono text-neutral-400">{item.slug}</code>
       ),
     },
     {
       key: 'description',
       header: 'Description',
       render: (item: Org) => (
-        <span className="text-sm text-text-dark-secondary">{item.description || '--'}</span>
+        <span className="text-sm text-neutral-500">{item.description || '--'}</span>
       ),
     },
     {
       key: 'created_at',
       header: 'Created',
       render: (item: Org) => (
-        <span className="text-xs text-text-dark-secondary">
+        <span className="text-xs text-neutral-500">
           {format(new Date(item.created_at), 'MMM d, yyyy')}
         </span>
       ),
@@ -83,13 +85,13 @@ export default function TeamsPage() {
       key: 'name',
       header: 'Name',
       sortable: true,
-      render: (item: User) => <span className="font-medium text-text-dark">{item.name}</span>,
+      render: (item: User) => <span className="font-medium text-neutral-100">{item.name}</span>,
     },
     {
       key: 'email',
       header: 'Email',
       render: (item: User) => (
-        <span className="text-sm text-text-dark-secondary">{item.email}</span>
+        <span className="text-sm text-neutral-500">{item.email}</span>
       ),
     },
     {
@@ -112,7 +114,7 @@ export default function TeamsPage() {
       key: 'created_at',
       header: 'Joined',
       render: (item: User) => (
-        <span className="text-xs text-text-dark-secondary">
+        <span className="text-xs text-neutral-500">
           {format(new Date(item.created_at), 'MMM d, yyyy')}
         </span>
       ),
@@ -123,8 +125,8 @@ export default function TeamsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-text-dark">Teams & Users</h1>
-          <p className="text-sm text-text-dark-secondary mt-1">
+          <h1 className="text-xl font-semibold text-white">Teams & Users</h1>
+          <p className="text-sm text-neutral-500 mt-1">
             Manage organizations, teams, and users
           </p>
         </div>

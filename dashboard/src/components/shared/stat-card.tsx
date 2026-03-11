@@ -1,5 +1,4 @@
 import { Sparkline } from '@/components/charts/sparkline'
-import { Card } from '@/components/ui/card'
 import type { TimeseriesPoint } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { TrendingDown, TrendingUp } from 'lucide-react'
@@ -30,24 +29,33 @@ export function StatCard({
   const trendDown = trend !== undefined && trend < 0
 
   return (
-    <Card className={cn('flex flex-col justify-between', className)}>
+    <div
+      className={cn(
+        'group relative flex flex-col justify-between rounded-xl border border-white/[6%] bg-white/[3%] p-6 transition-all duration-200 hover:border-white/[10%] hover:bg-white/[5%] hover:-translate-y-0.5',
+        className,
+      )}
+    >
       <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+        <div className="flex-1">
+          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
             {label}
           </p>
-          <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
+          <p className="mt-2 text-3xl font-bold text-white tracking-tight">{value}</p>
         </div>
-        {icon && <div className="text-neutral-500">{icon}</div>}
+        {icon && (
+          <div className="rounded-lg bg-white/[4%] p-2.5 text-zinc-500 group-hover:bg-white/[6%] group-hover:text-zinc-400 transition-all duration-200">
+            {icon}
+          </div>
+        )}
       </div>
-      <div className="mt-3 flex items-center justify-between">
+      <div className="mt-4 flex items-center justify-between">
         {trend !== undefined && (
           <div
             className={cn(
               'flex items-center gap-1 text-xs font-medium',
               trendUp && 'text-emerald-400',
               trendDown && 'text-red-400',
-              !trendUp && !trendDown && 'text-neutral-500',
+              !trendUp && !trendDown && 'text-zinc-500',
             )}
           >
             {trendUp && <TrendingUp className="h-3 w-3" />}
@@ -56,13 +64,13 @@ export function StatCard({
               {trendUp ? '+' : ''}
               {trend.toFixed(1)}%
             </span>
-            {trendLabel && <span className="text-neutral-500 ml-1">{trendLabel}</span>}
+            {trendLabel && <span className="text-zinc-600 ml-1">{trendLabel}</span>}
           </div>
         )}
         {sparklineData && sparklineData.length > 0 && (
           <Sparkline data={sparklineData} color={sparklineColor} />
         )}
       </div>
-    </Card>
+    </div>
   )
 }

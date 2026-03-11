@@ -20,7 +20,10 @@ interface TabsListProps {
 export function TabsList({ children, className }: TabsListProps) {
   return (
     <div
-      className={cn('inline-flex items-center gap-1 rounded-lg bg-neutral-800 p-1', className)}
+      className={cn(
+        'inline-flex items-center gap-1 rounded-lg border border-white/[6%] bg-white/[2%] p-1',
+        className,
+      )}
     >
       {children}
     </div>
@@ -47,10 +50,10 @@ export function TabsTrigger({
     <button
       type="button"
       className={cn(
-        'px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
+        'px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200 cursor-pointer',
         isActive
-          ? 'bg-primary text-white shadow-sm'
-          : 'text-neutral-400 hover:text-neutral-100',
+          ? 'bg-white/[8%] text-white shadow-sm'
+          : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/[4%]',
         className,
       )}
       onClick={() => onSelect(value)}
@@ -69,5 +72,5 @@ interface TabsContentProps {
 
 export function TabsContent({ value, activeValue, children, className }: TabsContentProps) {
   if (value !== activeValue) return null
-  return <div className={cn('mt-4', className)}>{children}</div>
+  return <div className={cn('mt-4 animate-fade-in', className)}>{children}</div>
 }
