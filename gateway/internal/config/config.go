@@ -191,6 +191,15 @@ func Load(path string) (*Config, error) {
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 
+	// Explicit env bindings for nested keys (AutomaticEnv + Unmarshal is unreliable).
+	v.BindEnv("server.host", "RAVEN_SERVER_HOST")
+	v.BindEnv("server.port", "RAVEN_SERVER_PORT")
+	v.BindEnv("admin.api_key", "RAVEN_ADMIN_KEY", "RAVEN_ADMIN_API_KEY")
+	v.BindEnv("store.driver", "RAVEN_STORE_DRIVER")
+	v.BindEnv("store.sqlite.path", "RAVEN_STORE_SQLITE_PATH")
+	v.BindEnv("store.postgres.url", "RAVEN_STORE_POSTGRES_URL", "DATABASE_URL")
+	v.BindEnv("observability.logs.level", "RAVEN_LOG_LEVEL")
+
 	if err := v.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 			return nil, fmt.Errorf("reading config: %w", err)
@@ -263,6 +272,20 @@ func setDefaults(v *viper.Viper) {
 func expandEnvVars(cfg *Config) {
 	cfg.Admin.APIKey = os.ExpandEnv(cfg.Admin.APIKey)
 	cfg.Store.Postgres.URL = os.ExpandEnv(cfg.Store.Postgres.URL)
+
+	// Support DATABASE_URL as a standard alias for store.postgres.url.
+	if cfg.Store.Postgres.URL == "" {
+		if dbURL := os.Getenv("DATABASE_URL"); dbURL != "" {
+			cfg.Store.Postgres.URL = dbURL
+		}
+	}
+
+	// Support RAVEN_ADMIN_KEY as alias for admin.api_key.
+	if cfg.Admin.APIKey == "" {
+		if key := os.Getenv("RAVEN_ADMIN_KEY"); key != "" {
+			cfg.Admin.APIKey = key
+		}
+	}
 }
 
 // Validate checks that the configuration is valid.

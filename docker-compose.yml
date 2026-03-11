@@ -13,8 +13,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    volumes:
-      - ./raven.yaml:/etc/raven/raven.yaml:ro
 
   postgres:
     image: postgres:17-alpine
