@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+.next/
+out/
+.turbo/
+
+# Go
+gateway/raven
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+*.egg
+.venv/
+venv/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.db-wal
+*.db-shm
+
+# Test coverage
+coverage/
+.coverage
+htmlcov/
+
+# Logs
+*.log
+
+# Binary
+raven
