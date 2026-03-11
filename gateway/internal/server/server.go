@@ -89,6 +89,11 @@ func (s *Server) Start() error {
 		return fmt.Errorf("running migrations: %w", err)
 	}
 
+	// Load provider credentials from database.
+	if err := s.registry.LoadCredentialsFromStore(newCredentialStoreAdapter(s.store)); err != nil {
+		slog.Warn("failed to load provider credentials from store", "error", err)
+	}
+
 	// Start health checker.
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -153,6 +158,33 @@ func (s *Server) Start() error {
 
 	slog.Info("raven gateway stopped")
 	return nil
+}
+
+// credentialStoreAdapter adapts store.Store to providers.CredentialStore.
+type credentialStoreAdapter struct {
+	st store.Store
+}
+
+func newCredentialStoreAdapter(st store.Store) *credentialStoreAdapter {
+	return &credentialStoreAdapter{st: st}
+}
+
+func (a *credentialStoreAdapter) ListProviderConfigs(ctx context.Context) ([]*providers.ProviderConfigEntry, error) {
+	configs, err := a.st.ListProviderConfigs(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	entries := make([]*providers.ProviderConfigEntry, len(configs))
+	for i, cfg := range configs {
+		entries[i] = &providers.ProviderConfigEntry{
+			Name:    cfg.Name,
+			APIKey:  cfg.APIKey,
+			BaseURL: cfg.BaseURL,
+			Enabled: cfg.Enabled,
+		}
+	}
+	return entries, nil
 }
 
 // buildRouter creates the chi router with all routes and middleware.

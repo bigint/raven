@@ -282,10 +282,11 @@ func (e *Engine) handleProxy(w http.ResponseWriter, r *http.Request, endpoint st
 	e.recordMetrics(proxyReq, proxyResp.StatusCode, startTime, proxyResp.Usage, false)
 }
 
-// getProviderAPIKey returns the API key for a provider from config.
+// getProviderAPIKey returns the API key for a provider from registry credentials.
 func (e *Engine) getProviderAPIKey(provider string) string {
-	if p, ok := e.cfg.Providers[provider]; ok {
-		return p.APIKey
+	apiKey, _, ok := e.registry.GetCredentials(provider)
+	if ok {
+		return apiKey
 	}
 	return ""
 }

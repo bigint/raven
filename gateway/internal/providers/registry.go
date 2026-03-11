@@ -2,6 +2,7 @@
 package providers
 
 import (
+	"context"
 	"embed"
 	"fmt"
 	"log/slog"
@@ -15,20 +16,42 @@ import (
 //go:embed specs/*.yaml
 var specsFS embed.FS
 
+// ProviderCredentials holds the API key and optional base URL override for a provider.
+type ProviderCredentials struct {
+	APIKey  string
+	BaseURL string
+}
+
+// CredentialStore is the interface needed to load provider configs from the database.
+type CredentialStore interface {
+	ListProviderConfigs(ctx context.Context) ([]*ProviderConfigEntry, error)
+}
+
+// ProviderConfigEntry mirrors the store.ProviderConfig fields needed by the registry.
+// This avoids a circular import with the store package.
+type ProviderConfigEntry struct {
+	Name    string
+	APIKey  string
+	BaseURL string
+	Enabled bool
+}
+
 // Registry manages provider specifications and adapters.
 type Registry struct {
-	mu        sync.RWMutex
-	specs     map[string]*types.ProviderSpec
-	adapters  map[string]Adapter
-	modelMap  map[string]string // model ID -> provider name
+	mu          sync.RWMutex
+	specs       map[string]*types.ProviderSpec
+	adapters    map[string]Adapter
+	modelMap    map[string]string // model ID -> provider name
+	credentials map[string]ProviderCredentials
 }
 
 // NewRegistry creates a new provider registry and loads embedded specs.
 func NewRegistry() (*Registry, error) {
 	r := &Registry{
-		specs:    make(map[string]*types.ProviderSpec),
-		adapters: make(map[string]Adapter),
-		modelMap: make(map[string]string),
+		specs:       make(map[string]*types.ProviderSpec),
+		adapters:    make(map[string]Adapter),
+		modelMap:    make(map[string]string),
+		credentials: make(map[string]ProviderCredentials),
 	}
 
 	if err := r.loadSpecs(); err != nil {
@@ -182,4 +205,49 @@ func (r *Registry) GetModelSpec(provider, modelID string) (*types.ModelSpec, boo
 		}
 	}
 	return nil, false
+}
+
+// SetCredentials stores the API key and optional base URL override for a provider.
+func (r *Registry) SetCredentials(name, apiKey, baseURL string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.credentials[name] = ProviderCredentials{
+		APIKey:  apiKey,
+		BaseURL: baseURL,
+	}
+}
+
+// GetCredentials returns the API key and base URL for a provider.
+func (r *Registry) GetCredentials(name string) (apiKey string, baseURL string, ok bool) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	cred, exists := r.credentials[name]
+	if !exists {
+		return "", "", false
+	}
+	return cred.APIKey, cred.BaseURL, true
+}
+
+// LoadCredentialsFromStore loads all enabled provider configs from the database into the registry.
+func (r *Registry) LoadCredentialsFromStore(st CredentialStore) error {
+	configs, err := st.ListProviderConfigs(context.Background())
+	if err != nil {
+		return fmt.Errorf("loading provider credentials from store: %w", err)
+	}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	for _, cfg := range configs {
+		if !cfg.Enabled {
+			continue
+		}
+		r.credentials[cfg.Name] = ProviderCredentials{
+			APIKey:  cfg.APIKey,
+			BaseURL: cfg.BaseURL,
+		}
+		slog.Debug("loaded provider credentials", "provider", cfg.Name)
+	}
+
+	return nil
 }

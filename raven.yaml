@@ -12,11 +12,7 @@ store:
   sqlite:
     path: ./raven.db
 
-providers:
-  openai:
-    api_key: ${OPENAI_API_KEY}
-  anthropic:
-    api_key: ${ANTHROPIC_API_KEY}
+# Provider API keys are managed via the dashboard UI (Admin API /admin/v1/providers).
 
 cache:
   enabled: true

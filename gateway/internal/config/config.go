@@ -10,11 +10,11 @@ import (
 )
 
 // Config represents the full Raven gateway configuration.
+// Provider API keys are managed via the database (dashboard UI), not config files.
 type Config struct {
 	Server        ServerConfig        `mapstructure:"server"`
 	Admin         AdminConfig         `mapstructure:"admin"`
 	Store         StoreConfig         `mapstructure:"store"`
-	Providers     map[string]Provider `mapstructure:"providers"`
 	Cache         CacheConfig         `mapstructure:"cache"`
 	RateLimit     RateLimitConfig     `mapstructure:"rate_limit"`
 	Routing       RoutingConfig       `mapstructure:"routing"`
@@ -64,12 +64,6 @@ type SQLiteConfig struct {
 // PostgresConfig holds PostgreSQL-specific settings.
 type PostgresConfig struct {
 	URL string `mapstructure:"url"`
-}
-
-// Provider holds a provider's configuration.
-type Provider struct {
-	APIKey  string `mapstructure:"api_key"`
-	BaseURL string `mapstructure:"base_url"`
 }
 
 // CacheConfig holds cache settings.
@@ -269,12 +263,6 @@ func setDefaults(v *viper.Viper) {
 func expandEnvVars(cfg *Config) {
 	cfg.Admin.APIKey = os.ExpandEnv(cfg.Admin.APIKey)
 	cfg.Store.Postgres.URL = os.ExpandEnv(cfg.Store.Postgres.URL)
-
-	for name, p := range cfg.Providers {
-		p.APIKey = os.ExpandEnv(p.APIKey)
-		p.BaseURL = os.ExpandEnv(p.BaseURL)
-		cfg.Providers[name] = p
-	}
 }
 
 // Validate checks that the configuration is valid.

@@ -2,8 +2,10 @@ package store
 
 import (
 	"context"
+	"crypto/rand"
 	"database/sql"
 	"embed"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -39,13 +41,20 @@ func NewSQLiteStore(path string) (*SQLiteStore, error) {
 
 // Migrate runs all SQL migration files.
 func (s *SQLiteStore) Migrate(ctx context.Context) error {
-	data, err := migrations.ReadFile("migrations/001_initial.sql")
-	if err != nil {
-		return fmt.Errorf("reading migration: %w", err)
+	migrationFiles := []string{
+		"migrations/001_initial.sql",
+		"migrations/002_provider_configs.sql",
 	}
 
-	if _, err := s.db.ExecContext(ctx, string(data)); err != nil {
-		return fmt.Errorf("executing migration: %w", err)
+	for _, file := range migrationFiles {
+		data, err := migrations.ReadFile(file)
+		if err != nil {
+			return fmt.Errorf("reading migration %s: %w", file, err)
+		}
+
+		if _, err := s.db.ExecContext(ctx, string(data)); err != nil {
+			return fmt.Errorf("executing migration %s: %w", file, err)
+		}
 	}
 
 	return nil
@@ -613,6 +622,134 @@ func (s *SQLiteStore) IncrementSpend(ctx context.Context, entityType string, ent
 		entityType, entityID, amount, amount)
 	if err != nil {
 		return fmt.Errorf("incrementing spend: %w", err)
+	}
+	return nil
+}
+
+// --- Provider Configs ---
+
+// generateProviderID generates a unique ID with a "prov_" prefix.
+func generateProviderID() string {
+	b := make([]byte, 12)
+	rand.Read(b) //nolint:errcheck
+	return "prov_" + hex.EncodeToString(b)
+}
+
+// CreateProviderConfig creates a new provider configuration.
+// TODO: API key should be encrypted at rest in a production system.
+func (s *SQLiteStore) CreateProviderConfig(ctx context.Context, cfg *ProviderConfig) error {
+	now := time.Now().UTC()
+	cfg.CreatedAt = now
+	cfg.UpdatedAt = now
+
+	if cfg.ID == "" {
+		cfg.ID = generateProviderID()
+	}
+
+	enabled := 0
+	if cfg.Enabled {
+		enabled = 1
+	}
+
+	_, err := s.db.ExecContext(ctx,
+		`INSERT INTO provider_configs (id, name, display_name, api_key, base_url, org_id, enabled, created_at, updated_at)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		cfg.ID, cfg.Name, cfg.DisplayName, cfg.APIKey, cfg.BaseURL, cfg.OrgID, enabled,
+		cfg.CreatedAt, cfg.UpdatedAt)
+	if err != nil {
+		return fmt.Errorf("creating provider config: %w", err)
+	}
+	return nil
+}
+
+// GetProviderConfig retrieves a provider configuration by ID.
+func (s *SQLiteStore) GetProviderConfig(ctx context.Context, id string) (*ProviderConfig, error) {
+	cfg := &ProviderConfig{}
+	var enabled int
+	err := s.db.QueryRowContext(ctx,
+		`SELECT id, name, display_name, api_key, base_url, org_id, enabled, created_at, updated_at
+		 FROM provider_configs WHERE id = ?`, id).
+		Scan(&cfg.ID, &cfg.Name, &cfg.DisplayName, &cfg.APIKey, &cfg.BaseURL, &cfg.OrgID,
+			&enabled, &cfg.CreatedAt, &cfg.UpdatedAt)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("getting provider config: %w", err)
+	}
+	cfg.Enabled = enabled == 1
+	return cfg, nil
+}
+
+// GetProviderConfigByName retrieves a provider configuration by name.
+func (s *SQLiteStore) GetProviderConfigByName(ctx context.Context, name string) (*ProviderConfig, error) {
+	cfg := &ProviderConfig{}
+	var enabled int
+	err := s.db.QueryRowContext(ctx,
+		`SELECT id, name, display_name, api_key, base_url, org_id, enabled, created_at, updated_at
+		 FROM provider_configs WHERE name = ?`, name).
+		Scan(&cfg.ID, &cfg.Name, &cfg.DisplayName, &cfg.APIKey, &cfg.BaseURL, &cfg.OrgID,
+			&enabled, &cfg.CreatedAt, &cfg.UpdatedAt)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("getting provider config by name: %w", err)
+	}
+	cfg.Enabled = enabled == 1
+	return cfg, nil
+}
+
+// ListProviderConfigs lists all provider configurations.
+func (s *SQLiteStore) ListProviderConfigs(ctx context.Context) ([]*ProviderConfig, error) {
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT id, name, display_name, api_key, base_url, org_id, enabled, created_at, updated_at
+		 FROM provider_configs ORDER BY created_at DESC`)
+	if err != nil {
+		return nil, fmt.Errorf("listing provider configs: %w", err)
+	}
+	defer rows.Close()
+
+	var configs []*ProviderConfig
+	for rows.Next() {
+		cfg := &ProviderConfig{}
+		var enabled int
+		if err := rows.Scan(&cfg.ID, &cfg.Name, &cfg.DisplayName, &cfg.APIKey, &cfg.BaseURL,
+			&cfg.OrgID, &enabled, &cfg.CreatedAt, &cfg.UpdatedAt); err != nil {
+			return nil, fmt.Errorf("scanning provider config: %w", err)
+		}
+		cfg.Enabled = enabled == 1
+		configs = append(configs, cfg)
+	}
+	return configs, rows.Err()
+}
+
+// UpdateProviderConfig updates an existing provider configuration.
+// TODO: API key should be encrypted at rest in a production system.
+func (s *SQLiteStore) UpdateProviderConfig(ctx context.Context, cfg *ProviderConfig) error {
+	cfg.UpdatedAt = time.Now().UTC()
+
+	enabled := 0
+	if cfg.Enabled {
+		enabled = 1
+	}
+
+	_, err := s.db.ExecContext(ctx,
+		`UPDATE provider_configs SET name = ?, display_name = ?, api_key = ?, base_url = ?,
+		 org_id = ?, enabled = ?, updated_at = ? WHERE id = ?`,
+		cfg.Name, cfg.DisplayName, cfg.APIKey, cfg.BaseURL, cfg.OrgID, enabled,
+		cfg.UpdatedAt, cfg.ID)
+	if err != nil {
+		return fmt.Errorf("updating provider config: %w", err)
+	}
+	return nil
+}
+
+// DeleteProviderConfig deletes a provider configuration by ID.
+func (s *SQLiteStore) DeleteProviderConfig(ctx context.Context, id string) error {
+	_, err := s.db.ExecContext(ctx, `DELETE FROM provider_configs WHERE id = ?`, id)
+	if err != nil {
+		return fmt.Errorf("deleting provider config: %w", err)
 	}
 	return nil
 }

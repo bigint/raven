@@ -155,3 +155,33 @@ func (s *PostgresStore) GetSpend(_ context.Context, _ string, _ string, _ string
 func (s *PostgresStore) IncrementSpend(_ context.Context, _ string, _ string, _ float64) error {
 	return fmt.Errorf("postgres: not yet implemented")
 }
+
+// CreateProviderConfig creates a new provider configuration.
+func (s *PostgresStore) CreateProviderConfig(_ context.Context, _ *ProviderConfig) error {
+	return fmt.Errorf("postgres: not yet implemented")
+}
+
+// GetProviderConfig retrieves a provider configuration by ID.
+func (s *PostgresStore) GetProviderConfig(_ context.Context, _ string) (*ProviderConfig, error) {
+	return nil, fmt.Errorf("postgres: not yet implemented")
+}
+
+// GetProviderConfigByName retrieves a provider configuration by name.
+func (s *PostgresStore) GetProviderConfigByName(_ context.Context, _ string) (*ProviderConfig, error) {
+	return nil, fmt.Errorf("postgres: not yet implemented")
+}
+
+// ListProviderConfigs lists all provider configurations.
+func (s *PostgresStore) ListProviderConfigs(_ context.Context) ([]*ProviderConfig, error) {
+	return nil, fmt.Errorf("postgres: not yet implemented")
+}
+
+// UpdateProviderConfig updates an existing provider configuration.
+func (s *PostgresStore) UpdateProviderConfig(_ context.Context, _ *ProviderConfig) error {
+	return fmt.Errorf("postgres: not yet implemented")
+}
+
+// DeleteProviderConfig deletes a provider configuration by ID.
+func (s *PostgresStore) DeleteProviderConfig(_ context.Context, _ string) error {
+	return fmt.Errorf("postgres: not yet implemented")
+}

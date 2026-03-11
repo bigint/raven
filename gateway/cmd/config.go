@@ -34,8 +34,7 @@ var configValidateCmd = &cobra.Command{
 		slog.Info("configuration is valid",
 			"host", cfg.Server.Host,
 			"port", cfg.Server.Port,
-			"store", cfg.Store.Driver,
-			"providers", len(cfg.Providers))
+			"store", cfg.Store.Driver)
 
 		fmt.Println("Configuration is valid.")
 		return nil

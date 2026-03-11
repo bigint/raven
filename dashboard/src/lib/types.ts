@@ -104,6 +104,45 @@ export interface ProviderHealth {
   last_check: string
 }
 
+export interface ProviderConfig {
+  id: string
+  name: string
+  display_name: string
+  api_key_masked: string
+  base_url: string
+  enabled: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface CreateProviderConfigInput {
+  name: string
+  api_key: string
+  base_url?: string
+  enabled?: boolean
+}
+
+export interface UpdateProviderConfigInput {
+  api_key?: string
+  base_url?: string
+  enabled?: boolean
+}
+
+export interface ProviderWithConfig {
+  name: string
+  display_name: string
+  base_url: string
+  models_count: number
+  configured: boolean
+  enabled: boolean
+  api_key_masked: string
+  health: {
+    status: 'healthy' | 'degraded' | 'down' | 'unconfigured'
+    latency_ms: number
+    error_rate: number
+  }
+}
+
 export interface RequestLog {
   id: string
   timestamp: string

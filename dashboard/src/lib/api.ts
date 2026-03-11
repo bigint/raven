@@ -5,6 +5,7 @@ import type {
   CostData,
   CreateKeyInput,
   CreateOrgInput,
+  CreateProviderConfigInput,
   CreateTeamInput,
   CreateUserInput,
   GatewaySettings,
@@ -15,10 +16,12 @@ import type {
   Org,
   PaginatedResponse,
   Provider,
+  ProviderConfig,
   ProviderHealth,
   RequestLog,
   Team,
   UpdateOrgInput,
+  UpdateProviderConfigInput,
   UsageData,
   User,
   VirtualKey,
@@ -153,6 +156,27 @@ export class ApiClient {
 
   async getProviderHealth(id: string): Promise<ProviderHealth> {
     return this.request(`/admin/v1/providers/${id}/health`)
+  }
+
+  async createProviderConfig(data: CreateProviderConfigInput): Promise<ProviderConfig> {
+    return this.request('/admin/v1/providers/config', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async updateProviderConfig(
+    name: string,
+    data: UpdateProviderConfigInput,
+  ): Promise<ProviderConfig> {
+    return this.request(`/admin/v1/providers/config/${name}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async deleteProviderConfig(name: string): Promise<void> {
+    return this.request(`/admin/v1/providers/config/${name}`, { method: 'DELETE' })
   }
 
   // Analytics

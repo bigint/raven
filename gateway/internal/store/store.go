@@ -66,6 +66,19 @@ type Store interface {
 	// IncrementSpend atomically increments the spend for an entity.
 	IncrementSpend(ctx context.Context, entityType string, entityID string, amount float64) error
 
+	// CreateProviderConfig creates a new provider configuration.
+	CreateProviderConfig(ctx context.Context, cfg *ProviderConfig) error
+	// GetProviderConfig retrieves a provider configuration by ID.
+	GetProviderConfig(ctx context.Context, id string) (*ProviderConfig, error)
+	// GetProviderConfigByName retrieves a provider configuration by name.
+	GetProviderConfigByName(ctx context.Context, name string) (*ProviderConfig, error)
+	// ListProviderConfigs lists all provider configurations.
+	ListProviderConfigs(ctx context.Context) ([]*ProviderConfig, error)
+	// UpdateProviderConfig updates an existing provider configuration.
+	UpdateProviderConfig(ctx context.Context, cfg *ProviderConfig) error
+	// DeleteProviderConfig deletes a provider configuration by ID.
+	DeleteProviderConfig(ctx context.Context, id string) error
+
 	// Migrate runs database migrations.
 	Migrate(ctx context.Context) error
 	// Close closes the database connection.
@@ -195,4 +208,17 @@ func (o *ListOpts) Normalize() {
 // Offset returns the SQL offset for pagination.
 func (o *ListOpts) Offset() int {
 	return (o.Page - 1) * o.PerPage
+}
+
+// ProviderConfig represents a provider's API key and configuration stored in the database.
+type ProviderConfig struct {
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	DisplayName string    `json:"display_name"`
+	APIKey      string    `json:"api_key"`
+	BaseURL     string    `json:"base_url,omitempty"`
+	OrgID       string    `json:"org_id,omitempty"`
+	Enabled     bool      `json:"enabled"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }

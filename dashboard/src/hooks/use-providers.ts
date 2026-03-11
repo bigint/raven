@@ -1,5 +1,6 @@
 import { apiClient } from '@/lib/api'
-import { useQuery } from '@tanstack/react-query'
+import type { CreateProviderConfigInput, UpdateProviderConfigInput } from '@/lib/types'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 export function useProviders() {
   return useQuery({
@@ -15,5 +16,36 @@ export function useProviderHealth(id: string) {
     queryFn: () => apiClient.getProviderHealth(id),
     refetchInterval: 15_000,
     enabled: !!id,
+  })
+}
+
+export function useCreateProviderConfig() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (data: CreateProviderConfigInput) => apiClient.createProviderConfig(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['providers'] })
+    },
+  })
+}
+
+export function useUpdateProviderConfig() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ name, data }: { name: string; data: UpdateProviderConfigInput }) =>
+      apiClient.updateProviderConfig(name, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['providers'] })
+    },
+  })
+}
+
+export function useDeleteProviderConfig() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (name: string) => apiClient.deleteProviderConfig(name),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['providers'] })
+    },
   })
 }

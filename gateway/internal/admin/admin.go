@@ -72,8 +72,12 @@ func (a *Router) Routes() chi.Router {
 		r.Delete("/{id}", a.deleteKey)
 	})
 
-	// Providers.
+	// Provider configuration (API keys managed via UI).
+	r.Post("/providers", a.createProviderConfig)
 	r.Get("/providers", a.listProviders)
+	r.Get("/providers/{name}", a.getProviderConfig)
+	r.Patch("/providers/{name}", a.updateProviderConfig)
+	r.Delete("/providers/{name}", a.deleteProviderConfig)
 	r.Get("/providers/{name}/health", a.getProviderHealth)
 
 	// Models.
@@ -389,9 +393,32 @@ func (a *Router) deleteKey(w http.ResponseWriter, r *http.Request) {
 
 // --- Providers ---
 
+// maskAPIKey returns a masked version of an API key, showing only the last 4 characters.
+func maskAPIKey(key string) string {
+	if len(key) <= 4 {
+		return "****"
+	}
+	prefix := key[:3]
+	suffix := key[len(key)-4:]
+	return prefix + "..." + suffix
+}
+
 func (a *Router) listProviders(w http.ResponseWriter, r *http.Request) {
-	_ = r
 	names := a.registry.ListProviders()
+
+	// Load provider configs from DB.
+	configs, err := a.store.ListProviderConfigs(r.Context())
+	if err != nil {
+		types.ErrInternal.WriteJSON(w)
+		return
+	}
+
+	// Build a map of configs by name.
+	configMap := make(map[string]*store.ProviderConfig)
+	for _, cfg := range configs {
+		configMap[cfg.Name] = cfg
+	}
+
 	providerList := make([]map[string]any, 0, len(names))
 
 	for _, name := range names {
@@ -400,21 +427,215 @@ func (a *Router) listProviders(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		health := a.health.GetHealth(name)
-		providerList = append(providerList, map[string]any{
+		entry := map[string]any{
 			"name":         spec.Name,
 			"display_name": spec.DisplayName,
 			"base_url":     spec.BaseURL,
 			"healthy":      health.Healthy,
 			"models":       len(spec.Models),
-		})
+			"configured":   false,
+			"enabled":      false,
+		}
+
+		if cfg, exists := configMap[name]; exists {
+			entry["configured"] = true
+			entry["enabled"] = cfg.Enabled
+			entry["api_key"] = maskAPIKey(cfg.APIKey)
+			if cfg.BaseURL != "" {
+				entry["base_url_override"] = cfg.BaseURL
+			}
+		}
+
+		providerList = append(providerList, entry)
 	}
 
 	writeJSON(w, http.StatusOK, types.AdminResponse{Data: providerList})
 }
 
+func (a *Router) createProviderConfig(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Name        string `json:"name"`
+		DisplayName string `json:"display_name"`
+		APIKey      string `json:"api_key"`
+		BaseURL     string `json:"base_url"`
+		Enabled     *bool  `json:"enabled"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		types.ErrBadRequest.WriteJSON(w)
+		return
+	}
+
+	if req.Name == "" || req.APIKey == "" {
+		types.NewAPIError(http.StatusBadRequest, "invalid_request_error", "name and api_key are required", "missing_fields").WriteJSON(w)
+		return
+	}
+
+	// Check if already exists.
+	existing, err := a.store.GetProviderConfigByName(r.Context(), req.Name)
+	if err != nil {
+		types.ErrInternal.WriteJSON(w)
+		return
+	}
+	if existing != nil {
+		types.NewAPIError(http.StatusConflict, "conflict_error", "provider config already exists", "duplicate").WriteJSON(w)
+		return
+	}
+
+	enabled := true
+	if req.Enabled != nil {
+		enabled = *req.Enabled
+	}
+
+	// Use display name from registry spec if not provided.
+	displayName := req.DisplayName
+	if displayName == "" {
+		if spec, ok := a.registry.GetSpec(req.Name); ok {
+			displayName = spec.DisplayName
+		}
+	}
+
+	cfg := &store.ProviderConfig{
+		Name:        req.Name,
+		DisplayName: displayName,
+		APIKey:      req.APIKey,
+		BaseURL:     req.BaseURL,
+		Enabled:     enabled,
+	}
+
+	if err := a.store.CreateProviderConfig(r.Context(), cfg); err != nil {
+		types.ErrInternal.WriteJSON(w)
+		return
+	}
+
+	// Update registry credentials.
+	if cfg.Enabled {
+		a.registry.SetCredentials(cfg.Name, cfg.APIKey, cfg.BaseURL)
+	}
+
+	// Return response with masked API key.
+	resp := map[string]any{
+		"id":           cfg.ID,
+		"name":         cfg.Name,
+		"display_name": cfg.DisplayName,
+		"api_key":      maskAPIKey(cfg.APIKey),
+		"base_url":     cfg.BaseURL,
+		"enabled":      cfg.Enabled,
+		"created_at":   cfg.CreatedAt,
+		"updated_at":   cfg.UpdatedAt,
+	}
+	writeJSON(w, http.StatusCreated, types.AdminResponse{Data: resp})
+}
+
+func (a *Router) getProviderConfig(w http.ResponseWriter, r *http.Request) {
+	name := chi.URLParam(r, "name")
+
+	cfg, err := a.store.GetProviderConfigByName(r.Context(), name)
+	if err != nil {
+		types.ErrInternal.WriteJSON(w)
+		return
+	}
+	if cfg == nil {
+		types.ErrNotFound.WriteJSON(w)
+		return
+	}
+
+	resp := map[string]any{
+		"id":           cfg.ID,
+		"name":         cfg.Name,
+		"display_name": cfg.DisplayName,
+		"api_key":      maskAPIKey(cfg.APIKey),
+		"base_url":     cfg.BaseURL,
+		"org_id":       cfg.OrgID,
+		"enabled":      cfg.Enabled,
+		"created_at":   cfg.CreatedAt,
+		"updated_at":   cfg.UpdatedAt,
+	}
+	writeJSON(w, http.StatusOK, types.AdminResponse{Data: resp})
+}
+
+func (a *Router) updateProviderConfig(w http.ResponseWriter, r *http.Request) {
+	name := chi.URLParam(r, "name")
+
+	existing, err := a.store.GetProviderConfigByName(r.Context(), name)
+	if err != nil {
+		types.ErrInternal.WriteJSON(w)
+		return
+	}
+	if existing == nil {
+		types.ErrNotFound.WriteJSON(w)
+		return
+	}
+
+	// Decode partial update.
+	var req map[string]any
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		types.ErrBadRequest.WriteJSON(w)
+		return
+	}
+
+	if v, ok := req["api_key"].(string); ok && v != "" {
+		existing.APIKey = v
+	}
+	if v, ok := req["base_url"].(string); ok {
+		existing.BaseURL = v
+	}
+	if v, ok := req["display_name"].(string); ok {
+		existing.DisplayName = v
+	}
+	if v, ok := req["org_id"].(string); ok {
+		existing.OrgID = v
+	}
+	if v, ok := req["enabled"].(bool); ok {
+		existing.Enabled = v
+	}
+
+	if err := a.store.UpdateProviderConfig(r.Context(), existing); err != nil {
+		types.ErrInternal.WriteJSON(w)
+		return
+	}
+
+	// Update registry credentials.
+	if existing.Enabled {
+		a.registry.SetCredentials(existing.Name, existing.APIKey, existing.BaseURL)
+	}
+
+	resp := map[string]any{
+		"id":           existing.ID,
+		"name":         existing.Name,
+		"display_name": existing.DisplayName,
+		"api_key":      maskAPIKey(existing.APIKey),
+		"base_url":     existing.BaseURL,
+		"org_id":       existing.OrgID,
+		"enabled":      existing.Enabled,
+		"created_at":   existing.CreatedAt,
+		"updated_at":   existing.UpdatedAt,
+	}
+	writeJSON(w, http.StatusOK, types.AdminResponse{Data: resp})
+}
+
+func (a *Router) deleteProviderConfig(w http.ResponseWriter, r *http.Request) {
+	name := chi.URLParam(r, "name")
+
+	cfg, err := a.store.GetProviderConfigByName(r.Context(), name)
+	if err != nil {
+		types.ErrInternal.WriteJSON(w)
+		return
+	}
+	if cfg == nil {
+		types.ErrNotFound.WriteJSON(w)
+		return
+	}
+
+	if err := a.store.DeleteProviderConfig(r.Context(), cfg.ID); err != nil {
+		types.ErrInternal.WriteJSON(w)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (a *Router) getProviderHealth(w http.ResponseWriter, r *http.Request) {
 	name := chi.URLParam(r, "name")
-	_ = r
 	health := a.health.GetHealth(name)
 	writeJSON(w, http.StatusOK, types.AdminResponse{Data: health})
 }
