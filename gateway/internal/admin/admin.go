@@ -87,6 +87,17 @@ func (a *Router) Routes() chi.Router {
 	r.Get("/logs", a.listLogs)
 	r.Get("/logs/{id}", a.getLog)
 
+	// Analytics.
+	r.Get("/analytics/usage", a.getAnalyticsUsage)
+	r.Get("/analytics/cost", a.getAnalyticsCost)
+	r.Get("/analytics/latency", a.getAnalyticsLatency)
+	r.Get("/analytics/cache", a.getAnalyticsCache)
+
+	// Budgets.
+	r.Get("/budgets", a.listBudgets)
+	r.Post("/budgets", a.createBudget)
+	r.Patch("/budgets/{id}", a.updateBudget)
+
 	// Health.
 	r.Get("/health", a.healthCheck)
 
@@ -721,4 +732,100 @@ func (a *Router) getSettings(w http.ResponseWriter, r *http.Request) {
 		"rate_limiting_enabled": true,
 	}
 	writeJSON(w, http.StatusOK, settings)
+}
+
+// --- Analytics ---
+
+func parseAnalyticsOpts(r *http.Request) store.AnalyticsOpts {
+	opts := store.AnalyticsOpts{
+		Start:       r.URL.Query().Get("start"),
+		End:         r.URL.Query().Get("end"),
+		Granularity: r.URL.Query().Get("granularity"),
+	}
+	if opts.Granularity == "" {
+		opts.Granularity = "hour"
+	}
+	return opts
+}
+
+func (a *Router) getAnalyticsUsage(w http.ResponseWriter, r *http.Request) {
+	opts := parseAnalyticsOpts(r)
+	usage, err := a.store.GetAnalyticsUsage(r.Context(), opts)
+	if err != nil {
+		types.ErrInternal.WriteJSON(w)
+		return
+	}
+	writeJSON(w, http.StatusOK, usage)
+}
+
+func (a *Router) getAnalyticsCost(w http.ResponseWriter, r *http.Request) {
+	opts := parseAnalyticsOpts(r)
+	cost, err := a.store.GetAnalyticsCost(r.Context(), opts)
+	if err != nil {
+		types.ErrInternal.WriteJSON(w)
+		return
+	}
+	writeJSON(w, http.StatusOK, cost)
+}
+
+func (a *Router) getAnalyticsLatency(w http.ResponseWriter, r *http.Request) {
+	opts := parseAnalyticsOpts(r)
+	latency, err := a.store.GetAnalyticsLatency(r.Context(), opts)
+	if err != nil {
+		types.ErrInternal.WriteJSON(w)
+		return
+	}
+	writeJSON(w, http.StatusOK, latency)
+}
+
+func (a *Router) getAnalyticsCache(w http.ResponseWriter, r *http.Request) {
+	opts := parseAnalyticsOpts(r)
+	cache, err := a.store.GetAnalyticsCache(r.Context(), opts)
+	if err != nil {
+		types.ErrInternal.WriteJSON(w)
+		return
+	}
+	writeJSON(w, http.StatusOK, cache)
+}
+
+// --- Budgets ---
+
+func (a *Router) listBudgets(w http.ResponseWriter, r *http.Request) {
+	configs, err := a.store.ListBudgetConfigs(r.Context())
+	if err != nil {
+		types.ErrInternal.WriteJSON(w)
+		return
+	}
+	if configs == nil {
+		configs = []*store.BudgetConfig{}
+	}
+	writeJSON(w, http.StatusOK, configs)
+}
+
+func (a *Router) createBudget(w http.ResponseWriter, r *http.Request) {
+	var cfg store.BudgetConfig
+	if err := json.NewDecoder(r.Body).Decode(&cfg); err != nil {
+		types.ErrBadRequest.WriteJSON(w)
+		return
+	}
+	if err := a.store.CreateBudgetConfig(r.Context(), &cfg); err != nil {
+		types.ErrInternal.WriteJSON(w)
+		return
+	}
+	writeJSON(w, http.StatusCreated, cfg)
+}
+
+func (a *Router) updateBudget(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	var cfg store.BudgetConfig
+	if err := json.NewDecoder(r.Body).Decode(&cfg); err != nil {
+		types.ErrBadRequest.WriteJSON(w)
+		return
+	}
+	cfg.ID = id
+	if err := a.store.UpdateBudgetConfig(r.Context(), &cfg); err != nil {
+		types.ErrInternal.WriteJSON(w)
+		return
+	}
+	writeJSON(w, http.StatusOK, cfg)
 }

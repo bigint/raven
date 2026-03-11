@@ -79,6 +79,17 @@ type Store interface {
 	// DeleteProviderConfig deletes a provider configuration by ID.
 	DeleteProviderConfig(ctx context.Context, id string) error
 
+	// Analytics
+	GetAnalyticsUsage(ctx context.Context, opts AnalyticsOpts) (*AnalyticsUsage, error)
+	GetAnalyticsCost(ctx context.Context, opts AnalyticsOpts) (*AnalyticsCost, error)
+	GetAnalyticsLatency(ctx context.Context, opts AnalyticsOpts) (*AnalyticsLatency, error)
+	GetAnalyticsCache(ctx context.Context, opts AnalyticsOpts) (*AnalyticsCache, error)
+
+	// Budget configs
+	ListBudgetConfigs(ctx context.Context) ([]*BudgetConfig, error)
+	CreateBudgetConfig(ctx context.Context, cfg *BudgetConfig) error
+	UpdateBudgetConfig(ctx context.Context, cfg *BudgetConfig) error
+
 	// Migrate runs database migrations.
 	Migrate(ctx context.Context) error
 	// Close closes the database connection.

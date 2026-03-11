@@ -148,6 +148,18 @@ CREATE TABLE IF NOT EXISTS provider_configs (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS budget_configs (
+    id TEXT PRIMARY KEY,
+    entity_type TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    "limit" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    period TEXT NOT NULL DEFAULT 'monthly',
+    alert_threshold DOUBLE PRECISION NOT NULL DEFAULT 0.8,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(entity_type, entity_id)
+);
 `
 
 	indexes := `
@@ -790,6 +802,434 @@ func (s *PostgresStore) DeleteProviderConfig(ctx context.Context, id string) err
 	_, err := s.db.ExecContext(ctx, `DELETE FROM provider_configs WHERE id = $1`, id)
 	if err != nil {
 		return fmt.Errorf("deleting provider config: %w", err)
+	}
+	return nil
+}
+
+// --- Analytics ---
+
+func pgTrunc(granularity string) string {
+	switch granularity {
+	case "minute":
+		return "minute"
+	case "hour":
+		return "hour"
+	case "day":
+		return "day"
+	case "week":
+		return "week"
+	case "month":
+		return "month"
+	default:
+		return "hour"
+	}
+}
+
+func (s *PostgresStore) GetAnalyticsUsage(ctx context.Context, opts AnalyticsOpts) (*AnalyticsUsage, error) {
+	usage := &AnalyticsUsage{
+		RequestsByModel:    make(map[string]int64),
+		RequestsByProvider: make(map[string]int64),
+		Timeseries:         []TimeseriesPoint{},
+	}
+
+	// Totals.
+	err := s.db.QueryRowContext(ctx,
+		`SELECT COALESCE(COUNT(*), 0),
+		        COALESCE(SUM(input_tokens + output_tokens), 0),
+		        COALESCE(SUM(input_tokens), 0),
+		        COALESCE(SUM(output_tokens), 0)
+		 FROM request_logs WHERE created_at >= $1 AND created_at < $2`,
+		opts.Start, opts.End).
+		Scan(&usage.TotalRequests, &usage.TotalTokens, &usage.TotalInputTokens, &usage.TotalOutputTokens)
+	if err != nil {
+		return nil, fmt.Errorf("getting usage totals: %w", err)
+	}
+
+	// By model.
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT model, COUNT(*) FROM request_logs
+		 WHERE created_at >= $1 AND created_at < $2
+		 GROUP BY model ORDER BY COUNT(*) DESC`,
+		opts.Start, opts.End)
+	if err != nil {
+		return nil, fmt.Errorf("getting usage by model: %w", err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var model string
+		var count int64
+		if err := rows.Scan(&model, &count); err != nil {
+			return nil, fmt.Errorf("scanning usage by model: %w", err)
+		}
+		usage.RequestsByModel[model] = count
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating usage by model: %w", err)
+	}
+
+	// By provider.
+	rows2, err := s.db.QueryContext(ctx,
+		`SELECT provider, COUNT(*) FROM request_logs
+		 WHERE created_at >= $1 AND created_at < $2
+		 GROUP BY provider ORDER BY COUNT(*) DESC`,
+		opts.Start, opts.End)
+	if err != nil {
+		return nil, fmt.Errorf("getting usage by provider: %w", err)
+	}
+	defer rows2.Close()
+	for rows2.Next() {
+		var provider string
+		var count int64
+		if err := rows2.Scan(&provider, &count); err != nil {
+			return nil, fmt.Errorf("scanning usage by provider: %w", err)
+		}
+		usage.RequestsByProvider[provider] = count
+	}
+	if err := rows2.Err(); err != nil {
+		return nil, fmt.Errorf("iterating usage by provider: %w", err)
+	}
+
+	// Timeseries.
+	trunc := pgTrunc(opts.Granularity)
+	tsRows, err := s.db.QueryContext(ctx,
+		fmt.Sprintf(`SELECT date_trunc('%s', created_at) AS bucket, COUNT(*)
+		 FROM request_logs WHERE created_at >= $1 AND created_at < $2
+		 GROUP BY bucket ORDER BY bucket`, trunc),
+		opts.Start, opts.End)
+	if err != nil {
+		return nil, fmt.Errorf("getting usage timeseries: %w", err)
+	}
+	defer tsRows.Close()
+	for tsRows.Next() {
+		var ts time.Time
+		var val float64
+		if err := tsRows.Scan(&ts, &val); err != nil {
+			return nil, fmt.Errorf("scanning usage timeseries: %w", err)
+		}
+		usage.Timeseries = append(usage.Timeseries, TimeseriesPoint{
+			Timestamp: ts.UTC().Format(time.RFC3339),
+			Value:     val,
+		})
+	}
+	if err := tsRows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating usage timeseries: %w", err)
+	}
+
+	return usage, nil
+}
+
+func (s *PostgresStore) GetAnalyticsCost(ctx context.Context, opts AnalyticsOpts) (*AnalyticsCost, error) {
+	cost := &AnalyticsCost{
+		CostByProvider: make(map[string]float64),
+		CostByModel:    make(map[string]float64),
+		CostByTeam:     make(map[string]float64),
+		Timeseries:     []TimeseriesPoint{},
+	}
+
+	// Total cost.
+	err := s.db.QueryRowContext(ctx,
+		`SELECT COALESCE(SUM(cost), 0) FROM request_logs
+		 WHERE created_at >= $1 AND created_at < $2`,
+		opts.Start, opts.End).Scan(&cost.TotalCost)
+	if err != nil {
+		return nil, fmt.Errorf("getting total cost: %w", err)
+	}
+
+	// Projected monthly.
+	var minTS, maxTS time.Time
+	err = s.db.QueryRowContext(ctx,
+		`SELECT COALESCE(MIN(created_at), NOW()), COALESCE(MAX(created_at), NOW())
+		 FROM request_logs WHERE created_at >= $1 AND created_at < $2`,
+		opts.Start, opts.End).Scan(&minTS, &maxTS)
+	if err == nil {
+		days := maxTS.Sub(minTS).Hours() / 24
+		if days > 0 {
+			cost.ProjectedMonthly = cost.TotalCost / days * 30
+		}
+	}
+
+	// Cache savings.
+	err = s.db.QueryRowContext(ctx,
+		`SELECT COALESCE(SUM(cost), 0) FROM request_logs
+		 WHERE created_at >= $1 AND created_at < $2 AND cache_hit = true`,
+		opts.Start, opts.End).Scan(&cost.CacheSavings)
+	if err != nil {
+		return nil, fmt.Errorf("getting cache savings: %w", err)
+	}
+
+	// By provider.
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT provider, COALESCE(SUM(cost), 0) FROM request_logs
+		 WHERE created_at >= $1 AND created_at < $2
+		 GROUP BY provider ORDER BY SUM(cost) DESC`,
+		opts.Start, opts.End)
+	if err != nil {
+		return nil, fmt.Errorf("getting cost by provider: %w", err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var provider string
+		var c float64
+		if err := rows.Scan(&provider, &c); err != nil {
+			return nil, fmt.Errorf("scanning cost by provider: %w", err)
+		}
+		cost.CostByProvider[provider] = c
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating cost by provider: %w", err)
+	}
+
+	// By model.
+	rows2, err := s.db.QueryContext(ctx,
+		`SELECT model, COALESCE(SUM(cost), 0) FROM request_logs
+		 WHERE created_at >= $1 AND created_at < $2
+		 GROUP BY model ORDER BY SUM(cost) DESC`,
+		opts.Start, opts.End)
+	if err != nil {
+		return nil, fmt.Errorf("getting cost by model: %w", err)
+	}
+	defer rows2.Close()
+	for rows2.Next() {
+		var model string
+		var c float64
+		if err := rows2.Scan(&model, &c); err != nil {
+			return nil, fmt.Errorf("scanning cost by model: %w", err)
+		}
+		cost.CostByModel[model] = c
+	}
+	if err := rows2.Err(); err != nil {
+		return nil, fmt.Errorf("iterating cost by model: %w", err)
+	}
+
+	// By team.
+	rows3, err := s.db.QueryContext(ctx,
+		`SELECT team_id, COALESCE(SUM(cost), 0) FROM request_logs
+		 WHERE created_at >= $1 AND created_at < $2 AND team_id != ''
+		 GROUP BY team_id ORDER BY SUM(cost) DESC`,
+		opts.Start, opts.End)
+	if err != nil {
+		return nil, fmt.Errorf("getting cost by team: %w", err)
+	}
+	defer rows3.Close()
+	for rows3.Next() {
+		var team string
+		var c float64
+		if err := rows3.Scan(&team, &c); err != nil {
+			return nil, fmt.Errorf("scanning cost by team: %w", err)
+		}
+		cost.CostByTeam[team] = c
+	}
+	if err := rows3.Err(); err != nil {
+		return nil, fmt.Errorf("iterating cost by team: %w", err)
+	}
+
+	// Timeseries.
+	trunc := pgTrunc(opts.Granularity)
+	tsRows, err := s.db.QueryContext(ctx,
+		fmt.Sprintf(`SELECT date_trunc('%s', created_at) AS bucket, COALESCE(SUM(cost), 0)
+		 FROM request_logs WHERE created_at >= $1 AND created_at < $2
+		 GROUP BY bucket ORDER BY bucket`, trunc),
+		opts.Start, opts.End)
+	if err != nil {
+		return nil, fmt.Errorf("getting cost timeseries: %w", err)
+	}
+	defer tsRows.Close()
+	for tsRows.Next() {
+		var ts time.Time
+		var val float64
+		if err := tsRows.Scan(&ts, &val); err != nil {
+			return nil, fmt.Errorf("scanning cost timeseries: %w", err)
+		}
+		cost.Timeseries = append(cost.Timeseries, TimeseriesPoint{
+			Timestamp: ts.UTC().Format(time.RFC3339),
+			Value:     val,
+		})
+	}
+	if err := tsRows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating cost timeseries: %w", err)
+	}
+
+	return cost, nil
+}
+
+func (s *PostgresStore) GetAnalyticsLatency(ctx context.Context, opts AnalyticsOpts) (*AnalyticsLatency, error) {
+	latency := &AnalyticsLatency{
+		Timeseries: []TimeseriesPoint{},
+	}
+
+	err := s.db.QueryRowContext(ctx,
+		`SELECT
+		    COALESCE(AVG(latency_ms), 0),
+		    COALESCE(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY latency_ms), 0),
+		    COALESCE(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY latency_ms), 0),
+		    COALESCE(PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY latency_ms), 0)
+		 FROM request_logs WHERE created_at >= $1 AND created_at < $2`,
+		opts.Start, opts.End).
+		Scan(&latency.AvgLatencyMs, &latency.P50LatencyMs, &latency.P95LatencyMs, &latency.P99LatencyMs)
+	if err != nil {
+		return nil, fmt.Errorf("getting latency percentiles: %w", err)
+	}
+
+	// Timeseries.
+	trunc := pgTrunc(opts.Granularity)
+	tsRows, err := s.db.QueryContext(ctx,
+		fmt.Sprintf(`SELECT date_trunc('%s', created_at) AS bucket, COALESCE(AVG(latency_ms), 0)
+		 FROM request_logs WHERE created_at >= $1 AND created_at < $2
+		 GROUP BY bucket ORDER BY bucket`, trunc),
+		opts.Start, opts.End)
+	if err != nil {
+		return nil, fmt.Errorf("getting latency timeseries: %w", err)
+	}
+	defer tsRows.Close()
+	for tsRows.Next() {
+		var ts time.Time
+		var val float64
+		if err := tsRows.Scan(&ts, &val); err != nil {
+			return nil, fmt.Errorf("scanning latency timeseries: %w", err)
+		}
+		latency.Timeseries = append(latency.Timeseries, TimeseriesPoint{
+			Timestamp: ts.UTC().Format(time.RFC3339),
+			Value:     val,
+		})
+	}
+	if err := tsRows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating latency timeseries: %w", err)
+	}
+
+	return latency, nil
+}
+
+func (s *PostgresStore) GetAnalyticsCache(ctx context.Context, opts AnalyticsOpts) (*AnalyticsCache, error) {
+	cache := &AnalyticsCache{
+		Timeseries: []TimeseriesPoint{},
+	}
+
+	var totalHits, totalMisses int64
+	err := s.db.QueryRowContext(ctx,
+		`SELECT
+		    COALESCE(SUM(CASE WHEN cache_hit = true THEN 1 ELSE 0 END), 0),
+		    COALESCE(SUM(CASE WHEN cache_hit = false THEN 1 ELSE 0 END), 0)
+		 FROM request_logs WHERE created_at >= $1 AND created_at < $2`,
+		opts.Start, opts.End).Scan(&totalHits, &totalMisses)
+	if err != nil {
+		return nil, fmt.Errorf("getting cache stats: %w", err)
+	}
+	cache.TotalHits = totalHits
+	cache.TotalMisses = totalMisses
+	total := totalHits + totalMisses
+	if total > 0 {
+		cache.HitRate = float64(totalHits) / float64(total)
+		cache.MissRate = float64(totalMisses) / float64(total)
+	}
+
+	// Savings.
+	err = s.db.QueryRowContext(ctx,
+		`SELECT COALESCE(SUM(cost), 0) FROM request_logs
+		 WHERE created_at >= $1 AND created_at < $2 AND cache_hit = true`,
+		opts.Start, opts.End).Scan(&cache.Savings)
+	if err != nil {
+		return nil, fmt.Errorf("getting cache savings: %w", err)
+	}
+
+	// Timeseries (hit rate per bucket).
+	trunc := pgTrunc(opts.Granularity)
+	tsRows, err := s.db.QueryContext(ctx,
+		fmt.Sprintf(`SELECT date_trunc('%s', created_at) AS bucket,
+		    CASE WHEN COUNT(*) > 0 THEN
+		        CAST(SUM(CASE WHEN cache_hit = true THEN 1 ELSE 0 END) AS DOUBLE PRECISION) / COUNT(*)
+		    ELSE 0 END
+		 FROM request_logs WHERE created_at >= $1 AND created_at < $2
+		 GROUP BY bucket ORDER BY bucket`, trunc),
+		opts.Start, opts.End)
+	if err != nil {
+		return nil, fmt.Errorf("getting cache timeseries: %w", err)
+	}
+	defer tsRows.Close()
+	for tsRows.Next() {
+		var ts time.Time
+		var val float64
+		if err := tsRows.Scan(&ts, &val); err != nil {
+			return nil, fmt.Errorf("scanning cache timeseries: %w", err)
+		}
+		cache.Timeseries = append(cache.Timeseries, TimeseriesPoint{
+			Timestamp: ts.UTC().Format(time.RFC3339),
+			Value:     val,
+		})
+	}
+	if err := tsRows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating cache timeseries: %w", err)
+	}
+
+	return cache, nil
+}
+
+// --- Budget Configs ---
+
+func generatePgBudgetID() string {
+	b := make([]byte, 12)
+	rand.Read(b) //nolint:errcheck
+	return "bgt_" + hex.EncodeToString(b)
+}
+
+func (s *PostgresStore) ListBudgetConfigs(ctx context.Context) ([]*BudgetConfig, error) {
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT bc.id, bc.entity_type, bc.entity_id, bc."limit", bc.period,
+		        bc.alert_threshold, bc.created_at, bc.updated_at,
+		        COALESCE(bt.spend, 0)
+		 FROM budget_configs bc
+		 LEFT JOIN budget_tracking bt ON bt.entity_type = bc.entity_type AND bt.entity_id = bc.entity_id
+		     AND bt.period = to_char(NOW(), 'YYYY-MM')
+		 ORDER BY bc.created_at DESC`)
+	if err != nil {
+		return nil, fmt.Errorf("listing budget configs: %w", err)
+	}
+	defer rows.Close()
+
+	var configs []*BudgetConfig
+	for rows.Next() {
+		cfg := &BudgetConfig{}
+		if err := rows.Scan(&cfg.ID, &cfg.EntityType, &cfg.EntityID, &cfg.Limit, &cfg.Period,
+			&cfg.AlertThreshold, &cfg.CreatedAt, &cfg.UpdatedAt, &cfg.CurrentUsage); err != nil {
+			return nil, fmt.Errorf("scanning budget config: %w", err)
+		}
+		configs = append(configs, cfg)
+	}
+	return configs, rows.Err()
+}
+
+func (s *PostgresStore) CreateBudgetConfig(ctx context.Context, cfg *BudgetConfig) error {
+	now := time.Now().UTC()
+	cfg.CreatedAt = now
+	cfg.UpdatedAt = now
+	if cfg.ID == "" {
+		cfg.ID = generatePgBudgetID()
+	}
+	if cfg.Period == "" {
+		cfg.Period = "monthly"
+	}
+	if cfg.AlertThreshold == 0 {
+		cfg.AlertThreshold = 0.8
+	}
+
+	_, err := s.db.ExecContext(ctx,
+		`INSERT INTO budget_configs (id, entity_type, entity_id, "limit", period, alert_threshold, created_at, updated_at)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+		cfg.ID, cfg.EntityType, cfg.EntityID, cfg.Limit, cfg.Period,
+		cfg.AlertThreshold, cfg.CreatedAt, cfg.UpdatedAt)
+	if err != nil {
+		return fmt.Errorf("creating budget config: %w", err)
+	}
+	return nil
+}
+
+func (s *PostgresStore) UpdateBudgetConfig(ctx context.Context, cfg *BudgetConfig) error {
+	cfg.UpdatedAt = time.Now().UTC()
+	_, err := s.db.ExecContext(ctx,
+		`UPDATE budget_configs SET "limit" = $1, period = $2, alert_threshold = $3, updated_at = $4
+		 WHERE id = $5`,
+		cfg.Limit, cfg.Period, cfg.AlertThreshold, cfg.UpdatedAt, cfg.ID)
+	if err != nil {
+		return fmt.Errorf("updating budget config: %w", err)
 	}
 	return nil
 }

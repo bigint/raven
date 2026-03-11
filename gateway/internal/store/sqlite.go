@@ -44,6 +44,7 @@ func (s *SQLiteStore) Migrate(ctx context.Context) error {
 	migrationFiles := []string{
 		"migrations/001_initial.sql",
 		"migrations/002_provider_configs.sql",
+		"migrations/003_budget_configs.sql",
 	}
 
 	for _, file := range migrationFiles {
@@ -750,6 +751,490 @@ func (s *SQLiteStore) DeleteProviderConfig(ctx context.Context, id string) error
 	_, err := s.db.ExecContext(ctx, `DELETE FROM provider_configs WHERE id = ?`, id)
 	if err != nil {
 		return fmt.Errorf("deleting provider config: %w", err)
+	}
+	return nil
+}
+
+// --- Analytics ---
+
+func sqliteTrunc(granularity string) string {
+	switch granularity {
+	case "minute":
+		return `strftime('%Y-%m-%dT%H:%M:00Z', created_at)`
+	case "hour":
+		return `strftime('%Y-%m-%dT%H:00:00Z', created_at)`
+	case "day":
+		return `strftime('%Y-%m-%dT00:00:00Z', created_at)`
+	case "week":
+		return `strftime('%Y-%m-%dT00:00:00Z', created_at, 'weekday 0', '-6 days')`
+	case "month":
+		return `strftime('%Y-%m-01T00:00:00Z', created_at)`
+	default:
+		return `strftime('%Y-%m-%dT%H:00:00Z', created_at)`
+	}
+}
+
+func (s *SQLiteStore) GetAnalyticsUsage(ctx context.Context, opts AnalyticsOpts) (*AnalyticsUsage, error) {
+	usage := &AnalyticsUsage{
+		RequestsByModel:    make(map[string]int64),
+		RequestsByProvider: make(map[string]int64),
+		Timeseries:         []TimeseriesPoint{},
+	}
+
+	// Totals.
+	err := s.db.QueryRowContext(ctx,
+		`SELECT COALESCE(COUNT(*), 0),
+		        COALESCE(SUM(input_tokens + output_tokens), 0),
+		        COALESCE(SUM(input_tokens), 0),
+		        COALESCE(SUM(output_tokens), 0)
+		 FROM request_logs WHERE created_at >= ? AND created_at < ?`,
+		opts.Start, opts.End).
+		Scan(&usage.TotalRequests, &usage.TotalTokens, &usage.TotalInputTokens, &usage.TotalOutputTokens)
+	if err != nil {
+		return nil, fmt.Errorf("getting usage totals: %w", err)
+	}
+
+	// By model.
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT model, COUNT(*) FROM request_logs
+		 WHERE created_at >= ? AND created_at < ?
+		 GROUP BY model ORDER BY COUNT(*) DESC`,
+		opts.Start, opts.End)
+	if err != nil {
+		return nil, fmt.Errorf("getting usage by model: %w", err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var model string
+		var count int64
+		if err := rows.Scan(&model, &count); err != nil {
+			return nil, fmt.Errorf("scanning usage by model: %w", err)
+		}
+		usage.RequestsByModel[model] = count
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating usage by model: %w", err)
+	}
+
+	// By provider.
+	rows2, err := s.db.QueryContext(ctx,
+		`SELECT provider, COUNT(*) FROM request_logs
+		 WHERE created_at >= ? AND created_at < ?
+		 GROUP BY provider ORDER BY COUNT(*) DESC`,
+		opts.Start, opts.End)
+	if err != nil {
+		return nil, fmt.Errorf("getting usage by provider: %w", err)
+	}
+	defer rows2.Close()
+	for rows2.Next() {
+		var provider string
+		var count int64
+		if err := rows2.Scan(&provider, &count); err != nil {
+			return nil, fmt.Errorf("scanning usage by provider: %w", err)
+		}
+		usage.RequestsByProvider[provider] = count
+	}
+	if err := rows2.Err(); err != nil {
+		return nil, fmt.Errorf("iterating usage by provider: %w", err)
+	}
+
+	// Timeseries.
+	trunc := sqliteTrunc(opts.Granularity)
+	tsRows, err := s.db.QueryContext(ctx,
+		fmt.Sprintf(`SELECT %s AS bucket, COUNT(*)
+		 FROM request_logs WHERE created_at >= ? AND created_at < ?
+		 GROUP BY bucket ORDER BY bucket`, trunc),
+		opts.Start, opts.End)
+	if err != nil {
+		return nil, fmt.Errorf("getting usage timeseries: %w", err)
+	}
+	defer tsRows.Close()
+	for tsRows.Next() {
+		var ts string
+		var val float64
+		if err := tsRows.Scan(&ts, &val); err != nil {
+			return nil, fmt.Errorf("scanning usage timeseries: %w", err)
+		}
+		usage.Timeseries = append(usage.Timeseries, TimeseriesPoint{
+			Timestamp: ts,
+			Value:     val,
+		})
+	}
+	if err := tsRows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating usage timeseries: %w", err)
+	}
+
+	return usage, nil
+}
+
+func (s *SQLiteStore) GetAnalyticsCost(ctx context.Context, opts AnalyticsOpts) (*AnalyticsCost, error) {
+	cost := &AnalyticsCost{
+		CostByProvider: make(map[string]float64),
+		CostByModel:    make(map[string]float64),
+		CostByTeam:     make(map[string]float64),
+		Timeseries:     []TimeseriesPoint{},
+	}
+
+	// Total cost.
+	err := s.db.QueryRowContext(ctx,
+		`SELECT COALESCE(SUM(cost), 0) FROM request_logs
+		 WHERE created_at >= ? AND created_at < ?`,
+		opts.Start, opts.End).Scan(&cost.TotalCost)
+	if err != nil {
+		return nil, fmt.Errorf("getting total cost: %w", err)
+	}
+
+	// Projected monthly.
+	var minTS, maxTS string
+	err = s.db.QueryRowContext(ctx,
+		`SELECT COALESCE(MIN(created_at), datetime('now')), COALESCE(MAX(created_at), datetime('now'))
+		 FROM request_logs WHERE created_at >= ? AND created_at < ?`,
+		opts.Start, opts.End).Scan(&minTS, &maxTS)
+	if err == nil {
+		tMin, e1 := time.Parse(time.RFC3339, minTS)
+		tMax, e2 := time.Parse(time.RFC3339, maxTS)
+		if e1 != nil {
+			tMin, e1 = time.Parse("2006-01-02 15:04:05", minTS)
+		}
+		if e2 != nil {
+			tMax, e2 = time.Parse("2006-01-02 15:04:05", maxTS)
+		}
+		if e1 == nil && e2 == nil {
+			days := tMax.Sub(tMin).Hours() / 24
+			if days > 0 {
+				cost.ProjectedMonthly = cost.TotalCost / days * 30
+			}
+		}
+	}
+
+	// Cache savings.
+	err = s.db.QueryRowContext(ctx,
+		`SELECT COALESCE(SUM(cost), 0) FROM request_logs
+		 WHERE created_at >= ? AND created_at < ? AND cache_hit = 1`,
+		opts.Start, opts.End).Scan(&cost.CacheSavings)
+	if err != nil {
+		return nil, fmt.Errorf("getting cache savings: %w", err)
+	}
+
+	// By provider.
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT provider, COALESCE(SUM(cost), 0) FROM request_logs
+		 WHERE created_at >= ? AND created_at < ?
+		 GROUP BY provider ORDER BY SUM(cost) DESC`,
+		opts.Start, opts.End)
+	if err != nil {
+		return nil, fmt.Errorf("getting cost by provider: %w", err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var provider string
+		var c float64
+		if err := rows.Scan(&provider, &c); err != nil {
+			return nil, fmt.Errorf("scanning cost by provider: %w", err)
+		}
+		cost.CostByProvider[provider] = c
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating cost by provider: %w", err)
+	}
+
+	// By model.
+	rows2, err := s.db.QueryContext(ctx,
+		`SELECT model, COALESCE(SUM(cost), 0) FROM request_logs
+		 WHERE created_at >= ? AND created_at < ?
+		 GROUP BY model ORDER BY SUM(cost) DESC`,
+		opts.Start, opts.End)
+	if err != nil {
+		return nil, fmt.Errorf("getting cost by model: %w", err)
+	}
+	defer rows2.Close()
+	for rows2.Next() {
+		var model string
+		var c float64
+		if err := rows2.Scan(&model, &c); err != nil {
+			return nil, fmt.Errorf("scanning cost by model: %w", err)
+		}
+		cost.CostByModel[model] = c
+	}
+	if err := rows2.Err(); err != nil {
+		return nil, fmt.Errorf("iterating cost by model: %w", err)
+	}
+
+	// By team.
+	rows3, err := s.db.QueryContext(ctx,
+		`SELECT team_id, COALESCE(SUM(cost), 0) FROM request_logs
+		 WHERE created_at >= ? AND created_at < ? AND team_id != ''
+		 GROUP BY team_id ORDER BY SUM(cost) DESC`,
+		opts.Start, opts.End)
+	if err != nil {
+		return nil, fmt.Errorf("getting cost by team: %w", err)
+	}
+	defer rows3.Close()
+	for rows3.Next() {
+		var team string
+		var c float64
+		if err := rows3.Scan(&team, &c); err != nil {
+			return nil, fmt.Errorf("scanning cost by team: %w", err)
+		}
+		cost.CostByTeam[team] = c
+	}
+	if err := rows3.Err(); err != nil {
+		return nil, fmt.Errorf("iterating cost by team: %w", err)
+	}
+
+	// Timeseries.
+	trunc := sqliteTrunc(opts.Granularity)
+	tsRows, err := s.db.QueryContext(ctx,
+		fmt.Sprintf(`SELECT %s AS bucket, COALESCE(SUM(cost), 0)
+		 FROM request_logs WHERE created_at >= ? AND created_at < ?
+		 GROUP BY bucket ORDER BY bucket`, trunc),
+		opts.Start, opts.End)
+	if err != nil {
+		return nil, fmt.Errorf("getting cost timeseries: %w", err)
+	}
+	defer tsRows.Close()
+	for tsRows.Next() {
+		var ts string
+		var val float64
+		if err := tsRows.Scan(&ts, &val); err != nil {
+			return nil, fmt.Errorf("scanning cost timeseries: %w", err)
+		}
+		cost.Timeseries = append(cost.Timeseries, TimeseriesPoint{
+			Timestamp: ts,
+			Value:     val,
+		})
+	}
+	if err := tsRows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating cost timeseries: %w", err)
+	}
+
+	return cost, nil
+}
+
+func (s *SQLiteStore) GetAnalyticsLatency(ctx context.Context, opts AnalyticsOpts) (*AnalyticsLatency, error) {
+	latency := &AnalyticsLatency{
+		Timeseries: []TimeseriesPoint{},
+	}
+
+	// Average.
+	err := s.db.QueryRowContext(ctx,
+		`SELECT COALESCE(AVG(latency_ms), 0) FROM request_logs
+		 WHERE created_at >= ? AND created_at < ?`,
+		opts.Start, opts.End).Scan(&latency.AvgLatencyMs)
+	if err != nil {
+		return nil, fmt.Errorf("getting avg latency: %w", err)
+	}
+
+	// Count for percentiles.
+	var count int64
+	err = s.db.QueryRowContext(ctx,
+		`SELECT COUNT(*) FROM request_logs WHERE created_at >= ? AND created_at < ?`,
+		opts.Start, opts.End).Scan(&count)
+	if err != nil {
+		return nil, fmt.Errorf("getting latency count: %w", err)
+	}
+
+	if count > 0 {
+		// P50
+		offset50 := int64(float64(count) * 0.5)
+		err = s.db.QueryRowContext(ctx,
+			`SELECT latency_ms FROM request_logs
+			 WHERE created_at >= ? AND created_at < ?
+			 ORDER BY latency_ms LIMIT 1 OFFSET ?`,
+			opts.Start, opts.End, offset50).Scan(&latency.P50LatencyMs)
+		if err != nil && err != sql.ErrNoRows {
+			return nil, fmt.Errorf("getting p50 latency: %w", err)
+		}
+
+		// P95
+		offset95 := int64(float64(count) * 0.95)
+		if offset95 >= count {
+			offset95 = count - 1
+		}
+		err = s.db.QueryRowContext(ctx,
+			`SELECT latency_ms FROM request_logs
+			 WHERE created_at >= ? AND created_at < ?
+			 ORDER BY latency_ms LIMIT 1 OFFSET ?`,
+			opts.Start, opts.End, offset95).Scan(&latency.P95LatencyMs)
+		if err != nil && err != sql.ErrNoRows {
+			return nil, fmt.Errorf("getting p95 latency: %w", err)
+		}
+
+		// P99
+		offset99 := int64(float64(count) * 0.99)
+		if offset99 >= count {
+			offset99 = count - 1
+		}
+		err = s.db.QueryRowContext(ctx,
+			`SELECT latency_ms FROM request_logs
+			 WHERE created_at >= ? AND created_at < ?
+			 ORDER BY latency_ms LIMIT 1 OFFSET ?`,
+			opts.Start, opts.End, offset99).Scan(&latency.P99LatencyMs)
+		if err != nil && err != sql.ErrNoRows {
+			return nil, fmt.Errorf("getting p99 latency: %w", err)
+		}
+	}
+
+	// Timeseries.
+	trunc := sqliteTrunc(opts.Granularity)
+	tsRows, err := s.db.QueryContext(ctx,
+		fmt.Sprintf(`SELECT %s AS bucket, COALESCE(AVG(latency_ms), 0)
+		 FROM request_logs WHERE created_at >= ? AND created_at < ?
+		 GROUP BY bucket ORDER BY bucket`, trunc),
+		opts.Start, opts.End)
+	if err != nil {
+		return nil, fmt.Errorf("getting latency timeseries: %w", err)
+	}
+	defer tsRows.Close()
+	for tsRows.Next() {
+		var ts string
+		var val float64
+		if err := tsRows.Scan(&ts, &val); err != nil {
+			return nil, fmt.Errorf("scanning latency timeseries: %w", err)
+		}
+		latency.Timeseries = append(latency.Timeseries, TimeseriesPoint{
+			Timestamp: ts,
+			Value:     val,
+		})
+	}
+	if err := tsRows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating latency timeseries: %w", err)
+	}
+
+	return latency, nil
+}
+
+func (s *SQLiteStore) GetAnalyticsCache(ctx context.Context, opts AnalyticsOpts) (*AnalyticsCache, error) {
+	cache := &AnalyticsCache{
+		Timeseries: []TimeseriesPoint{},
+	}
+
+	var totalHits, totalMisses int64
+	err := s.db.QueryRowContext(ctx,
+		`SELECT
+		    COALESCE(SUM(CASE WHEN cache_hit = 1 THEN 1 ELSE 0 END), 0),
+		    COALESCE(SUM(CASE WHEN cache_hit = 0 THEN 1 ELSE 0 END), 0)
+		 FROM request_logs WHERE created_at >= ? AND created_at < ?`,
+		opts.Start, opts.End).Scan(&totalHits, &totalMisses)
+	if err != nil {
+		return nil, fmt.Errorf("getting cache stats: %w", err)
+	}
+	cache.TotalHits = totalHits
+	cache.TotalMisses = totalMisses
+	total := totalHits + totalMisses
+	if total > 0 {
+		cache.HitRate = float64(totalHits) / float64(total)
+		cache.MissRate = float64(totalMisses) / float64(total)
+	}
+
+	// Savings.
+	err = s.db.QueryRowContext(ctx,
+		`SELECT COALESCE(SUM(cost), 0) FROM request_logs
+		 WHERE created_at >= ? AND created_at < ? AND cache_hit = 1`,
+		opts.Start, opts.End).Scan(&cache.Savings)
+	if err != nil {
+		return nil, fmt.Errorf("getting cache savings: %w", err)
+	}
+
+	// Timeseries (hit rate per bucket).
+	trunc := sqliteTrunc(opts.Granularity)
+	tsRows, err := s.db.QueryContext(ctx,
+		fmt.Sprintf(`SELECT %s AS bucket,
+		    CASE WHEN COUNT(*) > 0 THEN
+		        CAST(SUM(CASE WHEN cache_hit = 1 THEN 1 ELSE 0 END) AS REAL) / COUNT(*)
+		    ELSE 0 END
+		 FROM request_logs WHERE created_at >= ? AND created_at < ?
+		 GROUP BY bucket ORDER BY bucket`, trunc),
+		opts.Start, opts.End)
+	if err != nil {
+		return nil, fmt.Errorf("getting cache timeseries: %w", err)
+	}
+	defer tsRows.Close()
+	for tsRows.Next() {
+		var ts string
+		var val float64
+		if err := tsRows.Scan(&ts, &val); err != nil {
+			return nil, fmt.Errorf("scanning cache timeseries: %w", err)
+		}
+		cache.Timeseries = append(cache.Timeseries, TimeseriesPoint{
+			Timestamp: ts,
+			Value:     val,
+		})
+	}
+	if err := tsRows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating cache timeseries: %w", err)
+	}
+
+	return cache, nil
+}
+
+// --- Budget Configs ---
+
+func generateBudgetID() string {
+	b := make([]byte, 12)
+	rand.Read(b) //nolint:errcheck
+	return "bgt_" + hex.EncodeToString(b)
+}
+
+func (s *SQLiteStore) ListBudgetConfigs(ctx context.Context) ([]*BudgetConfig, error) {
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT bc.id, bc.entity_type, bc.entity_id, bc."limit", bc.period,
+		        bc.alert_threshold, bc.created_at, bc.updated_at,
+		        COALESCE(bt.spend, 0)
+		 FROM budget_configs bc
+		 LEFT JOIN budget_tracking bt ON bt.entity_type = bc.entity_type AND bt.entity_id = bc.entity_id
+		     AND bt.period = strftime('%Y-%m', 'now')
+		 ORDER BY bc.created_at DESC`)
+	if err != nil {
+		return nil, fmt.Errorf("listing budget configs: %w", err)
+	}
+	defer rows.Close()
+
+	var configs []*BudgetConfig
+	for rows.Next() {
+		cfg := &BudgetConfig{}
+		if err := rows.Scan(&cfg.ID, &cfg.EntityType, &cfg.EntityID, &cfg.Limit, &cfg.Period,
+			&cfg.AlertThreshold, &cfg.CreatedAt, &cfg.UpdatedAt, &cfg.CurrentUsage); err != nil {
+			return nil, fmt.Errorf("scanning budget config: %w", err)
+		}
+		configs = append(configs, cfg)
+	}
+	return configs, rows.Err()
+}
+
+func (s *SQLiteStore) CreateBudgetConfig(ctx context.Context, cfg *BudgetConfig) error {
+	now := time.Now().UTC()
+	cfg.CreatedAt = now
+	cfg.UpdatedAt = now
+	if cfg.ID == "" {
+		cfg.ID = generateBudgetID()
+	}
+	if cfg.Period == "" {
+		cfg.Period = "monthly"
+	}
+	if cfg.AlertThreshold == 0 {
+		cfg.AlertThreshold = 0.8
+	}
+
+	_, err := s.db.ExecContext(ctx,
+		`INSERT INTO budget_configs (id, entity_type, entity_id, "limit", period, alert_threshold, created_at, updated_at)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+		cfg.ID, cfg.EntityType, cfg.EntityID, cfg.Limit, cfg.Period,
+		cfg.AlertThreshold, cfg.CreatedAt, cfg.UpdatedAt)
+	if err != nil {
+		return fmt.Errorf("creating budget config: %w", err)
+	}
+	return nil
+}
+
+func (s *SQLiteStore) UpdateBudgetConfig(ctx context.Context, cfg *BudgetConfig) error {
+	cfg.UpdatedAt = time.Now().UTC()
+	_, err := s.db.ExecContext(ctx,
+		`UPDATE budget_configs SET "limit" = ?, period = ?, alert_threshold = ?, updated_at = ?
+		 WHERE id = ?`,
+		cfg.Limit, cfg.Period, cfg.AlertThreshold, cfg.UpdatedAt, cfg.ID)
+	if err != nil {
+		return fmt.Errorf("updating budget config: %w", err)
 	}
 	return nil
 }
