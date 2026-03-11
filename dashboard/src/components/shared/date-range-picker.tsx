@@ -39,18 +39,18 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
 
   return (
     <div className={cn('flex items-center gap-1', className)}>
-      <Calendar className="h-3.5 w-3.5 text-zinc-600 mr-1.5" />
-      <div className="inline-flex items-center gap-0.5 rounded-lg border border-white/[6%] bg-white/[2%] p-0.5">
+      <Calendar className="h-3.5 w-3.5 text-zinc-600 mr-1" />
+      <div className="inline-flex items-center gap-0.5 rounded-lg border border-zinc-800 bg-zinc-900/80 p-0.5">
         {presets.map((preset) => (
           <button
             type="button"
             key={preset.value}
             onClick={() => handlePresetClick(preset.value)}
             className={cn(
-              'px-2.5 py-1 text-[11px] font-medium rounded-md transition-all duration-200 cursor-pointer',
+              'px-2.5 py-1 text-[11px] font-medium rounded-md transition-colors duration-150 cursor-pointer',
               value === preset.value || (preset.value === 'custom' && value.includes('|'))
-                ? 'bg-teal-500/10 text-teal-300 shadow-sm'
-                : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/[4%]',
+                ? 'bg-teal-500/15 text-teal-300'
+                : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/60',
             )}
           >
             {preset.label}
@@ -63,19 +63,19 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
             type="datetime-local"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="h-7 rounded-lg border border-white/[6%] bg-[#0f0f0f] px-2 text-xs text-zinc-100 focus:outline-none focus:ring-2 focus:ring-teal-500/40"
+            className="h-7 rounded-lg border border-zinc-800 bg-zinc-900 px-2 text-xs text-zinc-100 focus:outline-none focus:ring-2 focus:ring-teal-500/40"
           />
           <span className="text-zinc-600 text-xs">to</span>
           <input
             type="datetime-local"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="h-7 rounded-lg border border-white/[6%] bg-[#0f0f0f] px-2 text-xs text-zinc-100 focus:outline-none focus:ring-2 focus:ring-teal-500/40"
+            className="h-7 rounded-lg border border-zinc-800 bg-zinc-900 px-2 text-xs text-zinc-100 focus:outline-none focus:ring-2 focus:ring-teal-500/40"
           />
           <button
             type="button"
             onClick={handleCustomApply}
-            className="px-2.5 py-1 text-xs font-medium rounded-lg bg-teal-500 text-white hover:bg-teal-400 transition-all duration-200 cursor-pointer"
+            className="px-2.5 py-1 text-xs font-medium rounded-lg bg-teal-600 text-white hover:bg-teal-500 transition-colors duration-150 cursor-pointer"
           >
             Apply
           </button>

@@ -5,25 +5,25 @@ interface SkeletonProps {
 }
 
 export function Skeleton({ className }: SkeletonProps) {
-  return <div className={cn('rounded-md bg-white/[4%] animate-shimmer', className)} />
+  return <div className={cn('rounded-md bg-zinc-800/60 animate-shimmer', className)} />
 }
 
 export function SkeletonCard() {
   return (
-    <div className="rounded-xl border border-white/[6%] bg-[#0f0f0f] p-6">
-      <Skeleton className="h-4 w-24 mb-3" />
-      <Skeleton className="h-8 w-32 mb-2" />
-      <Skeleton className="h-3 w-20" />
+    <div className="rounded-xl border border-zinc-800 bg-zinc-900/80 p-5">
+      <Skeleton className="h-3 w-20 mb-3" />
+      <Skeleton className="h-7 w-28 mb-2" />
+      <Skeleton className="h-3 w-16" />
     </div>
   )
 }
 
 export function SkeletonTable({ rows = 5 }: { rows?: number }) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <Skeleton className="h-10 w-full" />
       {Array.from({ length: rows }).map((_, i) => (
-        <Skeleton key={`skeleton-row-${i}`} className="h-12 w-full" />
+        <Skeleton key={`skeleton-row-${i}`} className="h-11 w-full" />
       ))}
     </div>
   )
