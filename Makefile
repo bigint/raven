@@ -39,7 +39,7 @@ dev:
 		RAVEN_STORE_DRIVER=postgres \
 		DATABASE_URL='postgres://raven:raven@localhost:5432/raven?sslmode=disable' \
 		REDIS_URL='redis://localhost:6379' \
-		go run . serve) & \
+		go run . serve -c ../raven.yaml) & \
 	(cd dashboard && pnpm dev) & \
 	wait
 
@@ -48,7 +48,7 @@ dev-gateway:
 		RAVEN_STORE_DRIVER=postgres \
 		DATABASE_URL='postgres://raven:raven@localhost:5432/raven?sslmode=disable' \
 		REDIS_URL='redis://localhost:6379' \
-		go run . serve
+		go run . serve -c ../raven.yaml
 
 dev-dashboard:
 	cd dashboard && pnpm dev
