@@ -2,8 +2,8 @@ import { DataTable } from '@/components/shared/data-table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import type { BudgetConfig } from '@/lib/types'
 import { apiClient } from '@/lib/api'
+import type { BudgetConfig } from '@/lib/types'
 import { formatCurrency, formatPercent } from '@/lib/utils'
 import { useQuery } from '@tanstack/react-query'
 import { Wallet } from 'lucide-react'
@@ -49,9 +49,7 @@ export default function BudgetsPage() {
     {
       key: 'period',
       header: 'Period',
-      render: (item: BudgetConfig) => (
-        <span className="text-sm capitalize">{item.period}</span>
-      ),
+      render: (item: BudgetConfig) => <span className="text-sm capitalize">{item.period}</span>,
     },
     {
       key: 'usage',

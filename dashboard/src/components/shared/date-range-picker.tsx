@@ -111,9 +111,7 @@ export function getDateRange(value: string): { start: string; end: string } {
   return { start: start.toISOString(), end }
 }
 
-export function getGranularity(
-  value: string,
-): 'minute' | 'hour' | 'day' | 'week' | 'month' {
+export function getGranularity(value: string): 'minute' | 'hour' | 'day' | 'week' | 'month' {
   switch (value) {
     case '1h':
       return 'minute'

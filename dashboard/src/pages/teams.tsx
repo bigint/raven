@@ -12,8 +12,8 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import type { Org, User } from '@/lib/types'
 import { apiClient } from '@/lib/api'
+import type { Org, User } from '@/lib/types'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { Plus } from 'lucide-react'
@@ -97,9 +97,7 @@ export default function TeamsPage() {
       header: 'Role',
       render: (item: User) => (
         <Badge
-          variant={
-            item.role === 'admin' ? 'info' : item.role === 'member' ? 'default' : 'warning'
-          }
+          variant={item.role === 'admin' ? 'info' : item.role === 'member' ? 'default' : 'warning'}
         >
           {item.role}
         </Badge>
@@ -108,9 +106,7 @@ export default function TeamsPage() {
     {
       key: 'teams',
       header: 'Teams',
-      render: (item: User) => (
-        <span className="text-sm">{item.team_ids.length}</span>
-      ),
+      render: (item: User) => <span className="text-sm">{item.team_ids.length}</span>,
     },
     {
       key: 'created_at',

@@ -75,9 +75,13 @@ export class Raven {
 
   chat: {
     completions: {
-      create(params: ChatCompletionRequest & { stream: true }): Promise<AsyncIterable<ChatCompletionChunk>>
+      create(
+        params: ChatCompletionRequest & { stream: true },
+      ): Promise<AsyncIterable<ChatCompletionChunk>>
       create(params: ChatCompletionRequest & { stream?: false }): Promise<ChatCompletionResponse>
-      create(params: ChatCompletionRequest): Promise<ChatCompletionResponse | AsyncIterable<ChatCompletionChunk>>
+      create(
+        params: ChatCompletionRequest,
+      ): Promise<ChatCompletionResponse | AsyncIterable<ChatCompletionChunk>>
     }
   }
 
@@ -150,11 +154,7 @@ export class Raven {
     this.responseInterceptors.push(interceptor)
   }
 
-  private async request<T>(
-    path: string,
-    options: RequestInit = {},
-    retryCount = 0,
-  ): Promise<T> {
+  private async request<T>(path: string, options: RequestInit = {}, retryCount = 0): Promise<T> {
     const url = `${this.baseUrl}${path}`
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), this.timeout)
@@ -224,11 +224,7 @@ export class Raven {
       }
 
       if (controller.signal.aborted) {
-        throw new RavenError(
-          `Request timed out after ${this.timeout}ms`,
-          0,
-          'timeout',
-        )
+        throw new RavenError(`Request timed out after ${this.timeout}ms`, 0, 'timeout')
       }
 
       // Retry on network errors
@@ -317,11 +313,7 @@ export class Raven {
       }
 
       if (controller.signal.aborted) {
-        throw new RavenError(
-          `Request timed out after ${this.timeout}ms`,
-          0,
-          'timeout',
-        )
+        throw new RavenError(`Request timed out after ${this.timeout}ms`, 0, 'timeout')
       }
 
       if (retryCount < this.maxRetries) {
@@ -364,9 +356,7 @@ export class Raven {
     return new Promise((resolve) => setTimeout(resolve, ms))
   }
 
-  private async createCompletion(
-    params: ChatCompletionRequest,
-  ): Promise<ChatCompletionResponse> {
+  private async createCompletion(params: ChatCompletionRequest): Promise<ChatCompletionResponse> {
     return this.request<ChatCompletionResponse>('/v1/chat/completions', {
       method: 'POST',
       body: JSON.stringify({ ...params, stream: false }),

@@ -10,8 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { DropdownItem, DropdownMenu, DropdownSeparator } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
-import { DropdownMenu, DropdownItem, DropdownSeparator } from '@/components/ui/dropdown-menu'
 import { useCreateKey, useDeleteKey, useKeys, useRotateKey } from '@/hooks/use-keys'
 import type { VirtualKey } from '@/lib/types'
 import { format } from 'date-fns'
@@ -69,9 +69,7 @@ export default function KeysPage() {
       key: 'budget_limit',
       header: 'Budget',
       render: (item: VirtualKey) => (
-        <span className="text-sm">
-          {item.budget_limit ? `$${item.budget_limit}` : 'Unlimited'}
-        </span>
+        <span className="text-sm">{item.budget_limit ? `$${item.budget_limit}` : 'Unlimited'}</span>
       ),
     },
     {
@@ -88,9 +86,7 @@ export default function KeysPage() {
       header: 'Last Used',
       render: (item: VirtualKey) => (
         <span className="text-xs text-text-dark-secondary">
-          {item.last_used_at
-            ? format(new Date(item.last_used_at), 'MMM d, HH:mm')
-            : 'Never'}
+          {item.last_used_at ? format(new Date(item.last_used_at), 'MMM d, HH:mm') : 'Never'}
         </span>
       ),
     },
@@ -168,9 +164,7 @@ export default function KeysPage() {
         <DialogClose onClose={() => setCreateOpen(false)} />
         <DialogHeader>
           <DialogTitle>Create Virtual Key</DialogTitle>
-          <DialogDescription>
-            Create a new API key for accessing the gateway.
-          </DialogDescription>
+          <DialogDescription>Create a new API key for accessing the gateway.</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <Input

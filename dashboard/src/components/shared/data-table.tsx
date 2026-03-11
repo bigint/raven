@@ -1,8 +1,15 @@
+import { EmptyState } from '@/components/shared/empty-state'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { SkeletonTable } from '@/components/ui/skeleton'
-import { EmptyState } from '@/components/shared/empty-state'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import { type ReactNode, useState } from 'react'
 
@@ -129,8 +136,8 @@ export function DataTable<T>({
           {totalPages > 1 && onPageChange && (
             <div className="flex items-center justify-between">
               <p className="text-xs text-text-dark-secondary">
-                Showing {(page - 1) * perPage + 1} to {Math.min(page * perPage, total)} of{' '}
-                {total} results
+                Showing {(page - 1) * perPage + 1} to {Math.min(page * perPage, total)} of {total}{' '}
+                results
               </p>
               <div className="flex items-center gap-1">
                 <Button

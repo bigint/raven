@@ -3,9 +3,9 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogClose, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select } from '@/components/ui/select'
-import { formatCurrency, formatLatency } from '@/lib/utils'
-import type { RequestLog } from '@/lib/types'
 import { apiClient } from '@/lib/api'
+import type { RequestLog } from '@/lib/types'
+import { formatCurrency, formatLatency } from '@/lib/utils'
 import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { useState } from 'react'
@@ -57,26 +57,20 @@ export default function RequestsPage() {
       key: 'provider',
       header: 'Provider',
       sortable: true,
-      render: (item: RequestLog) => (
-        <span className="text-sm font-medium">{item.provider}</span>
-      ),
+      render: (item: RequestLog) => <span className="text-sm font-medium">{item.provider}</span>,
     },
     {
       key: 'model',
       header: 'Model',
       sortable: true,
-      render: (item: RequestLog) => (
-        <span className="text-sm text-text-dark">{item.model}</span>
-      ),
+      render: (item: RequestLog) => <span className="text-sm text-text-dark">{item.model}</span>,
     },
     {
       key: 'status_code',
       header: 'Status',
       sortable: true,
       render: (item: RequestLog) => (
-        <Badge variant={item.status_code < 400 ? 'success' : 'error'}>
-          {item.status_code}
-        </Badge>
+        <Badge variant={item.status_code < 400 ? 'success' : 'error'}>{item.status_code}</Badge>
       ),
     },
     {
@@ -92,16 +86,16 @@ export default function RequestsPage() {
       header: 'Tokens',
       sortable: true,
       render: (item: RequestLog) => (
-        <span className="text-sm text-text-dark-secondary">{item.total_tokens.toLocaleString()}</span>
+        <span className="text-sm text-text-dark-secondary">
+          {item.total_tokens.toLocaleString()}
+        </span>
       ),
     },
     {
       key: 'cost',
       header: 'Cost',
       sortable: true,
-      render: (item: RequestLog) => (
-        <span className="text-sm">{formatCurrency(item.cost)}</span>
-      ),
+      render: (item: RequestLog) => <span className="text-sm">{formatCurrency(item.cost)}</span>,
     },
     {
       key: 'cache_hit',
@@ -196,10 +190,7 @@ export default function RequestsPage() {
               </div>
               <div>
                 <p className="text-text-dark-secondary text-xs">Status</p>
-                <Badge
-                  variant={selected.status_code < 400 ? 'success' : 'error'}
-                  className="mt-1"
-                >
+                <Badge variant={selected.status_code < 400 ? 'success' : 'error'} className="mt-1">
                   {selected.status_code}
                 </Badge>
               </div>

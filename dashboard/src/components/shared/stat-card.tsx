@@ -1,7 +1,7 @@
-import { Card } from '@/components/ui/card'
 import { Sparkline } from '@/components/charts/sparkline'
-import { cn } from '@/lib/utils'
+import { Card } from '@/components/ui/card'
 import type { TimeseriesPoint } from '@/lib/types'
+import { cn } from '@/lib/utils'
 import { TrendingDown, TrendingUp } from 'lucide-react'
 import type { ReactNode } from 'react'
 
@@ -56,9 +56,7 @@ export function StatCard({
               {trendUp ? '+' : ''}
               {trend.toFixed(1)}%
             </span>
-            {trendLabel && (
-              <span className="text-text-dark-secondary ml-1">{trendLabel}</span>
-            )}
+            {trendLabel && <span className="text-text-dark-secondary ml-1">{trendLabel}</span>}
           </div>
         )}
         {sparklineData && sparklineData.length > 0 && (

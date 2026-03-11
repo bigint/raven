@@ -1,5 +1,9 @@
 import { AreaChart } from '@/components/charts/area-chart'
-import { DateRangePicker, getDateRange, getGranularity } from '@/components/shared/date-range-picker'
+import {
+  DateRangePicker,
+  getDateRange,
+  getGranularity,
+} from '@/components/shared/date-range-picker'
 import { StatCard } from '@/components/shared/stat-card'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SkeletonCard } from '@/components/ui/skeleton'

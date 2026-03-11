@@ -78,7 +78,5 @@ export function DialogClose({ onClose, className }: { onClose: () => void; class
 }
 
 export function DialogFooter({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <div className={cn('mt-6 flex items-center justify-end gap-3', className)}>{children}</div>
-  )
+  return <div className={cn('mt-6 flex items-center justify-end gap-3', className)}>{children}</div>
 }

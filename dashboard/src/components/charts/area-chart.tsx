@@ -2,8 +2,8 @@ import type { TimeseriesPoint } from '@/lib/types'
 import { format } from 'date-fns'
 import {
   Area,
-  AreaChart as RechartsAreaChart,
   CartesianGrid,
+  AreaChart as RechartsAreaChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,

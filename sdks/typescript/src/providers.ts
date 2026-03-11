@@ -12,11 +12,7 @@ const PROVIDER_PREFIXES: Record<string, string> = {
 }
 
 const PROVIDER_MODELS: Record<string, string[]> = {
-  anthropic: [
-    'claude-sonnet-4-20250514',
-    'claude-3-5-haiku-20241022',
-    'claude-3-opus-20240229',
-  ],
+  anthropic: ['claude-sonnet-4-20250514', 'claude-3-5-haiku-20241022', 'claude-3-opus-20240229'],
   openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'o1', 'o1-mini', 'o3-mini'],
   google: ['gemini-2.0-flash', 'gemini-2.0-pro', 'gemini-1.5-flash', 'gemini-1.5-pro'],
   mistral: ['mistral-large-latest', 'mistral-medium-latest', 'mistral-small-latest'],

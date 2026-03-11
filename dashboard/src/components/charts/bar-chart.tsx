@@ -1,7 +1,7 @@
 import {
   Bar,
-  BarChart as RechartsBarChart,
   CartesianGrid,
+  BarChart as RechartsBarChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -31,7 +31,11 @@ export function BarChart({
   if (layout === 'horizontal') {
     return (
       <ResponsiveContainer width="100%" height={height}>
-        <RechartsBarChart data={data} layout="horizontal" margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
+        <RechartsBarChart
+          data={data}
+          layout="horizontal"
+          margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
+        >
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
           <XAxis
             dataKey="name"
@@ -66,7 +70,11 @@ export function BarChart({
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <RechartsBarChart data={data} layout="vertical" margin={{ top: 5, right: 20, bottom: 5, left: 5 }}>
+      <RechartsBarChart
+        data={data}
+        layout="vertical"
+        margin={{ top: 5, right: 20, bottom: 5, left: 5 }}
+      >
         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" horizontal={false} />
         <XAxis
           type="number"

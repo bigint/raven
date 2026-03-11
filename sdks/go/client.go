@@ -250,7 +250,8 @@ func (c *Client) parseError(resp *http.Response) error {
 
 // backoff sleeps with exponential backoff, optionally respecting Retry-After.
 func backoff(ctx context.Context, attempt int, resp *http.Response) {
-	delay := time.Duration(math.Min(float64(1<<uint(attempt))*500, 8000)) * time.Millisecond
+	shift := uint(1) << uint(attempt)
+	delay := time.Duration(math.Min(float64(shift)*500, 8000)) * time.Millisecond
 
 	if resp != nil {
 		if ra := resp.Header.Get("Retry-After"); ra != "" {

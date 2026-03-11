@@ -20,10 +20,7 @@ interface TabsListProps {
 export function TabsList({ children, className }: TabsListProps) {
   return (
     <div
-      className={cn(
-        'inline-flex items-center gap-1 rounded-lg bg-bg-dark-tertiary p-1',
-        className,
-      )}
+      className={cn('inline-flex items-center gap-1 rounded-lg bg-bg-dark-tertiary p-1', className)}
     >
       {children}
     </div>

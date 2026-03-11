@@ -165,9 +165,7 @@ export class ApiClient {
   }
 
   async getLatency(opts: AnalyticsOpts): Promise<LatencyData> {
-    return this.request(
-      `/admin/v1/analytics/latency${buildQuery(opts)}`,
-    )
+    return this.request(`/admin/v1/analytics/latency${buildQuery(opts)}`)
   }
 
   async getCacheStats(opts: AnalyticsOpts): Promise<CacheData> {

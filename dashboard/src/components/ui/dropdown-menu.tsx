@@ -59,9 +59,7 @@ export function DropdownItem({
     <button
       className={cn(
         'w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors',
-        danger
-          ? 'text-error hover:bg-error/10'
-          : 'text-text-dark hover:bg-white/10',
+        danger ? 'text-error hover:bg-error/10' : 'text-text-dark hover:bg-white/10',
         disabled && 'opacity-50 pointer-events-none',
         className,
       )}

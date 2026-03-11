@@ -86,10 +86,7 @@ export default function SettingsPage() {
   )
 }
 
-function SettingRow({
-  label,
-  value,
-}: { label: string; value: React.ReactNode }) {
+function SettingRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between">
       <span className="text-sm text-text-dark-secondary">{label}</span>

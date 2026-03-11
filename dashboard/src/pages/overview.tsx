@@ -1,5 +1,9 @@
 import { BarChart } from '@/components/charts/bar-chart'
-import { DateRangePicker, getDateRange, getGranularity } from '@/components/shared/date-range-picker'
+import {
+  DateRangePicker,
+  getDateRange,
+  getGranularity,
+} from '@/components/shared/date-range-picker'
 import { StatCard } from '@/components/shared/stat-card'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -38,9 +42,7 @@ export default function OverviewPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-text-dark">Overview</h1>
-          <p className="text-sm text-text-dark-secondary mt-1">
-            Gateway performance at a glance
-          </p>
+          <p className="text-sm text-text-dark-secondary mt-1">Gateway performance at a glance</p>
         </div>
         <DateRangePicker value={range} onChange={setRange} />
       </div>

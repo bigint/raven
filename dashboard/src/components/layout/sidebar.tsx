@@ -41,6 +41,7 @@ export function Sidebar() {
     <>
       {/* Mobile toggle */}
       <button
+        type="button"
         className="fixed top-3 left-3 z-50 rounded-lg bg-bg-dark-secondary border border-border-dark p-2 lg:hidden"
         onClick={() => setMobileOpen(!mobileOpen)}
       >
@@ -52,6 +53,11 @@ export function Sidebar() {
         <div
           className="fixed inset-0 z-30 bg-black/50 lg:hidden"
           onClick={() => setMobileOpen(false)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setMobileOpen(false)
+          }}
+          role="button"
+          tabIndex={0}
         />
       )}
 

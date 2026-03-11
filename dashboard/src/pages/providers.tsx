@@ -1,12 +1,18 @@
+import { EmptyState } from '@/components/shared/empty-state'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { SkeletonCard } from '@/components/ui/skeleton'
-import { EmptyState } from '@/components/shared/empty-state'
-import { useProviders, useProviderHealth } from '@/hooks/use-providers'
+import { useProviderHealth, useProviders } from '@/hooks/use-providers'
 import { formatLatency, formatPercent } from '@/lib/utils'
 import { Activity, Server, Wifi } from 'lucide-react'
 
-function ProviderCard({ providerId, name, displayName, status, models }: {
+function ProviderCard({
+  providerId,
+  name,
+  displayName,
+  status,
+  models,
+}: {
   providerId: string
   name: string
   displayName: string
@@ -29,9 +35,7 @@ function ProviderCard({ providerId, name, displayName, status, models }: {
             </div>
           </div>
           <Badge
-            variant={
-              status === 'healthy' ? 'success' : status === 'degraded' ? 'warning' : 'error'
-            }
+            variant={status === 'healthy' ? 'success' : status === 'degraded' ? 'warning' : 'error'}
           >
             {status}
           </Badge>
@@ -52,9 +56,7 @@ function ProviderCard({ providerId, name, displayName, status, models }: {
           </div>
           <div>
             <p className="text-xs text-text-dark-secondary">Connections</p>
-            <p className="text-sm font-medium mt-1">
-              {health?.active_connections ?? '--'}
-            </p>
+            <p className="text-sm font-medium mt-1">{health?.active_connections ?? '--'}</p>
           </div>
         </div>
 
@@ -66,9 +68,7 @@ function ProviderCard({ providerId, name, displayName, status, models }: {
                 {model}
               </Badge>
             ))}
-            {models.length > 5 && (
-              <Badge variant="default">+{models.length - 5} more</Badge>
-            )}
+            {models.length > 5 && <Badge variant="default">+{models.length - 5} more</Badge>}
           </div>
         </div>
       </CardContent>
@@ -84,7 +84,9 @@ export default function ProvidersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-text-dark">Providers</h1>
-          <p className="text-sm text-text-dark-secondary mt-1">Monitor provider health and status</p>
+          <p className="text-sm text-text-dark-secondary mt-1">
+            Monitor provider health and status
+          </p>
         </div>
         <div className="flex items-center gap-2 text-xs text-text-dark-secondary">
           <Activity className="h-3.5 w-3.5" />

@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api'
 import type { AnalyticsOpts } from '@/lib/types'
+import { useQuery } from '@tanstack/react-query'
 
 export function useUsage(opts: AnalyticsOpts) {
   return useQuery({
