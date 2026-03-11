@@ -90,6 +90,9 @@ func (a *Router) Routes() chi.Router {
 	// Health.
 	r.Get("/health", a.healthCheck)
 
+	// Settings.
+	r.Get("/settings", a.getSettings)
+
 	return r
 }
 
@@ -703,4 +706,19 @@ func (a *Router) healthCheck(w http.ResponseWriter, r *http.Request) {
 	_ = r
 	healthData := a.health.GetAllHealth()
 	writeJSON(w, http.StatusOK, types.AdminResponse{Data: healthData})
+}
+
+// --- Settings ---
+
+func (a *Router) getSettings(w http.ResponseWriter, r *http.Request) {
+	_ = r
+	providerNames := a.registry.ListProviders()
+	settings := map[string]any{
+		"version":              "0.1.0",
+		"providers":            providerNames,
+		"cache_enabled":        true,
+		"guardrails_enabled":   false,
+		"rate_limiting_enabled": true,
+	}
+	writeJSON(w, http.StatusOK, settings)
 }
