@@ -1,0 +1,8 @@
+node_modules
+dashboard/node_modules
+dashboard/dist
+website
+sdks
+.git
+*.md
+!gateway/**/*.md
