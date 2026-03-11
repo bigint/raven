@@ -23,7 +23,7 @@ interface BarChartProps {
 
 export function BarChart({
   data,
-  color = '#14b8a6',
+  color = 'rgba(255,255,255,0.15)',
   height = 300,
   valueFormatter = (v) => v.toLocaleString(),
   layout = 'vertical',
@@ -39,31 +39,31 @@ export function BarChart({
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
           <XAxis
             dataKey="name"
-            stroke="rgba(255,255,255,0.1)"
-            tick={{ fill: '#71717a', fontSize: 11 }}
+            stroke="rgba(255,255,255,0.04)"
+            tick={{ fill: '#525252', fontSize: 11 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             tickFormatter={valueFormatter}
-            stroke="rgba(255,255,255,0.1)"
-            tick={{ fill: '#71717a', fontSize: 11 }}
+            stroke="rgba(255,255,255,0.04)"
+            tick={{ fill: '#525252', fontSize: 11 }}
             axisLine={false}
             tickLine={false}
             width={60}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#18181b',
-              border: '1px solid #27272a',
-              borderRadius: '10px',
+              backgroundColor: '#141414',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: '8px',
               fontSize: '12px',
-              color: '#e4e4e7',
+              color: '#fafafa',
               boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
             }}
             formatter={(value: number) => [valueFormatter(value), 'Value']}
           />
-          <Bar dataKey="value" fill={color} radius={[4, 4, 0, 0]} fillOpacity={0.85} />
+          <Bar dataKey="value" fill={color} radius={[4, 4, 0, 0]} fillOpacity={1} />
         </RechartsBarChart>
       </ResponsiveContainer>
     )
@@ -80,32 +80,32 @@ export function BarChart({
         <XAxis
           type="number"
           tickFormatter={valueFormatter}
-          stroke="rgba(255,255,255,0.1)"
-          tick={{ fill: '#71717a', fontSize: 11 }}
+          stroke="rgba(255,255,255,0.04)"
+          tick={{ fill: '#525252', fontSize: 11 }}
           axisLine={false}
           tickLine={false}
         />
         <YAxis
           type="category"
           dataKey="name"
-          stroke="rgba(255,255,255,0.1)"
-          tick={{ fill: '#71717a', fontSize: 11 }}
+          stroke="rgba(255,255,255,0.04)"
+          tick={{ fill: '#525252', fontSize: 11 }}
           axisLine={false}
           tickLine={false}
           width={120}
         />
         <Tooltip
           contentStyle={{
-            backgroundColor: '#18181b',
-            border: '1px solid #27272a',
-            borderRadius: '10px',
+            backgroundColor: '#141414',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '8px',
             fontSize: '12px',
-            color: '#e4e4e7',
+            color: '#fafafa',
             boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
           }}
           formatter={(value: number) => [valueFormatter(value), 'Requests']}
         />
-        <Bar dataKey="value" fill={color} radius={[0, 4, 4, 0]} barSize={20} fillOpacity={0.85} />
+        <Bar dataKey="value" fill={color} radius={[0, 4, 4, 0]} barSize={20} fillOpacity={1} />
       </RechartsBarChart>
     </ResponsiveContainer>
   )

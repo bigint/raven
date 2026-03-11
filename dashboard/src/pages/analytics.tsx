@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useCacheStats, useCost, useUsage } from '@/hooks/use-analytics'
 import { formatCurrency, formatNumber } from '@/lib/utils'
-import { Activity, DollarSign, TrendingUp, Zap } from 'lucide-react'
+import { DollarSign } from 'lucide-react'
 import { useState } from 'react'
 
 export default function AnalyticsPage() {
@@ -43,8 +43,7 @@ export default function AnalyticsPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Analytics</h1>
-          <p className="text-sm text-zinc-500 mt-1">Cost and usage analytics</p>
+          <h1 className="text-base font-semibold text-[#fafafa]">Analytics</h1>
         </div>
         <DateRangePicker value={range} onChange={setRange} />
       </div>
@@ -54,22 +53,18 @@ export default function AnalyticsPage() {
         <StatCard
           label="Total Cost"
           value={formatCurrency(cost?.total_cost ?? 0)}
-          icon={<DollarSign className="h-5 w-5" />}
         />
         <StatCard
           label="Projected Monthly"
           value={formatCurrency(cost?.projected_monthly ?? 0)}
-          icon={<TrendingUp className="h-5 w-5" />}
         />
         <StatCard
           label="Cache Savings"
           value={formatCurrency(cache?.savings ?? 0)}
-          icon={<Zap className="h-5 w-5" />}
         />
         <StatCard
           label="Total Requests"
           value={formatNumber(usage?.total_requests ?? 0)}
-          icon={<Activity className="h-5 w-5" />}
         />
       </div>
 
@@ -96,7 +91,6 @@ export default function AnalyticsPage() {
               {cost?.timeseries && cost.timeseries.length > 0 ? (
                 <AreaChart
                   data={cost.timeseries}
-                  color="#f59e0b"
                   gradientId="costGradient"
                   valueFormatter={(v) => formatCurrency(v)}
                 />
@@ -104,7 +98,7 @@ export default function AnalyticsPage() {
                 <EmptyState
                   title="No cost data yet"
                   description="Cost data will appear once requests are processed"
-                  icon={<DollarSign className="h-8 w-8 text-zinc-600" />}
+                  icon={<DollarSign className="h-8 w-8 text-[#525252]" />}
                 />
               )}
             </CardContent>
@@ -120,14 +114,13 @@ export default function AnalyticsPage() {
               {costByTeam.length > 0 ? (
                 <BarChart
                   data={costByTeam}
-                  color="#14b8a6"
                   valueFormatter={(v) => formatCurrency(v)}
                 />
               ) : (
                 <EmptyState
                   title="No team cost data yet"
                   description="Create teams and route requests to see cost breakdowns"
-                  icon={<DollarSign className="h-8 w-8 text-zinc-600" />}
+                  icon={<DollarSign className="h-8 w-8 text-[#525252]" />}
                 />
               )}
             </CardContent>
@@ -143,14 +136,13 @@ export default function AnalyticsPage() {
               {costByModel.length > 0 ? (
                 <BarChart
                   data={costByModel}
-                  color="#2dd4bf"
                   valueFormatter={(v) => formatCurrency(v)}
                 />
               ) : (
                 <EmptyState
                   title="No model cost data yet"
                   description="Send requests through the gateway to see model-level costs"
-                  icon={<DollarSign className="h-8 w-8 text-zinc-600" />}
+                  icon={<DollarSign className="h-8 w-8 text-[#525252]" />}
                 />
               )}
             </CardContent>

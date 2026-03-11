@@ -51,25 +51,25 @@ export default function TeamsPage() {
       key: 'name',
       header: 'Name',
       sortable: true,
-      render: (item: Org) => <span className="font-medium text-zinc-100">{item.name}</span>,
+      render: (item: Org) => <span className="font-medium text-[#fafafa]">{item.name}</span>,
     },
     {
       key: 'slug',
       header: 'Slug',
-      render: (item: Org) => <code className="text-xs font-mono text-zinc-500">{item.slug}</code>,
+      render: (item: Org) => <code className="text-xs font-mono text-[#525252]">{item.slug}</code>,
     },
     {
       key: 'description',
       header: 'Description',
       render: (item: Org) => (
-        <span className="text-sm text-zinc-500">{item.description || '--'}</span>
+        <span className="text-sm text-[#525252]">{item.description || '--'}</span>
       ),
     },
     {
       key: 'created_at',
       header: 'Created',
       render: (item: Org) => (
-        <span className="text-xs text-zinc-500">
+        <span className="text-xs text-[#525252]">
           {format(new Date(item.created_at), 'MMM d, yyyy')}
         </span>
       ),
@@ -81,19 +81,19 @@ export default function TeamsPage() {
       key: 'name',
       header: 'Name',
       sortable: true,
-      render: (item: User) => <span className="font-medium text-zinc-100">{item.name}</span>,
+      render: (item: User) => <span className="font-medium text-[#fafafa]">{item.name}</span>,
     },
     {
       key: 'email',
       header: 'Email',
-      render: (item: User) => <span className="text-sm text-zinc-400">{item.email}</span>,
+      render: (item: User) => <span className="text-sm text-[#a3a3a3]">{item.email}</span>,
     },
     {
       key: 'role',
       header: 'Role',
       render: (item: User) => (
         <Badge
-          variant={item.role === 'admin' ? 'info' : item.role === 'member' ? 'default' : 'warning'}
+          variant={item.role === 'admin' ? 'default' : item.role === 'member' ? 'default' : 'warning'}
         >
           {item.role}
         </Badge>
@@ -102,13 +102,13 @@ export default function TeamsPage() {
     {
       key: 'teams',
       header: 'Teams',
-      render: (item: User) => <span className="text-sm text-zinc-300">{item.team_ids.length}</span>,
+      render: (item: User) => <span className="text-sm text-[#a3a3a3]">{item.team_ids.length}</span>,
     },
     {
       key: 'created_at',
       header: 'Joined',
       render: (item: User) => (
-        <span className="text-xs text-zinc-500">
+        <span className="text-xs text-[#525252]">
           {format(new Date(item.created_at), 'MMM d, yyyy')}
         </span>
       ),
@@ -119,8 +119,7 @@ export default function TeamsPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Teams & Users</h1>
-          <p className="text-sm text-zinc-500 mt-1">Manage organizations, teams, and users</p>
+          <h1 className="text-base font-semibold text-[#fafafa]">Teams & Users</h1>
         </div>
         <Button onClick={() => setCreateOrgOpen(true)}>
           <Plus className="h-4 w-4" />

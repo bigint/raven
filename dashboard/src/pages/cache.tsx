@@ -9,7 +9,7 @@ import { StatCard } from '@/components/shared/stat-card'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCacheStats } from '@/hooks/use-analytics'
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/utils'
-import { Database, HardDrive, TrendingUp, Zap } from 'lucide-react'
+import { Zap } from 'lucide-react'
 import { useState } from 'react'
 
 function formatBytes(bytes: number): string {
@@ -30,8 +30,7 @@ export default function CachePage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Cache</h1>
-          <p className="text-sm text-zinc-500 mt-1">Semantic cache performance metrics</p>
+          <h1 className="text-base font-semibold text-[#fafafa]">Cache</h1>
         </div>
         <DateRangePicker value={range} onChange={setRange} />
       </div>
@@ -41,22 +40,18 @@ export default function CachePage() {
         <StatCard
           label="Hit Rate"
           value={formatPercent(cache?.hit_rate ?? 0)}
-          icon={<Zap className="h-5 w-5" />}
         />
         <StatCard
           label="Total Hits"
           value={formatNumber(cache?.total_hits ?? 0)}
-          icon={<TrendingUp className="h-5 w-5" />}
         />
         <StatCard
           label="Storage Used"
           value={formatBytes(cache?.storage_bytes ?? 0)}
-          icon={<HardDrive className="h-5 w-5" />}
         />
         <StatCard
           label="Cost Savings"
           value={formatCurrency(cache?.savings ?? 0)}
-          icon={<Database className="h-5 w-5" />}
         />
       </div>
 
@@ -68,7 +63,6 @@ export default function CachePage() {
           {cache?.timeseries && cache.timeseries.length > 0 ? (
             <AreaChart
               data={cache.timeseries}
-              color="#22c55e"
               gradientId="cacheGradient"
               valueFormatter={(v) => formatPercent(v)}
             />
@@ -76,7 +70,7 @@ export default function CachePage() {
             <EmptyState
               title="No cache data yet"
               description="Cache metrics will appear once requests are processed"
-              icon={<Zap className="h-8 w-8 text-zinc-600" />}
+              icon={<Zap className="h-8 w-8 text-[#525252]" />}
             />
           )}
         </CardContent>

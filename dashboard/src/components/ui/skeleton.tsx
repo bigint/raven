@@ -5,12 +5,12 @@ interface SkeletonProps {
 }
 
 export function Skeleton({ className }: SkeletonProps) {
-  return <div className={cn('rounded-md bg-zinc-800/60 animate-shimmer', className)} />
+  return <div className={cn('rounded-md bg-white/[0.04] animate-shimmer', className)} />
 }
 
 export function SkeletonCard() {
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/80 p-5">
+    <div className="rounded-[10px] border border-white/[0.08] bg-transparent p-5">
       <Skeleton className="h-3 w-20 mb-3" />
       <Skeleton className="h-7 w-28 mb-2" />
       <Skeleton className="h-3 w-16" />

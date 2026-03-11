@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline'
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
 type ButtonSize = 'sm' | 'md' | 'lg' | 'icon'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -11,17 +11,16 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: 'bg-teal-600 text-white hover:bg-teal-500 active:bg-teal-700',
-  secondary: 'bg-zinc-800 text-zinc-200 hover:bg-zinc-700 border border-zinc-700',
-  ghost: 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60',
-  danger: 'bg-red-600 text-white hover:bg-red-500 active:bg-red-700',
-  outline: 'border border-zinc-700 text-zinc-200 hover:bg-zinc-800',
+  primary: 'bg-[#fafafa] text-[#0a0a0a] hover:bg-[#e5e5e5] active:bg-[#d4d4d4]',
+  secondary: 'bg-transparent text-[#a3a3a3] border border-white/[0.08] hover:bg-white/[0.04]',
+  ghost: 'text-[#a3a3a3] hover:text-[#fafafa] hover:bg-white/[0.04]',
+  danger: 'bg-transparent text-[#ef4444] border border-[rgba(239,68,68,0.1)] hover:bg-[rgba(239,68,68,0.06)]',
 }
 
 const sizeStyles: Record<ButtonSize, string> = {
   sm: 'px-3 py-1.5 text-xs',
-  md: 'px-4 py-2 text-sm',
-  lg: 'px-5 py-2.5 text-sm',
+  md: 'px-[14px] py-[7px] text-[13px]',
+  lg: 'px-5 py-2.5 text-[13px]',
   icon: 'p-2',
 }
 
@@ -36,7 +35,7 @@ export function Button({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50 disabled:opacity-40 disabled:pointer-events-none cursor-pointer',
+        'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/15 disabled:opacity-40 disabled:pointer-events-none cursor-pointer',
         variantStyles[variant],
         sizeStyles[size],
         className,

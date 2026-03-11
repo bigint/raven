@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 import type { HTMLAttributes, ReactNode } from 'react'
 
-type BadgeVariant = 'default' | 'success' | 'warning' | 'error' | 'info' | 'outline'
+type BadgeVariant = 'default' | 'success' | 'warning' | 'error' | 'outline'
 
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   variant?: BadgeVariant
@@ -10,21 +10,19 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
-  default: 'bg-zinc-800/60 text-zinc-400 border border-zinc-700/60',
-  success: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
-  warning: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
-  error: 'bg-red-500/10 text-red-400 border border-red-500/20',
-  info: 'bg-teal-500/10 text-teal-400 border border-teal-500/20',
-  outline: 'bg-transparent text-zinc-400 border border-zinc-700/60',
+  default: 'bg-transparent text-[#a3a3a3] border border-white/[0.08]',
+  success: 'bg-transparent text-[#a3a3a3] border border-white/[0.08]',
+  warning: 'bg-transparent text-[#a3a3a3] border border-white/[0.08]',
+  error: 'bg-transparent text-[#a3a3a3] border border-white/[0.08]',
+  outline: 'bg-transparent text-[#a3a3a3] border border-white/[0.08]',
 }
 
 const dotColors: Record<BadgeVariant, string> = {
-  default: 'bg-zinc-500',
+  default: 'bg-[#525252]',
   success: 'bg-emerald-400',
   warning: 'bg-amber-400',
   error: 'bg-red-400',
-  info: 'bg-teal-400',
-  outline: 'bg-zinc-500',
+  outline: 'bg-[#525252]',
 }
 
 export function Badge({ variant = 'default', dot, className, children, ...props }: BadgeProps) {

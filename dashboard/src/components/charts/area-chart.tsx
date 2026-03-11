@@ -21,7 +21,7 @@ interface AreaChartProps {
 
 export function AreaChart({
   data,
-  color = '#14b8a6',
+  color = 'rgba(255,255,255,0.3)',
   gradientId = 'areaGradient',
   height = 300,
   valueFormatter = (v) => v.toLocaleString(),
@@ -32,7 +32,7 @@ export function AreaChart({
       <RechartsAreaChart data={data} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor={color} stopOpacity={0.2} />
+            <stop offset="5%" stopColor={color} stopOpacity={0.06} />
             <stop offset="95%" stopColor={color} stopOpacity={0} />
           </linearGradient>
         </defs>
@@ -40,26 +40,26 @@ export function AreaChart({
         <XAxis
           dataKey="timestamp"
           tickFormatter={xAxisFormatter}
-          stroke="rgba(255,255,255,0.1)"
-          tick={{ fill: '#71717a', fontSize: 11 }}
+          stroke="rgba(255,255,255,0.04)"
+          tick={{ fill: '#525252', fontSize: 11 }}
           axisLine={false}
           tickLine={false}
         />
         <YAxis
           tickFormatter={valueFormatter}
-          stroke="rgba(255,255,255,0.1)"
-          tick={{ fill: '#71717a', fontSize: 11 }}
+          stroke="rgba(255,255,255,0.04)"
+          tick={{ fill: '#525252', fontSize: 11 }}
           axisLine={false}
           tickLine={false}
           width={60}
         />
         <Tooltip
           contentStyle={{
-            backgroundColor: '#18181b',
-            border: '1px solid #27272a',
-            borderRadius: '10px',
+            backgroundColor: '#141414',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '8px',
             fontSize: '12px',
-            color: '#e4e4e7',
+            color: '#fafafa',
             boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
           }}
           formatter={(value: number) => [valueFormatter(value), 'Value']}

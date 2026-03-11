@@ -40,8 +40,8 @@ export default function ModelsPage() {
       sortable: true,
       render: (item: Model) => (
         <div>
-          <p className="font-medium text-zinc-100">{item.name}</p>
-          <p className="text-xs text-zinc-600">{item.id}</p>
+          <p className="font-medium text-[#fafafa]">{item.name}</p>
+          <p className="text-xs text-[#525252]">{item.id}</p>
         </div>
       ),
     },
@@ -49,14 +49,14 @@ export default function ModelsPage() {
       key: 'provider',
       header: 'Provider',
       sortable: true,
-      render: (item: Model) => <Badge variant="info">{item.provider}</Badge>,
+      render: (item: Model) => <Badge variant="default">{item.provider}</Badge>,
     },
     {
       key: 'input_price_per_token',
       header: 'Input Price',
       sortable: true,
       render: (item: Model) => (
-        <span className="text-sm text-zinc-300">
+        <span className="text-sm text-[#a3a3a3]">
           {formatCurrency(item.input_price_per_token * 1_000_000)}/M
         </span>
       ),
@@ -66,7 +66,7 @@ export default function ModelsPage() {
       header: 'Output Price',
       sortable: true,
       render: (item: Model) => (
-        <span className="text-sm text-zinc-300">
+        <span className="text-sm text-[#a3a3a3]">
           {formatCurrency(item.output_price_per_token * 1_000_000)}/M
         </span>
       ),
@@ -76,7 +76,7 @@ export default function ModelsPage() {
       header: 'Context',
       sortable: true,
       render: (item: Model) => (
-        <span className="text-sm text-zinc-300">{(item.context_window / 1000).toFixed(0)}K</span>
+        <span className="text-sm text-[#a3a3a3]">{(item.context_window / 1000).toFixed(0)}K</span>
       ),
     },
     {
@@ -95,8 +95,7 @@ export default function ModelsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-white">Models</h1>
-        <p className="text-sm text-zinc-500 mt-1">Available models and pricing</p>
+        <h1 className="text-base font-semibold text-[#fafafa]">Models</h1>
       </div>
 
       <Card>

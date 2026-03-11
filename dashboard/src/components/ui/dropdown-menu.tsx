@@ -32,7 +32,7 @@ export function DropdownMenu({ trigger, children, align = 'right', className }: 
       {open && (
         <div
           className={cn(
-            'absolute z-50 mt-1.5 min-w-[180px] rounded-xl border border-zinc-800 bg-zinc-900 py-1 shadow-2xl shadow-black/40 animate-slide-in',
+            'absolute z-50 mt-1.5 min-w-[180px] rounded-[10px] border border-white/[0.08] bg-[#0a0a0a] py-1 shadow-[0_8px_24px_rgba(0,0,0,0.5)] animate-slide-in',
             align === 'right' ? 'right-0' : 'left-0',
             className,
           )}
@@ -58,7 +58,7 @@ export function DropdownItem({ children, onClick, disabled, danger, className }:
       type="button"
       className={cn(
         'w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors duration-150',
-        danger ? 'text-red-400 hover:bg-red-500/10' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white',
+        danger ? 'text-red-400 hover:bg-red-500/10' : 'text-[#a3a3a3] hover:bg-white/[0.04] hover:text-[#fafafa]',
         disabled && 'opacity-40 pointer-events-none',
         className,
       )}
@@ -71,5 +71,5 @@ export function DropdownItem({ children, onClick, disabled, danger, className }:
 }
 
 export function DropdownSeparator() {
-  return <div className="my-1 border-t border-zinc-800" />
+  return <div className="my-1 border-t border-white/[0.04]" />
 }

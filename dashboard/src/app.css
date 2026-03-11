@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #14b8a6;
-  --color-primary-hover: #0d9488;
-  --color-primary-light: #2dd4bf;
+  --color-primary: #fafafa;
+  --color-primary-hover: #e5e5e5;
+  --color-primary-light: #a3a3a3;
 
   --color-success: #22c55e;
   --color-warning: #f59e0b;
@@ -26,12 +26,12 @@ html {
 }
 
 body {
-  background-color: #09090b;
+  background-color: #0a0a0a;
   color: #fafafa;
 }
 
 ::selection {
-  background-color: rgba(20, 184, 166, 0.3);
+  background-color: rgba(255, 255, 255, 0.2);
   color: #fff;
 }
 
@@ -51,11 +51,6 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.15);
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-6px); }
 }
 
 @keyframes shimmer {
@@ -78,9 +73,8 @@ body {
   50% { opacity: 0.4; }
 }
 
-.animate-float { animation: float 3s ease-in-out infinite; }
 .animate-shimmer {
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.03) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.02) 50%, transparent 100%);
   background-size: 200% 100%;
   animation: shimmer 2s ease-in-out infinite;
 }

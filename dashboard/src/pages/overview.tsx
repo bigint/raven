@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCacheStats, useCost, useLatency, useUsage } from '@/hooks/use-analytics'
 import { useProviders } from '@/hooks/use-providers'
 import { formatCurrency, formatLatency, formatNumber, formatPercent } from '@/lib/utils'
-import { Activity, DollarSign, Server, Timer, Zap } from 'lucide-react'
+import { Server } from 'lucide-react'
 import { useState } from 'react'
 
 export default function OverviewPage() {
@@ -38,8 +38,7 @@ export default function OverviewPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-white">Overview</h1>
-          <p className="text-[13px] text-zinc-500 mt-0.5">Gateway performance at a glance</p>
+          <h1 className="text-base font-semibold text-[#fafafa]">Overview</h1>
         </div>
         <DateRangePicker value={range} onChange={setRange} />
       </div>
@@ -48,30 +47,22 @@ export default function OverviewPage() {
         <StatCard
           label="Total Requests"
           value={formatNumber(usage?.total_requests ?? 0)}
-          icon={<Activity className="h-4 w-4" />}
           sparklineData={usage?.timeseries}
-          sparklineColor="#14b8a6"
         />
         <StatCard
           label="Total Cost"
           value={formatCurrency(cost?.total_cost ?? 0)}
-          icon={<DollarSign className="h-4 w-4" />}
           sparklineData={cost?.timeseries}
-          sparklineColor="#f59e0b"
         />
         <StatCard
           label="Cache Hit Rate"
           value={formatPercent(cache?.hit_rate ?? 0)}
-          icon={<Zap className="h-4 w-4" />}
           sparklineData={cache?.timeseries}
-          sparklineColor="#22c55e"
         />
         <StatCard
           label="Avg Latency"
           value={formatLatency(latency?.avg_latency_ms ?? 0)}
-          icon={<Timer className="h-4 w-4" />}
           sparklineData={latency?.timeseries}
-          sparklineColor="#2dd4bf"
         />
       </div>
 
@@ -87,7 +78,7 @@ export default function OverviewPage() {
               <EmptyState
                 title="No requests yet"
                 description="Send your first request to see model usage"
-                icon={<Activity className="h-6 w-6 text-zinc-500" />}
+                icon={<Server className="h-6 w-6 text-[#525252]" />}
               />
             )}
           </CardContent>
@@ -103,15 +94,15 @@ export default function OverviewPage() {
                 {providers.map((provider) => (
                   <div
                     key={provider.id}
-                    className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-zinc-800/40 transition-colors duration-150"
+                    className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-white/[0.04] transition-colors duration-150"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="rounded-md bg-zinc-800 p-1.5">
-                        <Server className="h-3.5 w-3.5 text-zinc-500" />
+                      <div className="p-1.5">
+                        <Server className="h-3.5 w-3.5 text-[#525252]" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-zinc-200">{provider.display_name}</p>
-                        <p className="text-[11px] text-zinc-600">{provider.models.length} models</p>
+                        <p className="text-sm font-medium text-[#fafafa]">{provider.display_name}</p>
+                        <p className="text-[11px] text-[#525252]">{provider.models.length} models</p>
                       </div>
                     </div>
                     <Badge
@@ -133,7 +124,7 @@ export default function OverviewPage() {
               <EmptyState
                 title="No providers configured"
                 description="Go to Providers to add your API keys"
-                icon={<Server className="h-6 w-6 text-zinc-500" />}
+                icon={<Server className="h-6 w-6 text-[#525252]" />}
               />
             )}
           </CardContent>

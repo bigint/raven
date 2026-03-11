@@ -6,10 +6,7 @@ export default function GuardrailsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-white">Guardrails</h1>
-        <p className="text-sm text-zinc-500 mt-1">
-          Configure content filtering and safety guardrails
-        </p>
+        <h1 className="text-base font-semibold text-[#fafafa]">Guardrails</h1>
       </div>
 
       <Card>
@@ -17,7 +14,7 @@ export default function GuardrailsPage() {
           <EmptyState
             title="Guardrails coming soon"
             description="Configure content filtering, PII detection, and custom safety rules for your AI gateway."
-            icon={<Shield className="h-8 w-8 text-zinc-600" />}
+            icon={<Shield className="h-8 w-8 text-[#525252]" />}
           />
         </CardContent>
       </Card>

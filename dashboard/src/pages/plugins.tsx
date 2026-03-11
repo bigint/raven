@@ -6,8 +6,7 @@ export default function PluginsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-white">Plugins</h1>
-        <p className="text-sm text-zinc-500 mt-1">Manage gateway plugins and extensions</p>
+        <h1 className="text-base font-semibold text-[#fafafa]">Plugins</h1>
       </div>
 
       <Card>
@@ -15,7 +14,7 @@ export default function PluginsPage() {
           <EmptyState
             title="Plugins coming soon"
             description="Install and manage plugins to extend your gateway with custom middleware, logging, and integrations."
-            icon={<Puzzle className="h-8 w-8 text-zinc-600" />}
+            icon={<Puzzle className="h-8 w-8 text-[#525252]" />}
           />
         </CardContent>
       </Card>

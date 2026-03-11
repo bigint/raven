@@ -24,7 +24,7 @@ export default function BudgetsPage() {
         <Badge
           variant={
             item.entity_type === 'org'
-              ? 'info'
+              ? 'default'
               : item.entity_type === 'team'
                 ? 'default'
                 : 'warning'
@@ -38,21 +38,21 @@ export default function BudgetsPage() {
       key: 'entity_id',
       header: 'Entity',
       render: (item: BudgetConfig) => (
-        <code className="text-xs font-mono text-zinc-500">{item.entity_id}</code>
+        <code className="text-xs font-mono text-[#525252]">{item.entity_id}</code>
       ),
     },
     {
       key: 'limit',
       header: 'Limit',
       render: (item: BudgetConfig) => (
-        <span className="font-medium text-zinc-200">{formatCurrency(item.limit)}</span>
+        <span className="font-medium text-[#fafafa]">{formatCurrency(item.limit)}</span>
       ),
     },
     {
       key: 'period',
       header: 'Period',
       render: (item: BudgetConfig) => (
-        <span className="text-sm capitalize text-zinc-300">{item.period}</span>
+        <span className="text-sm capitalize text-[#a3a3a3]">{item.period}</span>
       ),
     },
     {
@@ -62,15 +62,15 @@ export default function BudgetsPage() {
         const pct = item.limit > 0 ? item.current_usage / item.limit : 0
         return (
           <div className="flex items-center gap-3 min-w-[120px]">
-            <div className="flex-1 h-1.5 rounded-full bg-zinc-800/60">
+            <div className="flex-1 h-1.5 rounded-full bg-white/[0.04]">
               <div
                 className={`h-full rounded-full transition-all duration-500 ${
-                  pct > 0.9 ? 'bg-red-400' : pct > 0.7 ? 'bg-amber-400' : 'bg-teal-400'
+                  pct > 0.9 ? 'bg-red-400' : pct > 0.7 ? 'bg-amber-400' : 'bg-[#fafafa]/30'
                 }`}
                 style={{ width: `${Math.min(pct * 100, 100)}%` }}
               />
             </div>
-            <span className="text-xs text-zinc-500 tabular-nums">{formatPercent(pct)}</span>
+            <span className="text-xs text-[#525252] tabular-nums">{formatPercent(pct)}</span>
           </div>
         )
       },
@@ -79,14 +79,14 @@ export default function BudgetsPage() {
       key: 'current_usage',
       header: 'Current',
       render: (item: BudgetConfig) => (
-        <span className="text-sm text-zinc-300">{formatCurrency(item.current_usage)}</span>
+        <span className="text-sm text-[#a3a3a3]">{formatCurrency(item.current_usage)}</span>
       ),
     },
     {
       key: 'alert_threshold',
       header: 'Alert At',
       render: (item: BudgetConfig) => (
-        <span className="text-sm text-zinc-500">{formatPercent(item.alert_threshold)}</span>
+        <span className="text-sm text-[#525252]">{formatPercent(item.alert_threshold)}</span>
       ),
     },
   ]
@@ -95,10 +95,7 @@ export default function BudgetsPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Budgets</h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            Configure spending limits per organization, team, or key
-          </p>
+          <h1 className="text-base font-semibold text-[#fafafa]">Budgets</h1>
         </div>
         <Button>
           <Wallet className="h-4 w-4" />

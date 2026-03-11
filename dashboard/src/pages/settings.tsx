@@ -15,8 +15,7 @@ export default function SettingsPage() {
     return (
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold text-white">Settings</h1>
-          <p className="text-sm text-zinc-500 mt-1">Gateway configuration</p>
+          <h1 className="text-base font-semibold text-[#fafafa]">Settings</h1>
         </div>
         <SkeletonCard />
       </div>
@@ -26,8 +25,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-white">Settings</h1>
-        <p className="text-sm text-zinc-500 mt-1">Gateway configuration and status</p>
+        <h1 className="text-base font-semibold text-[#fafafa]">Settings</h1>
       </div>
 
       <Card>
@@ -72,10 +70,10 @@ export default function SettingsPage() {
               value={
                 <div className="flex flex-wrap gap-1">
                   {settings?.providers?.map((p) => (
-                    <Badge key={p} variant="info">
+                    <Badge key={p} variant="default">
                       {p}
                     </Badge>
-                  )) ?? <span className="text-zinc-600">None</span>}
+                  )) ?? <span className="text-[#525252]">None</span>}
                 </div>
               }
             />
@@ -89,8 +87,8 @@ export default function SettingsPage() {
 function SettingRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between py-1">
-      <span className="text-sm text-zinc-500">{label}</span>
-      <span className="text-sm font-medium text-zinc-200">{value}</span>
+      <span className="text-sm text-[#525252]">{label}</span>
+      <span className="text-sm font-medium text-[#fafafa]">{value}</span>
     </div>
   )
 }

@@ -85,7 +85,7 @@ export function DataTable<T>({
       <div className="flex items-center justify-between gap-4">
         {onSearch && (
           <div className="relative max-w-sm flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#525252]" />
             <Input
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
@@ -139,7 +139,7 @@ export function DataTable<T>({
 
           {totalPages > 1 && onPageChange && (
             <div className="flex items-center justify-between pt-2">
-              <p className="text-xs text-zinc-600">
+              <p className="text-xs text-[#525252]">
                 Showing {(page - 1) * perPage + 1} to {Math.min(page * perPage, total)} of {total}{' '}
                 results
               </p>
@@ -161,8 +161,8 @@ export function DataTable<T>({
                       className={cn(
                         'h-8 w-8 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer',
                         p === page
-                          ? 'bg-teal-500/10 text-teal-300'
-                          : 'text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300',
+                          ? 'bg-white/[0.06] text-[#fafafa]'
+                          : 'text-[#525252] hover:bg-white/[0.04] hover:text-[#a3a3a3]',
                       )}
                     >
                       {p}
