@@ -1,0 +1,183 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-background: #0A0A0A;
+  --color-foreground: #F5F5F5;
+  --color-primary: #4338CA;
+  --color-primary-light: #818CF8;
+  --color-muted: #A3A3A3;
+  --color-border: #262626;
+  --color-surface: #141414;
+  --color-surface-hover: #1A1A1A;
+  --font-heading: 'Instrument Serif', serif;
+  --font-body: 'Geist', sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+}
+
+::selection {
+  background-color: #4338CA;
+  color: white;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0A0A0A;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+/* Terminal typing animation */
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-up-delay-1 {
+  animation: fade-in-up 0.8s ease-out 0.1s forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-up-delay-2 {
+  animation: fade-in-up 0.8s ease-out 0.2s forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-up-delay-3 {
+  animation: fade-in-up 0.8s ease-out 0.3s forwards;
+  opacity: 0;
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+/* Syntax highlighting */
+.token-keyword {
+  color: #C792EA;
+}
+
+.token-string {
+  color: #C3E88D;
+}
+
+.token-comment {
+  color: #546E7A;
+}
+
+.token-function {
+  color: #82AAFF;
+}
+
+.token-variable {
+  color: #F07178;
+}
+
+.token-operator {
+  color: #89DDFF;
+}
+
+.token-property {
+  color: #FFCB6B;
+}
+
+.token-punctuation {
+  color: #89DDFF;
+}
+
+.token-number {
+  color: #F78C6C;
+}
+
+.token-flag {
+  color: #82AAFF;
+}
+
+.token-url {
+  color: #80CBC4;
+  text-decoration: underline;
+  text-decoration-color: #80CBC440;
+}
+
+.token-prompt {
+  color: #C3E88D;
+}
+
+.token-output {
+  color: #A3A3A3;
+}
+
+.token-success {
+  color: #C3E88D;
+}
