@@ -82,7 +82,7 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
 
 export function getDateRange(range: string): { start: string; end: string } {
   if (range.includes('|')) {
-    const [start, end] = range.split('|')
+    const [start = '', end = ''] = range.split('|')
     return { start, end }
   }
   const now = new Date()
@@ -97,9 +97,11 @@ export function getDateRange(range: string): { start: string; end: string } {
   return { start, end }
 }
 
-export function getGranularity(range: string): string {
+export type Granularity = 'minute' | 'hour' | 'day' | 'week' | 'month'
+
+export function getGranularity(range: string): Granularity {
   if (range.includes('|')) return 'hour'
-  const map: Record<string, string> = {
+  const map: Record<string, Granularity> = {
     '1h': 'minute',
     '24h': 'hour',
     '7d': 'hour',
