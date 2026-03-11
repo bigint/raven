@@ -65,7 +65,7 @@ export default function BudgetsPage() {
             <div className="flex-1 h-1.5 rounded-full bg-white/[6%]">
               <div
                 className={`h-full rounded-full transition-all duration-500 ${
-                  pct > 0.9 ? 'bg-red-400' : pct > 0.7 ? 'bg-amber-400' : 'bg-indigo-400'
+                  pct > 0.9 ? 'bg-red-400' : pct > 0.7 ? 'bg-amber-400' : 'bg-teal-400'
                 }`}
                 style={{ width: `${Math.min(pct * 100, 100)}%` }}
               />

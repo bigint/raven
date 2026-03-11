@@ -8,7 +8,7 @@ interface SparklineProps {
   width?: number
 }
 
-export function Sparkline({ data, color = '#6366f1', height = 40, width = 120 }: SparklineProps) {
+export function Sparkline({ data, color = '#14b8a6', height = 40, width = 120 }: SparklineProps) {
   return (
     <ResponsiveContainer width={width} height={height}>
       <AreaChart data={data} margin={{ top: 2, right: 2, bottom: 2, left: 2 }}>

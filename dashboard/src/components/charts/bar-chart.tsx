@@ -23,7 +23,7 @@ interface BarChartProps {
 
 export function BarChart({
   data,
-  color = '#6366f1',
+  color = '#14b8a6',
   height = 300,
   valueFormatter = (v) => v.toLocaleString(),
   layout = 'vertical',
@@ -54,8 +54,8 @@ export function BarChart({
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#0f0f14',
-              border: '1px solid rgba(255,255,255,0.08)',
+              backgroundColor: '#0f0f0f',
+              border: '1px solid rgba(255,255,255,0.06)',
               borderRadius: '10px',
               fontSize: '12px',
               color: '#e4e4e7',
@@ -96,8 +96,8 @@ export function BarChart({
         />
         <Tooltip
           contentStyle={{
-            backgroundColor: '#0f0f14',
-            border: '1px solid rgba(255,255,255,0.08)',
+            backgroundColor: '#0f0f0f',
+            border: '1px solid rgba(255,255,255,0.06)',
             borderRadius: '10px',
             fontSize: '12px',
             color: '#e4e4e7',

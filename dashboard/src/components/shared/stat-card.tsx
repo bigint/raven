@@ -31,7 +31,7 @@ export function StatCard({
   return (
     <div
       className={cn(
-        'group relative flex flex-col justify-between rounded-xl border border-white/[6%] bg-white/[3%] p-6 transition-all duration-200 hover:border-white/[10%] hover:bg-white/[5%] hover:-translate-y-0.5',
+        'relative flex flex-col justify-between rounded-xl border border-white/[6%] bg-[#0f0f0f] p-6',
         className,
       )}
     >
@@ -43,7 +43,7 @@ export function StatCard({
           <p className="mt-2 text-3xl font-bold text-white tracking-tight">{value}</p>
         </div>
         {icon && (
-          <div className="rounded-lg bg-white/[4%] p-2.5 text-zinc-500 group-hover:bg-white/[6%] group-hover:text-zinc-400 transition-all duration-200">
+          <div className="rounded-lg bg-white/[4%] p-2.5 text-zinc-500">
             {icon}
           </div>
         )}

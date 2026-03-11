@@ -76,11 +76,11 @@ function ProviderCard({
   const hasModels = provider.models.length > 0
 
   return (
-    <Card className="group hover:bg-white/[5%] hover:-translate-y-0.5">
+    <Card>
       <CardContent>
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-white/[4%] p-2.5 group-hover:bg-white/[6%] transition-colors duration-200">
+            <div className="rounded-lg bg-white/[4%] p-2.5">
               <Server className="h-5 w-5 text-zinc-500" />
             </div>
             <div>
@@ -297,7 +297,7 @@ function ConfigureProviderDialog({
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder={state.isEditing ? 'Enter new key to update...' : 'Enter API key...'}
-              className="h-9 w-full rounded-lg border border-white/[8%] bg-white/[3%] px-3 pr-10 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500/40 transition-all duration-200 font-mono"
+              className="h-9 w-full rounded-lg border border-white/[6%] bg-[#0f0f0f] px-3 pr-10 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-teal-500/40 focus:border-teal-500/40 transition-all duration-200 font-mono"
             />
             <button
               type="button"
@@ -316,7 +316,7 @@ function ConfigureProviderDialog({
           placeholder={state.provider.base_url || 'https://api.provider.com/v1'}
         />
 
-        <div className="flex items-center justify-between rounded-lg border border-white/[8%] bg-white/[3%] px-3 py-2.5">
+        <div className="flex items-center justify-between rounded-lg border border-white/[6%] bg-white/[3%] px-3 py-2.5">
           <div>
             <p className="text-sm text-zinc-200">Enable Provider</p>
             <p className="text-xs text-zinc-500 mt-0.5">
@@ -327,7 +327,7 @@ function ConfigureProviderDialog({
             type="button"
             onClick={() => setEnabled((prev) => !prev)}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 cursor-pointer ${
-              enabled ? 'bg-indigo-500' : 'bg-white/10'
+              enabled ? 'bg-teal-500' : 'bg-white/10'
             }`}
           >
             <span

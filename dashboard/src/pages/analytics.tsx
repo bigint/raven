@@ -120,7 +120,7 @@ export default function AnalyticsPage() {
               {costByTeam.length > 0 ? (
                 <BarChart
                   data={costByTeam}
-                  color="#6366f1"
+                  color="#14b8a6"
                   valueFormatter={(v) => formatCurrency(v)}
                 />
               ) : (
@@ -143,7 +143,7 @@ export default function AnalyticsPage() {
               {costByModel.length > 0 ? (
                 <BarChart
                   data={costByModel}
-                  color="#818cf8"
+                  color="#2dd4bf"
                   valueFormatter={(v) => formatCurrency(v)}
                 />
               ) : (

@@ -46,7 +46,7 @@ export function Dialog({ open, onClose, children, className }: DialogProps) {
       />
       <div
         className={cn(
-          'relative z-10 w-full max-w-lg rounded-xl border border-white/[8%] bg-[#0f0f14] p-6 shadow-2xl shadow-black/40 animate-fade-in',
+          'relative z-10 w-full max-w-lg rounded-xl border border-white/[6%] bg-[#0f0f0f] p-6 shadow-2xl shadow-black/40 animate-fade-in',
           className,
         )}
       >

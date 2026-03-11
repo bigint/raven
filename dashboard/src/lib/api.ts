@@ -51,15 +51,9 @@ function buildQuery(params: object): string {
 
 export class ApiClient {
   private baseUrl: string
-  private apiKey: string
 
-  constructor(baseUrl: string, apiKey: string) {
+  constructor(baseUrl: string) {
     this.baseUrl = baseUrl.replace(/\/$/, '')
-    this.apiKey = apiKey
-  }
-
-  setKey(key: string) {
-    this.apiKey = key
   }
 
   private async request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -68,7 +62,6 @@ export class ApiClient {
       ...init,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.apiKey}`,
         ...init?.headers,
       },
     })
@@ -240,28 +233,7 @@ export class ApiClient {
 }
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : '')
+  import.meta.env.VITE_API_BASE_URL ||
+  (typeof window !== 'undefined' ? window.location.origin : '')
 
-function getApiKey(): string {
-  return (
-    import.meta.env.VITE_API_KEY ||
-    import.meta.env.VITE_RAVEN_ADMIN_KEY ||
-    localStorage.getItem('raven_admin_key') ||
-    ''
-  )
-}
-
-export function setApiKey(key: string) {
-  localStorage.setItem('raven_admin_key', key)
-  apiClient.setKey(key)
-}
-
-export function clearApiKey() {
-  localStorage.removeItem('raven_admin_key')
-}
-
-export function hasApiKey(): boolean {
-  return getApiKey() !== ''
-}
-
-export const apiClient = new ApiClient(API_BASE_URL, getApiKey())
+export const apiClient = new ApiClient(API_BASE_URL)

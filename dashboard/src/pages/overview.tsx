@@ -52,7 +52,7 @@ export default function OverviewPage() {
           value={formatNumber(usage?.total_requests ?? 0)}
           icon={<Activity className="h-5 w-5" />}
           sparklineData={usage?.timeseries}
-          sparklineColor="#6366f1"
+          sparklineColor="#14b8a6"
         />
         <StatCard
           label="Total Cost"
@@ -73,7 +73,7 @@ export default function OverviewPage() {
           value={formatLatency(latency?.avg_latency_ms ?? 0)}
           icon={<Timer className="h-5 w-5" />}
           sparklineData={latency?.timeseries}
-          sparklineColor="#818cf8"
+          sparklineColor="#2dd4bf"
         />
       </div>
 

@@ -241,11 +241,8 @@ func (s *Server) buildRouter() chi.Router {
 		r.Get("/v1/models", engine.HandleModels)
 	})
 
-	// Admin routes (authenticated + admin only).
+	// Admin routes (no auth required — self-hosted gateway).
 	r.Group(func(r chi.Router) {
-		r.Use(authMiddleware.Authenticate)
-		r.Use(authMiddleware.AdminOnly)
-
 		adminRouter := admin.NewRouter(s.store, s.registry, s.health, s.metrics)
 		r.Mount("/admin/v1", adminRouter.Routes())
 	})

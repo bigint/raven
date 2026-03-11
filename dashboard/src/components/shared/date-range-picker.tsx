@@ -49,7 +49,7 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
             className={cn(
               'px-2.5 py-1 text-[11px] font-medium rounded-md transition-all duration-200 cursor-pointer',
               value === preset.value || (preset.value === 'custom' && value.includes('|'))
-                ? 'bg-white/[8%] text-white shadow-sm'
+                ? 'bg-teal-500/10 text-teal-300 shadow-sm'
                 : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/[4%]',
             )}
           >
@@ -63,19 +63,19 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
             type="datetime-local"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="h-7 rounded-lg border border-white/[8%] bg-white/[3%] px-2 text-xs text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+            className="h-7 rounded-lg border border-white/[6%] bg-[#0f0f0f] px-2 text-xs text-zinc-100 focus:outline-none focus:ring-2 focus:ring-teal-500/40"
           />
           <span className="text-zinc-600 text-xs">to</span>
           <input
             type="datetime-local"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="h-7 rounded-lg border border-white/[8%] bg-white/[3%] px-2 text-xs text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+            className="h-7 rounded-lg border border-white/[6%] bg-[#0f0f0f] px-2 text-xs text-zinc-100 focus:outline-none focus:ring-2 focus:ring-teal-500/40"
           />
           <button
             type="button"
             onClick={handleCustomApply}
-            className="px-2.5 py-1 text-xs font-medium rounded-lg bg-indigo-500 text-white hover:bg-indigo-400 transition-all duration-200 cursor-pointer"
+            className="px-2.5 py-1 text-xs font-medium rounded-lg bg-teal-500 text-white hover:bg-teal-400 transition-all duration-200 cursor-pointer"
           >
             Apply
           </button>

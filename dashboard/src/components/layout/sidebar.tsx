@@ -57,7 +57,7 @@ export function Sidebar() {
       {/* Mobile toggle */}
       <button
         type="button"
-        className="fixed top-4 left-4 z-50 rounded-xl bg-zinc-900 border border-white/[8%] p-2.5 lg:hidden hover:bg-white/[5%] transition-all duration-200"
+        className="fixed top-4 left-4 z-50 rounded-xl bg-[#0f0f0f] border border-white/[6%] p-2.5 lg:hidden hover:bg-white/[5%] transition-all duration-200"
         onClick={() => setMobileOpen(!mobileOpen)}
       >
         {mobileOpen ? (
@@ -83,13 +83,13 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed top-0 left-0 z-40 h-screen w-60 border-r border-white/[6%] bg-[#0a0a0f] flex flex-col transition-transform duration-300 lg:translate-x-0',
+          'fixed top-0 left-0 z-40 h-screen w-60 border-r border-white/[6%] bg-[#0a0a0a] flex flex-col transition-transform duration-300 lg:translate-x-0',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
         )}
       >
         {/* Logo */}
         <div className="flex h-16 items-center gap-3 px-6 border-b border-white/[6%]">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center shadow-lg shadow-teal-500/20">
             <span className="text-white font-bold text-sm">R</span>
           </div>
           <div className="flex flex-col">
@@ -120,14 +120,14 @@ export function Sidebar() {
                         className={cn(
                           'flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-200',
                           isActive
-                            ? 'bg-white/[8%] text-white shadow-sm'
+                            ? 'bg-teal-500/10 text-teal-300 shadow-sm'
                             : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/[4%]',
                         )}
                       >
                         <Icon
                           className={cn(
                             'h-4 w-4 shrink-0 transition-colors duration-200',
-                            isActive ? 'text-indigo-400' : 'text-zinc-600',
+                            isActive ? 'text-teal-400' : 'text-zinc-600',
                           )}
                         />
                         {item.label}

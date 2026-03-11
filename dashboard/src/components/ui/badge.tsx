@@ -14,7 +14,7 @@ const variantStyles: Record<BadgeVariant, string> = {
   success: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
   warning: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
   error: 'bg-red-500/10 text-red-400 border border-red-500/20',
-  info: 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20',
+  info: 'bg-teal-500/10 text-teal-400 border border-teal-500/20',
   outline: 'bg-transparent text-zinc-400 border border-white/[8%]',
 }
 
@@ -23,7 +23,7 @@ const dotColors: Record<BadgeVariant, string> = {
   success: 'bg-emerald-400',
   warning: 'bg-amber-400',
   error: 'bg-red-400',
-  info: 'bg-indigo-400',
+  info: 'bg-teal-400',
   outline: 'bg-zinc-500',
 }
 

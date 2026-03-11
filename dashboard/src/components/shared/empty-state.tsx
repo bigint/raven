@@ -16,11 +16,11 @@ export function EmptyState({ title, description, icon, action, className }: Empt
       <div className="rounded-2xl bg-white/[4%] border border-white/[6%] p-5 mb-6 animate-float">
         {icon || <Inbox className="h-8 w-8 text-zinc-600" />}
       </div>
-      <h3 className="text-base font-semibold bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent">
+      <h3 className="text-base font-semibold text-white">
         {title}
       </h3>
       {description && (
-        <p className="mt-2 text-sm text-zinc-600 max-w-md leading-relaxed">{description}</p>
+        <p className="mt-2 text-sm text-zinc-500 max-w-md leading-relaxed">{description}</p>
       )}
       {action && <div className="mt-6">{action}</div>}
     </div>

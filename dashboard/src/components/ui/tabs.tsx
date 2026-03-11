@@ -52,7 +52,7 @@ export function TabsTrigger({
       className={cn(
         'px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200 cursor-pointer',
         isActive
-          ? 'bg-white/[8%] text-white shadow-sm'
+          ? 'bg-teal-500/10 text-teal-300 shadow-sm'
           : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/[4%]',
         className,
       )}

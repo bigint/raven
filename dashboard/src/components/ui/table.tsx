@@ -91,13 +91,13 @@ export function TableHead({
             <ChevronUp
               className={cn(
                 'h-3 w-3 -mb-1',
-                isSorted && sortOrder === 'asc' ? 'text-indigo-400' : 'text-zinc-800',
+                isSorted && sortOrder === 'asc' ? 'text-teal-400' : 'text-zinc-800',
               )}
             />
             <ChevronDown
               className={cn(
                 'h-3 w-3',
-                isSorted && sortOrder === 'desc' ? 'text-indigo-400' : 'text-zinc-800',
+                isSorted && sortOrder === 'desc' ? 'text-teal-400' : 'text-zinc-800',
               )}
             />
           </span>
