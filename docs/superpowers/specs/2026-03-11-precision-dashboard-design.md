@@ -9,7 +9,7 @@
 ## 1. Design Principles
 
 1. **Zero decoration** — If it doesn't convey information, it doesn't exist. No gradients for aesthetics, no rounded corners for softness, no animations for delight.
-2. **Monochrome only** — White, gray, black. The only colors are semantic status indicators (green/amber/red) and they're used sparingly.
+2. **Monochrome only** — White, gray, black. The only colors are semantic status indicators (green/amber/red) and they're used sparingly: provider health status, budget usage thresholds, and HTTP status codes in the request log.
 3. **Density over comfort** — Tight spacing, small type, more data per viewport. Engineers want to see everything at once.
 4. **Instant** — No transitions, no animations, no loading shimmers. State changes are immediate. The UI never makes you wait for cosmetic reasons.
 5. **Keyboard-first** — Command palette (⌘K), nav shortcuts (⌘1-9), escape to close. Mouse is supported but not required.
@@ -105,11 +105,12 @@ Stat card grid: `4 columns, 12px gap` on ≥1024px, `2 columns` on ≥640px, `1 
 | Buttons, inputs, selects | 6px |
 | Badges, pills | 4px |
 | Sidebar nav items | 5px |
+| Dropdown menus | 6px |
 | Tooltips | 4px |
 | Progress bars | 2px |
 | Bar chart bars | 2px top corners |
 
-Tighter than current. No 10px+ radii anywhere.
+Tighter than current. No 10px+ radii anywhere. Every existing 10px radius is reduced to 8px or less.
 
 ---
 
@@ -154,7 +155,7 @@ Tighter than current. No 10px+ radii anywhere.
 - **Logo area:** 22px rounded-md white logo + "Raven" text (13px semibold) + collapse toggle button (right-aligned)
 - **Command palette trigger:** `⌘K Search...` — styled as a subtle input-like row. Clicking opens the command palette overlay.
 - **Navigation groups:** Three groups with 9px uppercase labels: "Core", "Manage", "System"
-- **Nav items:** 13px icon + 12px label + optional keyboard shortcut badge (right-aligned, 9px mono). Top 3 items (Overview, Requests, Analytics) get ⌘1-⌘3 shortcuts.
+- **Nav items:** Icon (15px × 15px dimensions) + 12px label text + optional keyboard shortcut badge (right-aligned, 9px mono). Top 3 items (Overview, Requests, Analytics) get ⌘1-⌘3 shortcuts.
 - **Active state:** `rgba(255,255,255,0.06)` background, primary text color, primary icon color
 - **Inactive state:** tertiary text, tertiary icon
 - **Hover:** `rgba(255,255,255,0.04)` background, secondary text
@@ -180,8 +181,9 @@ Tighter than current. No 10px+ radii anywhere.
 ### 6.5 Mobile (< 1024px)
 
 - Sidebar hidden by default
-- Hamburger button fixed top-left
-- Tap opens sidebar as overlay with backdrop
+- Hamburger button fixed top-left (28px, ghost style)
+- Tap opens sidebar as overlay with `rgba(0,0,0,0.6)` backdrop — appears instantly, no slide-in transition
+- Tap backdrop or press Escape to close — instant, no animation
 - Content takes full width (no margin-left)
 
 ---
@@ -197,7 +199,10 @@ New component. Overlay that appears centered on screen.
 - **Results:** Grouped by category (Pages, Actions). Each result shows icon + label + optional shortcut. 10 results max visible, scrollable.
 - **Navigation:** Arrow keys to move, Enter to select, Escape to close
 - **Pages searchable:** All 12 nav items
-- **Actions searchable:** "Create Key", "Create Org", "Create Budget", "Export Data"
+- **Actions searchable:** "Create Key", "Create Org", "Create Budget" (each navigates to the relevant page and opens the create dialog)
+- **Search implementation:** Simple case-insensitive `includes()` substring matching. No external library needed — the item count is small (<20 total).
+- **Keyboard focus:** Active result has `rgba(255,255,255,0.05)` background. `aria-selected` on active item. Focus trap within the palette while open.
+- **Event listeners:** Registered in Shell component on mount. `⌘K` / `Ctrl+K` opens palette. `⌘1-3` / `Ctrl+1-3` navigate to Overview/Requests/Analytics. All listeners use `useEffect` cleanup.
 - **No transition** — appears and disappears instantly
 
 ---
@@ -240,7 +245,7 @@ New component. Overlay that appears centered on screen.
 | danger | transparent | #ef4444 | rgba(239,68,68,0.2) | rgba(239,68,68,0.08) |
 
 - Default height: **28px** (down from 36px). Padding: `4px 10px`.
-- Small: 24px height, 10px font.
+- Small: 24px height, 10px font, padding: `3px 8px`.
 - Font: 12px, weight 500.
 - Border-radius: 6px.
 - Focus: `ring-1 ring-white/20 ring-offset-1 ring-offset-[#09090b]`
@@ -350,7 +355,36 @@ New component. Overlay that appears centered on screen.
 - Vertical variant: Width: 1px.
 - No margins built in — parent controls spacing.
 
-### 8.16 Date Range Picker
+### 8.16 Toggle Switch
+
+Used in Providers page for "Enable Provider" setting.
+
+- Track: 32px × 16px, 8px radius. Background: `rgba(255,255,255,0.06)` (off) or `#22c55e` (on).
+- Thumb: 12px circle, `#fafafa`. Positioned 2px from left (off) or 2px from right (on).
+- Label: 12px, secondary, to the left of the toggle. Gap: 8px.
+- **No transition** — toggle snaps between states instantly.
+- Disabled: 0.4 opacity.
+
+### 8.17 Error Banner
+
+Inline error display for failed API calls or form errors within dialogs.
+
+- Container: `border: 1px solid rgba(239,68,68,0.2)`, `background: rgba(239,68,68,0.05)`, `border-radius: 6px`, `padding: 8px 12px`.
+- Text: 12px, `#ef4444`.
+- Icon: AlertCircle (14px) left of text, gap 8px.
+- Placed above the action that caused the error (e.g., above dialog footer buttons, or above a table if a fetch fails).
+- Dismissible: small X button right-aligned, muted, ghost style.
+
+### 8.18 Loading Spinner
+
+Exception to the "no animations" rule — functional loading spinners during async operations (save, delete, rotate key) are kept.
+
+- Use `Loader2` icon from lucide-react with `animate-spin` CSS.
+- Size: matches the button text size (12px for default buttons).
+- Replaces button text during loading: e.g., button shows spinner + "Saving..." instead of "Save".
+- This is the **only** animation in the entire app. It's functional, not decorative.
+
+### 8.19 Date Range Picker
 
 - Layout: flex row. Icon (Calendar, 13px, muted) + button group.
 - Button group: same styling as Tabs container — `rgba(255,255,255,0.02)` bg, border, 6px radius, 2px padding.
@@ -368,7 +402,7 @@ New component. Overlay that appears centered on screen.
 - **No grid lines.** Remove CartesianGrid entirely. The data stands alone.
 - **Axis text:** 10px, muted (#333), monospace for numbers.
 - **Axis line:** `rgba(255,255,255,0.04)`.
-- **Tooltip:** `#1a1a1a` background, `rgba(255,255,255,0.08)` border, 4px radius. 11px text. **No cursor line** on hover — just the tooltip.
+- **Tooltip:** `#1a1a1a` background, `rgba(255,255,255,0.08)` border, 4px radius. 11px text. Set `<Tooltip cursor={false} />` in Recharts — no vertical reference line on hover.
 - **Responsive:** `<ResponsiveContainer width="100%" height={height} />`
 
 ### 9.2 Area Chart
@@ -382,7 +416,7 @@ New component. Overlay that appears centered on screen.
 
 ### 9.3 Bar Chart
 
-- **Bar fill:** `rgba(255,255,255, opacity)` where opacity is proportional to the bar's value relative to max (range: 0.04 to 0.16). The tallest bar gets 0.16, the shortest gets 0.04.
+- **Bar fill:** `rgba(255,255,255, opacity)` where opacity is proportional to the bar's value relative to max (range: 0.04 to 0.16). The tallest bar gets 0.16, the shortest gets 0.04. Implement using Recharts `<Cell>` component to set per-bar fill: `{data.map((entry, i) => <Cell key={i} fill={...} />)}`.
 - **Bar radius:** `[2, 2, 0, 0]` (top corners only).
 - **Bar gap:** 4px between bars.
 - **Hover:** Bar fill opacity increases by 0.06. Instant.
@@ -392,8 +426,8 @@ New component. Overlay that appears centered on screen.
 ### 9.4 Sparkline
 
 - **Size:** 64x28px (unchanged).
-- **Stroke:** `rgba(255,255,255,0.20)`, width 1px.
-- **Fill:** Linear gradient from `rgba(255,255,255,0.06)` to transparent.
+- **Stroke:** `rgba(255,255,255,0.25)`, width 1px. (Uses system `Chart stroke` token.)
+- **Fill:** Linear gradient from `rgba(255,255,255,0.08)` to transparent. (Uses system `Chart fill high` → `Chart fill low` tokens.)
 - **No axes, no labels, no tooltip, no dots.**
 - Purely visual trend indicator.
 
@@ -452,8 +486,39 @@ New component. Overlay that appears centered on screen.
 - Latency and cost in monospace.
 - Token count in monospace with comma formatting.
 - Cache hit: show as small "CACHED" badge inline if true.
-- **Click row → inline expansion** (not a modal). Row expands below to show request/response details in a monospaced `<pre>` block. Click again to collapse. Maximum one expanded row at a time.
+- **Click row → inline expansion** (not a modal). Row expands below to show request detail panel. Click again to collapse. Maximum one expanded row at a time.
 - Filters: two Select dropdowns in the page header area (status code, provider).
+
+**Expanded row detail panel:**
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│ (collapsed row above)                                              │
+├────────────────────────────────────────────────────────────────────┤
+│                                                                    │
+│  REQUEST ID        PROVIDER        MODEL           STATUS          │
+│  req_abc123...     OpenAI          gpt-4o          200             │
+│                                                                    │
+│  TIMESTAMP         LATENCY         TOKENS (IN)     TOKENS (OUT)    │
+│  2026-03-11        142ms           847             400             │
+│  12:34:56.789                                                      │
+│                                                                    │
+│  COST              CACHE           ERROR                           │
+│  $0.04             miss            —                               │
+│                                                                    │
+│  ┌─ ERROR (if status >= 400) ──────────────────────────────────┐  │
+│  │ {"error": "rate_limit_exceeded", "message": "..."}          │  │
+│  └─────────────────────────────────────────────────────────────┘  │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+- Background: `rgba(255,255,255,0.01)` — barely distinguishable from normal rows.
+- Top border: `rgba(255,255,255,0.06)`.
+- Padding: `16px 20px`.
+- 4-column grid of key-value pairs. Label: 9px uppercase muted. Value: 12px mono primary.
+- Error block (only shown if `error` field exists on the RequestLog): `<pre>` with 11px monospace, tertiary text, `rgba(255,255,255,0.02)` background, `rgba(255,255,255,0.06)` border, 6px radius, padding 12px. Max-height 160px, scrollable.
+- Data comes from the existing `RequestLog` type fields: `id`, `timestamp`, `provider`, `model`, `status_code`, `latency_ms`, `tokens.input`, `tokens.output`, `cost`, `cache_hit`, `error`.
 
 ### 10.3 Analytics
 
@@ -507,7 +572,8 @@ New component. Overlay that appears centered on screen.
 - Card hover: border brightens to 0.10
 - Configure button: secondary variant
 - Status dot: green/amber/red — the only color on the page
-- Dialog for configuration: API key input, base URL, enable toggle, delete (with confirmation)
+- Dialog for configuration: API key input (with show/hide toggle), base URL, enable toggle (Section 8.16), delete (with confirmation flow)
+- **Data flow:** Uses existing `useProviders()` for base provider list and `useProviderHealth(providerId)` per-card for latency/error metrics. The `ProviderWithConfig` type combines both. No changes to hooks needed.
 
 ### 10.5 Models
 
@@ -600,6 +666,7 @@ New component. Overlay that appears centered on screen.
   - >90%: fill becomes `rgba(239,68,68,0.35)` (red tint)
 - Percentage in monospace next to the bar.
 - Entity shown in monospace.
+- **Create Budget dialog:** Fields — Entity type (Select: org/team/key), Entity ID (Input, monospace), Limit (Input, currency formatted), Period (Select: daily/weekly/monthly), Alert threshold (Input, percentage, default 80%). Footer: Cancel (ghost) + Create (primary).
 
 ### 10.9 Cache
 
@@ -749,6 +816,10 @@ body {
 
 **All animation keyframes and animation utility classes removed.** No shimmer, no fade-in, no slide-in, no pulse-dot.
 
+**Exception:** Keep `@keyframes spin` and `.animate-spin` for the `Loader2` loading spinner (see Section 8.18). This is the only animation in the app.
+
+**Firefox scrollbar support:** Add `scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.06) transparent;` to the `html` rule for Firefox compatibility alongside the WebKit-specific pseudo-elements.
+
 ---
 
 ## 12. Files Changed
@@ -812,9 +883,9 @@ Every file in the dashboard is rewritten. Full list:
 - `src/hooks/*` — No changes needed. Data layer is clean.
 - `src/lib/api.ts` — No changes.
 - `src/lib/types.ts` — No changes.
-- `src/lib/utils.ts` — Add formatBytes() utility if not present. Otherwise unchanged.
+- `src/lib/utils.ts` — Move the existing `formatBytes` function from `cache.tsx` into `utils.ts` as a shared utility. No other changes.
 
-**Total: 36 files changed, 1 deleted, 1 new.**
+**Total: 37 files changed, 1 deleted (header.tsx), 1 new (command-palette.tsx).**
 
 ---
 
