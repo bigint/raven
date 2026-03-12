@@ -9,23 +9,15 @@ export const createUserModule = (db: Database) => {
 
   // Update user profile
   app.put('/profile', async (c) => {
-    const user = c.get('user' as never) as
-      | { id: string; email: string }
-      | undefined
+    const user = c.get('user' as never) as { id: string; email: string } | undefined
     if (!user) {
-      return c.json(
-        { code: 'UNAUTHORIZED', message: 'Not authenticated' },
-        401
-      )
+      return c.json({ code: 'UNAUTHORIZED', message: 'Not authenticated' }, 401)
     }
 
     const body = await c.req.json<{ name: string }>()
     const name = body.name?.trim()
     if (!name) {
-      return c.json(
-        { code: 'VALIDATION_ERROR', message: 'Name is required' },
-        400
-      )
+      return c.json({ code: 'VALIDATION_ERROR', message: 'Name is required' }, 400)
     }
 
     const [updated] = await db
@@ -39,14 +31,9 @@ export const createUserModule = (db: Database) => {
 
   // List pending invitations for the authenticated user
   app.get('/invitations', async (c) => {
-    const user = c.get('user' as never) as
-      | { id: string; email: string }
-      | undefined
+    const user = c.get('user' as never) as { id: string; email: string } | undefined
     if (!user) {
-      return c.json(
-        { code: 'UNAUTHORIZED', message: 'Not authenticated' },
-        401
-      )
+      return c.json({ code: 'UNAUTHORIZED', message: 'Not authenticated' }, 401)
     }
 
     const pending = await db
@@ -58,30 +45,17 @@ export const createUserModule = (db: Database) => {
         expiresAt: invitations.expiresAt,
       })
       .from(invitations)
-      .innerJoin(
-        organizations,
-        eq(invitations.organizationId, organizations.id)
-      )
-      .where(
-        and(
-          eq(invitations.email, user.email),
-          eq(invitations.status, 'pending')
-        )
-      )
+      .innerJoin(organizations, eq(invitations.organizationId, organizations.id))
+      .where(and(eq(invitations.email, user.email), eq(invitations.status, 'pending')))
 
     return c.json(pending)
   })
 
   // Accept an invitation
   app.post('/invitations/:id/accept', async (c) => {
-    const user = c.get('user' as never) as
-      | { id: string; email: string }
-      | undefined
+    const user = c.get('user' as never) as { id: string; email: string } | undefined
     if (!user) {
-      return c.json(
-        { code: 'UNAUTHORIZED', message: 'Not authenticated' },
-        401
-      )
+      return c.json({ code: 'UNAUTHORIZED', message: 'Not authenticated' }, 401)
     }
 
     const id = c.req.param('id')
@@ -93,23 +67,17 @@ export const createUserModule = (db: Database) => {
         and(
           eq(invitations.id, id),
           eq(invitations.email, user.email),
-          eq(invitations.status, 'pending')
-        )
+          eq(invitations.status, 'pending'),
+        ),
       )
       .limit(1)
 
     if (!invitation) {
-      return c.json(
-        { code: 'NOT_FOUND', message: 'Invitation not found' },
-        404
-      )
+      return c.json({ code: 'NOT_FOUND', message: 'Invitation not found' }, 404)
     }
 
     if (new Date() > invitation.expiresAt) {
-      return c.json(
-        { code: 'GONE', message: 'Invitation has expired' },
-        410
-      )
+      return c.json({ code: 'GONE', message: 'Invitation has expired' }, 410)
     }
 
     const memberId = createId()
@@ -121,10 +89,7 @@ export const createUserModule = (db: Database) => {
         userId: user.id,
         role: invitation.role,
       })
-      await tx
-        .update(invitations)
-        .set({ status: 'accepted' })
-        .where(eq(invitations.id, id))
+      await tx.update(invitations).set({ status: 'accepted' }).where(eq(invitations.id, id))
     })
 
     return c.json(
@@ -134,20 +99,15 @@ export const createUserModule = (db: Database) => {
         userId: user.id,
         role: invitation.role,
       },
-      201
+      201,
     )
   })
 
   // Decline an invitation
   app.post('/invitations/:id/decline', async (c) => {
-    const user = c.get('user' as never) as
-      | { id: string; email: string }
-      | undefined
+    const user = c.get('user' as never) as { id: string; email: string } | undefined
     if (!user) {
-      return c.json(
-        { code: 'UNAUTHORIZED', message: 'Not authenticated' },
-        401
-      )
+      return c.json({ code: 'UNAUTHORIZED', message: 'Not authenticated' }, 401)
     }
 
     const id = c.req.param('id')
@@ -159,22 +119,16 @@ export const createUserModule = (db: Database) => {
         and(
           eq(invitations.id, id),
           eq(invitations.email, user.email),
-          eq(invitations.status, 'pending')
-        )
+          eq(invitations.status, 'pending'),
+        ),
       )
       .limit(1)
 
     if (!invitation) {
-      return c.json(
-        { code: 'NOT_FOUND', message: 'Invitation not found' },
-        404
-      )
+      return c.json({ code: 'NOT_FOUND', message: 'Invitation not found' }, 404)
     }
 
-    await db
-      .update(invitations)
-      .set({ status: 'declined' })
-      .where(eq(invitations.id, id))
+    await db.update(invitations).set({ status: 'declined' }).where(eq(invitations.id, id))
 
     return c.json({ message: 'Invitation declined' })
   })
@@ -183,10 +137,7 @@ export const createUserModule = (db: Database) => {
   app.get('/orgs', async (c) => {
     const user = c.get('user' as never) as { id: string } | undefined
     if (!user) {
-      return c.json(
-        { code: 'UNAUTHORIZED', message: 'Not authenticated' },
-        401
-      )
+      return c.json({ code: 'UNAUTHORIZED', message: 'Not authenticated' }, 401)
     }
 
     const userMembers = await db
@@ -207,10 +158,7 @@ export const createUserModule = (db: Database) => {
   app.post('/orgs', async (c) => {
     const user = c.get('user' as never) as { id: string } | undefined
     if (!user) {
-      return c.json(
-        { code: 'UNAUTHORIZED', message: 'Not authenticated' },
-        401
-      )
+      return c.json({ code: 'UNAUTHORIZED', message: 'Not authenticated' }, 401)
     }
 
     const body = await c.req.json<{ name: string; slug?: string }>()
@@ -221,7 +169,7 @@ export const createUserModule = (db: Database) => {
           code: 'VALIDATION_ERROR',
           message: 'Organization name is required',
         },
-        400
+        400,
       )
     }
 

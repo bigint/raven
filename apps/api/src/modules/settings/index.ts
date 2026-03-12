@@ -21,6 +21,7 @@ export const createSettingsModule = (db: Database) => {
   // GET / — Get organization details
   app.get('/', async (c) => {
     const orgId = c.get('orgId' as never) as string
+    const orgRole = c.get('orgRole' as never) as string
 
     const [org] = await db
       .select({
@@ -38,7 +39,7 @@ export const createSettingsModule = (db: Database) => {
     }
 
     const [sub] = await db
-      .select({ plan: subscriptions.plan })
+      .select({ plan: subscriptions.plan, status: subscriptions.status })
       .from(subscriptions)
       .where(eq(subscriptions.organizationId, orgId))
       .limit(1)
@@ -48,6 +49,8 @@ export const createSettingsModule = (db: Database) => {
       name: org.name,
       slug: org.slug,
       plan: sub?.plan ?? 'free',
+      subscriptionStatus: sub?.status ?? 'active',
+      userRole: orgRole,
       createdAt: org.createdAt,
     })
   })
@@ -91,10 +94,19 @@ export const createSettingsModule = (db: Database) => {
       throw new NotFoundError('Organization not found')
     }
 
+    const [sub] = await db
+      .select({ plan: subscriptions.plan, status: subscriptions.status })
+      .from(subscriptions)
+      .where(eq(subscriptions.organizationId, orgId))
+      .limit(1)
+
     return c.json({
       id: updated.id,
       name: updated.name,
       slug: updated.slug,
+      plan: sub?.plan ?? 'free',
+      subscriptionStatus: sub?.status ?? 'active',
+      userRole: orgRole,
       createdAt: updated.createdAt,
     })
   })

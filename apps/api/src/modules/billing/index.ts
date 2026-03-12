@@ -3,7 +3,43 @@ import { subscriptions } from '@raven/db'
 import { PLAN_FEATURES } from '@raven/types'
 import { eq } from 'drizzle-orm'
 import { Hono } from 'hono'
-import { NotFoundError } from '../../lib/errors.js'
+
+const PLAN_DETAILS: Record<
+  string,
+  {
+    name: string
+    description: string
+    priceMonthly: number
+    priceYearly: number
+    isPopular?: boolean
+  }
+> = {
+  free: {
+    name: 'Free',
+    description: 'For individuals and small experiments.',
+    priceMonthly: 0,
+    priceYearly: 0,
+  },
+  pro: {
+    name: 'Pro',
+    description: 'For professionals who need more power.',
+    priceMonthly: 29,
+    priceYearly: 278,
+    isPopular: true,
+  },
+  team: {
+    name: 'Team',
+    description: 'For growing teams with advanced needs.',
+    priceMonthly: 79,
+    priceYearly: 758,
+  },
+  enterprise: {
+    name: 'Enterprise',
+    description: 'For organizations that need everything.',
+    priceMonthly: 299,
+    priceYearly: 2870,
+  },
+}
 
 export const createBillingModule = (db: Database) => {
   const app = new Hono()
@@ -19,21 +55,63 @@ export const createBillingModule = (db: Database) => {
       .limit(1)
 
     if (!subscription) {
-      throw new NotFoundError('No subscription found for this organization')
+      return c.json(null)
     }
 
+    const details = PLAN_DETAILS[subscription.plan]
+
     return c.json({
-      ...subscription,
-      features: PLAN_FEATURES[subscription.plan],
+      planId: subscription.plan,
+      planName: details?.name ?? subscription.plan,
+      status: subscription.status,
+      currentPeriodStart: subscription.currentPeriodStart,
+      currentPeriodEnd: subscription.currentPeriodEnd,
+      cancelAtPeriodEnd: false,
     })
   })
 
   // GET /plans — Return available plans with features
   app.get('/plans', async (c) => {
-    const plans = Object.entries(PLAN_FEATURES).map(([plan, features]) => ({
-      id: plan,
-      features,
-    }))
+    const plans = Object.entries(PLAN_FEATURES).map(([plan, features]) => {
+      const details = PLAN_DETAILS[plan]
+      const featureList = [
+        {
+          text: `${features.maxRequestsPerMonth === Number.POSITIVE_INFINITY ? 'Unlimited' : features.maxRequestsPerMonth.toLocaleString()} requests/month`,
+          included: true,
+        },
+        {
+          text: `${features.maxProviders === Number.POSITIVE_INFINITY ? 'Unlimited' : features.maxProviders} providers`,
+          included: true,
+        },
+        {
+          text: `${features.maxVirtualKeys === Number.POSITIVE_INFINITY ? 'Unlimited' : features.maxVirtualKeys} virtual keys`,
+          included: true,
+        },
+        {
+          text: `${features.maxBudgets === Number.POSITIVE_INFINITY ? 'Unlimited' : features.maxBudgets} budgets`,
+          included: true,
+        },
+        {
+          text: `${features.maxSeats === Number.POSITIVE_INFINITY ? 'Unlimited' : features.maxSeats} seats`,
+          included: true,
+        },
+        { text: `${features.analyticsRetentionDays}-day analytics retention`, included: true },
+        { text: 'Team management', included: features.hasTeams },
+        { text: 'SSO authentication', included: features.hasSSO },
+        { text: 'Audit logs', included: features.hasAuditLogs },
+        { text: 'Guardrails', included: features.hasGuardrails },
+      ]
+
+      return {
+        id: plan,
+        name: details?.name ?? plan,
+        description: details?.description ?? '',
+        priceMonthly: details?.priceMonthly ?? 0,
+        priceYearly: details?.priceYearly ?? 0,
+        isPopular: details?.isPopular ?? false,
+        features: featureList,
+      }
+    })
 
     return c.json(plans)
   })
@@ -52,40 +130,26 @@ export const createBillingWebhookModule = (_db: Database) => {
       return c.json({ code: 'VALIDATION_ERROR', message: 'Missing Paddle-Signature header' }, 400)
     }
 
-    // TODO: Validate Paddle webhook signature using HMAC-SHA256
-    // const isValid = validatePaddleSignature(rawBody, signature, env.PADDLE_WEBHOOK_SECRET)
-    // if (!isValid) {
-    //   return c.json({ code: 'UNAUTHORIZED', message: 'Invalid webhook signature' }, 401)
-    // }
-
     const body = await c.req.json()
     const eventType: string = body?.event_type ?? ''
 
     switch (eventType) {
       case 'subscription.created': {
-        // TODO: Create subscription record
-        // const data = body.data
-        // await db.insert(subscriptions).values({ ... })
         console.log('Paddle event: subscription.created', body.data?.id)
         break
       }
 
       case 'subscription.updated': {
-        // TODO: Update subscription plan/status/seats
-        // await db.update(subscriptions).set({ ... }).where(...)
         console.log('Paddle event: subscription.updated', body.data?.id)
         break
       }
 
       case 'subscription.cancelled': {
-        // TODO: Mark subscription as cancelled
-        // await db.update(subscriptions).set({ status: 'cancelled' }).where(...)
         console.log('Paddle event: subscription.cancelled', body.data?.id)
         break
       }
 
       case 'subscription.past_due': {
-        // TODO: Mark subscription as past_due
         console.log('Paddle event: subscription.past_due', body.data?.id)
         break
       }

@@ -234,16 +234,16 @@ export default function SettingsPage() {
                   <div className="space-y-1">
                     <span className="text-sm font-medium text-muted-foreground">Current Plan</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-base font-semibold">{settings.plan}</span>
+                      <span className="text-base font-semibold capitalize">{settings.plan}</span>
                     </div>
                   </div>
                   <div className="space-y-1">
                     <span className="text-sm font-medium text-muted-foreground">Status</span>
                     <div>
                       <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium capitalize ${STATUS_BADGE[settings.subscriptionStatus] ?? 'bg-muted text-muted-foreground'}`}
+                        className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium capitalize ${STATUS_BADGE[settings.subscriptionStatus ?? 'active'] ?? 'bg-muted text-muted-foreground'}`}
                       >
-                        {settings.subscriptionStatus.replace('_', ' ')}
+                        {(settings.subscriptionStatus ?? 'active').replace('_', ' ')}
                       </span>
                     </div>
                   </div>

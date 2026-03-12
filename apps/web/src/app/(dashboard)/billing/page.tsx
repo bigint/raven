@@ -49,11 +49,11 @@ export default function BillingPage() {
       setLoading(true)
       setError(null)
       const [subData, plansData] = await Promise.all([
-        api.get<Subscription>('/v1/billing/subscription'),
+        api.get<Subscription | null>('/v1/billing/subscription'),
         api.get<Plan[]>('/v1/billing/plans'),
       ])
       setSubscription(subData)
-      setPlans(plansData)
+      setPlans(plansData ?? [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load billing data')
     } finally {
