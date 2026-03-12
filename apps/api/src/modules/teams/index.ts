@@ -1,4 +1,3 @@
-import { randomBytes } from 'node:crypto'
 import type { Database } from '@raven/db'
 import { invitations, members, teamMembers, teams, users } from '@raven/db'
 import { and, eq } from 'drizzle-orm'
@@ -43,7 +42,6 @@ export const createTeamsModule = (db: Database) => {
         createdAt: members.createdAt,
         userName: users.name,
         userEmail: users.email,
-        userAvatarUrl: users.avatarUrl,
       })
       .from(members)
       .innerJoin(users, eq(members.userId, users.id))
@@ -53,14 +51,10 @@ export const createTeamsModule = (db: Database) => {
       rows.map((r) => ({
         id: r.id,
         userId: r.userId,
+        name: r.userName,
+        email: r.userEmail,
         role: r.role,
-        createdAt: r.createdAt,
-        user: {
-          id: r.userId,
-          name: r.userName,
-          email: r.userEmail,
-          avatarUrl: r.userAvatarUrl,
-        },
+        joinedAt: r.createdAt,
       })),
     )
   })
@@ -115,7 +109,7 @@ export const createTeamsModule = (db: Database) => {
       throw new ConflictError('An invitation for this email already exists')
     }
 
-    const token = randomBytes(32).toString('hex')
+    const currentUser = c.get('user' as never) as { id: string }
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + 7)
 
@@ -125,7 +119,7 @@ export const createTeamsModule = (db: Database) => {
         organizationId: orgId,
         email,
         role,
-        token,
+        inviterId: currentUser.id,
         expiresAt,
       })
       .returning()
@@ -133,12 +127,51 @@ export const createTeamsModule = (db: Database) => {
     return c.json(created, 201)
   })
 
-  // DELETE /members/:userId — Remove a member from org
-  app.delete('/members/:userId', async (c) => {
+  // GET /invitations — List org invitations
+  app.get('/invitations', async (c) => {
+    const orgId = c.get('orgId' as never) as string
+
+    const rows = await db
+      .select()
+      .from(invitations)
+      .where(eq(invitations.organizationId, orgId))
+
+    return c.json(rows)
+  })
+
+  // DELETE /invitations/:id — Revoke an invitation
+  app.delete('/invitations/:id', async (c) => {
+    const orgId = c.get('orgId' as never) as string
+    const orgRole = c.get('orgRole' as never) as string
+    const id = c.req.param('id')
+
+    if (orgRole !== 'owner' && orgRole !== 'admin') {
+      throw new ForbiddenError('Only owners and admins can revoke invitations')
+    }
+
+    const [existing] = await db
+      .select({ id: invitations.id })
+      .from(invitations)
+      .where(and(eq(invitations.id, id), eq(invitations.organizationId, orgId)))
+      .limit(1)
+
+    if (!existing) {
+      throw new NotFoundError('Invitation not found')
+    }
+
+    await db
+      .delete(invitations)
+      .where(and(eq(invitations.id, id), eq(invitations.organizationId, orgId)))
+
+    return c.json({ success: true })
+  })
+
+  // DELETE /members/:id — Remove a member from org
+  app.delete('/members/:id', async (c) => {
     const orgId = c.get('orgId' as never) as string
     const orgRole = c.get('orgRole' as never) as string
     const currentUser = c.get('user' as never) as { id: string }
-    const userId = c.req.param('userId')
+    const id = c.req.param('id')
 
     if (orgRole !== 'owner' && orgRole !== 'admin') {
       throw new ForbiddenError('Only owners and admins can remove members')
@@ -147,7 +180,7 @@ export const createTeamsModule = (db: Database) => {
     const [membership] = await db
       .select()
       .from(members)
-      .where(and(eq(members.organizationId, orgId), eq(members.userId, userId)))
+      .where(and(eq(members.id, id), eq(members.organizationId, orgId)))
       .limit(1)
 
     if (!membership) {
@@ -158,22 +191,22 @@ export const createTeamsModule = (db: Database) => {
       throw new ForbiddenError('The owner cannot be removed from the organization')
     }
 
-    if (userId === currentUser.id && orgRole === 'owner') {
-      throw new ForbiddenError('Owner cannot remove themselves')
+    if (membership.userId === currentUser.id) {
+      throw new ForbiddenError('You cannot remove yourself')
     }
 
     await db
       .delete(members)
-      .where(and(eq(members.organizationId, orgId), eq(members.userId, userId)))
+      .where(and(eq(members.id, id), eq(members.organizationId, orgId)))
 
     return c.json({ success: true })
   })
 
-  // PUT /members/:userId/role — Change member role
-  app.put('/members/:userId/role', async (c) => {
+  // PUT /members/:id/role — Change member role
+  app.put('/members/:id/role', async (c) => {
     const orgId = c.get('orgId' as never) as string
     const orgRole = c.get('orgRole' as never) as string
-    const userId = c.req.param('userId')
+    const id = c.req.param('id')
 
     if (orgRole !== 'owner' && orgRole !== 'admin') {
       throw new ForbiddenError('Only owners and admins can change member roles')
@@ -191,7 +224,7 @@ export const createTeamsModule = (db: Database) => {
     const [membership] = await db
       .select()
       .from(members)
-      .where(and(eq(members.organizationId, orgId), eq(members.userId, userId)))
+      .where(and(eq(members.id, id), eq(members.organizationId, orgId)))
       .limit(1)
 
     if (!membership) {
@@ -205,7 +238,7 @@ export const createTeamsModule = (db: Database) => {
     const [updated] = await db
       .update(members)
       .set({ role: result.data.role })
-      .where(and(eq(members.organizationId, orgId), eq(members.userId, userId)))
+      .where(and(eq(members.id, id), eq(members.organizationId, orgId)))
       .returning()
 
     return c.json(updated)
