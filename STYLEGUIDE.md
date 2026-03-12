@@ -40,7 +40,8 @@ function processLargeDataset(data: any) {
 - [Performance Guidelines](#performance-guidelines)
 - [Error Boundaries](#error-boundaries)
 - [Styling with Tailwind CSS](#styling-with-tailwind-css)
-- [Routing with TanStack Router](#routing-with-tanstack-router)
+- [Routing with Next.js App Router](#routing-with-nextjs-app-router)
+- [Backend Patterns (Hono)](#backend-patterns-hono)
 - [Accessibility](#accessibility)
 - [General TypeScript/JavaScript Coding Guidelines](#general-typescriptjavascript-coding-guidelines)
 - [Code Formatting \& Linting with Biome](#code-formatting--linting-with-biome)
@@ -144,15 +145,17 @@ The app uses modern web technologies:
 
 ### Core Framework
 - **React 19** - UI framework with modern hooks and concurrent features
-- **TypeScript 5.9** - Type-safe JavaScript with strict mode
-- **Vite 7** - Fast build tool with HMR
+- **TypeScript 5.8** - Type-safe JavaScript with strict mode
+- **Next.js 15 (App Router)** - Full-stack React framework with file-based routing, server components, and API routes
 
 ### API & Data Management
-- **GraphQL Yoga + Pothos** - Type-safe GraphQL server
-- **urql** - Lightweight GraphQL client with graphcache
-- **GraphQL Codegen** - Type-safe operations from .graphql documents
+- **Hono** - Lightweight, fast backend framework (API server)
+- **TanStack Query v5** - Async state management for data fetching
 - **Drizzle ORM** - Zero-overhead PostgreSQL ORM
-- **React Router 7** - Client-side routing with code splitting
+- **Zod** - Runtime schema validation for API inputs and form data
+
+### Routing
+- **Next.js App Router** - File-based routing with route groups, layouts, and `page.tsx` conventions
 
 ### UI & Styling
 - **Tailwind CSS 4** - Utility-first CSS framework
@@ -162,6 +165,7 @@ The app uses modern web technologies:
 
 ### Quality
 - **Biome** - Fast formatter and linter
+- **Vitest** - Fast unit and integration testing
 
 ### File Naming Conventions
 
@@ -169,7 +173,7 @@ The app uses modern web technologies:
 - **Utility Files**: `camelCase.ts` (e.g., `formatDate.ts`)
 - **Hooks**: `use*.ts` (e.g., `useProfile.ts`)
 - **Types**: `*.types.ts` (e.g., `profile.types.ts`)
-- **Route Files**: TanStack Router conventions (e.g., `$name.tsx`)
+- **Route Files**: Next.js App Router conventions (`page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`)
 
 ## Naming Conventions
 
@@ -413,11 +417,6 @@ export const ProfileCard = ({ name, address }: ProfileCardProps) => {
   )
 }
 
-// Good - Inline arrow function for router components
-export const Route = createRootRoute({
-  component: () => <Outlet />,
-})
-
 // Avoid - Function declaration for components (use for utilities only)
 export function ProfileCard({ name, address }: ProfileCardProps) {
   return <div>...</div>
@@ -430,20 +429,6 @@ export const ProfileCard = function({ name, address }: ProfileCardProps) {
 ```
 
 **Note**: Function declarations (`function`) are reserved for utility functions and helpers, not React components.
-
-**Exception — Route component functions**: In TanStack Router route files (`routes/`), the `RouteComponent` function referenced by `createFileRoute` may use a function declaration. This is the convention used by TanStack Router's code generation and keeps route files consistent with the router's own patterns.
-
-```typescript
-// Good - Function declaration for route components in route files
-export const Route = createFileRoute('/$name/deploy-registry')({
-  component: RouteComponent,
-})
-
-function RouteComponent() {
-  const { name } = Route.useParams()
-  // ...
-}
-```
 
 ### Component Props
 
@@ -892,13 +877,12 @@ export const MultiProfileCard = ({ names }: { names: string[] }) => {
   )
 }
 
-// ✅ Preloading in router loader
-export const Route = createFileRoute('/$name/records')({
-  loader: ({ context: { queryClient }, params: { name } }) => {
-    return queryClient.prefetchQuery(getProfileQueryOptions(name))
-  },
-  component: ProfilePage,
-})
+// ✅ Preloading in Next.js page component
+// app/[name]/records/page.tsx
+export default function RecordsPage({ params }: { params: { name: string } }) {
+  // Data is prefetched via server component or loaded client-side
+  return <ProfilePage name={params.name} />
+}
 ```
 
 **Key points**:
@@ -1259,7 +1243,7 @@ export const Parent = () => {
 
 Before optimizing, check these first:
 
-1. **Code splitting** - Use route-based lazy loading with TanStack Router
+1. **Code splitting** - Use route-based code splitting with Next.js App Router (automatic per-route splitting)
 2. **Bundle analysis** - Remove unused dependencies (`pnpm why <package>`)
 3. **Image optimization** - Use WebP, lazy loading, proper sizing
 4. **Query management** - Set appropriate `staleTime` and `gcTime` for TanStack Query
@@ -1292,20 +1276,22 @@ Error boundaries catch rendering errors that escape normal error handling.
 ```typescript
 import { ErrorBoundary } from 'react-error-boundary'
 
-// Route-level error boundary
-export const Route = createFileRoute('/$name')({
-  component: () => (
-    <ErrorBoundary
-      fallback={<ErrorFallback />}
-      onError={(error, info) => {
-        console.error('Rendering error:', error, info)
-        // Optional: Send to error tracking service
-      }}
-    >
-      <NamePage />
-    </ErrorBoundary>
-  ),
-})
+// Route-level error boundary using Next.js error.tsx convention
+// app/[name]/error.tsx
+'use client'
+
+export default function NameError({ error, reset }: { error: Error; reset: () => void }) {
+  return (
+    <div role="alert" className="p-4">
+      <h2>Something went wrong</h2>
+      <pre className="text-sm">{error.message}</pre>
+      <button onClick={reset}>Try again</button>
+    </div>
+  )
+}
+
+// Or use react-error-boundary for component-level boundaries
+// within a page or layout
 ```
 
 ### Error Types
@@ -1543,72 +1529,121 @@ import { CalendarIcon } from 'lucide-react'
 <CalendarIcon size={16} />
 ```
 
-## Routing with TanStack Router
+## Routing with Next.js App Router
 
 ### File-Based Routing
 
-TanStack Router uses file-based routing:
+Next.js App Router uses file-system-based routing with special file conventions:
 
 ```
-routes/
-├── __root.tsx              # Root layout
-├── index.tsx               # / route
-├── $name.tsx               # /:name route
-└── $name/
-    ├── records.tsx         # /:name/records
-    └── history.tsx         # /:name/history
+app/
+├── layout.tsx                # Root layout (wraps all pages)
+├── page.tsx                  # / route
+├── loading.tsx               # Loading UI for / route
+├── error.tsx                 # Error UI for / route
+├── (dashboard)/              # Route group (no URL segment)
+│   ├── layout.tsx            # Shared layout for dashboard pages
+│   ├── settings/
+│   │   └── page.tsx          # /settings
+│   └── analytics/
+│       └── page.tsx          # /analytics
+├── [name]/                   # Dynamic segment (/:name)
+│   ├── page.tsx              # /:name route
+│   ├── layout.tsx            # Layout for /:name and children
+│   ├── records/
+│   │   └── page.tsx          # /:name/records
+│   └── history/
+│       └── page.tsx          # /:name/history
+└── api/                      # API routes (if needed alongside Hono)
+    └── [...slug]/
+        └── route.ts
 ```
 
-### Route Definition
+### Route Groups
+
+Use route groups `(groupName)` to organize routes without affecting the URL structure:
+
+```
+app/
+├── (marketing)/              # Marketing pages
+│   ├── layout.tsx            # Marketing-specific layout
+│   ├── page.tsx              # / (home)
+│   └── about/
+│       └── page.tsx          # /about
+├── (app)/                    # Application pages
+│   ├── layout.tsx            # App layout with sidebar/nav
+│   ├── dashboard/
+│   │   └── page.tsx          # /dashboard
+│   └── [name]/
+│       └── page.tsx          # /:name
+```
+
+### Page Components
 
 ```typescript
-// routes/$name.tsx
-import { createFileRoute } from '@tanstack/react-router'
+// app/[name]/page.tsx
+import { useParams } from 'next/navigation'
 
-export const Route = createFileRoute('/$name')({
-  // Type-safe params
-  validateSearch: (search) => ({
-    tab: (search.tab as 'profile' | 'records') || 'profile',
-  }),
-  
-  // Load data before rendering
-  loader: async ({ params: { name } }) => {
-    return await getProfile(name)
-  },
-  
-  // Component
-  component: function NamePage() {
-    const { name } = Route.useParams()
-    const { tab } = Route.useSearch()
-    
-    return <div>...</div>
-  },
-})
+// Server component (default in App Router)
+export default function NamePage({ params }: { params: { name: string } }) {
+  return <ProfileView name={params.name} />
+}
+
+// Client component (when you need hooks/interactivity)
+'use client'
+
+import { useParams, useSearchParams } from 'next/navigation'
+
+export default function NamePage() {
+  const params = useParams<{ name: string }>()
+  const searchParams = useSearchParams()
+  const tab = searchParams.get('tab') ?? 'profile'
+
+  return <div>...</div>
+}
+```
+
+### Layouts
+
+```typescript
+// app/[name]/layout.tsx
+export default function NameLayout({
+  children,
+  params
+}: {
+  children: React.ReactNode
+  params: { name: string }
+}) {
+  return (
+    <div>
+      <ProfileHeader name={params.name} />
+      <main>{children}</main>
+    </div>
+  )
+}
 ```
 
 ### Navigation
 
 ```typescript
-import { Link, useNavigate } from '@tanstack/react-router'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 export const Navigation = () => {
-  const navigate = useNavigate()
-  
+  const router = useRouter()
+
   return (
     <nav>
-      {/* Type-safe Link */}
-      <Link to="/$name" params={{ name: 'alice' }}>
+      {/* Link component */}
+      <Link href={`/alice`}>
         View Profile
       </Link>
-      
+
       {/* Programmatic navigation */}
       <button
+        type="button"
         onClick={() => {
-          navigate({
-            to: '/$name',
-            params: { name: 'alice' },
-            search: { tab: 'records' },
-          })
+          router.push('/alice?tab=records')
         }}
       >
         Go to Records
@@ -1616,6 +1651,209 @@ export const Navigation = () => {
     </nav>
   )
 }
+```
+
+## Backend Patterns (Hono)
+
+### Module Structure
+
+Each backend module exports a Hono app that is mounted on the main router. This keeps the codebase modular and each domain isolated.
+
+```typescript
+// modules/profiles/index.ts
+import { Hono } from 'hono'
+
+const app = new Hono()
+
+app.get('/:name', async (c) => {
+  const name = c.req.param('name')
+  const profile = await getProfile(name)
+  return c.json(profile)
+})
+
+app.post('/', async (c) => {
+  const body = await c.req.json()
+  const profile = await createProfile(body)
+  return c.json(profile, 201)
+})
+
+export default app
+```
+
+```typescript
+// Main router - mounts all modules
+import { Hono } from 'hono'
+import profiles from './modules/profiles'
+import channels from './modules/channels'
+import auth from './modules/auth'
+
+const app = new Hono()
+
+app.route('/profiles', profiles)
+app.route('/channels', channels)
+app.route('/auth', auth)
+
+export default app
+```
+
+### Request Validation with Zod
+
+Use `@hono/zod-validator` to validate request bodies, params, and query strings at the route level:
+
+```typescript
+import { Hono } from 'hono'
+import { zValidator } from '@hono/zod-validator'
+import { z } from 'zod'
+
+const createProfileSchema = z.object({
+  name: z.string().min(1).max(253),
+  email: z.string().email(),
+  bio: z.string().max(500).optional(),
+})
+
+const querySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+})
+
+const app = new Hono()
+
+app.post(
+  '/',
+  zValidator('json', createProfileSchema),
+  async (c) => {
+    const data = c.req.valid('json') // Fully typed from schema
+    const profile = await createProfile(data)
+    return c.json(profile, 201)
+  }
+)
+
+app.get(
+  '/',
+  zValidator('query', querySchema),
+  async (c) => {
+    const { page, limit } = c.req.valid('query')
+    const profiles = await listProfiles({ page, limit })
+    return c.json(profiles)
+  }
+)
+
+export default app
+```
+
+### Error Handling
+
+Use custom error classes with a global error handler:
+
+```typescript
+// errors.ts
+export class AppError extends Error {
+  constructor(
+    message: string,
+    public readonly statusCode: number = 500,
+    public readonly code: string = 'INTERNAL_ERROR'
+  ) {
+    super(message)
+  }
+}
+
+export class NotFoundError extends AppError {
+  constructor(resource: string, id: string) {
+    super(`${resource} '${id}' not found`, 404, 'NOT_FOUND')
+  }
+}
+
+export class ValidationError extends AppError {
+  constructor(message: string) {
+    super(message, 400, 'VALIDATION_ERROR')
+  }
+}
+
+export class UnauthorizedError extends AppError {
+  constructor(message = 'Unauthorized') {
+    super(message, 401, 'UNAUTHORIZED')
+  }
+}
+```
+
+```typescript
+// Global error handler
+import { type ErrorHandler } from 'hono'
+
+export const errorHandler: ErrorHandler = (err, c) => {
+  if (err instanceof AppError) {
+    return c.json(
+      { error: { code: err.code, message: err.message } },
+      err.statusCode as 400 | 401 | 404 | 500
+    )
+  }
+
+  console.error('Unhandled error:', err)
+  return c.json(
+    { error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } },
+    500
+  )
+}
+
+// Mount on app
+app.onError(errorHandler)
+```
+
+### Middleware Patterns
+
+Create reusable middleware for cross-cutting concerns:
+
+```typescript
+import { createMiddleware } from 'hono/factory'
+
+// Auth middleware
+export const requireAuth = createMiddleware<{
+  Variables: { userId: string }
+}>(async (c, next) => {
+  const token = c.req.header('Authorization')?.replace('Bearer ', '')
+  if (!token) throw new UnauthorizedError()
+
+  const session = await validateToken(token)
+  if (!session) throw new UnauthorizedError('Invalid token')
+
+  c.set('userId', session.userId)
+  await next()
+})
+
+// Usage in routes
+app.get('/me', requireAuth, async (c) => {
+  const userId = c.get('userId') // Typed from middleware
+  const profile = await getProfileByUserId(userId)
+  return c.json(profile)
+})
+```
+
+```typescript
+// Logging middleware
+export const requestLogger = createMiddleware(async (c, next) => {
+  const start = Date.now()
+  await next()
+  const duration = Date.now() - start
+  console.log(`${c.req.method} ${c.req.path} - ${c.res.status} (${duration}ms)`)
+})
+
+// Mount globally
+app.use('*', requestLogger)
+```
+
+### API Response Patterns
+
+Keep response shapes consistent across all endpoints:
+
+```typescript
+// Success responses
+c.json({ data: profile })              // Single resource
+c.json({ data: profiles, meta: { page, total } })  // Paginated list
+c.json(null, 204)                       // No content (delete)
+
+// Error responses (handled by global error handler)
+throw new NotFoundError('Profile', name)
+throw new ValidationError('Name is required')
 ```
 
 ## Accessibility
@@ -1999,13 +2237,16 @@ Ask yourself these questions when writing code:
 
 - **React 19**: [react.dev](https://react.dev)
 - **TypeScript**: [typescriptlang.org](https://www.typescriptlang.org/)
+- **Next.js 15**: [nextjs.org](https://nextjs.org/)
+- **Hono**: [hono.dev](https://hono.dev/)
 - **TanStack Query**: [tanstack.com/query](https://tanstack.com/query/latest)
-- **TanStack Router**: [tanstack.com/router](https://tanstack.com/router/latest)
+- **Drizzle ORM**: [orm.drizzle.team](https://orm.drizzle.team/)
+- **Zod**: [zod.dev](https://zod.dev/)
 - **XState**: [stately.ai/docs/xstate](https://stately.ai/docs/xstate)
 - **Tailwind CSS**: [tailwindcss.com](https://tailwindcss.com/)
-- **Shadcn UI**: [ui.shadcn.com](https://ui.shadcn.com/)
 - **Base UI**: [base-ui.com](https://base-ui.com/)
 - **Biome**: [biomejs.dev](https://biomejs.dev/)
+- **Vitest**: [vitest.dev](https://vitest.dev/)
 
 ### Internal Documentation
 

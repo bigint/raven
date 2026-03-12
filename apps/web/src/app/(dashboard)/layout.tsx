@@ -1,0 +1,273 @@
+"use client";
+
+import type { LucideIcon } from "lucide-react";
+import {
+  BarChart3,
+  Check,
+  ChevronDown,
+  CreditCard,
+  Key,
+  LayoutDashboard,
+  LogOut,
+  Network,
+  Plus,
+  Receipt,
+  ScrollText,
+  Settings,
+  User,
+  Users
+} from "lucide-react";
+import Link from "next/link";
+import { redirect, usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { api, setOrgId } from "@/lib/api";
+import { signOut, useSession } from "@/lib/auth-client";
+
+interface Org {
+  id: string;
+  name: string;
+  slug: string;
+  role: string;
+}
+
+const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
+  { href: "/overview", icon: LayoutDashboard, label: "Overview" },
+  { href: "/providers", icon: Network, label: "Providers" },
+  { href: "/keys", icon: Key, label: "Keys" },
+  { href: "/analytics", icon: BarChart3, label: "Analytics" },
+  { href: "/requests", icon: ScrollText, label: "Requests" },
+  { href: "/budgets", icon: CreditCard, label: "Budgets" },
+  { href: "/team", icon: Users, label: "Team" },
+  { href: "/billing", icon: Receipt, label: "Billing" }
+];
+
+export default function DashboardLayout({
+  children
+}: {
+  children: React.ReactNode;
+}) {
+  const { data: session, isPending } = useSession();
+  const [orgReady, setOrgReady] = useState(false);
+  const [orgs, setOrgs] = useState<Org[]>([]);
+  const [activeOrg, setActiveOrg] = useState<Org | null>(null);
+  const [orgDropdownOpen, setOrgDropdownOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const orgDropdownRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const fetchOrgs = useCallback(async () => {
+    try {
+      const orgList = await api.get<Org[]>("/v1/user/orgs");
+      setOrgs(orgList ?? []);
+      const firstOrg = orgList?.[0];
+      if (firstOrg) {
+        setOrgId(firstOrg.id);
+        setActiveOrg(firstOrg);
+      }
+    } catch {
+      // Org endpoint may not exist yet — try to continue without
+    }
+    setOrgReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (session?.user) {
+      fetchOrgs();
+    }
+  }, [session?.user, fetchOrgs]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        orgDropdownRef.current &&
+        !orgDropdownRef.current.contains(e.target as Node)
+      ) {
+        setOrgDropdownOpen(false);
+      }
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(e.target as Node)
+      ) {
+        setUserMenuOpen(false);
+      }
+    };
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOrgDropdownOpen(false);
+        setUserMenuOpen(false);
+      }
+    };
+    if (orgDropdownOpen || userMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleEscape);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [orgDropdownOpen, userMenuOpen]);
+
+  if (isPending || (!orgReady && session)) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="size-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!session) {
+    redirect("/sign-in");
+  }
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/");
+  };
+
+  const handleSwitchOrg = (org: Org) => {
+    setOrgId(org.id);
+    setActiveOrg(org);
+    setOrgDropdownOpen(false);
+    window.location.reload();
+  };
+
+  return (
+    <div className="flex min-h-screen">
+      <aside className="w-60 border-r border-border bg-muted/50 flex flex-col">
+        <div className="relative border-b border-border" ref={orgDropdownRef}>
+          <button
+            className="flex w-full items-center gap-2 px-5 py-4 transition-colors hover:bg-accent"
+            onClick={() => setOrgDropdownOpen(!orgDropdownOpen)}
+            type="button"
+          >
+            <div className="size-7 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-xs font-bold text-primary-foreground">
+                {activeOrg?.name?.charAt(0)?.toUpperCase() ?? "R"}
+              </span>
+            </div>
+            <span className="flex-1 text-left font-semibold truncate">
+              {activeOrg?.name ?? "Raven"}
+            </span>
+            <ChevronDown
+              className={`size-4 text-muted-foreground transition-transform ${orgDropdownOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+
+          {orgDropdownOpen && (
+            <div className="absolute left-2 right-2 z-50 mt-1 rounded-lg border border-border bg-popover py-1 shadow-md ring-1 ring-black/5">
+              {orgs.map((org) => (
+                <button
+                  className={`flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground ${
+                    org.id === activeOrg?.id
+                      ? "text-foreground"
+                      : "text-muted-foreground"
+                  }`}
+                  key={org.id}
+                  onClick={() => handleSwitchOrg(org)}
+                  type="button"
+                >
+                  <Check
+                    className={`size-3.5 shrink-0 ${org.id === activeOrg?.id ? "opacity-100" : "opacity-0"}`}
+                  />
+                  {org.name}
+                </button>
+              ))}
+              <div className="border-t border-border mt-1 pt-1">
+                <Link
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                  href="/profile"
+                  onClick={() => setOrgDropdownOpen(false)}
+                >
+                  <Plus className="size-3.5 shrink-0" />
+                  Create Organization
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <nav className="flex-1 px-3 py-3 space-y-0.5">
+          {NAV_ITEMS.map((item) => {
+            const isActive = pathname === item.href;
+            const Icon = item.icon;
+            return (
+              <Link
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
+                  isActive
+                    ? "bg-primary text-primary-foreground font-medium"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                }`}
+                href={item.href}
+                key={item.href}
+              >
+                <Icon className="size-4" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div
+          className="relative border-t border-border px-3 py-3"
+          ref={userMenuRef}
+        >
+          {userMenuOpen && (
+            <div className="absolute bottom-full left-2 right-2 mb-1 rounded-lg border border-border bg-popover py-1 shadow-md ring-1 ring-black/5">
+              <Link
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                href="/profile"
+                onClick={() => setUserMenuOpen(false)}
+              >
+                <User className="size-4" />
+                Profile
+              </Link>
+              <Link
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                href="/settings"
+                onClick={() => setUserMenuOpen(false)}
+              >
+                <Settings className="size-4" />
+                Settings
+              </Link>
+              <div className="border-t border-border my-1" />
+              <button
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive transition-colors hover:bg-destructive/10 text-left"
+                onClick={handleSignOut}
+                type="button"
+              >
+                <LogOut className="size-4" />
+                Sign out
+              </button>
+            </div>
+          )}
+          <button
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-accent"
+            onClick={() => setUserMenuOpen(!userMenuOpen)}
+            type="button"
+          >
+            <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium">
+              {session.user?.name?.charAt(0)?.toUpperCase() ?? "?"}
+            </div>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-sm font-medium truncate">
+                {session.user?.name}
+              </p>
+              <p className="text-xs text-muted-foreground truncate">
+                {session.user?.email}
+              </p>
+            </div>
+            <ChevronDown
+              className={`size-4 text-muted-foreground transition-transform ${userMenuOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+        </div>
+      </aside>
+
+      <main className="flex-1 overflow-auto">
+        <div className="px-8 py-6">{children}</div>
+      </main>
+    </div>
+  );
+}

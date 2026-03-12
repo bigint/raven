@@ -1,5 +1,0 @@
-* @bigint-studio/raven
-gateway/ @bigint-studio/gateway
-dashboard/ @bigint-studio/frontend
-website/ @bigint-studio/frontend
-sdks/ @bigint-studio/sdks

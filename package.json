@@ -1,6 +1,12 @@
 {
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.6",
+    "@paralleldrive/cuid2": "^3.3.0",
+    "drizzle-orm": "^0.45.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
   "name": "raven",
-  "private": true,
   "packageManager": "pnpm@10.27.0",
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -9,20 +15,20 @@
       "sharp"
     ]
   },
+  "private": true,
   "scripts": {
-    "dev": "pnpm -r --parallel dev",
     "build": "pnpm -r build",
-    "lint": "pnpm -r lint",
-    "format": "pnpm -r format",
+    "db:generate": "pnpm --filter @raven/db generate",
+    "db:migrate": "pnpm --filter @raven/db migrate",
+    "db:seed": "tsx --env-file=.env scripts/seed.ts",
+    "db:studio": "pnpm --filter @raven/db studio",
+    "dev": "pnpm -r --parallel dev",
+    "dev:api": "pnpm --filter @raven/api dev",
+    "dev:web": "pnpm --filter @raven/web dev",
+    "format": "biome format --write .",
+    "lint": "biome check --write .",
     "test": "pnpm -r test",
-    "dev:dashboard": "pnpm --filter dashboard dev",
-    "dev:website": "pnpm --filter website dev",
-    "build:dashboard": "pnpm --filter dashboard build",
-    "build:website": "pnpm --filter website build",
-    "build:sdk": "pnpm --filter @raven-gateway/sdk build",
-    "build:gateway": "cd gateway && go build -o raven .",
-    "test:gateway": "cd gateway && go test ./...",
-    "test:dashboard": "pnpm --filter dashboard test",
-    "test:sdk": "pnpm --filter @raven-gateway/sdk test"
-  }
+    "typecheck": "pnpm -r typecheck"
+  },
+  "type": "module"
 }
