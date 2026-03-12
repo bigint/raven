@@ -4,12 +4,7 @@ import { useState } from "react";
 import { Button, Input, Modal } from "@raven/ui";
 import { Select } from "@/components/select";
 import type { Budget } from "../hooks/use-budgets";
-import {
-  ENTITY_TYPE_OPTIONS,
-  PERIOD_OPTIONS,
-  useCreateBudget,
-  useUpdateBudget
-} from "../hooks/use-budgets";
+import { ENTITY_TYPE_OPTIONS, PERIOD_OPTIONS, useCreateBudget, useUpdateBudget } from "../hooks/use-budgets";
 
 interface FormState {
   entityType: string;
@@ -19,13 +14,7 @@ interface FormState {
   alertThreshold: string;
 }
 
-const DEFAULT_FORM: FormState = {
-  alertThreshold: "80",
-  entityId: "",
-  entityType: "org",
-  limitAmount: "",
-  period: "monthly"
-};
+const DEFAULT_FORM: FormState = { alertThreshold: "80", entityId: "", entityType: "org", limitAmount: "", period: "monthly" };
 
 interface BudgetFormProps {
   open: boolean;
@@ -35,169 +24,79 @@ interface BudgetFormProps {
 
 const BudgetForm = ({ open, onClose, editingBudget }: BudgetFormProps) => {
   const isEdit = !!editingBudget;
-
   const [form, setForm] = useState<FormState>(() =>
     editingBudget
       ? {
-          alertThreshold: String(
-            Math.round(Number(editingBudget.alertThreshold) * 100)
-          ),
-          entityId: editingBudget.entityId,
-          entityType: editingBudget.entityType,
-          limitAmount: String(editingBudget.limitAmount),
-          period: editingBudget.period
+          alertThreshold: String(Math.round(Number(editingBudget.alertThreshold) * 100)),
+          entityId: editingBudget.entityId, entityType: editingBudget.entityType,
+          limitAmount: String(editingBudget.limitAmount), period: editingBudget.period
         }
       : DEFAULT_FORM
   );
   const [formError, setFormError] = useState<string | null>(null);
-
   const createMutation = useCreateBudget();
   const updateMutation = useUpdateBudget();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
+  const update = (field: keyof FormState, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
-  const handleClose = () => {
-    setForm(DEFAULT_FORM);
-    setFormError(null);
-    onClose();
-  };
+  const handleClose = () => { setForm(DEFAULT_FORM); setFormError(null); onClose(); };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
-
-    if (!form.limitAmount.trim() || Number.isNaN(Number(form.limitAmount))) {
-      setFormError("Limit amount must be a valid number");
-      return;
-    }
-    if (!form.entityId.trim()) {
-      setFormError("Entity ID is required");
-      return;
-    }
+    if (!form.limitAmount.trim() || Number.isNaN(Number(form.limitAmount))) { setFormError("Limit amount must be a valid number"); return; }
+    if (!form.entityId.trim()) { setFormError("Entity ID is required"); return; }
     const alertVal = Number(form.alertThreshold);
-    if (Number.isNaN(alertVal) || alertVal < 0 || alertVal > 100) {
-      setFormError("Alert threshold must be between 0 and 100");
-      return;
-    }
+    if (Number.isNaN(alertVal) || alertVal < 0 || alertVal > 100) { setFormError("Alert threshold must be between 0 and 100"); return; }
 
     const body = {
-      alertThreshold: alertVal / 100,
-      entityId: form.entityId.trim(),
-      entityType: form.entityType,
-      limitAmount: Number(form.limitAmount),
-      period: form.period
+      alertThreshold: alertVal / 100, entityId: form.entityId.trim(),
+      entityType: form.entityType, limitAmount: Number(form.limitAmount), period: form.period
     };
 
     try {
-      if (isEdit && editingBudget) {
-        await updateMutation.mutateAsync({ id: editingBudget.id, ...body });
-      } else {
-        await createMutation.mutateAsync(body);
-      }
+      if (isEdit && editingBudget) { await updateMutation.mutateAsync({ id: editingBudget.id, ...body }); }
+      else { await createMutation.mutateAsync(body); }
       handleClose();
     } catch (err) {
-      setFormError(
-        err instanceof Error ? err.message : "Something went wrong"
-      );
+      setFormError(err instanceof Error ? err.message : "Something went wrong");
     }
   };
 
   return (
-    <Modal
-      open={open}
-      onClose={handleClose}
-      title={isEdit ? "Edit Budget" : "Add Budget"}
-    >
+    <Modal open={open} onClose={handleClose} title={isEdit ? "Edit Budget" : "Add Budget"}>
       <form className="space-y-4" onSubmit={handleSubmit}>
         {formError && (
-          <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            {formError}
-          </div>
+          <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{formError}</div>
         )}
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium" htmlFor="entity-type">
-            Entity Type
-          </label>
-          <Select
-            id="entity-type"
-            onChange={(v) => setForm((f) => ({ ...f, entityType: v }))}
-            options={ENTITY_TYPE_OPTIONS}
-            value={form.entityType}
-          />
+          <label className="text-sm font-medium" htmlFor="entity-type">Entity Type</label>
+          <Select id="entity-type" onChange={(v) => update("entityType", v)} options={ENTITY_TYPE_OPTIONS} value={form.entityType} />
         </div>
 
-        <Input
-          id="entity-id"
-          label="Entity ID"
-          onChange={(e) =>
-            setForm((f) => ({ ...f, entityId: e.target.value }))
-          }
-          placeholder="e.g. org_123 or *"
-          value={form.entityId}
-        />
+        <Input id="entity-id" label="Entity ID" onChange={(e) => update("entityId", e.target.value)} placeholder="e.g. org_123 or *" value={form.entityId} />
 
         <div className="grid grid-cols-2 gap-4">
-          <Input
-            id="limit-amount"
-            label="Limit ($)"
-            min="0"
-            onChange={(e) =>
-              setForm((f) => ({ ...f, limitAmount: e.target.value }))
-            }
-            placeholder="100.00"
-            step="0.01"
-            type="number"
-            value={form.limitAmount}
-          />
-
+          <Input id="limit-amount" label="Limit ($)" min="0" onChange={(e) => update("limitAmount", e.target.value)} placeholder="100.00" step="0.01" type="number" value={form.limitAmount} />
           <div className="space-y-1.5">
-            <label className="text-sm font-medium" htmlFor="period">
-              Period
-            </label>
-            <Select
-              id="period"
-              onChange={(v) => setForm((f) => ({ ...f, period: v }))}
-              options={PERIOD_OPTIONS}
-              value={form.period}
-            />
+            <label className="text-sm font-medium" htmlFor="period">Period</label>
+            <Select id="period" onChange={(v) => update("period", v)} options={PERIOD_OPTIONS} value={form.period} />
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium" htmlFor="alert-threshold">
-            Alert Threshold ({form.alertThreshold}%)
-          </label>
-          <input
-            className="w-full accent-primary"
-            id="alert-threshold"
-            max="100"
-            min="0"
-            onChange={(e) =>
-              setForm((f) => ({ ...f, alertThreshold: e.target.value }))
-            }
-            step="5"
-            type="range"
-            value={form.alertThreshold}
-          />
+          <label className="text-sm font-medium" htmlFor="alert-threshold">Alert Threshold ({form.alertThreshold}%)</label>
+          <input className="w-full accent-primary" id="alert-threshold" max="100" min="0" onChange={(e) => update("alertThreshold", e.target.value)} step="5" type="range" value={form.alertThreshold} />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>0%</span>
-            <span>50%</span>
-            <span>100%</span>
+            <span>0%</span><span>50%</span><span>100%</span>
           </div>
         </div>
 
         <div className="flex justify-end gap-2 pt-1">
-          <Button variant="secondary" onClick={handleClose} type="button">
-            Cancel
-          </Button>
+          <Button variant="secondary" onClick={handleClose} type="button">Cancel</Button>
           <Button disabled={isSubmitting} type="submit">
-            {isSubmitting
-              ? isEdit
-                ? "Saving..."
-                : "Adding..."
-              : isEdit
-                ? "Save Changes"
-                : "Add Budget"}
+            {isSubmitting ? (isEdit ? "Saving..." : "Adding...") : (isEdit ? "Save Changes" : "Add Budget")}
           </Button>
         </div>
       </form>

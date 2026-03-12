@@ -18,16 +18,8 @@ interface RequestTableProps {
 }
 
 const getStatusBadge = (statusCode: number) => {
-  if (statusCode >= 200 && statusCode < 300) {
-    return <Badge variant="success">{statusCode}</Badge>;
-  }
-  if (statusCode >= 400 && statusCode < 500) {
-    return <Badge variant="warning">{statusCode}</Badge>;
-  }
-  if (statusCode >= 500) {
-    return <Badge variant="error">{statusCode}</Badge>;
-  }
-  return <Badge variant="neutral">{statusCode}</Badge>;
+  const variant = statusCode >= 500 ? "error" : statusCode >= 400 ? "warning" : statusCode >= 200 && statusCode < 300 ? "success" : "neutral";
+  return <Badge variant={variant}>{statusCode}</Badge>;
 };
 
 const formatTime = (ts: string): string => {

@@ -1,5 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { useEffect, useRef, useState } from "react";
+import { API_URL, api, getOrgId } from "@/lib/api";
 
 export interface RequestLog {
   id: string;
@@ -99,3 +100,65 @@ export const requestsQueryOptions = (params: RequestsQueryParams) =>
     },
     queryKey: ["requests", params]
   });
+
+/** Custom hook for live SSE streaming of requests (DOM API: EventSource) */
+export const useLiveRequests = (enabled: boolean) => {
+  const [requests, setRequests] = useState<RequestLog[]>([]);
+  const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const eventSourceRef = useRef<EventSource | null>(null);
+
+  useEffect(() => {
+    if (!enabled) {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    const orgId = getOrgId();
+    const url = `${API_URL}/v1/analytics/requests/live${orgId ? `?orgId=${orgId}` : ""}`;
+    const es = new EventSource(url, { withCredentials: true });
+    eventSourceRef.current = es;
+
+    es.addEventListener("init", (e) => {
+      const logs: RequestLog[] = JSON.parse(e.data);
+      setRequests(logs);
+      setTotal(logs.length);
+      setIsLoading(false);
+    });
+
+    es.addEventListener("new", (e) => {
+      const newLogs: RequestLog[] = JSON.parse(e.data);
+      setRequests((prev) => {
+        const merged = [...newLogs, ...prev];
+        const seen = new Set<string>();
+        return merged
+          .filter((r) => {
+            if (seen.has(r.id)) return false;
+            seen.add(r.id);
+            return true;
+          })
+          .slice(0, 200);
+      });
+      setTotal((prev) => prev + newLogs.length);
+    });
+
+    es.addEventListener("error", () => {
+      setError("Live connection lost. Reconnecting...");
+      setIsLoading(false);
+    });
+
+    return () => {
+      es.close();
+      eventSourceRef.current = null;
+    };
+  }, [enabled]);
+
+  return { requests, total, isLoading, error };
+};
