@@ -57,15 +57,22 @@ app.onError((err, c) => {
 // Health check
 app.get('/health', (c) => c.json({ status: 'ok' }))
 
+// Auth routes (no auth middleware)
 app.route('/api/auth', createAuthModule(auth))
 
-// User-level routes (auth required, no tenant)
-const userRouter = new Hono()
-userRouter.use('*', createAuthMiddleware(auth))
-userRouter.route('/user', createUserModule(db))
-app.route('/v1', userRouter)
+// Proxy routes (virtual key auth, no session auth)
+app.route('/v1/proxy', createProxyModule(db, redis, env))
 
-// Protected API routes (auth + tenant required)
+// Billing webhooks (no auth)
+app.route('/webhooks/billing', createBillingWebhookModule(db))
+
+// User-level routes (session auth, no tenant)
+const userRoutes = new Hono()
+userRoutes.use('*', createAuthMiddleware(auth))
+userRoutes.route('/', createUserModule(db))
+app.route('/v1/user', userRoutes)
+
+// Protected API routes (session auth + tenant)
 const v1 = new Hono()
 v1.use('*', createAuthMiddleware(auth))
 v1.use('*', createTenantMiddleware(db))
@@ -77,10 +84,7 @@ v1.route('/analytics', createAnalyticsModule(db))
 v1.route('/teams', createTeamsModule(db))
 v1.route('/billing', createBillingModule(db))
 v1.route('/audit-logs', createAuditLogsModule(db))
-
 app.route('/v1', v1)
-app.route('/v1/proxy', createProxyModule(db, redis, env))
-app.route('/webhooks/billing', createBillingWebhookModule(db))
 
 app.notFound((c) => c.json({ code: 'NOT_FOUND', message: 'Route not found' }, 404))
 

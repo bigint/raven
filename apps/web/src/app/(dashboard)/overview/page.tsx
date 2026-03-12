@@ -22,10 +22,10 @@ export default function OverviewPage() {
       try {
         const data = await api.get<OverviewStats>('/v1/analytics/stats?range=30d')
         setStats({
-          totalRequests: data.totalRequests ?? 0,
-          totalCost: data.totalCost ?? 0,
-          activeKeys: data.activeKeys ?? 0,
-          providers: data.providers ?? 0,
+          totalRequests: Number(data.totalRequests) || 0,
+          totalCost: Number(data.totalCost) || 0,
+          activeKeys: Number(data.activeKeys) || 0,
+          providers: Number(data.providers) || 0,
         })
       } catch {
         // Stats API may not return all fields yet, use defaults
