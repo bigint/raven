@@ -54,7 +54,7 @@ export const TokenBreakdown = ({ usage, loading }: TokenBreakdownProps) => (
             {usage.map((row, idx) => (
               <tr
                 className={`transition-colors hover:bg-muted/30 ${idx !== usage.length - 1 ? "border-b border-border" : ""}`}
-                key={`${row.provider}-${row.model}`}
+                key={`${row.provider}-${row.model}-${idx}`}
               >
                 <td className="px-5 py-4 font-medium">
                   {row.providerConfigName ? (
