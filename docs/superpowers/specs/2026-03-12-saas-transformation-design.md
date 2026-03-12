@@ -293,9 +293,10 @@ Highest-volume table. Index on (organizationId, createdAt). At scale: partition 
 | limitAmount | numeric(12,2) | USD |
 | period | enum | daily, monthly |
 | alertThreshold | numeric(3,2) | Default 0.80 |
-| currentSpend | numeric(12,6) | Running total |
 | periodStart | timestamp | Reset point |
 | createdAt | timestamp | |
+
+**Real-time spend tracking:** `currentSpend` is tracked in Redis (`budget:spend:{budgetId}` with atomic INCRBYFLOAT), not in this table. A periodic sync job (every 5 minutes) writes the Redis value back to PostgreSQL for durability. Budget checks in the proxy flow read from Redis for speed. Redis key TTL matches the budget period. This avoids row-level lock contention on high-traffic orgs.
 
 #### subscriptions
 | Column | Type | Notes |
