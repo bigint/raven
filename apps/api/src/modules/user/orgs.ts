@@ -3,11 +3,14 @@ import type { Database } from "@raven/db";
 import { members, organizations } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Context } from "hono";
+import { UnauthorizedError, ValidationError } from "@/lib/errors";
+import { created, success } from "@/lib/response";
+import { createOrgSchema } from "./schema";
 
 export const listOrgs = (db: Database) => async (c: Context) => {
   const user = c.get("user" as never) as { id: string } | undefined;
   if (!user) {
-    return c.json({ code: "UNAUTHORIZED", message: "Not authenticated" }, 401);
+    throw new UnauthorizedError("Not authenticated");
   }
 
   const userMembers = await db
@@ -21,28 +24,26 @@ export const listOrgs = (db: Database) => async (c: Context) => {
     .innerJoin(organizations, eq(members.organizationId, organizations.id))
     .where(eq(members.userId, user.id));
 
-  return c.json(userMembers);
+  return success(c, userMembers);
 };
 
 export const createOrg = (db: Database) => async (c: Context) => {
   const user = c.get("user" as never) as { id: string } | undefined;
   if (!user) {
-    return c.json({ code: "UNAUTHORIZED", message: "Not authenticated" }, 401);
+    throw new UnauthorizedError("Not authenticated");
   }
 
-  const body = await c.req.json<{ name: string; slug?: string }>();
-  const name = body.name?.trim();
-  if (!name) {
-    return c.json(
-      {
-        code: "VALIDATION_ERROR",
-        message: "Organization name is required"
-      },
-      400
-    );
+  const body = await c.req.json();
+  const result = createOrgSchema.safeParse(body);
+
+  if (!result.success) {
+    throw new ValidationError("Invalid request body", {
+      errors: result.error.flatten().fieldErrors
+    });
   }
 
-  const slug = body.slug?.trim() || `org-${createId()}`;
+  const name = result.data.name;
+  const slug = result.data.slug?.trim() || `org-${createId()}`;
   const orgId = createId();
 
   await db.transaction(async (tx) => {
@@ -55,5 +56,5 @@ export const createOrg = (db: Database) => async (c: Context) => {
     });
   });
 
-  return c.json({ id: orgId, name, role: "owner", slug }, 201);
+  return created(c, { id: orgId, name, role: "owner", slug });
 };

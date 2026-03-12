@@ -2,29 +2,32 @@ import type { Database } from "@raven/db";
 import { users } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Context } from "hono";
+import { UnauthorizedError, ValidationError } from "@/lib/errors";
+import { success } from "@/lib/response";
+import { updateProfileSchema } from "./schema";
 
 export const updateProfile = (db: Database) => async (c: Context) => {
   const user = c.get("user" as never) as
     | { id: string; email: string }
     | undefined;
   if (!user) {
-    return c.json({ code: "UNAUTHORIZED", message: "Not authenticated" }, 401);
+    throw new UnauthorizedError("Not authenticated");
   }
 
-  const body = await c.req.json<{ name: string }>();
-  const name = body.name?.trim();
-  if (!name) {
-    return c.json(
-      { code: "VALIDATION_ERROR", message: "Name is required" },
-      400
-    );
+  const body = await c.req.json();
+  const result = updateProfileSchema.safeParse(body);
+
+  if (!result.success) {
+    throw new ValidationError("Invalid request body", {
+      errors: result.error.flatten().fieldErrors
+    });
   }
 
   const [updated] = await db
     .update(users)
-    .set({ name, updatedAt: new Date() })
+    .set({ name: result.data.name, updatedAt: new Date() })
     .where(eq(users.id, user.id))
     .returning();
 
-  return c.json(updated);
+  return success(c, updated);
 };
