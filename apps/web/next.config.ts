@@ -1,8 +1,8 @@
-import type { NextConfig } from 'next'
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
-  transpilePackages: ['@raven/types'],
-}
+  output: "standalone",
+  transpilePackages: ["@raven/types"]
+};
 
-export default nextConfig
+export default nextConfig;

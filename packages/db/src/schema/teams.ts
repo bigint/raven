@@ -1,31 +1,35 @@
-import { createId } from '@paralleldrive/cuid2'
-import { pgEnum, pgTable, text, timestamp, unique } from 'drizzle-orm/pg-core'
-import { organizations } from './organizations'
-import { users } from './users'
+import { createId } from "@paralleldrive/cuid2";
+import { pgEnum, pgTable, text, timestamp, unique } from "drizzle-orm/pg-core";
+import { organizations } from "./organizations";
+import { users } from "./users";
 
-export const teamRoleEnum = pgEnum('team_role', ['lead', 'member'])
+export const teamRoleEnum = pgEnum("team_role", ["lead", "member"]);
 
-export const teams = pgTable('teams', {
-  id: text('id').primaryKey().$defaultFn(createId),
-  organizationId: text('organization_id')
+export const teams = pgTable("teams", {
+  createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
-    .references(() => organizations.id, { onDelete: 'cascade' }),
-  name: text('name').notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-})
+    .defaultNow(),
+  id: text("id").primaryKey().$defaultFn(createId),
+  name: text("name").notNull(),
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" })
+});
 
 export const teamMembers = pgTable(
-  'team_members',
+  "team_members",
   {
-    id: text('id').primaryKey().$defaultFn(createId),
-    teamId: text('team_id')
+    createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
-      .references(() => teams.id, { onDelete: 'cascade' }),
-    userId: text('user_id')
+      .defaultNow(),
+    id: text("id").primaryKey().$defaultFn(createId),
+    role: teamRoleEnum("role").notNull().default("member"),
+    teamId: text("team_id")
       .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
-    role: teamRoleEnum('role').notNull().default('member'),
-    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+      .references(() => teams.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" })
   },
-  (t) => [unique('team_members_team_user_unique').on(t.teamId, t.userId)],
-)
+  (t) => [unique("team_members_team_user_unique").on(t.teamId, t.userId)]
+);

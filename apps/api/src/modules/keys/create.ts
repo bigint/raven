@@ -1,47 +1,51 @@
-import type { Database } from '@raven/db'
-import { virtualKeys } from '@raven/db'
-import type { Context } from 'hono'
-import { ValidationError } from '../../lib/errors.js'
-import { publishEvent } from '../../lib/events.js'
-import { createKeySchema, generateKey, safeKey } from './helpers.js'
+import type { Database } from "@raven/db";
+import { virtualKeys } from "@raven/db";
+import type { Context } from "hono";
+import { ValidationError } from "../../lib/errors.js";
+import { publishEvent } from "../../lib/events.js";
+import { createKeySchema, generateKey, safeKey } from "./helpers.js";
 
 export const createKey = (db: Database) => async (c: Context) => {
-  const orgId = c.get('orgId' as never) as string
-  const body = await c.req.json()
-  const result = createKeySchema.safeParse(body)
+  const orgId = c.get("orgId" as never) as string;
+  const body = await c.req.json();
+  const result = createKeySchema.safeParse(body);
 
   if (!result.success) {
-    throw new ValidationError('Invalid request body', {
-      errors: result.error.flatten().fieldErrors,
-    })
+    throw new ValidationError("Invalid request body", {
+      errors: result.error.flatten().fieldErrors
+    });
   }
 
-  const { name, environment, rateLimitRpm, rateLimitRpd, expiresAt } = result.data
+  const { name, environment, rateLimitRpm, rateLimitRpd, expiresAt } =
+    result.data;
 
-  const { key, hash, prefix } = generateKey(environment)
+  const { key, hash, prefix } = generateKey(environment);
 
   const [created] = await db
     .insert(virtualKeys)
     .values({
-      organizationId: orgId,
-      name,
+      environment,
+      expiresAt: expiresAt ? new Date(expiresAt) : undefined,
       keyHash: hash,
       keyPrefix: prefix,
-      environment,
-      rateLimitRpm,
+      name,
+      organizationId: orgId,
       rateLimitRpd,
-      expiresAt: expiresAt ? new Date(expiresAt) : undefined,
+      rateLimitRpm
     })
-    .returning()
+    .returning();
 
   // Return full plaintext key ONLY on creation
-  const record = created as NonNullable<typeof created>
-  void publishEvent(orgId, 'key.created', { ...safeKey(record), key: undefined })
+  const record = created as NonNullable<typeof created>;
+  void publishEvent(orgId, "key.created", {
+    ...safeKey(record),
+    key: undefined
+  });
   return c.json(
     {
       ...safeKey(record),
-      key,
+      key
     },
-    201,
-  )
-}
+    201
+  );
+};

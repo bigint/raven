@@ -1,14 +1,11 @@
-import { z } from 'zod'
+import { z } from "zod";
 
 const envSchema = z.object({
-  DATABASE_URL: z.string().url(),
-  REDIS_URL: z.string().url(),
+  API_PORT: z.coerce.number().default(3001),
+  APP_URL: z.string().url(),
   BETTER_AUTH_SECRET: z.string().min(16),
   BETTER_AUTH_URL: z.string().url(),
-  APP_URL: z.string().url(),
-  PADDLE_API_KEY: z.string().optional(),
-  PADDLE_WEBHOOK_SECRET: z.string().optional(),
-  RESEND_API_KEY: z.string().optional(),
+  DATABASE_URL: z.string().url(),
   ENCRYPTION_SECRET: z.string().min(32),
   ENCRYPTION_SECRET_PREVIOUS: z.string().min(32).optional(),
   GITHUB_CLIENT_ID: z.string().optional(),
@@ -16,20 +13,27 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   NEXT_PUBLIC_API_URL: z.string().url(),
-  API_PORT: z.coerce.number().default(3001),
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-})
+  NODE_ENV: z
+    .enum(["development", "production", "test"])
+    .default("development"),
+  PADDLE_API_KEY: z.string().optional(),
+  PADDLE_WEBHOOK_SECRET: z.string().optional(),
+  REDIS_URL: z.string().url(),
+  RESEND_API_KEY: z.string().optional()
+});
 
-export type Env = z.infer<typeof envSchema>
+export type Env = z.infer<typeof envSchema>;
 
-export const parseEnv = (source: Record<string, string | undefined> = process.env): Env => {
-  const result = envSchema.safeParse(source)
+export const parseEnv = (
+  source: Record<string, string | undefined> = process.env
+): Env => {
+  const result = envSchema.safeParse(source);
   if (!result.success) {
-    const formatted = result.error.flatten().fieldErrors
+    const formatted = result.error.flatten().fieldErrors;
     const missing = Object.entries(formatted)
-      .map(([key, errors]) => `  ${key}: ${errors?.join(', ')}`)
-      .join('\n')
-    throw new Error(`Invalid environment variables:\n${missing}`)
+      .map(([key, errors]) => `  ${key}: ${errors?.join(", ")}`)
+      .join("\n");
+    throw new Error(`Invalid environment variables:\n${missing}`);
   }
-  return result.data
-}
+  return result.data;
+};

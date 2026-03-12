@@ -7,24 +7,24 @@ import {
   Html,
   Preview,
   Section,
-  Text,
-} from '@react-email/components'
+  Text
+} from "@react-email/components";
 
 interface BudgetAlertEmailProps {
-  budgetName: string
-  currentUsage: number
-  limit: number
-  threshold: number
+  budgetName: string;
+  currentUsage: number;
+  limit: number;
+  threshold: number;
 }
 
 export const BudgetAlertEmail = ({
   budgetName,
   currentUsage,
   limit,
-  threshold,
+  threshold
 }: BudgetAlertEmailProps) => {
-  const usagePercent = Math.min(Math.round((currentUsage / limit) * 100), 100)
-  const thresholdPercent = Math.round(threshold * 100)
+  const usagePercent = Math.min(Math.round((currentUsage / limit) * 100), 100);
+  const thresholdPercent = Math.round(threshold * 100);
 
   return (
     <Html>
@@ -34,8 +34,9 @@ export const BudgetAlertEmail = ({
         <Container style={container}>
           <Heading style={heading}>Budget Alert</Heading>
           <Text style={text}>
-            Your budget <strong>{budgetName}</strong> has reached <strong>{usagePercent}%</strong>{' '}
-            of its limit, exceeding the {thresholdPercent}% alert threshold.
+            Your budget <strong>{budgetName}</strong> has reached{" "}
+            <strong>{usagePercent}%</strong> of its limit, exceeding the{" "}
+            {thresholdPercent}% alert threshold.
           </Text>
 
           <Section style={statsSection}>
@@ -51,7 +52,9 @@ export const BudgetAlertEmail = ({
                 </tr>
                 <tr>
                   <td style={statsLabel}>Remaining</td>
-                  <td style={statsValue}>${Math.max(limit - currentUsage, 0).toFixed(2)}</td>
+                  <td style={statsValue}>
+                    ${Math.max(limit - currentUsage, 0).toFixed(2)}
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -62,8 +65,8 @@ export const BudgetAlertEmail = ({
               <div
                 style={{
                   ...barFill,
-                  width: `${usagePercent}%`,
-                  backgroundColor: usagePercent >= 90 ? '#dc2626' : '#f59e0b',
+                  backgroundColor: usagePercent >= 90 ? "#dc2626" : "#f59e0b",
+                  width: `${usagePercent}%`
                 }}
               />
             </div>
@@ -72,98 +75,99 @@ export const BudgetAlertEmail = ({
 
           <Hr style={hr} />
           <Text style={footer}>
-            Adjust your budget limits or review usage from the Raven dashboard to avoid service
-            interruptions.
+            Adjust your budget limits or review usage from the Raven dashboard
+            to avoid service interruptions.
           </Text>
         </Container>
       </Body>
     </Html>
-  )
-}
+  );
+};
 
 const body = {
-  backgroundColor: '#f6f9fc',
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-}
+  backgroundColor: "#f6f9fc",
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
+};
 
 const container = {
-  backgroundColor: '#ffffff',
-  margin: '0 auto',
-  padding: '40px 24px',
-  borderRadius: '8px',
-  maxWidth: '480px',
-}
+  backgroundColor: "#ffffff",
+  borderRadius: "8px",
+  margin: "0 auto",
+  maxWidth: "480px",
+  padding: "40px 24px"
+};
 
 const heading = {
-  fontSize: '24px',
-  fontWeight: '700' as const,
-  color: '#111827',
-  textAlign: 'center' as const,
-  margin: '0 0 24px',
-}
+  color: "#111827",
+  fontSize: "24px",
+  fontWeight: "700" as const,
+  margin: "0 0 24px",
+  textAlign: "center" as const
+};
 
 const text = {
-  fontSize: '15px',
-  lineHeight: '24px',
-  color: '#374151',
-  margin: '0 0 16px',
-}
+  color: "#374151",
+  fontSize: "15px",
+  lineHeight: "24px",
+  margin: "0 0 16px"
+};
 
 const statsSection = {
-  margin: '24px 0',
-}
+  margin: "24px 0"
+};
 
 const statsTable = {
-  width: '100%',
-  borderCollapse: 'collapse' as const,
-}
+  borderCollapse: "collapse" as const,
+  width: "100%"
+};
 
 const statsLabel = {
-  fontSize: '14px',
-  color: '#6b7280',
-  padding: '8px 0',
-}
+  color: "#6b7280",
+  fontSize: "14px",
+  padding: "8px 0"
+};
 
 const statsValue = {
-  fontSize: '14px',
-  fontWeight: '600' as const,
-  color: '#111827',
-  textAlign: 'right' as const,
-  padding: '8px 0',
-}
+  color: "#111827",
+  fontSize: "14px",
+  fontWeight: "600" as const,
+  padding: "8px 0",
+  textAlign: "right" as const
+};
 
 const barContainer = {
-  margin: '16px 0 24px',
-}
+  margin: "16px 0 24px"
+};
 
 const barTrack = {
-  backgroundColor: '#e5e7eb',
-  borderRadius: '4px',
-  height: '8px',
-  overflow: 'hidden' as const,
-}
+  backgroundColor: "#e5e7eb",
+  borderRadius: "4px",
+  height: "8px",
+  overflow: "hidden" as const
+};
 
 const barFill = {
-  height: '8px',
-  borderRadius: '4px',
-  transition: 'width 0.3s ease',
-}
+  borderRadius: "4px",
+  height: "8px",
+  transition: "width 0.3s ease"
+};
 
 const barLabel = {
-  fontSize: '12px',
-  color: '#6b7280',
-  margin: '4px 0 0',
-  textAlign: 'right' as const,
-}
+  color: "#6b7280",
+  fontSize: "12px",
+  margin: "4px 0 0",
+  textAlign: "right" as const
+};
 
 const hr = {
-  borderColor: '#e5e7eb',
-  margin: '24px 0',
-}
+  borderColor: "#e5e7eb",
+  margin: "24px 0"
+};
 
 const footer = {
-  fontSize: '13px',
-  lineHeight: '20px',
-  color: '#6b7280',
-  margin: '0',
-}
+  color: "#6b7280",
+  fontSize: "13px",
+  lineHeight: "20px",
+  margin: "0"
+};

@@ -1,102 +1,155 @@
-'use client'
+"use client";
 
-import { Check } from 'lucide-react'
-import Link from 'next/link'
-import { useState } from 'react'
+import { Check } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
 const plans = [
   {
-    name: 'Free',
+    cta: "Get started free",
+    ctaHref: "/sign-up",
+    description: "For individuals exploring AI integrations.",
+    features: [
+      "1,000 requests/mo",
+      "1 provider",
+      "1 virtual key",
+      "Community support"
+    ],
     monthlyPrice: 0,
-    yearlyPrice: 0,
-    unit: '/mo',
-    description: 'For individuals exploring AI integrations.',
-    cta: 'Get started free',
-    ctaHref: '/sign-up',
+    name: "Free",
     popular: false,
-    features: ['1,000 requests/mo', '1 provider', '1 virtual key', 'Community support'],
+    unit: "/mo",
+    yearlyPrice: 0
   },
   {
-    name: 'Pro',
+    cta: "Start free trial",
+    ctaHref: "/sign-up?plan=pro",
+    description: "For developers shipping AI-powered products.",
+    features: [
+      "50,000 requests/mo",
+      "Unlimited providers",
+      "10 virtual keys",
+      "Email support",
+      "Analytics dashboard"
+    ],
     monthlyPrice: 29,
-    yearlyPrice: 23,
-    unit: '/mo',
-    description: 'For developers shipping AI-powered products.',
-    cta: 'Start free trial',
-    ctaHref: '/sign-up?plan=pro',
+    name: "Pro",
     popular: true,
-    features: [
-      '50,000 requests/mo',
-      'Unlimited providers',
-      '10 virtual keys',
-      'Email support',
-      'Analytics dashboard',
-    ],
+    unit: "/mo",
+    yearlyPrice: 23
   },
   {
-    name: 'Team',
+    cta: "Start free trial",
+    ctaHref: "/sign-up?plan=team",
+    description: "For teams that need collaboration and control.",
+    features: [
+      "200,000 requests/mo",
+      "Unlimited providers",
+      "Unlimited virtual keys",
+      "Priority support",
+      "SSO",
+      "Audit logs",
+      "Team management"
+    ],
     monthlyPrice: 49,
-    yearlyPrice: 39,
-    unit: '/seat/mo',
-    description: 'For teams that need collaboration and control.',
-    cta: 'Start free trial',
-    ctaHref: '/sign-up?plan=team',
+    name: "Team",
     popular: false,
-    features: [
-      '200,000 requests/mo',
-      'Unlimited providers',
-      'Unlimited virtual keys',
-      'Priority support',
-      'SSO',
-      'Audit logs',
-      'Team management',
-    ],
+    unit: "/seat/mo",
+    yearlyPrice: 39
   },
   {
-    name: 'Enterprise',
-    monthlyPrice: null,
-    yearlyPrice: null,
-    unit: '',
-    description: 'For organizations with custom requirements.',
-    cta: 'Contact sales',
-    ctaHref: 'mailto:sales@raven.dev',
-    popular: false,
+    cta: "Contact sales",
+    ctaHref: "mailto:sales@raven.dev",
+    description: "For organizations with custom requirements.",
     features: [
-      'Unlimited requests',
-      'Unlimited providers',
-      'Unlimited virtual keys',
-      'Dedicated support',
-      'SLA',
-      'Custom contracts',
-      'On-prem option',
+      "Unlimited requests",
+      "Unlimited providers",
+      "Unlimited virtual keys",
+      "Dedicated support",
+      "SLA",
+      "Custom contracts",
+      "On-prem option"
     ],
-  },
-]
+    monthlyPrice: null,
+    name: "Enterprise",
+    popular: false,
+    unit: "",
+    yearlyPrice: null
+  }
+];
 
 const comparisonFeatures = [
   {
-    name: 'Monthly requests',
-    free: '1,000',
-    pro: '50,000',
-    team: '200,000',
-    enterprise: 'Unlimited',
+    enterprise: "Unlimited",
+    free: "1,000",
+    name: "Monthly requests",
+    pro: "50,000",
+    team: "200,000"
   },
-  { name: 'Providers', free: '1', pro: 'Unlimited', team: 'Unlimited', enterprise: 'Unlimited' },
-  { name: 'Virtual keys', free: '1', pro: '10', team: 'Unlimited', enterprise: 'Unlimited' },
-  { name: 'Analytics', free: false, pro: true, team: true, enterprise: true },
-  { name: 'Email support', free: false, pro: true, team: true, enterprise: true },
-  { name: 'Priority support', free: false, pro: false, team: true, enterprise: true },
-  { name: 'Dedicated support', free: false, pro: false, team: false, enterprise: true },
-  { name: 'SSO', free: false, pro: false, team: true, enterprise: true },
-  { name: 'Audit logs', free: false, pro: false, team: true, enterprise: true },
-  { name: 'Team management', free: false, pro: false, team: true, enterprise: true },
-  { name: 'SLA', free: false, pro: false, team: false, enterprise: true },
-  { name: 'Custom contracts', free: false, pro: false, team: false, enterprise: true },
-  { name: 'On-prem deployment', free: false, pro: false, team: false, enterprise: true },
-]
+  {
+    enterprise: "Unlimited",
+    free: "1",
+    name: "Providers",
+    pro: "Unlimited",
+    team: "Unlimited"
+  },
+  {
+    enterprise: "Unlimited",
+    free: "1",
+    name: "Virtual keys",
+    pro: "10",
+    team: "Unlimited"
+  },
+  { enterprise: true, free: false, name: "Analytics", pro: true, team: true },
+  {
+    enterprise: true,
+    free: false,
+    name: "Email support",
+    pro: true,
+    team: true
+  },
+  {
+    enterprise: true,
+    free: false,
+    name: "Priority support",
+    pro: false,
+    team: true
+  },
+  {
+    enterprise: true,
+    free: false,
+    name: "Dedicated support",
+    pro: false,
+    team: false
+  },
+  { enterprise: true, free: false, name: "SSO", pro: false, team: true },
+  { enterprise: true, free: false, name: "Audit logs", pro: false, team: true },
+  {
+    enterprise: true,
+    free: false,
+    name: "Team management",
+    pro: false,
+    team: true
+  },
+  { enterprise: true, free: false, name: "SLA", pro: false, team: false },
+  {
+    enterprise: true,
+    free: false,
+    name: "Custom contracts",
+    pro: false,
+    team: false
+  },
+  {
+    enterprise: true,
+    free: false,
+    name: "On-prem deployment",
+    pro: false,
+    team: false
+  }
+];
 
 export default function PricingPage() {
-  const [yearly, setYearly] = useState(false)
+  const [yearly, setYearly] = useState(false);
 
   return (
     <div className="px-8 py-24">
@@ -111,28 +164,30 @@ export default function PricingPage() {
 
           <div className="flex items-center justify-center gap-3 mt-8">
             <span
-              className={`text-sm font-medium ${!yearly ? 'text-primary' : 'text-muted-foreground'}`}
+              className={`text-sm font-medium ${yearly ? "text-muted-foreground" : "text-primary"}`}
             >
               Monthly
             </span>
             <button
-              type="button"
-              onClick={() => setYearly(!yearly)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                yearly ? 'bg-primary' : 'bg-border'
+                yearly ? "bg-primary" : "bg-border"
               }`}
+              onClick={() => setYearly(!yearly)}
+              type="button"
             >
               <span
                 className={`inline-block size-4 rounded-full bg-white transition-transform ${
-                  yearly ? 'translate-x-6' : 'translate-x-1'
+                  yearly ? "translate-x-6" : "translate-x-1"
                 }`}
               />
             </button>
             <span
-              className={`text-sm font-medium ${yearly ? 'text-primary' : 'text-muted-foreground'}`}
+              className={`text-sm font-medium ${yearly ? "text-primary" : "text-muted-foreground"}`}
             >
               Yearly
-              <span className="ml-1.5 text-xs text-success font-medium">Save 20%</span>
+              <span className="ml-1.5 text-xs text-success font-medium">
+                Save 20%
+              </span>
             </span>
           </div>
         </div>
@@ -140,10 +195,10 @@ export default function PricingPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {plans.map((plan) => (
             <div
-              key={plan.name}
               className={`relative rounded-xl border p-6 flex flex-col ${
-                plan.popular ? 'border-primary shadow-lg' : 'border-border'
+                plan.popular ? "border-primary shadow-lg" : "border-border"
               }`}
+              key={plan.name}
             >
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -155,31 +210,37 @@ export default function PricingPage() {
 
               <div className="mb-6">
                 <h3 className="text-lg font-semibold">{plan.name}</h3>
-                <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {plan.description}
+                </p>
                 <div className="mt-4">
                   {plan.monthlyPrice !== null ? (
                     <div className="flex items-baseline gap-1">
                       <span className="text-4xl font-bold">
                         ${yearly ? plan.yearlyPrice : plan.monthlyPrice}
                       </span>
-                      <span className="text-sm text-muted-foreground">{plan.unit}</span>
+                      <span className="text-sm text-muted-foreground">
+                        {plan.unit}
+                      </span>
                     </div>
                   ) : (
                     <div className="flex items-baseline">
                       <span className="text-4xl font-bold">Custom</span>
                     </div>
                   )}
-                  {yearly && plan.yearlyPrice !== null && plan.yearlyPrice > 0 && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Billed annually (${plan.yearlyPrice * 12}/yr)
-                    </p>
-                  )}
+                  {yearly &&
+                    plan.yearlyPrice !== null &&
+                    plan.yearlyPrice > 0 && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Billed annually (${plan.yearlyPrice * 12}/yr)
+                      </p>
+                    )}
                 </div>
               </div>
 
               <ul className="space-y-3 mb-8 flex-1">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2 text-sm">
+                  <li className="flex items-start gap-2 text-sm" key={feature}>
                     <Check className="size-4 text-success shrink-0 mt-0.5" />
                     <span>{feature}</span>
                   </li>
@@ -187,12 +248,12 @@ export default function PricingPage() {
               </ul>
 
               <Link
-                href={plan.ctaHref}
                 className={`block text-center px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${
                   plan.popular
-                    ? 'bg-primary text-primary-foreground hover:opacity-90'
-                    : 'border border-border hover:bg-muted'
+                    ? "bg-primary text-primary-foreground hover:opacity-90"
+                    : "border border-border hover:bg-muted"
                 }`}
+                href={plan.ctaHref}
               >
                 {plan.cta}
               </Link>
@@ -201,38 +262,50 @@ export default function PricingPage() {
         </div>
 
         <div className="mt-24">
-          <h2 className="text-2xl font-bold text-center mb-10">Compare plans</h2>
+          <h2 className="text-2xl font-bold text-center mb-10">
+            Compare plans
+          </h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left py-3 pr-4 font-medium text-muted-foreground">Feature</th>
+                  <th className="text-left py-3 pr-4 font-medium text-muted-foreground">
+                    Feature
+                  </th>
                   <th className="text-center py-3 px-4 font-medium">Free</th>
                   <th className="text-center py-3 px-4 font-medium">Pro</th>
                   <th className="text-center py-3 px-4 font-medium">Team</th>
-                  <th className="text-center py-3 px-4 font-medium">Enterprise</th>
+                  <th className="text-center py-3 px-4 font-medium">
+                    Enterprise
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {comparisonFeatures.map((feature) => (
-                  <tr key={feature.name} className="border-b border-border">
-                    <td className="py-3 pr-4 text-muted-foreground">{feature.name}</td>
-                    {(['free', 'pro', 'team', 'enterprise'] as const).map((tier) => {
-                      const value = feature[tier]
-                      return (
-                        <td key={tier} className="text-center py-3 px-4">
-                          {typeof value === 'boolean' ? (
-                            value ? (
-                              <Check className="size-4 text-success mx-auto" />
+                  <tr className="border-b border-border" key={feature.name}>
+                    <td className="py-3 pr-4 text-muted-foreground">
+                      {feature.name}
+                    </td>
+                    {(["free", "pro", "team", "enterprise"] as const).map(
+                      (tier) => {
+                        const value = feature[tier];
+                        return (
+                          <td className="text-center py-3 px-4" key={tier}>
+                            {typeof value === "boolean" ? (
+                              value ? (
+                                <Check className="size-4 text-success mx-auto" />
+                              ) : (
+                                <span className="text-muted-foreground">
+                                  &mdash;
+                                </span>
+                              )
                             ) : (
-                              <span className="text-muted-foreground">&mdash;</span>
-                            )
-                          ) : (
-                            <span>{value}</span>
-                          )}
-                        </td>
-                      )
-                    })}
+                              <span>{value}</span>
+                            )}
+                          </td>
+                        );
+                      }
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -241,5 +314,5 @@ export default function PricingPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

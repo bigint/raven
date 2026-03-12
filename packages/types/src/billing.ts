@@ -1,75 +1,79 @@
-export type Plan = 'free' | 'pro' | 'team' | 'enterprise'
+export type Plan = "free" | "pro" | "team" | "enterprise";
 
-export type SubscriptionStatus = 'active' | 'past_due' | 'cancelled' | 'trialing'
+export type SubscriptionStatus =
+  | "active"
+  | "past_due"
+  | "cancelled"
+  | "trialing";
 
 export interface PlanFeatures {
-  readonly maxSeats: number
-  readonly maxRequestsPerMonth: number
-  readonly maxProviders: number
-  readonly maxBudgets: number
-  readonly maxVirtualKeys: number
-  readonly analyticsRetentionDays: number
-  readonly hasTeams: boolean
-  readonly hasSSO: boolean
-  readonly hasAuditLogs: boolean
-  readonly hasGuardrails: boolean
+  readonly maxSeats: number;
+  readonly maxRequestsPerMonth: number;
+  readonly maxProviders: number;
+  readonly maxBudgets: number;
+  readonly maxVirtualKeys: number;
+  readonly analyticsRetentionDays: number;
+  readonly hasTeams: boolean;
+  readonly hasSSO: boolean;
+  readonly hasAuditLogs: boolean;
+  readonly hasGuardrails: boolean;
 }
 
 export type BooleanFeatureKey = {
-  [K in keyof PlanFeatures]: PlanFeatures[K] extends boolean ? K : never
-}[keyof PlanFeatures]
+  [K in keyof PlanFeatures]: PlanFeatures[K] extends boolean ? K : never;
+}[keyof PlanFeatures];
 
 export type NumericFeatureKey = {
-  [K in keyof PlanFeatures]: PlanFeatures[K] extends number ? K : never
-}[keyof PlanFeatures]
+  [K in keyof PlanFeatures]: PlanFeatures[K] extends number ? K : never;
+}[keyof PlanFeatures];
 
 export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
-  free: {
-    maxSeats: 1,
-    maxRequestsPerMonth: 10_000,
-    maxProviders: 2,
-    maxBudgets: 1,
-    maxVirtualKeys: 3,
-    analyticsRetentionDays: 7,
-    hasTeams: false,
-    hasSSO: false,
-    hasAuditLogs: false,
-    hasGuardrails: false,
-  },
-  pro: {
-    maxSeats: 1,
-    maxRequestsPerMonth: 500_000,
-    maxProviders: Number.POSITIVE_INFINITY,
-    maxBudgets: 10,
-    maxVirtualKeys: 20,
-    analyticsRetentionDays: 30,
-    hasTeams: false,
-    hasSSO: false,
-    hasAuditLogs: false,
-    hasGuardrails: true,
-  },
-  team: {
-    maxSeats: 20,
-    maxRequestsPerMonth: 2_000_000,
-    maxProviders: Number.POSITIVE_INFINITY,
-    maxBudgets: Number.POSITIVE_INFINITY,
-    maxVirtualKeys: Number.POSITIVE_INFINITY,
-    analyticsRetentionDays: 90,
-    hasTeams: true,
-    hasSSO: false,
-    hasAuditLogs: false,
-    hasGuardrails: true,
-  },
   enterprise: {
-    maxSeats: Number.POSITIVE_INFINITY,
-    maxRequestsPerMonth: Number.POSITIVE_INFINITY,
-    maxProviders: Number.POSITIVE_INFINITY,
-    maxBudgets: Number.POSITIVE_INFINITY,
-    maxVirtualKeys: Number.POSITIVE_INFINITY,
     analyticsRetentionDays: 365,
-    hasTeams: true,
-    hasSSO: true,
     hasAuditLogs: true,
     hasGuardrails: true,
+    hasSSO: true,
+    hasTeams: true,
+    maxBudgets: Number.POSITIVE_INFINITY,
+    maxProviders: Number.POSITIVE_INFINITY,
+    maxRequestsPerMonth: Number.POSITIVE_INFINITY,
+    maxSeats: Number.POSITIVE_INFINITY,
+    maxVirtualKeys: Number.POSITIVE_INFINITY
   },
-} as const
+  free: {
+    analyticsRetentionDays: 7,
+    hasAuditLogs: false,
+    hasGuardrails: false,
+    hasSSO: false,
+    hasTeams: false,
+    maxBudgets: 1,
+    maxProviders: 2,
+    maxRequestsPerMonth: 10_000,
+    maxSeats: 1,
+    maxVirtualKeys: 3
+  },
+  pro: {
+    analyticsRetentionDays: 30,
+    hasAuditLogs: false,
+    hasGuardrails: true,
+    hasSSO: false,
+    hasTeams: false,
+    maxBudgets: 10,
+    maxProviders: Number.POSITIVE_INFINITY,
+    maxRequestsPerMonth: 500_000,
+    maxSeats: 1,
+    maxVirtualKeys: 20
+  },
+  team: {
+    analyticsRetentionDays: 90,
+    hasAuditLogs: false,
+    hasGuardrails: true,
+    hasSSO: false,
+    hasTeams: true,
+    maxBudgets: Number.POSITIVE_INFINITY,
+    maxProviders: Number.POSITIVE_INFINITY,
+    maxRequestsPerMonth: 2_000_000,
+    maxSeats: 20,
+    maxVirtualKeys: Number.POSITIVE_INFINITY
+  }
+} as const;
