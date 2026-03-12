@@ -12,7 +12,7 @@ type TenantContext = {
 
 export const createTenantMiddleware = (db: Database) => {
   return createMiddleware<TenantContext>(async (c, next) => {
-    const orgId = c.req.header('X-Org-Id')
+    const orgId = c.req.header('X-Org-Id') ?? c.req.query('orgId')
 
     if (!orgId) {
       return c.json({ code: 'VALIDATION_ERROR', message: 'Organization ID required' }, 400)
