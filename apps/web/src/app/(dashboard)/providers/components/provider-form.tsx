@@ -2,7 +2,7 @@
 
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Provider } from "../hooks/use-providers";
 import {
   PROVIDER_LABELS,

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Input, Modal, Select, Switch, Textarea } from "@raven/ui";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Guardrail } from "../hooks/use-guardrails";
 import {
   ACTION_OPTIONS,
@@ -93,6 +93,15 @@ const GuardrailForm = ({
     editingGuardrail ? extractFormFromGuardrail(editingGuardrail) : DEFAULT_FORM
   );
   const [formError, setFormError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (editingGuardrail) {
+      setForm(extractFormFromGuardrail(editingGuardrail));
+    } else {
+      setForm(DEFAULT_FORM);
+    }
+  }, [editingGuardrail]);
+
   const createMutation = useCreateGuardrail();
   const updateMutation = useUpdateGuardrail();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Input, Modal, Switch } from "@raven/ui";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Webhook } from "../hooks/use-webhooks";
 import {
   EVENT_CATEGORIES,
@@ -39,6 +39,19 @@ const WebhookForm = ({ open, onClose, editingWebhook }: WebhookFormProps) => {
       : DEFAULT_FORM
   );
   const [formError, setFormError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (editingWebhook) {
+      setForm({
+        events: [...editingWebhook.events],
+        isEnabled: editingWebhook.isEnabled,
+        url: editingWebhook.url
+      });
+    } else {
+      setForm(DEFAULT_FORM);
+    }
+  }, [editingWebhook]);
+
   const createMutation = useCreateWebhook();
   const updateMutation = useUpdateWebhook();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;

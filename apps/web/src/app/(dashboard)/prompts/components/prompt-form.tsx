@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Input, Modal, Textarea } from "@raven/ui";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Prompt } from "../hooks/use-prompts";
 import { useCreatePrompt, useUpdatePrompt } from "../hooks/use-prompts";
 
@@ -35,6 +35,19 @@ const PromptForm = ({ open, onClose, editingPrompt }: PromptFormProps) => {
       : DEFAULT_FORM
   );
   const [formError, setFormError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (editingPrompt) {
+      setForm({
+        content: "",
+        model: "",
+        name: editingPrompt.name
+      });
+    } else {
+      setForm(DEFAULT_FORM);
+    }
+  }, [editingPrompt]);
+
   const createMutation = useCreatePrompt();
   const updateMutation = useUpdatePrompt();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;

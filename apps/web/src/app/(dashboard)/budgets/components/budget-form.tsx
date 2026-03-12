@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Input, Modal, Select } from "@raven/ui";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Budget } from "../hooks/use-budgets";
 import {
   ENTITY_TYPE_OPTIONS,
@@ -48,6 +48,23 @@ const BudgetForm = ({ open, onClose, editingBudget }: BudgetFormProps) => {
       : DEFAULT_FORM
   );
   const [formError, setFormError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (editingBudget) {
+      setForm({
+        alertThreshold: String(
+          Math.round(Number(editingBudget.alertThreshold) * 100)
+        ),
+        entityId: editingBudget.entityId,
+        entityType: editingBudget.entityType,
+        limitAmount: String(editingBudget.limitAmount),
+        period: editingBudget.period
+      });
+    } else {
+      setForm(DEFAULT_FORM);
+    }
+  }, [editingBudget]);
+
   const createMutation = useCreateBudget();
   const updateMutation = useUpdateBudget();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
