@@ -1,10 +1,18 @@
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
-let currentOrgId: string | null = null;
+let currentOrgId: string | null =
+  typeof window !== "undefined" ? localStorage.getItem("orgId") : null;
 
 export const setOrgId = (orgId: string | null) => {
   currentOrgId = orgId;
+  if (typeof window !== "undefined") {
+    if (orgId) {
+      localStorage.setItem("orgId", orgId);
+    } else {
+      localStorage.removeItem("orgId");
+    }
+  }
 };
 
 export const getOrgId = () => currentOrgId;

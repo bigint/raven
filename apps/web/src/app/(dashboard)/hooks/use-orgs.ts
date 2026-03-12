@@ -2,7 +2,7 @@
 
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
-import { api, setOrgId } from "@/lib/api";
+import { api, getOrgId, setOrgId } from "@/lib/api";
 
 interface Org {
   id: string;
@@ -21,12 +21,14 @@ export const useOrgs = () => {
   const { data: orgs = [], isPending, isError } = useQuery(orgsQueryOptions());
   const [activeOrg, setActiveOrg] = useState<Org | null>(null);
 
-  // Set initial org when data loads
+  // Restore saved org or fall back to first
   if (orgs.length > 0 && !activeOrg) {
-    const firstOrg = orgs[0];
-    if (firstOrg) {
-      setOrgId(firstOrg.id);
-      setActiveOrg(firstOrg);
+    const savedId = getOrgId();
+    const saved = savedId ? orgs.find((o) => o.id === savedId) : null;
+    const org = saved ?? orgs[0];
+    if (org) {
+      setOrgId(org.id);
+      setActiveOrg(org);
     }
   }
 
