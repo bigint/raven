@@ -2,9 +2,9 @@ import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import type { Context } from "hono";
-import { encrypt } from "../../lib/crypto";
-import { ValidationError } from "../../lib/errors";
-import { publishEvent } from "../../lib/events";
+import { encrypt } from "@/lib/crypto";
+import { ValidationError } from "@/lib/errors";
+import { publishEvent } from "@/lib/events";
 import { createProviderSchema, maskApiKey, validateApiKey } from "./helpers";
 
 export const createProvider =

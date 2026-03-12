@@ -5,9 +5,9 @@ import { providerConfigs, requestLogs, virtualKeys } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import type { Redis } from "ioredis";
-import { decrypt } from "../../lib/crypto";
-import { RateLimitError, UnauthorizedError } from "../../lib/errors";
-import { publishEvent } from "../../lib/events";
+import { decrypt } from "@/lib/crypto";
+import { RateLimitError, UnauthorizedError } from "@/lib/errors";
+import { publishEvent } from "@/lib/events";
 import { getProviderAdapter } from "./providers/registry";
 
 const hashKey = (key: string): string =>

@@ -1,4 +1,4 @@
-import { PROVIDERS } from "../../../lib/providers";
+import { PROVIDERS } from "@/lib/providers";
 import type { ProviderAdapter } from "./registry";
 
 const config = PROVIDERS.anthropic!;

@@ -3,8 +3,8 @@ import { budgets } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { z } from "zod";
-import { NotFoundError, ValidationError } from "../../lib/errors";
-import { publishEvent } from "../../lib/events";
+import { NotFoundError, ValidationError } from "@/lib/errors";
+import { publishEvent } from "@/lib/events";
 
 const updateBudgetSchema = z.object({
   alertThreshold: z.number().min(0).max(1).optional(),

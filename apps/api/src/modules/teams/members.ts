@@ -7,8 +7,8 @@ import {
   ForbiddenError,
   NotFoundError,
   ValidationError
-} from "../../lib/errors";
-import { publishEvent } from "../../lib/events";
+} from "@/lib/errors";
+import { publishEvent } from "@/lib/events";
 
 const changeRoleSchema = z.object({
   role: z.enum(["admin", "member", "viewer"])

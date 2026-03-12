@@ -2,8 +2,8 @@ import type { Database } from "@raven/db";
 import { budgets } from "@raven/db";
 import type { Context } from "hono";
 import { z } from "zod";
-import { ValidationError } from "../../lib/errors";
-import { publishEvent } from "../../lib/events";
+import { ValidationError } from "@/lib/errors";
+import { publishEvent } from "@/lib/events";
 
 const createBudgetSchema = z.object({
   alertThreshold: z.number().min(0).max(1).default(0.8),

@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { auditLogs } from "@raven/db";
-import { publishEvent } from "../../lib/events";
+import { publishEvent } from "@/lib/events";
 
 export const logAudit = async (
   db: Database,

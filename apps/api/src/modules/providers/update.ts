@@ -3,9 +3,9 @@ import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { encrypt } from "../../lib/crypto";
-import { NotFoundError, ValidationError } from "../../lib/errors";
-import { publishEvent } from "../../lib/events";
+import { encrypt } from "@/lib/crypto";
+import { NotFoundError, ValidationError } from "@/lib/errors";
+import { publishEvent } from "@/lib/events";
 import { maskApiKey, updateProviderSchema, validateApiKey } from "./helpers";
 
 export const updateProvider =

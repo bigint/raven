@@ -8,8 +8,8 @@ import {
   ForbiddenError,
   NotFoundError,
   ValidationError
-} from "../../lib/errors";
-import { publishEvent } from "../../lib/events";
+} from "@/lib/errors";
+import { publishEvent } from "@/lib/events";
 
 const inviteSchema = z.object({
   email: z.string().email(),

@@ -2,8 +2,8 @@ import type { Database } from "@raven/db";
 import { guardrailRules } from "@raven/db";
 import type { Context } from "hono";
 import { z } from "zod";
-import { ValidationError } from "../../lib/errors";
-import { publishEvent } from "../../lib/events";
+import { ValidationError } from "@/lib/errors";
+import { publishEvent } from "@/lib/events";
 
 const createGuardrailSchema = z.object({
   action: z.enum(["block", "warn", "log"]).default("log"),

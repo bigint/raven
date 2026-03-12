@@ -2,7 +2,7 @@ import type { Database } from "@raven/db";
 import { virtualKeys } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { NotFoundError } from "../../lib/errors";
+import { NotFoundError } from "@/lib/errors";
 import { safeKey } from "./helpers";
 
 export const getKey = (db: Database) => async (c: Context) => {

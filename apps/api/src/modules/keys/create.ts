@@ -1,8 +1,8 @@
 import type { Database } from "@raven/db";
 import { virtualKeys } from "@raven/db";
 import type { Context } from "hono";
-import { ValidationError } from "../../lib/errors";
-import { publishEvent } from "../../lib/events";
+import { ValidationError } from "@/lib/errors";
+import { publishEvent } from "@/lib/events";
 import { createKeySchema, generateKey, safeKey } from "./helpers";
 
 export const createKey = (db: Database) => async (c: Context) => {
