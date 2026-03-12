@@ -1,8 +1,6 @@
 node_modules
-dashboard/node_modules
-dashboard/dist
-website
-sdks
+.next
 .git
 *.md
-!gateway/**/*.md
+.env*
+!.env.example
