@@ -5,6 +5,7 @@ import type { Context } from "hono";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
+import { logAudit } from "@/modules/audit-logs/index";
 import { changeRoleSchema } from "./schema";
 
 export const listMembers = (db: Database) => async (c: Context) => {
@@ -71,12 +72,21 @@ export const removeMember = (db: Database) => async (c: Context) => {
     .where(and(eq(members.id, id), eq(members.organizationId, orgId)));
 
   void publishEvent(orgId, "member.removed", { id });
+  void logAudit(db, {
+    action: "member.removed",
+    actorId: currentUser.id,
+    metadata: { memberId: id, userId: membership.userId },
+    orgId,
+    resourceId: id,
+    resourceType: "member"
+  });
   return success(c, { success: true });
 };
 
 export const changeRole = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
   const orgRole = c.get("orgRole" as never) as string;
+  const user = c.get("user" as never) as { id: string };
   const id = c.req.param("id") as string;
 
   if (orgRole !== "owner" && orgRole !== "admin") {
@@ -115,5 +125,13 @@ export const changeRole = (db: Database) => async (c: Context) => {
     .returning();
 
   void publishEvent(orgId, "member.role_changed", updated);
+  void logAudit(db, {
+    action: "member.updated",
+    actorId: user.id,
+    metadata: { memberId: id, newRole: result.data.role },
+    orgId,
+    resourceId: id,
+    resourceType: "member"
+  });
   return success(c, updated);
 };

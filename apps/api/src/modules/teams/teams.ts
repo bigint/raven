@@ -10,6 +10,7 @@ import {
 } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { created, success } from "@/lib/response";
+import { logAudit } from "@/modules/audit-logs/index";
 import { checkFeatureGate } from "@/modules/proxy/plan-gate";
 import {
   addTeamMemberSchema,
@@ -38,6 +39,7 @@ export const listTeams = (db: Database) => async (c: Context) => {
 export const createTeam = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
   const orgRole = c.get("orgRole" as never) as string;
+  const user = c.get("user" as never) as { id: string };
 
   if (orgRole !== "owner" && orgRole !== "admin") {
     throw new ForbiddenError("Only owners and admins can create teams");
@@ -62,13 +64,23 @@ export const createTeam = (db: Database) => async (c: Context) => {
     })
     .returning();
 
-  void publishEvent(orgId, "team.created", record);
-  return created(c, record);
+  const safe = record as NonNullable<typeof record>;
+  void publishEvent(orgId, "team.created", safe);
+  void logAudit(db, {
+    action: "team.created",
+    actorId: user.id,
+    metadata: { name: result.data.name },
+    orgId,
+    resourceId: safe.id,
+    resourceType: "team"
+  });
+  return created(c, safe);
 };
 
 export const updateTeam = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
   const orgRole = c.get("orgRole" as never) as string;
+  const user = c.get("user" as never) as { id: string };
   const id = c.req.param("id") as string;
 
   if (orgRole !== "owner" && orgRole !== "admin") {
@@ -101,12 +113,21 @@ export const updateTeam = (db: Database) => async (c: Context) => {
     .returning();
 
   void publishEvent(orgId, "team.updated", updated);
+  void logAudit(db, {
+    action: "team.updated",
+    actorId: user.id,
+    metadata: { name: result.data.name },
+    orgId,
+    resourceId: id,
+    resourceType: "team"
+  });
   return success(c, updated);
 };
 
 export const deleteTeam = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
   const orgRole = c.get("orgRole" as never) as string;
+  const user = c.get("user" as never) as { id: string };
   const id = c.req.param("id") as string;
 
   if (orgRole !== "owner" && orgRole !== "admin") {
@@ -128,12 +149,20 @@ export const deleteTeam = (db: Database) => async (c: Context) => {
     .where(and(eq(teams.id, id), eq(teams.organizationId, orgId)));
 
   void publishEvent(orgId, "team.deleted", { id });
+  void logAudit(db, {
+    action: "team.deleted",
+    actorId: user.id,
+    orgId,
+    resourceId: id,
+    resourceType: "team"
+  });
   return success(c, { success: true });
 };
 
 export const addTeamMember = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
   const orgRole = c.get("orgRole" as never) as string;
+  const user = c.get("user" as never) as { id: string };
   const id = c.req.param("id") as string;
 
   if (orgRole !== "owner" && orgRole !== "admin") {
@@ -204,12 +233,21 @@ export const addTeamMember = (db: Database) => async (c: Context) => {
     teamId: id,
     userId: result.data.userId
   });
+  void logAudit(db, {
+    action: "member.added",
+    actorId: user.id,
+    metadata: { role: result.data.role, teamId: id, userId: result.data.userId },
+    orgId,
+    resourceId: id,
+    resourceType: "team"
+  });
   return created(c, record);
 };
 
 export const removeTeamMember = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
   const orgRole = c.get("orgRole" as never) as string;
+  const user = c.get("user" as never) as { id: string };
   const id = c.req.param("id") as string;
   const userId = c.req.param("userId") as string;
 
@@ -242,5 +280,13 @@ export const removeTeamMember = (db: Database) => async (c: Context) => {
     .where(and(eq(teamMembers.teamId, id), eq(teamMembers.userId, userId)));
 
   void publishEvent(orgId, "team_member.removed", { teamId: id, userId });
+  void logAudit(db, {
+    action: "member.removed",
+    actorId: user.id,
+    metadata: { teamId: id, userId },
+    orgId,
+    resourceId: id,
+    resourceType: "team"
+  });
   return success(c, { success: true });
 };

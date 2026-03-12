@@ -5,11 +5,13 @@ import type { Context } from "hono";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
+import { logAudit } from "@/modules/audit-logs/index";
 import { safeKey } from "./helpers";
 import { updateKeySchema } from "./schema";
 
 export const updateKey = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
+  const user = c.get("user" as never) as { id: string };
   const id = c.req.param("id") as string;
   const body = await c.req.json();
   const result = updateKeySchema.safeParse(body);
@@ -58,5 +60,13 @@ export const updateKey = (db: Database) => async (c: Context) => {
 
   const safeKeyData = safeKey(updated as NonNullable<typeof updated>);
   void publishEvent(orgId, "key.updated", safeKeyData);
+  void logAudit(db, {
+    action: "key.updated",
+    actorId: user.id,
+    metadata: { isActive, name, rateLimitRpd, rateLimitRpm },
+    orgId,
+    resourceId: id,
+    resourceType: "key"
+  });
   return success(c, safeKeyData);
 };

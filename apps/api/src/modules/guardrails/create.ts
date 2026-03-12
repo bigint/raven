@@ -4,11 +4,13 @@ import type { Context } from "hono";
 import { ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { created } from "@/lib/response";
+import { logAudit } from "@/modules/audit-logs/index";
 import { checkFeatureGate } from "@/modules/proxy/plan-gate";
 import { createGuardrailSchema } from "./schema";
 
 export const createGuardrail = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
+  const user = c.get("user" as never) as { id: string };
 
   await checkFeatureGate(db, orgId, "hasGuardrails");
 
@@ -36,6 +38,15 @@ export const createGuardrail = (db: Database) => async (c: Context) => {
     })
     .returning();
 
-  void publishEvent(orgId, "guardrail.created", record);
-  return created(c, record);
+  const safe = record as NonNullable<typeof record>;
+  void publishEvent(orgId, "guardrail.created", safe);
+  void logAudit(db, {
+    action: "guardrail.created",
+    actorId: user.id,
+    metadata: { action, name, type },
+    orgId,
+    resourceId: safe.id,
+    resourceType: "guardrail"
+  });
+  return created(c, safe);
 };

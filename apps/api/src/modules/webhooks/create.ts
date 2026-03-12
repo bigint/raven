@@ -5,10 +5,12 @@ import type { Context } from "hono";
 import { ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { created } from "@/lib/response";
+import { logAudit } from "@/modules/audit-logs/index";
 import { createWebhookSchema } from "./schema";
 
 export const createWebhook = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
+  const user = c.get("user" as never) as { id: string };
   const body = await c.req.json();
   const result = createWebhookSchema.safeParse(body);
 
@@ -32,6 +34,15 @@ export const createWebhook = (db: Database) => async (c: Context) => {
     })
     .returning();
 
-  void publishEvent(orgId, "webhook.created", record);
-  return created(c, record);
+  const safe = record as NonNullable<typeof record>;
+  void publishEvent(orgId, "webhook.created", safe);
+  void logAudit(db, {
+    action: "webhook.created",
+    actorId: user.id,
+    metadata: { events, url },
+    orgId,
+    resourceId: safe.id,
+    resourceType: "webhook"
+  });
+  return created(c, safe);
 };

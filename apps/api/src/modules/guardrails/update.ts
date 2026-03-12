@@ -5,10 +5,12 @@ import type { Context } from "hono";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
+import { logAudit } from "@/modules/audit-logs/index";
 import { updateGuardrailSchema } from "./schema";
 
 export const updateGuardrail = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
+  const user = c.get("user" as never) as { id: string };
   const id = c.req.param("id") as string;
   const body = await c.req.json();
   const result = updateGuardrailSchema.safeParse(body);
@@ -67,5 +69,13 @@ export const updateGuardrail = (db: Database) => async (c: Context) => {
     .returning();
 
   void publishEvent(orgId, "guardrail.updated", updated);
+  void logAudit(db, {
+    action: "guardrail.updated",
+    actorId: user.id,
+    metadata: { action, config, isEnabled, name, priority, type },
+    orgId,
+    resourceId: id,
+    resourceType: "guardrail"
+  });
   return success(c, updated);
 };

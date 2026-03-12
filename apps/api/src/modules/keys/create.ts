@@ -5,12 +5,14 @@ import type { Context } from "hono";
 import { ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { created } from "@/lib/response";
+import { logAudit } from "@/modules/audit-logs/index";
 import { checkResourceLimit } from "@/modules/proxy/plan-gate";
 import { generateKey, safeKey } from "./helpers";
 import { createKeySchema } from "./schema";
 
 export const createKey = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
+  const user = c.get("user" as never) as { id: string };
   const body = await c.req.json();
   const result = createKeySchema.safeParse(body);
 
@@ -50,6 +52,14 @@ export const createKey = (db: Database) => async (c: Context) => {
   void publishEvent(orgId, "key.created", {
     ...safe,
     key: undefined
+  });
+  void logAudit(db, {
+    action: "key.created",
+    actorId: user.id,
+    metadata: { environment, name },
+    orgId,
+    resourceId: safe.id,
+    resourceType: "key"
   });
   return created(c, { ...safe, key });
 };

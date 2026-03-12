@@ -5,10 +5,12 @@ import type { Context } from "hono";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
+import { logAudit } from "@/modules/audit-logs/index";
 import { updateBudgetSchema } from "./schema";
 
 export const updateBudget = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
+  const user = c.get("user" as never) as { id: string };
   const id = c.req.param("id") as string;
   const body = await c.req.json();
   const result = updateBudgetSchema.safeParse(body);
@@ -51,5 +53,13 @@ export const updateBudget = (db: Database) => async (c: Context) => {
     .returning();
 
   void publishEvent(orgId, "budget.updated", updated);
+  void logAudit(db, {
+    action: "budget.updated",
+    actorId: user.id,
+    metadata: { alertThreshold, limitAmount, period },
+    orgId,
+    resourceId: id,
+    resourceType: "budget"
+  });
   return success(c, updated);
 };

@@ -8,12 +8,14 @@ import { ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { created } from "@/lib/response";
 import { checkResourceLimit } from "@/modules/proxy/plan-gate";
+import { logAudit } from "@/modules/audit-logs/index";
 import { maskApiKey, validateApiKey } from "./helpers";
 import { createProviderSchema } from "./schema";
 
 export const createProvider =
   (db: Database, env: Env) => async (c: Context) => {
     const orgId = c.get("orgId" as never) as string;
+    const user = c.get("user" as never) as { id: string };
     const body = await c.req.json();
     const result = createProviderSchema.safeParse(body);
 
@@ -50,5 +52,13 @@ export const createProvider =
     const safe = record as NonNullable<typeof record>;
     const masked = maskApiKey(safe.apiKey);
     void publishEvent(orgId, "provider.created", { ...safe, apiKey: masked });
+    void logAudit(db, {
+      action: "provider.created",
+      actorId: user.id,
+      metadata: { name: safe.name, provider: safe.provider },
+      orgId,
+      resourceId: safe.id,
+      resourceType: "provider"
+    });
     return created(c, { ...safe, apiKey: masked });
   };

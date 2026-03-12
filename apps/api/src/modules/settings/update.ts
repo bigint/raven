@@ -5,11 +5,13 @@ import type { Context } from "hono";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
+import { logAudit } from "@/modules/audit-logs/index";
 import { updateOrgSchema } from "./schema";
 
 export const updateSettings = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
   const orgRole = c.get("orgRole" as never) as string;
+  const user = c.get("user" as never) as { id: string };
 
   if (orgRole !== "owner" && orgRole !== "admin") {
     throw new ForbiddenError(
@@ -63,5 +65,13 @@ export const updateSettings = (db: Database) => async (c: Context) => {
     userRole: orgRole
   };
   void publishEvent(orgId, "settings.updated", settings);
+  void logAudit(db, {
+    action: "org.updated",
+    actorId: user.id,
+    metadata: { name, slug },
+    orgId,
+    resourceId: orgId,
+    resourceType: "organization"
+  });
   return success(c, settings);
 };

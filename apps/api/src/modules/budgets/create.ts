@@ -5,11 +5,13 @@ import type { Context } from "hono";
 import { ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { created } from "@/lib/response";
+import { logAudit } from "@/modules/audit-logs/index";
 import { checkResourceLimit } from "@/modules/proxy/plan-gate";
 import { createBudgetSchema } from "./schema";
 
 export const createBudget = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
+  const user = c.get("user" as never) as { id: string };
   const body = await c.req.json();
   const result = createBudgetSchema.safeParse(body);
 
@@ -40,6 +42,15 @@ export const createBudget = (db: Database) => async (c: Context) => {
     })
     .returning();
 
-  void publishEvent(orgId, "budget.created", record);
-  return created(c, record);
+  const safe = record as NonNullable<typeof record>;
+  void publishEvent(orgId, "budget.created", safe);
+  void logAudit(db, {
+    action: "budget.created",
+    actorId: user.id,
+    metadata: { entityId, entityType, limitAmount, period },
+    orgId,
+    resourceId: safe.id,
+    resourceType: "budget"
+  });
+  return created(c, safe);
 };

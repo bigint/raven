@@ -10,6 +10,7 @@ import {
 } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { created, success } from "@/lib/response";
+import { logAudit } from "@/modules/audit-logs/index";
 import { inviteSchema } from "./schema";
 
 export const inviteUser = (db: Database) => async (c: Context) => {
@@ -83,8 +84,17 @@ export const inviteUser = (db: Database) => async (c: Context) => {
     })
     .returning();
 
-  void publishEvent(orgId, "invitation.created", record);
-  return created(c, record);
+  const safe = record as NonNullable<typeof record>;
+  void publishEvent(orgId, "invitation.created", safe);
+  void logAudit(db, {
+    action: "member.added",
+    actorId: currentUser.id,
+    metadata: { email, role },
+    orgId,
+    resourceId: safe.id,
+    resourceType: "invitation"
+  });
+  return created(c, safe);
 };
 
 export const listInvitations = (db: Database) => async (c: Context) => {
@@ -101,6 +111,7 @@ export const listInvitations = (db: Database) => async (c: Context) => {
 export const revokeInvitation = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
   const orgRole = c.get("orgRole" as never) as string;
+  const user = c.get("user" as never) as { id: string };
   const id = c.req.param("id") as string;
 
   if (orgRole !== "owner" && orgRole !== "admin") {
@@ -122,5 +133,12 @@ export const revokeInvitation = (db: Database) => async (c: Context) => {
     .where(and(eq(invitations.id, id), eq(invitations.organizationId, orgId)));
 
   void publishEvent(orgId, "invitation.revoked", { id });
+  void logAudit(db, {
+    action: "member.removed",
+    actorId: user.id,
+    orgId,
+    resourceId: id,
+    resourceType: "invitation"
+  });
   return success(c, { success: true });
 };
