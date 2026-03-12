@@ -2,20 +2,10 @@ import type { Database } from "@raven/db";
 import { guardrailRules } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { z } from "zod";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
-
-const updateGuardrailSchema = z.object({
-  action: z.enum(["block", "warn", "log"]).optional(),
-  config: z.record(z.string(), z.unknown()).optional(),
-  isEnabled: z.boolean().optional(),
-  name: z.string().min(1).optional(),
-  priority: z.number().int().min(0).optional(),
-  type: z
-    .enum(["block_topics", "pii_detection", "content_filter", "custom_regex"])
-    .optional()
-});
+import { success } from "@/lib/response";
+import { updateGuardrailSchema } from "./schema";
 
 export const updateGuardrail = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
@@ -77,5 +67,5 @@ export const updateGuardrail = (db: Database) => async (c: Context) => {
     .returning();
 
   void publishEvent(orgId, "guardrail.updated", updated);
-  return c.json(updated);
+  return success(c, updated);
 };

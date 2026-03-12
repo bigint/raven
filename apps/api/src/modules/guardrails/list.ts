@@ -2,6 +2,7 @@ import type { Database } from "@raven/db";
 import { guardrailRules } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Context } from "hono";
+import { success } from "@/lib/response";
 
 export const listGuardrails = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
@@ -11,5 +12,5 @@ export const listGuardrails = (db: Database) => async (c: Context) => {
     .from(guardrailRules)
     .where(eq(guardrailRules.organizationId, orgId));
 
-  return c.json(rows);
+  return success(c, rows);
 };

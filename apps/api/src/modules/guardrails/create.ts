@@ -1,23 +1,10 @@
 import type { Database } from "@raven/db";
 import { guardrailRules } from "@raven/db";
 import type { Context } from "hono";
-import { z } from "zod";
 import { ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
-
-const createGuardrailSchema = z.object({
-  action: z.enum(["block", "warn", "log"]).default("log"),
-  config: z.record(z.string(), z.unknown()),
-  isEnabled: z.boolean().default(true),
-  name: z.string().min(1),
-  priority: z.number().int().min(0).default(0),
-  type: z.enum([
-    "block_topics",
-    "pii_detection",
-    "content_filter",
-    "custom_regex"
-  ])
-});
+import { created } from "@/lib/response";
+import { createGuardrailSchema } from "./schema";
 
 export const createGuardrail = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
@@ -32,7 +19,7 @@ export const createGuardrail = (db: Database) => async (c: Context) => {
 
   const { name, type, config, action, isEnabled, priority } = result.data;
 
-  const [created] = await db
+  const [record] = await db
     .insert(guardrailRules)
     .values({
       action,
@@ -45,6 +32,6 @@ export const createGuardrail = (db: Database) => async (c: Context) => {
     })
     .returning();
 
-  void publishEvent(orgId, "guardrail.created", created);
-  return c.json(created, 201);
+  void publishEvent(orgId, "guardrail.created", record);
+  return created(c, record);
 };
