@@ -53,7 +53,17 @@ const columns: Column<RequestLog>[] = [
     className: "font-medium",
     header: "Provider",
     key: "provider",
-    render: (req) => PROVIDER_LABELS[req.provider] ?? req.provider
+    render: (req) =>
+      req.providerConfigName ? (
+        <div>
+          <div>{req.providerConfigName}</div>
+          <div className="text-xs font-normal text-muted-foreground">
+            {PROVIDER_LABELS[req.provider] ?? req.provider}
+          </div>
+        </div>
+      ) : (
+        (PROVIDER_LABELS[req.provider] ?? req.provider)
+      )
   },
   {
     className: "font-mono text-xs text-muted-foreground",

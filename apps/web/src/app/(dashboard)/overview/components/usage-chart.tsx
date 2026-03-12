@@ -72,7 +72,16 @@ export const UsageChart = ({
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">
-                      {PROVIDER_LABELS[row.provider] ?? row.provider}
+                      {row.providerConfigName ? (
+                        <>
+                          {row.providerConfigName}
+                          <span className="ml-1 text-xs font-normal text-muted-foreground">
+                            {PROVIDER_LABELS[row.provider] ?? row.provider}
+                          </span>
+                        </>
+                      ) : (
+                        (PROVIDER_LABELS[row.provider] ?? row.provider)
+                      )}
                     </span>
                     <span className="text-muted-foreground">{row.model}</span>
                   </div>

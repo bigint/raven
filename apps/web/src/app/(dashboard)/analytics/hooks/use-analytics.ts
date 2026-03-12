@@ -14,6 +14,7 @@ interface Stats {
 
 interface UsageRow {
   provider: string;
+  providerConfigName: string | null;
   model: string;
   totalRequests: number;
   totalCost: string;

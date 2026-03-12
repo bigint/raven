@@ -7,6 +7,7 @@ export interface RequestLog {
   id: string;
   createdAt: string;
   provider: string;
+  providerConfigName: string | null;
   model: string;
   statusCode: number;
   latencyMs: number;

@@ -1,9 +1,17 @@
 import type { Database } from "@raven/db";
-import { requestLogs } from "@raven/db";
+import { providerConfigs, requestLogs } from "@raven/db";
 import { and, count, eq, sql } from "drizzle-orm";
 import type { Context } from "hono";
 
 import { parseDateRange } from "./helpers";
+
+const providerConfigNameSubquery = sql<string | null>`(
+  SELECT ${providerConfigs.name}
+  FROM ${providerConfigs}
+  WHERE ${providerConfigs.organizationId} = ${requestLogs.organizationId}
+    AND ${providerConfigs.provider} = ${requestLogs.provider}
+  LIMIT 1
+)`.as("provider_config_name");
 
 export const getRequests = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
@@ -43,7 +51,24 @@ export const getRequests = (db: Database) => async (c: Context) => {
 
   const [rows, countResult] = await Promise.all([
     db
-      .select()
+      .select({
+        cachedTokens: requestLogs.cachedTokens,
+        cacheHit: requestLogs.cacheHit,
+        cost: requestLogs.cost,
+        createdAt: requestLogs.createdAt,
+        id: requestLogs.id,
+        inputTokens: requestLogs.inputTokens,
+        latencyMs: requestLogs.latencyMs,
+        method: requestLogs.method,
+        model: requestLogs.model,
+        organizationId: requestLogs.organizationId,
+        outputTokens: requestLogs.outputTokens,
+        path: requestLogs.path,
+        provider: requestLogs.provider,
+        providerConfigName: providerConfigNameSubquery,
+        statusCode: requestLogs.statusCode,
+        virtualKeyId: requestLogs.virtualKeyId
+      })
       .from(requestLogs)
       .where(where)
       .orderBy(sql`${requestLogs.createdAt} DESC`)

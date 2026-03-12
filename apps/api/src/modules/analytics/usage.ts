@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
-import { requestLogs } from "@raven/db";
-import { and, avg, count, eq, sum } from "drizzle-orm";
+import { providerConfigs, requestLogs } from "@raven/db";
+import { and, avg, count, eq, sql, sum } from "drizzle-orm";
 import type { Context } from "hono";
 
 import { parseDateRange } from "./helpers";
@@ -17,6 +17,13 @@ export const getUsage = (db: Database) => async (c: Context) => {
       avgLatencyMs: avg(requestLogs.latencyMs),
       model: requestLogs.model,
       provider: requestLogs.provider,
+      providerConfigName: sql<string | null>`(
+        SELECT ${providerConfigs.name}
+        FROM ${providerConfigs}
+        WHERE ${providerConfigs.organizationId} = ${requestLogs.organizationId}
+          AND ${providerConfigs.provider} = ${requestLogs.provider}
+        LIMIT 1
+      )`.as("provider_config_name"),
       totalCost: sum(requestLogs.cost),
       totalInputTokens: sum(requestLogs.inputTokens),
       totalOutputTokens: sum(requestLogs.outputTokens),

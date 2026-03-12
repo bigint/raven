@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
-import { requestLogs } from "@raven/db";
-import { desc, eq } from "drizzle-orm";
+import { providerConfigs, requestLogs } from "@raven/db";
+import { desc, eq, sql } from "drizzle-orm";
 import type { Context } from "hono";
 import { streamSSE } from "hono/streaming";
 import { getEventRedis } from "@/lib/events";
@@ -17,7 +17,30 @@ export const getRequestsLive = (db: Database) => async (c: Context) => {
 
     // Send initial batch of recent logs
     const initial = await db
-      .select()
+      .select({
+        cachedTokens: requestLogs.cachedTokens,
+        cacheHit: requestLogs.cacheHit,
+        cost: requestLogs.cost,
+        createdAt: requestLogs.createdAt,
+        id: requestLogs.id,
+        inputTokens: requestLogs.inputTokens,
+        latencyMs: requestLogs.latencyMs,
+        method: requestLogs.method,
+        model: requestLogs.model,
+        organizationId: requestLogs.organizationId,
+        outputTokens: requestLogs.outputTokens,
+        path: requestLogs.path,
+        provider: requestLogs.provider,
+        providerConfigName: sql<string | null>`(
+          SELECT ${providerConfigs.name}
+          FROM ${providerConfigs}
+          WHERE ${providerConfigs.organizationId} = ${requestLogs.organizationId}
+            AND ${providerConfigs.provider} = ${requestLogs.provider}
+          LIMIT 1
+        )`.as("provider_config_name"),
+        statusCode: requestLogs.statusCode,
+        virtualKeyId: requestLogs.virtualKeyId
+      })
       .from(requestLogs)
       .where(eq(requestLogs.organizationId, orgId))
       .orderBy(desc(requestLogs.createdAt))

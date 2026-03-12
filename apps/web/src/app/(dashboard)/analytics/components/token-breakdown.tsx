@@ -65,7 +65,16 @@ export const TokenBreakdown = ({ usage, loading }: TokenBreakdownProps) => (
                 key={`${row.provider}-${row.model}`}
               >
                 <td className="px-5 py-4 font-medium">
-                  {PROVIDER_LABELS[row.provider] ?? row.provider}
+                  {row.providerConfigName ? (
+                    <div>
+                      <div>{row.providerConfigName}</div>
+                      <div className="text-xs font-normal text-muted-foreground">
+                        {PROVIDER_LABELS[row.provider] ?? row.provider}
+                      </div>
+                    </div>
+                  ) : (
+                    (PROVIDER_LABELS[row.provider] ?? row.provider)
+                  )}
                 </td>
                 <td className="px-5 py-4 font-mono text-sm text-muted-foreground">
                   {row.model}
