@@ -291,7 +291,97 @@ git commit -m "chore: scaffold monorepo structure for SaaS transformation"
 
 ---
 
-### Task 2: Set up packages/config (shared env validation)
+### Task 2: Update STYLEGUIDE.md for new stack
+
+The current STYLEGUIDE.md references Vite, TanStack Router, GraphQL Yoga, Pothos, urql, and React Router — all removed. Update it for the new stack while preserving all coding principles.
+
+**Files:**
+- Modify: `STYLEGUIDE.md`
+
+- [ ] **Step 1: Update the Tech Stack Overview section**
+
+Replace the "Tech Stack Overview" section with the new stack:
+
+```markdown
+### Core Framework
+- **React 19** - UI framework with modern hooks and concurrent features
+- **TypeScript 5.8** - Type-safe JavaScript with strict mode
+- **Next.js 15** - React framework with App Router, SSR/SSG, and file-based routing
+
+### API & Data Management
+- **Hono** - Fast, lightweight backend framework
+- **TanStack Query v5** - Async state management for dashboard data fetching
+- **Drizzle ORM** - Zero-overhead PostgreSQL ORM
+- **Zod** - Schema validation for API inputs and env vars
+- **Next.js App Router** - File-based routing with route groups
+
+### UI & Styling
+- **Tailwind CSS 4** - Utility-first CSS framework
+- **Base UI** - Unstyled, accessible component primitives
+- **Lucide Icons** - Clean icon library
+- **Recharts** - Composable charting library
+
+### Quality
+- **Biome** - Fast formatter and linter
+- **Vitest** - Unit and integration testing
+```
+
+- [ ] **Step 2: Update routing references**
+
+Replace all TanStack Router references with Next.js App Router equivalents:
+- `createFileRoute` → Next.js `page.tsx` files in `app/` directory
+- `Route.useParams()` → `useParams()` from `next/navigation`
+- `Route.useSearch()` → `useSearchParams()` from `next/navigation`
+- `<Link>` from `@tanstack/react-router` → `<Link>` from `next/link`
+- `useNavigate()` → `useRouter()` from `next/navigation`
+- Route loaders → Server Components or `prefetchQuery` in layouts
+
+- [ ] **Step 3: Update data fetching references**
+
+Replace GraphQL (urql/Yoga/Pothos) references with REST (Hono + TanStack Query):
+- Remove all GraphQL Codegen references
+- Replace `urql` client examples with `fetch`-based API client
+- Keep TanStack Query patterns (queryOptions, useQuery, etc.) — they work the same with REST
+
+- [ ] **Step 4: Update file naming for route files**
+
+Replace:
+```
+- **Route Files**: TanStack Router conventions (e.g., `$name.tsx`)
+```
+With:
+```
+- **Route Files**: Next.js App Router conventions (e.g., `page.tsx`, `layout.tsx`, `loading.tsx`)
+```
+
+- [ ] **Step 5: Add backend coding conventions section**
+
+Add a new section for Hono/backend patterns:
+
+```markdown
+## Backend Patterns (Hono)
+
+### Module Structure
+Each API module exports a Hono app mounted on the main router:
+
+### Request Validation
+All request bodies validated with Zod via `@hono/zod-validator`:
+
+### Error Handling
+Use custom error classes from `apps/api/src/lib/errors.ts`.
+Throw errors — the global error handler catches and formats them.
+```
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add STYLEGUIDE.md
+git commit -m "docs: update STYLEGUIDE.md for new TypeScript-only stack"
+```
+
+---
+
+### Task 3: Set up packages/config
 
 **Files:**
 - Create: `packages/config/package.json`
@@ -392,7 +482,7 @@ git commit -m "feat: add shared config package with Zod env validation"
 
 ---
 
-### Task 3: Set up packages/types (shared TypeScript types)
+### Task 4: Set up packages/types
 
 **Files:**
 - Create: `packages/types/package.json`
@@ -584,7 +674,7 @@ git commit -m "feat: add shared types package with billing, provider, and API ty
 
 ---
 
-### Task 4: Set up packages/db (Drizzle schema + migrations)
+### Task 5: Set up packages/db
 
 **Files:**
 - Create: `packages/db/package.json`
@@ -1082,7 +1172,7 @@ git commit -m "feat: add database package with Drizzle schema and migrations"
 
 ## Chunk 2: Hono API Scaffold + Auth System
 
-### Task 5: Set up apps/api (Hono backend)
+### Task 6: Set up apps/api
 
 **Files:**
 - Create: `apps/api/package.json`
@@ -1278,7 +1368,7 @@ git commit -m "feat: add Hono API scaffold with health check, Redis, and error h
 
 ---
 
-### Task 6: Set up packages/auth (Better Auth)
+### Task 7: Set up packages/auth
 
 **Files:**
 - Create: `packages/auth/package.json`
@@ -1418,7 +1508,7 @@ git commit -m "feat: add Better Auth package with org support"
 
 ---
 
-### Task 7: Mount auth on API + add auth middleware
+### Task 8: Mount auth on API + add auth middleware
 
 **Files:**
 - Create: `apps/api/src/modules/auth/index.ts`
@@ -1562,7 +1652,6 @@ git commit -m "feat: mount Better Auth on API with session middleware"
 - Create: `apps/web/package.json`
 - Create: `apps/web/tsconfig.json`
 - Create: `apps/web/next.config.ts`
-- Create: `apps/web/tailwind.config.ts`
 - Create: `apps/web/postcss.config.mjs`
 - Create: `apps/web/src/app/layout.tsx`
 - Create: `apps/web/src/app/(marketing)/page.tsx`
@@ -1654,28 +1743,17 @@ export default {
 }
 ```
 
-- [ ] **Step 5: Create apps/web/tailwind.config.ts**
+- [ ] **Step 5: Create apps/web/src/app/globals.css**
 
-```typescript
-import type { Config } from 'tailwindcss'
-
-const config: Config = {
-  content: ['./src/**/*.{ts,tsx}'],
-  theme: {
-    extend: {},
-  },
-}
-
-export default config
-```
-
-- [ ] **Step 6: Create apps/web/src/app/globals.css**
+Tailwind CSS 4 uses CSS-based configuration. No `tailwind.config.ts` file needed.
 
 ```css
 @import 'tailwindcss';
+
+@source "../**/*.tsx";
 ```
 
-- [ ] **Step 7: Create apps/web/src/lib/auth-client.ts**
+- [ ] **Step 6: Create apps/web/src/lib/auth-client.ts**
 
 Uses `@raven/auth/client` rather than duplicating the Better Auth client setup.
 
@@ -1696,7 +1774,7 @@ export const {
 } = authClient
 ```
 
-- [ ] **Step 8: Create apps/web/src/lib/api.ts**
+- [ ] **Step 7: Create apps/web/src/lib/api.ts**
 
 ```typescript
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
@@ -1755,7 +1833,7 @@ export const api = {
 }
 ```
 
-- [ ] **Step 9: Create apps/web/src/app/layout.tsx**
+- [ ] **Step 8: Create apps/web/src/app/layout.tsx**
 
 ```tsx
 import type { Metadata } from 'next'
@@ -1777,7 +1855,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-- [ ] **Step 10: Create apps/web/src/app/(marketing)/page.tsx**
+- [ ] **Step 9: Create apps/web/src/app/(marketing)/page.tsx**
 
 ```tsx
 export default function HomePage() {
@@ -1790,7 +1868,7 @@ export default function HomePage() {
 }
 ```
 
-- [ ] **Step 11: Create apps/web/src/app/(auth)/sign-in/page.tsx**
+- [ ] **Step 10: Create apps/web/src/app/(auth)/sign-in/page.tsx**
 
 ```tsx
 'use client'
@@ -1861,7 +1939,7 @@ export default function SignInPage() {
 }
 ```
 
-- [ ] **Step 12: Create apps/web/src/app/(auth)/sign-up/page.tsx**
+- [ ] **Step 11: Create apps/web/src/app/(auth)/sign-up/page.tsx**
 
 ```tsx
 'use client'
@@ -1945,7 +2023,7 @@ export default function SignUpPage() {
 }
 ```
 
-- [ ] **Step 13: Create apps/web/src/app/(dashboard)/layout.tsx**
+- [ ] **Step 12: Create apps/web/src/app/(dashboard)/layout.tsx**
 
 ```tsx
 'use client'
@@ -2001,7 +2079,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 }
 ```
 
-- [ ] **Step 14: Create apps/web/src/app/(dashboard)/overview/page.tsx**
+- [ ] **Step 13: Create apps/web/src/app/(dashboard)/overview/page.tsx**
 
 ```tsx
 'use client'
@@ -2022,7 +2100,7 @@ export default function OverviewPage() {
 }
 ```
 
-- [ ] **Step 15: Install dependencies and verify**
+- [ ] **Step 14: Install dependencies and verify**
 
 ```bash
 pnpm install
@@ -2031,7 +2109,7 @@ pnpm dev:web
 
 Expected: Next.js starts on port 3000, landing page renders
 
-- [ ] **Step 16: Commit**
+- [ ] **Step 15: Commit**
 
 ```bash
 git add apps/web/
