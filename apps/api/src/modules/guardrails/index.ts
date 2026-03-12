@@ -1,9 +1,9 @@
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
-import { createGuardrail } from "./create.js";
-import { deleteGuardrail } from "./delete.js";
-import { listGuardrails } from "./list.js";
-import { updateGuardrail } from "./update.js";
+import { createGuardrail } from "./create";
+import { deleteGuardrail } from "./delete";
+import { listGuardrails } from "./list";
+import { updateGuardrail } from "./update";
 
 export const createGuardrailsModule = (db: Database) => {
   const app = new Hono();

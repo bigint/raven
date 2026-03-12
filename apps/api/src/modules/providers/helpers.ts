@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { ValidationError } from "../../lib/errors.js";
-import { getProviderConfig } from "../../lib/providers.js";
+import { ValidationError } from "../../lib/errors";
+import { getProviderConfig } from "../../lib/providers";
 
 export const createProviderSchema = z.object({
   apiKey: z.string().min(1),

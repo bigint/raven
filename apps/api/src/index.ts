@@ -5,27 +5,27 @@ import { createDatabase } from "@raven/db";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import { AppError } from "./lib/errors.js";
-import { initEventBus } from "./lib/events.js";
-import { getRedis } from "./lib/redis.js";
-import { createAuthMiddleware } from "./middleware/auth.js";
-import { createTenantMiddleware } from "./middleware/tenant.js";
-import { createAnalyticsModule } from "./modules/analytics/index.js";
-import { createAuditLogsModule } from "./modules/audit-logs/index.js";
-import { createAuthModule } from "./modules/auth/index.js";
+import { AppError } from "./lib/errors";
+import { initEventBus } from "./lib/events";
+import { getRedis } from "./lib/redis";
+import { createAuthMiddleware } from "./middleware/auth";
+import { createTenantMiddleware } from "./middleware/tenant";
+import { createAnalyticsModule } from "./modules/analytics/index";
+import { createAuditLogsModule } from "./modules/audit-logs/index";
+import { createAuthModule } from "./modules/auth/index";
 import {
   createBillingModule,
   createBillingWebhookModule
-} from "./modules/billing/index.js";
-import { createBudgetsModule } from "./modules/budgets/index.js";
-import { createEventsModule } from "./modules/events/index.js";
-import { createGuardrailsModule } from "./modules/guardrails/index.js";
-import { createKeysModule } from "./modules/keys/index.js";
-import { createProvidersModule } from "./modules/providers/index.js";
-import { createProxyModule } from "./modules/proxy/index.js";
-import { createSettingsModule } from "./modules/settings/index.js";
-import { createTeamsModule } from "./modules/teams/index.js";
-import { createUserModule } from "./modules/user/index.js";
+} from "./modules/billing/index";
+import { createBudgetsModule } from "./modules/budgets/index";
+import { createEventsModule } from "./modules/events/index";
+import { createGuardrailsModule } from "./modules/guardrails/index";
+import { createKeysModule } from "./modules/keys/index";
+import { createProvidersModule } from "./modules/providers/index";
+import { createProxyModule } from "./modules/proxy/index";
+import { createSettingsModule } from "./modules/settings/index";
+import { createTeamsModule } from "./modules/teams/index";
+import { createUserModule } from "./modules/user/index";
 
 const env = parseEnv();
 export const db = createDatabase(env.DATABASE_URL);

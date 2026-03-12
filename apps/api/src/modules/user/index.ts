@@ -4,9 +4,9 @@ import {
   acceptInvitation,
   declineInvitation,
   listInvitations
-} from "./invitations.js";
-import { createOrg, listOrgs } from "./orgs.js";
-import { updateProfile } from "./profile.js";
+} from "./invitations";
+import { createOrg, listOrgs } from "./orgs";
+import { updateProfile } from "./profile";
 
 export const createUserModule = (db: Database) => {
   const app = new Hono();

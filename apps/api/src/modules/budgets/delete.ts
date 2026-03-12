@@ -2,8 +2,8 @@ import type { Database } from "@raven/db";
 import { budgets } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { NotFoundError } from "../../lib/errors.js";
-import { publishEvent } from "../../lib/events.js";
+import { NotFoundError } from "../../lib/errors";
+import { publishEvent } from "../../lib/events";
 
 export const deleteBudget = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;

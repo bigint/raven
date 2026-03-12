@@ -1,7 +1,7 @@
 import { requestLogs } from "@raven/db";
 import { gte, lte } from "drizzle-orm";
 
-import { ValidationError } from "../../lib/errors.js";
+import { ValidationError } from "../../lib/errors";
 
 export const parseDateRange = (from?: string, to?: string) => {
   const conditions: ReturnType<typeof gte>[] = [];

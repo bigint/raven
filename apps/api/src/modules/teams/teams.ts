@@ -8,8 +8,8 @@ import {
   ForbiddenError,
   NotFoundError,
   ValidationError
-} from "../../lib/errors.js";
-import { publishEvent } from "../../lib/events.js";
+} from "../../lib/errors";
+import { publishEvent } from "../../lib/events";
 
 const createTeamSchema = z.object({
   name: z.string().min(1).max(100)

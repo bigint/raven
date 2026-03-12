@@ -1,9 +1,9 @@
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
-import { getRequests } from "./requests.js";
-import { getRequestsLive } from "./requests-live.js";
-import { getStats } from "./stats.js";
-import { getUsage } from "./usage.js";
+import { getRequests } from "./requests";
+import { getRequestsLive } from "./requests-live";
+import { getStats } from "./stats";
+import { getUsage } from "./usage";
 
 export const createAnalyticsModule = (db: Database) => {
   const app = new Hono();

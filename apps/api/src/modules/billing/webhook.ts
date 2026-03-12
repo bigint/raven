@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import type { Context } from "hono";
-import { publishEvent } from "../../lib/events.js";
+import { publishEvent } from "../../lib/events";
 
 export const handleWebhook = (_db: Database) => async (c: Context) => {
   const signature = c.req.header("Paddle-Signature");

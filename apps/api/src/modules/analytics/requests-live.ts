@@ -3,7 +3,7 @@ import { requestLogs } from "@raven/db";
 import { desc, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { streamSSE } from "hono/streaming";
-import { getEventRedis } from "../../lib/events.js";
+import { getEventRedis } from "../../lib/events";
 
 export const getRequestsLive = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;

@@ -2,7 +2,7 @@ import type { Database } from "@raven/db";
 import { virtualKeys } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { safeKey } from "./helpers.js";
+import { safeKey } from "./helpers";
 
 export const listKeys = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;

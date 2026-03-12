@@ -2,8 +2,8 @@ import type { Database } from "@raven/db";
 import { virtualKeys } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { NotFoundError } from "../../lib/errors.js";
-import { safeKey } from "./helpers.js";
+import { NotFoundError } from "../../lib/errors";
+import { safeKey } from "./helpers";
 
 export const getKey = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;

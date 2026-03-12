@@ -1,8 +1,8 @@
-export { createDatabase } from "./client.js";
+export { createDatabase } from "./client";
 export {
   createTenantQueries,
   type Database,
   insertWithTenant,
   type TenantQueries
-} from "./helpers.js";
-export * from "./schema/index.js";
+} from "./helpers";
+export * from "./schema/index";

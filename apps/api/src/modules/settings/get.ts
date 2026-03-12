@@ -2,7 +2,7 @@ import type { Database } from "@raven/db";
 import { organizations, subscriptions } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { NotFoundError } from "../../lib/errors.js";
+import { NotFoundError } from "../../lib/errors";
 
 export const getSettings = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;

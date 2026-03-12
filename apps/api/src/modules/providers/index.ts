@@ -1,11 +1,11 @@
 import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
-import { createProvider } from "./create.js";
-import { deleteProvider } from "./delete.js";
-import { getProvider } from "./get.js";
-import { listProviders } from "./list.js";
-import { updateProvider } from "./update.js";
+import { createProvider } from "./create";
+import { deleteProvider } from "./delete";
+import { getProvider } from "./get";
+import { listProviders } from "./list";
+import { updateProvider } from "./update";
 
 export const createProvidersModule = (db: Database, env: Env) => {
   const app = new Hono();

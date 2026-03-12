@@ -3,7 +3,7 @@ import { requestLogs } from "@raven/db";
 import { and, count, eq, sql } from "drizzle-orm";
 import type { Context } from "hono";
 
-import { parseDateRange } from "./helpers.js";
+import { parseDateRange } from "./helpers";
 
 export const getRequests = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;

@@ -3,8 +3,8 @@ import { guardrailRules } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { z } from "zod";
-import { NotFoundError, ValidationError } from "../../lib/errors.js";
-import { publishEvent } from "../../lib/events.js";
+import { NotFoundError, ValidationError } from "../../lib/errors";
+import { publishEvent } from "../../lib/events";
 
 const updateGuardrailSchema = z.object({
   action: z.enum(["block", "warn", "log"]).optional(),

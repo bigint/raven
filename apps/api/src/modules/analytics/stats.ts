@@ -3,7 +3,7 @@ import { requestLogs } from "@raven/db";
 import { and, avg, count, eq, sql, sum } from "drizzle-orm";
 import type { Context } from "hono";
 
-import { parseDateRange } from "./helpers.js";
+import { parseDateRange } from "./helpers";
 
 export const getStats = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;

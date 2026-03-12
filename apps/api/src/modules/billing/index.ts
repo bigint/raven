@@ -1,8 +1,8 @@
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
-import { getPlans } from "./plans.js";
-import { getSubscription } from "./subscription.js";
-import { handleWebhook } from "./webhook.js";
+import { getPlans } from "./plans";
+import { getSubscription } from "./subscription";
+import { handleWebhook } from "./webhook";
 
 export const createBillingModule = (db: Database) => {
   const app = new Hono();

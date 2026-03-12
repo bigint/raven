@@ -1,10 +1,10 @@
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
-import { createKey } from "./create.js";
-import { deleteKey } from "./delete.js";
-import { getKey } from "./get.js";
-import { listKeys } from "./list.js";
-import { updateKey } from "./update.js";
+import { createKey } from "./create";
+import { deleteKey } from "./delete";
+import { getKey } from "./get";
+import { listKeys } from "./list";
+import { updateKey } from "./update";
 
 export const createKeysModule = (db: Database) => {
   const app = new Hono();

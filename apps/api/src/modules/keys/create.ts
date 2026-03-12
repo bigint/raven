@@ -1,9 +1,9 @@
 import type { Database } from "@raven/db";
 import { virtualKeys } from "@raven/db";
 import type { Context } from "hono";
-import { ValidationError } from "../../lib/errors.js";
-import { publishEvent } from "../../lib/events.js";
-import { createKeySchema, generateKey, safeKey } from "./helpers.js";
+import { ValidationError } from "../../lib/errors";
+import { publishEvent } from "../../lib/events";
+import { createKeySchema, generateKey, safeKey } from "./helpers";
 
 export const createKey = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;

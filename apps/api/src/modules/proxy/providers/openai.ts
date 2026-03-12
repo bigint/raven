@@ -1,5 +1,5 @@
-import { PROVIDERS } from "../../../lib/providers.js";
-import type { ProviderAdapter } from "./registry.js";
+import { PROVIDERS } from "../../../lib/providers";
+import type { ProviderAdapter } from "./registry";
 
 const config = PROVIDERS.openai!;
 

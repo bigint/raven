@@ -1,8 +1,8 @@
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
-import { deleteSettings } from "./delete.js";
-import { getSettings } from "./get.js";
-import { updateSettings } from "./update.js";
+import { deleteSettings } from "./delete";
+import { getSettings } from "./get";
+import { updateSettings } from "./update";
 
 export const createSettingsModule = (db: Database) => {
   const app = new Hono();

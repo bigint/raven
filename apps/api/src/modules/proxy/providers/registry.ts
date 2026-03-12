@@ -1,5 +1,5 @@
-import { anthropicAdapter } from "./anthropic.js";
-import { openaiAdapter } from "./openai.js";
+import { anthropicAdapter } from "./anthropic";
+import { openaiAdapter } from "./openai";
 
 export interface ProviderAdapter {
   name: string;

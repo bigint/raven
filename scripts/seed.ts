@@ -1,9 +1,9 @@
 import { createId } from '@paralleldrive/cuid2'
 import { eq } from 'drizzle-orm'
-import { createAuth } from '../packages/auth/src/server.js'
-import { parseEnv } from '../packages/config/src/env.js'
-import { createDatabase } from '../packages/db/src/client.js'
-import { members, organizations } from '../packages/db/src/schema/index.js'
+import { createAuth } from '../packages/auth/src/server'
+import { parseEnv } from '../packages/config/src/env'
+import { createDatabase } from '../packages/db/src/client'
+import { members, organizations } from '../packages/db/src/schema/index'
 
 const env = parseEnv()
 const db = createDatabase(env.DATABASE_URL)

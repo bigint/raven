@@ -4,8 +4,8 @@ import {
   inviteUser,
   listInvitations,
   revokeInvitation
-} from "./invitations.js";
-import { changeRole, listMembers, removeMember } from "./members.js";
+} from "./invitations";
+import { changeRole, listMembers, removeMember } from "./members";
 import {
   addTeamMember,
   createTeam,
@@ -13,7 +13,7 @@ import {
   listTeams,
   removeTeamMember,
   updateTeam
-} from "./teams.js";
+} from "./teams";
 
 export const createTeamsModule = (db: Database) => {
   const app = new Hono();

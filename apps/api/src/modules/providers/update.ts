@@ -3,10 +3,10 @@ import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { encrypt } from "../../lib/crypto.js";
-import { NotFoundError, ValidationError } from "../../lib/errors.js";
-import { publishEvent } from "../../lib/events.js";
-import { maskApiKey, updateProviderSchema, validateApiKey } from "./helpers.js";
+import { encrypt } from "../../lib/crypto";
+import { NotFoundError, ValidationError } from "../../lib/errors";
+import { publishEvent } from "../../lib/events";
+import { maskApiKey, updateProviderSchema, validateApiKey } from "./helpers";
 
 export const updateProvider =
   (db: Database, env: Env) => async (c: Context) => {
