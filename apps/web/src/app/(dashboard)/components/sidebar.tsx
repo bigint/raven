@@ -46,7 +46,7 @@ export const Sidebar = ({
   const orgSettingsHref = activeOrg ? `/${activeOrg.slug}/settings` : "/settings";
 
   return (
-    <aside className="w-60 border-r border-border bg-muted/50 flex flex-col">
+    <aside className="w-60 border-r border-border bg-muted/50 flex flex-col shrink-0">
       <OrgSwitcher activeOrg={activeOrg} onSwitch={onSwitchOrg} orgs={orgs} />
 
       <nav className="flex-1 px-3 py-3 space-y-0.5">
