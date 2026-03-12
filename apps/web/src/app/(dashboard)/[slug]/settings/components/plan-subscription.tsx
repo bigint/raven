@@ -2,7 +2,7 @@
 
 import { CreditCard } from "lucide-react";
 import { useRouter } from "next/navigation";
-import type { OrgSettings } from "../hooks/use-settings";
+import type { OrgSettings } from "../hooks/use-org-settings";
 
 const STATUS_BADGE: Record<string, string> = {
   active: "bg-green-500/10 text-green-600",

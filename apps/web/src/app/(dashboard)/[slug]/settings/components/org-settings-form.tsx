@@ -2,9 +2,9 @@
 
 import { Button, Input } from "@raven/ui";
 import { Building2 } from "lucide-react";
-import type { OrgSettings } from "../hooks/use-settings";
+import type { OrgSettings } from "../hooks/use-org-settings";
 
-interface SettingsFormProps {
+interface OrgSettingsFormProps {
   settings: OrgSettings;
   editName: string;
   editSlug: string;
@@ -19,7 +19,7 @@ interface SettingsFormProps {
   onSave: () => void;
 }
 
-export const SettingsForm = ({
+export const OrgSettingsForm = ({
   settings,
   editName,
   editSlug,
@@ -32,7 +32,7 @@ export const SettingsForm = ({
   onSlugChange,
   onSaveErrorClear,
   onSave
-}: SettingsFormProps) => (
+}: OrgSettingsFormProps) => (
   <div className="rounded-xl border border-border">
     <div className="flex items-center gap-3 border-b border-border px-6 py-4">
       <div className="rounded-lg bg-primary/10 p-2">

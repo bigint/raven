@@ -17,13 +17,13 @@ interface OrgSettings {
 
 const SLUG_PATTERN = /^[a-z][a-z0-9-]{1,48}[a-z0-9]$/;
 
-export const settingsQueryOptions = () =>
+export const orgSettingsQueryOptions = () =>
   queryOptions({
     queryFn: () => api.get<OrgSettings>("/v1/settings"),
-    queryKey: ["settings"]
+    queryKey: ["org-settings"]
   });
 
-export const useSettings = () => {
+export const useOrgSettings = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -31,7 +31,7 @@ export const useSettings = () => {
     data: settings = null,
     isPending: isLoading,
     error: queryError
-  } = useQuery(settingsQueryOptions());
+  } = useQuery(orgSettingsQueryOptions());
 
   const [editName, setEditName] = useState("");
   const [editSlug, setEditSlug] = useState("");
@@ -43,7 +43,6 @@ export const useSettings = () => {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Initialize edit fields from fetched settings
   if (settings && !isInitialized) {
     setEditName(settings.name);
     setEditSlug(settings.slug);
@@ -54,7 +53,7 @@ export const useSettings = () => {
     enabled: !isLoading,
     events: ["settings.updated"],
     onEvent: () => {
-      queryClient.invalidateQueries({ queryKey: ["settings"] });
+      queryClient.invalidateQueries({ queryKey: ["org-settings"] });
     }
   });
 
@@ -75,8 +74,11 @@ export const useSettings = () => {
         name: editName.trim(),
         slug: editSlug.trim()
       });
-      queryClient.setQueryData(["settings"], data);
+      queryClient.setQueryData(["org-settings"], data);
       toast.success("Organization settings saved");
+      if (data.slug !== settings?.slug) {
+        router.replace(`/${data.slug}/settings`);
+      }
     } catch (err) {
       setSaveError(
         err instanceof Error ? err.message : "Failed to save settings"
@@ -92,7 +94,7 @@ export const useSettings = () => {
       setDeleting(true);
       setDeleteError(null);
       await api.delete("/v1/settings");
-      router.push("/profile");
+      router.push("/settings");
     } catch (err) {
       setDeleteError(
         err instanceof Error ? err.message : "Failed to delete organization"

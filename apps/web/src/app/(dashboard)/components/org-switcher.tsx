@@ -84,7 +84,7 @@ export const OrgSwitcher = ({
           <div className="border-t border-border mt-1 pt-1">
             <Link
               className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-              href="/profile"
+              href="/settings"
               onClick={() => setOpen(false)}
             >
               <Plus className="size-3.5 shrink-0" />
