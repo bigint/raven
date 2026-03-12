@@ -10,6 +10,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { virtualKeys } from "./keys";
 import { organizations } from "./organizations";
+import { providerConfigs } from "./providers";
 
 export const requestLogs = pgTable(
   "request_logs",
@@ -31,6 +32,10 @@ export const requestLogs = pgTable(
     outputTokens: integer("output_tokens").notNull().default(0),
     path: text("path").notNull(),
     provider: text("provider").notNull(),
+    providerConfigId: text("provider_config_id").references(
+      () => providerConfigs.id,
+      { onDelete: "set null" }
+    ),
     statusCode: integer("status_code").notNull(),
     virtualKeyId: text("virtual_key_id")
       .notNull()

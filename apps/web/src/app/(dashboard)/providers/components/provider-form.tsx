@@ -161,6 +161,28 @@ const ProviderForm = ({
           onCheckedChange={(checked) => update("isEnabled", checked)}
         />
 
+        {isEdit && editingProvider && (
+          <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
+            <div>
+              <p className="text-sm font-medium">Usage</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Use this config ID in your proxy path to route requests to this
+                specific key:
+              </p>
+            </div>
+            <code className="block overflow-x-auto rounded-md bg-background px-3 py-2 text-xs">
+              /v1/proxy/{editingProvider.provider}~{editingProvider.id}
+              /chat/completions
+            </code>
+            <p className="text-xs text-muted-foreground">
+              Without the config ID, requests use the first available key:
+            </p>
+            <code className="block rounded-md bg-background px-3 py-2 text-xs">
+              /v1/proxy/{editingProvider.provider}/chat/completions
+            </code>
+          </div>
+        )}
+
         <div className="flex justify-end gap-2 pt-1">
           <Button onClick={handleClose} type="button" variant="secondary">
             Cancel

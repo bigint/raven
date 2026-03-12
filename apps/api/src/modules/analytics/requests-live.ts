@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { providerConfigs, requestLogs } from "@raven/db";
-import { desc, eq, sql } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { streamSSE } from "hono/streaming";
 import { getEventRedis } from "@/lib/events";
@@ -31,17 +31,15 @@ export const getRequestsLive = (db: Database) => async (c: Context) => {
         outputTokens: requestLogs.outputTokens,
         path: requestLogs.path,
         provider: requestLogs.provider,
-        providerConfigName: sql<string | null>`(
-          SELECT ${providerConfigs.name}
-          FROM ${providerConfigs}
-          WHERE ${providerConfigs.organizationId} = ${requestLogs.organizationId}
-            AND ${providerConfigs.provider} = ${requestLogs.provider}
-          LIMIT 1
-        )`.as("provider_config_name"),
+        providerConfigName: providerConfigs.name,
         statusCode: requestLogs.statusCode,
         virtualKeyId: requestLogs.virtualKeyId
       })
       .from(requestLogs)
+      .leftJoin(
+        providerConfigs,
+        eq(requestLogs.providerConfigId, providerConfigs.id)
+      )
       .where(eq(requestLogs.organizationId, orgId))
       .orderBy(desc(requestLogs.createdAt))
       .limit(50);

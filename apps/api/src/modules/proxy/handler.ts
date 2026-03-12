@@ -31,8 +31,13 @@ export const proxyHandler = (
     );
 
     // 3. Resolve provider and decrypt credentials
-    const { adapter, decryptedApiKey, providerName, upstreamPath } =
-      await resolveProvider(db, env, virtualKey.organizationId, c.req.path);
+    const {
+      adapter,
+      decryptedApiKey,
+      providerConfigId,
+      providerName,
+      upstreamPath
+    } = await resolveProvider(db, env, virtualKey.organizationId, c.req.path);
 
     // 4. Forward request to upstream provider
     const method = c.req.method;
@@ -70,6 +75,7 @@ export const proxyHandler = (
       outputTokens: 0,
       path: upstreamPath,
       provider: providerName,
+      providerConfigId,
       statusCode: upstreamResponse.status,
       virtualKeyId: virtualKey.id
     };

@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { providerConfigs, requestLogs } from "@raven/db";
-import { and, avg, count, eq, sql, sum } from "drizzle-orm";
+import { and, avg, count, eq, sum } from "drizzle-orm";
 import type { Context } from "hono";
 
 import { parseDateRange } from "./helpers";
@@ -17,21 +17,19 @@ export const getUsage = (db: Database) => async (c: Context) => {
       avgLatencyMs: avg(requestLogs.latencyMs),
       model: requestLogs.model,
       provider: requestLogs.provider,
-      providerConfigName: sql<string | null>`(
-        SELECT ${providerConfigs.name}
-        FROM ${providerConfigs}
-        WHERE ${providerConfigs.organizationId} = ${requestLogs.organizationId}
-          AND ${providerConfigs.provider} = ${requestLogs.provider}
-        LIMIT 1
-      )`.as("provider_config_name"),
+      providerConfigName: providerConfigs.name,
       totalCost: sum(requestLogs.cost),
       totalInputTokens: sum(requestLogs.inputTokens),
       totalOutputTokens: sum(requestLogs.outputTokens),
       totalRequests: count()
     })
     .from(requestLogs)
+    .leftJoin(
+      providerConfigs,
+      eq(requestLogs.providerConfigId, providerConfigs.id)
+    )
     .where(where)
-    .groupBy(requestLogs.provider, requestLogs.model)
+    .groupBy(requestLogs.provider, requestLogs.model, providerConfigs.name)
     .orderBy(requestLogs.provider, requestLogs.model);
 
   return c.json(rows);

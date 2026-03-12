@@ -7,6 +7,7 @@ export interface LogData {
   organizationId: string;
   virtualKeyId: string;
   provider: string;
+  providerConfigId: string;
   model: string;
   method: string;
   path: string;
@@ -37,6 +38,7 @@ export const logProxyRequest = async (
         outputTokens: data.outputTokens,
         path: data.path,
         provider: data.provider,
+        providerConfigId: data.providerConfigId,
         statusCode: data.statusCode,
         virtualKeyId: data.virtualKeyId
       })
