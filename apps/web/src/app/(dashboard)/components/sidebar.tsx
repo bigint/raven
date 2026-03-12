@@ -10,6 +10,7 @@ import {
   Receipt,
   ScrollText,
   Settings,
+  Shield,
   Users
 } from "lucide-react";
 import Link from "next/link";
@@ -25,6 +26,7 @@ const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/analytics", icon: BarChart3, label: "Analytics" },
   { href: "/requests", icon: ScrollText, label: "Requests" },
   { href: "/budgets", icon: CreditCard, label: "Budgets" },
+  { href: "/guardrails", icon: Shield, label: "Guardrails" },
   { href: "/team", icon: Users, label: "Team" },
   { href: "/billing", icon: Receipt, label: "Billing" }
 ];
@@ -43,7 +45,9 @@ export const Sidebar = ({
   onSwitchOrg
 }: SidebarProps) => {
   const pathname = usePathname();
-  const orgSettingsHref = activeOrg ? `/${activeOrg.slug}/settings` : "/settings";
+  const orgSettingsHref = activeOrg
+    ? `/${activeOrg.slug}/settings`
+    : "/settings";
 
   return (
     <aside className="w-60 border-r border-border bg-muted/50 flex flex-col shrink-0">
