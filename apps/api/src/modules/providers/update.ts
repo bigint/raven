@@ -5,6 +5,7 @@ import { and, eq } from 'drizzle-orm'
 import type { Context } from 'hono'
 import { encrypt } from '../../lib/crypto.js'
 import { NotFoundError, ValidationError } from '../../lib/errors.js'
+import { publishEvent } from '../../lib/events.js'
 import { maskApiKey, updateProviderSchema } from './helpers.js'
 
 export const updateProvider = (db: Database, env: Env) => async (c: Context) => {
@@ -50,8 +51,10 @@ export const updateProvider = (db: Database, env: Env) => async (c: Context) => 
     .returning()
 
   const record = updated as NonNullable<typeof updated>
+  const masked = maskApiKey(record.apiKey)
+  void publishEvent(orgId, 'provider.updated', { ...record, apiKey: masked })
   return c.json({
     ...record,
-    apiKey: maskApiKey(record.apiKey),
+    apiKey: masked,
   })
 }

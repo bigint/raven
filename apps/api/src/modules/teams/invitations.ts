@@ -4,6 +4,7 @@ import { and, eq } from 'drizzle-orm'
 import type { Context } from 'hono'
 import { z } from 'zod'
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '../../lib/errors.js'
+import { publishEvent } from '../../lib/events.js'
 
 const inviteSchema = z.object({
   email: z.string().email(),
@@ -74,6 +75,7 @@ export const inviteUser = (db: Database) => async (c: Context) => {
     })
     .returning()
 
+  void publishEvent(orgId, 'invitation.created', created)
   return c.json(created, 201)
 }
 
@@ -108,5 +110,6 @@ export const revokeInvitation = (db: Database) => async (c: Context) => {
     .delete(invitations)
     .where(and(eq(invitations.id, id), eq(invitations.organizationId, orgId)))
 
+  void publishEvent(orgId, 'invitation.revoked', { id })
   return c.json({ success: true })
 }

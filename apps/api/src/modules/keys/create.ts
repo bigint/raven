@@ -2,6 +2,7 @@ import type { Database } from '@raven/db'
 import { virtualKeys } from '@raven/db'
 import type { Context } from 'hono'
 import { ValidationError } from '../../lib/errors.js'
+import { publishEvent } from '../../lib/events.js'
 import { createKeySchema, generateKey, safeKey } from './helpers.js'
 
 export const createKey = (db: Database) => async (c: Context) => {
@@ -35,6 +36,7 @@ export const createKey = (db: Database) => async (c: Context) => {
 
   // Return full plaintext key ONLY on creation
   const record = created as NonNullable<typeof created>
+  void publishEvent(orgId, 'key.created', { ...safeKey(record), key: undefined })
   return c.json(
     {
       ...safeKey(record),

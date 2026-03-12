@@ -1,5 +1,6 @@
 'use client'
 
+import { useEventStream } from '@/hooks/use-event-stream'
 import { api } from '@/lib/api'
 import { Activity, Clock, DollarSign, Zap } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'

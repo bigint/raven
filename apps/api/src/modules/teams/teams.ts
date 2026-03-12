@@ -4,6 +4,7 @@ import { and, count, eq } from 'drizzle-orm'
 import type { Context } from 'hono'
 import { z } from 'zod'
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '../../lib/errors.js'
+import { publishEvent } from '../../lib/events.js'
 
 const createTeamSchema = z.object({
   name: z.string().min(1).max(100),
@@ -61,6 +62,7 @@ export const createTeam = (db: Database) => async (c: Context) => {
     })
     .returning()
 
+  void publishEvent(orgId, 'team.created', created)
   return c.json(created, 201)
 }
 
@@ -98,6 +100,7 @@ export const updateTeam = (db: Database) => async (c: Context) => {
     .where(and(eq(teams.id, id), eq(teams.organizationId, orgId)))
     .returning()
 
+  void publishEvent(orgId, 'team.updated', updated)
   return c.json(updated)
 }
 

@@ -4,6 +4,7 @@ import { and, eq } from 'drizzle-orm'
 import type { Context } from 'hono'
 import { z } from 'zod'
 import { ForbiddenError, NotFoundError, ValidationError } from '../../lib/errors.js'
+import { publishEvent } from '../../lib/events.js'
 
 const changeRoleSchema = z.object({
   role: z.enum(['admin', 'member', 'viewer']),
@@ -67,6 +68,7 @@ export const removeMember = (db: Database) => async (c: Context) => {
 
   await db.delete(members).where(and(eq(members.id, id), eq(members.organizationId, orgId)))
 
+  void publishEvent(orgId, 'member.removed', { id })
   return c.json({ success: true })
 }
 
@@ -108,5 +110,6 @@ export const changeRole = (db: Database) => async (c: Context) => {
     .where(and(eq(members.id, id), eq(members.organizationId, orgId)))
     .returning()
 
+  void publishEvent(orgId, 'member.role_changed', updated)
   return c.json(updated)
 }

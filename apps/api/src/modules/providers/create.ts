@@ -5,6 +5,7 @@ import { and, eq } from 'drizzle-orm'
 import type { Context } from 'hono'
 import { encrypt } from '../../lib/crypto.js'
 import { ConflictError, ValidationError } from '../../lib/errors.js'
+import { publishEvent } from '../../lib/events.js'
 import { createProviderSchema, maskApiKey } from './helpers.js'
 
 export const createProvider = (db: Database, env: Env) => async (c: Context) => {
@@ -44,10 +45,12 @@ export const createProvider = (db: Database, env: Env) => async (c: Context) => 
     .returning()
 
   const record = created as NonNullable<typeof created>
+  const masked = maskApiKey(record.apiKey)
+  void publishEvent(orgId, 'provider.created', { ...record, apiKey: masked })
   return c.json(
     {
       ...record,
-      apiKey: maskApiKey(record.apiKey),
+      apiKey: masked,
     },
     201,
   )

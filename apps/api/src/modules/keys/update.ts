@@ -3,6 +3,7 @@ import { virtualKeys } from '@raven/db'
 import { and, eq } from 'drizzle-orm'
 import type { Context } from 'hono'
 import { NotFoundError, ValidationError } from '../../lib/errors.js'
+import { publishEvent } from '../../lib/events.js'
 import { safeKey, updateKeySchema } from './helpers.js'
 
 export const updateKey = (db: Database) => async (c: Context) => {
@@ -53,5 +54,7 @@ export const updateKey = (db: Database) => async (c: Context) => {
     .where(and(eq(virtualKeys.id, id), eq(virtualKeys.organizationId, orgId)))
     .returning()
 
-  return c.json(safeKey(updated as NonNullable<typeof updated>))
+  const safeKeyData = safeKey(updated as NonNullable<typeof updated>)
+  void publishEvent(orgId, 'key.updated', safeKeyData)
+  return c.json(safeKeyData)
 }
