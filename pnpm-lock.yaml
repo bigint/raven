@@ -66,6 +66,9 @@ importers:
 
   packages/auth:
     dependencies:
+      '@raven/config':
+        specifier: workspace:*
+        version: link:../config
       '@raven/db':
         specifier: workspace:*
         version: link:../db
