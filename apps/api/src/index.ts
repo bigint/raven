@@ -15,6 +15,7 @@ import { createBillingModule, createBillingWebhookModule } from './modules/billi
 import { createBudgetsModule } from './modules/budgets/index.js'
 import { createKeysModule } from './modules/keys/index.js'
 import { createProvidersModule } from './modules/providers/index.js'
+import { createProxyModule } from './modules/proxy/index.js'
 import { createTeamsModule } from './modules/teams/index.js'
 
 const env = parseEnv()
@@ -67,6 +68,7 @@ v1.route('/teams', createTeamsModule(db))
 v1.route('/billing', createBillingModule(db))
 
 app.route('/v1', v1)
+app.route('/v1/proxy', createProxyModule(db, redis, env))
 app.route('/webhooks/billing', createBillingWebhookModule(db))
 
 app.notFound((c) => c.json({ code: 'NOT_FOUND', message: 'Route not found' }, 404))
