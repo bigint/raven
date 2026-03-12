@@ -2,7 +2,6 @@ import type { Database } from "@raven/db";
 import { members, teamMembers, teams } from "@raven/db";
 import { and, count, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { z } from "zod";
 import {
   ConflictError,
   ForbiddenError,
@@ -10,19 +9,12 @@ import {
   ValidationError
 } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
-
-const createTeamSchema = z.object({
-  name: z.string().min(1).max(100)
-});
-
-const updateTeamSchema = z.object({
-  name: z.string().min(1).max(100)
-});
-
-const addTeamMemberSchema = z.object({
-  role: z.enum(["lead", "member"]).default("member"),
-  userId: z.string().min(1)
-});
+import { created, success } from "@/lib/response";
+import {
+  addTeamMemberSchema,
+  createTeamSchema,
+  updateTeamSchema
+} from "./schema";
 
 export const listTeams = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
@@ -39,7 +31,7 @@ export const listTeams = (db: Database) => async (c: Context) => {
     .where(eq(teams.organizationId, orgId))
     .groupBy(teams.id, teams.name, teams.createdAt);
 
-  return c.json(rows);
+  return success(c, rows);
 };
 
 export const createTeam = (db: Database) => async (c: Context) => {
@@ -59,7 +51,7 @@ export const createTeam = (db: Database) => async (c: Context) => {
     });
   }
 
-  const [created] = await db
+  const [record] = await db
     .insert(teams)
     .values({
       name: result.data.name,
@@ -67,8 +59,8 @@ export const createTeam = (db: Database) => async (c: Context) => {
     })
     .returning();
 
-  void publishEvent(orgId, "team.created", created);
-  return c.json(created, 201);
+  void publishEvent(orgId, "team.created", record);
+  return created(c, record);
 };
 
 export const updateTeam = (db: Database) => async (c: Context) => {
@@ -106,7 +98,7 @@ export const updateTeam = (db: Database) => async (c: Context) => {
     .returning();
 
   void publishEvent(orgId, "team.updated", updated);
-  return c.json(updated);
+  return success(c, updated);
 };
 
 export const deleteTeam = (db: Database) => async (c: Context) => {
@@ -133,7 +125,7 @@ export const deleteTeam = (db: Database) => async (c: Context) => {
     .where(and(eq(teams.id, id), eq(teams.organizationId, orgId)));
 
   void publishEvent(orgId, "team.deleted", { id });
-  return c.json({ success: true });
+  return success(c, { success: true });
 };
 
 export const addTeamMember = (db: Database) => async (c: Context) => {
@@ -196,7 +188,7 @@ export const addTeamMember = (db: Database) => async (c: Context) => {
     throw new ConflictError("User is already a member of this team");
   }
 
-  const [created] = await db
+  const [record] = await db
     .insert(teamMembers)
     .values({
       role: result.data.role,
@@ -209,7 +201,7 @@ export const addTeamMember = (db: Database) => async (c: Context) => {
     teamId: id,
     userId: result.data.userId
   });
-  return c.json(created, 201);
+  return created(c, record);
 };
 
 export const removeTeamMember = (db: Database) => async (c: Context) => {
@@ -247,5 +239,5 @@ export const removeTeamMember = (db: Database) => async (c: Context) => {
     .where(and(eq(teamMembers.teamId, id), eq(teamMembers.userId, userId)));
 
   void publishEvent(orgId, "team_member.removed", { teamId: id, userId });
-  return c.json({ success: true });
+  return success(c, { success: true });
 };

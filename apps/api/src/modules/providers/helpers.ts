@@ -1,19 +1,5 @@
-import { z } from "zod";
 import { ValidationError } from "@/lib/errors";
 import { getProviderConfig } from "@/lib/providers";
-
-export const createProviderSchema = z.object({
-  apiKey: z.string().min(1),
-  isEnabled: z.boolean().default(true),
-  name: z.string().min(1).optional(),
-  provider: z.string().min(1)
-});
-
-export const updateProviderSchema = z.object({
-  apiKey: z.string().min(1).optional(),
-  isEnabled: z.boolean().optional(),
-  name: z.string().optional()
-});
 
 export const maskApiKey = (encryptedKey: string): string => {
   const suffix = encryptedKey.slice(-4);

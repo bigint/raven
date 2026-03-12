@@ -2,26 +2,14 @@ import type { Database } from "@raven/db";
 import { organizations, subscriptions } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { z } from "zod";
 import {
   ForbiddenError,
   NotFoundError,
   ValidationError
 } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
-
-const updateOrgSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  slug: z
-    .string()
-    .min(3)
-    .max(50)
-    .regex(
-      /^[a-z0-9-]+$/,
-      "Slug must be lowercase alphanumeric with hyphens only"
-    )
-    .optional()
-});
+import { success } from "@/lib/response";
+import { updateOrgSchema } from "./schema";
 
 export const updateSettings = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
@@ -79,5 +67,5 @@ export const updateSettings = (db: Database) => async (c: Context) => {
     userRole: orgRole
   };
   void publishEvent(orgId, "settings.updated", settings);
-  return c.json(settings);
+  return success(c, settings);
 };

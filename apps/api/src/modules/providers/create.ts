@@ -5,7 +5,9 @@ import type { Context } from "hono";
 import { encrypt } from "@/lib/crypto";
 import { ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
-import { createProviderSchema, maskApiKey, validateApiKey } from "./helpers";
+import { created } from "@/lib/response";
+import { maskApiKey, validateApiKey } from "./helpers";
+import { createProviderSchema } from "./schema";
 
 export const createProvider =
   (db: Database, env: Env) => async (c: Context) => {
@@ -26,7 +28,7 @@ export const createProvider =
 
     const encryptedKey = encrypt(apiKey, env.ENCRYPTION_SECRET);
 
-    const [created] = await db
+    const [record] = await db
       .insert(providerConfigs)
       .values({
         apiKey: encryptedKey,
@@ -37,14 +39,8 @@ export const createProvider =
       })
       .returning();
 
-    const record = created as NonNullable<typeof created>;
-    const masked = maskApiKey(record.apiKey);
-    void publishEvent(orgId, "provider.created", { ...record, apiKey: masked });
-    return c.json(
-      {
-        ...record,
-        apiKey: masked
-      },
-      201
-    );
+    const safe = record as NonNullable<typeof record>;
+    const masked = maskApiKey(safe.apiKey);
+    void publishEvent(orgId, "provider.created", { ...safe, apiKey: masked });
+    return created(c, { ...safe, apiKey: masked });
   };

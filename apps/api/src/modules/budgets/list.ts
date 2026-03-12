@@ -2,6 +2,7 @@ import type { Database } from "@raven/db";
 import { budgets } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Context } from "hono";
+import { success } from "@/lib/response";
 
 export const listBudgets = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
@@ -11,5 +12,5 @@ export const listBudgets = (db: Database) => async (c: Context) => {
     .from(budgets)
     .where(eq(budgets.organizationId, orgId));
 
-  return c.json(rows);
+  return success(c, rows);
 };

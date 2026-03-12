@@ -2,6 +2,7 @@ import type { Database } from "@raven/db";
 import { virtualKeys } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Context } from "hono";
+import { success } from "@/lib/response";
 import { safeKey } from "./helpers";
 
 export const listKeys = (db: Database) => async (c: Context) => {
@@ -12,5 +13,5 @@ export const listKeys = (db: Database) => async (c: Context) => {
     .from(virtualKeys)
     .where(eq(virtualKeys.organizationId, orgId));
 
-  return c.json(keys.map(safeKey));
+  return success(c, keys.map(safeKey));
 };

@@ -3,13 +3,15 @@ import type { Database } from "@raven/db";
 import { invitations, members, organizations } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
+import { AppError, NotFoundError, UnauthorizedError } from "@/lib/errors";
+import { created, success } from "@/lib/response";
 
 export const listInvitations = (db: Database) => async (c: Context) => {
   const user = c.get("user" as never) as
     | { id: string; email: string }
     | undefined;
   if (!user) {
-    return c.json({ code: "UNAUTHORIZED", message: "Not authenticated" }, 401);
+    throw new UnauthorizedError("Not authenticated");
   }
 
   const pending = await db
@@ -26,7 +28,7 @@ export const listInvitations = (db: Database) => async (c: Context) => {
       and(eq(invitations.email, user.email), eq(invitations.status, "pending"))
     );
 
-  return c.json(pending);
+  return success(c, pending);
 };
 
 export const acceptInvitation = (db: Database) => async (c: Context) => {
@@ -34,7 +36,7 @@ export const acceptInvitation = (db: Database) => async (c: Context) => {
     | { id: string; email: string }
     | undefined;
   if (!user) {
-    return c.json({ code: "UNAUTHORIZED", message: "Not authenticated" }, 401);
+    throw new UnauthorizedError("Not authenticated");
   }
 
   const id = c.req.param("id") as string;
@@ -52,11 +54,11 @@ export const acceptInvitation = (db: Database) => async (c: Context) => {
     .limit(1);
 
   if (!invitation) {
-    return c.json({ code: "NOT_FOUND", message: "Invitation not found" }, 404);
+    throw new NotFoundError("Invitation not found");
   }
 
   if (new Date() > invitation.expiresAt) {
-    return c.json({ code: "GONE", message: "Invitation has expired" }, 410);
+    throw new AppError("Invitation has expired", 410, "GONE");
   }
 
   const memberId = createId();
@@ -74,15 +76,12 @@ export const acceptInvitation = (db: Database) => async (c: Context) => {
       .where(eq(invitations.id, id));
   });
 
-  return c.json(
-    {
-      id: memberId,
-      organizationId: invitation.organizationId,
-      role: invitation.role,
-      userId: user.id
-    },
-    201
-  );
+  return created(c, {
+    id: memberId,
+    organizationId: invitation.organizationId,
+    role: invitation.role,
+    userId: user.id
+  });
 };
 
 export const declineInvitation = (db: Database) => async (c: Context) => {
@@ -90,7 +89,7 @@ export const declineInvitation = (db: Database) => async (c: Context) => {
     | { id: string; email: string }
     | undefined;
   if (!user) {
-    return c.json({ code: "UNAUTHORIZED", message: "Not authenticated" }, 401);
+    throw new UnauthorizedError("Not authenticated");
   }
 
   const id = c.req.param("id") as string;
@@ -108,7 +107,7 @@ export const declineInvitation = (db: Database) => async (c: Context) => {
     .limit(1);
 
   if (!invitation) {
-    return c.json({ code: "NOT_FOUND", message: "Invitation not found" }, 404);
+    throw new NotFoundError("Invitation not found");
   }
 
   await db
@@ -116,5 +115,5 @@ export const declineInvitation = (db: Database) => async (c: Context) => {
     .set({ status: "declined" })
     .where(eq(invitations.id, id));
 
-  return c.json({ message: "Invitation declined" });
+  return success(c, { message: "Invitation declined" });
 };

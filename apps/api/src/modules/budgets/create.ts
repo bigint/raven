@@ -1,17 +1,10 @@
 import type { Database } from "@raven/db";
 import { budgets } from "@raven/db";
 import type { Context } from "hono";
-import { z } from "zod";
 import { ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
-
-const createBudgetSchema = z.object({
-  alertThreshold: z.number().min(0).max(1).default(0.8),
-  entityId: z.string().min(1),
-  entityType: z.enum(["organization", "team", "key"]),
-  limitAmount: z.number().positive(),
-  period: z.enum(["daily", "monthly"]).default("monthly")
-});
+import { created } from "@/lib/response";
+import { createBudgetSchema } from "./schema";
 
 export const createBudget = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
@@ -27,7 +20,7 @@ export const createBudget = (db: Database) => async (c: Context) => {
   const { entityType, entityId, limitAmount, period, alertThreshold } =
     result.data;
 
-  const [created] = await db
+  const [record] = await db
     .insert(budgets)
     .values({
       alertThreshold: alertThreshold.toFixed(2),
@@ -39,6 +32,6 @@ export const createBudget = (db: Database) => async (c: Context) => {
     })
     .returning();
 
-  void publishEvent(orgId, "budget.created", created);
-  return c.json(created, 201);
+  void publishEvent(orgId, "budget.created", record);
+  return created(c, record);
 };

@@ -4,7 +4,9 @@ import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
-import { safeKey, updateKeySchema } from "./helpers";
+import { success } from "@/lib/response";
+import { safeKey } from "./helpers";
+import { updateKeySchema } from "./schema";
 
 export const updateKey = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
@@ -56,5 +58,5 @@ export const updateKey = (db: Database) => async (c: Context) => {
 
   const safeKeyData = safeKey(updated as NonNullable<typeof updated>);
   void publishEvent(orgId, "key.updated", safeKeyData);
-  return c.json(safeKeyData);
+  return success(c, safeKeyData);
 };

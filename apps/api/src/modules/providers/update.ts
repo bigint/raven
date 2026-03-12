@@ -6,7 +6,9 @@ import type { Context } from "hono";
 import { encrypt } from "@/lib/crypto";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
-import { maskApiKey, updateProviderSchema, validateApiKey } from "./helpers";
+import { success } from "@/lib/response";
+import { maskApiKey, validateApiKey } from "./helpers";
+import { updateProviderSchema } from "./schema";
 
 export const updateProvider =
   (db: Database, env: Env) => async (c: Context) => {
@@ -69,8 +71,5 @@ export const updateProvider =
     const record = updated as NonNullable<typeof updated>;
     const masked = maskApiKey(record.apiKey);
     void publishEvent(orgId, "provider.updated", { ...record, apiKey: masked });
-    return c.json({
-      ...record,
-      apiKey: masked
-    });
+    return success(c, { ...record, apiKey: masked });
   };
