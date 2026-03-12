@@ -5,12 +5,15 @@
 @theme {
   --color-background: #ffffff;
   --color-foreground: #0a0a0a;
+  --color-card: #ffffff;
+  --color-card-foreground: #0a0a0a;
   --color-popover: #ffffff;
   --color-popover-foreground: #0a0a0a;
   --color-primary: #0a0a0a;
   --color-primary-foreground: #fafafa;
   --color-muted: #f5f5f5;
   --color-muted-foreground: #737373;
+  --color-surface: #fafafa;
   --color-border: #e5e5e5;
   --color-input: #e5e5e5;
   --color-ring: #0a0a0a;
@@ -40,4 +43,49 @@ input[type="range"],
 [role="option"],
 label[for] {
   cursor: pointer;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #0a0a0a;
+    --color-foreground: #fafafa;
+    --color-card: #141414;
+    --color-card-foreground: #fafafa;
+    --color-popover: #141414;
+    --color-popover-foreground: #fafafa;
+    --color-primary: #fafafa;
+    --color-primary-foreground: #0a0a0a;
+    --color-muted: #262626;
+    --color-muted-foreground: #a3a3a3;
+    --color-surface: #1a1a1a;
+    --color-border: #262626;
+    --color-input: #262626;
+    --color-ring: #d4d4d4;
+    --color-accent: #262626;
+    --color-accent-foreground: #fafafa;
+    --color-destructive: #dc2626;
+    --color-destructive-foreground: #fafafa;
+    --color-success: #16a34a;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-muted) 25%,
+    var(--color-surface) 50%,
+    var(--color-muted) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-md);
 }

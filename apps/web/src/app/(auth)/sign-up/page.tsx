@@ -42,7 +42,7 @@ export default function SignUpPage() {
             </span>
           </div>
           <h2 className="text-2xl font-bold text-primary-foreground">Raven</h2>
-          <p className="mt-2 text-sm text-white/60">
+          <p className="mt-2 text-sm text-primary-foreground/60">
             Unified AI Gateway for Teams
           </p>
         </div>
@@ -65,7 +65,7 @@ export default function SignUpPage() {
           </p>
 
           {error && (
-            <div className="mt-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            <div className="mt-4 rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
               {error}
             </div>
           )}
@@ -76,7 +76,7 @@ export default function SignUpPage() {
                 Name
               </label>
               <input
-                className="block w-full rounded-lg border border-input bg-white px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring"
+                className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring"
                 id="name"
                 onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
@@ -90,7 +90,7 @@ export default function SignUpPage() {
                 Email
               </label>
               <input
-                className="block w-full rounded-lg border border-input bg-white px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring"
+                className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring"
                 id="email"
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
@@ -104,7 +104,7 @@ export default function SignUpPage() {
                 Password
               </label>
               <input
-                className="block w-full rounded-lg border border-input bg-white px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring"
+                className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring"
                 id="password"
                 minLength={8}
                 onChange={(e) => setPassword(e.target.value)}
