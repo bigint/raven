@@ -18,10 +18,11 @@ export type CacheResult = CacheCheckResult | CacheMissResult;
 const buildCacheKey = (
   provider: string,
   model: string,
-  messages: unknown,
-  temperature: unknown
+  body: Record<string, unknown>
 ): string => {
-  const payload = `${provider}:${model}:${JSON.stringify(messages)}:${temperature}`;
+  const content = body.messages ?? body.input ?? [];
+  const temperature = body.temperature ?? null;
+  const payload = `${provider}:${model}:${JSON.stringify(content)}:${temperature}`;
   const hash = createHash("sha256").update(payload).digest("hex");
   return `cache:resp:${hash}`;
 };
@@ -36,10 +37,7 @@ export const checkCache = async (
   }
 
   const model = (requestBody.model as string) ?? "unknown";
-  const messages = requestBody.messages ?? [];
-  const temperature = requestBody.temperature ?? null;
-
-  const key = buildCacheKey(provider, model, messages, temperature);
+  const key = buildCacheKey(provider, model, requestBody);
   const cached = await redis.get(key);
 
   if (!cached) {
@@ -68,9 +66,6 @@ export const storeCache = async (
   }
 
   const model = (requestBody.model as string) ?? "unknown";
-  const messages = requestBody.messages ?? [];
-  const temperature = requestBody.temperature ?? null;
-
-  const key = buildCacheKey(provider, model, messages, temperature);
+  const key = buildCacheKey(provider, model, requestBody);
   await redis.set(key, responseBody, "EX", ttlSeconds);
 };
