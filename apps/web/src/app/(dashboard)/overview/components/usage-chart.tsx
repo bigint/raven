@@ -54,13 +54,13 @@ export const UsageChart = ({
         <EmptyState />
       ) : (
         <div className="space-y-3">
-          {usage.slice(0, 5).map((row) => {
+          {usage.slice(0, 5).map((row, idx) => {
             const pct =
               totalRequests > 0
                 ? (Number(row.totalRequests) / totalRequests) * 100
                 : 0;
             return (
-              <div key={`${row.provider}-${row.model}`}>
+              <div key={`${row.provider}-${row.model}-${idx}`}>
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">
