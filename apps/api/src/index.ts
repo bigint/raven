@@ -11,9 +11,11 @@ import { createAuthMiddleware } from './middleware/auth.js'
 import { createTenantMiddleware } from './middleware/tenant.js'
 import { createAnalyticsModule } from './modules/analytics/index.js'
 import { createAuthModule } from './modules/auth/index.js'
+import { createBillingModule, createBillingWebhookModule } from './modules/billing/index.js'
 import { createBudgetsModule } from './modules/budgets/index.js'
 import { createKeysModule } from './modules/keys/index.js'
 import { createProvidersModule } from './modules/providers/index.js'
+import { createTeamsModule } from './modules/teams/index.js'
 
 const env = parseEnv()
 export const db = createDatabase(env.DATABASE_URL)
@@ -61,8 +63,11 @@ v1.route('/providers', createProvidersModule(db, env))
 v1.route('/keys', createKeysModule(db))
 v1.route('/budgets', createBudgetsModule(db))
 v1.route('/analytics', createAnalyticsModule(db))
+v1.route('/teams', createTeamsModule(db))
+v1.route('/billing', createBillingModule(db))
 
 app.route('/v1', v1)
+app.route('/webhooks/billing', createBillingWebhookModule(db))
 
 app.notFound((c) => c.json({ code: 'NOT_FOUND', message: 'Route not found' }, 404))
 
