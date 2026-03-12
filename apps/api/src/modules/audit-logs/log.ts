@@ -1,5 +1,6 @@
 import type { Database } from '@raven/db'
 import { auditLogs } from '@raven/db'
+import { publishEvent } from '../../lib/events.js'
 
 export const logAudit = async (
   db: Database,
@@ -12,12 +13,14 @@ export const logAudit = async (
     metadata?: Record<string, unknown>
   },
 ): Promise<void> => {
-  await db.insert(auditLogs).values({
+  const entry = {
     organizationId: params.orgId,
     actorId: params.actorId,
     action: params.action,
     resourceType: params.resourceType,
     resourceId: params.resourceId,
     metadata: params.metadata ?? null,
-  })
+  }
+  await db.insert(auditLogs).values(entry)
+  void publishEvent(params.orgId, 'audit.created', entry)
 }
