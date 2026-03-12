@@ -1,11 +1,7 @@
 "use client";
 
+import { PROVIDER_LABELS } from "@raven/types";
 import type { UsageRow } from "../hooks/use-analytics";
-
-const PROVIDER_LABELS: Record<string, string> = {
-  anthropic: "Anthropic",
-  openai: "OpenAI"
-};
 
 interface TokenBreakdownProps {
   usage: UsageRow[];

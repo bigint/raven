@@ -1,13 +1,9 @@
 "use client";
 
+import { PROVIDER_LABELS } from "@raven/types";
 import { Activity, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import type { RecentRequest } from "../hooks/use-overview";
-
-const PROVIDER_LABELS: Record<string, string> = {
-  anthropic: "Anthropic",
-  openai: "OpenAI"
-};
 
 const timeAgo = (dateStr: string): string => {
   const diff = Date.now() - new Date(dateStr).getTime();
