@@ -256,7 +256,7 @@ export default function OnboardingPage() {
 
           {/* Step 1: Create Organization */}
           {step === 0 && (
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
                 <h2 className="text-lg font-semibold">
                   Name your organization
@@ -292,7 +292,7 @@ export default function OnboardingPage() {
 
           {/* Step 2: Add Provider */}
           {step === 1 && (
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
                 <h2 className="text-lg font-semibold">
                   Connect an AI provider
@@ -301,9 +301,9 @@ export default function OnboardingPage() {
                   Add your first provider API key to start routing requests.
                 </p>
               </div>
-              <div className="space-y-1.5">
+              <div>
                 <label
-                  className="text-sm font-medium"
+                  className="mb-1.5 block text-sm font-medium"
                   htmlFor="provider-select"
                 >
                   Provider
@@ -323,8 +323,11 @@ export default function OnboardingPage() {
                 placeholder={`e.g. Production ${PROVIDER_OPTIONS.find((p) => p.value === provider)?.label ?? ""}`}
                 value={providerName}
               />
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium" htmlFor="provider-key">
+              <div>
+                <label
+                  className="mb-1.5 block text-sm font-medium"
+                  htmlFor="provider-key"
+                >
                   API Key
                 </label>
                 <div className="relative">
@@ -373,7 +376,7 @@ export default function OnboardingPage() {
 
           {/* Step 3: Create API Key */}
           {step === 2 && !generatedKey && (
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
                 <h2 className="text-lg font-semibold">Create your API key</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -411,7 +414,7 @@ export default function OnboardingPage() {
 
           {/* Step 3: Show Generated Key */}
           {step === 2 && generatedKey && (
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
                 <h2 className="text-lg font-semibold">Your API key is ready</h2>
                 <p className="mt-1 text-sm text-muted-foreground">

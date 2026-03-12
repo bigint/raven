@@ -58,9 +58,9 @@ const Select = ({
   }, [open]);
 
   return (
-    <div className={cn("space-y-1.5", className)}>
+    <div className={className}>
       {label && (
-        <label className="text-sm font-medium" htmlFor={id}>
+        <label className="mb-1 block text-sm font-medium" htmlFor={id}>
           {label}
         </label>
       )}
@@ -135,7 +135,7 @@ const Select = ({
           </div>
         )}
       </div>
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {error && <p className="mt-1.5 text-xs text-destructive">{error}</p>}
     </div>
   );
 };
