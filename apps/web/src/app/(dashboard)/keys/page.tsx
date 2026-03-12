@@ -3,6 +3,7 @@
 import { Select } from '@/components/select'
 import { api } from '@/lib/api'
 import { AlertTriangle, Check, Copy, Key, Pencil, Plus, Trash2, X } from 'lucide-react'
+import { toast } from 'sonner'
 import { useCallback, useEffect, useState } from 'react'
 
 interface VirtualKey {
@@ -65,7 +66,6 @@ export default function KeysPage() {
 
   const [newKeyValue, setNewKeyValue] = useState<string | null>(null)
   const [copiedKey, setCopiedKey] = useState(false)
-  const [copiedPrefix, setCopiedPrefix] = useState<string | null>(null)
 
   const fetchKeys = useCallback(async () => {
     try {
@@ -180,12 +180,6 @@ export default function KeysPage() {
     }
   }
 
-  const handleCopyPrefix = async (prefix: string) => {
-    await navigator.clipboard.writeText(prefix)
-    setCopiedPrefix(prefix)
-    setTimeout(() => setCopiedPrefix(null), 2000)
-  }
-
   const handleCopyNewKey = async () => {
     if (!newKeyValue) return
     await navigator.clipboard.writeText(newKeyValue)
@@ -243,9 +237,6 @@ export default function KeysPage() {
               <tr className="border-b border-border">
                 <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Name
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Key
                 </th>
                 <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Environment

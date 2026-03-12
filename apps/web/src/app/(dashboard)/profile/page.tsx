@@ -15,6 +15,7 @@ import {
   X,
 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 interface Organization {
   id: string
@@ -47,7 +48,6 @@ export default function ProfilePage() {
   // Profile
   const [name, setName] = useState('')
   const [saving, setSaving] = useState(false)
-  const [saveSuccess, setSaveSuccess] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
 
   // Orgs
@@ -116,10 +116,8 @@ export default function ProfilePage() {
     try {
       setSaving(true)
       setSaveError(null)
-      setSaveSuccess(false)
       await api.put('/v1/user/profile', { name: name.trim() })
-      setSaveSuccess(true)
-      setTimeout(() => setSaveSuccess(false), 3000)
+      toast.success('Profile updated successfully')
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Failed to save profile')
     } finally {
@@ -203,11 +201,6 @@ export default function ProfilePage() {
             {saveError && (
               <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                 {saveError}
-              </div>
-            )}
-            {saveSuccess && (
-              <div className="rounded-lg border border-green-500/30 bg-green-500/10 px-3 py-2 text-sm text-green-600">
-                Profile updated successfully.
               </div>
             )}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

@@ -4,6 +4,7 @@ import { api } from '@/lib/api'
 import { AlertTriangle, Building2, CreditCard, Settings, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 interface OrgSettings {
   name: string
@@ -34,10 +35,7 @@ export default function SettingsPage() {
   const [editName, setEditName] = useState('')
   const [editSlug, setEditSlug] = useState('')
   const [saving, setSaving] = useState(false)
-  const [saveMessage, setSaveMessage] = useState<{
-    type: 'success' | 'error'
-    text: string
-  } | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   // Delete modal
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -74,18 +72,15 @@ export default function SettingsPage() {
     if (!hasChanges || !isSlugValid) return
     try {
       setSaving(true)
-      setSaveMessage(null)
+      setSaveError(null)
       const data = await api.put<OrgSettings>('/v1/settings', {
         name: editName.trim(),
         slug: editSlug.trim(),
       })
       setSettings(data)
-      setSaveMessage({ type: 'success', text: 'Organization settings saved.' })
+      toast.success('Organization settings saved')
     } catch (err) {
-      setSaveMessage({
-        type: 'error',
-        text: err instanceof Error ? err.message : 'Failed to save settings',
-      })
+      setSaveError(err instanceof Error ? err.message : 'Failed to save settings')
     } finally {
       setSaving(false)
     }
@@ -138,15 +133,9 @@ export default function SettingsPage() {
               </div>
             </div>
             <div className="space-y-4 px-6 py-5">
-              {saveMessage && (
-                <div
-                  className={`rounded-lg border px-3 py-2 text-sm ${
-                    saveMessage.type === 'success'
-                      ? 'border-green-500/30 bg-green-500/10 text-green-600'
-                      : 'border-destructive/30 bg-destructive/10 text-destructive'
-                  }`}
-                >
-                  {saveMessage.text}
+              {saveError && (
+                <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {saveError}
                 </div>
               )}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -161,7 +150,7 @@ export default function SettingsPage() {
                       value={editName}
                       onChange={(e) => {
                         setEditName(e.target.value)
-                        setSaveMessage(null)
+                        setSaveError(null)
                       }}
                       className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
                     />
@@ -183,7 +172,7 @@ export default function SettingsPage() {
                         value={editSlug}
                         onChange={(e) => {
                           setEditSlug(e.target.value.toLowerCase())
-                          setSaveMessage(null)
+                          setSaveError(null)
                         }}
                         className={`w-full rounded-lg border bg-background px-3 py-2 font-mono text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring ${
                           editSlug && !isSlugValid ? 'border-destructive' : 'border-input'
