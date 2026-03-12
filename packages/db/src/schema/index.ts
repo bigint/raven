@@ -10,6 +10,7 @@ export { invitations } from "./invitations";
 export { keyEnvironmentEnum, virtualKeys } from "./keys";
 export { members } from "./members";
 export { organizations } from "./organizations";
+export { prompts, promptVersions } from "./prompts";
 export { providerConfigs } from "./providers";
 export { requestLogs } from "./request-logs";
 export { ssoConfigs, ssoProviderEnum } from "./sso-configs";
