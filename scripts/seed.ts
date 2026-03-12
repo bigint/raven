@@ -1,9 +1,9 @@
-import { parseEnv } from '../packages/config/src/env.js'
 import { createAuth } from '../packages/auth/src/server.js'
+import { parseEnv } from '../packages/config/src/env.js'
 import { createDatabase } from '../packages/db/src/client.js'
-import { organizations, members } from '../packages/db/src/schema/index.js'
-import { eq } from 'drizzle-orm'
+import { members, organizations } from '../packages/db/src/schema/index.js'
 import { createId } from '@paralleldrive/cuid2'
+import { eq } from 'drizzle-orm'
 
 const env = parseEnv()
 const db = createDatabase(env.DATABASE_URL)
@@ -25,15 +25,14 @@ async function seed() {
       console.log(`Created: ${result.user.email}`)
       userIds.push(result.user.id)
     } catch (err: unknown) {
-      const error = err as { statusCode?: number; body?: { user?: { id: string } } }
-      if (error.statusCode === 422) {
+      const error = err as { status?: number; statusCode?: number }
+      if (error.status === 422 || error.statusCode === 422) {
         console.log(`Exists:  ${user.email} (skipped)`)
-        // Look up existing user ID
-        const existing = await auth.api.signInEmail({
+        const signInResult = await auth.api.signInEmail({
           body: { email: user.email, password: user.password },
         })
-        if (existing.user?.id) {
-          userIds.push(existing.user.id)
+        if (signInResult.user?.id) {
+          userIds.push(signInResult.user.id)
         }
       } else {
         throw err
@@ -41,7 +40,7 @@ async function seed() {
     }
   }
 
-  // Create default organization if it doesn't exist
+  // Create default organization directly in DB
   const [existingOrg] = await db
     .select()
     .from(organizations)
@@ -63,10 +62,11 @@ async function seed() {
     console.log(`\nCreated org: Default Organization (${orgId})`)
   }
 
-  // Add users as members (owner for admin, member for others)
+  // Add users as members
   for (let i = 0; i < userIds.length; i++) {
     const userId = userIds[i]
-    const role = i === 0 ? 'owner' : 'member'
+    if (!userId) continue
+    const role: 'owner' | 'member' = i === 0 ? 'owner' : 'member'
 
     const [existing] = await db
       .select()

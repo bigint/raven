@@ -1,9 +1,7 @@
 import { createId } from '@paralleldrive/cuid2'
-import { pgEnum, pgTable, text, timestamp, unique } from 'drizzle-orm/pg-core'
+import { pgTable, text, timestamp, unique } from 'drizzle-orm/pg-core'
 import { organizations } from './organizations'
 import { users } from './users'
-
-export const orgRoleEnum = pgEnum('org_role', ['owner', 'admin', 'member', 'viewer'])
 
 export const members = pgTable(
   'members',
@@ -15,7 +13,7 @@ export const members = pgTable(
     userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    role: orgRoleEnum('role').notNull().default('member'),
+    role: text('role').notNull().default('member'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [unique('members_org_user_unique').on(t.organizationId, t.userId)],

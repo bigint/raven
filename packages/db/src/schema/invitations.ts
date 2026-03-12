@@ -1,7 +1,7 @@
 import { createId } from '@paralleldrive/cuid2'
 import { pgTable, text, timestamp, unique } from 'drizzle-orm/pg-core'
-import { orgRoleEnum } from './members'
 import { organizations } from './organizations'
+import { users } from './users'
 
 export const invitations = pgTable(
   'invitations',
@@ -11,10 +11,12 @@ export const invitations = pgTable(
       .notNull()
       .references(() => organizations.id, { onDelete: 'cascade' }),
     email: text('email').notNull(),
-    role: orgRoleEnum('role').notNull().default('member'),
-    token: text('token').notNull().unique(),
+    role: text('role').notNull().default('member'),
+    status: text('status').notNull().default('pending'),
+    inviterId: text('inviter_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
-    acceptedAt: timestamp('accepted_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [unique('invitations_org_email_unique').on(t.organizationId, t.email)],

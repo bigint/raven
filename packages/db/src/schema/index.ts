@@ -1,7 +1,7 @@
 export { sessions, accounts, verifications } from './auth'
 export { organizations } from './organizations'
 export { users, platformRoleEnum } from './users'
-export { members, orgRoleEnum } from './members'
+export { members } from './members'
 export { teams, teamMembers, teamRoleEnum } from './teams'
 export { providerConfigs } from './providers'
 export { virtualKeys, keyEnvironmentEnum } from './keys'
