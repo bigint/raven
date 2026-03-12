@@ -33,7 +33,7 @@ const RequestsPage = () => {
 
   const live = useLiveRequests(isLive);
   const requests = isLive ? live.requests : (data?.data ?? []);
-  const total = isLive ? live.total : (data?.pagination.total ?? 0);
+  const total = isLive ? live.total : (data?.pagination?.total ?? 0);
   const loading = isLive ? live.isLoading : isLoading;
   const displayError = isLive ? live.error : (error?.message ?? null);
 

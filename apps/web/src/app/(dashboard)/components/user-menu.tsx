@@ -1,10 +1,11 @@
 "use client";
 
-import { ChevronDown, LogOut, Settings, User } from "lucide-react";
+import { ChevronDown, LogOut, Moon, Settings, Sun, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { signOut } from "@/lib/auth-client";
+import { useTheme } from "@/lib/theme";
 
 interface UserMenuProps {
   user: { name?: string | null; email?: string | null };
@@ -14,6 +15,7 @@ export const UserMenu = ({ user }: UserMenuProps) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     if (!open) return;
@@ -60,6 +62,18 @@ export const UserMenu = ({ user }: UserMenuProps) => {
             <Settings className="size-4" />
             Settings
           </Link>
+          <button
+            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground text-left"
+            onClick={toggleTheme}
+            type="button"
+          >
+            {theme === "light" ? (
+              <Moon className="size-4" />
+            ) : (
+              <Sun className="size-4" />
+            )}
+            {theme === "light" ? "Dark mode" : "Light mode"}
+          </button>
           <div className="border-t border-border my-1" />
           <button
             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive transition-colors hover:bg-destructive/10 text-left"

@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ThemeToggle } from "@/components/theme-toggle";
 import type { Org } from "../hooks/use-orgs";
 import { OrgSwitcher } from "./org-switcher";
 import { UserMenu } from "./user-menu";
@@ -69,9 +68,6 @@ export const Sidebar = ({
         })}
       </nav>
 
-      <div className="flex items-center justify-between border-t border-border px-4 py-2">
-        <ThemeToggle />
-      </div>
       <UserMenu user={user} />
     </aside>
   );
