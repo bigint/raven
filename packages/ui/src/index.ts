@@ -10,3 +10,6 @@ export { PageHeader, type PageHeaderProps } from "./components/page-header";
 export { Modal, type ModalProps } from "./components/modal";
 export { ConfirmDialog, type ConfirmDialogProps } from "./components/confirm-dialog";
 export { EmptyState, type EmptyStateProps } from "./components/empty-state";
+export { DataTable, type DataTableProps, type Column } from "./components/data-table";
+export { Tabs, type TabsProps, type Tab } from "./components/tabs";
+export { Select, type SelectProps, type SelectOption } from "./components/select";
