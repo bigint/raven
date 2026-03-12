@@ -42,8 +42,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const resolveOrg = async () => {
       try {
         const orgs = await api.get<{ id: string; name: string }[]>('/v1/user/orgs')
-        if (orgs?.length > 0) {
-          setOrgId(orgs[0]!.id)
+        const firstOrg = orgs?.[0]
+        if (firstOrg) {
+          setOrgId(firstOrg.id)
         }
       } catch {
         // Org endpoint may not exist yet — try to continue without

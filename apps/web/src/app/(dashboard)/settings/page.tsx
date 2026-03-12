@@ -33,15 +33,13 @@ export default function SettingsPage() {
           <div className="space-y-4 px-6 py-5">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-muted-foreground">
-                  Organization Name
-                </label>
+                <span className="text-sm font-medium text-muted-foreground">Organization Name</span>
                 <div className="rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm">
                   {activeOrg?.name ?? '—'}
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-muted-foreground">Organization ID</label>
+                <span className="text-sm font-medium text-muted-foreground">Organization ID</span>
                 <div className="rounded-lg border border-input bg-muted/50 px-3 py-2 font-mono text-xs text-muted-foreground">
                   {activeOrg?.id ?? '—'}
                 </div>
@@ -49,7 +47,7 @@ export default function SettingsPage() {
             </div>
             {activeOrg?.slug && (
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-muted-foreground">Slug</label>
+                <span className="text-sm font-medium text-muted-foreground">Slug</span>
                 <div className="rounded-lg border border-input bg-muted/50 px-3 py-2 font-mono text-sm">
                   {activeOrg.slug}
                 </div>
@@ -72,20 +70,20 @@ export default function SettingsPage() {
           <div className="space-y-4 px-6 py-5">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-muted-foreground">Name</label>
+                <span className="text-sm font-medium text-muted-foreground">Name</span>
                 <div className="rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm">
                   {session?.user?.name ?? '—'}
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-muted-foreground">Email</label>
+                <span className="text-sm font-medium text-muted-foreground">Email</span>
                 <div className="rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm">
                   {session?.user?.email ?? '—'}
                 </div>
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-muted-foreground">User ID</label>
+              <span className="text-sm font-medium text-muted-foreground">User ID</span>
               <div className="rounded-lg border border-input bg-muted/50 px-3 py-2 font-mono text-xs text-muted-foreground">
                 {session?.user?.id ?? '—'}
               </div>
@@ -127,8 +125,18 @@ export default function SettingsPage() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowDeleteConfirm(false)}>
-          <div className="w-full max-w-sm rounded-xl border border-border bg-background shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setShowDeleteConfirm(false)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setShowDeleteConfirm(false)
+          }}
+        >
+          <div
+            className="w-full max-w-sm rounded-xl border border-border bg-background shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
             <div className="px-6 py-5">
               <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-destructive/10">
                 <AlertTriangle className="size-5 text-destructive" />
@@ -149,6 +157,9 @@ export default function SettingsPage() {
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(false)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') setShowDeleteConfirm(false)
+                }}
                 className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent"
               >
                 Cancel

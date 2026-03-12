@@ -3,7 +3,7 @@
 import { Select } from '@/components/select'
 import { api } from '@/lib/api'
 import { AlertTriangle, Check, Copy, Key, Pencil, Plus, Trash2, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 interface VirtualKey {
   id: string
@@ -67,7 +67,7 @@ export default function KeysPage() {
   const [copiedKey, setCopiedKey] = useState(false)
   const [copiedPrefix, setCopiedPrefix] = useState<string | null>(null)
 
-  const fetchKeys = async () => {
+  const fetchKeys = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -78,11 +78,11 @@ export default function KeysPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     fetchKeys()
-  }, [])
+  }, [fetchKeys])
 
   const openCreate = () => {
     setForm(DEFAULT_FORM)
@@ -366,8 +366,18 @@ export default function KeysPage() {
 
       {/* Create / Edit Modal */}
       {modalMode !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={closeModal}>
-          <div className="w-full max-w-md rounded-xl border border-border bg-background shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={closeModal}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') closeModal()
+          }}
+        >
+          <div
+            className="w-full max-w-md rounded-xl border border-border bg-background shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between border-b border-border px-6 py-4">
               <h2 className="text-base font-semibold">
                 {modalMode === 'create' ? 'Create Key' : 'Edit Key'}
@@ -375,6 +385,9 @@ export default function KeysPage() {
               <button
                 type="button"
                 onClick={closeModal}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') closeModal()
+                }}
                 className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
               >
                 <X className="size-4" />
@@ -410,9 +423,7 @@ export default function KeysPage() {
                   <Select
                     id="key-environment"
                     value={form.environment}
-                    onChange={(v) =>
-                      setForm((f) => ({ ...f, environment: v as 'live' | 'test' }))
-                    }
+                    onChange={(v) => setForm((f) => ({ ...f, environment: v as 'live' | 'test' }))}
                     options={[
                       { value: 'live', label: 'Live' },
                       { value: 'test', label: 'Test' },
@@ -477,6 +488,9 @@ export default function KeysPage() {
                 <button
                   type="button"
                   onClick={closeModal}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') closeModal()
+                  }}
                   className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent"
                 >
                   Cancel
@@ -502,13 +516,26 @@ export default function KeysPage() {
 
       {/* New Key Reveal Dialog */}
       {newKeyValue !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setNewKeyValue(null)}>
-          <div className="w-full max-w-md rounded-xl border border-border bg-background shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setNewKeyValue(null)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setNewKeyValue(null)
+          }}
+        >
+          <div
+            className="w-full max-w-md rounded-xl border border-border bg-background shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between border-b border-border px-6 py-4">
               <h2 className="text-base font-semibold">Key Created</h2>
               <button
                 type="button"
                 onClick={() => setNewKeyValue(null)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') setNewKeyValue(null)
+                }}
                 className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
               >
                 <X className="size-4" />
@@ -524,7 +551,7 @@ export default function KeysPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium">Your API Key</label>
+                <span className="text-sm font-medium">Your API Key</span>
                 <div className="flex items-center gap-2 rounded-lg border border-input bg-muted/50 px-3 py-2">
                   <span className="flex-1 truncate font-mono text-sm">{newKeyValue}</span>
                   <button
@@ -547,6 +574,9 @@ export default function KeysPage() {
               <button
                 type="button"
                 onClick={() => setNewKeyValue(null)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') setNewKeyValue(null)
+                }}
                 className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
               >
                 Done
@@ -558,8 +588,18 @@ export default function KeysPage() {
 
       {/* Delete Confirmation Modal */}
       {deleteId !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setDeleteId(null)}>
-          <div className="w-full max-w-sm rounded-xl border border-border bg-background shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setDeleteId(null)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setDeleteId(null)
+          }}
+        >
+          <div
+            className="w-full max-w-sm rounded-xl border border-border bg-background shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
             <div className="px-6 py-5">
               <h2 className="text-base font-semibold">Delete Key</h2>
               <p className="mt-2 text-sm text-muted-foreground">
@@ -571,6 +611,9 @@ export default function KeysPage() {
               <button
                 type="button"
                 onClick={() => setDeleteId(null)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') setDeleteId(null)
+                }}
                 disabled={deleting}
                 className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent disabled:opacity-50"
               >

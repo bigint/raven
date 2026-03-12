@@ -51,9 +51,7 @@ async function streamingChat() {
 
   const stream = await client.chat.completions.create({
     model: 'gpt-4o-mini',
-    messages: [
-      { role: 'user', content: 'Write a haiku about API gateways.' },
-    ],
+    messages: [{ role: 'user', content: 'Write a haiku about API gateways.' }],
     stream: true,
   })
 

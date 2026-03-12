@@ -106,7 +106,11 @@ const logRequest = async (
   }
 }
 
-export const proxyHandler = (db: Database, redis: Redis, env: Env): ((c: Context) => Promise<Response>) => {
+export const proxyHandler = (
+  db: Database,
+  redis: Redis,
+  env: Env,
+): ((c: Context) => Promise<Response>) => {
   return async (c: Context): Promise<Response> => {
     const startTime = Date.now()
 
@@ -116,7 +120,7 @@ export const proxyHandler = (db: Database, redis: Redis, env: Env): ((c: Context
     if (!match) {
       throw new UnauthorizedError('Missing or invalid Authorization header')
     }
-    const rawKey = match[1]!
+    const rawKey = match[1] as string
     const keyHash = hashKey(rawKey)
 
     // 2. Look up virtual key by SHA-256 hash
@@ -186,7 +190,10 @@ export const proxyHandler = (db: Database, redis: Redis, env: Env): ((c: Context
     })()
 
     if (!decryptedApiKey) {
-      return c.json({ code: 'INTERNAL_ERROR', message: 'Failed to decrypt provider credentials' }, 500)
+      return c.json(
+        { code: 'INTERNAL_ERROR', message: 'Failed to decrypt provider credentials' },
+        500,
+      )
     }
 
     // 7. Build upstream URL
@@ -238,7 +245,11 @@ export const proxyHandler = (db: Database, redis: Redis, env: Env): ((c: Context
       // SSE passthrough — stream directly to client
       const responseHeaders: Record<string, string> = {}
       upstreamResponse.headers.forEach((value, key) => {
-        if (!['connection', 'transfer-encoding', 'content-encoding', 'content-length'].includes(key.toLowerCase())) {
+        if (
+          !['connection', 'transfer-encoding', 'content-encoding', 'content-length'].includes(
+            key.toLowerCase(),
+          )
+        ) {
           responseHeaders[key] = value
         }
       })
@@ -260,7 +271,10 @@ export const proxyHandler = (db: Database, redis: Redis, env: Env): ((c: Context
       })
 
       // Update lastUsedAt async
-      db.update(virtualKeys).set({ lastUsedAt: new Date() }).where(eq(virtualKeys.id, vKey.id)).catch((err) => console.error('Failed to update lastUsedAt:', err))
+      db.update(virtualKeys)
+        .set({ lastUsedAt: new Date() })
+        .where(eq(virtualKeys.id, vKey.id))
+        .catch((err) => console.error('Failed to update lastUsedAt:', err))
 
       return new Response(upstreamResponse.body, {
         status: upstreamResponse.status,
@@ -298,11 +312,18 @@ export const proxyHandler = (db: Database, redis: Redis, env: Env): ((c: Context
     })
 
     // Update lastUsedAt async
-    db.update(virtualKeys).set({ lastUsedAt: new Date() }).where(eq(virtualKeys.id, vKey.id)).catch((err) => console.error('Failed to update lastUsedAt:', err))
+    db.update(virtualKeys)
+      .set({ lastUsedAt: new Date() })
+      .where(eq(virtualKeys.id, vKey.id))
+      .catch((err) => console.error('Failed to update lastUsedAt:', err))
 
     const responseHeaders: Record<string, string> = {}
     upstreamResponse.headers.forEach((value, key) => {
-      if (!['connection', 'transfer-encoding', 'content-encoding', 'content-length'].includes(key.toLowerCase())) {
+      if (
+        !['connection', 'transfer-encoding', 'content-encoding', 'content-length'].includes(
+          key.toLowerCase(),
+        )
+      ) {
         responseHeaders[key] = value
       }
     })

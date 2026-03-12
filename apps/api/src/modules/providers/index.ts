@@ -102,10 +102,11 @@ export const createProvidersModule = (db: Database, env: Env) => {
       })
       .returning()
 
+    const record = created as NonNullable<typeof created>
     return c.json(
       {
-        ...created!,
-        apiKey: maskApiKey(created!.apiKey),
+        ...record,
+        apiKey: maskApiKey(record.apiKey),
       },
       201,
     )
@@ -154,9 +155,10 @@ export const createProvidersModule = (db: Database, env: Env) => {
       .where(and(eq(providerConfigs.id, id), eq(providerConfigs.organizationId, orgId)))
       .returning()
 
+    const record = updated as NonNullable<typeof updated>
     return c.json({
-      ...updated!,
-      apiKey: maskApiKey(updated!.apiKey),
+      ...record,
+      apiKey: maskApiKey(record.apiKey),
     })
   })
 

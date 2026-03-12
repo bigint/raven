@@ -107,9 +107,10 @@ export const createKeysModule = (db: Database) => {
       .returning()
 
     // Return full plaintext key ONLY on creation
+    const record = created as NonNullable<typeof created>
     return c.json(
       {
-        ...safeKey(created!),
+        ...safeKey(record),
         key,
       },
       201,
@@ -165,7 +166,7 @@ export const createKeysModule = (db: Database) => {
       .where(and(eq(virtualKeys.id, id), eq(virtualKeys.organizationId, orgId)))
       .returning()
 
-    return c.json(safeKey(updated!))
+    return c.json(safeKey(updated as NonNullable<typeof updated>))
   })
 
   // DELETE /:id — Delete a key

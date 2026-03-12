@@ -3,7 +3,7 @@
 import { Select } from '@/components/select'
 import { api } from '@/lib/api'
 import { Mail, Pencil, Plus, Trash2, Users, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 interface Member {
   id: string
@@ -73,7 +73,7 @@ export default function TeamPage() {
   } | null>(null)
   const [deleting, setDeleting] = useState(false)
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -90,11 +90,11 @@ export default function TeamPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [fetchData])
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -489,13 +489,26 @@ export default function TeamPage() {
 
       {/* Invite Modal */}
       {showInviteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowInviteModal(false)}>
-          <div className="w-full max-w-md rounded-xl border border-border bg-background shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setShowInviteModal(false)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setShowInviteModal(false)
+          }}
+        >
+          <div
+            className="w-full max-w-md rounded-xl border border-border bg-background shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between border-b border-border px-6 py-4">
               <h2 className="text-base font-semibold">Invite Member</h2>
               <button
                 type="button"
                 onClick={() => setShowInviteModal(false)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') setShowInviteModal(false)
+                }}
                 className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
               >
                 <X className="size-4" />
@@ -535,6 +548,9 @@ export default function TeamPage() {
                 <button
                   type="button"
                   onClick={() => setShowInviteModal(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') setShowInviteModal(false)
+                  }}
                   className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent"
                 >
                   Cancel
@@ -554,13 +570,26 @@ export default function TeamPage() {
 
       {/* Create Team Modal */}
       {showTeamModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowTeamModal(false)}>
-          <div className="w-full max-w-md rounded-xl border border-border bg-background shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setShowTeamModal(false)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setShowTeamModal(false)
+          }}
+        >
+          <div
+            className="w-full max-w-md rounded-xl border border-border bg-background shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between border-b border-border px-6 py-4">
               <h2 className="text-base font-semibold">Create Team</h2>
               <button
                 type="button"
                 onClick={() => setShowTeamModal(false)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') setShowTeamModal(false)
+                }}
                 className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
               >
                 <X className="size-4" />
@@ -589,6 +618,9 @@ export default function TeamPage() {
                 <button
                   type="button"
                   onClick={() => setShowTeamModal(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') setShowTeamModal(false)
+                  }}
                   className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent"
                 >
                   Cancel
@@ -608,8 +640,18 @@ export default function TeamPage() {
 
       {/* Delete Confirmation */}
       {deleteTarget !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setDeleteTarget(null)}>
-          <div className="w-full max-w-sm rounded-xl border border-border bg-background shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setDeleteTarget(null)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setDeleteTarget(null)
+          }}
+        >
+          <div
+            className="w-full max-w-sm rounded-xl border border-border bg-background shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
             <div className="px-6 py-5">
               <h2 className="text-base font-semibold">
                 {deleteTarget.type === 'member'
@@ -630,6 +672,9 @@ export default function TeamPage() {
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') setDeleteTarget(null)
+                }}
                 disabled={deleting}
                 className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent disabled:opacity-50"
               >

@@ -3,7 +3,7 @@
 import { Select } from '@/components/select'
 import { api } from '@/lib/api'
 import { Check, Eye, EyeOff, Pencil, Plus, Trash2, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 interface Provider {
   id: string
@@ -61,7 +61,7 @@ export default function ProvidersPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
 
-  const fetchProviders = async () => {
+  const fetchProviders = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -72,11 +72,11 @@ export default function ProvidersPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     fetchProviders()
-  }, [])
+  }, [fetchProviders])
 
   const openAdd = () => {
     setForm(DEFAULT_FORM)
@@ -233,9 +233,7 @@ export default function ProvidersPage() {
                   <td className="px-5 py-4 font-medium">
                     {PROVIDER_LABELS[provider.provider] ?? provider.provider}
                   </td>
-                  <td className="px-5 py-4 font-mono text-muted-foreground">
-                    {provider.apiKey}
-                  </td>
+                  <td className="px-5 py-4 font-mono text-muted-foreground">{provider.apiKey}</td>
                   <td className="px-5 py-4">
                     <button
                       type="button"
@@ -288,8 +286,18 @@ export default function ProvidersPage() {
 
       {/* Add / Edit Modal */}
       {modalMode !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={closeModal}>
-          <div className="w-full max-w-md rounded-xl border border-border bg-background shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={closeModal}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') closeModal()
+          }}
+        >
+          <div
+            className="w-full max-w-md rounded-xl border border-border bg-background shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between border-b border-border px-6 py-4">
               <h2 className="text-base font-semibold">
                 {modalMode === 'add' ? 'Add Provider' : 'Edit Provider'}
@@ -297,6 +305,9 @@ export default function ProvidersPage() {
               <button
                 type="button"
                 onClick={closeModal}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') closeModal()
+                }}
                 className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
               >
                 <X className="size-4" />
@@ -370,6 +381,9 @@ export default function ProvidersPage() {
                 <button
                   type="button"
                   onClick={closeModal}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') closeModal()
+                  }}
                   className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent"
                 >
                   Cancel
@@ -395,8 +409,18 @@ export default function ProvidersPage() {
 
       {/* Delete Confirmation Modal */}
       {deleteId !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setDeleteId(null)}>
-          <div className="w-full max-w-sm rounded-xl border border-border bg-background shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setDeleteId(null)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setDeleteId(null)
+          }}
+        >
+          <div
+            className="w-full max-w-sm rounded-xl border border-border bg-background shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
             <div className="px-6 py-5">
               <h2 className="text-base font-semibold">Delete Provider</h2>
               <p className="mt-2 text-sm text-muted-foreground">
@@ -407,6 +431,9 @@ export default function ProvidersPage() {
               <button
                 type="button"
                 onClick={() => setDeleteId(null)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') setDeleteId(null)
+                }}
                 disabled={deleting}
                 className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent disabled:opacity-50"
               >

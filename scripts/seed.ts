@@ -1,9 +1,9 @@
+import { createId } from '@paralleldrive/cuid2'
+import { eq } from 'drizzle-orm'
 import { createAuth } from '../packages/auth/src/server.js'
 import { parseEnv } from '../packages/config/src/env.js'
 import { createDatabase } from '../packages/db/src/client.js'
 import { members, organizations } from '../packages/db/src/schema/index.js'
-import { createId } from '@paralleldrive/cuid2'
-import { eq } from 'drizzle-orm'
 
 const env = parseEnv()
 const db = createDatabase(env.DATABASE_URL)
@@ -68,11 +68,7 @@ async function seed() {
     if (!userId) continue
     const role: 'owner' | 'member' = i === 0 ? 'owner' : 'member'
 
-    const [existing] = await db
-      .select()
-      .from(members)
-      .where(eq(members.userId, userId))
-      .limit(1)
+    const [existing] = await db.select().from(members).where(eq(members.userId, userId)).limit(1)
 
     if (!existing) {
       await db.insert(members).values({

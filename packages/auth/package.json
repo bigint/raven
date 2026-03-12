@@ -17,11 +17,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "better-auth": "^1.2.0",
     "@raven/config": "workspace:*",
-    "@raven/db": "workspace:*"
+    "@raven/db": "workspace:*",
+    "better-auth": "^1.2.0"
   },
   "devDependencies": {
+    "@types/node": "^25.4.0",
     "typescript": "^5.8.3"
   }
 }

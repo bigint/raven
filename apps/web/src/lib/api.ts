@@ -1,10 +1,12 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
+export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
 
 let currentOrgId: string | null = null
 
 export const setOrgId = (orgId: string | null) => {
   currentOrgId = orgId
 }
+
+export const getOrgId = () => currentOrgId
 
 export const api = {
   async get<T>(path: string): Promise<T> {

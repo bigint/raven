@@ -1,26 +1,29 @@
 'use client'
 
 import { Select } from '@/components/select'
-import { api } from '@/lib/api'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { API_URL, api, getOrgId } from '@/lib/api'
+import { ChevronLeft, ChevronRight, Radio } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface RequestLog {
   id: string
-  timestamp: string
+  createdAt: string
   provider: string
   model: string
   statusCode: number
   latencyMs: number
-  costUsd: number
+  cost: string
   cacheHit: boolean
 }
 
 interface RequestsResponse {
   data: RequestLog[]
-  total: number
-  page: number
-  pageSize: number
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }
 }
 
 const PROVIDER_OPTIONS = [
@@ -108,41 +111,113 @@ export default function RequestsPage() {
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isLive, setIsLive] = useState(false)
 
   const [provider, setProvider] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [dateRange, setDateRange] = useState<DateRange>('24h')
 
-  const fetchRequests = async (opts: {
-    page: number
-    provider: string
-    status: string
-    range: DateRange
-  }) => {
-    try {
-      setLoading(true)
-      setError(null)
-      const params = new URLSearchParams({
-        page: String(opts.page),
-        pageSize: String(PAGE_SIZE),
-        range: opts.range,
-      })
-      if (opts.provider) params.set('provider', opts.provider)
-      if (opts.status) params.set('status', opts.status)
+  const eventSourceRef = useRef<EventSource | null>(null)
 
-      const data = await api.get<RequestsResponse>(`/v1/analytics/requests?${params.toString()}`)
-      setRequests(data.data)
-      setTotal(data.total)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load requests')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const fetchRequests = useCallback(
+    async (opts: {
+      page: number
+      provider: string
+      status: string
+      range: DateRange
+    }) => {
+      try {
+        setLoading(true)
+        setError(null)
+        const now = new Date()
+        const rangeMs: Record<DateRange, number> = {
+          '1h': 3_600_000,
+          '24h': 86_400_000,
+          '7d': 604_800_000,
+          '30d': 2_592_000_000,
+        }
+        const from = new Date(now.getTime() - rangeMs[opts.range]).toISOString()
+        const params = new URLSearchParams({
+          page: String(opts.page),
+          limit: String(PAGE_SIZE),
+          from,
+        })
+        if (opts.provider) params.set('provider', opts.provider)
+        if (opts.status) {
+          const codeMap: Record<string, string> = { '2xx': '200', '4xx': '400', '5xx': '500' }
+          const code = codeMap[opts.status]
+          if (code) params.set('statusCode', code)
+        }
 
+        const data = await api.get<RequestsResponse>(`/v1/analytics/requests?${params.toString()}`)
+        setRequests(data.data)
+        setTotal(data.pagination.total)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load requests')
+      } finally {
+        setLoading(false)
+      }
+    },
+    [],
+  )
+
+  // Standard polling mode
   useEffect(() => {
+    if (isLive) return
     fetchRequests({ page, provider, status: statusFilter, range: dateRange })
-  }, [page, provider, statusFilter, dateRange])
+  }, [fetchRequests, isLive, page, provider, statusFilter, dateRange])
+
+  // Live SSE mode
+  useEffect(() => {
+    if (!isLive) {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close()
+        eventSourceRef.current = null
+      }
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+
+    const orgId = getOrgId()
+    const url = `${API_URL}/v1/analytics/requests/live${orgId ? `?orgId=${orgId}` : ''}`
+    const es = new EventSource(url, { withCredentials: true })
+    eventSourceRef.current = es
+
+    es.addEventListener('init', (e) => {
+      const logs: RequestLog[] = JSON.parse(e.data)
+      setRequests(logs)
+      setTotal(logs.length)
+      setLoading(false)
+    })
+
+    es.addEventListener('new', (e) => {
+      const newLogs: RequestLog[] = JSON.parse(e.data)
+      setRequests((prev) => {
+        const merged = [...newLogs, ...prev]
+        const seen = new Set<string>()
+        return merged
+          .filter((r) => {
+            if (seen.has(r.id)) return false
+            seen.add(r.id)
+            return true
+          })
+          .slice(0, 200)
+      })
+      setTotal((prev) => prev + newLogs.length)
+    })
+
+    es.addEventListener('error', () => {
+      setError('Live connection lost. Reconnecting...')
+      setLoading(false)
+    })
+
+    return () => {
+      es.close()
+      eventSourceRef.current = null
+    }
+  }, [isLive])
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
@@ -150,61 +225,94 @@ export default function RequestsPage() {
     setPage(1)
   }
 
+  const toggleLive = () => {
+    setIsLive((prev) => !prev)
+    setPage(1)
+  }
+
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold">Requests</h1>
-        <p className="mt-1 text-sm text-muted-foreground">View and inspect API request logs.</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Requests</h1>
+          <p className="mt-1 text-sm text-muted-foreground">View and inspect API request logs.</p>
+        </div>
+        <button
+          type="button"
+          onClick={toggleLive}
+          className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+            isLive
+              ? 'bg-green-500/10 text-green-600 border border-green-500/30'
+              : 'border border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+          }`}
+        >
+          <Radio className={`size-4 ${isLive ? 'animate-pulse' : ''}`} />
+          {isLive ? 'Live' : 'Go Live'}
+        </button>
       </div>
 
       {/* Filters */}
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <Select
-          value={provider}
-          onChange={(v) => {
-            setProvider(v)
-            handleFilterChange()
-          }}
-          options={PROVIDER_OPTIONS}
-          className="w-44"
-        />
+      {!isLive && (
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <Select
+            value={provider}
+            onChange={(v) => {
+              setProvider(v)
+              handleFilterChange()
+            }}
+            options={PROVIDER_OPTIONS}
+            className="w-44"
+          />
 
-        <Select
-          value={statusFilter}
-          onChange={(v) => {
-            setStatusFilter(v)
-            handleFilterChange()
-          }}
-          options={STATUS_OPTIONS}
-          className="w-40"
-        />
+          <Select
+            value={statusFilter}
+            onChange={(v) => {
+              setStatusFilter(v)
+              handleFilterChange()
+            }}
+            options={STATUS_OPTIONS}
+            className="w-40"
+          />
 
-        <div className="flex items-center gap-1 rounded-lg border border-border p-1">
-          {DATE_RANGE_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => {
-                setDateRange(opt.value)
-                handleFilterChange()
-              }}
-              className={`rounded-md px-3 py-1 text-sm font-medium transition-colors ${
-                dateRange === opt.value
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
+          <div className="flex items-center gap-1 rounded-lg border border-border p-1">
+            {DATE_RANGE_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => {
+                  setDateRange(opt.value)
+                  handleFilterChange()
+                }}
+                className={`rounded-md px-3 py-1 text-sm font-medium transition-colors ${
+                  dateRange === opt.value
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
+          {total > 0 && (
+            <span className="ml-auto text-sm text-muted-foreground">
+              {total.toLocaleString()} total
+            </span>
+          )}
         </div>
+      )}
 
-        {total > 0 && (
-          <span className="ml-auto text-sm text-muted-foreground">
-            {total.toLocaleString()} total
+      {isLive && (
+        <div className="mb-4 flex items-center gap-2">
+          <span className="relative flex size-2">
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75" />
+            <span className="relative inline-flex size-2 rounded-full bg-green-500" />
           </span>
-        )}
-      </div>
+          <span className="text-sm text-muted-foreground">
+            Streaming live — {requests.length} requests
+          </span>
+        </div>
+      )}
 
       {error && (
         <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -215,11 +323,15 @@ export default function RequestsPage() {
       {loading ? (
         <div className="rounded-xl border border-border p-12 text-center">
           <div className="mx-auto size-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
-          <p className="mt-3 text-sm text-muted-foreground">Loading requests...</p>
+          <p className="mt-3 text-sm text-muted-foreground">
+            {isLive ? 'Connecting to live stream...' : 'Loading requests...'}
+          </p>
         </div>
       ) : requests.length === 0 ? (
         <div className="rounded-xl border border-border p-12 text-center">
-          <p className="text-muted-foreground">No requests found for the selected filters.</p>
+          <p className="text-muted-foreground">
+            {isLive ? 'Waiting for new requests...' : 'No requests found for the selected filters.'}
+          </p>
         </div>
       ) : (
         <>
@@ -257,7 +369,7 @@ export default function RequestsPage() {
                     className={`transition-colors hover:bg-muted/30 ${idx !== requests.length - 1 ? 'border-b border-border' : ''}`}
                   >
                     <td className="px-5 py-4 text-xs text-muted-foreground whitespace-nowrap">
-                      {formatTime(req.timestamp)}
+                      {formatTime(req.createdAt)}
                     </td>
                     <td className="px-5 py-4 font-medium">
                       {PROVIDER_LABELS[req.provider] ?? req.provider}
@@ -267,7 +379,7 @@ export default function RequestsPage() {
                     </td>
                     <td className="px-5 py-4">{getStatusBadge(req.statusCode)}</td>
                     <td className="px-5 py-4 text-right">{req.latencyMs}ms</td>
-                    <td className="px-5 py-4 text-right">${Number(req.costUsd).toFixed(6)}</td>
+                    <td className="px-5 py-4 text-right">${Number(req.cost).toFixed(6)}</td>
                     <td className="px-5 py-4 text-center">
                       {req.cacheHit ? (
                         <span className="inline-flex items-center rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600">
@@ -285,32 +397,34 @@ export default function RequestsPage() {
             </table>
           </div>
 
-          {/* Pagination */}
-          <div className="mt-4 flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              Page {page} of {totalPages}
-            </p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <ChevronLeft className="size-4" />
-                Prev
-              </button>
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Next
-                <ChevronRight className="size-4" />
-              </button>
+          {/* Pagination — only in non-live mode */}
+          {!isLive && (
+            <div className="mt-4 flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                Page {page} of {totalPages}
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <ChevronLeft className="size-4" />
+                  Prev
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Next
+                  <ChevronRight className="size-4" />
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </>
       )}
     </div>

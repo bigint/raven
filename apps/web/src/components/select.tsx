@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronDown, Check } from 'lucide-react'
+import { Check, ChevronDown } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 interface SelectOption {
@@ -61,7 +61,9 @@ export function Select({
         className="flex w-full items-center justify-between rounded-lg border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
       >
         <span className={value ? '' : 'text-muted-foreground'}>{selectedLabel}</span>
-        <ChevronDown className={`size-4 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          className={`size-4 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {open && (
@@ -78,7 +80,9 @@ export function Select({
                 option.value === value ? 'text-foreground' : 'text-muted-foreground'
               }`}
             >
-              <Check className={`size-3.5 shrink-0 ${option.value === value ? 'opacity-100' : 'opacity-0'}`} />
+              <Check
+                className={`size-3.5 shrink-0 ${option.value === value ? 'opacity-100' : 'opacity-0'}`}
+              />
               {option.label}
             </button>
           ))}

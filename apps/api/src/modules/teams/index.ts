@@ -131,10 +131,7 @@ export const createTeamsModule = (db: Database) => {
   app.get('/invitations', async (c) => {
     const orgId = c.get('orgId' as never) as string
 
-    const rows = await db
-      .select()
-      .from(invitations)
-      .where(eq(invitations.organizationId, orgId))
+    const rows = await db.select().from(invitations).where(eq(invitations.organizationId, orgId))
 
     return c.json(rows)
   })
@@ -195,9 +192,7 @@ export const createTeamsModule = (db: Database) => {
       throw new ForbiddenError('You cannot remove yourself')
     }
 
-    await db
-      .delete(members)
-      .where(and(eq(members.id, id), eq(members.organizationId, orgId)))
+    await db.delete(members).where(and(eq(members.id, id), eq(members.organizationId, orgId)))
 
     return c.json({ success: true })
   })

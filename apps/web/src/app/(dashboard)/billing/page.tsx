@@ -2,7 +2,7 @@
 
 import { api } from '@/lib/api'
 import { Check, CreditCard, Zap } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 interface Subscription {
   planId: string
@@ -44,7 +44,7 @@ export default function BillingPage() {
   const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly')
   const [upgrading, setUpgrading] = useState<string | null>(null)
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -59,11 +59,11 @@ export default function BillingPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [fetchData])
 
   const handlePlanAction = async (planId: string) => {
     try {

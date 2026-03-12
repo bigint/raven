@@ -29,9 +29,7 @@ export const BudgetAlertEmail = ({
   return (
     <Html>
       <Head />
-      <Preview>
-        Budget alert: {budgetName} has reached {usagePercent}% of its limit
-      </Preview>
+      <Preview>{`Budget alert: ${budgetName} has reached ${usagePercent}% of its limit`}</Preview>
       <Body style={body}>
         <Container style={container}>
           <Heading style={heading}>Budget Alert</Heading>

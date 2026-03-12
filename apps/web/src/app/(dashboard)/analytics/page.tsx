@@ -2,21 +2,23 @@
 
 import { api } from '@/lib/api'
 import { Activity, Clock, DollarSign, Zap } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 interface Stats {
   totalRequests: number
-  totalCost: number
-  avgLatency: number
-  cacheHitRate: number
+  totalCost: string
+  avgLatencyMs: string
+  cacheHitRate: string
 }
 
 interface UsageRow {
   provider: string
   model: string
-  requests: number
-  cost: number
-  tokens: number
+  totalRequests: number
+  totalCost: string
+  totalInputTokens: string
+  totalOutputTokens: string
+  avgLatencyMs: string
 }
 
 type DateRange = '7d' | '30d' | '90d'
@@ -43,50 +45,51 @@ export default function AnalyticsPage() {
   const [error, setError] = useState<string | null>(null)
   const [dateRange, setDateRange] = useState<DateRange>('30d')
 
-  const fetchData = async (range: DateRange) => {
+  const fetchData = useCallback(async (range: DateRange) => {
     try {
       setLoading(true)
       setError(null)
+      const rangeMs: Record<DateRange, number> = {
+        '7d': 604_800_000,
+        '30d': 2_592_000_000,
+        '90d': 7_776_000_000,
+      }
+      const from = new Date(Date.now() - rangeMs[range]).toISOString()
       const [statsData, usageData] = await Promise.all([
-        api.get<Stats>(`/v1/analytics/stats?range=${range}`),
-        api.get<UsageRow[]>(`/v1/analytics/usage?range=${range}`),
+        api.get<Stats>(`/v1/analytics/stats?from=${from}`),
+        api.get<UsageRow[]>(`/v1/analytics/usage?from=${from}`),
       ])
-      setStats({
-        totalRequests: Number(statsData.totalRequests) || 0,
-        totalCost: Number(statsData.totalCost) || 0,
-        avgLatency: Number(statsData.avgLatency) || 0,
-        cacheHitRate: Number(statsData.cacheHitRate) || 0,
-      })
+      setStats(statsData)
       setUsage(usageData)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load analytics')
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     fetchData(dateRange)
-  }, [dateRange])
+  }, [fetchData, dateRange])
 
   const statCards = [
     {
       label: 'Total Requests',
-      value: stats ? stats.totalRequests.toLocaleString() : '—',
+      value: stats ? Number(stats.totalRequests).toLocaleString() : '—',
       icon: Activity,
       color: 'text-blue-500',
       bg: 'bg-blue-500/10',
     },
     {
       label: 'Total Cost',
-      value: stats ? `$${stats.totalCost.toFixed(4)}` : '—',
+      value: stats ? `$${Number(stats.totalCost).toFixed(4)}` : '—',
       icon: DollarSign,
       color: 'text-green-500',
       bg: 'bg-green-500/10',
     },
     {
       label: 'Avg Latency',
-      value: stats ? `${Math.round(Number(stats.avgLatency))}ms` : '—',
+      value: stats ? `${Math.round(Number(stats.avgLatencyMs))}ms` : '—',
       icon: Clock,
       color: 'text-orange-500',
       bg: 'bg-orange-500/10',
@@ -203,9 +206,15 @@ export default function AnalyticsPage() {
                     <td className="px-5 py-4 font-mono text-sm text-muted-foreground">
                       {row.model}
                     </td>
-                    <td className="px-5 py-4 text-right">{Number(row.requests).toLocaleString()}</td>
-                    <td className="px-5 py-4 text-right">${Number(row.cost).toFixed(4)}</td>
-                    <td className="px-5 py-4 text-right">{Number(row.tokens).toLocaleString()}</td>
+                    <td className="px-5 py-4 text-right">
+                      {Number(row.totalRequests).toLocaleString()}
+                    </td>
+                    <td className="px-5 py-4 text-right">${Number(row.totalCost).toFixed(4)}</td>
+                    <td className="px-5 py-4 text-right">
+                      {(
+                        Number(row.totalInputTokens) + Number(row.totalOutputTokens)
+                      ).toLocaleString()}
+                    </td>
                   </tr>
                 ))}
               </tbody>

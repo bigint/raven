@@ -18,7 +18,8 @@ export default function OverviewPage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const data = await api.get<OverviewStats>('/v1/analytics/stats?range=30d')
+        const from = new Date(Date.now() - 2_592_000_000).toISOString()
+        const data = await api.get<OverviewStats>(`/v1/analytics/stats?from=${from}`)
         setStats({
           totalRequests: Number(data.totalRequests) || 0,
           totalCost: Number(data.totalCost) || 0,
