@@ -26,6 +26,7 @@ const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/providers", icon: Network, label: "Providers" },
   { href: "/keys", icon: Key, label: "Keys" },
   { href: "/analytics", icon: BarChart3, label: "Analytics" },
+  { href: "/routing", icon: Route, label: "Routing" },
   { href: "/requests", icon: ScrollText, label: "Requests" },
   { href: "/budgets", icon: CreditCard, label: "Budgets" },
   { href: "/guardrails", icon: Shield, label: "Guardrails" },
