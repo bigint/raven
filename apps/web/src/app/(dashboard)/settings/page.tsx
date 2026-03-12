@@ -2,6 +2,7 @@
 
 import { Settings } from "lucide-react";
 import { DangerZone } from "./components/danger-zone";
+import { PlanSubscription } from "./components/plan-subscription";
 import { SettingsForm } from "./components/settings-form";
 import { useSettings } from "./hooks/use-settings";
 
@@ -71,6 +72,8 @@ const SettingsPage = () => {
             onSaveErrorClear={() => setSaveError(null)}
             onSave={handleSave}
           />
+
+          <PlanSubscription settings={settings} />
 
           {isOwner && (
             <DangerZone
