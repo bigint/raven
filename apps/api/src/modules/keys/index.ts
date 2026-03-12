@@ -1,9 +1,9 @@
 import { createHash, randomBytes } from 'node:crypto'
+import type { Database } from '@raven/db'
+import { virtualKeys } from '@raven/db'
 import { and, eq } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
-import type { Database } from '@raven/db'
-import { virtualKeys } from '@raven/db'
 import { NotFoundError, ValidationError } from '../../lib/errors.js'
 
 const generateKey = (

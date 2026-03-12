@@ -1,8 +1,8 @@
-import { eq } from 'drizzle-orm'
-import { Hono } from 'hono'
 import type { Database } from '@raven/db'
 import { subscriptions } from '@raven/db'
 import { PLAN_FEATURES } from '@raven/types'
+import { eq } from 'drizzle-orm'
+import { Hono } from 'hono'
 import { NotFoundError } from '../../lib/errors.js'
 
 export const createBillingModule = (db: Database) => {
@@ -41,7 +41,7 @@ export const createBillingModule = (db: Database) => {
   return app
 }
 
-export const createBillingWebhookModule = (db: Database) => {
+export const createBillingWebhookModule = (_db: Database) => {
   const app = new Hono()
 
   // POST /webhooks/billing — Paddle webhook handler (no auth required)

@@ -245,253 +245,244 @@ export default function TeamPage() {
       ) : (
         <>
           {/* Members Tab */}
-          {activeTab === 'members' && (
-            <>
-              {members.length === 0 ? (
-                <div className="rounded-xl border border-border p-12 text-center">
-                  <Users className="mx-auto size-8 text-muted-foreground/50" />
-                  <p className="mt-3 text-muted-foreground">No members yet.</p>
-                </div>
-              ) : (
-                <div className="rounded-xl border border-border">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border">
-                        <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Member
-                        </th>
-                        <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Role
-                        </th>
-                        <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Joined
-                        </th>
-                        <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {members.map((member, idx) => (
-                        <tr
-                          key={member.id}
-                          className={`transition-colors hover:bg-muted/30 ${idx !== members.length - 1 ? 'border-b border-border' : ''}`}
-                        >
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-xs font-medium">
-                                {member.name?.charAt(0)?.toUpperCase() ?? '?'}
-                              </div>
-                              <div>
-                                <p className="font-medium">{member.name}</p>
-                                <p className="text-xs text-muted-foreground">{member.email}</p>
-                              </div>
+          {activeTab === 'members' &&
+            (members.length === 0 ? (
+              <div className="rounded-xl border border-border p-12 text-center">
+                <Users className="mx-auto size-8 text-muted-foreground/50" />
+                <p className="mt-3 text-muted-foreground">No members yet.</p>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-border">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Member
+                      </th>
+                      <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Role
+                      </th>
+                      <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Joined
+                      </th>
+                      <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {members.map((member, idx) => (
+                      <tr
+                        key={member.id}
+                        className={`transition-colors hover:bg-muted/30 ${idx !== members.length - 1 ? 'border-b border-border' : ''}`}
+                      >
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-xs font-medium">
+                              {member.name?.charAt(0)?.toUpperCase() ?? '?'}
                             </div>
-                          </td>
-                          <td className="px-5 py-4">
-                            <span
-                              className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium capitalize ${ROLE_BADGE[member.role] ?? 'bg-muted text-muted-foreground'}`}
+                            <div>
+                              <p className="font-medium">{member.name}</p>
+                              <p className="text-xs text-muted-foreground">{member.email}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span
+                            className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium capitalize ${ROLE_BADGE[member.role] ?? 'bg-muted text-muted-foreground'}`}
+                          >
+                            {member.role}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4 text-sm text-muted-foreground">
+                          {new Date(member.joinedAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              type="button"
+                              onClick={() => setDeleteTarget({ type: 'member', id: member.id })}
+                              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                              title="Remove member"
                             >
-                              {member.role}
-                            </span>
-                          </td>
-                          <td className="px-5 py-4 text-sm text-muted-foreground">
-                            {new Date(member.joinedAt).toLocaleDateString()}
-                          </td>
-                          <td className="px-5 py-4">
-                            <div className="flex items-center justify-end gap-1">
-                              <button
-                                type="button"
-                                onClick={() => setDeleteTarget({ type: 'member', id: member.id })}
-                                className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                                title="Remove member"
-                              >
-                                <Trash2 className="size-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </>
-          )}
+                              <Trash2 className="size-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))}
 
           {/* Invitations Tab */}
-          {activeTab === 'invitations' && (
-            <>
-              {invitations.length === 0 ? (
-                <div className="rounded-xl border border-border p-12 text-center">
-                  <Mail className="mx-auto size-8 text-muted-foreground/50" />
-                  <p className="mt-3 text-muted-foreground">No pending invitations.</p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setInviteError(null)
-                      setInviteEmail('')
-                      setInviteRole('member')
-                      setShowInviteModal(true)
-                    }}
-                    className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-                  >
-                    <Mail className="size-4" />
-                    Invite a member
-                  </button>
-                </div>
-              ) : (
-                <div className="rounded-xl border border-border">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border">
-                        <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Email
-                        </th>
-                        <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Role
-                        </th>
-                        <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Status
-                        </th>
-                        <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Expires
-                        </th>
-                        <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Actions
-                        </th>
+          {activeTab === 'invitations' &&
+            (invitations.length === 0 ? (
+              <div className="rounded-xl border border-border p-12 text-center">
+                <Mail className="mx-auto size-8 text-muted-foreground/50" />
+                <p className="mt-3 text-muted-foreground">No pending invitations.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInviteError(null)
+                    setInviteEmail('')
+                    setInviteRole('member')
+                    setShowInviteModal(true)
+                  }}
+                  className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                >
+                  <Mail className="size-4" />
+                  Invite a member
+                </button>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-border">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Email
+                      </th>
+                      <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Role
+                      </th>
+                      <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Status
+                      </th>
+                      <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Expires
+                      </th>
+                      <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {invitations.map((inv, idx) => (
+                      <tr
+                        key={inv.id}
+                        className={`transition-colors hover:bg-muted/30 ${idx !== invitations.length - 1 ? 'border-b border-border' : ''}`}
+                      >
+                        <td className="px-5 py-4 font-medium">{inv.email}</td>
+                        <td className="px-5 py-4">
+                          <span
+                            className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium capitalize ${ROLE_BADGE[inv.role] ?? 'bg-muted text-muted-foreground'}`}
+                          >
+                            {inv.role}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span
+                            className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium capitalize ${
+                              inv.status === 'pending'
+                                ? 'bg-yellow-500/10 text-yellow-600'
+                                : inv.status === 'accepted'
+                                  ? 'bg-green-500/10 text-green-600'
+                                  : 'bg-muted text-muted-foreground'
+                            }`}
+                          >
+                            {inv.status}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4 text-sm text-muted-foreground">
+                          {new Date(inv.expiresAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              type="button"
+                              onClick={() => setDeleteTarget({ type: 'invitation', id: inv.id })}
+                              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                              title="Revoke invitation"
+                            >
+                              <Trash2 className="size-4" />
+                            </button>
+                          </div>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {invitations.map((inv, idx) => (
-                        <tr
-                          key={inv.id}
-                          className={`transition-colors hover:bg-muted/30 ${idx !== invitations.length - 1 ? 'border-b border-border' : ''}`}
-                        >
-                          <td className="px-5 py-4 font-medium">{inv.email}</td>
-                          <td className="px-5 py-4">
-                            <span
-                              className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium capitalize ${ROLE_BADGE[inv.role] ?? 'bg-muted text-muted-foreground'}`}
-                            >
-                              {inv.role}
-                            </span>
-                          </td>
-                          <td className="px-5 py-4">
-                            <span
-                              className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium capitalize ${
-                                inv.status === 'pending'
-                                  ? 'bg-yellow-500/10 text-yellow-600'
-                                  : inv.status === 'accepted'
-                                    ? 'bg-green-500/10 text-green-600'
-                                    : 'bg-muted text-muted-foreground'
-                              }`}
-                            >
-                              {inv.status}
-                            </span>
-                          </td>
-                          <td className="px-5 py-4 text-sm text-muted-foreground">
-                            {new Date(inv.expiresAt).toLocaleDateString()}
-                          </td>
-                          <td className="px-5 py-4">
-                            <div className="flex items-center justify-end gap-1">
-                              <button
-                                type="button"
-                                onClick={() => setDeleteTarget({ type: 'invitation', id: inv.id })}
-                                className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                                title="Revoke invitation"
-                              >
-                                <Trash2 className="size-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </>
-          )}
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))}
 
           {/* Teams Tab */}
-          {activeTab === 'teams' && (
-            <>
-              {teams.length === 0 ? (
-                <div className="rounded-xl border border-border p-12 text-center">
-                  <Users className="mx-auto size-8 text-muted-foreground/50" />
-                  <p className="mt-3 text-muted-foreground">No teams created yet.</p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTeamError(null)
-                      setTeamName('')
-                      setShowTeamModal(true)
-                    }}
-                    className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-                  >
-                    <Plus className="size-4" />
-                    Create your first team
-                  </button>
-                </div>
-              ) : (
-                <div className="rounded-xl border border-border">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border">
-                        <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Team Name
-                        </th>
-                        <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Members
-                        </th>
-                        <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Created
-                        </th>
-                        <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Actions
-                        </th>
+          {activeTab === 'teams' &&
+            (teams.length === 0 ? (
+              <div className="rounded-xl border border-border p-12 text-center">
+                <Users className="mx-auto size-8 text-muted-foreground/50" />
+                <p className="mt-3 text-muted-foreground">No teams created yet.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTeamError(null)
+                    setTeamName('')
+                    setShowTeamModal(true)
+                  }}
+                  className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                >
+                  <Plus className="size-4" />
+                  Create your first team
+                </button>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-border">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Team Name
+                      </th>
+                      <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Members
+                      </th>
+                      <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Created
+                      </th>
+                      <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {teams.map((team, idx) => (
+                      <tr
+                        key={team.id}
+                        className={`transition-colors hover:bg-muted/30 ${idx !== teams.length - 1 ? 'border-b border-border' : ''}`}
+                      >
+                        <td className="px-5 py-4 font-medium">{team.name}</td>
+                        <td className="px-5 py-4 text-muted-foreground">
+                          {team.memberCount} member{team.memberCount !== 1 ? 's' : ''}
+                        </td>
+                        <td className="px-5 py-4 text-sm text-muted-foreground">
+                          {new Date(team.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              type="button"
+                              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                              title="Edit team"
+                            >
+                              <Pencil className="size-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDeleteTarget({ type: 'team', id: team.id })}
+                              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                              title="Delete team"
+                            >
+                              <Trash2 className="size-4" />
+                            </button>
+                          </div>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {teams.map((team, idx) => (
-                        <tr
-                          key={team.id}
-                          className={`transition-colors hover:bg-muted/30 ${idx !== teams.length - 1 ? 'border-b border-border' : ''}`}
-                        >
-                          <td className="px-5 py-4 font-medium">{team.name}</td>
-                          <td className="px-5 py-4 text-muted-foreground">
-                            {team.memberCount} member{team.memberCount !== 1 ? 's' : ''}
-                          </td>
-                          <td className="px-5 py-4 text-sm text-muted-foreground">
-                            {new Date(team.createdAt).toLocaleDateString()}
-                          </td>
-                          <td className="px-5 py-4">
-                            <div className="flex items-center justify-end gap-1">
-                              <button
-                                type="button"
-                                className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                                title="Edit team"
-                              >
-                                <Pencil className="size-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setDeleteTarget({ type: 'team', id: team.id })}
-                                className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                                title="Delete team"
-                              >
-                                <Trash2 className="size-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </>
-          )}
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))}
         </>
       )}
 
