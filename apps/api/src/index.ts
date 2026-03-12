@@ -7,7 +7,10 @@ import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { AppError } from './lib/errors.js'
 import { getRedis } from './lib/redis.js'
+import { createAuthMiddleware } from './middleware/auth.js'
+import { createTenantMiddleware } from './middleware/tenant.js'
 import { createAuthModule } from './modules/auth/index.js'
+import { createProvidersModule } from './modules/providers/index.js'
 
 const env = parseEnv()
 export const db = createDatabase(env.DATABASE_URL)
@@ -46,6 +49,14 @@ app.onError((err, c) => {
 app.get('/health', (c) => c.json({ status: 'ok' }))
 
 app.route('/api/auth', createAuthModule(auth))
+
+// Protected API routes
+const v1 = new Hono()
+v1.use('*', createAuthMiddleware(auth))
+v1.use('*', createTenantMiddleware(db))
+v1.route('/providers', createProvidersModule(db, env))
+
+app.route('/v1', v1)
 
 app.notFound((c) => c.json({ code: 'NOT_FOUND', message: 'Route not found' }, 404))
 
