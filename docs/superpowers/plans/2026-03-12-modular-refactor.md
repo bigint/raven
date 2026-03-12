@@ -425,10 +425,11 @@ git commit -m "feat: add Button, Spinner, Badge, Avatar components to @raven/ui"
 
 ---
 
-### Task 4: Build `@raven/ui` — Input, Switch, PageHeader
+### Task 4: Build `@raven/ui` — Input, Textarea, Switch, PageHeader
 
 **Files:**
 - Create: `packages/ui/src/components/input.tsx`
+- Create: `packages/ui/src/components/textarea.tsx`
 - Create: `packages/ui/src/components/switch.tsx`
 - Create: `packages/ui/src/components/page-header.tsx`
 - Modify: `packages/ui/src/index.ts`
@@ -477,7 +478,51 @@ export { Input };
 export type { InputProps };
 ```
 
-- [ ] **Step 2: Create Switch component using Base UI**
+- [ ] **Step 2: Create Textarea component**
+
+```tsx
+// packages/ui/src/components/textarea.tsx
+import { forwardRef, type TextareaHTMLAttributes } from "react";
+import { cn } from "../cn";
+
+interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+  label?: string;
+  error?: string | null;
+  description?: string;
+}
+
+const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
+  ({ className, label, error, description, id, ...props }, ref) => (
+    <div className="space-y-1.5">
+      {label && (
+        <label className="text-sm font-medium" htmlFor={id}>
+          {label}
+        </label>
+      )}
+      <textarea
+        className={cn(
+          "w-full rounded-[var(--radius-md)] border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring min-h-[80px] resize-y",
+          error && "border-destructive focus:ring-destructive",
+          className
+        )}
+        id={id}
+        ref={ref}
+        {...props}
+      />
+      {description && !error && (
+        <p className="text-xs text-muted-foreground">{description}</p>
+      )}
+      {error && <p className="text-xs text-destructive">{error}</p>}
+    </div>
+  )
+);
+Textarea.displayName = "Textarea";
+
+export { Textarea };
+export type { TextareaProps };
+```
+
+- [ ] **Step 3: Create Switch component**
 
 ```tsx
 // packages/ui/src/components/switch.tsx
@@ -555,25 +600,26 @@ export { PageHeader };
 export type { PageHeaderProps };
 ```
 
-- [ ] **Step 4: Update index exports**
+- [ ] **Step 5: Update index exports**
 
 Append to `packages/ui/src/index.ts`:
 ```tsx
 export { Input, type InputProps } from "./components/input";
+export { Textarea, type TextareaProps } from "./components/textarea";
 export { Switch, type SwitchProps } from "./components/switch";
 export { PageHeader, type PageHeaderProps } from "./components/page-header";
 ```
 
-- [ ] **Step 5: Type check**
+- [ ] **Step 6: Type check**
 
 Run: `cd packages/ui && pnpm typecheck`
 Expected: No errors.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
 git add packages/ui/
-git commit -m "feat: add Input, Switch, PageHeader components to @raven/ui"
+git commit -m "feat: add Input, Textarea, Switch, PageHeader components to @raven/ui"
 ```
 
 ---
@@ -1389,6 +1435,24 @@ git commit -m "feat: extract shared constants to @raven/types"
 
 ---
 
+### Task 10: Update STYLEGUIDE hook naming convention
+
+**Files:**
+- Modify: `STYLEGUIDE.md`
+
+- [ ] **Step 1: Update hook filename convention**
+
+In `STYLEGUIDE.md`, find the hook naming convention section (around line 174) and change `useProfile.ts` (camelCase) to `use-profile.ts` (kebab-case) to match the actual codebase convention (`use-event-stream.ts`). This must be done before Phase 1 agents start creating hook files.
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add STYLEGUIDE.md
+git commit -m "docs: update hook naming convention to kebab-case"
+```
+
+---
+
 ## Chunk 2: Phase 1 — Frontend Agent Tasks
 
 Phase 1 agents work in isolated git worktrees. Each agent owns specific files and follows the same pattern:
@@ -1399,7 +1463,7 @@ Phase 1 agents work in isolated git worktrees. Each agent owns specific files an
 5. Replace all raw `useState`/`useEffect` data fetching with TanStack Query
 6. Use `@raven/ui` components (`Button`, `Modal`, `DataTable`, `Badge`, `PageHeader`, etc.) instead of raw Tailwind
 
-### Task 10: Frontend Agent 1 — `team`, `keys`, `profile` pages
+### Task 11: Frontend Agent 1 — `team`, `keys`, `profile` pages
 
 **Agent prompt context:** This agent decomposes the three largest pages.
 
@@ -1446,7 +1510,7 @@ components/select.tsx                             # Delete
 
 ---
 
-### Task 11: Frontend Agent 2 — `providers`, `budgets`, `requests` pages
+### Task 12: Frontend Agent 2 — `providers`, `budgets`, `requests` pages
 
 **Files to create/modify:**
 ```
@@ -1469,11 +1533,11 @@ app/(dashboard)/requests/components/request-table.tsx    # Create
 app/(dashboard)/requests/components/request-filters.tsx  # Create
 ```
 
-**Instructions for agent:** Same conventions as Task 10. Read existing pages first. Use `@raven/ui` components, `queryOptions()` pattern, arrow functions, kebab-case files. The requests page has pagination — keep pagination state in the hook via query key params. Commit after each page.
+**Instructions for agent:** Same conventions as Task 11. Read existing pages first. Use `@raven/ui` components, `queryOptions()` pattern, arrow functions, kebab-case files. The requests page has pagination — keep pagination state in the hook via query key params. Commit after each page.
 
 ---
 
-### Task 12: Frontend Agent 3 — `overview`, `analytics`, `billing`, `settings` + layout
+### Task 13: Frontend Agent 3 — `overview`, `analytics`, `billing`, `settings` + layout
 
 **Files to create/modify:**
 ```
@@ -1510,13 +1574,13 @@ app/(dashboard)/components/user-menu.tsx                  # Create
 app/(dashboard)/hooks/use-orgs.ts                        # Create
 ```
 
-**Instructions for agent:** Same conventions as Tasks 10-11. The layout decomposition is critical — extract `OrgSwitcher`, `UserMenu`, and `Sidebar` into their own components. The `useOrgs` hook uses TanStack Query for org fetching. Use `@raven/ui` components. Commit after each page/component group.
+**Instructions for agent:** Same conventions as Tasks 11-12. The layout decomposition is critical — extract `OrgSwitcher`, `UserMenu`, and `Sidebar` into their own components. The `useOrgs` hook uses TanStack Query for org fetching. Use `@raven/ui` components. Commit after each page/component group.
 
 ---
 
 ## Chunk 3: Phase 1 — Backend & Design Agent Tasks
 
-### Task 13: Backend Agent 1 — Proxy handler decomposition + middleware
+### Task 14: Backend Agent 1 — Proxy handler decomposition + middleware
 
 **Files to create/modify:**
 ```
@@ -1555,7 +1619,7 @@ middleware/tenant.ts                # Modify: fix type safety
 
 ---
 
-### Task 14: Backend Agent 2 — Zod schema extraction + response wrapping
+### Task 15: Backend Agent 2 — Zod schema extraction + response wrapping
 
 **Files to create/modify:**
 ```
@@ -1580,9 +1644,11 @@ modules/budgets/create.ts           # Modify: use schema
 modules/budgets/update.ts           # Modify: use schema
 modules/guardrails/create.ts        # Modify: use schema
 modules/guardrails/update.ts        # Modify: use schema
-modules/teams/create.ts             # Modify: use schema
+modules/teams/teams.ts              # Modify: use schema (contains team CRUD)
+modules/teams/invitations.ts        # Modify: use schema (contains invitation CRUD)
+modules/teams/members.ts            # Modify: use schema (contains member management)
 modules/settings/update.ts          # Modify: use schema
-modules/user/update.ts              # Modify: use schema
+modules/user/profile.ts             # Modify: use schema (contains profile update)
 ```
 
 **Instructions for agent:**
@@ -1602,7 +1668,7 @@ modules/user/update.ts              # Modify: use schema
 
 ---
 
-### Task 15: Designer Agent — Motion system, visual polish, dark mode audit
+### Task 16: Designer Agent — Motion system, visual polish, dark mode audit
 
 **Files to create/modify:**
 ```
@@ -1610,33 +1676,36 @@ modules/user/update.ts              # Modify: use schema
 packages/ui/src/components/motion.tsx     # Create: reusable motion wrappers
 
 # Polish existing components (styling only)
-packages/ui/src/components/modal.tsx      # Modify: add Framer Motion enter/exit
 packages/ui/src/components/data-table.tsx # Modify: add row stagger animation
-packages/ui/src/components/button.tsx     # Modify: add press animation
+packages/ui/src/components/button.tsx     # Modify: refine press animation
 packages/ui/src/components/empty-state.tsx # Modify: add fade-in animation
 
 # CSS refinements
 apps/web/src/app/globals.css             # Modify: add animation keyframes, skeleton shimmer
+
+# Auth page dark mode fixes
+apps/web/src/app/(auth)/sign-in/page.tsx  # Modify: replace hardcoded bg-white with tokens
+apps/web/src/app/(auth)/sign-up/page.tsx  # Modify: replace hardcoded bg-white with tokens
 ```
 
 **Instructions for agent:**
 - Create `motion.tsx` with reusable wrappers:
   - `FadeIn` — simple opacity animation for mounting
   - `StaggerList` — children animate in with stagger delay
-  - `ScaleIn` — scale from 95% + fade (for modals)
-- Update `Modal` to wrap content in Framer Motion's `AnimatePresence` + `motion.div`
+- Modal already uses Framer Motion (built in Phase 0 with Base UI Dialog + AnimatePresence) — do NOT modify modal structure
 - Add skeleton shimmer keyframe to `globals.css`
 - Add subtle hover lift (`translateY(-1px)`) to `DataTable` rows via CSS
 - Audit all `@raven/ui` components for hardcoded colors — replace with CSS custom property references
-- Do NOT modify page files (owned by frontend agents)
+- Audit auth pages (`sign-in`, `sign-up`) for hardcoded `bg-white` / color values — replace with design tokens
+- Do NOT modify dashboard page files (owned by frontend agents)
 - Do NOT add structural changes to components — styling only
 - Commit after each component group
 
 ---
 
-### Task 16: QA Agent — Type checking + lint + integration review
+### Task 17: QA Agent — Type checking + lint + integration review
 
-**Runs after Tasks 10-15 are complete and merged.**
+**Runs after Tasks 11-16 are complete and merged.**
 
 - [ ] **Step 1: Run full type check**
 
@@ -1671,9 +1740,9 @@ git commit -m "fix: resolve type errors and lint issues from refactor"
 
 ---
 
-### Task 17: Security Agent — Audit
+### Task 18: Security Agent — Audit
 
-**Runs after Tasks 10-15 are complete and merged.**
+**Runs after Tasks 11-16 are complete and merged.**
 
 - [ ] **Step 1: Audit crypto**
 
@@ -1711,7 +1780,7 @@ Create a security report at `docs/superpowers/security-audit-2026-03-12.md` with
 
 ## Chunk 4: Phase 2 — Integration
 
-### Task 18: Merge all worktree branches
+### Task 19: Merge all worktree branches
 
 - [ ] **Step 1: List all worktree branches**
 
@@ -1734,6 +1803,8 @@ git merge <branch-name> --no-edit
 
 If conflicts arise, resolve by keeping the destination branch's structure and incorporating the incoming changes.
 
+**Important:** Backend Agent 2 wraps all responses in `{ data: T }`. After merging Backend Agent 2's branch, update `apps/web/src/lib/api.ts` `handleResponse` to unwrap: `return body.data as T` instead of `return body as T`. Do this before merging any frontend branches.
+
 - [ ] **Step 3: Run full verification after all merges**
 
 ```bash
@@ -1751,17 +1822,13 @@ git commit -m "feat: integrate modular refactor from all agent branches"
 
 ---
 
-### Task 19: Final cleanup
+### Task 20: Final cleanup
 
 - [ ] **Step 1: Delete old `@/components/select.tsx` if still present**
 
 Verify it was removed by Frontend Agent 1. If not, delete it.
 
-- [ ] **Step 2: Update STYLEGUIDE.md hook naming convention**
-
-Change hook filename convention from `useProfile.ts` to `use-profile.ts` to match codebase reality.
-
-- [ ] **Step 3: Run dev server and smoke test**
+- [ ] **Step 2: Run dev server and smoke test**
 
 Run: `pnpm dev`
 Manually verify:
@@ -1772,7 +1839,7 @@ Manually verify:
 - Forms submit and show validation errors
 - Tables show loading skeletons, empty states
 
-- [ ] **Step 4: Final commit**
+- [ ] **Step 3: Final commit**
 
 ```bash
 git add -A
