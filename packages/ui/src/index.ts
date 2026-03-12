@@ -7,3 +7,6 @@ export { Input, type InputProps } from "./components/input";
 export { Textarea, type TextareaProps } from "./components/textarea";
 export { Switch, type SwitchProps } from "./components/switch";
 export { PageHeader, type PageHeaderProps } from "./components/page-header";
+export { Modal, type ModalProps } from "./components/modal";
+export { ConfirmDialog, type ConfirmDialogProps } from "./components/confirm-dialog";
+export { EmptyState, type EmptyStateProps } from "./components/empty-state";
