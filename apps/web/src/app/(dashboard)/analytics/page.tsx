@@ -1,11 +1,13 @@
 "use client";
 
+import { CacheStats } from "./components/cache-stats";
 import { TokenBreakdown } from "./components/token-breakdown";
 import { UsageCharts } from "./components/usage-charts";
 import { useAnalytics } from "./hooks/use-analytics";
 
 const AnalyticsPage = () => {
   const {
+    cache,
     stats,
     usage,
     isLoading,
@@ -30,6 +32,8 @@ const AnalyticsPage = () => {
         onDateRangeChange={setDateRange}
         stats={stats}
       />
+
+      <CacheStats cache={cache} loading={isLoading} />
 
       <TokenBreakdown loading={isLoading} usage={usage} />
     </div>

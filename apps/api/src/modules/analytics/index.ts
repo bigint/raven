@@ -1,5 +1,6 @@
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
+import { getCache } from "./cache";
 import { getRequests } from "./requests";
 import { getRequestsLive } from "./requests-live";
 import { getSessionById, getSessions } from "./sessions";
@@ -11,6 +12,7 @@ export const createAnalyticsModule = (db: Database) => {
 
   app.get("/stats", getStats(db));
   app.get("/usage", getUsage(db));
+  app.get("/cache", getCache(db));
   app.get("/requests/live", getRequestsLive(db));
   app.get("/requests", getRequests(db));
   app.get("/sessions", getSessions(db));
