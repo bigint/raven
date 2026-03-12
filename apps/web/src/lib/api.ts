@@ -20,7 +20,14 @@ const handleResponse = async <T>(res: Response): Promise<T> => {
     throw new Error(message);
   }
   const body = await res.json();
-  return (body?.data !== undefined ? body.data : body) as T;
+  // Unwrap { data: T } envelope only when data is the sole key
+  if (
+    body?.data !== undefined &&
+    Object.keys(body).length === 1
+  ) {
+    return body.data as T;
+  }
+  return body as T;
 };
 
 export const api = {
