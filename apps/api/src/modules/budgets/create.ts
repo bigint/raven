@@ -3,6 +3,7 @@ import { budgets } from '@raven/db'
 import type { Context } from 'hono'
 import { z } from 'zod'
 import { ValidationError } from '../../lib/errors.js'
+import { publishEvent } from '../../lib/events.js'
 
 const createBudgetSchema = z.object({
   entityType: z.enum(['organization', 'team', 'key']),
@@ -37,5 +38,6 @@ export const createBudget = (db: Database) => async (c: Context) => {
     })
     .returning()
 
+  void publishEvent(orgId, 'budget.created', created)
   return c.json(created, 201)
 }

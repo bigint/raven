@@ -1,5 +1,6 @@
 'use client'
 
+import { useEventStream } from '@/hooks/use-event-stream'
 import { api } from '@/lib/api'
 import { Check, CreditCard, Zap } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -79,6 +80,12 @@ export default function BillingPage() {
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  useEventStream({
+    events: ['subscription.updated'],
+    onEvent: () => fetchData(),
+    enabled: !loading,
+  })
 
   const handlePlanAction = async (planId: string) => {
     try {

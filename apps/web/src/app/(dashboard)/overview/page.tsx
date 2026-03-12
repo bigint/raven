@@ -98,6 +98,23 @@ export default function OverviewPage() {
     fetchData()
   }, [fetchData])
 
+  useEventStream({
+    events: ['request.created'],
+    onEvent: (data) => {
+      const req = data as RecentRequest
+      setRecentRequests((prev) => [req, ...prev].slice(0, 5))
+      setStats((prev) => {
+        if (!prev) return prev
+        return {
+          ...prev,
+          totalRequests: prev.totalRequests + 1,
+          totalCost: (Number(prev.totalCost) + Number(req.cost)).toString(),
+        }
+      })
+    },
+    enabled: !loading,
+  })
+
   const totalRequests = stats?.totalRequests ?? 0
   const totalCost = Number(stats?.totalCost ?? 0)
   const avgLatency = Number(stats?.avgLatencyMs ?? 0)

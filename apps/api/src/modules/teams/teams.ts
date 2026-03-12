@@ -125,6 +125,7 @@ export const deleteTeam = (db: Database) => async (c: Context) => {
 
   await db.delete(teams).where(and(eq(teams.id, id), eq(teams.organizationId, orgId)))
 
+  void publishEvent(orgId, 'team.deleted', { id })
   return c.json({ success: true })
 }
 
@@ -187,6 +188,7 @@ export const addTeamMember = (db: Database) => async (c: Context) => {
     })
     .returning()
 
+  void publishEvent(orgId, 'team_member.added', { teamId: id, userId: result.data.userId })
   return c.json(created, 201)
 }
 
@@ -224,5 +226,6 @@ export const removeTeamMember = (db: Database) => async (c: Context) => {
     .delete(teamMembers)
     .where(and(eq(teamMembers.teamId, id), eq(teamMembers.userId, userId)))
 
+  void publishEvent(orgId, 'team_member.removed', { teamId: id, userId })
   return c.json({ success: true })
 }

@@ -86,6 +86,33 @@ export default function AnalyticsPage() {
     fetchData(dateRange)
   }, [fetchData, dateRange])
 
+  useEventStream({
+    events: ['request.created'],
+    onEvent: (data) => {
+      const req = data as { provider: string; model: string; cost: string }
+      setStats((prev) => {
+        if (!prev) return prev
+        return {
+          ...prev,
+          totalRequests: prev.totalRequests + 1,
+          totalCost: (Number(prev.totalCost) + Number(req.cost)).toString(),
+        }
+      })
+      setUsage((prev) =>
+        prev.map((row) =>
+          row.provider === req.provider && row.model === req.model
+            ? {
+                ...row,
+                totalRequests: row.totalRequests + 1,
+                totalCost: (Number(row.totalCost) + Number(req.cost)).toString(),
+              }
+            : row,
+        ),
+      )
+    },
+    enabled: !loading,
+  })
+
   const statCards = [
     {
       label: 'Total Requests',

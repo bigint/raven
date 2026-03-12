@@ -1,6 +1,7 @@
 'use client'
 
 import { Select } from '@/components/select'
+import { useEventStream } from '@/hooks/use-event-stream'
 import { API_URL, api, getOrgId } from '@/lib/api'
 import { ChevronLeft, ChevronRight, Radio } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -113,6 +114,8 @@ export default function RequestsPage() {
   const [error, setError] = useState<string | null>(null)
   const [isLive, setIsLive] = useState(false)
 
+  const [hasNewData, setHasNewData] = useState(false)
+
   const [provider, setProvider] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [dateRange, setDateRange] = useState<DateRange>('24h')
@@ -160,6 +163,15 @@ export default function RequestsPage() {
     },
     [],
   )
+
+  useEventStream({
+    events: ['request.created'],
+    onEvent: () => setHasNewData(true),
+    enabled: !isLive,
+  })
+
+  // Reset new data indicator when filters change
+  useEffect(() => setHasNewData(false), [page, provider, statusFilter, dateRange])
 
   // Standard polling mode
   useEffect(() => {

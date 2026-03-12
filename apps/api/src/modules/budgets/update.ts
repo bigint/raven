@@ -4,6 +4,7 @@ import { and, eq } from 'drizzle-orm'
 import type { Context } from 'hono'
 import { z } from 'zod'
 import { NotFoundError, ValidationError } from '../../lib/errors.js'
+import { publishEvent } from '../../lib/events.js'
 
 const updateBudgetSchema = z.object({
   limitAmount: z.number().positive().optional(),
@@ -54,5 +55,6 @@ export const updateBudget = (db: Database) => async (c: Context) => {
     .where(and(eq(budgets.id, id), eq(budgets.organizationId, orgId)))
     .returning()
 
+  void publishEvent(orgId, 'budget.updated', updated)
   return c.json(updated)
 }

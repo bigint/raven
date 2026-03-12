@@ -1,6 +1,7 @@
 'use client'
 
 import { Select } from '@/components/select'
+import { useEventStream } from '@/hooks/use-event-stream'
 import { api } from '@/lib/api'
 import { Pencil, Plus, Trash2, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
@@ -81,6 +82,12 @@ export default function BudgetsPage() {
   useEffect(() => {
     fetchBudgets()
   }, [fetchBudgets])
+
+  useEventStream({
+    events: ['budget.created', 'budget.updated', 'budget.deleted'],
+    onEvent: () => fetchBudgets(),
+    enabled: !loading,
+  })
 
   const openAdd = () => {
     setForm(DEFAULT_FORM)

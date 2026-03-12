@@ -1,6 +1,7 @@
 'use client'
 
 import { Select } from '@/components/select'
+import { useEventStream } from '@/hooks/use-event-stream'
 import { api } from '@/lib/api'
 import { Mail, Pencil, Plus, Trash2, Users, X } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -107,6 +108,22 @@ export default function TeamPage() {
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  useEventStream({
+    events: [
+      'member.removed',
+      'member.role_changed',
+      'invitation.created',
+      'invitation.revoked',
+      'team.created',
+      'team.updated',
+      'team.deleted',
+      'team_member.added',
+      'team_member.removed',
+    ],
+    onEvent: () => fetchData(),
+    enabled: !loading,
+  })
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault()

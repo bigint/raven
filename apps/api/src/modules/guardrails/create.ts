@@ -3,6 +3,7 @@ import { guardrailRules } from '@raven/db'
 import type { Context } from 'hono'
 import { z } from 'zod'
 import { ValidationError } from '../../lib/errors.js'
+import { publishEvent } from '../../lib/events.js'
 
 const createGuardrailSchema = z.object({
   name: z.string().min(1),
@@ -39,5 +40,6 @@ export const createGuardrail = (db: Database) => async (c: Context) => {
     })
     .returning()
 
+  void publishEvent(orgId, 'guardrail.created', created)
   return c.json(created, 201)
 }

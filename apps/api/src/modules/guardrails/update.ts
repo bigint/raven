@@ -4,6 +4,7 @@ import { and, eq } from 'drizzle-orm'
 import type { Context } from 'hono'
 import { z } from 'zod'
 import { NotFoundError, ValidationError } from '../../lib/errors.js'
+import { publishEvent } from '../../lib/events.js'
 
 const updateGuardrailSchema = z.object({
   name: z.string().min(1).optional(),
@@ -69,5 +70,6 @@ export const updateGuardrail = (db: Database) => async (c: Context) => {
     .where(and(eq(guardrailRules.id, id), eq(guardrailRules.organizationId, orgId)))
     .returning()
 
+  void publishEvent(orgId, 'guardrail.updated', updated)
   return c.json(updated)
 }

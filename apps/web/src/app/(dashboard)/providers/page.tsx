@@ -1,6 +1,7 @@
 'use client'
 
 import { Select } from '@/components/select'
+import { useEventStream } from '@/hooks/use-event-stream'
 import { api } from '@/lib/api'
 import { Check, Eye, EyeOff, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
@@ -77,6 +78,12 @@ export default function ProvidersPage() {
   useEffect(() => {
     fetchProviders()
   }, [fetchProviders])
+
+  useEventStream({
+    events: ['provider.created', 'provider.updated', 'provider.deleted'],
+    onEvent: () => fetchProviders(),
+    enabled: !loading,
+  })
 
   const openAdd = () => {
     setForm(DEFAULT_FORM)

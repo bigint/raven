@@ -1,5 +1,6 @@
 'use client'
 
+import { useEventStream } from '@/hooks/use-event-stream'
 import { api } from '@/lib/api'
 import { AlertTriangle, Building2, CreditCard, Settings, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -61,6 +62,12 @@ export default function SettingsPage() {
   useEffect(() => {
     fetchSettings()
   }, [fetchSettings])
+
+  useEventStream({
+    events: ['settings.updated'],
+    onEvent: () => fetchSettings(),
+    enabled: !loading,
+  })
 
   const isAdmin = settings?.userRole === 'owner' || settings?.userRole === 'admin'
   const isOwner = settings?.userRole === 'owner'

@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm'
 import type { Context } from 'hono'
 import { z } from 'zod'
 import { ForbiddenError, NotFoundError, ValidationError } from '../../lib/errors.js'
+import { publishEvent } from '../../lib/events.js'
 
 const updateOrgSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -59,7 +60,7 @@ export const updateSettings = (db: Database) => async (c: Context) => {
     .where(eq(subscriptions.organizationId, orgId))
     .limit(1)
 
-  return c.json({
+  const settings = {
     id: updated.id,
     name: updated.name,
     slug: updated.slug,
@@ -67,5 +68,7 @@ export const updateSettings = (db: Database) => async (c: Context) => {
     subscriptionStatus: sub?.status ?? 'active',
     userRole: orgRole,
     createdAt: updated.createdAt,
-  })
+  }
+  void publishEvent(orgId, 'settings.updated', settings)
+  return c.json(settings)
 }

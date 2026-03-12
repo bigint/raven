@@ -3,6 +3,7 @@ import { guardrailRules } from '@raven/db'
 import { and, eq } from 'drizzle-orm'
 import type { Context } from 'hono'
 import { NotFoundError } from '../../lib/errors.js'
+import { publishEvent } from '../../lib/events.js'
 
 export const deleteGuardrail = (db: Database) => async (c: Context) => {
   const orgId = c.get('orgId' as never) as string
@@ -22,5 +23,6 @@ export const deleteGuardrail = (db: Database) => async (c: Context) => {
     .delete(guardrailRules)
     .where(and(eq(guardrailRules.id, id), eq(guardrailRules.organizationId, orgId)))
 
+  void publishEvent(orgId, 'guardrail.deleted', { id })
   return c.json({ success: true })
 }
