@@ -3,6 +3,7 @@ import { auditLogs } from "@raven/db";
 import { and, desc, eq, gte, lte } from "drizzle-orm";
 import type { Context } from "hono";
 import { z } from "zod";
+import { checkFeatureGate } from "@/modules/proxy/plan-gate";
 
 const listQuerySchema = z.object({
   action: z.string().optional(),
@@ -16,6 +17,9 @@ const listQuerySchema = z.object({
 
 export const listAuditLogs = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
+
+  await checkFeatureGate(db, orgId, "hasAuditLogs");
+
   const query = listQuerySchema.parse(c.req.query());
 
   const conditions = [eq(auditLogs.organizationId, orgId)];

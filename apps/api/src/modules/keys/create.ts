@@ -1,9 +1,11 @@
 import type { Database } from "@raven/db";
 import { virtualKeys } from "@raven/db";
+import { count, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { created } from "@/lib/response";
+import { checkResourceLimit } from "@/modules/proxy/plan-gate";
 import { generateKey, safeKey } from "./helpers";
 import { createKeySchema } from "./schema";
 
@@ -20,6 +22,12 @@ export const createKey = (db: Database) => async (c: Context) => {
 
   const { name, environment, rateLimitRpm, rateLimitRpd, expiresAt } =
     result.data;
+
+  const [existing] = await db
+    .select({ value: count() })
+    .from(virtualKeys)
+    .where(eq(virtualKeys.organizationId, orgId));
+  await checkResourceLimit(db, orgId, "maxVirtualKeys", existing?.value ?? 0);
 
   const { key, hash, prefix } = generateKey(environment);
 
