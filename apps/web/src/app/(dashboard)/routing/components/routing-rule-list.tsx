@@ -58,7 +58,7 @@ const columns: Column<RoutingRule>[] = [
     header: "Enabled",
     key: "isEnabled",
     render: (rule) => (
-      <Badge variant={rule.isEnabled ? "default" : "neutral"}>
+      <Badge variant={rule.isEnabled ? "success" : "neutral"}>
         {rule.isEnabled ? "Yes" : "No"}
       </Badge>
     )

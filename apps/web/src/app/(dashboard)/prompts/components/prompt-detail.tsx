@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, Button, Input, Modal } from "@raven/ui";
+import { Badge, Button, Input, Modal, Textarea } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState } from "react";
@@ -77,7 +77,7 @@ const PromptDetail = ({ prompt, open, onClose }: PromptDetailProps) => {
           <Button
             onClick={() => setShowNewVersion((v) => !v)}
             size="sm"
-            variant={showNewVersion ? "secondary" : "default"}
+            variant={showNewVersion ? "secondary" : "primary"}
           >
             <Plus className="size-4" />
             New Version
@@ -94,25 +94,16 @@ const PromptDetail = ({ prompt, open, onClose }: PromptDetailProps) => {
                 {formError}
               </div>
             )}
-            <div className="space-y-1.5">
-              <label
-                className="text-sm font-medium"
-                htmlFor="new-version-content"
-              >
-                Content
-              </label>
-              <textarea
-                className="w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                id="new-version-content"
-                onChange={(e) => setNewContent(e.target.value)}
-                placeholder="Enter prompt template..."
-                rows={6}
-                value={newContent}
-              />
-              <p className="text-xs text-muted-foreground">
-                Use {"{{variable}}"} for template variables
-              </p>
-            </div>
+            <Textarea
+              className="font-mono"
+              description={"Use {{variable}} for template variables"}
+              id="new-version-content"
+              label="Content"
+              onChange={(e) => setNewContent(e.target.value)}
+              placeholder="Enter prompt template..."
+              rows={6}
+              value={newContent}
+            />
             <Input
               id="new-version-model"
               label="Model (optional)"

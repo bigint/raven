@@ -198,7 +198,6 @@ const RoutingRuleForm = ({
             <div className="pt-1.5">
               <Switch
                 checked={form.isEnabled}
-                id="is-enabled"
                 onCheckedChange={(v) => update("isEnabled", v)}
               />
             </div>

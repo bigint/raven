@@ -37,13 +37,14 @@ const columns: Column<Webhook>[] = [
     className: "font-mono text-muted-foreground",
     header: "Secret",
     key: "secret",
-    render: (webhook) => webhook.secret
+    render: (webhook) =>
+      webhook.secret ? `${"*".repeat(8)}${webhook.secret.slice(-4)}` : "—"
   },
   {
     header: "Enabled",
     key: "isEnabled",
     render: (webhook) => (
-      <Badge variant={webhook.isEnabled ? "default" : "neutral"}>
+      <Badge variant={webhook.isEnabled ? "success" : "neutral"}>
         {webhook.isEnabled ? "Enabled" : "Disabled"}
       </Badge>
     )

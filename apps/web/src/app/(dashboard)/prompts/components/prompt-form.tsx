@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input, Modal } from "@raven/ui";
+import { Button, Input, Modal, Textarea } from "@raven/ui";
 import { useState } from "react";
 import type { Prompt } from "../hooks/use-prompts";
 import { useCreatePrompt, useUpdatePrompt } from "../hooks/use-prompts";
@@ -103,22 +103,16 @@ const PromptForm = ({ open, onClose, editingPrompt }: PromptFormProps) => {
 
         {!isEdit && (
           <>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium" htmlFor="prompt-content">
-                Template Content
-              </label>
-              <textarea
-                className="w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                id="prompt-content"
-                onChange={(e) => update("content", e.target.value)}
-                placeholder="Enter your prompt template..."
-                rows={8}
-                value={form.content}
-              />
-              <p className="text-xs text-muted-foreground">
-                Use {"{{variable}}"} for template variables
-              </p>
-            </div>
+            <Textarea
+              className="font-mono"
+              description={"Use {{variable}} for template variables"}
+              id="prompt-content"
+              label="Template Content"
+              onChange={(e) => update("content", e.target.value)}
+              placeholder="Enter your prompt template..."
+              rows={8}
+              value={form.content}
+            />
 
             <Input
               id="prompt-model"
