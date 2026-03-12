@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "better-auth": "^1.2.0",
+    "@raven/config": "workspace:*",
     "@raven/db": "workspace:*"
   },
   "devDependencies": {
