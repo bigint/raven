@@ -41,8 +41,8 @@ export default function HomePage() {
         </h1>
 
         <p className="mt-6 text-lg text-muted-foreground text-center max-w-xl leading-relaxed">
-          Route, monitor, and manage API calls across OpenAI, Anthropic, Google,
-          and more. Built for teams that need control and visibility.
+          Route, monitor, and manage API calls across OpenAI, Anthropic, Google, and more. Built for
+          teams that need control and visibility.
         </p>
 
         <div className="flex items-center gap-4 mt-10">

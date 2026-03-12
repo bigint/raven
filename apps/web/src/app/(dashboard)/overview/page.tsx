@@ -37,9 +37,7 @@ export default function OverviewPage() {
       </div>
 
       <div className="mt-8 rounded-xl border border-border p-8 text-center">
-        <p className="text-muted-foreground">
-          No activity yet. Add a provider to get started.
-        </p>
+        <p className="text-muted-foreground">No activity yet. Add a provider to get started.</p>
       </div>
     </div>
   )
