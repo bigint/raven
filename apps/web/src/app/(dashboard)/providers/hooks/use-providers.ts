@@ -1,9 +1,12 @@
+import { PROVIDER_LABELS, PROVIDER_OPTIONS } from "@raven/types";
 import {
   queryOptions,
   useMutation,
   useQueryClient
 } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+
+export { PROVIDER_LABELS, PROVIDER_OPTIONS };
 
 export interface Provider {
   id: string;
@@ -14,24 +17,6 @@ export interface Provider {
   createdAt: string;
   updatedAt: string;
 }
-
-export const PROVIDER_OPTIONS = [
-  { label: "OpenAI", value: "openai" },
-  { label: "Anthropic", value: "anthropic" },
-  { label: "Google", value: "google" },
-  { label: "Azure", value: "azure" },
-  { label: "Cohere", value: "cohere" },
-  { label: "Mistral", value: "mistral" }
-];
-
-export const PROVIDER_LABELS: Record<string, string> = {
-  anthropic: "Anthropic",
-  azure: "Azure",
-  cohere: "Cohere",
-  google: "Google",
-  mistral: "Mistral",
-  openai: "OpenAI"
-};
 
 export const providersQueryOptions = () =>
   queryOptions({

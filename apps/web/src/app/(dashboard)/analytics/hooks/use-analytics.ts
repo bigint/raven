@@ -23,6 +23,21 @@ interface UsageRow {
   avgLatencyMs: string;
 }
 
+interface CacheDailyRow {
+  date: string;
+  hits: number;
+  misses: number;
+  total: number;
+}
+
+interface CacheStats {
+  cacheHits: number;
+  cacheMisses: number;
+  daily: CacheDailyRow[];
+  hitRate: string;
+  totalRequests: number;
+}
+
 type DateRange = "7d" | "30d" | "90d";
 
 const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
@@ -56,6 +71,13 @@ export const analyticsUsageQueryOptions = (range: DateRange) =>
     queryKey: ["analytics", "usage", range]
   });
 
+export const analyticsCacheQueryOptions = (range: DateRange) =>
+  queryOptions({
+    queryFn: () =>
+      api.get<CacheStats>(`/v1/analytics/cache?from=${rangeToFrom(range)}`),
+    queryKey: ["analytics", "cache", range]
+  });
+
 export const useAnalytics = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -73,9 +95,15 @@ export const useAnalytics = () => {
 
   const statsQuery = useQuery(analyticsStatsQueryOptions(dateRange));
   const usageQuery = useQuery(analyticsUsageQueryOptions(dateRange));
+  const cacheQuery = useQuery(analyticsCacheQueryOptions(dateRange));
 
-  const isLoading = statsQuery.isPending || usageQuery.isPending;
-  const error = statsQuery.error?.message ?? usageQuery.error?.message ?? null;
+  const isLoading =
+    statsQuery.isPending || usageQuery.isPending || cacheQuery.isPending;
+  const error =
+    statsQuery.error?.message ??
+    usageQuery.error?.message ??
+    cacheQuery.error?.message ??
+    null;
 
   useEventStream({
     enabled: !isLoading,
@@ -112,6 +140,7 @@ export const useAnalytics = () => {
   });
 
   return {
+    cache: cacheQuery.data ?? null,
     dateRange,
     dateRangeOptions: DATE_RANGE_OPTIONS,
     error,
@@ -122,4 +151,4 @@ export const useAnalytics = () => {
   };
 };
 
-export type { DateRange, Stats, UsageRow };
+export type { CacheDailyRow, CacheStats, DateRange, Stats, UsageRow };

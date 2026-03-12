@@ -1,11 +1,3 @@
-import type { Provider } from "./providers";
-
-export const PROVIDER_LABELS: Record<Provider, string> = {
-  anthropic: "Anthropic",
-  google: "Google AI",
-  openai: "OpenAI"
-};
-
 export const ROLE_OPTIONS = [
   { label: "Member", value: "member" },
   { label: "Admin", value: "admin" },

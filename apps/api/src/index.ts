@@ -21,13 +21,14 @@ import {
   createBillingWebhookModule
 } from "./modules/billing/index";
 import { createBudgetsModule } from "./modules/budgets/index";
+import { createCacheModule } from "./modules/cache/index";
 import { createEventsModule } from "./modules/events/index";
 import { createGuardrailsModule } from "./modules/guardrails/index";
 import { createKeysModule } from "./modules/keys/index";
 import { createPromptsModule } from "./modules/prompts/index";
 import { createProvidersModule } from "./modules/providers/index";
-import { createRoutingRulesModule } from "./modules/routing-rules/index";
 import { createProxyModule } from "./modules/proxy/index";
+import { createRoutingRulesModule } from "./modules/routing-rules/index";
 import { createSettingsModule } from "./modules/settings/index";
 import { createTeamsModule } from "./modules/teams/index";
 import { createUserModule } from "./modules/user/index";
@@ -85,7 +86,7 @@ app.route("/api/auth", createAuthModule(auth));
 app.route("/v1/proxy", createProxyModule(db, redis, env));
 
 // Billing webhooks (no auth)
-app.route("/webhooks/billing", createBillingWebhookModule(db));
+app.route("/webhooks/billing", createBillingWebhookModule(db, env));
 
 // User-level routes (session auth, no tenant)
 const userRoutes = new Hono();
@@ -101,6 +102,7 @@ v1.route("/providers", createProvidersModule(db, env));
 v1.route("/keys", createKeysModule(db));
 v1.route("/prompts", createPromptsModule(db));
 v1.route("/budgets", createBudgetsModule(db));
+v1.route("/cache", createCacheModule(db, redis));
 v1.route("/guardrails", createGuardrailsModule(db));
 v1.route("/analytics", createAnalyticsModule(db));
 v1.route("/teams", createTeamsModule(db));

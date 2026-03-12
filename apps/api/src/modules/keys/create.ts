@@ -2,28 +2,19 @@ import type { Database } from "@raven/db";
 import { virtualKeys } from "@raven/db";
 import { count, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { ValidationError } from "@/lib/errors";
+import type { z } from "zod";
 import { publishEvent } from "@/lib/events";
 import { created } from "@/lib/response";
 import { logAudit } from "@/modules/audit-logs/index";
 import { checkResourceLimit } from "@/modules/proxy/plan-gate";
 import { generateKey, safeKey } from "./helpers";
-import { createKeySchema } from "./schema";
+import type { createKeySchema } from "./schema";
 
 export const createKey = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
   const user = c.get("user" as never) as { id: string };
-  const body = await c.req.json();
-  const result = createKeySchema.safeParse(body);
-
-  if (!result.success) {
-    throw new ValidationError("Invalid request body", {
-      errors: result.error.flatten().fieldErrors
-    });
-  }
-
   const { name, environment, rateLimitRpm, rateLimitRpd, expiresAt } =
-    result.data;
+    c.req.valid("json" as never) as z.infer<typeof createKeySchema>;
 
   const [existing] = await db
     .select({ value: count() })

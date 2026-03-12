@@ -4,6 +4,8 @@ import type { ProviderAdapter } from "./registry";
 const config = PROVIDERS.anthropic!;
 
 const PRICING: Record<string, { input: number; output: number }> = {
+  "claude-haiku-3.5": { input: 0.8, output: 4 },
+  "claude-opus-4-20250514": { input: 15, output: 75 },
   "claude-sonnet-4-20250514": { input: 3, output: 15 }
 };
 

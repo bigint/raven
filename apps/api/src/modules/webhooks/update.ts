@@ -2,24 +2,20 @@ import type { Database } from "@raven/db";
 import { webhooks } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { NotFoundError, ValidationError } from "@/lib/errors";
+import type { z } from "zod";
+import { NotFoundError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
 import { logAudit } from "@/modules/audit-logs/index";
-import { updateWebhookSchema } from "./schema";
+import type { updateWebhookSchema } from "./schema";
 
 export const updateWebhook = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
   const user = c.get("user" as never) as { id: string };
   const id = c.req.param("id") as string;
-  const body = await c.req.json();
-  const result = updateWebhookSchema.safeParse(body);
-
-  if (!result.success) {
-    throw new ValidationError("Invalid request body", {
-      errors: result.error.flatten().fieldErrors
-    });
-  }
+  const { url, events, isEnabled } = c.req.valid("json" as never) as z.infer<
+    typeof updateWebhookSchema
+  >;
 
   const [existing] = await db
     .select({ id: webhooks.id })
@@ -31,7 +27,6 @@ export const updateWebhook = (db: Database) => async (c: Context) => {
     throw new NotFoundError("Webhook not found");
   }
 
-  const { url, events, isEnabled } = result.data;
   const updates: Partial<typeof webhooks.$inferInsert> = {};
 
   if (url !== undefined) {

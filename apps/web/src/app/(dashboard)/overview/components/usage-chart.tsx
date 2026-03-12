@@ -1,17 +1,9 @@
 "use client";
 
+import { PROVIDER_LABELS } from "@raven/types";
 import { ArrowRight, Network, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import type { UsageRow } from "../hooks/use-overview";
-
-const PROVIDER_LABELS: Record<string, string> = {
-  anthropic: "Anthropic",
-  azure: "Azure",
-  cohere: "Cohere",
-  google: "Google",
-  mistral: "Mistral",
-  openai: "OpenAI"
-};
 
 interface UsageChartProps {
   usage: UsageRow[];

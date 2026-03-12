@@ -24,19 +24,15 @@ export const validateApiKey = async (
     });
 
     if (res.status === 401 || res.status === 403) {
-      throw new ValidationError(`Invalid API key for ${config.label}`);
+      throw new ValidationError("Invalid API key");
     }
 
     // 429 means rate limited but key is still valid
     if (res.ok || res.status === 429) return;
 
-    throw new ValidationError(
-      `API key validation failed for ${config.label} (status ${res.status})`
-    );
+    throw new ValidationError("API key validation failed");
   } catch (err) {
     if (err instanceof ValidationError) throw err;
-    throw new ValidationError(
-      `Could not validate API key for ${config.label}: ${err instanceof Error ? err.message : "connection failed"}`
-    );
+    throw new ValidationError("Could not validate API key");
   }
 };

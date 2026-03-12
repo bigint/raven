@@ -2,21 +2,17 @@ import type { Database } from "@raven/db";
 import { prompts } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { NotFoundError, ValidationError } from "@/lib/errors";
+import type { z } from "zod";
+import { NotFoundError } from "@/lib/errors";
 import { success } from "@/lib/response";
-import { updatePromptSchema } from "./schema";
+import type { updatePromptSchema } from "./schema";
 
 export const updatePrompt = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
   const id = c.req.param("id") as string;
-  const body = await c.req.json();
-  const result = updatePromptSchema.safeParse(body);
-
-  if (!result.success) {
-    throw new ValidationError("Invalid request body", {
-      errors: result.error.flatten().fieldErrors
-    });
-  }
+  const data = c.req.valid("json" as never) as z.infer<
+    typeof updatePromptSchema
+  >;
 
   const [existing] = await db
     .select({ id: prompts.id })
@@ -30,8 +26,8 @@ export const updatePrompt = (db: Database) => async (c: Context) => {
 
   const updates: Partial<typeof prompts.$inferInsert> = {};
 
-  if (result.data.name !== undefined) {
-    updates.name = result.data.name;
+  if (data.name !== undefined) {
+    updates.name = data.name;
   }
 
   updates.updatedAt = new Date();

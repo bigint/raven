@@ -2,17 +2,13 @@ import type { Database } from "@raven/db";
 import { members, teamMembers, teams } from "@raven/db";
 import { and, count, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import {
-  ConflictError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError
-} from "@/lib/errors";
+import type { z } from "zod";
+import { ConflictError, ForbiddenError, NotFoundError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { created, success } from "@/lib/response";
 import { logAudit } from "@/modules/audit-logs/index";
 import { checkFeatureGate } from "@/modules/proxy/plan-gate";
-import {
+import type {
   addTeamMemberSchema,
   createTeamSchema,
   updateTeamSchema
@@ -47,19 +43,12 @@ export const createTeam = (db: Database) => async (c: Context) => {
 
   await checkFeatureGate(db, orgId, "hasTeams");
 
-  const body = await c.req.json();
-  const result = createTeamSchema.safeParse(body);
-
-  if (!result.success) {
-    throw new ValidationError("Invalid request body", {
-      errors: result.error.flatten().fieldErrors
-    });
-  }
+  const data = c.req.valid("json" as never) as z.infer<typeof createTeamSchema>;
 
   const [record] = await db
     .insert(teams)
     .values({
-      name: result.data.name,
+      name: data.name,
       organizationId: orgId
     })
     .returning();
@@ -69,7 +58,7 @@ export const createTeam = (db: Database) => async (c: Context) => {
   void logAudit(db, {
     action: "team.created",
     actorId: user.id,
-    metadata: { name: result.data.name },
+    metadata: { name: data.name },
     orgId,
     resourceId: safe.id,
     resourceType: "team"
@@ -87,14 +76,7 @@ export const updateTeam = (db: Database) => async (c: Context) => {
     throw new ForbiddenError("Only owners and admins can update teams");
   }
 
-  const body = await c.req.json();
-  const result = updateTeamSchema.safeParse(body);
-
-  if (!result.success) {
-    throw new ValidationError("Invalid request body", {
-      errors: result.error.flatten().fieldErrors
-    });
-  }
+  const data = c.req.valid("json" as never) as z.infer<typeof updateTeamSchema>;
 
   const [existing] = await db
     .select({ id: teams.id })
@@ -108,7 +90,7 @@ export const updateTeam = (db: Database) => async (c: Context) => {
 
   const [updated] = await db
     .update(teams)
-    .set({ name: result.data.name })
+    .set({ name: data.name })
     .where(and(eq(teams.id, id), eq(teams.organizationId, orgId)))
     .returning();
 
@@ -116,7 +98,7 @@ export const updateTeam = (db: Database) => async (c: Context) => {
   void logAudit(db, {
     action: "team.updated",
     actorId: user.id,
-    metadata: { name: result.data.name },
+    metadata: { name: data.name },
     orgId,
     resourceId: id,
     resourceType: "team"
@@ -169,14 +151,9 @@ export const addTeamMember = (db: Database) => async (c: Context) => {
     throw new ForbiddenError("Only owners and admins can add team members");
   }
 
-  const body = await c.req.json();
-  const result = addTeamMemberSchema.safeParse(body);
-
-  if (!result.success) {
-    throw new ValidationError("Invalid request body", {
-      errors: result.error.flatten().fieldErrors
-    });
-  }
+  const data = c.req.valid("json" as never) as z.infer<
+    typeof addTeamMemberSchema
+  >;
 
   const [team] = await db
     .select({ id: teams.id })
@@ -193,10 +170,7 @@ export const addTeamMember = (db: Database) => async (c: Context) => {
     .select({ id: members.id })
     .from(members)
     .where(
-      and(
-        eq(members.organizationId, orgId),
-        eq(members.userId, result.data.userId)
-      )
+      and(eq(members.organizationId, orgId), eq(members.userId, data.userId))
     )
     .limit(1);
 
@@ -208,12 +182,7 @@ export const addTeamMember = (db: Database) => async (c: Context) => {
   const [existingTeamMember] = await db
     .select({ id: teamMembers.id })
     .from(teamMembers)
-    .where(
-      and(
-        eq(teamMembers.teamId, id),
-        eq(teamMembers.userId, result.data.userId)
-      )
-    )
+    .where(and(eq(teamMembers.teamId, id), eq(teamMembers.userId, data.userId)))
     .limit(1);
 
   if (existingTeamMember) {
@@ -223,23 +192,23 @@ export const addTeamMember = (db: Database) => async (c: Context) => {
   const [record] = await db
     .insert(teamMembers)
     .values({
-      role: result.data.role,
+      role: data.role,
       teamId: id,
-      userId: result.data.userId
+      userId: data.userId
     })
     .returning();
 
   void publishEvent(orgId, "team_member.added", {
     teamId: id,
-    userId: result.data.userId
+    userId: data.userId
   });
   void logAudit(db, {
     action: "member.added",
     actorId: user.id,
     metadata: {
-      role: result.data.role,
+      role: data.role,
       teamId: id,
-      userId: result.data.userId
+      userId: data.userId
     },
     orgId,
     resourceId: id,

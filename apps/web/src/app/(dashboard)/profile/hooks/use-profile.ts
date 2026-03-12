@@ -49,8 +49,8 @@ export const useCreateOrg = () => {
       useOrgStore.getState().setActiveOrg({
         id: created.id,
         name: created.name,
-        slug: created.slug,
-        role: "owner"
+        role: "owner",
+        slug: created.slug
       });
       window.location.reload();
     }

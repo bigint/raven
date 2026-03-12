@@ -2,11 +2,12 @@ import type { Database } from "@raven/db";
 import { members, users } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
+import type { z } from "zod";
+import { ForbiddenError, NotFoundError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
 import { logAudit } from "@/modules/audit-logs/index";
-import { changeRoleSchema } from "./schema";
+import type { changeRoleSchema } from "./schema";
 
 export const listMembers = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
@@ -93,14 +94,7 @@ export const changeRole = (db: Database) => async (c: Context) => {
     throw new ForbiddenError("Only owners and admins can change member roles");
   }
 
-  const body = await c.req.json();
-  const result = changeRoleSchema.safeParse(body);
-
-  if (!result.success) {
-    throw new ValidationError("Invalid request body", {
-      errors: result.error.flatten().fieldErrors
-    });
-  }
+  const data = c.req.valid("json" as never) as z.infer<typeof changeRoleSchema>;
 
   const [membership] = await db
     .select()
@@ -120,7 +114,7 @@ export const changeRole = (db: Database) => async (c: Context) => {
 
   const [updated] = await db
     .update(members)
-    .set({ role: result.data.role })
+    .set({ role: data.role })
     .where(and(eq(members.id, id), eq(members.organizationId, orgId)))
     .returning();
 
@@ -128,7 +122,7 @@ export const changeRole = (db: Database) => async (c: Context) => {
   void logAudit(db, {
     action: "member.updated",
     actorId: user.id,
-    metadata: { memberId: id, newRole: result.data.role },
+    metadata: { memberId: id, newRole: data.role },
     orgId,
     resourceId: id,
     resourceType: "member"

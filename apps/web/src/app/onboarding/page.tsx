@@ -1,5 +1,6 @@
 "use client";
 
+import { PROVIDER_OPTIONS } from "@raven/types";
 import { Button, Input, Select } from "@raven/ui";
 import {
   ArrowRight,
@@ -18,15 +19,6 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 import { useOrgStore } from "@/stores/org";
-
-const PROVIDER_OPTIONS = [
-  { label: "OpenAI", value: "openai" },
-  { label: "Anthropic", value: "anthropic" },
-  { label: "Google", value: "google" },
-  { label: "Azure", value: "azure" },
-  { label: "Cohere", value: "cohere" },
-  { label: "Mistral", value: "mistral" }
-];
 
 interface OrgResponse {
   id: string;

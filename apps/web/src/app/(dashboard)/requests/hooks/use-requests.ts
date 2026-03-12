@@ -1,3 +1,4 @@
+import { PROVIDER_FILTER_OPTIONS, PROVIDER_LABELS } from "@raven/types";
 import { queryOptions } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { API_URL, api } from "@/lib/api";
@@ -25,24 +26,7 @@ export interface RequestsResponse {
   };
 }
 
-export const PROVIDER_FILTER_OPTIONS = [
-  { label: "All Providers", value: "" },
-  { label: "OpenAI", value: "openai" },
-  { label: "Anthropic", value: "anthropic" },
-  { label: "Google", value: "google" },
-  { label: "Azure", value: "azure" },
-  { label: "Cohere", value: "cohere" },
-  { label: "Mistral", value: "mistral" }
-];
-
-export const PROVIDER_LABELS: Record<string, string> = {
-  anthropic: "Anthropic",
-  azure: "Azure",
-  cohere: "Cohere",
-  google: "Google",
-  mistral: "Mistral",
-  openai: "OpenAI"
-};
+export { PROVIDER_FILTER_OPTIONS, PROVIDER_LABELS };
 
 export const STATUS_OPTIONS = [
   { label: "All Statuses", value: "" },

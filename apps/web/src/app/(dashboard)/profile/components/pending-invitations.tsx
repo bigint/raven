@@ -80,6 +80,7 @@ const PendingInvitations = ({
                     disabled={respondingTo === inv.id}
                     onClick={() => onDeclineInvitation(inv.id)}
                     size="sm"
+                    type="button"
                     variant="secondary"
                   >
                     <X className="size-3.5" />
@@ -89,6 +90,7 @@ const PendingInvitations = ({
                     disabled={respondingTo === inv.id}
                     onClick={() => onAcceptInvitation(inv.id)}
                     size="sm"
+                    type="button"
                   >
                     <Check className="size-3.5" />
                     Accept

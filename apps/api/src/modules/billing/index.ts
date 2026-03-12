@@ -1,3 +1,4 @@
+import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
 import { getPlans } from "./plans";
@@ -11,8 +12,8 @@ export const createBillingModule = (db: Database) => {
   return app;
 };
 
-export const createBillingWebhookModule = (db: Database) => {
+export const createBillingWebhookModule = (db: Database, env: Env) => {
   const app = new Hono();
-  app.post("/", handleWebhook(db));
+  app.post("/", handleWebhook(db, env));
   return app;
 };
