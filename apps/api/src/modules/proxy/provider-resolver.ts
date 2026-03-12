@@ -101,7 +101,9 @@ export const resolveProvider = async (
     providerConfig = allConfigs[Math.floor(Math.random() * allConfigs.length)];
   }
 
-  if (!providerConfig.isEnabled) {
+  const resolvedConfig = providerConfig as NonNullable<typeof providerConfig>;
+
+  if (!resolvedConfig.isEnabled) {
     throw new ForbiddenError(`Provider '${providerName}' is disabled`);
   }
 
@@ -109,7 +111,7 @@ export const resolveProvider = async (
 
   let decryptedApiKey: string;
   try {
-    decryptedApiKey = decrypt(providerConfig.apiKey, env.ENCRYPTION_SECRET);
+    decryptedApiKey = decrypt(resolvedConfig.apiKey, env.ENCRYPTION_SECRET);
   } catch {
     throw new Error("Failed to decrypt provider credentials");
   }
@@ -119,7 +121,7 @@ export const resolveProvider = async (
   return {
     adapter,
     decryptedApiKey,
-    providerConfigId: providerConfig.id,
+    providerConfigId: resolvedConfig.id,
     providerName,
     upstreamPath
   };

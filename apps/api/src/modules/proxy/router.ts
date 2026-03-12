@@ -35,8 +35,9 @@ export const resolveWithStrategy = async (
     throw new Error(`No enabled configs for provider '${providerName}'`);
   }
 
+  const first = configs[0] as { id: string };
   if (configs.length === 1) {
-    return configs[0].id;
+    return first.id;
   }
 
   switch (strategy) {
@@ -53,7 +54,8 @@ export const resolveWithStrategy = async (
 
 const pickRandom = (configs: { id: string }[]): string => {
   const idx = Math.floor(Math.random() * configs.length);
-  return configs[idx].id;
+  const picked = configs[idx] as { id: string };
+  return picked.id;
 };
 
 const roundRobin = async (
@@ -64,10 +66,10 @@ const roundRobin = async (
 ): Promise<string> => {
   const key = `rr:${orgId}:${provider}`;
   const counter = await redis.incr(key);
-  // Set a TTL so stale counters don't linger forever
   await redis.expire(key, 86400);
   const idx = (counter - 1) % configs.length;
-  return configs[idx].id;
+  const picked = configs[idx] as { id: string };
+  return picked.id;
 };
 
 const leastLatency = async (
@@ -82,21 +84,22 @@ const leastLatency = async (
 
   for (let i = 0; i < configs.length; i++) {
     const raw = values[i];
-    // Configs with no recorded latency get the lowest priority
     const latency =
-      raw !== null ? Number.parseFloat(raw) : Number.POSITIVE_INFINITY;
+      raw !== undefined && raw !== null
+        ? Number.parseFloat(raw)
+        : Number.POSITIVE_INFINITY;
     if (latency < bestLatency) {
       bestLatency = latency;
       bestIdx = i;
     }
   }
 
-  // If no latency data exists for any config, fall back to random
   if (bestIdx === -1 || bestLatency === Number.POSITIVE_INFINITY) {
     return pickRandom(configs);
   }
 
-  return configs[bestIdx].id;
+  const best = configs[bestIdx] as { id: string };
+  return best.id;
 };
 
 const leastCost = async (
@@ -114,13 +117,14 @@ const leastCost = async (
 
   for (let i = 0; i < configs.length; i++) {
     const raw = values[i];
-    // Configs with no recorded cost are treated as zero spend
-    const cost = raw !== null ? Number.parseFloat(raw) : 0;
+    const cost = raw !== undefined && raw !== null ? Number.parseFloat(raw) : 0;
     if (cost < bestCost) {
       bestCost = cost;
       bestIdx = i;
     }
   }
 
-  return bestIdx === -1 ? pickRandom(configs) : configs[bestIdx].id;
+  if (bestIdx === -1) return pickRandom(configs);
+  const best = configs[bestIdx] as { id: string };
+  return best.id;
 };

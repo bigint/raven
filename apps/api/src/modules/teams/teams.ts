@@ -236,7 +236,11 @@ export const addTeamMember = (db: Database) => async (c: Context) => {
   void logAudit(db, {
     action: "member.added",
     actorId: user.id,
-    metadata: { role: result.data.role, teamId: id, userId: result.data.userId },
+    metadata: {
+      role: result.data.role,
+      teamId: id,
+      userId: result.data.userId
+    },
     orgId,
     resourceId: id,
     resourceType: "team"

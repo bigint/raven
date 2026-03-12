@@ -5,9 +5,9 @@ import type { Redis } from "ioredis";
 import { GuardrailError } from "@/lib/errors";
 import { authenticateKey } from "./auth";
 import { checkBudgets } from "./budget-check";
+import { checkCache, storeCache } from "./cache";
 import { analyzeContent } from "./content-analyzer";
 import { evaluateRoutingRules } from "./content-router";
-import { checkCache, storeCache } from "./cache";
 import { withFallback } from "./fallback";
 import { evaluateGuardrails, type GuardrailMatch } from "./guardrails";
 import { updateCost, updateLatency } from "./latency-tracker";
@@ -138,11 +138,18 @@ export const proxyHandler = (
       const latencyMs = Date.now() - startTime;
       const requestedModel = (requestBody.model as string) ?? "unknown";
 
+      const cacheAnalysis = analyzeContent(
+        requestBody,
+        c.req.header("x-session-id")
+      );
       const logData = {
         cacheHit: true,
         cost: 0,
         guardrailMatches:
           guardrailMatches.length > 0 ? guardrailMatches : undefined,
+        hasImages: cacheAnalysis.hasImages,
+        hasToolUse: cacheAnalysis.hasToolUse,
+        imageCount: cacheAnalysis.imageCount,
         inputTokens: 0,
         latencyMs,
         method,
@@ -152,7 +159,9 @@ export const proxyHandler = (
         path: upstreamPath,
         provider: providerName,
         providerConfigId,
+        sessionId: cacheAnalysis.sessionId,
         statusCode: 200,
+        toolCount: cacheAnalysis.toolCount,
         virtualKeyId: virtualKey.id
       };
 

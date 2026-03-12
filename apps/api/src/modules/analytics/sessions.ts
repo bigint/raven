@@ -76,7 +76,7 @@ export const getSessions = (db: Database) => async (c: Context) => {
 
 export const getSessionById = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
-  const sessionId = c.req.param("sessionId");
+  const sessionId = c.req.param("sessionId") ?? "";
 
   const rows = await db
     .select()
@@ -84,7 +84,7 @@ export const getSessionById = (db: Database) => async (c: Context) => {
     .where(
       and(
         eq(requestLogs.organizationId, orgId),
-        eq(requestLogs.sessionId, sessionId)
+        sql`${requestLogs.sessionId} = ${sessionId}`
       )
     )
     .orderBy(sql`${requestLogs.createdAt} ASC`);

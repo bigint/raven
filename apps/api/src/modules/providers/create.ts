@@ -7,8 +7,8 @@ import { encrypt } from "@/lib/crypto";
 import { ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { created } from "@/lib/response";
-import { checkResourceLimit } from "@/modules/proxy/plan-gate";
 import { logAudit } from "@/modules/audit-logs/index";
+import { checkResourceLimit } from "@/modules/proxy/plan-gate";
 import { maskApiKey, validateApiKey } from "./helpers";
 import { createProviderSchema } from "./schema";
 
