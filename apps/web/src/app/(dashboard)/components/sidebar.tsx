@@ -4,6 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
   CreditCard,
+  FileText,
   Key,
   LayoutDashboard,
   Network,
@@ -25,6 +26,7 @@ const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/overview", icon: LayoutDashboard, label: "Overview" },
   { href: "/providers", icon: Network, label: "Providers" },
   { href: "/keys", icon: Key, label: "Keys" },
+  { href: "/prompts", icon: FileText, label: "Prompts" },
   { href: "/analytics", icon: BarChart3, label: "Analytics" },
   { href: "/routing", icon: Route, label: "Routing" },
   { href: "/requests", icon: ScrollText, label: "Requests" },
