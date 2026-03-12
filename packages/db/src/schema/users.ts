@@ -1,5 +1,5 @@
-import { boolean, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { createId } from '@paralleldrive/cuid2'
+import { boolean, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 
 export const platformRoleEnum = pgEnum('platform_role', ['user', 'admin'])
 

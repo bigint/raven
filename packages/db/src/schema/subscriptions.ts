@@ -1,13 +1,20 @@
-import { integer, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { createId } from '@paralleldrive/cuid2'
-import { organizations } from './organizations.js'
+import { integer, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { organizations } from './organizations'
 
 export const planEnum = pgEnum('plan', ['free', 'pro', 'team', 'enterprise'])
-export const subscriptionStatusEnum = pgEnum('subscription_status', ['active', 'past_due', 'cancelled', 'trialing'])
+export const subscriptionStatusEnum = pgEnum('subscription_status', [
+  'active',
+  'past_due',
+  'cancelled',
+  'trialing',
+])
 
 export const subscriptions = pgTable('subscriptions', {
   id: text('id').primaryKey().$defaultFn(createId),
-  organizationId: text('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  organizationId: text('organization_id')
+    .notNull()
+    .references(() => organizations.id, { onDelete: 'cascade' }),
   paddleSubscriptionId: text('paddle_subscription_id').notNull().unique(),
   plan: planEnum('plan').notNull().default('free'),
   status: subscriptionStatusEnum('status').notNull().default('active'),

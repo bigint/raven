@@ -1,12 +1,12 @@
 import { serve } from '@hono/node-server'
+import { createAuth } from '@raven/auth'
+import { parseEnv } from '@raven/config'
+import { createDatabase } from '@raven/db'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
-import { parseEnv } from '@raven/config'
-import { createDatabase } from '@raven/db'
-import { getRedis } from './lib/redis.js'
 import { AppError } from './lib/errors.js'
-import { createAuth } from '@raven/auth'
+import { getRedis } from './lib/redis.js'
 import { createAuthModule } from './modules/auth/index.js'
 
 const env = parseEnv()

@@ -1,13 +1,15 @@
-import { numeric, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { createId } from '@paralleldrive/cuid2'
-import { organizations } from './organizations.js'
+import { numeric, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { organizations } from './organizations'
 
 export const budgetEntityTypeEnum = pgEnum('budget_entity_type', ['organization', 'team', 'key'])
 export const budgetPeriodEnum = pgEnum('budget_period', ['daily', 'monthly'])
 
 export const budgets = pgTable('budgets', {
   id: text('id').primaryKey().$defaultFn(createId),
-  organizationId: text('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  organizationId: text('organization_id')
+    .notNull()
+    .references(() => organizations.id, { onDelete: 'cascade' }),
   entityType: budgetEntityTypeEnum('entity_type').notNull(),
   entityId: text('entity_id').notNull(),
   limitAmount: numeric('limit_amount', { precision: 12, scale: 2 }).notNull(),

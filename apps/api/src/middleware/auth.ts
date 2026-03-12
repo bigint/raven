@@ -1,5 +1,5 @@
-import { createMiddleware } from 'hono/factory'
 import type { Auth } from '@raven/auth'
+import { createMiddleware } from 'hono/factory'
 
 type AuthContext = {
   Variables: {

@@ -1,8 +1,8 @@
 'use client'
 
 import { useSession } from '@/lib/auth-client'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
 const NAV_ITEMS = [
   { href: '/overview', label: 'Overview' },

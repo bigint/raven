@@ -1,13 +1,15 @@
-import { boolean, integer, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { createId } from '@paralleldrive/cuid2'
-import { organizations } from './organizations.js'
-import { teams } from './teams.js'
+import { boolean, integer, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { organizations } from './organizations'
+import { teams } from './teams'
 
 export const keyEnvironmentEnum = pgEnum('key_environment', ['live', 'test'])
 
 export const virtualKeys = pgTable('virtual_keys', {
   id: text('id').primaryKey().$defaultFn(createId),
-  organizationId: text('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  organizationId: text('organization_id')
+    .notNull()
+    .references(() => organizations.id, { onDelete: 'cascade' }),
   teamId: text('team_id').references(() => teams.id, { onDelete: 'set null' }),
   name: text('name').notNull(),
   keyHash: text('key_hash').notNull().unique(),
