@@ -43,7 +43,7 @@ export const UserMenu = ({ user }: UserMenuProps) => {
   return (
     <div className="relative border-t border-border px-3 py-3" ref={ref}>
       {open && (
-        <div className="absolute bottom-full left-2 right-2 mb-1 rounded-lg border border-border bg-popover py-1 shadow-md ring-1 ring-black/5">
+        <div className="absolute bottom-full left-2 right-2 mb-1 rounded-md border border-border bg-popover py-1 shadow-md ring-1 ring-black/5">
           <Link
             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
             href="/profile"
@@ -72,7 +72,7 @@ export const UserMenu = ({ user }: UserMenuProps) => {
         </div>
       )}
       <button
-        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-accent"
+        className="flex w-full items-center gap-3 rounded-md px-3 py-2 transition-colors hover:bg-accent"
         onClick={() => setOpen(!open)}
         type="button"
       >

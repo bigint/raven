@@ -60,14 +60,14 @@ const TeamList = ({ onCreateTeam, onDelete, teams }: TeamListProps) => {
             render: (team) => (
               <div className="flex items-center justify-end gap-1">
                 <button
-                  className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                  className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                   title="Edit team"
                   type="button"
                 >
                   <Pencil className="size-4" />
                 </button>
                 <button
-                  className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                  className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                   onClick={() => onDelete(team.id)}
                   title="Delete team"
                   type="button"

@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, Input } from "@raven/ui";
 import { AlertTriangle, Trash2 } from "lucide-react";
 
 interface DangerZoneProps {
@@ -43,7 +44,7 @@ export const DangerZone = ({
         </div>
       </div>
       <div className="px-6 py-5">
-        <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-4">
+        <div className="flex items-center justify-between rounded-md border border-destructive/20 bg-destructive/5 px-4 py-4">
           <div>
             <p className="text-sm font-medium">Delete Organization</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
@@ -51,13 +52,14 @@ export const DangerZone = ({
               cannot be undone.
             </p>
           </div>
-          <button
-            className="ml-4 shrink-0 rounded-lg border border-destructive px-4 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground"
+          <Button
+            className="ml-4 shrink-0"
             onClick={onOpenConfirm}
             type="button"
+            variant="destructive"
           >
             Delete Organization
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -95,8 +97,8 @@ export const DangerZone = ({
               </span>{" "}
               to confirm.
             </p>
-            <input
-              className="mt-2 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+            <Input
+              className="mt-2"
               onChange={(e) => {
                 onConfirmTextChange(e.target.value);
                 onDeleteErrorClear();
@@ -106,31 +108,31 @@ export const DangerZone = ({
               value={deleteConfirmText}
             />
             {deleteError && (
-              <div className="mt-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              <div className="mt-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                 {deleteError}
               </div>
             )}
           </div>
           <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
-            <button
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent disabled:opacity-50"
+            <Button
               disabled={deleting}
               onClick={onCloseConfirm}
               onKeyDown={(e) => {
                 if (e.key === "Escape") onCloseConfirm();
               }}
               type="button"
+              variant="secondary"
             >
               Cancel
-            </button>
-            <button
-              className="rounded-lg bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+            </Button>
+            <Button
               disabled={deleting || deleteConfirmText !== orgName}
               onClick={onDelete}
               type="button"
+              variant="destructive"
             >
               {deleting ? "Deleting..." : "Delete Organization"}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

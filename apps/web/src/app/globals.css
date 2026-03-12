@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
 @source "../**/*.tsx";
+@source "../../../../packages/ui/src/**/*.tsx";
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   /* Light mode (default) */
@@ -67,32 +70,30 @@ label[for] {
   cursor: pointer;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: #09090b;
-    --color-foreground: #fafafa;
-    --color-card: #0a0a0a;
-    --color-card-foreground: #fafafa;
-    --color-popover: #0a0a0a;
-    --color-popover-foreground: #fafafa;
-    --color-primary: #fafafa;
-    --color-primary-foreground: #0a0a0a;
-    --color-muted: #1a1a1a;
-    --color-muted-foreground: #a3a3a3;
-    --color-surface: #111111;
-    --color-border: #262626;
-    --color-input: #262626;
-    --color-ring: #d4d4d4;
-    --color-accent: #1a1a1a;
-    --color-accent-foreground: #fafafa;
-    --color-destructive: #dc2626;
-    --color-destructive-foreground: #ffffff;
-    --color-success: #16a34a;
-    --color-warning: #d97706;
-    --color-warning-foreground: #ffffff;
-    --color-info: #2563eb;
-    --color-info-foreground: #ffffff;
-  }
+.dark {
+  --color-background: #09090b;
+  --color-foreground: #fafafa;
+  --color-card: #0a0a0a;
+  --color-card-foreground: #fafafa;
+  --color-popover: #0a0a0a;
+  --color-popover-foreground: #fafafa;
+  --color-primary: #fafafa;
+  --color-primary-foreground: #0a0a0a;
+  --color-muted: #1a1a1a;
+  --color-muted-foreground: #a3a3a3;
+  --color-surface: #111111;
+  --color-border: #262626;
+  --color-input: #262626;
+  --color-ring: #d4d4d4;
+  --color-accent: #1a1a1a;
+  --color-accent-foreground: #fafafa;
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-warning-foreground: #ffffff;
+  --color-info: #2563eb;
+  --color-info-foreground: #ffffff;
 }
 
 @keyframes shimmer {

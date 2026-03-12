@@ -109,7 +109,7 @@ const RequestsPage = () => {
 
       {hasNewData && !isLive && (
         <button
-          className="mb-4 flex w-full items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+          className="mb-4 flex w-full items-center justify-center gap-2 rounded-md border border-primary/30 bg-primary/5 px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
           onClick={() => {
             setHasNewData(false);
             refetch();
@@ -121,7 +121,7 @@ const RequestsPage = () => {
       )}
 
       {displayError && (
-        <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {displayError}
         </div>
       )}

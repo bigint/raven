@@ -17,7 +17,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       )}
       <textarea
         className={cn(
-          "w-full rounded-[var(--radius-md)] border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring min-h-[80px] resize-y",
+          "w-full rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring min-h-[80px] resize-y",
           error && "border-destructive focus:ring-destructive",
           className
         )}

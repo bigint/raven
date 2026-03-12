@@ -43,7 +43,7 @@ const ProfileForm = () => {
       </div>
       <div className="space-y-4 px-6 py-5">
         {updateProfile.isError && (
-          <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {updateProfile.error.message}
           </div>
         )}
@@ -57,14 +57,14 @@ const ProfileForm = () => {
           />
           <div className="space-y-1.5">
             <span className="text-sm font-medium">Email</span>
-            <div className="rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm">
+            <div className="rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">
               {session?.user?.email ?? "\u2014"}
             </div>
           </div>
         </div>
         <div className="space-y-1.5">
           <span className="text-sm font-medium">User ID</span>
-          <div className="rounded-lg border border-input bg-muted/50 px-3 py-2 font-mono text-xs text-muted-foreground">
+          <div className="rounded-md border border-input bg-muted/50 px-3 py-2 font-mono text-xs text-muted-foreground">
             {session?.user?.id ?? "\u2014"}
           </div>
         </div>

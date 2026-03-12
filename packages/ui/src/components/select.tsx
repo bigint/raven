@@ -67,7 +67,7 @@ const Select = ({
       <div className="relative" ref={containerRef}>
         <button
           className={cn(
-            "flex w-full items-center justify-between rounded-[var(--radius-md)] border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+            "flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
             error && "border-destructive focus:ring-destructive"
           )}
           disabled={disabled}
@@ -97,7 +97,7 @@ const Select = ({
         </button>
 
         {open && (
-          <div className="absolute z-50 mt-1 w-full rounded-[var(--radius-md)] border border-border bg-popover py-1 shadow-md">
+          <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover py-1 shadow-md">
             {options.map((option) => (
               <button
                 className={cn(

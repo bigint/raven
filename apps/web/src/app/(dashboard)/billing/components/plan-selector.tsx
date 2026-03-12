@@ -128,7 +128,7 @@ export const PlanSelector = ({
               </ul>
 
               <button
-                className={`w-full rounded-lg px-4 py-2 text-sm font-medium transition-opacity ${
+                className={`w-full rounded-md px-4 py-2 text-sm font-medium transition-opacity ${
                   isCurrent
                     ? "cursor-default bg-muted text-muted-foreground"
                     : plan.isPopular

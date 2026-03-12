@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ThemeToggle } from "@/components/theme-toggle";
 import type { Org } from "../hooks/use-orgs";
 import { OrgSwitcher } from "./org-switcher";
 import { UserMenu } from "./user-menu";
@@ -53,7 +54,7 @@ export const Sidebar = ({
           const Icon = item.icon;
           return (
             <Link
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
+              className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
                 isActive
                   ? "bg-primary text-primary-foreground font-medium"
                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
@@ -68,6 +69,9 @@ export const Sidebar = ({
         })}
       </nav>
 
+      <div className="flex items-center justify-between border-t border-border px-4 py-2">
+        <ThemeToggle />
+      </div>
       <UserMenu user={user} />
     </aside>
   );

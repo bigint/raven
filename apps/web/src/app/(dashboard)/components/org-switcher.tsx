@@ -60,7 +60,7 @@ export const OrgSwitcher = ({
       </button>
 
       {open && (
-        <div className="absolute left-2 right-2 z-50 mt-1 rounded-lg border border-border bg-popover py-1 shadow-md ring-1 ring-black/5">
+        <div className="absolute left-2 right-2 z-50 mt-1 rounded-md border border-border bg-popover py-1 shadow-md ring-1 ring-black/5">
           {orgs.map((org) => (
             <button
               className={`flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground ${

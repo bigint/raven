@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, Input } from "@raven/ui";
 import { Building2 } from "lucide-react";
 import type { OrgSettings } from "../hooks/use-settings";
 
@@ -46,22 +47,16 @@ export const SettingsForm = ({
     </div>
     <div className="space-y-4 px-6 py-5">
       {saveError && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {saveError}
         </div>
       )}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <label
-            className="text-sm font-medium text-muted-foreground"
-            htmlFor="org-name"
-          >
-            Organization Name
-          </label>
           {isAdmin ? (
-            <input
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+            <Input
               id="org-name"
+              label="Organization Name"
               onChange={(e) => {
                 onNameChange(e.target.value);
                 onSaveErrorClear();
@@ -70,55 +65,58 @@ export const SettingsForm = ({
               value={editName}
             />
           ) : (
-            <div className="rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm">
-              {settings.name}
-            </div>
+            <>
+              <label
+                className="text-sm font-medium text-muted-foreground"
+                htmlFor="org-name"
+              >
+                Organization Name
+              </label>
+              <div className="rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">
+                {settings.name}
+              </div>
+            </>
           )}
         </div>
         <div className="space-y-1.5">
-          <label
-            className="text-sm font-medium text-muted-foreground"
-            htmlFor="org-slug"
-          >
-            Slug
-          </label>
           {isAdmin ? (
-            <>
-              <input
-                className={`w-full rounded-lg border bg-background px-3 py-2 font-mono text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring ${
-                  editSlug && !isSlugValid
-                    ? "border-destructive"
-                    : "border-input"
-                }`}
-                id="org-slug"
-                onChange={(e) => {
-                  onSlugChange(e.target.value.toLowerCase());
-                  onSaveErrorClear();
-                }}
-                type="text"
-                value={editSlug}
-              />
-              <p className="text-xs text-muted-foreground">
-                Lowercase letters, numbers, and hyphens. 3-50 characters.
-              </p>
-            </>
+            <Input
+              className="font-mono"
+              description="Lowercase letters, numbers, and hyphens. 3-50 characters."
+              error={editSlug && !isSlugValid ? "Invalid slug" : null}
+              id="org-slug"
+              label="Slug"
+              onChange={(e) => {
+                onSlugChange(e.target.value.toLowerCase());
+                onSaveErrorClear();
+              }}
+              type="text"
+              value={editSlug}
+            />
           ) : (
-            <div className="rounded-lg border border-input bg-muted/50 px-3 py-2 font-mono text-sm">
-              {settings.slug}
-            </div>
+            <>
+              <label
+                className="text-sm font-medium text-muted-foreground"
+                htmlFor="org-slug"
+              >
+                Slug
+              </label>
+              <div className="rounded-md border border-input bg-muted/50 px-3 py-2 font-mono text-sm">
+                {settings.slug}
+              </div>
+            </>
           )}
         </div>
       </div>
       {isAdmin && (
         <div className="flex justify-end pt-1">
-          <button
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+          <Button
             disabled={saving || !hasChanges || !isSlugValid}
             onClick={onSave}
             type="button"
           >
             {saving ? "Saving..." : "Save Changes"}
-          </button>
+          </Button>
         </div>
       )}
     </div>

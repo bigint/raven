@@ -41,7 +41,7 @@ const CreateOrgForm = ({ onClose, onSubmit, open }: CreateOrgFormProps) => {
     <Modal onClose={onClose} open={open} title="Create Organization">
       <form className="space-y-4" onSubmit={handleSubmit}>
         {error && (
-          <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {error}
           </div>
         )}

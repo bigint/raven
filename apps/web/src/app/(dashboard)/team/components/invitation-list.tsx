@@ -85,7 +85,7 @@ const InvitationList = ({
             render: (inv) => (
               <div className="flex items-center justify-end gap-1">
                 <button
-                  className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                  className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                   onClick={() => onDelete(inv.id)}
                   title="Revoke invitation"
                   type="button"

@@ -55,10 +55,7 @@ export const overviewUsageQueryOptions = () =>
 
 export const overviewRequestsQueryOptions = () =>
   queryOptions({
-    queryFn: () =>
-      api
-        .get<{ data: RecentRequest[] }>("/v1/analytics/requests?limit=5")
-        .then((r) => r.data),
+    queryFn: () => api.get<RecentRequest[]>("/v1/analytics/requests?limit=5"),
     queryKey: ["overview", "requests"]
   });
 

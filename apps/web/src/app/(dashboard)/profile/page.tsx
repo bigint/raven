@@ -92,7 +92,7 @@ export default function ProfilePage() {
             </div>
           </div>
           <div className="px-6 py-5">
-            <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-4">
+            <div className="flex items-center justify-between rounded-md border border-destructive/20 bg-destructive/5 px-4 py-4">
               <div>
                 <p className="text-sm font-medium">Delete Account</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
@@ -101,7 +101,7 @@ export default function ProfilePage() {
                 </p>
               </div>
               <button
-                className="ml-4 shrink-0 rounded-lg border border-destructive px-4 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                className="ml-4 shrink-0 rounded-md border border-destructive px-4 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground disabled:cursor-not-allowed disabled:opacity-50"
                 disabled
                 title="Coming soon"
                 type="button"

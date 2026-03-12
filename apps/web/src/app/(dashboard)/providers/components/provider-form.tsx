@@ -100,7 +100,7 @@ const ProviderForm = ({
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
         {formError && (
-          <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {formError}
           </div>
         )}
@@ -133,7 +133,7 @@ const ProviderForm = ({
           </label>
           <div className="relative">
             <input
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 pr-10 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
               id="api-key-input"
               onChange={(e) => update("apiKey", e.target.value)}
               placeholder={isEdit ? "--------" : "sk-..."}

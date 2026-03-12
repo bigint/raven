@@ -33,22 +33,24 @@ const KeyReveal = ({ keyValue, onClose }: KeyRevealProps) => {
         </div>
         <div className="space-y-1.5">
           <span className="text-sm font-medium">Your API Key</span>
-          <div className="flex items-center gap-2 rounded-lg border border-input bg-muted/50 px-3 py-2">
+          <div className="flex items-center gap-2 rounded-md border border-input bg-muted/50 px-3 py-2">
             <span className="flex-1 truncate font-mono text-sm">
               {keyValue}
             </span>
-            <button
-              className="shrink-0 rounded p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            <Button
+              className="shrink-0"
               onClick={handleCopy}
+              size="sm"
               title="Copy key"
               type="button"
+              variant="ghost"
             >
               {copied ? (
                 <Check className="size-4 text-green-600" />
               ) : (
                 <Copy className="size-4" />
               )}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

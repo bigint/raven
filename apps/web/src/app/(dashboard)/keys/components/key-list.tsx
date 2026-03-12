@@ -115,22 +115,25 @@ const KeyList = ({ keys, onCreate, onDelete, onEdit }: KeyListProps) => {
             key: "actions",
             render: (key) => (
               <div className="flex items-center justify-end gap-1">
-                <button
-                  className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                <Button
                   onClick={() => onEdit(key)}
+                  size="sm"
                   title="Edit key"
                   type="button"
+                  variant="ghost"
                 >
                   <Pencil className="size-4" />
-                </button>
-                <button
-                  className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                </Button>
+                <Button
+                  className="hover:bg-destructive/10 hover:text-destructive"
                   onClick={() => onDelete(key.id)}
+                  size="sm"
                   title="Delete key"
                   type="button"
+                  variant="ghost"
                 >
                   <Trash2 className="size-4" />
-                </button>
+                </Button>
               </div>
             )
           }

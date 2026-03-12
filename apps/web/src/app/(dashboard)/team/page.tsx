@@ -140,7 +140,7 @@ export default function TeamPage() {
         title="Team"
       />
       {membersQuery.isError && (
-        <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {membersQuery.error.message}
         </div>
       )}
