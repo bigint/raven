@@ -2,15 +2,10 @@ import type { Database } from "@raven/db";
 import { budgets } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { z } from "zod";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
-
-const updateBudgetSchema = z.object({
-  alertThreshold: z.number().min(0).max(1).optional(),
-  limitAmount: z.number().positive().optional(),
-  period: z.enum(["daily", "monthly"]).optional()
-});
+import { success } from "@/lib/response";
+import { updateBudgetSchema } from "./schema";
 
 export const updateBudget = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
@@ -56,5 +51,5 @@ export const updateBudget = (db: Database) => async (c: Context) => {
     .returning();
 
   void publishEvent(orgId, "budget.updated", updated);
-  return c.json(updated);
+  return success(c, updated);
 };
