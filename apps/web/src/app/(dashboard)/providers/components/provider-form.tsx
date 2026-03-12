@@ -49,6 +49,20 @@ const ProviderForm = ({
   );
   const [showApiKey, setShowApiKey] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (editingProvider) {
+      setForm({
+        apiKey: "",
+        isEnabled: editingProvider.isEnabled,
+        name: editingProvider.name ?? "",
+        provider: editingProvider.provider
+      });
+    } else {
+      setForm(DEFAULT_FORM);
+    }
+  }, [editingProvider]);
+
   const createMutation = useCreateProvider();
   const updateMutation = useUpdateProvider();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;

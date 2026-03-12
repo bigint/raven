@@ -2,7 +2,7 @@
 
 import { ENVIRONMENT_OPTIONS } from "@raven/types";
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { VirtualKey } from "../hooks/use-keys";
 
 interface FormState {
