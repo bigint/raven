@@ -15,6 +15,8 @@ export const createAuth = (db: Database, env: Env) => {
         account: schema.accounts,
         session: schema.sessions,
         verification: schema.verifications,
+        organization: schema.organizations,
+        member: schema.members,
       },
     }),
     secret: env.BETTER_AUTH_SECRET,

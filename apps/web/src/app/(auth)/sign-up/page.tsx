@@ -1,6 +1,6 @@
 'use client'
 
-import { signUp } from '@/lib/auth-client'
+import { authClient, signUp } from '@/lib/auth-client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -20,6 +20,10 @@ export default function SignUpPage() {
 
     try {
       await signUp.email({ name, email, password })
+      // Create a default org for the new user
+      const orgName = name ? `${name}'s Organization` : 'My Organization'
+      const slug = `org-${Date.now()}`
+      await authClient.organization.create({ name: orgName, slug })
       router.push('/overview')
     } catch {
       setError('Failed to create account')

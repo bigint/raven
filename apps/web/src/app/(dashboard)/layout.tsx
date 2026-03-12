@@ -1,7 +1,7 @@
 'use client'
 
-import { setOrgId } from '@/lib/api'
-import { signOut, useActiveOrganization, useSession } from '@/lib/auth-client'
+import { api, setOrgId } from '@/lib/api'
+import { authClient, signOut, useActiveOrganization, useListOrganizations, useSession } from '@/lib/auth-client'
 import {
   BarChart3,
   CreditCard,
@@ -18,7 +18,7 @@ import type { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { redirect } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: '/overview', label: 'Overview', icon: LayoutDashboard },
@@ -35,14 +35,19 @@ const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: session, isPending } = useSession()
   const { data: activeOrg } = useActiveOrganization()
+  const { data: orgList } = useListOrganizations()
   const pathname = usePathname()
   const router = useRouter()
 
   useEffect(() => {
     if (activeOrg?.id) {
       setOrgId(activeOrg.id)
+    } else if (orgList && orgList.length > 0) {
+      // No active org set — activate the first one
+      authClient.organization.setActive({ organizationId: orgList[0].id })
+      setOrgId(orgList[0].id)
     }
-  }, [activeOrg?.id])
+  }, [activeOrg?.id, orgList])
 
   if (isPending) {
     return (
