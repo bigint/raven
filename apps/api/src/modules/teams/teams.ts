@@ -10,6 +10,7 @@ import {
 } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { created, success } from "@/lib/response";
+import { checkFeatureGate } from "@/modules/proxy/plan-gate";
 import {
   addTeamMemberSchema,
   createTeamSchema,
@@ -41,6 +42,8 @@ export const createTeam = (db: Database) => async (c: Context) => {
   if (orgRole !== "owner" && orgRole !== "admin") {
     throw new ForbiddenError("Only owners and admins can create teams");
   }
+
+  await checkFeatureGate(db, orgId, "hasTeams");
 
   const body = await c.req.json();
   const result = createTeamSchema.safeParse(body);
