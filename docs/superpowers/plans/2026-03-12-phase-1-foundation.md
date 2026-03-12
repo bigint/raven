@@ -1050,7 +1050,7 @@ export const createDatabase = (url: string) => {
 ```typescript
 export * from './schema/index.js'
 export { createDatabase } from './client.js'
-export { createTenantQueries, type Database, type TenantQueries } from './helpers.js'
+export { createTenantQueries, insertWithTenant, type Database, type TenantQueries } from './helpers.js'
 ```
 
 - [ ] **Step 21: Install dependencies and generate initial migration**
