@@ -54,6 +54,26 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (editingKey && mode === "edit") {
+      setForm({
+        environment: editingKey.environment,
+        isActive: editingKey.isActive,
+        name: editingKey.name,
+        rateLimitRpd:
+          editingKey.rateLimitRpd !== null
+            ? String(editingKey.rateLimitRpd)
+            : "",
+        rateLimitRpm:
+          editingKey.rateLimitRpm !== null
+            ? String(editingKey.rateLimitRpm)
+            : ""
+      });
+    } else {
+      setForm(DEFAULT_FORM);
+    }
+  }, [editingKey, mode]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
