@@ -1,6 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { API_URL, api, getOrgId } from "@/lib/api";
+import { API_URL, api } from "@/lib/api";
+import { useOrgStore } from "@/stores/org";
 
 export interface RequestLog {
   id: string;

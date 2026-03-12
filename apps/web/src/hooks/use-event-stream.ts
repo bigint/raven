@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { API_URL, getOrgId } from "@/lib/api";
+import { API_URL } from "@/lib/api";
+import { useOrgStore } from "@/stores/org";
 
 type EventHandler = (data: unknown) => void;
 
@@ -28,7 +29,7 @@ export function useEventStream({
   useEffect(() => {
     if (!enabled) return;
 
-    const orgId = getOrgId();
+    const orgId = useOrgStore.getState().activeOrg?.id ?? null;
     const url = `${API_URL}/v1/events/stream${orgId ? `?orgId=${orgId}` : ""}`;
     const es = new EventSource(url, { withCredentials: true });
 

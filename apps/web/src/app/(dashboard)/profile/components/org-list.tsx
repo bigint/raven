@@ -119,7 +119,7 @@ const OrgList = ({
                       </Badge>
                     ) : (
                       <Button
-                        onClick={() => handleSwitchOrg(org.id)}
+                        onClick={() => handleSwitchOrg(org)}
                         size="sm"
                         variant="secondary"
                       >
