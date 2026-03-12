@@ -2,7 +2,6 @@ import type { Provider } from "./providers";
 
 export const PROVIDER_LABELS: Record<Provider, string> = {
   anthropic: "Anthropic",
-  google: "Google AI",
   openai: "OpenAI"
 };
 

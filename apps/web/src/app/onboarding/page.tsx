@@ -21,11 +21,7 @@ import { useOrgStore } from "@/stores/org";
 
 const PROVIDER_OPTIONS = [
   { label: "OpenAI", value: "openai" },
-  { label: "Anthropic", value: "anthropic" },
-  { label: "Google", value: "google" },
-  { label: "Azure", value: "azure" },
-  { label: "Cohere", value: "cohere" },
-  { label: "Mistral", value: "mistral" }
+  { label: "Anthropic", value: "anthropic" }
 ];
 
 interface OrgResponse {

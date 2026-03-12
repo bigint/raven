@@ -6,10 +6,6 @@ import type { RecentRequest } from "../hooks/use-overview";
 
 const PROVIDER_LABELS: Record<string, string> = {
   anthropic: "Anthropic",
-  azure: "Azure",
-  cohere: "Cohere",
-  google: "Google",
-  mistral: "Mistral",
   openai: "OpenAI"
 };
 

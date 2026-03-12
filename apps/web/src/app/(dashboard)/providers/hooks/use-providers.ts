@@ -17,19 +17,11 @@ export interface Provider {
 
 export const PROVIDER_OPTIONS = [
   { label: "OpenAI", value: "openai" },
-  { label: "Anthropic", value: "anthropic" },
-  { label: "Google", value: "google" },
-  { label: "Azure", value: "azure" },
-  { label: "Cohere", value: "cohere" },
-  { label: "Mistral", value: "mistral" }
+  { label: "Anthropic", value: "anthropic" }
 ];
 
 export const PROVIDER_LABELS: Record<string, string> = {
   anthropic: "Anthropic",
-  azure: "Azure",
-  cohere: "Cohere",
-  google: "Google",
-  mistral: "Mistral",
   openai: "OpenAI"
 };
 
