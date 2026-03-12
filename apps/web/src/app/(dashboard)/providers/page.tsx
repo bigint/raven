@@ -11,7 +11,7 @@ import {
   X
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { Select } from "@/components/select";
+import { Select } from "@raven/ui";
 import { useEventStream } from "@/hooks/use-event-stream";
 import { api } from "@/lib/api";
 

@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight, Radio } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Select } from "@/components/select";
+import { Select } from "@raven/ui";
 import { useEventStream } from "@/hooks/use-event-stream";
 import { API_URL, api, getOrgId } from "@/lib/api";
 
