@@ -51,7 +51,12 @@ export default function AnalyticsPage() {
         api.get<Stats>(`/v1/analytics/stats?range=${range}`),
         api.get<UsageRow[]>(`/v1/analytics/usage?range=${range}`),
       ])
-      setStats(statsData)
+      setStats({
+        totalRequests: Number(statsData.totalRequests) || 0,
+        totalCost: Number(statsData.totalCost) || 0,
+        avgLatency: Number(statsData.avgLatency) || 0,
+        cacheHitRate: Number(statsData.cacheHitRate) || 0,
+      })
       setUsage(usageData)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load analytics')

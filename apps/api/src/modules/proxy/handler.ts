@@ -228,7 +228,7 @@ export const proxyHandler = (db: Database, redis: Redis, env: Env) => {
       // SSE passthrough — stream directly to client
       const responseHeaders: Record<string, string> = {}
       upstreamResponse.headers.forEach((value, key) => {
-        if (!['connection', 'transfer-encoding'].includes(key.toLowerCase())) {
+        if (!['connection', 'transfer-encoding', 'content-encoding', 'content-length'].includes(key.toLowerCase())) {
           responseHeaders[key] = value
         }
       })
@@ -292,7 +292,7 @@ export const proxyHandler = (db: Database, redis: Redis, env: Env) => {
 
     const responseHeaders: Record<string, string> = {}
     upstreamResponse.headers.forEach((value, key) => {
-      if (!['connection', 'transfer-encoding'].includes(key.toLowerCase())) {
+      if (!['connection', 'transfer-encoding', 'content-encoding', 'content-length'].includes(key.toLowerCase())) {
         responseHeaders[key] = value
       }
     })
