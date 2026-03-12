@@ -395,8 +395,8 @@ export default function ProvidersPage() {
 
       {/* Delete Confirmation Modal */}
       {deleteId !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-sm rounded-xl border border-border bg-background shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setDeleteId(null)}>
+          <div className="w-full max-w-sm rounded-xl border border-border bg-background shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="px-6 py-5">
               <h2 className="text-base font-semibold">Delete Provider</h2>
               <p className="mt-2 text-sm text-muted-foreground">
