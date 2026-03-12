@@ -8,8 +8,10 @@ import {
   LayoutDashboard,
   LogOut,
   Network,
+  Receipt,
   ScrollText,
   Settings,
+  Users,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
@@ -23,6 +25,8 @@ const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/requests', label: 'Requests', icon: ScrollText },
   { href: '/budgets', label: 'Budgets', icon: CreditCard },
+  { href: '/team', label: 'Team', icon: Users },
+  { href: '/billing', label: 'Billing', icon: Receipt },
   { href: '/settings', label: 'Settings', icon: Settings },
 ]
 
