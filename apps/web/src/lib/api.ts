@@ -1,9 +1,18 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
 
+let currentOrgId: string | null = null
+
+export const setOrgId = (orgId: string | null) => {
+  currentOrgId = orgId
+}
+
 export const api = {
   async get<T>(path: string): Promise<T> {
     const res = await fetch(`${API_URL}${path}`, {
       credentials: 'include',
+      headers: {
+        ...(currentOrgId ? { 'X-Org-Id': currentOrgId } : {}),
+      },
     })
     if (!res.ok) {
       const error = await res.json().catch(() => ({ message: 'Request failed' }))
@@ -16,7 +25,10 @@ export const api = {
     const res = await fetch(`${API_URL}${path}`, {
       method: 'POST',
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(currentOrgId ? { 'X-Org-Id': currentOrgId } : {}),
+      },
       body: body ? JSON.stringify(body) : undefined,
     })
     if (!res.ok) {
@@ -30,7 +42,10 @@ export const api = {
     const res = await fetch(`${API_URL}${path}`, {
       method: 'PUT',
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(currentOrgId ? { 'X-Org-Id': currentOrgId } : {}),
+      },
       body: body ? JSON.stringify(body) : undefined,
     })
     if (!res.ok) {
@@ -44,6 +59,9 @@ export const api = {
     const res = await fetch(`${API_URL}${path}`, {
       method: 'DELETE',
       credentials: 'include',
+      headers: {
+        ...(currentOrgId ? { 'X-Org-Id': currentOrgId } : {}),
+      },
     })
     if (!res.ok) {
       const error = await res.json().catch(() => ({ message: 'Request failed' }))
