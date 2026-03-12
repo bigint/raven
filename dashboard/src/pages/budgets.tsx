@@ -63,14 +63,14 @@ export default function BudgetsPage() {
       key: 'entity_id',
       header: 'Entity',
       render: (item: BudgetConfig) => (
-        <span className="font-mono text-[11px] text-[#525252]">{item.entity_id}</span>
+        <span className="font-mono text-[11px] text-text-tertiary">{item.entity_id}</span>
       ),
     },
     {
       key: 'limit',
       header: 'Limit',
       render: (item: BudgetConfig) => (
-        <span className="font-mono text-xs font-medium text-[#fafafa]">
+        <span className="font-mono text-xs font-medium text-text-primary">
           {formatCurrency(item.limit)}
         </span>
       ),
@@ -79,7 +79,7 @@ export default function BudgetsPage() {
       key: 'period',
       header: 'Period',
       render: (item: BudgetConfig) => (
-        <span className="text-xs text-[#a3a3a3] capitalize">{item.period}</span>
+        <span className="text-xs text-text-secondary capitalize">{item.period}</span>
       ),
     },
     {
@@ -89,19 +89,19 @@ export default function BudgetsPage() {
         const pct = item.limit > 0 ? item.current_usage / item.limit : 0
         const barColor =
           pct > 0.9
-            ? 'bg-[rgba(239,68,68,0.35)]'
+            ? 'bg-error/35'
             : pct > 0.7
-              ? 'bg-[rgba(245,158,11,0.35)]'
-              : 'bg-white/[0.20]'
+              ? 'bg-warning/35'
+              : 'bg-surface-active'
         return (
           <div className="flex items-center gap-2">
-            <div className="w-20 h-1 rounded-sm bg-white/[0.04]">
+            <div className="w-20 h-1 rounded-sm bg-surface-hover">
               <div
                 className={`h-full rounded-sm ${barColor}`}
                 style={{ width: `${Math.min(pct * 100, 100)}%` }}
               />
             </div>
-            <span className="font-mono text-xs font-medium text-[#fafafa]">
+            <span className="font-mono text-xs font-medium text-text-primary">
               {formatPercent(pct)}
             </span>
           </div>
@@ -112,7 +112,7 @@ export default function BudgetsPage() {
       key: 'current_usage',
       header: 'Spent',
       render: (item: BudgetConfig) => (
-        <span className="font-mono text-xs font-medium text-[#fafafa]">
+        <span className="font-mono text-xs font-medium text-text-primary">
           {formatCurrency(item.current_usage)}
         </span>
       ),
@@ -122,7 +122,7 @@ export default function BudgetsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-[13px] font-semibold text-[#fafafa]">Budgets</h1>
+        <h1 className="text-[13px] font-semibold text-text-primary">Budgets</h1>
         <Button variant="primary" onClick={() => setCreateOpen(true)}>
           <Plus className="h-3.5 w-3.5" />
           Create Budget

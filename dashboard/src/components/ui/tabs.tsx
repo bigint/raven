@@ -5,7 +5,7 @@ export function TabsList({ className, children }: { className?: string; children
   return (
     <div
       className={cn(
-        'inline-flex rounded-md border border-white/[0.06] bg-white/[0.02] p-0.5',
+        'inline-flex rounded-md border border-border bg-surface p-0.5',
         className,
       )}
     >
@@ -30,7 +30,7 @@ export function TabsTrigger({ value, activeValue, onSelect, children, className 
       onClick={() => onSelect(value)}
       className={cn(
         'px-3 py-1 text-[11px] font-medium rounded-[5px]',
-        isActive ? 'bg-white/[0.08] text-[#fafafa]' : 'text-[#525252] hover:text-[#a3a3a3]',
+        isActive ? 'bg-surface-active text-text-primary' : 'text-text-tertiary hover:text-text-secondary',
         className,
       )}
     >

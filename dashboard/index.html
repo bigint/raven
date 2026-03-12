@@ -12,6 +12,13 @@
     />
   </head>
   <body>
+    <script>
+      (function() {
+        var t = localStorage.getItem('raven-theme') || 'system';
+        var d = t === 'system' ? window.matchMedia('(prefers-color-scheme: dark)').matches : t === 'dark';
+        if (d) document.documentElement.classList.add('dark');
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

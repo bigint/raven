@@ -13,14 +13,14 @@ export function Sparkline({ data, width = 64, height = 28 }: SparklineProps) {
       <RechartsAreaChart data={data} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
         <defs>
           <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#fff" stopOpacity={0.08} />
-            <stop offset="100%" stopColor="#fff" stopOpacity={0} />
+            <stop offset="0%" stopColor="var(--c-chart-fill-from)" stopOpacity={1} />
+            <stop offset="100%" stopColor="var(--c-chart-fill-to)" stopOpacity={1} />
           </linearGradient>
         </defs>
         <Area
           type="monotone"
           dataKey="value"
-          stroke="rgba(255,255,255,0.25)"
+          stroke="var(--c-chart-line)"
           strokeWidth={1}
           fill="url(#sparkGrad)"
           isAnimationActive={false}

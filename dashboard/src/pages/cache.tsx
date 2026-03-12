@@ -25,7 +25,7 @@ export default function CachePage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-[13px] font-semibold text-[#fafafa]">Cache</h1>
+        <h1 className="text-[13px] font-semibold text-text-primary">Cache</h1>
         <DateRangePicker value={range} onChange={setRange} />
       </div>
 

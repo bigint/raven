@@ -71,7 +71,7 @@ export function Shell({ children }: ShellProps) {
   }, [navigate])
 
   return (
-    <div className="min-h-screen bg-[#09090b]">
+    <div className="min-h-screen bg-bg">
       <Sidebar
         collapsed={collapsed}
         onToggle={toggleSidebar}

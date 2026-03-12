@@ -10,7 +10,7 @@ import { useState } from 'react'
 
 function StatusCode({ code }: { code: number }) {
   const color =
-    code < 300 ? 'text-[#22c55e]' : code < 500 ? 'text-[#f59e0b]' : 'text-[#ef4444]'
+    code < 300 ? 'text-success' : code < 500 ? 'text-warning' : 'text-error'
   return <span className={`font-mono text-xs font-medium ${color}`}>{code}</span>
 }
 
@@ -19,57 +19,57 @@ function ExpandedRowDetail({ row }: { row: RequestLog }) {
     <div className="px-5 py-4">
       <div className="grid grid-cols-4 gap-x-8 gap-y-4">
         <div>
-          <p className="text-[9px] font-medium text-[#333] uppercase tracking-[1px]">Request ID</p>
-          <p className="mt-1 font-mono text-xs text-[#fafafa]">{row.id}</p>
+          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Request ID</p>
+          <p className="mt-1 font-mono text-xs text-text-primary">{row.id}</p>
         </div>
         <div>
-          <p className="text-[9px] font-medium text-[#333] uppercase tracking-[1px]">Provider</p>
-          <p className="mt-1 font-mono text-xs text-[#fafafa]">{row.provider}</p>
+          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Provider</p>
+          <p className="mt-1 font-mono text-xs text-text-primary">{row.provider}</p>
         </div>
         <div>
-          <p className="text-[9px] font-medium text-[#333] uppercase tracking-[1px]">Model</p>
-          <p className="mt-1 font-mono text-xs text-[#fafafa]">{row.model}</p>
+          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Model</p>
+          <p className="mt-1 font-mono text-xs text-text-primary">{row.model}</p>
         </div>
         <div>
-          <p className="text-[9px] font-medium text-[#333] uppercase tracking-[1px]">Status</p>
+          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Status</p>
           <div className="mt-1">
             <StatusCode code={row.status_code} />
           </div>
         </div>
         <div>
-          <p className="text-[9px] font-medium text-[#333] uppercase tracking-[1px]">Timestamp</p>
-          <p className="mt-1 font-mono text-xs text-[#fafafa]">
+          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Timestamp</p>
+          <p className="mt-1 font-mono text-xs text-text-primary">
             {format(new Date(row.timestamp), 'yyyy-MM-dd')}{' '}
             {format(new Date(row.timestamp), 'HH:mm:ss.SSS')}
           </p>
         </div>
         <div>
-          <p className="text-[9px] font-medium text-[#333] uppercase tracking-[1px]">Latency</p>
-          <p className="mt-1 font-mono text-xs text-[#fafafa]">{formatLatency(row.latency_ms)}</p>
+          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Latency</p>
+          <p className="mt-1 font-mono text-xs text-text-primary">{formatLatency(row.latency_ms)}</p>
         </div>
         <div>
-          <p className="text-[9px] font-medium text-[#333] uppercase tracking-[1px]">Tokens (In)</p>
-          <p className="mt-1 font-mono text-xs text-[#fafafa]">{row.input_tokens.toLocaleString()}</p>
+          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Tokens (In)</p>
+          <p className="mt-1 font-mono text-xs text-text-primary">{row.input_tokens.toLocaleString()}</p>
         </div>
         <div>
-          <p className="text-[9px] font-medium text-[#333] uppercase tracking-[1px]">Tokens (Out)</p>
-          <p className="mt-1 font-mono text-xs text-[#fafafa]">{row.output_tokens.toLocaleString()}</p>
+          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Tokens (Out)</p>
+          <p className="mt-1 font-mono text-xs text-text-primary">{row.output_tokens.toLocaleString()}</p>
         </div>
         <div>
-          <p className="text-[9px] font-medium text-[#333] uppercase tracking-[1px]">Cost</p>
-          <p className="mt-1 font-mono text-xs text-[#fafafa]">{formatCurrency(row.cost)}</p>
+          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Cost</p>
+          <p className="mt-1 font-mono text-xs text-text-primary">{formatCurrency(row.cost)}</p>
         </div>
         <div>
-          <p className="text-[9px] font-medium text-[#333] uppercase tracking-[1px]">Cache</p>
-          <p className="mt-1 font-mono text-xs text-[#fafafa]">{row.cache_hit ? 'hit' : 'miss'}</p>
+          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Cache</p>
+          <p className="mt-1 font-mono text-xs text-text-primary">{row.cache_hit ? 'hit' : 'miss'}</p>
         </div>
         <div>
-          <p className="text-[9px] font-medium text-[#333] uppercase tracking-[1px]">Error</p>
-          <p className="mt-1 font-mono text-xs text-[#fafafa]">{row.error ? '—' : '—'}</p>
+          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Error</p>
+          <p className="mt-1 font-mono text-xs text-text-primary">{row.error ? '—' : '—'}</p>
         </div>
       </div>
       {row.error && (
-        <pre className="mt-4 max-h-[160px] overflow-auto rounded-md border border-white/[0.06] bg-white/[0.02] p-3 font-mono text-[11px] text-[#525252]">
+        <pre className="mt-4 max-h-[160px] overflow-auto rounded-md border border-border bg-surface p-3 font-mono text-[11px] text-text-tertiary">
           {row.error}
         </pre>
       )}
@@ -119,7 +119,7 @@ export default function RequestsPage() {
       header: 'Timestamp',
       sortable: true,
       render: (item: RequestLog) => (
-        <span className="font-mono text-xs text-[#525252]">
+        <span className="font-mono text-xs text-text-tertiary">
           {format(new Date(item.timestamp), 'HH:mm:ss.SSS')}
         </span>
       ),
@@ -129,7 +129,7 @@ export default function RequestsPage() {
       header: 'Provider',
       sortable: true,
       render: (item: RequestLog) => (
-        <span className="text-xs text-[#a3a3a3]">{item.provider}</span>
+        <span className="text-xs text-text-secondary">{item.provider}</span>
       ),
     },
     {
@@ -137,7 +137,7 @@ export default function RequestsPage() {
       header: 'Model',
       sortable: true,
       render: (item: RequestLog) => (
-        <span className="text-xs text-[#a3a3a3]">{item.model}</span>
+        <span className="text-xs text-text-secondary">{item.model}</span>
       ),
     },
     {
@@ -151,7 +151,7 @@ export default function RequestsPage() {
       header: 'Latency',
       sortable: true,
       render: (item: RequestLog) => (
-        <span className="font-mono text-xs font-medium text-[#fafafa]">
+        <span className="font-mono text-xs font-medium text-text-primary">
           {formatLatency(item.latency_ms)}
         </span>
       ),
@@ -161,7 +161,7 @@ export default function RequestsPage() {
       header: 'Tokens',
       sortable: true,
       render: (item: RequestLog) => (
-        <span className="font-mono text-xs font-medium text-[#fafafa]">
+        <span className="font-mono text-xs font-medium text-text-primary">
           {item.total_tokens.toLocaleString()}
         </span>
       ),
@@ -171,7 +171,7 @@ export default function RequestsPage() {
       header: 'Cost',
       sortable: true,
       render: (item: RequestLog) => (
-        <span className="font-mono text-xs font-medium text-[#fafafa]">
+        <span className="font-mono text-xs font-medium text-text-primary">
           {formatCurrency(item.cost)}
         </span>
       ),
@@ -189,7 +189,7 @@ export default function RequestsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-[13px] font-semibold text-[#fafafa]">Requests</h1>
+        <h1 className="text-[13px] font-semibold text-text-primary">Requests</h1>
         <div className="flex items-center gap-3">
           <Select
             options={[

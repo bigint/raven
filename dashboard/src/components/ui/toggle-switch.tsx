@@ -11,7 +11,7 @@ interface ToggleSwitchProps {
 export function ToggleSwitch({ checked, onChange, label, disabled, className }: ToggleSwitchProps) {
   return (
     <label className={cn('inline-flex items-center gap-2 cursor-pointer', disabled && 'opacity-40 cursor-not-allowed', className)}>
-      {label && <span className="text-xs text-[#a3a3a3]">{label}</span>}
+      {label && <span className="text-xs text-text-secondary">{label}</span>}
       <button
         type="button"
         role="switch"
@@ -20,12 +20,12 @@ export function ToggleSwitch({ checked, onChange, label, disabled, className }: 
         onClick={() => !disabled && onChange(!checked)}
         className={cn(
           'relative h-4 w-8 rounded-lg',
-          checked ? 'bg-[#22c55e]' : 'bg-white/[0.06]',
+          checked ? 'bg-success' : 'bg-border',
         )}
       >
         <span
           className={cn(
-            'absolute top-0.5 h-3 w-3 rounded-full bg-[#fafafa]',
+            'absolute top-0.5 h-3 w-3 rounded-full bg-accent-text dark:bg-text-primary',
             checked ? 'left-[18px]' : 'left-0.5',
           )}
         />

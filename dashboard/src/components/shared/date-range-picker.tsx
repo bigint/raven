@@ -23,8 +23,8 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
 
   return (
     <div className={cn('flex items-center gap-2', className)}>
-      <Calendar className="h-3.5 w-3.5 text-[#333]" />
-      <div className="inline-flex rounded-md border border-white/[0.06] bg-white/[0.02] p-0.5">
+      <Calendar className="h-3.5 w-3.5 text-text-muted" />
+      <div className="inline-flex rounded-md border border-border bg-surface p-0.5">
         {presets.map((preset) => (
           <button
             key={preset}
@@ -33,8 +33,8 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
             className={cn(
               'px-3 py-1 text-[11px] font-medium rounded-[5px]',
               value === preset && !showCustom
-                ? 'bg-white/[0.08] text-[#fafafa]'
-                : 'text-[#525252] hover:text-[#a3a3a3]',
+                ? 'bg-surface-active text-text-primary'
+                : 'text-text-tertiary hover:text-text-secondary',
             )}
           >
             {preset}
@@ -45,7 +45,7 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
           onClick={() => setShowCustom(!showCustom)}
           className={cn(
             'px-3 py-1 text-[11px] font-medium rounded-[5px]',
-            showCustom ? 'bg-white/[0.08] text-[#fafafa]' : 'text-[#525252] hover:text-[#a3a3a3]',
+            showCustom ? 'bg-surface-active text-text-primary' : 'text-text-tertiary hover:text-text-secondary',
           )}
         >
           Custom
@@ -57,14 +57,14 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
             type="datetime-local"
             value={customStart}
             onChange={(e) => setCustomStart(e.target.value)}
-            className="h-8 rounded-md border border-white/[0.06] bg-transparent px-2 text-[11px] text-[#fafafa] focus:outline-none focus:border-white/[0.15]"
+            className="h-8 rounded-md border border-border bg-transparent px-2 text-[11px] text-text-primary focus:outline-none focus:border-border-focus"
           />
-          <span className="text-[11px] text-[#333]">to</span>
+          <span className="text-[11px] text-text-muted">to</span>
           <input
             type="datetime-local"
             value={customEnd}
             onChange={(e) => setCustomEnd(e.target.value)}
-            className="h-8 rounded-md border border-white/[0.06] bg-transparent px-2 text-[11px] text-[#fafafa] focus:outline-none focus:border-white/[0.15]"
+            className="h-8 rounded-md border border-border bg-transparent px-2 text-[11px] text-text-primary focus:outline-none focus:border-border-focus"
           />
           <Button
             size="sm"

@@ -23,7 +23,7 @@ export function Tooltip({ content, children, side = 'top', className }: TooltipP
       {show && (
         <div
           className={cn(
-            'absolute z-50 whitespace-nowrap rounded-[4px] border border-white/[0.08] bg-[#1a1a1a] px-2 py-1 text-[11px] text-[#a3a3a3]',
+            'absolute z-50 whitespace-nowrap rounded-[4px] border border-border-hover bg-elevated px-2 py-1 text-[11px] text-text-secondary',
             positions[side],
             className,
           )}

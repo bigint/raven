@@ -16,10 +16,10 @@ export function ErrorBanner({ children, onDismiss, className }: ErrorBannerProps
         className,
       )}
     >
-      <AlertCircle className="h-3.5 w-3.5 shrink-0 text-[#ef4444]" />
-      <span className="flex-1 text-xs text-[#ef4444]">{children}</span>
+      <AlertCircle className="h-3.5 w-3.5 shrink-0 text-error" />
+      <span className="flex-1 text-xs text-error">{children}</span>
       {onDismiss && (
-        <button type="button" onClick={onDismiss} className="text-[#333] hover:text-[#a3a3a3]">
+        <button type="button" onClick={onDismiss} className="text-text-muted hover:text-text-secondary">
           <X className="h-3 w-3" />
         </button>
       )}

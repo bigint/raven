@@ -120,7 +120,7 @@ export function DataTable<T>({
                     </TableRow>
                     {isExpanded && renderExpandedRow && (
                       <tr key={`${key}-expanded`}>
-                        <td colSpan={columns.length} className="bg-white/[0.01] border-b border-white/[0.06] p-0">
+                        <td colSpan={columns.length} className="bg-surface border-b border-border p-0">
                           {renderExpandedRow(row)}
                         </td>
                       </tr>
@@ -133,7 +133,7 @@ export function DataTable<T>({
 
           {onPageChange && totalPages > 1 && (
             <div className="mt-3 flex items-center justify-between">
-              <span className="text-[11px] text-[#525252]">
+              <span className="text-[11px] text-text-tertiary">
                 {start}–{end} of {totalItems} results
               </span>
               <div className="flex gap-1">
@@ -141,7 +141,7 @@ export function DataTable<T>({
                   type="button"
                   disabled={page <= 1}
                   onClick={() => onPageChange(page - 1)}
-                  className="h-6 w-6 rounded-[5px] text-[11px] text-[#a3a3a3] hover:bg-white/[0.05] disabled:opacity-40"
+                  className="h-6 w-6 rounded-[5px] text-[11px] text-text-secondary hover:bg-surface-hover disabled:opacity-40"
                 >
                   ‹
                 </button>
@@ -152,7 +152,7 @@ export function DataTable<T>({
                     onClick={() => onPageChange(p)}
                     className={cn(
                       'h-6 w-6 rounded-[5px] text-[11px]',
-                      p === page ? 'bg-white/[0.08] text-[#fafafa]' : 'text-[#525252] hover:bg-white/[0.05]',
+                      p === page ? 'bg-surface-active text-text-primary' : 'text-text-tertiary hover:bg-surface-hover',
                     )}
                   >
                     {p}
@@ -162,7 +162,7 @@ export function DataTable<T>({
                   type="button"
                   disabled={page >= totalPages}
                   onClick={() => onPageChange(page + 1)}
-                  className="h-6 w-6 rounded-[5px] text-[11px] text-[#a3a3a3] hover:bg-white/[0.05] disabled:opacity-40"
+                  className="h-6 w-6 rounded-[5px] text-[11px] text-text-secondary hover:bg-surface-hover disabled:opacity-40"
                 >
                   ›
                 </button>

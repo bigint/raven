@@ -31,7 +31,7 @@ export function TableBody({ className, children, ...props }: HTMLAttributes<HTML
 export function TableRow({ className, children, ...props }: HTMLAttributes<HTMLTableRowElement>) {
   return (
     <tr
-      className={cn('h-9 border-b border-white/[0.04] hover:bg-white/[0.02]', className)}
+      className={cn('h-9 border-b border-surface-hover hover:bg-surface', className)}
       {...props}
     >
       {children}
@@ -52,8 +52,8 @@ export function TableHead({ sortKey, currentSort, sortOrder, onSort, className, 
   return (
     <th
       className={cn(
-        'h-8 px-3 text-left text-[10px] font-medium uppercase tracking-[0.5px] text-[#333]',
-        'border-b border-white/[0.06]',
+        'h-8 px-3 text-left text-[10px] font-medium uppercase tracking-[0.5px] text-text-muted',
+        'border-b border-border',
         sortKey && 'cursor-pointer select-none',
         className,
       )}
@@ -64,8 +64,8 @@ export function TableHead({ sortKey, currentSort, sortOrder, onSort, className, 
         {children}
         {sortKey && (
           <span className="inline-flex flex-col">
-            <ChevronUp className={cn('h-2 w-2', isSorted && sortOrder === 'asc' ? 'text-[#fafafa]' : 'text-[#333]')} />
-            <ChevronDown className={cn('h-2 w-2 -mt-0.5', isSorted && sortOrder === 'desc' ? 'text-[#fafafa]' : 'text-[#333]')} />
+            <ChevronUp className={cn('h-2 w-2', isSorted && sortOrder === 'asc' ? 'text-text-primary' : 'text-text-muted')} />
+            <ChevronDown className={cn('h-2 w-2 -mt-0.5', isSorted && sortOrder === 'desc' ? 'text-text-primary' : 'text-text-muted')} />
           </span>
         )}
       </div>
@@ -75,7 +75,7 @@ export function TableHead({ sortKey, currentSort, sortOrder, onSort, className, 
 
 export function TableCell({ className, children, ...props }: HTMLAttributes<HTMLTableCellElement>) {
   return (
-    <td className={cn('px-3 text-xs text-[#a3a3a3]', className)} {...props}>
+    <td className={cn('px-3 text-xs text-text-secondary', className)} {...props}>
       {children}
     </td>
   )

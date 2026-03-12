@@ -38,7 +38,7 @@ export default function OverviewPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-[13px] font-semibold text-[#fafafa]">Overview</h1>
+        <h1 className="text-[13px] font-semibold text-text-primary">Overview</h1>
         <DateRangePicker value={range} onChange={setRange} />
       </div>
 
@@ -95,9 +95,9 @@ export default function OverviewPage() {
                   return (
                     <div
                       key={provider.name}
-                      className="flex items-center justify-between h-9 px-3 hover:bg-white/[0.02]"
+                      className="flex items-center justify-between h-9 px-3 hover:bg-surface"
                     >
-                      <span className="text-xs text-[#a3a3a3]">{provider.display_name}</span>
+                      <span className="text-xs text-text-secondary">{provider.display_name}</span>
                       <Badge
                         variant={
                           status === 'healthy'

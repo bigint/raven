@@ -49,7 +49,7 @@ function ProviderCard({
   const status = provider.healthy ? 'healthy' : provider.configured ? 'degraded' : 'down'
 
   return (
-    <Card className="hover:border-white/[0.10]">
+    <Card className="hover:border-border-hover">
       <CardContent>
         <div className="flex items-start justify-between mb-3">
           <div>
@@ -57,29 +57,29 @@ function ProviderCard({
               <span
                 className={`h-2 w-2 rounded-full ${
                   status === 'healthy'
-                    ? 'bg-[#22c55e]'
+                    ? 'bg-success'
                     : status === 'degraded'
-                      ? 'bg-[#f59e0b]'
-                      : 'bg-[#ef4444]'
+                      ? 'bg-warning'
+                      : 'bg-error'
                 }`}
               />
-              <h3 className="text-[13px] font-medium text-[#fafafa]">{provider.display_name}</h3>
+              <h3 className="text-[13px] font-medium text-text-primary">{provider.display_name}</h3>
             </div>
-            <p className="mt-0.5 text-[11px] text-[#525252]">{status}</p>
+            <p className="mt-0.5 text-[11px] text-text-tertiary">{status}</p>
           </div>
         </div>
 
         {isConfigured && (
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
-              <p className="text-[9px] font-medium text-[#333] uppercase tracking-[1px]">Latency</p>
-              <p className="mt-1 font-mono text-xs font-medium text-[#fafafa]">
+              <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Latency</p>
+              <p className="mt-1 font-mono text-xs font-medium text-text-primary">
                 {health ? formatLatency(health.latency_ms) : '--'}
               </p>
             </div>
             <div>
-              <p className="text-[9px] font-medium text-[#333] uppercase tracking-[1px]">Errors</p>
-              <p className="mt-1 font-mono text-xs font-medium text-[#fafafa]">
+              <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Errors</p>
+              <p className="mt-1 font-mono text-xs font-medium text-text-primary">
                 {health ? formatPercent(health.error_rate) : '--'}
               </p>
             </div>
@@ -88,9 +88,9 @@ function ProviderCard({
 
         <div className="mb-3">
           {provider.models > 0 ? (
-            <p className="text-[11px] text-[#525252]">{provider.models} model{provider.models !== 1 ? 's' : ''} available</p>
+            <p className="text-[11px] text-text-tertiary">{provider.models} model{provider.models !== 1 ? 's' : ''} available</p>
           ) : (
-            <p className="text-[11px] text-[#525252]">No models available</p>
+            <p className="text-[11px] text-text-tertiary">No models available</p>
           )}
         </div>
 
@@ -205,7 +205,7 @@ function ConfigureProviderDialog({
 
       <div className="space-y-4">
         <div>
-          <label className="block text-[11px] text-[#525252] mb-1">
+          <label className="block text-[11px] text-text-tertiary mb-1">
             API Key {state.isEditing && '(leave blank to keep current)'}
           </label>
           <div className="relative">
@@ -214,12 +214,12 @@ function ConfigureProviderDialog({
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder={state.isEditing ? 'Enter new key to update...' : 'Enter API key...'}
-              className="h-8 w-full rounded-md border border-white/[0.06] bg-transparent px-2.5 pr-8 text-[13px] text-[#fafafa] placeholder:text-[#333] font-mono focus:outline-none focus:border-white/[0.15] focus:ring-1 focus:ring-white/[0.10]"
+              className="h-8 w-full rounded-md border border-border bg-transparent px-2.5 pr-8 text-[13px] text-text-primary placeholder:text-text-muted font-mono focus:outline-none focus:border-border-focus focus:ring-1 focus:ring-focus"
             />
             <button
               type="button"
               onClick={() => setShowKey((prev) => !prev)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-[#333] hover:text-[#a3a3a3]"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary"
             >
               {showKey ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
             </button>
@@ -233,10 +233,10 @@ function ConfigureProviderDialog({
           placeholder={state.provider.base_url || 'https://api.provider.com/v1'}
         />
 
-        <div className="flex items-center justify-between rounded-lg border border-white/[0.06] bg-transparent px-3 py-2.5">
+        <div className="flex items-center justify-between rounded-lg border border-border bg-transparent px-3 py-2.5">
           <div>
-            <p className="text-xs text-[#fafafa]">Enable Provider</p>
-            <p className="text-[11px] text-[#525252] mt-0.5">
+            <p className="text-xs text-text-primary">Enable Provider</p>
+            <p className="text-[11px] text-text-tertiary mt-0.5">
               Route requests to this provider when enabled
             </p>
           </div>
@@ -249,7 +249,7 @@ function ConfigureProviderDialog({
       </div>
 
       {state.isEditing && !showDeleteConfirm && (
-        <div className="mt-4 pt-4 border-t border-white/[0.06]">
+        <div className="mt-4 pt-4 border-t border-border">
           <Button
             variant="danger"
             size="sm"
@@ -263,12 +263,12 @@ function ConfigureProviderDialog({
       )}
 
       {showDeleteConfirm && (
-        <div className="mt-4 pt-4 border-t border-white/[0.06]">
+        <div className="mt-4 pt-4 border-t border-border">
           <div className="rounded-md border border-red-500/20 bg-red-500/[0.05] p-3">
-            <p className="text-xs text-[#ef4444] font-medium mb-2">
+            <p className="text-xs text-error font-medium mb-2">
               Are you sure you want to remove this configuration?
             </p>
-            <p className="text-[11px] text-[#525252] mb-3">
+            <p className="text-[11px] text-text-tertiary mb-3">
               This will delete the API key and disable the provider. This action cannot be undone.
             </p>
             <div className="flex gap-2">
@@ -340,8 +340,8 @@ export default function ProvidersPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-[13px] font-semibold text-[#fafafa]">Providers</h1>
-        <div className="flex items-center gap-2 text-[11px] text-[#525252]">
+        <h1 className="text-[13px] font-semibold text-text-primary">Providers</h1>
+        <div className="flex items-center gap-2 text-[11px] text-text-tertiary">
           <Activity className="h-3 w-3" />
           Auto-refreshes every 30s
         </div>

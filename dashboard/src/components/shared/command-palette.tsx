@@ -101,26 +101,26 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh]">
-      <div className="fixed inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-[560px] rounded-lg border border-white/[0.08] bg-[#111] overflow-hidden">
-        <div className="border-b border-white/[0.06] px-4 py-3">
+      <div className="fixed inset-0 bg-overlay" onClick={onClose} />
+      <div className="relative z-10 w-full max-w-[560px] rounded-lg border border-border-hover bg-elevated overflow-hidden">
+        <div className="border-b border-border px-4 py-3">
           <input
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Search pages, actions, settings..."
-            className="w-full bg-transparent text-sm text-[#fafafa] placeholder:text-[#333] outline-none"
+            className="w-full bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none"
           />
         </div>
         <div className="max-h-[320px] overflow-y-auto p-2">
           {filtered.length === 0 ? (
-            <p className="px-3 py-4 text-center text-xs text-[#525252]">No results</p>
+            <p className="px-3 py-4 text-center text-xs text-text-tertiary">No results</p>
           ) : (
             Object.entries(grouped).map(([category, items]) =>
               items.length > 0 ? (
                 <div key={category} className="mb-2 last:mb-0">
-                  <p className="px-2 py-1 text-[9px] font-medium text-[#333] uppercase tracking-[1px]">
+                  <p className="px-2 py-1 text-[9px] font-medium text-text-muted uppercase tracking-[1px]">
                     {category}
                   </p>
                   {items.map((item) => {
@@ -136,13 +136,13 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                         onMouseEnter={() => setActiveIndex(idx)}
                         className={cn(
                           'flex w-full items-center gap-2.5 rounded-[5px] px-2.5 py-1.5 text-xs',
-                          isActive ? 'bg-white/[0.05] text-[#fafafa]' : 'text-[#a3a3a3]',
+                          isActive ? 'bg-surface-hover text-text-primary' : 'text-text-secondary',
                         )}
                       >
-                        <span className="text-[#525252]">{item.icon}</span>
+                        <span className="text-text-tertiary">{item.icon}</span>
                         <span className="flex-1 text-left">{item.label}</span>
                         {item.shortcut && (
-                          <span className="text-[9px] font-mono text-[#333]">{item.shortcut}</span>
+                          <span className="text-[9px] font-mono text-text-muted">{item.shortcut}</span>
                         )}
                       </button>
                     )

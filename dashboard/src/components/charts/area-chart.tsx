@@ -20,8 +20,8 @@ interface AreaChartProps {
 function ChartTooltip({ active, payload, valueFormatter }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-[4px] border border-white/[0.08] bg-[#1a1a1a] px-2 py-1">
-      <p className="text-[11px] text-[#a3a3a3]">
+    <div className="rounded-[4px] border border-border-hover bg-elevated px-2 py-1">
+      <p className="text-[11px] text-text-secondary">
         {valueFormatter ? valueFormatter(payload[0].value) : payload[0].value}
       </p>
     </div>
@@ -36,38 +36,40 @@ export function AreaChart({
   xAxisFormatter,
 }: AreaChartProps) {
   const formatX = xAxisFormatter ?? ((ts: string) => format(new Date(ts), 'MMM d'))
+  const tickFill = 'var(--c-text-muted)'
+  const axisStroke = 'var(--c-border)'
 
   return (
     <ResponsiveContainer width="100%" height={height}>
       <RechartsAreaChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#fff" stopOpacity={0.08} />
-            <stop offset="100%" stopColor="#fff" stopOpacity={0} />
+            <stop offset="0%" stopColor="var(--c-chart-fill-from)" stopOpacity={1} />
+            <stop offset="100%" stopColor="var(--c-chart-fill-to)" stopOpacity={1} />
           </linearGradient>
         </defs>
         <XAxis
           dataKey="timestamp"
           tickFormatter={formatX}
-          axisLine={{ stroke: 'rgba(255,255,255,0.04)' }}
+          axisLine={{ stroke: axisStroke }}
           tickLine={false}
-          tick={{ fontSize: 10, fill: '#333', fontFamily: 'var(--font-mono)' }}
+          tick={{ fontSize: 10, fill: tickFill, fontFamily: 'var(--font-mono)' }}
         />
         <YAxis
-          axisLine={{ stroke: 'rgba(255,255,255,0.04)' }}
+          axisLine={{ stroke: axisStroke }}
           tickLine={false}
-          tick={{ fontSize: 10, fill: '#333', fontFamily: 'var(--font-mono)' }}
+          tick={{ fontSize: 10, fill: tickFill, fontFamily: 'var(--font-mono)' }}
           tickFormatter={valueFormatter}
         />
         <Tooltip cursor={false} content={<ChartTooltip valueFormatter={valueFormatter} />} />
         <Area
           type="monotone"
           dataKey="value"
-          stroke="rgba(255,255,255,0.25)"
+          stroke="var(--c-chart-line)"
           strokeWidth={1.5}
           fill={`url(#${gradientId})`}
           dot={false}
-          activeDot={{ r: 3, fill: '#fff', stroke: 'none' }}
+          activeDot={{ r: 3, fill: 'var(--c-text-primary)', stroke: 'none' }}
           isAnimationActive={false}
         />
       </RechartsAreaChart>

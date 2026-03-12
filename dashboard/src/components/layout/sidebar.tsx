@@ -76,22 +76,22 @@ export function Sidebar({ collapsed, onToggle, onOpenPalette, gatewayStatus }: S
     <>
       {/* Logo area */}
       <div className={cn(
-        'flex h-12 items-center border-b border-white/[0.06] shrink-0',
+        'flex h-12 items-center border-b border-border shrink-0',
         collapsed ? 'justify-center px-0' : 'justify-between px-4',
       )}>
         <div className={cn('flex items-center', collapsed ? '' : 'gap-2')}>
-          <div className="h-[22px] w-[22px] rounded-md bg-[#fafafa] flex items-center justify-center shrink-0">
-            <span className="text-[#09090b] font-bold text-[10px]">R</span>
+          <div className="h-[22px] w-[22px] rounded-md bg-accent flex items-center justify-center shrink-0">
+            <span className="text-accent-text font-bold text-[10px]">R</span>
           </div>
           {!collapsed && (
-            <span className="font-semibold text-[#e0e0e0] text-[13px] tracking-[-0.3px]">Raven</span>
+            <span className="font-semibold text-text-primary text-[13px] tracking-[-0.3px]">Raven</span>
           )}
         </div>
         {!collapsed && (
           <button
             type="button"
             onClick={onToggle}
-            className="h-5 w-5 rounded-[4px] flex items-center justify-center bg-white/[0.04] text-[#525252] hover:text-[#a3a3a3]"
+            className="h-5 w-5 rounded-[4px] flex items-center justify-center bg-surface-hover text-text-tertiary hover:text-text-secondary"
           >
             <ChevronLeft className="h-3 w-3" />
           </button>
@@ -104,7 +104,7 @@ export function Sidebar({ collapsed, onToggle, onOpenPalette, gatewayStatus }: S
           <button
             type="button"
             onClick={onOpenPalette}
-            className="h-8 w-8 rounded-md flex items-center justify-center text-[#525252] hover:text-[#a3a3a3] hover:bg-white/[0.04]"
+            className="h-8 w-8 rounded-md flex items-center justify-center text-text-tertiary hover:text-text-secondary hover:bg-surface-hover"
           >
             <Search className="h-3.5 w-3.5" />
           </button>
@@ -114,7 +114,7 @@ export function Sidebar({ collapsed, onToggle, onOpenPalette, gatewayStatus }: S
           <button
             type="button"
             onClick={onOpenPalette}
-            className="w-full flex items-center gap-1.5 rounded-md border border-white/[0.06] px-2.5 py-1.5 text-[11px] text-[#333] hover:border-white/[0.10]"
+            className="w-full flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-[11px] text-text-muted hover:border-border-hover"
           >
             <Search className="h-3 w-3" />
             <span>Search...</span>
@@ -128,7 +128,7 @@ export function Sidebar({ collapsed, onToggle, onOpenPalette, gatewayStatus }: S
         {navGroups.map((group) => (
           <div key={group.label} className="mb-4 last:mb-0">
             {!collapsed && (
-              <p className="px-2.5 mb-1.5 text-[9px] font-medium text-[#333] uppercase tracking-[1px]">
+              <p className="px-2.5 mb-1.5 text-[9px] font-medium text-text-muted uppercase tracking-[1px]">
                 {group.label}
               </p>
             )}
@@ -148,8 +148,8 @@ export function Sidebar({ collapsed, onToggle, onOpenPalette, gatewayStatus }: S
                           className={cn(
                             'flex items-center justify-center h-8 w-8 mx-auto rounded-[5px]',
                             isActive
-                              ? 'bg-white/[0.06] text-[#fafafa]'
-                              : 'text-[#525252] hover:text-[#a3a3a3] hover:bg-white/[0.04]',
+                              ? 'bg-surface-active text-text-primary'
+                              : 'text-text-tertiary hover:text-text-secondary hover:bg-surface-hover',
                           )}
                         >
                           <Icon className="h-[15px] w-[15px]" />
@@ -167,14 +167,14 @@ export function Sidebar({ collapsed, onToggle, onOpenPalette, gatewayStatus }: S
                       className={cn(
                         'flex items-center gap-2 rounded-[5px] px-2.5 py-[6px] text-xs font-medium',
                         isActive
-                          ? 'bg-white/[0.06] text-[#fafafa]'
-                          : 'text-[#525252] hover:text-[#a3a3a3] hover:bg-white/[0.04]',
+                          ? 'bg-surface-active text-text-primary'
+                          : 'text-text-tertiary hover:text-text-secondary hover:bg-surface-hover',
                       )}
                     >
-                      <Icon className={cn('h-[15px] w-[15px] shrink-0', isActive ? 'text-[#fafafa]' : 'text-[#525252]')} />
+                      <Icon className={cn('h-[15px] w-[15px] shrink-0', isActive ? 'text-text-primary' : 'text-text-tertiary')} />
                       <span className="flex-1">{item.label}</span>
                       {'shortcut' in item && (
-                        <span className="text-[9px] font-mono text-[#333] bg-white/[0.04] px-1 py-0.5 rounded-[3px]">
+                        <span className="text-[9px] font-mono text-text-muted bg-surface-hover px-1 py-0.5 rounded-[3px]">
                           {item.shortcut}
                         </span>
                       )}
@@ -189,7 +189,7 @@ export function Sidebar({ collapsed, onToggle, onOpenPalette, gatewayStatus }: S
 
       {/* Footer */}
       <div className={cn(
-        'border-t border-white/[0.06] shrink-0',
+        'border-t border-border shrink-0',
         collapsed ? 'py-3 flex flex-col items-center gap-2' : 'px-4 py-3',
       )}>
         {collapsed ? (
@@ -197,13 +197,13 @@ export function Sidebar({ collapsed, onToggle, onOpenPalette, gatewayStatus }: S
             <div
               className={cn(
                 'h-[5px] w-[5px] rounded-full',
-                gatewayStatus === 'connected' ? 'bg-[#22c55e]' : 'bg-[#ef4444]',
+                gatewayStatus === 'connected' ? 'bg-success' : 'bg-error',
               )}
             />
             <button
               type="button"
               onClick={onToggle}
-              className="h-6 w-6 rounded-[4px] flex items-center justify-center text-[#333] hover:text-[#a3a3a3] hover:bg-white/[0.04]"
+              className="h-6 w-6 rounded-[4px] flex items-center justify-center text-text-muted hover:text-text-secondary hover:bg-surface-hover"
             >
               <ChevronRight className="h-3 w-3" />
             </button>
@@ -214,16 +214,16 @@ export function Sidebar({ collapsed, onToggle, onOpenPalette, gatewayStatus }: S
               <div
                 className={cn(
                   'h-[5px] w-[5px] rounded-full',
-                  gatewayStatus === 'connected' ? 'bg-[#22c55e]' : 'bg-[#ef4444]',
+                  gatewayStatus === 'connected' ? 'bg-success' : 'bg-error',
                 )}
               />
-              <span className="text-[10px] text-[#525252]">
+              <span className="text-[10px] text-text-tertiary">
                 {gatewayStatus === 'connected' ? 'Connected' : 'Disconnected'}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <p className="text-[10px] text-[#333] uppercase tracking-wider">Raven</p>
-              <span className="text-[10px] font-mono text-[#333] bg-white/[0.04] px-1.5 py-0.5 rounded-[3px]">v0.1.0</span>
+              <p className="text-[10px] text-text-muted uppercase tracking-wider">Raven</p>
+              <span className="text-[10px] font-mono text-text-muted bg-surface-hover px-1.5 py-0.5 rounded-[3px]">v0.1.0</span>
             </div>
           </>
         )}
@@ -236,7 +236,7 @@ export function Sidebar({ collapsed, onToggle, onOpenPalette, gatewayStatus }: S
       {/* Mobile hamburger */}
       <button
         type="button"
-        className="fixed top-3 left-3 z-50 h-7 w-7 rounded-md flex items-center justify-center text-[#a3a3a3] hover:bg-white/[0.05] lg:hidden"
+        className="fixed top-3 left-3 z-50 h-7 w-7 rounded-md flex items-center justify-center text-text-secondary hover:bg-surface-hover lg:hidden"
         onClick={() => setMobileOpen(!mobileOpen)}
       >
         {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -245,7 +245,7 @@ export function Sidebar({ collapsed, onToggle, onOpenPalette, gatewayStatus }: S
       {/* Mobile backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/60 lg:hidden"
+          className="fixed inset-0 z-30 bg-overlay lg:hidden"
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -253,7 +253,7 @@ export function Sidebar({ collapsed, onToggle, onOpenPalette, gatewayStatus }: S
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed top-0 left-0 z-40 h-screen border-r border-white/[0.06] bg-[#09090b] flex flex-col',
+          'fixed top-0 left-0 z-40 h-screen border-r border-border bg-bg flex flex-col',
           collapsed ? 'w-[52px]' : 'w-[220px]',
           'max-lg:hidden lg:flex',
         )}
@@ -263,7 +263,7 @@ export function Sidebar({ collapsed, onToggle, onOpenPalette, gatewayStatus }: S
 
       {/* Mobile sidebar */}
       {mobileOpen && (
-        <aside className="fixed top-0 left-0 z-40 h-screen w-[220px] border-r border-white/[0.06] bg-[#09090b] flex flex-col lg:hidden">
+        <aside className="fixed top-0 left-0 z-40 h-screen w-[220px] border-r border-border bg-bg flex flex-col lg:hidden">
           {sidebarContent}
         </aside>
       )}

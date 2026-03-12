@@ -27,7 +27,7 @@ export function DropdownMenu({ trigger, children, align = 'right', className }: 
       {open && (
         <div
           className={cn(
-            'absolute top-full mt-1 z-50 min-w-[160px] rounded-md border border-white/[0.08] bg-[#111] p-1',
+            'absolute top-full mt-1 z-50 min-w-[160px] rounded-md border border-border-hover bg-elevated p-1',
             align === 'right' ? 'right-0' : 'left-0',
             className,
           )}
@@ -56,8 +56,8 @@ export function DropdownItem({ children, onClick, disabled, danger, className }:
       className={cn(
         'w-full text-left px-2.5 py-1.5 text-xs rounded-[4px]',
         danger
-          ? 'text-[#ef4444] hover:bg-red-500/[0.08]'
-          : 'text-[#a3a3a3] hover:bg-white/[0.05]',
+          ? 'text-error hover:bg-red-500/[0.08]'
+          : 'text-text-secondary hover:bg-surface-hover',
         disabled && 'opacity-40 cursor-not-allowed',
         className,
       )}
@@ -68,5 +68,5 @@ export function DropdownItem({ children, onClick, disabled, danger, className }:
 }
 
 export function DropdownSeparator() {
-  return <div className="my-1 h-px bg-white/[0.06]" />
+  return <div className="my-1 h-px bg-border" />
 }

@@ -50,21 +50,21 @@ export default function TeamsPage() {
       header: 'Name',
       sortable: true,
       render: (item: Org) => (
-        <span className="text-xs font-medium text-[#fafafa]">{item.name}</span>
+        <span className="text-xs font-medium text-text-primary">{item.name}</span>
       ),
     },
     {
       key: 'slug',
       header: 'Slug',
       render: (item: Org) => (
-        <span className="font-mono text-[11px] text-[#525252]">{item.slug}</span>
+        <span className="font-mono text-[11px] text-text-tertiary">{item.slug}</span>
       ),
     },
     {
       key: 'description',
       header: 'Description',
       render: (item: Org) => (
-        <span className="text-xs text-[#525252] truncate max-w-[200px] inline-block">
+        <span className="text-xs text-text-tertiary truncate max-w-[200px] inline-block">
           {item.description || '--'}
         </span>
       ),
@@ -73,7 +73,7 @@ export default function TeamsPage() {
       key: 'created_at',
       header: 'Created',
       render: (item: Org) => (
-        <span className="text-xs text-[#525252]">
+        <span className="text-xs text-text-tertiary">
           {format(new Date(item.created_at), 'MMM d, yyyy')}
         </span>
       ),
@@ -86,14 +86,14 @@ export default function TeamsPage() {
       header: 'Name',
       sortable: true,
       render: (item: User) => (
-        <span className="text-xs font-medium text-[#fafafa]">{item.name}</span>
+        <span className="text-xs font-medium text-text-primary">{item.name}</span>
       ),
     },
     {
       key: 'email',
       header: 'Email',
       render: (item: User) => (
-        <span className="text-xs text-[#a3a3a3]">{item.email}</span>
+        <span className="text-xs text-text-secondary">{item.email}</span>
       ),
     },
     {
@@ -105,14 +105,14 @@ export default function TeamsPage() {
       key: 'teams',
       header: 'Teams',
       render: (item: User) => (
-        <span className="font-mono text-xs font-medium text-[#fafafa]">{item.team_ids.length}</span>
+        <span className="font-mono text-xs font-medium text-text-primary">{item.team_ids.length}</span>
       ),
     },
     {
       key: 'created_at',
       header: 'Joined',
       render: (item: User) => (
-        <span className="text-xs text-[#525252]">
+        <span className="text-xs text-text-tertiary">
           {format(new Date(item.created_at), 'MMM d, yyyy')}
         </span>
       ),
@@ -122,7 +122,7 @@ export default function TeamsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-[13px] font-semibold text-[#fafafa]">Teams</h1>
+        <h1 className="text-[13px] font-semibold text-text-primary">Teams</h1>
         <Button variant="primary" onClick={() => setCreateOrgOpen(true)}>
           <Plus className="h-3.5 w-3.5" />
           Create Org

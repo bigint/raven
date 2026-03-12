@@ -13,13 +13,13 @@ export function StatCard({ label, value, sparklineData, className }: StatCardPro
   return (
     <div
       className={cn(
-        'flex justify-between rounded-lg border border-white/[0.06] bg-white/[0.02] px-3.5 py-3 hover:border-white/[0.10]',
+        'flex justify-between rounded-lg border border-border bg-surface px-3.5 py-3 hover:border-border-hover',
         className,
       )}
     >
       <div className="flex flex-col min-w-0">
-        <p className="text-[10px] text-[#525252] uppercase tracking-[0.5px]">{label}</p>
-        <p className="mt-2 text-[22px] font-semibold text-[#fafafa] tracking-[-0.5px]">{value}</p>
+        <p className="text-[10px] text-text-tertiary uppercase tracking-[0.5px]">{label}</p>
+        <p className="mt-2 text-[22px] font-semibold text-text-primary tracking-[-0.5px]">{value}</p>
       </div>
       {sparklineData && sparklineData.length > 0 && (
         <div className="shrink-0 self-end">

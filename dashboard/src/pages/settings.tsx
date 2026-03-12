@@ -1,30 +1,40 @@
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { SkeletonCard } from '@/components/ui/skeleton'
+import { useTheme } from '@/hooks/use-theme'
 import { apiClient } from '@/lib/api'
+import { cn } from '@/lib/utils'
 import { useQuery } from '@tanstack/react-query'
+import { Monitor, Moon, Sun } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 function SettingRow({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex items-center justify-between py-2">
-      <span className="text-xs text-[#a3a3a3]">{label}</span>
-      <span className="text-xs font-medium text-[#fafafa]">{value}</span>
+      <span className="text-xs text-text-secondary">{label}</span>
+      <span className="text-xs font-medium text-text-primary">{value}</span>
     </div>
   )
 }
+
+const themeOptions = [
+  { value: 'light' as const, label: 'Light', icon: Sun },
+  { value: 'dark' as const, label: 'Dark', icon: Moon },
+  { value: 'system' as const, label: 'System', icon: Monitor },
+]
 
 export default function SettingsPage() {
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings'],
     queryFn: () => apiClient.getSettings(),
   })
+  const { theme, setTheme } = useTheme()
 
   if (isLoading) {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-[13px] font-semibold text-[#fafafa]">Settings</h1>
+          <h1 className="text-[13px] font-semibold text-text-primary">Settings</h1>
         </div>
         <SkeletonCard />
       </div>
@@ -34,11 +44,44 @@ export default function SettingsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-[13px] font-semibold text-[#fafafa]">Settings</h1>
+        <h1 className="text-[13px] font-semibold text-text-primary">Settings</h1>
       </div>
 
-      <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4">
-        <h3 className="text-[9px] font-medium text-[#333] uppercase tracking-[1px] mb-3">
+      <div className="rounded-lg border border-border bg-surface p-4">
+        <h3 className="text-[9px] font-medium text-text-muted uppercase tracking-[1px] mb-3">
+          Appearance
+        </h3>
+
+        <SettingRow
+          label="Theme"
+          value={
+            <div className="inline-flex rounded-md border border-border bg-surface p-0.5">
+              {themeOptions.map((opt) => {
+                const Icon = opt.icon
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setTheme(opt.value)}
+                    className={cn(
+                      'flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-[5px]',
+                      theme === opt.value
+                        ? 'bg-surface-active text-text-primary'
+                        : 'text-text-tertiary hover:text-text-secondary',
+                    )}
+                  >
+                    <Icon className="h-3 w-3" />
+                    {opt.label}
+                  </button>
+                )
+              })}
+            </div>
+          }
+        />
+      </div>
+
+      <div className="rounded-lg border border-border bg-surface p-4">
+        <h3 className="text-[9px] font-medium text-text-muted uppercase tracking-[1px] mb-3">
           Gateway Configuration
         </h3>
 
@@ -91,7 +134,7 @@ export default function SettingsPage() {
                 <Badge key={p} variant="default">
                   {p}
                 </Badge>
-              )) ?? <span className="text-[#525252]">None</span>}
+              )) ?? <span className="text-text-tertiary">None</span>}
             </div>
           }
         />

@@ -8,10 +8,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variants = {
-  primary: 'bg-[#fafafa] text-[#09090b] hover:bg-[#e5e5e5]',
-  secondary: 'bg-transparent text-[#a3a3a3] border border-white/[0.06] hover:bg-white/[0.05]',
-  ghost: 'bg-transparent text-[#a3a3a3] hover:bg-white/[0.05]',
-  danger: 'bg-transparent text-[#ef4444] border border-red-500/20 hover:bg-red-500/[0.08]',
+  primary: 'bg-accent text-accent-text hover:bg-accent-hover',
+  secondary: 'bg-transparent text-text-secondary border border-border hover:bg-surface-hover',
+  ghost: 'bg-transparent text-text-secondary hover:bg-surface-hover',
+  danger: 'bg-transparent text-error border border-red-500/20 hover:bg-red-500/[0.08]',
 }
 
 const sizes = {
@@ -25,7 +25,7 @@ export function Button({ variant = 'secondary', size = 'md', className, children
     <button
       className={cn(
         'inline-flex items-center gap-1.5 rounded-md font-medium',
-        'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/20 focus-visible:ring-offset-1 focus-visible:ring-offset-[#09090b]',
+        'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-bg',
         'disabled:opacity-40 disabled:cursor-not-allowed',
         variants[variant],
         sizes[size],

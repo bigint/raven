@@ -56,21 +56,21 @@ export default function KeysPage() {
       header: 'Name',
       sortable: true,
       render: (item: VirtualKey) => (
-        <span className="text-xs font-medium text-[#fafafa]">{item.name}</span>
+        <span className="text-xs font-medium text-text-primary">{item.name}</span>
       ),
     },
     {
       key: 'key_prefix',
       header: 'Key',
       render: (item: VirtualKey) => (
-        <span className="font-mono text-[11px] text-[#525252]">{item.key_prefix}...</span>
+        <span className="font-mono text-[11px] text-text-tertiary">{item.key_prefix}...</span>
       ),
     },
     {
       key: 'budget_limit',
       header: 'Budget',
       render: (item: VirtualKey) => (
-        <span className="font-mono text-xs text-[#a3a3a3]">
+        <span className="font-mono text-xs text-text-secondary">
           {item.budget_limit ? `$${item.budget_limit}` : 'unlimited'}
         </span>
       ),
@@ -79,7 +79,7 @@ export default function KeysPage() {
       key: 'rate_limit',
       header: 'Rate Limit',
       render: (item: VirtualKey) => (
-        <span className="font-mono text-xs text-[#a3a3a3]">
+        <span className="font-mono text-xs text-text-secondary">
           {item.rate_limit ? `${item.rate_limit}/${item.rate_limit_window}` : 'unlimited'}
         </span>
       ),
@@ -88,7 +88,7 @@ export default function KeysPage() {
       key: 'last_used_at',
       header: 'Last Used',
       render: (item: VirtualKey) => (
-        <span className="font-mono text-xs text-[#525252]">
+        <span className="font-mono text-xs text-text-tertiary">
           {relativeTime(item.last_used_at)}
         </span>
       ),
@@ -97,7 +97,7 @@ export default function KeysPage() {
       key: 'expires_at',
       header: 'Expires',
       render: (item: VirtualKey) => (
-        <span className="font-mono text-xs text-[#525252]">
+        <span className="font-mono text-xs text-text-tertiary">
           {item.expires_at ? relativeTime(item.expires_at) : 'never'}
         </span>
       ),
@@ -111,9 +111,9 @@ export default function KeysPage() {
           trigger={
             <button
               type="button"
-              className="rounded-md p-1 hover:bg-white/[0.05]"
+              className="rounded-md p-1 hover:bg-surface-hover"
             >
-              <MoreVertical className="h-3.5 w-3.5 text-[#525252]" />
+              <MoreVertical className="h-3.5 w-3.5 text-text-tertiary" />
             </button>
           }
         >
@@ -129,7 +129,7 @@ export default function KeysPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-[13px] font-semibold text-[#fafafa]">Keys</h1>
+        <h1 className="text-[13px] font-semibold text-text-primary">Keys</h1>
         <Button variant="primary" onClick={() => setCreateOpen(true)}>
           <Plus className="h-3.5 w-3.5" />
           Create Key
@@ -182,7 +182,7 @@ export default function KeysPage() {
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center gap-2 mt-2">
-          <code className="flex-1 rounded-md border border-white/[0.06] bg-white/[0.02] px-3 py-2 font-mono text-[11px] text-[#fafafa] break-all">
+          <code className="flex-1 rounded-md border border-border bg-surface px-3 py-2 font-mono text-[11px] text-text-primary break-all">
             {createdKey}
           </code>
           <Button

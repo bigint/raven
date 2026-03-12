@@ -7,10 +7,10 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 const variants = {
-  default: 'border-white/[0.06] text-[#525252]',
-  success: 'border-green-500/25 text-[#22c55e]',
-  warning: 'border-amber-500/25 text-[#f59e0b]',
-  error: 'border-red-500/25 text-[#ef4444]',
+  default: 'border-border text-text-tertiary',
+  success: 'border-green-500/25 text-success',
+  warning: 'border-amber-500/25 text-warning',
+  error: 'border-red-500/25 text-error',
 }
 
 export function Badge({ variant = 'default', className, children, ...props }: BadgeProps) {

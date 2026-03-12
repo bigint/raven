@@ -27,17 +27,17 @@ export function Dialog({ open, onClose, children, className }: DialogProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/60" onClick={onClose} />
+      <div className="fixed inset-0 bg-overlay" onClick={onClose} />
       <div
         className={cn(
-          'relative z-10 w-full max-w-[480px] rounded-lg border border-white/[0.08] bg-[#111] p-5',
+          'relative z-10 w-full max-w-[480px] rounded-lg border border-border-hover bg-elevated p-5',
           className,
         )}
       >
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 text-[#333] hover:text-[#a3a3a3]"
+          className="absolute right-4 top-4 text-text-muted hover:text-text-secondary"
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -53,19 +53,19 @@ export function DialogHeader({ className, children }: { className?: string; chil
 
 export function DialogTitle({ className, children }: { className?: string; children: ReactNode }) {
   return (
-    <h2 className={cn('text-[13px] font-semibold text-[#fafafa]', className)}>{children}</h2>
+    <h2 className={cn('text-[13px] font-semibold text-text-primary', className)}>{children}</h2>
   )
 }
 
 export function DialogDescription({ className, children }: { className?: string; children: ReactNode }) {
   return (
-    <p className={cn('mt-1 text-xs text-[#525252]', className)}>{children}</p>
+    <p className={cn('mt-1 text-xs text-text-tertiary', className)}>{children}</p>
   )
 }
 
 export function DialogClose({ onClick, children }: { onClick: () => void; children: ReactNode }) {
   return (
-    <button type="button" onClick={onClick} className="text-[#a3a3a3] hover:text-[#fafafa]">
+    <button type="button" onClick={onClick} className="text-text-secondary hover:text-text-primary">
       {children}
     </button>
   )
@@ -74,7 +74,7 @@ export function DialogClose({ onClick, children }: { onClick: () => void; childr
 export function DialogFooter({ className, children }: { className?: string; children: ReactNode }) {
   return (
     <div
-      className={cn('mt-4 flex justify-end gap-2 border-t border-white/[0.06] pt-3', className)}
+      className={cn('mt-4 flex justify-end gap-2 border-t border-border pt-3', className)}
     >
       {children}
     </div>
