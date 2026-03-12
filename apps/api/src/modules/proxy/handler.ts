@@ -2,12 +2,24 @@ import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import type { Context } from "hono";
 import type { Redis } from "ioredis";
+import { GuardrailError } from "@/lib/errors";
 import { authenticateKey } from "./auth";
+import { checkBudgets } from "./budget-check";
+import { checkCache, storeCache } from "./cache";
+import { withFallback } from "./fallback";
+import { evaluateGuardrails, type GuardrailMatch } from "./guardrails";
+import { updateCost, updateLatency } from "./latency-tracker";
 import { logAndPublish, updateLastUsed } from "./logger";
+import { checkPlanLimit } from "./plan-check";
 import { resolveProvider } from "./provider-resolver";
 import { checkRateLimit } from "./rate-limiter";
 import { buildResponse } from "./response";
-import { extractModel, extractTokenUsage } from "./token-usage";
+import { withRetry } from "./retry";
+import {
+  extractModel,
+  extractTokenUsage,
+  StreamTokenAccumulator
+} from "./token-usage";
 import { forwardRequest } from "./upstream";
 
 export const proxyHandler = (
@@ -30,25 +42,123 @@ export const proxyHandler = (
       virtualKey.rateLimitRpd
     );
 
-    // 3. Resolve provider and decrypt credentials
+    // 3. Plan limit check
+    await checkPlanLimit(db, redis, virtualKey.organizationId);
+
+    // 4. Budget check
+    await checkBudgets(
+      db,
+      redis,
+      virtualKey.organizationId,
+      virtualKey.teamId,
+      virtualKey.id
+    );
+
+    // 5. Extract body and evaluate guardrails
+    const method = c.req.method;
+    const hasBody = method !== "GET" && method !== "HEAD";
+    const bodyText = hasBody ? await c.req.text() : undefined;
+
+    let guardrailWarnings: string[] = [];
+    let guardrailMatches: GuardrailMatch[] = [];
+
+    if (bodyText) {
+      try {
+        const parsed = JSON.parse(bodyText);
+        const messages = Array.isArray(parsed.messages) ? parsed.messages : [];
+        if (messages.length > 0) {
+          const result = await evaluateGuardrails(
+            db,
+            virtualKey.organizationId,
+            messages
+          );
+          guardrailWarnings = result.warnings;
+          guardrailMatches = result.matches;
+        }
+      } catch (err) {
+        if (err instanceof GuardrailError) throw err;
+        // Non-JSON body or missing messages - skip guardrail evaluation
+      }
+    }
+
+    // 6. Resolve provider and decrypt credentials
     const {
       adapter,
       decryptedApiKey,
       providerConfigId,
       providerName,
       upstreamPath
-    } = await resolveProvider(db, env, virtualKey.organizationId, c.req.path);
+    } = await resolveProvider(
+      db,
+      env,
+      virtualKey.organizationId,
+      c.req.path,
+      redis
+    );
 
-    // 4. Forward request to upstream provider
-    const method = c.req.method;
-    const hasBody = method !== "GET" && method !== "HEAD";
-    const bodyText = hasBody ? await c.req.text() : undefined;
+    // 7. Parse request body for cache lookup
+    let requestBody: Record<string, unknown> = {};
+    if (bodyText) {
+      try {
+        requestBody = JSON.parse(bodyText);
+      } catch {
+        requestBody = {};
+      }
+    }
 
-    const {
-      isStreaming,
-      requestedModel,
-      response: upstreamResponse
-    } = await forwardRequest({
+    // 8. Check cache before forwarding
+    const cacheResult = await checkCache(redis, providerName, requestBody);
+
+    if (cacheResult.hit) {
+      const latencyMs = Date.now() - startTime;
+      const requestedModel = (requestBody.model as string) ?? "unknown";
+
+      const logData = {
+        cacheHit: true,
+        cost: 0,
+        guardrailMatches:
+          guardrailMatches.length > 0 ? guardrailMatches : undefined,
+        inputTokens: 0,
+        latencyMs,
+        method,
+        model: requestedModel,
+        organizationId: virtualKey.organizationId,
+        outputTokens: 0,
+        path: upstreamPath,
+        provider: providerName,
+        providerConfigId,
+        statusCode: 200,
+        virtualKeyId: virtualKey.id
+      };
+
+      const { inputTokens, outputTokens } = extractTokenUsage(
+        cacheResult.parsed
+      );
+      const model = extractModel(cacheResult.parsed, requestedModel);
+      logData.inputTokens = inputTokens;
+      logData.outputTokens = outputTokens;
+      logData.model = model;
+      logData.cost = adapter.estimateCost(model, inputTokens, outputTokens);
+
+      logAndPublish(db, logData, { redis, teamId: virtualKey.teamId });
+      updateLastUsed(db, virtualKey.id);
+
+      const cacheHeaders: Record<string, string> = {
+        "content-type": "application/json"
+      };
+
+      if (guardrailWarnings.length > 0) {
+        cacheHeaders["X-Guardrail-Warnings"] = guardrailWarnings.join("; ");
+      }
+
+      return new Response(cacheResult.body, {
+        headers: cacheHeaders,
+        status: 200
+      });
+    }
+
+    // 9. Forward request with retry logic
+    const forwardInput = {
       adapter,
       body: bodyText,
       decryptedApiKey,
@@ -56,53 +166,155 @@ export const proxyHandler = (
       method,
       rawUrl: c.req.url,
       upstreamPath
-    });
+    };
+
+    let upstreamResult = await withRetry(() => forwardRequest(forwardInput));
+    let finalProviderConfigId = providerConfigId;
+    let finalProviderName = providerName;
+
+    // 10. If retries exhausted and response is not ok, try fallbacks
+    if (!upstreamResult.response.ok) {
+      const fallbackResult = await withFallback(
+        db,
+        env,
+        virtualKey.organizationId,
+        providerConfigId,
+        (overrides) =>
+          withRetry(() =>
+            forwardRequest({
+              ...forwardInput,
+              ...overrides
+            })
+          )
+      );
+
+      if (fallbackResult) {
+        upstreamResult = fallbackResult.result;
+        finalProviderConfigId = fallbackResult.providerConfigId;
+        finalProviderName = fallbackResult.providerName;
+      }
+    }
 
     const latencyMs = Date.now() - startTime;
 
-    // 5. Build response
-    const proxyResponse = await buildResponse(upstreamResponse, isStreaming);
+    // 11. Build response
+    const proxyResponse = await buildResponse(
+      upstreamResult.response,
+      upstreamResult.isStreaming
+    );
 
-    // 6. Log and update last used (fire-and-forget)
+    // 12. Prepare log data
     const logData = {
       cacheHit: false,
       cost: 0,
+      guardrailMatches:
+        guardrailMatches.length > 0 ? guardrailMatches : undefined,
       inputTokens: 0,
       latencyMs,
       method,
-      model: requestedModel,
+      model: upstreamResult.requestedModel,
       organizationId: virtualKey.organizationId,
       outputTokens: 0,
       path: upstreamPath,
-      provider: providerName,
-      providerConfigId,
-      statusCode: upstreamResponse.status,
+      provider: finalProviderName,
+      providerConfigId: finalProviderConfigId,
+      statusCode: upstreamResult.response.status,
       virtualKeyId: virtualKey.id
     };
+
+    // 13. Add guardrail warning headers if present
+    if (guardrailWarnings.length > 0) {
+      proxyResponse.headers["X-Guardrail-Warnings"] =
+        guardrailWarnings.join("; ");
+    }
 
     if (proxyResponse.kind === "buffered") {
       const { inputTokens, outputTokens } = extractTokenUsage(
         proxyResponse.body
       );
-      const model = extractModel(proxyResponse.body, requestedModel);
+      const model = extractModel(
+        proxyResponse.body,
+        upstreamResult.requestedModel
+      );
       logData.inputTokens = inputTokens;
       logData.outputTokens = outputTokens;
       logData.model = model;
       logData.cost = adapter.estimateCost(model, inputTokens, outputTokens);
-    }
 
-    logAndPublish(db, logData);
-    updateLastUsed(db, virtualKey.id);
+      // Cache successful non-streaming responses
+      if (upstreamResult.response.ok) {
+        void storeCache(
+          redis,
+          finalProviderName,
+          requestBody,
+          proxyResponse.text
+        );
+      }
 
-    // 7. Return response to client
-    if (proxyResponse.kind === "streaming") {
-      return new Response(proxyResponse.response.body, {
+      logAndPublish(db, logData, { redis, teamId: virtualKey.teamId });
+      updateLastUsed(db, virtualKey.id);
+
+      // Track latency and cost for routing strategies
+      void updateLatency(redis, finalProviderConfigId, latencyMs);
+      void updateCost(redis, finalProviderConfigId, logData.cost);
+
+      return new Response(proxyResponse.text, {
         headers: proxyResponse.headers,
         status: proxyResponse.response.status
       });
     }
 
-    return new Response(proxyResponse.text, {
+    // 14. Streaming: pipe through a TransformStream to accumulate tokens
+    const accumulator = new StreamTokenAccumulator();
+    let partialLine = "";
+
+    const transform = new TransformStream<Uint8Array, Uint8Array>({
+      flush() {
+        // Process any remaining partial line
+        if (partialLine) {
+          accumulator.processChunk(partialLine);
+        }
+
+        // Fire-and-forget: log accumulated token usage
+        const { inputTokens, outputTokens } = accumulator.getUsage();
+        const model =
+          accumulator.getModel() !== "unknown"
+            ? accumulator.getModel()
+            : upstreamResult.requestedModel;
+        logData.inputTokens = inputTokens;
+        logData.outputTokens = outputTokens;
+        logData.model = model;
+        logData.cost = adapter.estimateCost(model, inputTokens, outputTokens);
+
+        logAndPublish(db, logData, { redis, teamId: virtualKey.teamId });
+        updateLastUsed(db, virtualKey.id);
+
+        void updateLatency(redis, finalProviderConfigId, latencyMs);
+        void updateCost(redis, finalProviderConfigId, logData.cost);
+      },
+      transform(chunk, controller) {
+        controller.enqueue(chunk);
+
+        // Decode the chunk and process SSE lines
+        const text = new TextDecoder().decode(chunk);
+        const combined = partialLine + text;
+        const lines = combined.split("\n");
+
+        // Last element may be incomplete; keep it for next chunk
+        partialLine = lines.pop() ?? "";
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed) {
+            accumulator.processChunk(trimmed);
+          }
+        }
+      }
+    });
+
+    const streamBody = proxyResponse.response.body?.pipeThrough(transform);
+
+    return new Response(streamBody, {
       headers: proxyResponse.headers,
       status: proxyResponse.response.status
     });

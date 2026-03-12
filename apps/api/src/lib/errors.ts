@@ -51,3 +51,30 @@ export class RateLimitError extends AppError {
     super(message, 429, "RATE_LIMITED", details);
   }
 }
+
+export class GuardrailError extends AppError {
+  constructor(
+    message = "Request blocked by guardrail",
+    details?: Record<string, unknown>
+  ) {
+    super(message, 403, "GUARDRAIL_BLOCKED", details);
+  }
+}
+
+export class BudgetExceededError extends AppError {
+  constructor(
+    message = "Budget limit exceeded",
+    details?: Record<string, unknown>
+  ) {
+    super(message, 429, "BUDGET_EXCEEDED", details);
+  }
+}
+
+export class PlanLimitError extends AppError {
+  constructor(
+    message = "Plan request limit exceeded",
+    details?: Record<string, unknown>
+  ) {
+    super(message, 429, "PLAN_LIMIT_EXCEEDED", details);
+  }
+}

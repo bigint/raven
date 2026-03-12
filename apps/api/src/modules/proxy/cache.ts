@@ -1,0 +1,76 @@
+import { createHash } from "node:crypto";
+import type { Redis } from "ioredis";
+
+const DEFAULT_TTL_SECONDS = 3600;
+
+export interface CacheCheckResult {
+  hit: true;
+  body: string;
+  parsed: Record<string, unknown>;
+}
+
+export interface CacheMissResult {
+  hit: false;
+}
+
+export type CacheResult = CacheCheckResult | CacheMissResult;
+
+const buildCacheKey = (
+  provider: string,
+  model: string,
+  messages: unknown,
+  temperature: unknown
+): string => {
+  const payload = `${provider}:${model}:${JSON.stringify(messages)}:${temperature}`;
+  const hash = createHash("sha256").update(payload).digest("hex");
+  return `cache:resp:${hash}`;
+};
+
+export const checkCache = async (
+  redis: Redis,
+  provider: string,
+  requestBody: Record<string, unknown>
+): Promise<CacheResult> => {
+  if (requestBody.stream === true) {
+    return { hit: false };
+  }
+
+  const model = (requestBody.model as string) ?? "unknown";
+  const messages = requestBody.messages ?? [];
+  const temperature = requestBody.temperature ?? null;
+
+  const key = buildCacheKey(provider, model, messages, temperature);
+  const cached = await redis.get(key);
+
+  if (!cached) {
+    return { hit: false };
+  }
+
+  let parsed: Record<string, unknown> = {};
+  try {
+    parsed = JSON.parse(cached);
+  } catch {
+    parsed = {};
+  }
+
+  return { body: cached, hit: true, parsed };
+};
+
+export const storeCache = async (
+  redis: Redis,
+  provider: string,
+  requestBody: Record<string, unknown>,
+  responseBody: string,
+  ttlSeconds: number = DEFAULT_TTL_SECONDS
+): Promise<void> => {
+  if (requestBody.stream === true) {
+    return;
+  }
+
+  const model = (requestBody.model as string) ?? "unknown";
+  const messages = requestBody.messages ?? [];
+  const temperature = requestBody.temperature ?? null;
+
+  const key = buildCacheKey(provider, model, messages, temperature);
+  await redis.set(key, responseBody, "EX", ttlSeconds);
+};

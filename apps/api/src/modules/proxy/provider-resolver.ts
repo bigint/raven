@@ -1,10 +1,12 @@
 import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
+import type { Redis } from "ioredis";
 import { decrypt } from "@/lib/crypto";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
 import { getProviderAdapter, type ProviderAdapter } from "./providers/registry";
+import { type RoutingStrategy, resolveWithStrategy } from "./router";
 
 export interface ProviderResolution {
   adapter: ProviderAdapter;
@@ -18,7 +20,9 @@ export const resolveProvider = async (
   db: Database,
   env: Env,
   organizationId: string,
-  reqPath: string
+  reqPath: string,
+  redis?: Redis,
+  strategy?: RoutingStrategy
 ): Promise<ProviderResolution> => {
   const pathSegments = reqPath.replace(/^\/v1\/proxy\/?/, "").split("/");
   const providerSegment = pathSegments[0];
@@ -58,8 +62,28 @@ export const resolveProvider = async (
         `No provider config found for '${providerName}' with ID '${configId}'`
       );
     }
-  } else {
+  } else if (redis) {
+    // Use smart routing when Redis is available
+    const resolvedId = await resolveWithStrategy(
+      db,
+      redis,
+      organizationId,
+      providerName,
+      strategy
+    );
     const [result] = await db
+      .select()
+      .from(providerConfigs)
+      .where(eq(providerConfigs.id, resolvedId))
+      .limit(1);
+    providerConfig = result;
+
+    if (!providerConfig) {
+      throw new NotFoundError(`No provider config found for '${providerName}'`);
+    }
+  } else {
+    // Fallback: pick a random enabled config
+    const allConfigs = await db
       .select()
       .from(providerConfigs)
       .where(
@@ -68,14 +92,13 @@ export const resolveProvider = async (
           eq(providerConfigs.provider, providerName),
           eq(providerConfigs.isEnabled, true)
         )
-      )
-      .orderBy(sql`RANDOM()`)
-      .limit(1);
-    providerConfig = result;
+      );
 
-    if (!providerConfig) {
+    if (allConfigs.length === 0) {
       throw new NotFoundError(`No provider config found for '${providerName}'`);
     }
+
+    providerConfig = allConfigs[Math.floor(Math.random() * allConfigs.length)];
   }
 
   if (!providerConfig.isEnabled) {

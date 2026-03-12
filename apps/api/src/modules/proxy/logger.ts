@@ -1,7 +1,9 @@
 import type { Database } from "@raven/db";
 import { requestLogs, virtualKeys } from "@raven/db";
 import { eq } from "drizzle-orm";
+import type { Redis } from "ioredis";
 import { publishEvent } from "@/lib/events";
+import { incrementBudgetSpend } from "./budget-check";
 
 export interface LogData {
   organizationId: string;
@@ -17,6 +19,12 @@ export interface LogData {
   cost: number;
   latencyMs: number;
   cacheHit: boolean;
+  guardrailMatches?: Array<{
+    ruleName: string;
+    ruleType: string;
+    action: string;
+    matchedContent: string;
+  }>;
 }
 
 export const logProxyRequest = async (
@@ -57,8 +65,28 @@ export const updateLastUsed = (db: Database, keyId: string): void => {
     .catch((err) => console.error("Failed to update lastUsedAt:", err));
 };
 
-export const logAndPublish = (db: Database, data: LogData): void => {
+export interface BudgetContext {
+  redis: Redis;
+  teamId: string | null;
+}
+
+export const logAndPublish = (
+  db: Database,
+  data: LogData,
+  budgetCtx?: BudgetContext
+): void => {
   void logProxyRequest(db, data).then((row) => {
     if (row) void publishEvent(data.organizationId, "request.created", row);
+
+    if (budgetCtx && data.cost > 0) {
+      void incrementBudgetSpend(
+        db,
+        budgetCtx.redis,
+        data.organizationId,
+        budgetCtx.teamId,
+        data.virtualKeyId,
+        data.cost
+      );
+    }
   });
 };
