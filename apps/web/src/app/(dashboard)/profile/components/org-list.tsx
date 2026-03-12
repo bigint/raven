@@ -1,15 +1,19 @@
 "use client";
 
-import { Building2, Check, Crown, Shield, User } from "lucide-react";
+import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable, Spinner } from "@raven/ui";
+import { Building2, Check, Crown, Shield, User } from "lucide-react";
 import { setOrgId } from "@/lib/api";
 import type { Organization } from "../hooks/use-profile";
 
-const ROLE_BADGES: Record<string, { className: "primary" | "neutral"; icon: typeof Crown }> = {
+const ROLE_BADGES: Record<
+  string,
+  { className: "primary" | "neutral"; icon: typeof Crown }
+> = {
   admin: { className: "primary", icon: Shield },
   member: { className: "neutral", icon: User },
   owner: { className: "primary", icon: Crown },
-  viewer: { className: "neutral", icon: User },
+  viewer: { className: "neutral", icon: User }
 };
 
 const getRoleBadge = (role: string) =>
@@ -33,7 +37,7 @@ const OrgList = ({
   onCreateOrg,
   orgs,
   orgsError,
-  orgsLoading,
+  orgsLoading
 }: OrgListProps) => (
   <div className="rounded-xl border border-border">
     <div className="flex items-center justify-between border-b border-border px-6 py-4">
@@ -68,55 +72,62 @@ const OrgList = ({
         </div>
       ) : (
         <DataTable
-          columns={[
-            {
-              header: "Name",
-              key: "name",
-              render: (org) => <span className="font-medium">{org.name}</span>,
-            },
-            {
-              header: "Slug",
-              key: "slug",
-              render: (org) => (
-                <span className="font-mono text-xs text-muted-foreground">{org.slug}</span>
-              ),
-            },
-            {
-              header: "Role",
-              key: "role",
-              render: (org) => {
-                const badge = getRoleBadge(org.role);
-                const RoleIcon = badge.icon;
-                return (
-                  <Badge variant={badge.className}>
-                    <RoleIcon className="size-3" />
-                    {org.role}
-                  </Badge>
-                );
+          columns={
+            [
+              {
+                header: "Name",
+                key: "name",
+                render: (org) => <span className="font-medium">{org.name}</span>
               },
-            },
-            {
-              align: "right",
-              header: "Actions",
-              key: "actions",
-              render: (org) => (
-                <div className="flex items-center justify-end gap-2">
-                  {org.id === activeOrgId ? (
-                    <Badge variant="success">
-                      <Check className="size-3" />
-                      Current
+              {
+                header: "Slug",
+                key: "slug",
+                render: (org) => (
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {org.slug}
+                  </span>
+                )
+              },
+              {
+                header: "Role",
+                key: "role",
+                render: (org) => {
+                  const badge = getRoleBadge(org.role);
+                  const RoleIcon = badge.icon;
+                  return (
+                    <Badge variant={badge.className}>
+                      <RoleIcon className="size-3" />
+                      {org.role}
                     </Badge>
-                  ) : (
-                    <Button onClick={() => handleSwitchOrg(org.id)} size="sm" variant="secondary">
-                      Switch
-                    </Button>
-                  )}
-                </div>
-              ),
-            },
-          ]}
+                  );
+                }
+              },
+              {
+                header: "Actions",
+                key: "actions",
+                render: (org) => (
+                  <div className="flex items-center justify-end gap-2">
+                    {org.id === activeOrgId ? (
+                      <Badge variant="success">
+                        <Check className="size-3" />
+                        Current
+                      </Badge>
+                    ) : (
+                      <Button
+                        onClick={() => handleSwitchOrg(org.id)}
+                        size="sm"
+                        variant="secondary"
+                      >
+                        Switch
+                      </Button>
+                    )}
+                  </div>
+                )
+              }
+            ] satisfies Column<Organization>[]
+          }
           data={orgs}
-          rowKey={(org) => org.id}
+          keyExtractor={(org) => org.id}
         />
       )}
     </div>

@@ -1,21 +1,21 @@
 "use client";
 
+import { Button, ConfirmDialog, PageHeader, Spinner } from "@raven/ui";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { Button, ConfirmDialog, PageHeader, Spinner } from "@raven/ui";
 import { useEventStream } from "@/hooks/use-event-stream";
+import type { FormState } from "./components/key-form";
 import { KeyForm } from "./components/key-form";
 import { KeyList } from "./components/key-list";
 import { KeyReveal } from "./components/key-reveal";
+import type { VirtualKey } from "./hooks/use-keys";
 import {
   keysQueryOptions,
   useCreateKey,
-  useUpdateKey,
   useDeleteKey,
+  useUpdateKey
 } from "./hooks/use-keys";
-import type { FormState } from "./components/key-form";
-import type { VirtualKey } from "./hooks/use-keys";
 
 export default function KeysPage() {
   const keysQuery = useQuery(keysQueryOptions());
@@ -33,7 +33,7 @@ export default function KeysPage() {
   useEventStream({
     enabled: keysQuery.isSuccess,
     events: ["key.created", "key.updated", "key.deleted"],
-    onEvent: () => queryClient.invalidateQueries({ queryKey: ["keys"] }),
+    onEvent: () => queryClient.invalidateQueries({ queryKey: ["keys"] })
   });
 
   const openCreate = () => {
@@ -46,25 +46,40 @@ export default function KeysPage() {
     setModalMode("edit");
   };
 
-  const handleFormSubmit = async (mode: "create" | "edit", form: FormState, keyId?: string) => {
+  const handleFormSubmit = async (
+    mode: "create" | "edit",
+    form: FormState,
+    keyId?: string
+  ) => {
     if (mode === "create") {
-      const body: { name: string; environment: "live" | "test"; rateLimitRpm?: number; rateLimitRpd?: number } = {
+      const body: {
+        name: string;
+        environment: "live" | "test";
+        rateLimitRpm?: number;
+        rateLimitRpd?: number;
+      } = {
         environment: form.environment,
-        name: form.name.trim(),
+        name: form.name.trim()
       };
-      if (form.rateLimitRpm.trim()) body.rateLimitRpm = Number(form.rateLimitRpm);
-      if (form.rateLimitRpd.trim()) body.rateLimitRpd = Number(form.rateLimitRpd);
+      if (form.rateLimitRpm.trim())
+        body.rateLimitRpm = Number(form.rateLimitRpm);
+      if (form.rateLimitRpd.trim())
+        body.rateLimitRpd = Number(form.rateLimitRpd);
       const created = await createKey.mutateAsync(body);
       setNewKeyValue(created.key);
     } else if (mode === "edit" && keyId) {
       await updateKey.mutateAsync({
-        id: keyId,
         data: {
           isActive: form.isActive,
           name: form.name.trim(),
-          rateLimitRpd: form.rateLimitRpd.trim() ? Number(form.rateLimitRpd) : null,
-          rateLimitRpm: form.rateLimitRpm.trim() ? Number(form.rateLimitRpm) : null,
+          rateLimitRpd: form.rateLimitRpd.trim()
+            ? Number(form.rateLimitRpd)
+            : null,
+          rateLimitRpm: form.rateLimitRpm.trim()
+            ? Number(form.rateLimitRpm)
+            : null
         },
+        id: keyId
       });
     }
   };
@@ -97,7 +112,7 @@ export default function KeysPage() {
       )}
 
       {keysQuery.isLoading ? (
-        <Spinner label="Loading keys..." />
+        <Spinner />
       ) : (
         <KeyList
           keys={keys}
@@ -116,15 +131,12 @@ export default function KeysPage() {
         }}
         onSubmit={handleFormSubmit}
       />
-      <KeyReveal
-        keyValue={newKeyValue}
-        onClose={() => setNewKeyValue(null)}
-      />
+      <KeyReveal keyValue={newKeyValue} onClose={() => setNewKeyValue(null)} />
       <ConfirmDialog
         confirmLabel={deleteKey.isPending ? "Deleting..." : "Delete"}
         description="Are you sure you want to delete this key? Any applications using it will lose access. This action cannot be undone."
         loading={deleteKey.isPending}
-        onCancel={() => setDeleteId(null)}
+        onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
         open={deleteId !== null}
         title="Delete Key"

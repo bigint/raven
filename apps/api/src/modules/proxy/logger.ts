@@ -55,10 +55,7 @@ export const updateLastUsed = (db: Database, keyId: string): void => {
     .catch((err) => console.error("Failed to update lastUsedAt:", err));
 };
 
-export const logAndPublish = (
-  db: Database,
-  data: LogData
-): void => {
+export const logAndPublish = (db: Database, data: LogData): void => {
   void logProxyRequest(db, data).then((row) => {
     if (row) void publishEvent(data.organizationId, "request.created", row);
   });

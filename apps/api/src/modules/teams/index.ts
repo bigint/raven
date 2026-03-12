@@ -1,10 +1,6 @@
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
-import {
-  inviteUser,
-  listInvitations,
-  revokeInvitation
-} from "./invitations";
+import { inviteUser, listInvitations, revokeInvitation } from "./invitations";
 import { changeRole, listMembers, removeMember } from "./members";
 import {
   addTeamMember,

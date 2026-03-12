@@ -1,4 +1,8 @@
-import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQueryClient
+} from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
 export interface Budget {
@@ -47,8 +51,7 @@ export const useCreateBudget = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: BudgetInput) =>
-      api.post<Budget>("/v1/budgets", input),
+    mutationFn: (input: BudgetInput) => api.post<Budget>("/v1/budgets", input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["budgets"] });
     }

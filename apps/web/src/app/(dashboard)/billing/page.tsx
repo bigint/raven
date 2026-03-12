@@ -42,18 +42,16 @@ const BillingPage = () => {
         </div>
       ) : (
         <div className="space-y-8">
-          {subscription && (
-            <SubscriptionStatus subscription={subscription} />
-          )}
+          {subscription && <SubscriptionStatus subscription={subscription} />}
 
           <PlanSelector
-            plans={plans}
-            subscription={subscription}
             billingInterval={billingInterval}
-            upgrading={upgrading}
+            getPlanButtonLabel={getPlanButtonLabel}
             onIntervalChange={setBillingInterval}
             onPlanAction={handlePlanAction}
-            getPlanButtonLabel={getPlanButtonLabel}
+            plans={plans}
+            subscription={subscription}
+            upgrading={upgrading}
           />
 
           {!subscription && plans.length === 0 && (

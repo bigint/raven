@@ -87,9 +87,7 @@ export const useAnalytics = () => {
           if (!prev) return prev;
           return {
             ...prev,
-            totalCost: (
-              Number(prev.totalCost) + Number(req.cost)
-            ).toString(),
+            totalCost: (Number(prev.totalCost) + Number(req.cost)).toString(),
             totalRequests: prev.totalRequests + 1
           };
         }

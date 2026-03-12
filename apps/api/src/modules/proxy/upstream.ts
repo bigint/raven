@@ -27,7 +27,15 @@ export interface ForwardRequestResult {
 export const forwardRequest = async (
   input: ForwardRequestInput
 ): Promise<ForwardRequestResult> => {
-  const { adapter, decryptedApiKey, upstreamPath, method, rawUrl, incomingHeaders, body } = input;
+  const {
+    adapter,
+    decryptedApiKey,
+    upstreamPath,
+    method,
+    rawUrl,
+    incomingHeaders,
+    body
+  } = input;
 
   const queryString = rawUrl.includes("?")
     ? rawUrl.split("?").slice(1).join("?")

@@ -24,14 +24,14 @@ const AnalyticsPage = () => {
       )}
 
       <UsageCharts
-        stats={stats}
-        loading={isLoading}
         dateRange={dateRange}
         dateRangeOptions={dateRangeOptions}
+        loading={isLoading}
         onDateRangeChange={setDateRange}
+        stats={stats}
       />
 
-      <TokenBreakdown usage={usage} loading={isLoading} />
+      <TokenBreakdown loading={isLoading} usage={usage} />
     </div>
   );
 };

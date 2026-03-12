@@ -23,15 +23,15 @@ const OverviewPage = () => {
         </p>
       </div>
 
-      <StatCards stats={stats} activeKeys={activeKeys} loading={isLoading} />
+      <StatCards activeKeys={activeKeys} loading={isLoading} stats={stats} />
 
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <UsageChart
-          usage={usage}
-          totalRequests={totalRequests}
           loading={isLoading}
+          totalRequests={totalRequests}
+          usage={usage}
         />
-        <RecentRequests requests={recentRequests} loading={isLoading} />
+        <RecentRequests loading={isLoading} requests={recentRequests} />
       </div>
 
       {/* Quick Actions */}

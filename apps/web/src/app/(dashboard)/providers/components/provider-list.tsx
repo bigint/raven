@@ -1,9 +1,8 @@
 "use client";
 
-import { Check, Pencil, Trash2, X } from "lucide-react";
 import type { Column } from "@raven/ui";
-import { Badge, DataTable, Button } from "@raven/ui";
-import { Plus } from "lucide-react";
+import { Badge, Button, DataTable } from "@raven/ui";
+import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
 import type { Provider } from "../hooks/use-providers";
 import { PROVIDER_LABELS } from "../hooks/use-providers";
 
@@ -18,8 +17,8 @@ interface ProviderListProps {
 
 const columns: Column<Provider>[] = [
   {
-    key: "provider",
     header: "Provider",
+    key: "provider",
     render: (provider) => (
       <div>
         <span className="font-medium">
@@ -32,9 +31,9 @@ const columns: Column<Provider>[] = [
     )
   },
   {
-    key: "apiKey",
-    header: "API Key",
     className: "font-mono text-muted-foreground",
+    header: "API Key",
+    key: "apiKey",
     render: (provider) => provider.apiKey
   }
 ];
@@ -50,18 +49,15 @@ const ProviderList = ({
   const allColumns: Column<Provider>[] = [
     ...columns,
     {
-      key: "status",
       header: "Status",
+      key: "status",
       render: (provider) => (
         <button
           className="cursor-pointer"
           onClick={() => onToggleEnabled(provider)}
           type="button"
         >
-          <Badge
-            variant={provider.isEnabled ? "success" : "neutral"}
-            dot
-          >
+          <Badge dot variant={provider.isEnabled ? "success" : "neutral"}>
             {provider.isEnabled ? (
               <>
                 <Check className="size-3" />
@@ -78,26 +74,26 @@ const ProviderList = ({
       )
     },
     {
-      key: "actions",
+      className: "text-right",
       header: "Actions",
       headerClassName: "text-right",
-      className: "text-right",
+      key: "actions",
       render: (provider) => (
         <div className="flex items-center justify-end gap-1">
           <Button
-            variant="ghost"
-            size="sm"
             onClick={() => onEdit(provider)}
+            size="sm"
             title="Edit provider"
+            variant="ghost"
           >
             <Pencil className="size-4" />
           </Button>
           <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onDelete(provider.id)}
-            title="Delete provider"
             className="hover:bg-destructive/10 hover:text-destructive"
+            onClick={() => onDelete(provider.id)}
+            size="sm"
+            title="Delete provider"
+            variant="ghost"
           >
             <Trash2 className="size-4" />
           </Button>
@@ -110,16 +106,16 @@ const ProviderList = ({
     <DataTable
       columns={allColumns}
       data={providers}
-      keyExtractor={(p) => p.id}
-      loading={loading}
-      loadingMessage="Loading providers..."
-      emptyTitle="No providers configured yet."
       emptyAction={
         <Button onClick={onAdd}>
           <Plus className="size-4" />
           Add your first provider
         </Button>
       }
+      emptyTitle="No providers configured yet."
+      keyExtractor={(p) => p.id}
+      loading={loading}
+      loadingMessage="Loading providers..."
     />
   );
 };

@@ -38,8 +38,7 @@ interface KeySummary {
 
 const THIRTY_DAYS_MS = 2_592_000_000;
 
-const overviewFrom = () =>
-  new Date(Date.now() - THIRTY_DAYS_MS).toISOString();
+const overviewFrom = () => new Date(Date.now() - THIRTY_DAYS_MS).toISOString();
 
 export const overviewStatsQueryOptions = () =>
   queryOptions({
@@ -49,7 +48,8 @@ export const overviewStatsQueryOptions = () =>
 
 export const overviewUsageQueryOptions = () =>
   queryOptions({
-    queryFn: () => api.get<UsageRow[]>(`/v1/analytics/usage?from=${overviewFrom()}`),
+    queryFn: () =>
+      api.get<UsageRow[]>(`/v1/analytics/usage?from=${overviewFrom()}`),
     queryKey: ["overview", "usage"]
   });
 

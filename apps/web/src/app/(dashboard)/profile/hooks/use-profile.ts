@@ -1,6 +1,10 @@
 "use client";
 
-import { useMutation, useQueryClient, queryOptions } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQueryClient
+} from "@tanstack/react-query";
 import { api, setOrgId } from "@/lib/api";
 
 export interface Organization {
@@ -19,20 +23,19 @@ export interface ProfileInvitation {
 
 export const orgsQueryOptions = () =>
   queryOptions({
-    queryKey: ["user", "orgs"],
     queryFn: () => api.get<Organization[]>("/v1/user/orgs"),
+    queryKey: ["user", "orgs"]
   });
 
 export const profileInvitationsQueryOptions = () =>
   queryOptions({
-    queryKey: ["user", "invitations"],
     queryFn: () => api.get<ProfileInvitation[]>("/v1/user/invitations"),
+    queryKey: ["user", "invitations"]
   });
 
 export const useUpdateProfile = () =>
   useMutation({
-    mutationFn: (data: { name: string }) =>
-      api.put("/v1/user/profile", data),
+    mutationFn: (data: { name: string }) => api.put("/v1/user/profile", data)
   });
 
 export const useCreateOrg = () => {
@@ -44,7 +47,7 @@ export const useCreateOrg = () => {
       queryClient.invalidateQueries({ queryKey: ["user", "orgs"] });
       setOrgId(created.id);
       window.location.reload();
-    },
+    }
   });
 };
 
@@ -55,7 +58,7 @@ export const useAcceptInvitation = () => {
       api.post(`/v1/user/invitations/${invitationId}/accept`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user"] });
-    },
+    }
   });
 };
 
@@ -66,6 +69,6 @@ export const useDeclineInvitation = () => {
       api.post(`/v1/user/invitations/${invitationId}/decline`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user", "invitations"] });
-    },
+    }
   });
 };

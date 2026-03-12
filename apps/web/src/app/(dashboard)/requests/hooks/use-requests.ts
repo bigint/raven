@@ -78,7 +78,9 @@ export const requestsQueryOptions = (params: RequestsQueryParams) =>
   queryOptions({
     queryFn: () => {
       const now = new Date();
-      const from = new Date(now.getTime() - RANGE_MS[params.range]).toISOString();
+      const from = new Date(
+        now.getTime() - RANGE_MS[params.range]
+      ).toISOString();
       const searchParams = new URLSearchParams({
         from,
         limit: String(PAGE_SIZE),
@@ -160,5 +162,5 @@ export const useLiveRequests = (enabled: boolean) => {
     };
   }, [enabled]);
 
-  return { requests, total, isLoading, error };
+  return { error, isLoading, requests, total };
 };

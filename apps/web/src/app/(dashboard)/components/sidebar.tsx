@@ -35,12 +35,17 @@ interface SidebarProps {
   onSwitchOrg: (org: Org) => void;
 }
 
-export const Sidebar = ({ activeOrg, orgs, user, onSwitchOrg }: SidebarProps) => {
+export const Sidebar = ({
+  activeOrg,
+  orgs,
+  user,
+  onSwitchOrg
+}: SidebarProps) => {
   const pathname = usePathname();
 
   return (
     <aside className="w-60 border-r border-border bg-muted/50 flex flex-col">
-      <OrgSwitcher activeOrg={activeOrg} orgs={orgs} onSwitch={onSwitchOrg} />
+      <OrgSwitcher activeOrg={activeOrg} onSwitch={onSwitchOrg} orgs={orgs} />
 
       <nav className="flex-1 px-3 py-3 space-y-0.5">
         {NAV_ITEMS.map((item) => {

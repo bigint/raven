@@ -31,9 +31,7 @@ const EmptyState = () => (
 
 export const TokenBreakdown = ({ usage, loading }: TokenBreakdownProps) => (
   <div>
-    <h2 className="mb-4 text-base font-semibold">
-      Usage by Provider & Model
-    </h2>
+    <h2 className="mb-4 text-base font-semibold">Usage by Provider & Model</h2>
     {loading ? (
       <LoadingState />
     ) : usage.length === 0 ? (
@@ -80,8 +78,7 @@ export const TokenBreakdown = ({ usage, loading }: TokenBreakdownProps) => (
                 </td>
                 <td className="px-5 py-4 text-right">
                   {(
-                    Number(row.totalInputTokens) +
-                    Number(row.totalOutputTokens)
+                    Number(row.totalInputTokens) + Number(row.totalOutputTokens)
                   ).toLocaleString()}
                 </td>
               </tr>

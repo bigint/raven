@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Button, Input, Modal } from "@raven/ui";
+import { useState } from "react";
 
 interface TeamFormProps {
   onClose: () => void;
@@ -29,9 +29,7 @@ const TeamForm = ({ onClose, onSubmit, open }: TeamFormProps) => {
       setName("");
       onClose();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to create team"
-      );
+      setError(err instanceof Error ? err.message : "Failed to create team");
     } finally {
       setSubmitting(false);
     }

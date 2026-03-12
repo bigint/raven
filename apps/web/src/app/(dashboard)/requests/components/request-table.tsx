@@ -1,8 +1,8 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { RequestLog } from "../hooks/use-requests";
 import { PAGE_SIZE, PROVIDER_LABELS } from "../hooks/use-requests";
 
@@ -18,7 +18,14 @@ interface RequestTableProps {
 }
 
 const getStatusBadge = (statusCode: number) => {
-  const variant = statusCode >= 500 ? "error" : statusCode >= 400 ? "warning" : statusCode >= 200 && statusCode < 300 ? "success" : "neutral";
+  const variant =
+    statusCode >= 500
+      ? "error"
+      : statusCode >= 400
+        ? "warning"
+        : statusCode >= 200 && statusCode < 300
+          ? "success"
+          : "neutral";
   return <Badge variant={variant}>{statusCode}</Badge>;
 };
 
@@ -37,47 +44,47 @@ const formatTime = (ts: string): string => {
 
 const columns: Column<RequestLog>[] = [
   {
-    key: "time",
-    header: "Time",
     className: "text-xs text-muted-foreground whitespace-nowrap",
+    header: "Time",
+    key: "time",
     render: (req) => formatTime(req.createdAt)
   },
   {
-    key: "provider",
-    header: "Provider",
     className: "font-medium",
+    header: "Provider",
+    key: "provider",
     render: (req) => PROVIDER_LABELS[req.provider] ?? req.provider
   },
   {
-    key: "model",
-    header: "Model",
     className: "font-mono text-xs text-muted-foreground",
+    header: "Model",
+    key: "model",
     render: (req) => req.model
   },
   {
-    key: "status",
     header: "Status",
+    key: "status",
     render: (req) => getStatusBadge(req.statusCode)
   },
   {
-    key: "latency",
+    className: "text-right",
     header: "Latency",
     headerClassName: "text-right",
-    className: "text-right",
+    key: "latency",
     render: (req) => `${req.latencyMs}ms`
   },
   {
-    key: "cost",
+    className: "text-right",
     header: "Cost",
     headerClassName: "text-right",
-    className: "text-right",
+    key: "cost",
     render: (req) => `$${Number(req.cost).toFixed(6)}`
   },
   {
-    key: "cache",
+    className: "text-center",
     header: "Cache",
     headerClassName: "text-center",
-    className: "text-center",
+    key: "cache",
     render: (req) =>
       req.cacheHit ? (
         <Badge variant="success">Hit</Badge>
@@ -104,10 +111,10 @@ const RequestTable = ({
       <DataTable
         columns={columns}
         data={requests}
+        emptyTitle={emptyMessage}
         keyExtractor={(r) => r.id}
         loading={loading}
         loadingMessage={loadingMessage}
-        emptyTitle={emptyMessage}
       />
 
       {showPagination && requests.length > 0 && !loading && (
@@ -117,19 +124,19 @@ const RequestTable = ({
           </p>
           <div className="flex items-center gap-2">
             <Button
-              variant="secondary"
-              size="sm"
               disabled={page === 1}
               onClick={() => onPageChange(Math.max(1, page - 1))}
+              size="sm"
+              variant="secondary"
             >
               <ChevronLeft className="size-4" />
               Prev
             </Button>
             <Button
-              variant="secondary"
-              size="sm"
               disabled={page === totalPages}
               onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+              size="sm"
+              variant="secondary"
             >
               Next
               <ChevronRight className="size-4" />

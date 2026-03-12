@@ -2,8 +2,8 @@
 
 import type { ReactNode } from "react";
 import { cn } from "../cn";
-import { Spinner } from "./spinner";
 import { EmptyState } from "./empty-state";
+import { Spinner } from "./spinner";
 
 interface Column<T> {
   key: string;
@@ -32,7 +32,7 @@ const DataTable = <T,>({
   loadingMessage = "Loading...",
   emptyIcon,
   emptyTitle = "No data",
-  emptyAction,
+  emptyAction
 }: DataTableProps<T>) => {
   if (loading) {
     return (
@@ -45,11 +45,7 @@ const DataTable = <T,>({
 
   if (data.length === 0) {
     return (
-      <EmptyState
-        icon={emptyIcon}
-        title={emptyTitle}
-        action={emptyAction}
-      />
+      <EmptyState action={emptyAction} icon={emptyIcon} title={emptyTitle} />
     );
   }
 
@@ -60,11 +56,11 @@ const DataTable = <T,>({
           <tr className="border-b border-border">
             {columns.map((col) => (
               <th
-                key={col.key}
                 className={cn(
                   "px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground",
                   col.headerClassName
                 )}
+                key={col.key}
               >
                 {col.header}
               </th>
@@ -74,14 +70,14 @@ const DataTable = <T,>({
         <tbody>
           {data.map((item, idx) => (
             <tr
-              key={keyExtractor(item)}
               className={cn(
                 "transition-colors hover:bg-muted/30",
                 idx !== data.length - 1 && "border-b border-border"
               )}
+              key={keyExtractor(item)}
             >
               {columns.map((col) => (
-                <td key={col.key} className={cn("px-5 py-4", col.className)}>
+                <td className={cn("px-5 py-4", col.className)} key={col.key}>
                   {col.render(item, idx)}
                 </td>
               ))}

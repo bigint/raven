@@ -1,7 +1,7 @@
 "use client";
 
-import { Modal } from "./modal";
 import { Button } from "./button";
+import { Modal } from "./modal";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -22,27 +22,23 @@ const ConfirmDialog = ({
   description,
   confirmLabel = "Confirm",
   loading = false,
-  variant = "destructive",
+  variant = "destructive"
 }: ConfirmDialogProps) => (
   <Modal
-    open={open}
-    onClose={onClose}
-    title={title}
-    size="sm"
     footer={
       <>
-        <Button variant="secondary" onClick={onClose} disabled={loading}>
+        <Button disabled={loading} onClick={onClose} variant="secondary">
           Cancel
         </Button>
-        <Button
-          variant={variant}
-          onClick={onConfirm}
-          disabled={loading}
-        >
+        <Button disabled={loading} onClick={onConfirm} variant={variant}>
           {loading ? "Processing..." : confirmLabel}
         </Button>
       </>
     }
+    onClose={onClose}
+    open={open}
+    size="sm"
+    title={title}
   >
     <p className="text-sm text-muted-foreground">{description}</p>
   </Modal>

@@ -27,8 +27,11 @@ export const useSettings = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const { data: settings = null, isPending: isLoading, error: queryError } =
-    useQuery(settingsQueryOptions());
+  const {
+    data: settings = null,
+    isPending: isLoading,
+    error: queryError
+  } = useQuery(settingsQueryOptions());
 
   const [editName, setEditName] = useState("");
   const [editSlug, setEditSlug] = useState("");
@@ -126,8 +129,8 @@ export const useSettings = () => {
     setEditName,
     setEditSlug,
     setSaveError,
-    settings,
     setShowDeleteConfirm,
+    settings,
     showDeleteConfirm
   };
 };

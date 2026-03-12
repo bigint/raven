@@ -2,11 +2,7 @@ import type { Database } from "@raven/db";
 import { organizations, subscriptions } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Context } from "hono";
-import {
-  ForbiddenError,
-  NotFoundError,
-  ValidationError
-} from "@/lib/errors";
+import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
 import { updateOrgSchema } from "./schema";

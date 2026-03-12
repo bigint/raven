@@ -1,6 +1,10 @@
 "use client";
 
-import { useMutation, useQueryClient, queryOptions } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQueryClient
+} from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
 export interface VirtualKey {
@@ -36,8 +40,8 @@ export interface UpdateKeyInput {
 
 export const keysQueryOptions = () =>
   queryOptions({
-    queryKey: ["keys"],
     queryFn: () => api.get<VirtualKey[]>("/v1/keys"),
+    queryKey: ["keys"]
   });
 
 export const useCreateKey = () => {
@@ -47,7 +51,7 @@ export const useCreateKey = () => {
       api.post<CreateKeyResponse>("/v1/keys", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["keys"] });
-    },
+    }
   });
 };
 
@@ -58,7 +62,7 @@ export const useUpdateKey = () => {
       api.put<VirtualKey>(`/v1/keys/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["keys"] });
-    },
+    }
   });
 };
 
@@ -68,6 +72,6 @@ export const useDeleteKey = () => {
     mutationFn: (id: string) => api.delete(`/v1/keys/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["keys"] });
-    },
+    }
   });
 };

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Button, Input, Modal, Select, Switch } from "@raven/ui";
 import { ENVIRONMENT_OPTIONS } from "@raven/types";
+import { Button, Input, Modal, Select, Switch } from "@raven/ui";
+import { useState } from "react";
 import type { VirtualKey } from "../hooks/use-keys";
 
 interface FormState {
@@ -18,14 +18,18 @@ const DEFAULT_FORM: FormState = {
   isActive: true,
   name: "",
   rateLimitRpd: "",
-  rateLimitRpm: "",
+  rateLimitRpm: ""
 };
 
 interface KeyFormProps {
   editingKey: VirtualKey | null;
   mode: "create" | "edit" | null;
   onClose: () => void;
-  onSubmit: (mode: "create" | "edit", form: FormState, keyId?: string) => Promise<void>;
+  onSubmit: (
+    mode: "create" | "edit",
+    form: FormState,
+    keyId?: string
+  ) => Promise<void>;
 }
 
 const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
@@ -35,8 +39,14 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
         environment: editingKey.environment,
         isActive: editingKey.isActive,
         name: editingKey.name,
-        rateLimitRpd: editingKey.rateLimitRpd !== null ? String(editingKey.rateLimitRpd) : "",
-        rateLimitRpm: editingKey.rateLimitRpm !== null ? String(editingKey.rateLimitRpm) : "",
+        rateLimitRpd:
+          editingKey.rateLimitRpd !== null
+            ? String(editingKey.rateLimitRpd)
+            : "",
+        rateLimitRpm:
+          editingKey.rateLimitRpm !== null
+            ? String(editingKey.rateLimitRpm)
+            : ""
       };
     }
     return DEFAULT_FORM;
@@ -100,7 +110,9 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
             id="key-rpm"
             label="Rate Limit (RPM)"
             min="1"
-            onChange={(e) => setForm((f) => ({ ...f, rateLimitRpm: e.target.value }))}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, rateLimitRpm: e.target.value }))
+            }
             placeholder="No limit"
             type="number"
             value={form.rateLimitRpm}
@@ -109,7 +121,9 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
             id="key-rpd"
             label="Rate Limit (RPD)"
             min="1"
-            onChange={(e) => setForm((f) => ({ ...f, rateLimitRpd: e.target.value }))}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, rateLimitRpd: e.target.value }))
+            }
             placeholder="No limit"
             type="number"
             value={form.rateLimitRpd}
@@ -119,7 +133,9 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
           <Switch
             checked={form.isActive}
             label="Active"
-            onChange={(checked) => setForm((f) => ({ ...f, isActive: checked }))}
+            onCheckedChange={(checked) =>
+              setForm((f) => ({ ...f, isActive: checked }))
+            }
           />
         )}
         <div className="flex justify-end gap-2 pt-1">

@@ -63,6 +63,7 @@ export const DangerZone = ({
     </div>
 
     {showDeleteConfirm && (
+      // biome-ignore lint/a11y/noStaticElementInteractions: modal backdrop dismiss
       <div
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
         onClick={onCloseConfirm}
@@ -74,6 +75,7 @@ export const DangerZone = ({
           className="w-full max-w-sm rounded-xl border border-border bg-background shadow-xl"
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
+          role="dialog"
         >
           <div className="px-6 py-5">
             <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-destructive/10">

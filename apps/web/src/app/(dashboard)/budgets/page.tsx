@@ -1,22 +1,25 @@
 "use client";
 
+import { Button, ConfirmDialog, PageHeader } from "@raven/ui";
+import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Button, ConfirmDialog, PageHeader } from "@raven/ui";
 import { useEventStream } from "@/hooks/use-event-stream";
-import { BudgetList } from "./components/budget-list";
 import { BudgetForm } from "./components/budget-form";
+import { BudgetList } from "./components/budget-list";
 import {
+  type Budget,
   budgetsQueryOptions,
-  useDeleteBudget,
-  type Budget
+  useDeleteBudget
 } from "./hooks/use-budgets";
 
 const BudgetsPage = () => {
-  const { data: budgets = [], isLoading, error, refetch } = useQuery(
-    budgetsQueryOptions()
-  );
+  const {
+    data: budgets = [],
+    isLoading,
+    error,
+    refetch
+  } = useQuery(budgetsQueryOptions());
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
@@ -39,14 +42,14 @@ const BudgetsPage = () => {
   return (
     <div>
       <PageHeader
-        title="Budgets"
-        description="Set spending limits and alerts for your organization."
         actions={
           <Button onClick={() => setFormOpen(true)}>
             <Plus className="size-4" />
             Add Budget
           </Button>
         }
+        description="Set spending limits and alerts for your organization."
+        title="Budgets"
       />
 
       {error && (
@@ -59,27 +62,27 @@ const BudgetsPage = () => {
         budgets={budgets}
         loading={isLoading}
         onAdd={() => setFormOpen(true)}
-        onEdit={(b) => setEditingBudget(b)}
         onDelete={(id) => setDeleteId(id)}
+        onEdit={(b) => setEditingBudget(b)}
       />
 
       <BudgetForm
-        open={formOpen || !!editingBudget}
+        editingBudget={editingBudget}
         onClose={() => {
           setFormOpen(false);
           setEditingBudget(null);
         }}
-        editingBudget={editingBudget}
+        open={formOpen || !!editingBudget}
       />
 
       <ConfirmDialog
-        open={deleteId !== null}
+        confirmLabel="Delete"
+        description="Are you sure you want to delete this budget? This action cannot be undone."
+        loading={deleteMutation.isPending}
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
+        open={deleteId !== null}
         title="Delete Budget"
-        description="Are you sure you want to delete this budget? This action cannot be undone."
-        confirmLabel="Delete"
-        loading={deleteMutation.isPending}
       />
     </div>
   );

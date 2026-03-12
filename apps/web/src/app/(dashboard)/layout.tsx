@@ -25,9 +25,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     <div className="flex min-h-screen">
       <Sidebar
         activeOrg={activeOrg}
+        onSwitchOrg={switchOrg}
         orgs={orgs}
         user={session.user}
-        onSwitchOrg={switchOrg}
       />
       <main className="flex-1 overflow-auto">
         <div className="px-8 py-6">{children}</div>

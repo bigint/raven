@@ -1,23 +1,26 @@
 "use client";
 
+import { Button, ConfirmDialog, PageHeader } from "@raven/ui";
+import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Button, ConfirmDialog, PageHeader } from "@raven/ui";
 import { useEventStream } from "@/hooks/use-event-stream";
-import { ProviderList } from "./components/provider-list";
 import { ProviderForm } from "./components/provider-form";
+import { ProviderList } from "./components/provider-list";
 import {
+  type Provider,
   providersQueryOptions,
   useDeleteProvider,
-  useUpdateProvider,
-  type Provider
+  useUpdateProvider
 } from "./hooks/use-providers";
 
 const ProvidersPage = () => {
-  const { data: providers = [], isLoading, error, refetch } = useQuery(
-    providersQueryOptions()
-  );
+  const {
+    data: providers = [],
+    isLoading,
+    error,
+    refetch
+  } = useQuery(providersQueryOptions());
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingProvider, setEditingProvider] = useState<Provider | null>(null);
@@ -45,14 +48,14 @@ const ProvidersPage = () => {
   return (
     <div>
       <PageHeader
-        title="Providers"
-        description="Configure your AI provider API keys."
         actions={
           <Button onClick={() => setFormOpen(true)}>
             <Plus className="size-4" />
             Add Provider
           </Button>
         }
+        description="Configure your AI provider API keys."
+        title="Providers"
       />
 
       {error && (
@@ -62,31 +65,31 @@ const ProvidersPage = () => {
       )}
 
       <ProviderList
-        providers={providers}
         loading={isLoading}
         onAdd={() => setFormOpen(true)}
-        onEdit={(p) => setEditingProvider(p)}
         onDelete={(id) => setDeleteId(id)}
+        onEdit={(p) => setEditingProvider(p)}
         onToggleEnabled={handleToggleEnabled}
+        providers={providers}
       />
 
       <ProviderForm
-        open={formOpen || !!editingProvider}
+        editingProvider={editingProvider}
         onClose={() => {
           setFormOpen(false);
           setEditingProvider(null);
         }}
-        editingProvider={editingProvider}
+        open={formOpen || !!editingProvider}
       />
 
       <ConfirmDialog
-        open={deleteId !== null}
+        confirmLabel="Delete"
+        description="Are you sure you want to delete this provider? This action cannot be undone."
+        loading={deleteMutation.isPending}
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
+        open={deleteId !== null}
         title="Delete Provider"
-        description="Are you sure you want to delete this provider? This action cannot be undone."
-        confirmLabel="Delete"
-        loading={deleteMutation.isPending}
       />
     </div>
   );

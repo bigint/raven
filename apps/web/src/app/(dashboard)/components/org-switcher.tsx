@@ -11,7 +11,11 @@ interface OrgSwitcherProps {
   onSwitch: (org: Org) => void;
 }
 
-export const OrgSwitcher = ({ activeOrg, orgs, onSwitch }: OrgSwitcherProps) => {
+export const OrgSwitcher = ({
+  activeOrg,
+  orgs,
+  onSwitch
+}: OrgSwitcherProps) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 

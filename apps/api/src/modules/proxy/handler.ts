@@ -23,7 +23,12 @@ export const proxyHandler = (
     const { virtualKey } = await authenticateKey(db, authHeader);
 
     // 2. Rate limit check
-    await checkRateLimit(redis, virtualKey.id, virtualKey.rateLimitRpm, virtualKey.rateLimitRpd);
+    await checkRateLimit(
+      redis,
+      virtualKey.id,
+      virtualKey.rateLimitRpm,
+      virtualKey.rateLimitRpd
+    );
 
     // 3. Resolve provider and decrypt credentials
     const { adapter, decryptedApiKey, providerName, upstreamPath } =
@@ -34,16 +39,19 @@ export const proxyHandler = (
     const hasBody = method !== "GET" && method !== "HEAD";
     const bodyText = hasBody ? await c.req.text() : undefined;
 
-    const { isStreaming, requestedModel, response: upstreamResponse } =
-      await forwardRequest({
-        adapter,
-        body: bodyText,
-        decryptedApiKey,
-        incomingHeaders: c.req.header(),
-        method,
-        rawUrl: c.req.url,
-        upstreamPath
-      });
+    const {
+      isStreaming,
+      requestedModel,
+      response: upstreamResponse
+    } = await forwardRequest({
+      adapter,
+      body: bodyText,
+      decryptedApiKey,
+      incomingHeaders: c.req.header(),
+      method,
+      rawUrl: c.req.url,
+      upstreamPath
+    });
 
     const latencyMs = Date.now() - startTime;
 
@@ -67,7 +75,9 @@ export const proxyHandler = (
     };
 
     if (proxyResponse.kind === "buffered") {
-      const { inputTokens, outputTokens } = extractTokenUsage(proxyResponse.body);
+      const { inputTokens, outputTokens } = extractTokenUsage(
+        proxyResponse.body
+      );
       const model = extractModel(proxyResponse.body, requestedModel);
       logData.inputTokens = inputTokens;
       logData.outputTokens = outputTokens;

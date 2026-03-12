@@ -19,7 +19,10 @@ interface StatCard {
   value: string;
 }
 
-const buildStatCards = (stats: Stats | null, activeKeys: number): StatCard[] => {
+const buildStatCards = (
+  stats: Stats | null,
+  activeKeys: number
+): StatCard[] => {
   const totalRequests = stats?.totalRequests ?? 0;
   const totalCost = Number(stats?.totalCost ?? 0);
   const avgLatency = Number(stats?.avgLatencyMs ?? 0);

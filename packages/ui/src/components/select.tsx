@@ -29,16 +29,20 @@ const Select = ({
   id,
   className,
   label,
-  error,
+  error
 }: SelectProps) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const selectedLabel = options.find((o) => o.value === value)?.label ?? placeholder;
+  const selectedLabel =
+    options.find((o) => o.value === value)?.label ?? placeholder;
 
   useEffect(() => {
     if (!open) return;
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     };
@@ -80,11 +84,15 @@ const Select = ({
               open && "rotate-180"
             )}
             fill="none"
-            viewBox="0 0 24 24"
             stroke="currentColor"
             strokeWidth={2}
+            viewBox="0 0 24 24"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            <path
+              d="M19 9l-7 7-7-7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </button>
 
@@ -92,11 +100,13 @@ const Select = ({
           <div className="absolute z-50 mt-1 w-full rounded-[var(--radius-md)] border border-border bg-popover py-1 shadow-md">
             {options.map((option) => (
               <button
-                key={option.value}
                 className={cn(
                   "flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
-                  option.value === value ? "text-foreground" : "text-muted-foreground"
+                  option.value === value
+                    ? "text-foreground"
+                    : "text-muted-foreground"
                 )}
+                key={option.value}
                 onClick={() => {
                   onChange(option.value);
                   setOpen(false);
@@ -109,11 +119,15 @@ const Select = ({
                     option.value === value ? "opacity-100" : "opacity-0"
                   )}
                   fill="none"
-                  viewBox="0 0 24 24"
                   stroke="currentColor"
                   strokeWidth={2}
+                  viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  <path
+                    d="M5 13l4 4L19 7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
                 {option.label}
               </button>

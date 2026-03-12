@@ -3,12 +3,8 @@ import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import { decrypt } from "@/lib/crypto";
-import {
-  ForbiddenError,
-  NotFoundError,
-  ValidationError
-} from "@/lib/errors";
-import { type ProviderAdapter, getProviderAdapter } from "./providers/registry";
+import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
+import { getProviderAdapter, type ProviderAdapter } from "./providers/registry";
 
 export interface ProviderResolution {
   adapter: ProviderAdapter;
@@ -42,9 +38,7 @@ export const resolveProvider = async (
     .limit(1);
 
   if (!providerConfig) {
-    throw new NotFoundError(
-      `No provider config found for '${providerName}'`
-    );
+    throw new NotFoundError(`No provider config found for '${providerName}'`);
   }
 
   if (!providerConfig.isEnabled) {

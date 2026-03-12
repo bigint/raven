@@ -59,34 +59,34 @@ const SettingsPage = () => {
       ) : settings !== null ? (
         <div className="space-y-6">
           <SettingsForm
-            settings={settings}
             editName={editName}
             editSlug={editSlug}
+            hasChanges={hasChanges}
             isAdmin={isAdmin}
             isSlugValid={isSlugValid}
-            hasChanges={hasChanges}
-            saving={saving}
-            saveError={saveError}
             onNameChange={setEditName}
-            onSlugChange={setEditSlug}
-            onSaveErrorClear={() => setSaveError(null)}
             onSave={handleSave}
+            onSaveErrorClear={() => setSaveError(null)}
+            onSlugChange={setEditSlug}
+            saveError={saveError}
+            saving={saving}
+            settings={settings}
           />
 
           <PlanSubscription settings={settings} />
 
           {isOwner && (
             <DangerZone
-              orgName={settings.name}
-              showDeleteConfirm={showDeleteConfirm}
               deleteConfirmText={deleteConfirmText}
-              deleting={deleting}
               deleteError={deleteError}
-              onOpenConfirm={openDeleteConfirm}
+              deleting={deleting}
               onCloseConfirm={() => setShowDeleteConfirm(false)}
               onConfirmTextChange={setDeleteConfirmText}
-              onDeleteErrorClear={() => setDeleteError(null)}
               onDelete={handleDelete}
+              onDeleteErrorClear={() => setDeleteError(null)}
+              onOpenConfirm={openDeleteConfirm}
+              orgName={settings.name}
+              showDeleteConfirm={showDeleteConfirm}
             />
           )}
         </div>

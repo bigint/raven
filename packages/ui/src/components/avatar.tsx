@@ -8,9 +8,9 @@ interface AvatarProps {
 }
 
 const sizeMap = {
-  sm: "size-7 text-xs",
-  md: "size-8 text-xs",
   lg: "size-10 text-sm",
+  md: "size-8 text-xs",
+  sm: "size-7 text-xs"
 };
 
 const Avatar = ({ name, src, size = "md", className }: AvatarProps) => {
@@ -19,9 +19,9 @@ const Avatar = ({ name, src, size = "md", className }: AvatarProps) => {
   if (src) {
     return (
       <img
-        src={src}
         alt={name ?? "Avatar"}
         className={cn("rounded-full object-cover", sizeMap[size], className)}
+        src={src}
       />
     );
   }

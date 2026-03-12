@@ -1,9 +1,9 @@
 "use client";
 
+import { PageHeader } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 import { useState } from "react";
-import { PageHeader } from "@raven/ui";
 import { CreateOrgForm } from "./components/create-org-form";
 import { OrgList } from "./components/org-list";
 import { PendingInvitations } from "./components/pending-invitations";
@@ -11,9 +11,9 @@ import { ProfileForm } from "./components/profile-form";
 import {
   orgsQueryOptions,
   profileInvitationsQueryOptions,
-  useCreateOrg,
   useAcceptInvitation,
-  useDeclineInvitation,
+  useCreateOrg,
+  useDeclineInvitation
 } from "./hooks/use-profile";
 
 export default function ProfilePage() {
@@ -67,7 +67,9 @@ export default function ProfilePage() {
 
         <PendingInvitations
           invitations={invitationsQuery.data ?? []}
-          invitationsError={invitationsQuery.isError ? invitationsQuery.error.message : null}
+          invitationsError={
+            invitationsQuery.isError ? invitationsQuery.error.message : null
+          }
           invitationsLoading={invitationsQuery.isLoading}
           onAcceptInvitation={handleAccept}
           onDeclineInvitation={handleDecline}
@@ -113,7 +115,9 @@ export default function ProfilePage() {
 
       <CreateOrgForm
         onClose={() => setShowCreateOrgModal(false)}
-        onSubmit={(data) => createOrg.mutateAsync(data)}
+        onSubmit={async (data) => {
+          await createOrg.mutateAsync(data);
+        }}
         open={showCreateOrgModal}
       />
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, type HTMLMotionProps } from "motion/react";
+import { type HTMLMotionProps, motion } from "motion/react";
 import type { ReactNode } from "react";
 
 interface FadeInProps extends HTMLMotionProps<"div"> {
@@ -10,9 +10,9 @@ interface FadeInProps extends HTMLMotionProps<"div"> {
 
 const FadeIn = ({ children, delay = 0, ...props }: FadeInProps) => (
   <motion.div
-    initial={{ opacity: 0, y: 8 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.3, delay, ease: [0.16, 1, 0.3, 1] }}
+    initial={{ opacity: 0, y: 8 }}
+    transition={{ delay, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
     {...props}
   >
     {children}
@@ -28,15 +28,15 @@ interface StaggerListProps {
 const StaggerList = ({
   children,
   staggerDelay = 0.03,
-  className,
+  className
 }: StaggerListProps) => (
   <motion.div
+    animate="visible"
     className={className}
     initial="hidden"
-    animate="visible"
     variants={{
       hidden: {},
-      visible: { transition: { staggerChildren: staggerDelay } },
+      visible: { transition: { staggerChildren: staggerDelay } }
     }}
   >
     {children}
@@ -45,11 +45,11 @@ const StaggerList = ({
 
 const StaggerItem = ({ children, ...props }: FadeInProps) => (
   <motion.div
+    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
     variants={{
       hidden: { opacity: 0, y: 8 },
-      visible: { opacity: 1, y: 0 },
+      visible: { opacity: 1, y: 0 }
     }}
-    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
     {...props}
   >
     {children}

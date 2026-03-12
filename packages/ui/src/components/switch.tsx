@@ -15,18 +15,18 @@ const Switch = ({
   onCheckedChange,
   label,
   disabled = false,
-  className,
+  className
 }: SwitchProps) => (
   <div className={cn("flex items-center gap-3", className)}>
     <button
-      role="switch"
       aria-checked={checked}
-      disabled={disabled}
-      onClick={() => onCheckedChange(!checked)}
       className={cn(
         "relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors duration-[var(--duration-fast)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
         checked ? "bg-primary" : "bg-muted"
       )}
+      disabled={disabled}
+      onClick={() => onCheckedChange(!checked)}
+      role="switch"
       type="button"
     >
       <span

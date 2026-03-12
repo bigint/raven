@@ -1,16 +1,27 @@
 export { cn } from "./cn";
-export { Button, buttonVariants, type ButtonProps } from "./components/button";
-export { Spinner, type SpinnerProps } from "./components/spinner";
-export { Badge, badgeVariants, type BadgeProps } from "./components/badge";
 export { Avatar, type AvatarProps } from "./components/avatar";
-export { Input, type InputProps } from "./components/input";
-export { Textarea, type TextareaProps } from "./components/textarea";
-export { Switch, type SwitchProps } from "./components/switch";
-export { PageHeader, type PageHeaderProps } from "./components/page-header";
-export { Modal, type ModalProps } from "./components/modal";
-export { ConfirmDialog, type ConfirmDialogProps } from "./components/confirm-dialog";
+export { Badge, type BadgeProps, badgeVariants } from "./components/badge";
+export { Button, type ButtonProps, buttonVariants } from "./components/button";
+export {
+  ConfirmDialog,
+  type ConfirmDialogProps
+} from "./components/confirm-dialog";
+export {
+  type Column,
+  DataTable,
+  type DataTableProps
+} from "./components/data-table";
 export { EmptyState, type EmptyStateProps } from "./components/empty-state";
-export { DataTable, type DataTableProps, type Column } from "./components/data-table";
-export { Tabs, type TabsProps, type Tab } from "./components/tabs";
-export { Select, type SelectProps, type SelectOption } from "./components/select";
-export { FadeIn, StaggerList, StaggerItem } from "./components/motion";
+export { Input, type InputProps } from "./components/input";
+export { Modal, type ModalProps } from "./components/modal";
+export { FadeIn, StaggerItem, StaggerList } from "./components/motion";
+export { PageHeader, type PageHeaderProps } from "./components/page-header";
+export {
+  Select,
+  type SelectOption,
+  type SelectProps
+} from "./components/select";
+export { Spinner, type SpinnerProps } from "./components/spinner";
+export { Switch, type SwitchProps } from "./components/switch";
+export { type Tab, Tabs, type TabsProps } from "./components/tabs";
+export { Textarea, type TextareaProps } from "./components/textarea";
