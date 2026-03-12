@@ -2,7 +2,6 @@
 
 import { Button, Input, Select } from "@raven/ui";
 import {
-  ArrowLeft,
   ArrowRight,
   Building2,
   Check,
@@ -11,7 +10,8 @@ import {
   EyeOff,
   Key,
   Loader2,
-  Plug
+  Plug,
+  X
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -170,26 +170,43 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4">
-      <div className="w-full max-w-lg">
-        {/* Back to dashboard */}
-        {hasExistingOrg && step === 0 && (
+    <div className="relative flex min-h-screen flex-col items-center justify-center px-4">
+      {/* Top bar — logo + close */}
+      {hasExistingOrg && (
+        <div className="fixed inset-x-0 top-0 z-10 flex items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-2">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-primary">
+              <span className="text-sm font-bold text-primary-foreground">
+                R
+              </span>
+            </div>
+            <span className="text-sm font-semibold">Raven</span>
+          </div>
           <button
-            className="mb-6 flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             onClick={() => router.push("/overview")}
             type="button"
           >
-            <ArrowLeft className="size-3.5" />
-            Back to dashboard
+            <X className="size-5" />
           </button>
-        )}
+        </div>
+      )}
 
+      <div className="w-full max-w-lg">
         {/* Header */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary">
-            <span className="text-lg font-bold text-primary-foreground">R</span>
-          </div>
-          <h1 className="text-2xl font-bold">Set up your workspace</h1>
+          {!hasExistingOrg && (
+            <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary">
+              <span className="text-lg font-bold text-primary-foreground">
+                R
+              </span>
+            </div>
+          )}
+          <h1 className="text-2xl font-bold">
+            {hasExistingOrg
+              ? "Create a new organization"
+              : "Set up your workspace"}
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Get started with Raven in a few quick steps
           </p>
