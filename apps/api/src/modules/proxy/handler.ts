@@ -5,6 +5,7 @@ import type { Redis } from "ioredis";
 import { GuardrailError } from "@/lib/errors";
 import { authenticateKey } from "./auth";
 import { checkBudgets } from "./budget-check";
+import { evaluateRoutingRules } from "./content-router";
 import { checkCache, storeCache } from "./cache";
 import { withFallback } from "./fallback";
 import { evaluateGuardrails, type GuardrailMatch } from "./guardrails";
@@ -78,6 +79,28 @@ export const proxyHandler = (
       } catch (err) {
         if (err instanceof GuardrailError) throw err;
         // Non-JSON body or missing messages - skip guardrail evaluation
+      }
+    }
+
+    // 5b. Content-based routing: evaluate routing rules to potentially switch model
+    let finalBodyText = bodyText;
+    if (bodyText) {
+      try {
+        const parsed = JSON.parse(bodyText);
+        if (typeof parsed.model === "string") {
+          const routingResult = await evaluateRoutingRules(
+            db,
+            virtualKey.organizationId,
+            parsed.model,
+            parsed
+          );
+          if (routingResult.ruleApplied) {
+            parsed.model = routingResult.model;
+            finalBodyText = JSON.stringify(parsed);
+          }
+        }
+      } catch {
+        // Non-JSON or missing model, skip content routing
       }
     }
 
@@ -160,7 +183,7 @@ export const proxyHandler = (
     // 9. Forward request with retry logic
     const forwardInput = {
       adapter,
-      body: bodyText,
+      body: finalBodyText,
       decryptedApiKey,
       incomingHeaders: c.req.header(),
       method,
