@@ -3,6 +3,7 @@ import { providerConfigs } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { NotFoundError } from "@/lib/errors";
+import { success } from "@/lib/response";
 import { maskApiKey } from "./helpers";
 
 export const getProvider = (db: Database) => async (c: Context) => {
@@ -21,8 +22,5 @@ export const getProvider = (db: Database) => async (c: Context) => {
     throw new NotFoundError("Provider not found");
   }
 
-  return c.json({
-    ...provider,
-    apiKey: maskApiKey(provider.apiKey)
-  });
+  return success(c, { ...provider, apiKey: maskApiKey(provider.apiKey) });
 };

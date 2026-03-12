@@ -2,6 +2,7 @@ import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Context } from "hono";
+import { success } from "@/lib/response";
 import { maskApiKey } from "./helpers";
 
 export const listProviders = (db: Database) => async (c: Context) => {
@@ -12,7 +13,8 @@ export const listProviders = (db: Database) => async (c: Context) => {
     .from(providerConfigs)
     .where(eq(providerConfigs.organizationId, orgId));
 
-  return c.json(
+  return success(
+    c,
     providers.map((p) => ({
       ...p,
       apiKey: maskApiKey(p.apiKey)
