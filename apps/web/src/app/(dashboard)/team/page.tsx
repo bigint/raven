@@ -3,6 +3,7 @@
 import { Select } from '@/components/select'
 import { api } from '@/lib/api'
 import { Mail, Pencil, Plus, Trash2, Users, X } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
 interface Member {
@@ -43,8 +44,19 @@ const ROLE_BADGE: Record<string, string> = {
 
 type ActiveTab = 'members' | 'invitations' | 'teams'
 
+const VALID_TABS: ActiveTab[] = ['members', 'invitations', 'teams']
+
 export default function TeamPage() {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('members')
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const tabParam = searchParams.get('tab') as ActiveTab | null
+  const activeTab = tabParam && VALID_TABS.includes(tabParam) ? tabParam : 'members'
+
+  const setActiveTab = (tab: ActiveTab) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('tab', tab)
+    router.replace(`?${params.toString()}`)
+  }
 
   const [members, setMembers] = useState<Member[]>([])
   const [invitations, setInvitations] = useState<Invitation[]>([])

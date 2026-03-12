@@ -2,6 +2,7 @@
 
 import { api } from '@/lib/api'
 import { Check, CreditCard, Zap } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
 interface Subscription {
@@ -36,12 +37,26 @@ const STATUS_BADGE: Record<string, string> = {
   incomplete: 'bg-orange-500/10 text-orange-600',
 }
 
+type BillingInterval = 'monthly' | 'yearly'
+const VALID_INTERVALS: BillingInterval[] = ['monthly', 'yearly']
+
 export default function BillingPage() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const intervalParam = searchParams.get('interval') as BillingInterval | null
+  const billingInterval =
+    intervalParam && VALID_INTERVALS.includes(intervalParam) ? intervalParam : 'monthly'
+
+  const setBillingInterval = (interval: BillingInterval) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('interval', interval)
+    router.replace(`?${params.toString()}`)
+  }
+
   const [subscription, setSubscription] = useState<Subscription | null>(null)
   const [plans, setPlans] = useState<Plan[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly')
   const [upgrading, setUpgrading] = useState<string | null>(null)
 
   const fetchData = useCallback(async () => {

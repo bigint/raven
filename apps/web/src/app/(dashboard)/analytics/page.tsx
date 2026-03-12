@@ -2,6 +2,7 @@
 
 import { api } from '@/lib/api'
 import { Activity, Clock, DollarSign, Zap } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
 interface Stats {
@@ -38,12 +39,24 @@ const PROVIDER_LABELS: Record<string, string> = {
   mistral: 'Mistral',
 }
 
+const VALID_RANGES: DateRange[] = ['7d', '30d', '90d']
+
 export default function AnalyticsPage() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const rangeParam = searchParams.get('range') as DateRange | null
+  const dateRange = rangeParam && VALID_RANGES.includes(rangeParam) ? rangeParam : '30d'
+
+  const setDateRange = (range: DateRange) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('range', range)
+    router.replace(`?${params.toString()}`)
+  }
+
   const [stats, setStats] = useState<Stats | null>(null)
   const [usage, setUsage] = useState<UsageRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [dateRange, setDateRange] = useState<DateRange>('30d')
 
   const fetchData = useCallback(async (range: DateRange) => {
     try {

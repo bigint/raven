@@ -3,8 +3,8 @@
 import { Select } from '@/components/select'
 import { api } from '@/lib/api'
 import { AlertTriangle, Check, Copy, Key, Pencil, Plus, Trash2, X } from 'lucide-react'
-import { toast } from 'sonner'
 import { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 interface VirtualKey {
   id: string
@@ -184,6 +184,7 @@ export default function KeysPage() {
     if (!newKeyValue) return
     await navigator.clipboard.writeText(newKeyValue)
     setCopiedKey(true)
+    toast.success('Key copied to clipboard')
     setTimeout(() => setCopiedKey(false), 2000)
   }
 
@@ -262,23 +263,6 @@ export default function KeysPage() {
                   className={`transition-colors hover:bg-muted/30 ${idx !== keys.length - 1 ? 'border-b border-border' : ''}`}
                 >
                   <td className="px-5 py-4 font-medium">{key.name}</td>
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-muted-foreground">{key.keyPrefix}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleCopyPrefix(key.keyPrefix)}
-                        className="rounded p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                        title="Copy key prefix"
-                      >
-                        {copiedPrefix === key.keyPrefix ? (
-                          <Check className="size-3.5 text-green-600" />
-                        ) : (
-                          <Copy className="size-3.5" />
-                        )}
-                      </button>
-                    </div>
-                  </td>
                   <td className="px-5 py-4">
                     <span
                       className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
