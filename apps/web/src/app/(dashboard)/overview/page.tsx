@@ -79,9 +79,7 @@ export default function OverviewPage() {
       const [statsData, usageData, requestsData, keysData] = await Promise.all([
         api.get<Stats>(`/v1/analytics/stats?from=${from}`),
         api.get<UsageRow[]>(`/v1/analytics/usage?from=${from}`),
-        api
-          .get<{ data: RecentRequest[] }>('/v1/analytics/requests?limit=5')
-          .then((r) => r.data),
+        api.get<{ data: RecentRequest[] }>('/v1/analytics/requests?limit=5').then((r) => r.data),
         api.get<KeySummary[]>('/v1/keys'),
       ])
       setStats(statsData)
@@ -209,9 +207,7 @@ export default function OverviewPage() {
               <div className="space-y-3">
                 {usage.slice(0, 5).map((row) => {
                   const pct =
-                    totalRequests > 0
-                      ? (Number(row.totalRequests) / totalRequests) * 100
-                      : 0
+                    totalRequests > 0 ? (Number(row.totalRequests) / totalRequests) * 100 : 0
                   return (
                     <div key={`${row.provider}-${row.model}`}>
                       <div className="flex items-center justify-between text-sm">
@@ -295,9 +291,7 @@ export default function OverviewPage() {
                         </p>
                       </div>
                     </div>
-                    <span className="text-xs text-muted-foreground">
-                      {timeAgo(req.createdAt)}
-                    </span>
+                    <span className="text-xs text-muted-foreground">{timeAgo(req.createdAt)}</span>
                   </div>
                 ))}
               </div>
