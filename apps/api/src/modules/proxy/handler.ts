@@ -5,6 +5,7 @@ import type { Redis } from "ioredis";
 import { GuardrailError } from "@/lib/errors";
 import { authenticateKey } from "./auth";
 import { checkBudgets } from "./budget-check";
+import { analyzeContent } from "./content-analyzer";
 import { evaluateRoutingRules } from "./content-router";
 import { checkCache, storeCache } from "./cache";
 import { withFallback } from "./fallback";
@@ -15,6 +16,7 @@ import { checkPlanLimit } from "./plan-check";
 import { resolveProvider } from "./provider-resolver";
 import { checkRateLimit } from "./rate-limiter";
 import { buildResponse } from "./response";
+import { analyzeResponse } from "./response-analyzer";
 import { withRetry } from "./retry";
 import {
   extractModel,
@@ -226,12 +228,19 @@ export const proxyHandler = (
       upstreamResult.isStreaming
     );
 
+    // 11b. Analyze request content for multi-modal and agentic tracking
+    const sessionHeader = c.req.header("x-session-id");
+    const contentAnalysis = analyzeContent(requestBody, sessionHeader);
+
     // 12. Prepare log data
     const logData = {
       cacheHit: false,
       cost: 0,
       guardrailMatches:
         guardrailMatches.length > 0 ? guardrailMatches : undefined,
+      hasImages: contentAnalysis.hasImages,
+      hasToolUse: contentAnalysis.hasToolUse,
+      imageCount: contentAnalysis.imageCount,
       inputTokens: 0,
       latencyMs,
       method,
@@ -241,7 +250,9 @@ export const proxyHandler = (
       path: upstreamPath,
       provider: finalProviderName,
       providerConfigId: finalProviderConfigId,
+      sessionId: contentAnalysis.sessionId,
       statusCode: upstreamResult.response.status,
+      toolCount: contentAnalysis.toolCount,
       virtualKeyId: virtualKey.id
     };
 
@@ -263,6 +274,13 @@ export const proxyHandler = (
       logData.outputTokens = outputTokens;
       logData.model = model;
       logData.cost = adapter.estimateCost(model, inputTokens, outputTokens);
+
+      // Analyze response for tool calls
+      const responseAnalysis = analyzeResponse(proxyResponse.body);
+      if (responseAnalysis.hasToolCalls) {
+        logData.hasToolUse = true;
+        logData.toolCount += responseAnalysis.toolCallCount;
+      }
 
       // Cache successful non-streaming responses
       if (upstreamResult.response.ok) {

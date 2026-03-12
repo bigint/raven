@@ -21,7 +21,10 @@ export const requestLogs = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    hasImages: boolean("has_images").notNull().default(false),
+    hasToolUse: boolean("has_tool_use").notNull().default(false),
     id: text("id").primaryKey().$defaultFn(createId),
+    imageCount: integer("image_count").notNull().default(0),
     inputTokens: integer("input_tokens").notNull().default(0),
     latencyMs: integer("latency_ms").notNull().default(0),
     method: text("method").notNull(),
@@ -36,7 +39,9 @@ export const requestLogs = pgTable(
       () => providerConfigs.id,
       { onDelete: "set null" }
     ),
+    sessionId: text("session_id"),
     statusCode: integer("status_code").notNull(),
+    toolCount: integer("tool_count").notNull().default(0),
     virtualKeyId: text("virtual_key_id")
       .notNull()
       .references(() => virtualKeys.id, { onDelete: "cascade" })
