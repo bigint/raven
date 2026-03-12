@@ -1,7 +1,7 @@
 'use client'
 
 import { api, setOrgId } from '@/lib/api'
-import { authClient, signOut, useActiveOrganization, useListOrganizations, useSession } from '@/lib/auth-client'
+import { signOut, useSession } from '@/lib/auth-client'
 import {
   BarChart3,
   CreditCard,
@@ -34,22 +34,28 @@ const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: session, isPending } = useSession()
-  const { data: activeOrg } = useActiveOrganization()
-  const { data: orgList } = useListOrganizations()
+  const [orgReady, setOrgReady] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
 
   useEffect(() => {
-    if (activeOrg?.id) {
-      setOrgId(activeOrg.id)
-    } else if (orgList && orgList.length > 0) {
-      // No active org set — activate the first one
-      authClient.organization.setActive({ organizationId: orgList[0].id })
-      setOrgId(orgList[0].id)
+    const resolveOrg = async () => {
+      try {
+        const orgs = await api.get<{ id: string; name: string }[]>('/v1/user/orgs')
+        if (orgs.length > 0) {
+          setOrgId(orgs[0].id)
+        }
+      } catch {
+        // Org endpoint may not exist yet — try to continue without
+      }
+      setOrgReady(true)
     }
-  }, [activeOrg?.id, orgList])
+    if (session?.user) {
+      resolveOrg()
+    }
+  }, [session?.user])
 
-  if (isPending) {
+  if (isPending || (!orgReady && session)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="size-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />

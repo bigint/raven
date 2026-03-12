@@ -19,6 +19,7 @@ import { createKeysModule } from './modules/keys/index.js'
 import { createProvidersModule } from './modules/providers/index.js'
 import { createProxyModule } from './modules/proxy/index.js'
 import { createTeamsModule } from './modules/teams/index.js'
+import { createUserModule } from './modules/user/index.js'
 
 const env = parseEnv()
 export const db = createDatabase(env.DATABASE_URL)
@@ -58,7 +59,13 @@ app.get('/health', (c) => c.json({ status: 'ok' }))
 
 app.route('/api/auth', createAuthModule(auth))
 
-// Protected API routes
+// User-level routes (auth required, no tenant)
+const userRouter = new Hono()
+userRouter.use('*', createAuthMiddleware(auth))
+userRouter.route('/user', createUserModule(db))
+app.route('/v1', userRouter)
+
+// Protected API routes (auth + tenant required)
 const v1 = new Hono()
 v1.use('*', createAuthMiddleware(auth))
 v1.use('*', createTenantMiddleware(db))
