@@ -2,7 +2,6 @@ import type { Database } from "@raven/db";
 import { invitations, members, users } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { z } from "zod";
 import {
   ConflictError,
   ForbiddenError,
@@ -10,11 +9,8 @@ import {
   ValidationError
 } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
-
-const inviteSchema = z.object({
-  email: z.string().email(),
-  role: z.enum(["admin", "member", "viewer"]).default("member")
-});
+import { created, success } from "@/lib/response";
+import { inviteSchema } from "./schema";
 
 export const inviteUser = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
@@ -76,7 +72,7 @@ export const inviteUser = (db: Database) => async (c: Context) => {
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 7);
 
-  const [created] = await db
+  const [record] = await db
     .insert(invitations)
     .values({
       email,
@@ -87,8 +83,8 @@ export const inviteUser = (db: Database) => async (c: Context) => {
     })
     .returning();
 
-  void publishEvent(orgId, "invitation.created", created);
-  return c.json(created, 201);
+  void publishEvent(orgId, "invitation.created", record);
+  return created(c, record);
 };
 
 export const listInvitations = (db: Database) => async (c: Context) => {
@@ -99,7 +95,7 @@ export const listInvitations = (db: Database) => async (c: Context) => {
     .from(invitations)
     .where(eq(invitations.organizationId, orgId));
 
-  return c.json(rows);
+  return success(c, rows);
 };
 
 export const revokeInvitation = (db: Database) => async (c: Context) => {
@@ -126,5 +122,5 @@ export const revokeInvitation = (db: Database) => async (c: Context) => {
     .where(and(eq(invitations.id, id), eq(invitations.organizationId, orgId)));
 
   void publishEvent(orgId, "invitation.revoked", { id });
-  return c.json({ success: true });
+  return success(c, { success: true });
 };

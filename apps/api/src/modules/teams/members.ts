@@ -2,17 +2,14 @@ import type { Database } from "@raven/db";
 import { members, users } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { z } from "zod";
 import {
   ForbiddenError,
   NotFoundError,
   ValidationError
 } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
-
-const changeRoleSchema = z.object({
-  role: z.enum(["admin", "member", "viewer"])
-});
+import { success } from "@/lib/response";
+import { changeRoleSchema } from "./schema";
 
 export const listMembers = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
@@ -30,7 +27,8 @@ export const listMembers = (db: Database) => async (c: Context) => {
     .innerJoin(users, eq(members.userId, users.id))
     .where(eq(members.organizationId, orgId));
 
-  return c.json(
+  return success(
+    c,
     rows.map((r) => ({
       email: r.userEmail,
       id: r.id,
@@ -77,7 +75,7 @@ export const removeMember = (db: Database) => async (c: Context) => {
     .where(and(eq(members.id, id), eq(members.organizationId, orgId)));
 
   void publishEvent(orgId, "member.removed", { id });
-  return c.json({ success: true });
+  return success(c, { success: true });
 };
 
 export const changeRole = (db: Database) => async (c: Context) => {
@@ -121,5 +119,5 @@ export const changeRole = (db: Database) => async (c: Context) => {
     .returning();
 
   void publishEvent(orgId, "member.role_changed", updated);
-  return c.json(updated);
+  return success(c, updated);
 };
