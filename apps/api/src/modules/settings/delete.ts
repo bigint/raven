@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { ForbiddenError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
+import { success } from "@/lib/response";
 
 export const deleteSettings = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
@@ -16,5 +17,5 @@ export const deleteSettings = (db: Database) => async (c: Context) => {
   await db.delete(organizations).where(eq(organizations.id, orgId));
 
   void publishEvent(orgId, "settings.deleted", { id: orgId });
-  return c.json({ success: true });
+  return success(c, { success: true });
 };

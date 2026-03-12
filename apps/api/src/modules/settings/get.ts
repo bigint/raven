@@ -3,6 +3,7 @@ import { organizations, subscriptions } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { NotFoundError } from "@/lib/errors";
+import { success } from "@/lib/response";
 
 export const getSettings = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
@@ -29,7 +30,7 @@ export const getSettings = (db: Database) => async (c: Context) => {
     .where(eq(subscriptions.organizationId, orgId))
     .limit(1);
 
-  return c.json({
+  return success(c, {
     createdAt: org.createdAt,
     id: org.id,
     name: org.name,
