@@ -171,7 +171,7 @@ The app uses modern web technologies:
 
 - **React Components**: `snake-case.tsx` (e.g., `user-profile.tsx`)
 - **Utility Files**: `camelCase.ts` (e.g., `formatDate.ts`)
-- **Hooks**: `use*.ts` (e.g., `useProfile.ts`)
+- **Hooks**: `use-*.ts` (e.g., `use-profile.ts`)
 - **Types**: `*.types.ts` (e.g., `profile.types.ts`)
 - **Route Files**: Next.js App Router conventions (`page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`)
 
@@ -1069,9 +1069,9 @@ export const MultiProfilePage = ({ names }: { names: string[] }) => {
 features/
 └── profile/
     ├── hooks/
-    │   ├── useProfile.ts       # getProfile + getProfileQueryOptions
-    │   ├── useChannels.ts      # getChannels + getChannelsQueryOptions
-    │   └── useBlocks.ts        # getBlocks + getBlocksQueryOptions
+    │   ├── use-profile.ts      # getProfile + getProfileQueryOptions
+    │   ├── use-channels.ts     # getChannels + getChannelsQueryOptions
+    │   └── use-blocks.ts       # getBlocks + getBlocksQueryOptions
     └── components/
         └── ProfileCard.tsx      # useQuery(getProfileQueryOptions(...))
 ```
