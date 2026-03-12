@@ -48,22 +48,10 @@ const AnalyticsPage = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard
-          label="Total Cost"
-          value={formatCurrency(cost?.total_cost ?? 0)}
-        />
-        <StatCard
-          label="Projected Monthly"
-          value={formatCurrency(cost?.projected_monthly ?? 0)}
-        />
-        <StatCard
-          label="Cache Savings"
-          value={formatCurrency(cache?.savings ?? 0)}
-        />
-        <StatCard
-          label="Total Requests"
-          value={formatNumber(usage?.total_requests ?? 0)}
-        />
+        <StatCard label="Total Cost" value={formatCurrency(cost?.total_cost ?? 0)} />
+        <StatCard label="Projected Monthly" value={formatCurrency(cost?.projected_monthly ?? 0)} />
+        <StatCard label="Cache Savings" value={formatCurrency(cache?.savings ?? 0)} />
+        <StatCard label="Total Requests" value={formatNumber(usage?.total_requests ?? 0)} />
       </div>
 
       <div>

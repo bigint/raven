@@ -19,7 +19,7 @@ import { useState } from 'react'
 function relativeTime(dateStr: string | undefined): string {
   if (!dateStr) return 'Never'
   try {
-    return formatDistanceToNow(new Date(dateStr), { addSuffix: false }) + ' ago'
+    return `${formatDistanceToNow(new Date(dateStr), { addSuffix: false })} ago`
   } catch {
     return '--'
   }
@@ -109,10 +109,7 @@ const KeysPage = () => {
       render: (item: VirtualKey) => (
         <DropdownMenu
           trigger={
-            <button
-              type="button"
-              className="rounded-md p-1 hover:bg-surface-hover"
-            >
+            <button type="button" className="rounded-md p-1 hover:bg-surface-hover">
               <MoreVertical className="size-3.5 text-text-tertiary" />
             </button>
           }

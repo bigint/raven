@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Updates and articles from the Raven team.',
 }
 
-export default function BlogPage() {
+const BlogPage = () => {
   return (
     <div className="min-h-screen pt-32 pb-24">
       <div className="mx-auto max-w-7xl px-6">
@@ -28,3 +28,5 @@ export default function BlogPage() {
     </div>
   )
 }
+
+export default BlogPage

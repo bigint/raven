@@ -105,7 +105,9 @@ export class ApiClient {
 
   // Orgs
   async listOrgs(opts?: ListOpts): Promise<PaginatedResponse<Org>> {
-    const res = await this.request<RawPaginatedResponse<Org>>(`/admin/v1/orgs${buildQuery(opts ?? {})}`)
+    const res = await this.request<RawPaginatedResponse<Org>>(
+      `/admin/v1/orgs${buildQuery(opts ?? {})}`,
+    )
     return toPaginated(res)
   }
 
@@ -133,7 +135,9 @@ export class ApiClient {
 
   // Teams
   async listTeams(orgId: string, opts?: ListOpts): Promise<PaginatedResponse<Team>> {
-    const res = await this.request<RawPaginatedResponse<Team>>(`/admin/v1/teams${buildQuery({ org_id: orgId, ...(opts ?? {}) })}`)
+    const res = await this.request<RawPaginatedResponse<Team>>(
+      `/admin/v1/teams${buildQuery({ org_id: orgId, ...(opts ?? {}) })}`,
+    )
     return toPaginated(res)
   }
 
@@ -146,7 +150,9 @@ export class ApiClient {
 
   // Users
   async listUsers(opts?: ListOpts): Promise<PaginatedResponse<User>> {
-    const res = await this.request<RawPaginatedResponse<User>>(`/admin/v1/users${buildQuery(opts ?? {})}`)
+    const res = await this.request<RawPaginatedResponse<User>>(
+      `/admin/v1/users${buildQuery(opts ?? {})}`,
+    )
     return toPaginated(res)
   }
 
@@ -159,7 +165,9 @@ export class ApiClient {
 
   // Keys
   async listKeys(opts?: ListOpts): Promise<PaginatedResponse<VirtualKey>> {
-    const res = await this.request<RawPaginatedResponse<VirtualKey>>(`/admin/v1/keys${buildQuery(opts ?? {})}`)
+    const res = await this.request<RawPaginatedResponse<VirtualKey>>(
+      `/admin/v1/keys${buildQuery(opts ?? {})}`,
+    )
     return toPaginated(res)
   }
 
@@ -177,7 +185,7 @@ export class ApiClient {
   // Providers
   async listProviders(): Promise<Provider[]> {
     const res = await this.request<Provider[] | RawListResponse<Provider>>('/admin/v1/providers')
-    return Array.isArray(res) ? res : res.data ?? []
+    return Array.isArray(res) ? res : (res.data ?? [])
   }
 
   async getProviderHealth(name: string): Promise<ProviderHealth> {
@@ -224,7 +232,9 @@ export class ApiClient {
 
   // Logs
   async listLogs(opts: LogQueryOpts): Promise<PaginatedResponse<RequestLog>> {
-    const res = await this.request<RawPaginatedResponse<RequestLog>>(`/admin/v1/logs${buildQuery(opts)}`)
+    const res = await this.request<RawPaginatedResponse<RequestLog>>(
+      `/admin/v1/logs${buildQuery(opts)}`,
+    )
     return toPaginated(res)
   }
 
@@ -235,13 +245,15 @@ export class ApiClient {
   // Models
   async listModels(): Promise<Model[]> {
     const res = await this.request<Model[] | RawListResponse<Model>>('/admin/v1/models')
-    return Array.isArray(res) ? res : res.data ?? []
+    return Array.isArray(res) ? res : (res.data ?? [])
   }
 
   // Budgets
   async listBudgets(): Promise<BudgetConfig[]> {
-    const res = await this.request<BudgetConfig[] | RawListResponse<BudgetConfig>>('/admin/v1/budgets')
-    return Array.isArray(res) ? res : res.data ?? []
+    const res = await this.request<BudgetConfig[] | RawListResponse<BudgetConfig>>(
+      '/admin/v1/budgets',
+    )
+    return Array.isArray(res) ? res : (res.data ?? [])
   }
 
   async createBudget(data: Partial<BudgetConfig>): Promise<BudgetConfig> {
@@ -265,7 +277,6 @@ export class ApiClient {
 }
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  (typeof window !== 'undefined' ? window.location.origin : '')
+  import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : '')
 
 export const apiClient = new ApiClient(API_BASE_URL)

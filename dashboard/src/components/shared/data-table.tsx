@@ -1,6 +1,13 @@
 import { EmptyState } from '@/components/shared/empty-state'
 import { Input } from '@/components/ui/input'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 import type { ReactNode } from 'react'
 
@@ -70,10 +77,7 @@ export const DataTable = <T,>({
         <div className="flex items-center gap-3 mb-3">
           {onSearch && (
             <div className="flex-1">
-              <Input
-                placeholder={searchPlaceholder}
-                onChange={(e) => onSearch(e.target.value)}
-              />
+              <Input placeholder={searchPlaceholder} onChange={(e) => onSearch(e.target.value)} />
             </div>
           )}
           {actions && <div className="shrink-0">{actions}</div>}
@@ -114,13 +118,18 @@ export const DataTable = <T,>({
                     >
                       {columns.map((col) => (
                         <TableCell key={col.key} className={col.className}>
-                          {col.render ? col.render(row) : String((row as Record<string, unknown>)[col.key] ?? '')}
+                          {col.render
+                            ? col.render(row)
+                            : String((row as Record<string, unknown>)[col.key] ?? '')}
                         </TableCell>
                       ))}
                     </TableRow>
                     {isExpanded && renderExpandedRow && (
                       <tr key={`${key}-expanded`}>
-                        <td colSpan={columns.length} className="bg-surface border-b border-border p-0">
+                        <td
+                          colSpan={columns.length}
+                          className="bg-surface border-b border-border p-0"
+                        >
                           {renderExpandedRow(row)}
                         </td>
                       </tr>
@@ -152,7 +161,9 @@ export const DataTable = <T,>({
                     onClick={() => onPageChange(p)}
                     className={cn(
                       'size-6 rounded-[5px] text-[11px]',
-                      p === page ? 'bg-surface-active text-text-primary' : 'text-text-tertiary hover:bg-surface-hover',
+                      p === page
+                        ? 'bg-surface-active text-text-primary'
+                        : 'text-text-tertiary hover:bg-surface-hover',
                     )}
                   >
                     {p}

@@ -1,17 +1,17 @@
 'use client'
 
+import { useRevealOnce } from '@/hooks/use-reveal-once'
 import { cn } from '@/lib/utils'
 import { Check, Minus, X } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
 
 type CellValue = true | false | string
 
 interface ComparisonRow {
-  feature: string
-  raven: CellValue
-  litellm: CellValue
-  portkey: CellValue
-  cloudflare: CellValue
+  readonly feature: string
+  readonly raven: CellValue
+  readonly litellm: CellValue
+  readonly portkey: CellValue
+  readonly cloudflare: CellValue
 }
 
 const rows: ComparisonRow[] = [
@@ -40,38 +40,21 @@ const rows: ComparisonRow[] = [
   { feature: 'OpenTelemetry', raven: true, litellm: false, portkey: false, cloudflare: false },
 ]
 
-function CellContent({ value }: { value: CellValue }) {
+const CellContent = ({ value }: { readonly value: CellValue }) => {
   if (value === true) return <Check className="h-5 w-5 text-emerald-400" />
   if (value === false) return <X className="h-5 w-5 text-white/20" />
   if (value === 'N/A') return <Minus className="h-5 w-5 text-white/20" />
   return <span className="text-sm">{value}</span>
 }
 
-export function Comparison() {
-  const [visible, setVisible] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true)
-          observer.disconnect()
-        }
-      },
-      { threshold: 0.1 },
-    )
-    if (ref.current) observer.observe(ref.current)
-    return () => observer.disconnect()
-  }, [])
+export const Comparison = () => {
+  const { ref, isVisible } = useRevealOnce<HTMLDivElement>()
 
   return (
     <section className="py-24 md:py-32" ref={ref}>
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-2xl text-center mb-16">
-          <h2 className="font-heading text-4xl md:text-5xl text-foreground">
-            How Raven Compares
-          </h2>
+          <h2 className="font-heading text-4xl md:text-5xl text-foreground">How Raven Compares</h2>
           <p className="mt-4 text-lg text-muted">
             The only open-source AI gateway with zero telemetry, semantic caching, and a plugin
             system.
@@ -81,7 +64,7 @@ export function Comparison() {
         <div
           className={cn(
             'mx-auto max-w-5xl overflow-x-auto transition-all duration-700',
-            visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8',
+            isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0',
           )}
         >
           <table className="w-full border-collapse text-sm">
@@ -98,7 +81,10 @@ export function Comparison() {
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.feature} className="border-b border-border/50 hover:bg-surface/50 transition-colors">
+                <tr
+                  key={row.feature}
+                  className="border-b border-border/50 hover:bg-surface/50 transition-colors"
+                >
                   <td className="py-3.5 px-4 text-foreground">{row.feature}</td>
                   <td className="py-3.5 px-4 text-center bg-primary/5">
                     <span className="inline-flex justify-center">

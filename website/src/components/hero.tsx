@@ -1,8 +1,8 @@
-import { Button } from '@/components/ui/button'
 import { TerminalDemo } from '@/components/terminal-demo'
+import { Button } from '@/components/ui/button'
 import { ArrowRight, Github } from 'lucide-react'
 
-export function Hero() {
+export const Hero = () => {
   return (
     <section className="relative pt-32 pb-24 md:pt-44 md:pb-32 overflow-hidden">
       {/* Background gradient */}
@@ -29,10 +29,7 @@ export function Hero() {
               Get Started
               <ArrowRight className="h-4 w-4" />
             </Button>
-            <Button
-              href="https://github.com/bigint-studio/raven"
-              variant="secondary"
-            >
+            <Button href="https://github.com/bigint-studio/raven" variant="secondary">
               <Github className="h-4 w-4" />
               View on GitHub
             </Button>

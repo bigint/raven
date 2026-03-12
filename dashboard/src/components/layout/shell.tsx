@@ -50,10 +50,7 @@ export const Shell = ({ children }: ShellProps) => {
 
   return (
     <div className="min-h-screen bg-bg">
-      <Sidebar
-        onOpenPalette={() => setPaletteOpen(true)}
-        gatewayStatus={gatewayStatus}
-      />
+      <Sidebar onOpenPalette={() => setPaletteOpen(true)} gatewayStatus={gatewayStatus} />
       <div className="max-lg:ml-0 lg:ml-[220px]">
         <main className="p-5">{children}</main>
       </div>

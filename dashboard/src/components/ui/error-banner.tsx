@@ -19,7 +19,11 @@ export const ErrorBanner = ({ children, onDismiss, className }: ErrorBannerProps
       <AlertCircle className="size-3.5 shrink-0 text-error" />
       <span className="flex-1 text-xs text-error">{children}</span>
       {onDismiss && (
-        <button type="button" onClick={onDismiss} className="text-text-muted hover:text-text-secondary">
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="text-text-muted hover:text-text-secondary"
+        >
           <X className="size-3" />
         </button>
       )}

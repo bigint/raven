@@ -44,9 +44,7 @@ const ModelsPage = () => {
       key: 'provider',
       header: 'Provider',
       sortable: true,
-      render: (item: Model) => (
-        <span className="text-xs text-text-secondary">{item.provider}</span>
-      ),
+      render: (item: Model) => <span className="text-xs text-text-secondary">{item.provider}</span>,
     },
     {
       key: 'input_price_per_token',
@@ -83,9 +81,15 @@ const ModelsPage = () => {
       header: 'Features',
       render: (item: Model) => (
         <div className="flex gap-1.5 font-mono text-xs">
-          <span className={item.supports_streaming ? 'text-text-primary' : 'text-text-muted'}>S</span>
+          <span className={item.supports_streaming ? 'text-text-primary' : 'text-text-muted'}>
+            S
+          </span>
           <span className={item.supports_vision ? 'text-text-primary' : 'text-text-muted'}>V</span>
-          <span className={item.supports_function_calling ? 'text-text-primary' : 'text-text-muted'}>T</span>
+          <span
+            className={item.supports_function_calling ? 'text-text-primary' : 'text-text-muted'}
+          >
+            T
+          </span>
         </div>
       ),
     },

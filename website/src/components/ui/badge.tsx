@@ -2,10 +2,10 @@ import { cn } from '@/lib/utils'
 import type { HTMLAttributes } from 'react'
 
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
-  variant?: 'default' | 'outline'
+  readonly variant?: 'default' | 'outline'
 }
 
-export function Badge({ variant = 'default', className, children, ...props }: BadgeProps) {
+export const Badge = ({ variant = 'default', className, children, ...props }: BadgeProps) => {
   return (
     <span
       className={cn(

@@ -4,8 +4,8 @@ import type { ButtonHTMLAttributes } from 'react'
 type ButtonVariant = 'primary' | 'secondary' | 'ghost'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ButtonVariant
-  href?: string
+  readonly variant?: ButtonVariant
+  readonly href?: string
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
@@ -16,7 +16,13 @@ const variantStyles: Record<ButtonVariant, string> = {
   ghost: 'text-white/70 hover:text-white hover:bg-white/5',
 }
 
-export function Button({ variant = 'primary', className, href, children, ...props }: ButtonProps) {
+export const Button = ({
+  variant = 'primary',
+  className,
+  href,
+  children,
+  ...props
+}: ButtonProps) => {
   const styles = cn(
     'inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 text-sm font-medium transition-all duration-200 cursor-pointer',
     variantStyles[variant],

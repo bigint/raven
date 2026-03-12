@@ -5,7 +5,7 @@ import { Features } from '@/components/features'
 import { Hero } from '@/components/hero'
 import { ProvidersGrid } from '@/components/providers-grid'
 
-export default function Home() {
+const HomePage = () => {
   return (
     <>
       <Hero />
@@ -17,3 +17,5 @@ export default function Home() {
     </>
   )
 }
+
+export default HomePage

@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Raven AI Gateway documentation and guides.',
 }
 
-export default function DocsPage() {
+const DocsPage = () => {
   return (
     <div className="min-h-screen pt-32 pb-24">
       <div className="mx-auto max-w-7xl px-6">
@@ -28,3 +28,5 @@ export default function DocsPage() {
     </div>
   )
 }
+
+export default DocsPage

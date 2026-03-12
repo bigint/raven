@@ -1,8 +1,9 @@
+import { Footer } from '@/components/footer'
+import { Header } from '@/components/header'
 import type { Metadata } from 'next'
 import { Geist } from 'next/font/google'
 import { Instrument_Serif } from 'next/font/google'
-import { Footer } from '@/components/footer'
-import { Header } from '@/components/header'
+import type { ReactNode } from 'react'
 import './globals.css'
 
 const geist = Geist({
@@ -36,11 +37,11 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+interface RootLayoutProps {
+  readonly children: ReactNode
+}
+
+const RootLayout = ({ children }: RootLayoutProps) => {
   return (
     <html lang="en" className={`${geist.variable} ${instrumentSerif.variable}`}>
       <body className="min-h-screen bg-background text-foreground font-body antialiased">
@@ -51,3 +52,5 @@ export default function RootLayout({
     </html>
   )
 }
+
+export default RootLayout

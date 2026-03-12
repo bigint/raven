@@ -1,15 +1,8 @@
 'use client'
 
+import { useRevealOnce } from '@/hooks/use-reveal-once'
 import { cn } from '@/lib/utils'
-import {
-  Activity,
-  DollarSign,
-  Eye,
-  Puzzle,
-  Server,
-  ShieldCheck,
-} from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { Activity, DollarSign, Eye, Puzzle, Server, ShieldCheck } from 'lucide-react'
 
 const features = [
   {
@@ -20,14 +13,12 @@ const features = [
   {
     icon: Server,
     title: '50+ Providers',
-    description:
-      'OpenAI, Anthropic, Google, Mistral, Cohere, Groq, and 45 more. One unified API.',
+    description: 'OpenAI, Anthropic, Google, Mistral, Cohere, Groq, and 45 more. One unified API.',
   },
   {
     icon: Activity,
     title: 'Semantic Cache',
-    description:
-      'Two-tier caching with exact match and vector similarity. Cut costs by up to 90%.',
+    description: 'Two-tier caching with exact match and vector similarity. Cut costs by up to 90%.',
   },
   {
     icon: DollarSign,
@@ -44,28 +35,12 @@ const features = [
   {
     icon: Puzzle,
     title: 'Plugin Ecosystem',
-    description:
-      'Extend with Go, WASM, or webhooks. Guardrails, custom auth, trace export.',
+    description: 'Extend with Go, WASM, or webhooks. Guardrails, custom auth, trace export.',
   },
 ]
 
-export function Features() {
-  const [visible, setVisible] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true)
-          observer.disconnect()
-        }
-      },
-      { threshold: 0.1 },
-    )
-    if (ref.current) observer.observe(ref.current)
-    return () => observer.disconnect()
-  }, [])
+export const Features = () => {
+  const { ref, isVisible } = useRevealOnce<HTMLDivElement>()
 
   return (
     <section className="py-24 md:py-32" ref={ref}>
@@ -87,9 +62,9 @@ export function Features() {
                 key={feature.title}
                 className={cn(
                   'group relative rounded-xl border border-border bg-surface p-8 transition-all duration-500 hover:bg-surface-hover hover:border-primary/30',
-                  visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6',
+                  isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0',
                 )}
-                style={{ transitionDelay: visible ? `${i * 100}ms` : '0ms' }}
+                style={{ transitionDelay: isVisible ? `${i * 100}ms` : '0ms' }}
               >
                 <div className="mb-4 inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 text-primary-light group-hover:bg-primary/20 transition-colors duration-300">
                   <Icon className="h-6 w-6" />

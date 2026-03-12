@@ -19,7 +19,9 @@ export const StatCard = ({ label, value, sparklineData, className }: StatCardPro
     >
       <div className="flex flex-col min-w-0">
         <p className="text-[10px] text-text-tertiary uppercase tracking-[0.5px]">{label}</p>
-        <p className="mt-2 text-[22px] font-semibold text-text-primary tracking-[-0.5px]">{value}</p>
+        <p className="mt-2 text-[22px] font-semibold text-text-primary tracking-[-0.5px]">
+          {value}
+        </p>
       </div>
       {sparklineData && sparklineData.length > 0 && (
         <div className="shrink-0 self-end">

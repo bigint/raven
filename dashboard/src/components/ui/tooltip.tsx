@@ -18,7 +18,11 @@ const positions = {
 export const Tooltip = ({ content, children, side = 'top', className }: TooltipProps) => {
   const [show, setShow] = useState(false)
   return (
-    <div className="relative inline-flex" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+    <div
+      className="relative inline-flex"
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+    >
       {children}
       {show && (
         <div

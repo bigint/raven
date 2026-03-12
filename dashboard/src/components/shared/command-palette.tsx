@@ -1,40 +1,150 @@
 import { cn } from '@/lib/utils'
 import {
-  BarChart3, Cpu, Database, Key, LayoutDashboard, List, Puzzle,
-  Server, Settings, Shield, Users, Wallet,
+  BarChart3,
+  Cpu,
+  Database,
+  Key,
+  LayoutDashboard,
+  List,
+  Puzzle,
+  Server,
+  Settings,
+  Shield,
+  Users,
+  Wallet,
 } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import {
+  type ChangeEvent,
+  type KeyboardEvent,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { useNavigate } from 'react-router-dom'
 
 interface PaletteItem {
   readonly id: string
   readonly label: string
   readonly category: 'Pages' | 'Actions'
-  readonly icon: React.ReactNode
+  readonly icon: ReactNode
   readonly path?: string
   readonly shortcut?: string
   readonly action?: () => void
 }
 
 const pageItems: PaletteItem[] = [
-  { id: 'overview', label: 'Overview', category: 'Pages', icon: <LayoutDashboard className="size-3.5" />, path: '/', shortcut: '⌘1' },
-  { id: 'requests', label: 'Requests', category: 'Pages', icon: <List className="size-3.5" />, path: '/requests', shortcut: '⌘2' },
-  { id: 'analytics', label: 'Analytics', category: 'Pages', icon: <BarChart3 className="size-3.5" />, path: '/analytics', shortcut: '⌘3' },
-  { id: 'providers', label: 'Providers', category: 'Pages', icon: <Server className="size-3.5" />, path: '/providers' },
-  { id: 'models', label: 'Models', category: 'Pages', icon: <Cpu className="size-3.5" />, path: '/models' },
-  { id: 'keys', label: 'Keys', category: 'Pages', icon: <Key className="size-3.5" />, path: '/keys' },
-  { id: 'teams', label: 'Teams', category: 'Pages', icon: <Users className="size-3.5" />, path: '/teams' },
-  { id: 'budgets', label: 'Budgets', category: 'Pages', icon: <Wallet className="size-3.5" />, path: '/budgets' },
-  { id: 'cache', label: 'Cache', category: 'Pages', icon: <Database className="size-3.5" />, path: '/cache' },
-  { id: 'guardrails', label: 'Guardrails', category: 'Pages', icon: <Shield className="size-3.5" />, path: '/guardrails' },
-  { id: 'plugins', label: 'Plugins', category: 'Pages', icon: <Puzzle className="size-3.5" />, path: '/plugins' },
-  { id: 'settings', label: 'Settings', category: 'Pages', icon: <Settings className="size-3.5" />, path: '/settings' },
+  {
+    id: 'overview',
+    label: 'Overview',
+    category: 'Pages',
+    icon: <LayoutDashboard className="size-3.5" />,
+    path: '/',
+    shortcut: '⌘1',
+  },
+  {
+    id: 'requests',
+    label: 'Requests',
+    category: 'Pages',
+    icon: <List className="size-3.5" />,
+    path: '/requests',
+    shortcut: '⌘2',
+  },
+  {
+    id: 'analytics',
+    label: 'Analytics',
+    category: 'Pages',
+    icon: <BarChart3 className="size-3.5" />,
+    path: '/analytics',
+    shortcut: '⌘3',
+  },
+  {
+    id: 'providers',
+    label: 'Providers',
+    category: 'Pages',
+    icon: <Server className="size-3.5" />,
+    path: '/providers',
+  },
+  {
+    id: 'models',
+    label: 'Models',
+    category: 'Pages',
+    icon: <Cpu className="size-3.5" />,
+    path: '/models',
+  },
+  {
+    id: 'keys',
+    label: 'Keys',
+    category: 'Pages',
+    icon: <Key className="size-3.5" />,
+    path: '/keys',
+  },
+  {
+    id: 'teams',
+    label: 'Teams',
+    category: 'Pages',
+    icon: <Users className="size-3.5" />,
+    path: '/teams',
+  },
+  {
+    id: 'budgets',
+    label: 'Budgets',
+    category: 'Pages',
+    icon: <Wallet className="size-3.5" />,
+    path: '/budgets',
+  },
+  {
+    id: 'cache',
+    label: 'Cache',
+    category: 'Pages',
+    icon: <Database className="size-3.5" />,
+    path: '/cache',
+  },
+  {
+    id: 'guardrails',
+    label: 'Guardrails',
+    category: 'Pages',
+    icon: <Shield className="size-3.5" />,
+    path: '/guardrails',
+  },
+  {
+    id: 'plugins',
+    label: 'Plugins',
+    category: 'Pages',
+    icon: <Puzzle className="size-3.5" />,
+    path: '/plugins',
+  },
+  {
+    id: 'settings',
+    label: 'Settings',
+    category: 'Pages',
+    icon: <Settings className="size-3.5" />,
+    path: '/settings',
+  },
 ]
 
 const actionItems: PaletteItem[] = [
-  { id: 'create-key', label: 'Create Key', category: 'Actions', icon: <Key className="size-3.5" />, path: '/keys' },
-  { id: 'create-org', label: 'Create Org', category: 'Actions', icon: <Users className="size-3.5" />, path: '/teams' },
-  { id: 'create-budget', label: 'Create Budget', category: 'Actions', icon: <Wallet className="size-3.5" />, path: '/budgets' },
+  {
+    id: 'create-key',
+    label: 'Create Key',
+    category: 'Actions',
+    icon: <Key className="size-3.5" />,
+    path: '/keys',
+  },
+  {
+    id: 'create-org',
+    label: 'Create Org',
+    category: 'Actions',
+    icon: <Users className="size-3.5" />,
+    path: '/teams',
+  },
+  {
+    id: 'create-budget',
+    label: 'Create Budget',
+    category: 'Actions',
+    icon: <Wallet className="size-3.5" />,
+    path: '/budgets',
+  },
 ]
 
 const allItems = [...pageItems, ...actionItems]
@@ -62,9 +172,10 @@ export const CommandPalette = ({ open, onClose }: CommandPaletteProps) => {
     }
   }, [open])
 
-  useEffect(() => {
+  const handleQueryChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setQuery(event.target.value)
     setActiveIndex(0)
-  }, [query])
+  }
 
   const execute = (item: PaletteItem) => {
     onClose()
@@ -75,7 +186,7 @@ export const CommandPalette = ({ open, onClose }: CommandPaletteProps) => {
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault()
       setActiveIndex((i) => Math.min(i + 1, filtered.length - 1))
@@ -101,7 +212,9 @@ export const CommandPalette = ({ open, onClose }: CommandPaletteProps) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh]">
-      <div
+      <button
+        type="button"
+        aria-label="Close command palette"
         className="fixed inset-0 bg-overlay"
         style={{ animation: 'overlay-in 150ms ease-out' }}
         onClick={onClose}
@@ -114,7 +227,7 @@ export const CommandPalette = ({ open, onClose }: CommandPaletteProps) => {
           <input
             ref={inputRef}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={handleQueryChange}
             onKeyDown={handleKeyDown}
             placeholder="Search pages, actions, settings..."
             className="w-full bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none"
@@ -149,7 +262,9 @@ export const CommandPalette = ({ open, onClose }: CommandPaletteProps) => {
                         <span className="text-text-tertiary">{item.icon}</span>
                         <span className="flex-1 text-left">{item.label}</span>
                         {item.shortcut && (
-                          <span className="text-[9px] font-mono text-text-muted">{item.shortcut}</span>
+                          <span className="text-[9px] font-mono text-text-muted">
+                            {item.shortcut}
+                          </span>
                         )}
                       </button>
                     )

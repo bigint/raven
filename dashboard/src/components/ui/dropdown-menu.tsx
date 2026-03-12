@@ -8,7 +8,12 @@ interface DropdownMenuProps {
   readonly className?: string
 }
 
-export const DropdownMenu = ({ trigger, children, align = 'right', className }: DropdownMenuProps) => {
+export const DropdownMenu = ({
+  trigger,
+  children,
+  align = 'right',
+  className,
+}: DropdownMenuProps) => {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -23,7 +28,9 @@ export const DropdownMenu = ({ trigger, children, align = 'right', className }: 
 
   return (
     <div ref={ref} className="relative inline-flex">
-      <button type="button" onClick={() => setOpen(!open)}>{trigger}</button>
+      <button type="button" onClick={() => setOpen(!open)}>
+        {trigger}
+      </button>
       {open && (
         <div
           className={cn(
@@ -48,7 +55,13 @@ interface DropdownItemProps {
   readonly className?: string
 }
 
-export const DropdownItem = ({ children, onClick, disabled, danger, className }: DropdownItemProps) => {
+export const DropdownItem = ({
+  children,
+  onClick,
+  disabled,
+  danger,
+  className,
+}: DropdownItemProps) => {
   return (
     <button
       type="button"

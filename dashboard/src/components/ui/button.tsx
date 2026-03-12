@@ -20,7 +20,13 @@ const sizes = {
   icon: 'h-7 w-7 p-0 justify-center',
 }
 
-export const Button = ({ variant = 'secondary', size = 'md', className, children, ...props }: ButtonProps) => {
+export const Button = ({
+  variant = 'secondary',
+  size = 'md',
+  className,
+  children,
+  ...props
+}: ButtonProps) => {
   return (
     <button
       className={cn(

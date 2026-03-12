@@ -2,13 +2,26 @@
 
 import { cn } from '@/lib/utils'
 import { Check, Copy } from 'lucide-react'
-import { useState } from 'react'
+import { type ReactNode, useState } from 'react'
 
 interface Tab {
-  label: string
-  language: string
-  code: string
-  highlighted: React.ReactNode
+  readonly label: string
+  readonly code: string
+  readonly highlighted: ReactNode
+}
+
+interface HighlightProps {
+  readonly code: string
+}
+
+interface CodeLine {
+  readonly key: string
+  readonly text: string
+}
+
+interface CodeToken {
+  readonly key: string
+  readonly value: string
 }
 
 const quickStartCode = `curl -LO https://github.com/bigint-studio/raven/releases/latest/download/raven
@@ -43,16 +56,58 @@ const curlCode = `curl http://localhost:8080/v1/chat/completions \\
     "messages": [{"role": "user", "content": "Hello!"}]
   }'`
 
-function HighlightBash({ code }: { code: string }) {
+const splitCodeLines = (code: string): readonly CodeLine[] => {
+  let offset = 0
+
+  return code.split('\n').map((text) => {
+    const line = { key: `${offset}:${text.slice(0, 16)}`, text }
+    offset += text.length + 1
+    return line
+  })
+}
+
+const tokenizeLine = (line: string, pattern: RegExp): readonly CodeToken[] => {
+  let offset = 0
+
+  return line
+    .split(pattern)
+    .filter((part) => part.length > 0)
+    .map((value) => {
+      const token = { key: `${offset}:${value}`, value }
+      offset += value.length
+      return token
+    })
+}
+
+const renderToken = (key: string, value: string, className?: string) => {
+  return (
+    <span key={key} className={className}>
+      {value}
+    </span>
+  )
+}
+
+const HighlightBash = ({ code }: HighlightProps) => {
   return (
     <>
-      {code.split('\n').map((line, i) => (
-        <div key={`bash-${line.slice(0, 15)}-${i}`}>
-          {line.split(/(\s+|[|\\]|https?:\/\/\S+|-\w+|--\w[\w-]*)/).map((part, j) => {
-            if (/^https?:\/\//.test(part)) return <span key={`p-${i}-${j}`} className="token-url">{part}</span>
-            if (/^-/.test(part) && part.length > 1) return <span key={`p-${i}-${j}`} className="token-flag">{part}</span>
-            if (part === '\\' || part === '|') return <span key={`p-${i}-${j}`} className="token-operator">{part}</span>
-            return <span key={`p-${i}-${j}`}>{part}</span>
+      {splitCodeLines(code).map((line) => (
+        <div key={line.key}>
+          {tokenizeLine(line.text, /(\s+|[|\\]|https?:\/\/\S+|-\w+|--\w[\w-]*)/).map((token) => {
+            const key = `${line.key}-${token.key}`
+
+            if (/^https?:\/\//.test(token.value)) {
+              return renderToken(key, token.value, 'token-url')
+            }
+
+            if (/^-/.test(token.value) && token.value.length > 1) {
+              return renderToken(key, token.value, 'token-flag')
+            }
+
+            if (token.value === '\\' || token.value === '|') {
+              return renderToken(key, token.value, 'token-operator')
+            }
+
+            return renderToken(key, token.value)
           })}
         </div>
       ))}
@@ -60,17 +115,32 @@ function HighlightBash({ code }: { code: string }) {
   )
 }
 
-function HighlightTS({ code }: { code: string }) {
+const HighlightTS = ({ code }: HighlightProps) => {
   const keywords = ['import', 'from', 'const', 'await', 'new']
+
   return (
     <>
-      {code.split('\n').map((line, i) => (
-        <div key={`ts-${i}`}>
-          {line.split(/('[^']*'|"[^"]*"|\b(?:import|from|const|await|new)\b|[{}(),.:[\]]|\s+)/).map((part, j) => {
-            if (/^['"]/.test(part)) return <span key={`p-${i}-${j}`} className="token-string">{part}</span>
-            if (keywords.includes(part)) return <span key={`p-${i}-${j}`} className="token-keyword">{part}</span>
-            if (/^[{}(),.:[\]]$/.test(part)) return <span key={`p-${i}-${j}`} className="token-punctuation">{part}</span>
-            return <span key={`p-${i}-${j}`}>{part}</span>
+      {splitCodeLines(code).map((line) => (
+        <div key={line.key}>
+          {tokenizeLine(
+            line.text,
+            /('[^']*'|"[^"]*"|\b(?:import|from|const|await|new)\b|[{}(),.:[\]]|\s+)/,
+          ).map((token) => {
+            const key = `${line.key}-${token.key}`
+
+            if (/^['"]/.test(token.value)) {
+              return renderToken(key, token.value, 'token-string')
+            }
+
+            if (keywords.includes(token.value)) {
+              return renderToken(key, token.value, 'token-keyword')
+            }
+
+            if (/^[{}(),.:[\]]$/.test(token.value)) {
+              return renderToken(key, token.value, 'token-punctuation')
+            }
+
+            return renderToken(key, token.value)
           })}
         </div>
       ))}
@@ -78,35 +148,63 @@ function HighlightTS({ code }: { code: string }) {
   )
 }
 
-function HighlightPython({ code }: { code: string }) {
+const HighlightPython = ({ code }: HighlightProps) => {
   const keywords = ['from', 'import']
+
   return (
     <>
-      {code.split('\n').map((line, i) => (
-        <div key={`py-${i}`}>
-          {line.split(/("[^"]*"|\b(?:from|import)\b|[{}(),.:[\]=]|\s+)/).map((part, j) => {
-            if (/^"/.test(part)) return <span key={`p-${i}-${j}`} className="token-string">{part}</span>
-            if (keywords.includes(part)) return <span key={`p-${i}-${j}`} className="token-keyword">{part}</span>
-            if (/^[{}(),.:[\]=]$/.test(part)) return <span key={`p-${i}-${j}`} className="token-punctuation">{part}</span>
-            return <span key={`p-${i}-${j}`}>{part}</span>
-          })}
+      {splitCodeLines(code).map((line) => (
+        <div key={line.key}>
+          {tokenizeLine(line.text, /("[^"]*"|\b(?:from|import)\b|[{}(),.:[\]=]|\s+)/).map(
+            (token) => {
+              const key = `${line.key}-${token.key}`
+
+              if (/^"/.test(token.value)) {
+                return renderToken(key, token.value, 'token-string')
+              }
+
+              if (keywords.includes(token.value)) {
+                return renderToken(key, token.value, 'token-keyword')
+              }
+
+              if (/^[{}(),.:[\]=]$/.test(token.value)) {
+                return renderToken(key, token.value, 'token-punctuation')
+              }
+
+              return renderToken(key, token.value)
+            },
+          )}
         </div>
       ))}
     </>
   )
 }
 
-function HighlightCurl({ code }: { code: string }) {
+const HighlightCurl = ({ code }: HighlightProps) => {
   return (
     <>
-      {code.split('\n').map((line, i) => (
-        <div key={`curl-${i}`}>
-          {line.split(/("[^"]*"|'[^']*'|https?:\/\/\S+|-\w+|\\|\s+)/).map((part, j) => {
-            if (/^["']/.test(part)) return <span key={`p-${i}-${j}`} className="token-string">{part}</span>
-            if (/^https?:\/\//.test(part)) return <span key={`p-${i}-${j}`} className="token-url">{part}</span>
-            if (/^-/.test(part) && part.length > 1) return <span key={`p-${i}-${j}`} className="token-flag">{part}</span>
-            if (part === '\\') return <span key={`p-${i}-${j}`} className="token-operator">{part}</span>
-            return <span key={`p-${i}-${j}`}>{part}</span>
+      {splitCodeLines(code).map((line) => (
+        <div key={line.key}>
+          {tokenizeLine(line.text, /("[^"]*"|'[^']*'|https?:\/\/\S+|-\w+|\\|\s+)/).map((token) => {
+            const key = `${line.key}-${token.key}`
+
+            if (/^["']/.test(token.value)) {
+              return renderToken(key, token.value, 'token-string')
+            }
+
+            if (/^https?:\/\//.test(token.value)) {
+              return renderToken(key, token.value, 'token-url')
+            }
+
+            if (/^-/.test(token.value) && token.value.length > 1) {
+              return renderToken(key, token.value, 'token-flag')
+            }
+
+            if (token.value === '\\') {
+              return renderToken(key, token.value, 'token-operator')
+            }
+
+            return renderToken(key, token.value)
           })}
         </div>
       ))}
@@ -117,31 +215,27 @@ function HighlightCurl({ code }: { code: string }) {
 const tabs: Tab[] = [
   {
     label: 'Quick Start',
-    language: 'bash',
     code: quickStartCode,
     highlighted: <HighlightBash code={quickStartCode} />,
   },
   {
     label: 'TypeScript',
-    language: 'typescript',
     code: typescriptCode,
     highlighted: <HighlightTS code={typescriptCode} />,
   },
   {
     label: 'Python',
-    language: 'python',
     code: pythonCode,
     highlighted: <HighlightPython code={pythonCode} />,
   },
   {
     label: 'curl',
-    language: 'bash',
     code: curlCode,
     highlighted: <HighlightCurl code={curlCode} />,
   },
 ]
 
-export function CodeExample() {
+export const CodeExample = () => {
   const [activeTab, setActiveTab] = useState(0)
   const [copied, setCopied] = useState(false)
 
@@ -193,7 +287,11 @@ export function CodeExample() {
                 className="mr-3 p-2 text-muted hover:text-foreground transition-colors cursor-pointer"
                 title="Copy code"
               >
-                {copied ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                {copied ? (
+                  <Check className="h-4 w-4 text-emerald-400" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
               </button>
             </div>
 

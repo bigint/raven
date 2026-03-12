@@ -21,15 +21,8 @@ import {
 } from '@/hooks/use-providers'
 import type { Provider } from '@/lib/types'
 import { formatLatency, formatPercent } from '@/lib/utils'
-import {
-  Activity,
-  Eye,
-  EyeOff,
-  Loader2,
-  Trash2,
-  Wifi,
-} from 'lucide-react'
-import { useCallback, useMemo, useState } from 'react'
+import { Activity, Eye, EyeOff, Loader2, Trash2, Wifi } from 'lucide-react'
+import { useCallback, useId, useMemo, useState } from 'react'
 
 interface ConfigDialogState {
   readonly open: boolean
@@ -72,13 +65,17 @@ const ProviderCard = ({
         {isConfigured && (
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
-              <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Latency</p>
+              <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">
+                Latency
+              </p>
               <p className="mt-1 font-mono text-xs font-medium text-text-primary">
                 {health ? formatLatency(health.latency_ms) : '--'}
               </p>
             </div>
             <div>
-              <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Errors</p>
+              <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">
+                Errors
+              </p>
               <p className="mt-1 font-mono text-xs font-medium text-text-primary">
                 {health ? formatPercent(health.error_rate) : '--'}
               </p>
@@ -88,7 +85,9 @@ const ProviderCard = ({
 
         <div className="mb-3">
           {provider.models > 0 ? (
-            <p className="text-[11px] text-text-tertiary">{provider.models} model{provider.models !== 1 ? 's' : ''} available</p>
+            <p className="text-[11px] text-text-tertiary">
+              {provider.models} model{provider.models !== 1 ? 's' : ''} available
+            </p>
           ) : (
             <p className="text-[11px] text-text-tertiary">No models available</p>
           )}
@@ -114,6 +113,7 @@ const ConfigureProviderDialog = ({
   readonly state: ConfigDialogState
   readonly onClose: () => void
 }) => {
+  const apiKeyInputId = useId()
   const [apiKey, setApiKey] = useState('')
   const [baseUrl, setBaseUrl] = useState('')
   const [enabled, setEnabled] = useState(true)
@@ -214,11 +214,12 @@ const ConfigureProviderDialog = ({
 
       <div className="space-y-4">
         <div>
-          <label className="block text-[11px] text-text-tertiary mb-1">
+          <label htmlFor={apiKeyInputId} className="mb-1 block text-[11px] text-text-tertiary">
             API Key {state.isEditing && '(leave blank to keep current)'}
           </label>
           <div className="relative">
             <input
+              id={apiKeyInputId}
               type={showKey ? 'text' : 'password'}
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
@@ -252,9 +253,7 @@ const ConfigureProviderDialog = ({
           <ToggleSwitch checked={enabled} onChange={setEnabled} />
         </div>
 
-        {error && (
-          <ErrorBanner onDismiss={() => setError(null)}>{error}</ErrorBanner>
-        )}
+        {error && <ErrorBanner onDismiss={() => setError(null)}>{error}</ErrorBanner>}
       </div>
 
       {state.isEditing && !showDeleteConfirm && (

@@ -9,8 +9,7 @@ import { format } from 'date-fns'
 import { useState } from 'react'
 
 const StatusCode = ({ code }: { readonly code: number }) => {
-  const color =
-    code < 300 ? 'text-success' : code < 500 ? 'text-warning' : 'text-error'
+  const color = code < 300 ? 'text-success' : code < 500 ? 'text-warning' : 'text-error'
   return <span className={`font-mono text-xs font-medium ${color}`}>{code}</span>
 }
 
@@ -19,11 +18,15 @@ const ExpandedRowDetail = ({ row }: { readonly row: RequestLog }) => {
     <div className="px-5 py-4">
       <div className="grid grid-cols-4 gap-x-8 gap-y-4">
         <div>
-          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Request ID</p>
+          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">
+            Request ID
+          </p>
           <p className="mt-1 font-mono text-xs text-text-primary">{row.id}</p>
         </div>
         <div>
-          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Provider</p>
+          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">
+            Provider
+          </p>
           <p className="mt-1 font-mono text-xs text-text-primary">{row.provider}</p>
         </div>
         <div>
@@ -37,7 +40,9 @@ const ExpandedRowDetail = ({ row }: { readonly row: RequestLog }) => {
           </div>
         </div>
         <div>
-          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Timestamp</p>
+          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">
+            Timestamp
+          </p>
           <p className="mt-1 font-mono text-xs text-text-primary">
             {format(new Date(row.timestamp), 'yyyy-MM-dd')}{' '}
             {format(new Date(row.timestamp), 'HH:mm:ss.SSS')}
@@ -45,15 +50,25 @@ const ExpandedRowDetail = ({ row }: { readonly row: RequestLog }) => {
         </div>
         <div>
           <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Latency</p>
-          <p className="mt-1 font-mono text-xs text-text-primary">{formatLatency(row.latency_ms)}</p>
+          <p className="mt-1 font-mono text-xs text-text-primary">
+            {formatLatency(row.latency_ms)}
+          </p>
         </div>
         <div>
-          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Tokens (In)</p>
-          <p className="mt-1 font-mono text-xs text-text-primary">{row.input_tokens.toLocaleString()}</p>
+          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">
+            Tokens (In)
+          </p>
+          <p className="mt-1 font-mono text-xs text-text-primary">
+            {row.input_tokens.toLocaleString()}
+          </p>
         </div>
         <div>
-          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Tokens (Out)</p>
-          <p className="mt-1 font-mono text-xs text-text-primary">{row.output_tokens.toLocaleString()}</p>
+          <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">
+            Tokens (Out)
+          </p>
+          <p className="mt-1 font-mono text-xs text-text-primary">
+            {row.output_tokens.toLocaleString()}
+          </p>
         </div>
         <div>
           <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Cost</p>
@@ -61,7 +76,9 @@ const ExpandedRowDetail = ({ row }: { readonly row: RequestLog }) => {
         </div>
         <div>
           <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Cache</p>
-          <p className="mt-1 font-mono text-xs text-text-primary">{row.cache_hit ? 'hit' : 'miss'}</p>
+          <p className="mt-1 font-mono text-xs text-text-primary">
+            {row.cache_hit ? 'hit' : 'miss'}
+          </p>
         </div>
         <div>
           <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px]">Error</p>
@@ -180,9 +197,7 @@ const RequestsPage = () => {
       key: 'cache_hit',
       header: 'Cache',
       render: (item: RequestLog) =>
-        item.cache_hit ? (
-          <Badge variant="success">CACHED</Badge>
-        ) : null,
+        item.cache_hit ? <Badge variant="success">CACHED</Badge> : null,
     },
   ]
 

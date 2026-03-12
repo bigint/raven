@@ -12,7 +12,11 @@ export const Table = ({ className, children, ...props }: HTMLAttributes<HTMLTabl
   )
 }
 
-export const TableHeader = ({ className, children, ...props }: HTMLAttributes<HTMLTableSectionElement>) => {
+export const TableHeader = ({
+  className,
+  children,
+  ...props
+}: HTMLAttributes<HTMLTableSectionElement>) => {
   return (
     <thead className={cn('', className)} {...props}>
       {children}
@@ -20,7 +24,11 @@ export const TableHeader = ({ className, children, ...props }: HTMLAttributes<HT
   )
 }
 
-export const TableBody = ({ className, children, ...props }: HTMLAttributes<HTMLTableSectionElement>) => {
+export const TableBody = ({
+  className,
+  children,
+  ...props
+}: HTMLAttributes<HTMLTableSectionElement>) => {
   return (
     <tbody className={cn('', className)} {...props}>
       {children}
@@ -28,12 +36,13 @@ export const TableBody = ({ className, children, ...props }: HTMLAttributes<HTML
   )
 }
 
-export const TableRow = ({ className, children, ...props }: HTMLAttributes<HTMLTableRowElement>) => {
+export const TableRow = ({
+  className,
+  children,
+  ...props
+}: HTMLAttributes<HTMLTableRowElement>) => {
   return (
-    <tr
-      className={cn('h-9 border-b border-surface-hover hover:bg-surface', className)}
-      {...props}
-    >
+    <tr className={cn('h-9 border-b border-surface-hover hover:bg-surface', className)} {...props}>
       {children}
     </tr>
   )
@@ -47,7 +56,15 @@ interface TableHeadProps extends ThHTMLAttributes<HTMLTableCellElement> {
   readonly children: ReactNode
 }
 
-export const TableHead = ({ sortKey, currentSort, sortOrder, onSort, className, children, ...props }: TableHeadProps) => {
+export const TableHead = ({
+  sortKey,
+  currentSort,
+  sortOrder,
+  onSort,
+  className,
+  children,
+  ...props
+}: TableHeadProps) => {
   const isSorted = sortKey && currentSort === sortKey
   return (
     <th
@@ -64,8 +81,18 @@ export const TableHead = ({ sortKey, currentSort, sortOrder, onSort, className, 
         {children}
         {sortKey && (
           <span className="inline-flex flex-col">
-            <ChevronUp className={cn('size-2', isSorted && sortOrder === 'asc' ? 'text-text-primary' : 'text-text-muted')} />
-            <ChevronDown className={cn('size-2 -mt-0.5', isSorted && sortOrder === 'desc' ? 'text-text-primary' : 'text-text-muted')} />
+            <ChevronUp
+              className={cn(
+                'size-2',
+                isSorted && sortOrder === 'asc' ? 'text-text-primary' : 'text-text-muted',
+              )}
+            />
+            <ChevronDown
+              className={cn(
+                'size-2 -mt-0.5',
+                isSorted && sortOrder === 'desc' ? 'text-text-primary' : 'text-text-muted',
+              )}
+            />
           </span>
         )}
       </div>
@@ -73,7 +100,11 @@ export const TableHead = ({ sortKey, currentSort, sortOrder, onSort, className, 
   )
 }
 
-export const TableCell = ({ className, children, ...props }: HTMLAttributes<HTMLTableCellElement>) => {
+export const TableCell = ({
+  className,
+  children,
+  ...props
+}: HTMLAttributes<HTMLTableCellElement>) => {
   return (
     <td className={cn('px-3 text-xs text-text-secondary', className)} {...props}>
       {children}

@@ -92,9 +92,7 @@ const TeamsPage = () => {
     {
       key: 'email',
       header: 'Email',
-      render: (item: User) => (
-        <span className="text-xs text-text-secondary">{item.email}</span>
-      ),
+      render: (item: User) => <span className="text-xs text-text-secondary">{item.email}</span>,
     },
     {
       key: 'role',
@@ -105,7 +103,9 @@ const TeamsPage = () => {
       key: 'teams',
       header: 'Teams',
       render: (item: User) => (
-        <span className="font-mono text-xs font-medium text-text-primary">{item.team_ids.length}</span>
+        <span className="font-mono text-xs font-medium text-text-primary">
+          {item.team_ids.length}
+        </span>
       ),
     },
     {
@@ -187,7 +187,11 @@ const TeamsPage = () => {
           <Button variant="ghost" onClick={() => setCreateOrgOpen(false)}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={() => createOrg.mutate()} disabled={createOrg.isPending}>
+          <Button
+            variant="primary"
+            onClick={() => createOrg.mutate()}
+            disabled={createOrg.isPending}
+          >
             {createOrg.isPending ? 'Creating...' : 'Create'}
           </Button>
         </DialogFooter>

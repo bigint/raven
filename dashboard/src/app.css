@@ -47,7 +47,7 @@
   --c-surface-hover: rgba(0, 0, 0, 0.04);
   --c-surface-active: rgba(0, 0, 0, 0.06);
   --c-elevated: #ffffff;
-  --c-overlay: rgba(0, 0, 0, 0.40);
+  --c-overlay: rgba(0, 0, 0, 0.4);
 
   --c-border: rgba(0, 0, 0, 0.08);
   --c-border-hover: rgba(0, 0, 0, 0.15);
@@ -66,7 +66,7 @@
   --c-focus: rgba(0, 0, 0, 0.12);
 
   --c-chart-bar: rgba(0, 0, 0, 0.08);
-  --c-chart-line: rgba(0, 0, 0, 0.30);
+  --c-chart-line: rgba(0, 0, 0, 0.3);
   --c-chart-fill-from: rgba(0, 0, 0, 0.06);
   --c-chart-fill-to: rgba(0, 0, 0, 0);
 }
@@ -78,10 +78,10 @@
   --c-surface-hover: rgba(255, 255, 255, 0.05);
   --c-surface-active: rgba(255, 255, 255, 0.08);
   --c-elevated: #111111;
-  --c-overlay: rgba(0, 0, 0, 0.60);
+  --c-overlay: rgba(0, 0, 0, 0.6);
 
   --c-border: rgba(255, 255, 255, 0.06);
-  --c-border-hover: rgba(255, 255, 255, 0.10);
+  --c-border-hover: rgba(255, 255, 255, 0.1);
   --c-border-focus: rgba(255, 255, 255, 0.15);
 
   --c-text-primary: #fafafa;
@@ -94,7 +94,7 @@
   --c-accent-hover: #e5e5e5;
   --c-accent-text: #09090b;
 
-  --c-focus: rgba(255, 255, 255, 0.20);
+  --c-focus: rgba(255, 255, 255, 0.2);
 
   --c-chart-bar: rgba(255, 255, 255, 0.08);
   --c-chart-line: rgba(255, 255, 255, 0.25);
@@ -103,23 +103,43 @@
 }
 
 @keyframes overlay-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes dialog-in {
-  from { opacity: 0; transform: scale(0.97) translateY(4px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 @keyframes dropdown-in {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @layer base {

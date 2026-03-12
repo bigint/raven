@@ -1,16 +1,16 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @theme {
-  --color-background: #0A0A0A;
-  --color-foreground: #F5F5F5;
-  --color-primary: #4338CA;
-  --color-primary-light: #818CF8;
-  --color-muted: #A3A3A3;
+  --color-background: #0a0a0a;
+  --color-foreground: #f5f5f5;
+  --color-primary: #4338ca;
+  --color-primary-light: #818cf8;
+  --color-muted: #a3a3a3;
   --color-border: #262626;
   --color-surface: #141414;
-  --color-surface-hover: #1A1A1A;
-  --font-heading: 'Instrument Serif', serif;
-  --font-body: 'Geist', sans-serif;
+  --color-surface-hover: #1a1a1a;
+  --font-heading: "Instrument Serif", serif;
+  --font-body: "Geist", sans-serif;
 }
 
 * {
@@ -41,7 +41,7 @@ h6 {
 }
 
 ::selection {
-  background-color: #4338CA;
+  background-color: #4338ca;
   color: white;
 }
 
@@ -51,7 +51,7 @@ h6 {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0A0A0A;
+  background: #0a0a0a;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -125,59 +125,59 @@ h6 {
 
 /* Syntax highlighting */
 .token-keyword {
-  color: #C792EA;
+  color: #c792ea;
 }
 
 .token-string {
-  color: #C3E88D;
+  color: #c3e88d;
 }
 
 .token-comment {
-  color: #546E7A;
+  color: #546e7a;
 }
 
 .token-function {
-  color: #82AAFF;
+  color: #82aaff;
 }
 
 .token-variable {
-  color: #F07178;
+  color: #f07178;
 }
 
 .token-operator {
-  color: #89DDFF;
+  color: #89ddff;
 }
 
 .token-property {
-  color: #FFCB6B;
+  color: #ffcb6b;
 }
 
 .token-punctuation {
-  color: #89DDFF;
+  color: #89ddff;
 }
 
 .token-number {
-  color: #F78C6C;
+  color: #f78c6c;
 }
 
 .token-flag {
-  color: #82AAFF;
+  color: #82aaff;
 }
 
 .token-url {
-  color: #80CBC4;
+  color: #80cbc4;
   text-decoration: underline;
-  text-decoration-color: #80CBC440;
+  text-decoration-color: #80cbc440;
 }
 
 .token-prompt {
-  color: #C3E88D;
+  color: #c3e88d;
 }
 
 .token-output {
-  color: #A3A3A3;
+  color: #a3a3a3;
 }
 
 .token-success {
-  color: #C3E88D;
+  color: #c3e88d;
 }

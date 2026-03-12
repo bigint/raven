@@ -40,14 +40,8 @@ const CachePage = () => {
           value={formatNumber(cache?.total_hits ?? 0)}
           sparklineData={cache?.timeseries}
         />
-        <StatCard
-          label="Storage"
-          value={formatBytes(cache?.storage_bytes ?? 0)}
-        />
-        <StatCard
-          label="Cost Savings"
-          value={formatCurrency(cache?.savings ?? 0)}
-        />
+        <StatCard label="Storage" value={formatBytes(cache?.storage_bytes ?? 0)} />
+        <StatCard label="Cost Savings" value={formatCurrency(cache?.savings ?? 0)} />
       </div>
 
       <Card>

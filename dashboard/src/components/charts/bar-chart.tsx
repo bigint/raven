@@ -1,7 +1,7 @@
 import {
   Bar,
-  BarChart as RechartsBarChart,
   Cell,
+  BarChart as RechartsBarChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -9,7 +9,7 @@ import {
 } from 'recharts'
 
 interface BarChartProps {
-  readonly data: { name: string; value: number }[]
+  readonly data: readonly { readonly name: string; readonly value: number }[]
   readonly height?: number
   readonly valueFormatter?: (value: number) => string
   readonly layout?: 'vertical' | 'horizontal'
@@ -17,7 +17,10 @@ interface BarChartProps {
 
 interface ChartTooltipProps {
   readonly active?: boolean
-  readonly payload?: { value: number; payload: { name: string } }[]
+  readonly payload?: readonly {
+    readonly value: number
+    readonly payload: { readonly name: string }
+  }[]
   readonly valueFormatter?: (value: number) => string
 }
 
@@ -38,15 +41,25 @@ const getBarOpacity = (value: number, max: number): number => {
   return 0.04 + (value / max) * 0.12
 }
 
-export const BarChart = ({ data, height = 200, valueFormatter, layout = 'vertical' }: BarChartProps) => {
-  const max = Math.max(...data.map((d) => d.value), 0)
+export const BarChart = ({
+  data,
+  height = 200,
+  valueFormatter,
+  layout = 'vertical',
+}: BarChartProps) => {
+  const chartData = [...data]
+  const max = Math.max(...chartData.map((d) => d.value), 0)
   const tickFill = 'var(--c-text-muted)'
   const axisStroke = 'var(--c-border)'
 
   if (layout === 'horizontal') {
     return (
       <ResponsiveContainer width="100%" height={height}>
-        <RechartsBarChart data={data} layout="vertical" margin={{ top: 0, right: 4, bottom: 0, left: 0 }}>
+        <RechartsBarChart
+          data={chartData}
+          layout="vertical"
+          margin={{ top: 0, right: 4, bottom: 0, left: 0 }}
+        >
           <XAxis type="number" hide />
           <YAxis
             type="category"
@@ -58,8 +71,12 @@ export const BarChart = ({ data, height = 200, valueFormatter, layout = 'vertica
           />
           <Tooltip cursor={false} content={<ChartTooltip valueFormatter={valueFormatter} />} />
           <Bar dataKey="value" radius={[0, 2, 2, 0]} barSize={16} isAnimationActive={false}>
-            {data.map((entry, i) => (
-              <Cell key={i} fill={`var(--c-chart-bar)`} fillOpacity={getBarOpacity(entry.value, max) / 0.08} />
+            {chartData.map((entry) => (
+              <Cell
+                key={`${entry.name}-${entry.value}`}
+                fill="var(--c-chart-bar)"
+                fillOpacity={getBarOpacity(entry.value, max) / 0.08}
+              />
             ))}
           </Bar>
         </RechartsBarChart>
@@ -69,7 +86,7 @@ export const BarChart = ({ data, height = 200, valueFormatter, layout = 'vertica
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <RechartsBarChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
+      <RechartsBarChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
         <XAxis
           dataKey="name"
           axisLine={{ stroke: axisStroke }}
@@ -84,8 +101,12 @@ export const BarChart = ({ data, height = 200, valueFormatter, layout = 'vertica
         />
         <Tooltip cursor={false} content={<ChartTooltip valueFormatter={valueFormatter} />} />
         <Bar dataKey="value" radius={[2, 2, 0, 0]} barSize={20} isAnimationActive={false}>
-          {data.map((entry, i) => (
-            <Cell key={i} fill={`var(--c-chart-bar)`} fillOpacity={getBarOpacity(entry.value, max) / 0.08} />
+          {chartData.map((entry) => (
+            <Cell
+              key={`${entry.name}-${entry.value}`}
+              fill="var(--c-chart-bar)"
+              fillOpacity={getBarOpacity(entry.value, max) / 0.08}
+            />
           ))}
         </Bar>
       </RechartsBarChart>

@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import { useId } from 'react'
 
 interface ToggleSwitchProps {
   readonly checked: boolean
@@ -8,14 +9,34 @@ interface ToggleSwitchProps {
   readonly className?: string
 }
 
-export const ToggleSwitch = ({ checked, onChange, label, disabled, className }: ToggleSwitchProps) => {
+export const ToggleSwitch = ({
+  checked,
+  onChange,
+  label,
+  disabled,
+  className,
+}: ToggleSwitchProps) => {
+  const labelId = useId()
+
   return (
-    <label className={cn('inline-flex items-center gap-2 cursor-pointer', disabled && 'opacity-40 cursor-not-allowed', className)}>
-      {label && <span className="text-xs text-text-secondary">{label}</span>}
+    <div
+      className={cn(
+        'inline-flex items-center gap-2 cursor-pointer',
+        disabled && 'opacity-40 cursor-not-allowed',
+        className,
+      )}
+    >
+      {label && (
+        <span id={labelId} className="text-xs text-text-secondary">
+          {label}
+        </span>
+      )}
       <button
         type="button"
         role="switch"
+        aria-label={label ?? 'Toggle setting'}
         aria-checked={checked}
+        aria-labelledby={label ? labelId : undefined}
         disabled={disabled}
         onClick={() => !disabled && onChange(!checked)}
         className={cn(
@@ -30,6 +51,6 @@ export const ToggleSwitch = ({ checked, onChange, label, disabled, className }: 
           )}
         />
       </button>
-    </label>
+    </div>
   )
 }

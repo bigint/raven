@@ -87,16 +87,12 @@ const SettingsPage = () => {
 
         <SettingRow
           label="Version"
-          value={
-            <span className="font-mono text-xs">{settings?.version ?? 'Unknown'}</span>
-          }
+          value={<span className="font-mono text-xs">{settings?.version ?? 'Unknown'}</span>}
         />
         <Separator />
         <SettingRow
           label="Uptime"
-          value={
-            <span className="font-mono text-xs">{settings?.uptime ?? 'Unknown'}</span>
-          }
+          value={<span className="font-mono text-xs">{settings?.uptime ?? 'Unknown'}</span>}
         />
         <Separator />
         <SettingRow

@@ -24,7 +24,7 @@ const footerLinks = {
   ],
 }
 
-export function Footer() {
+export const Footer = () => {
   return (
     <footer className="border-t border-border">
       {/* CTA */}
@@ -56,9 +56,7 @@ export function Footer() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
             <div className="col-span-2 md:col-span-1">
               <span className="font-heading text-2xl text-foreground">Raven</span>
-              <p className="mt-3 text-sm text-muted leading-relaxed">
-                The open-source AI gateway.
-              </p>
+              <p className="mt-3 text-sm text-muted leading-relaxed">The open-source AI gateway.</p>
             </div>
 
             {Object.entries(footerLinks).map(([title, links]) => (

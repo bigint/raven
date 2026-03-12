@@ -72,7 +72,12 @@ const OverviewPage = () => {
           </CardHeader>
           <CardContent>
             {topModels.length > 0 ? (
-              <BarChart data={topModels} height={200} layout="horizontal" valueFormatter={formatNumber} />
+              <BarChart
+                data={topModels}
+                height={200}
+                layout="horizontal"
+                valueFormatter={formatNumber}
+              />
             ) : (
               <EmptyState
                 title="No requests yet"
@@ -91,7 +96,11 @@ const OverviewPage = () => {
             {providers && providers.length > 0 ? (
               <div>
                 {providers.map((provider) => {
-                  const status = provider.healthy ? 'healthy' : provider.configured ? 'degraded' : 'down'
+                  const status = provider.healthy
+                    ? 'healthy'
+                    : provider.configured
+                      ? 'degraded'
+                      : 'down'
                   return (
                     <div
                       key={provider.name}

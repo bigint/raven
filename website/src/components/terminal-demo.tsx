@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from 'react'
 
 interface TerminalLine {
-  type: 'command' | 'output'
-  text: string
-  delay?: number
+  readonly type: 'command' | 'output'
+  readonly text: string
+  readonly delay?: number
 }
 
 const lines: TerminalLine[] = [
@@ -25,7 +25,7 @@ const lines: TerminalLine[] = [
   { type: 'output', text: '\u2713 Dashboard at http://localhost:8080/dashboard', delay: 0 },
 ]
 
-export function TerminalDemo() {
+export const TerminalDemo = () => {
   const [visibleLines, setVisibleLines] = useState<number>(0)
   const [typedChars, setTypedChars] = useState<number>(0)
   const [isTyping, setIsTyping] = useState(true)
@@ -89,7 +89,7 @@ export function TerminalDemo() {
 
           if (line.type === 'command') {
             commandIndex++
-            const isCurrentlyTyping = isTyping && commandIndex === countCommands(visibleLines, lines) - 1
+            const isCurrentlyTyping = isTyping && commandIndex === countCommands(visibleLines) - 1
             const displayText = isCurrentlyTyping ? line.text.slice(0, typedChars) : line.text
 
             return (
@@ -98,7 +98,10 @@ export function TerminalDemo() {
                 <span className="text-foreground">
                   {displayText}
                   {isCurrentlyTyping && (
-                    <span className="inline-block w-2 h-4 bg-foreground ml-0.5 align-middle" style={{ animation: 'blink 1s step-end infinite' }} />
+                    <span
+                      className="inline-block w-2 h-4 bg-foreground ml-0.5 align-middle"
+                      style={{ animation: 'blink 1s step-end infinite' }}
+                    />
                   )}
                 </span>
               </div>
@@ -114,7 +117,10 @@ export function TerminalDemo() {
         {visibleLines === 0 && (
           <div className="flex gap-2">
             <span className="token-prompt select-none">$</span>
-            <span className="inline-block w-2 h-4 bg-foreground" style={{ animation: 'blink 1s step-end infinite' }} />
+            <span
+              className="inline-block w-2 h-4 bg-foreground"
+              style={{ animation: 'blink 1s step-end infinite' }}
+            />
           </div>
         )}
       </div>
@@ -122,10 +128,6 @@ export function TerminalDemo() {
   )
 }
 
-function countCommands(upTo: number, allLines: TerminalLine[]): number {
-  let count = 0
-  for (let i = 0; i < upTo && i < allLines.length; i++) {
-    if (allLines[i].type === 'command') count++
-  }
-  return count
+function countCommands(upTo: number): number {
+  return lines.slice(0, upTo).filter((line) => line.type === 'command').length
 }

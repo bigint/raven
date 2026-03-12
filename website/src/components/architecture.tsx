@@ -1,7 +1,7 @@
 'use client'
 
+import { useRevealOnce } from '@/hooks/use-reveal-once'
 import { cn } from '@/lib/utils'
-import { useEffect, useRef, useState } from 'react'
 
 const steps = [
   { label: 'Auth', description: 'API key validation & RBAC' },
@@ -10,23 +10,8 @@ const steps = [
   { label: 'Provider', description: 'OpenAI, Anthropic, etc.' },
 ]
 
-export function Architecture() {
-  const [visible, setVisible] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true)
-          observer.disconnect()
-        }
-      },
-      { threshold: 0.2 },
-    )
-    if (ref.current) observer.observe(ref.current)
-    return () => observer.disconnect()
-  }, [])
+export const Architecture = () => {
+  const { ref, isVisible } = useRevealOnce<HTMLDivElement>(0.2)
 
   return (
     <section className="py-24 md:py-32" ref={ref}>
@@ -45,7 +30,7 @@ export function Architecture() {
             <div
               className={cn(
                 'flex-shrink-0 rounded-xl border border-border bg-surface px-6 py-4 text-center transition-all duration-700',
-                visible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8',
+                isVisible ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0',
               )}
             >
               <div className="text-xs text-muted uppercase tracking-wider mb-1">Client</div>
@@ -56,13 +41,13 @@ export function Architecture() {
             <div
               className={cn(
                 'hidden md:block flex-shrink-0 w-8 h-px bg-gradient-to-r from-border to-primary/50 transition-all duration-700 delay-200',
-                visible ? 'opacity-100' : 'opacity-0',
+                isVisible ? 'opacity-100' : 'opacity-0',
               )}
             />
             <div
               className={cn(
                 'md:hidden flex-shrink-0 h-8 w-px bg-gradient-to-b from-border to-primary/50 transition-all duration-700 delay-200',
-                visible ? 'opacity-100' : 'opacity-0',
+                isVisible ? 'opacity-100' : 'opacity-0',
               )}
             />
 
@@ -70,7 +55,7 @@ export function Architecture() {
             <div
               className={cn(
                 'flex-1 rounded-xl border border-primary/30 bg-primary/5 p-6 transition-all duration-700 delay-300',
-                visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95',
+                isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0',
               )}
             >
               <div className="text-xs text-primary-light uppercase tracking-wider mb-4 text-center">
@@ -82,9 +67,9 @@ export function Architecture() {
                     key={step.label}
                     className={cn(
                       'relative rounded-lg border border-border bg-background p-3 text-center transition-all duration-500',
-                      visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4',
+                      isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
                     )}
-                    style={{ transitionDelay: visible ? `${400 + i * 100}ms` : '0ms' }}
+                    style={{ transitionDelay: isVisible ? `${400 + i * 100}ms` : '0ms' }}
                   >
                     <div className="text-sm font-medium text-foreground">{step.label}</div>
                     <div className="text-xs text-muted mt-1">{step.description}</div>
@@ -100,21 +85,27 @@ export function Architecture() {
           {/* Explanation */}
           <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
-              <h3 className="text-lg font-semibold text-foreground mb-2 font-body">Single Entry Point</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2 font-body">
+                Single Entry Point
+              </h3>
               <p className="text-sm text-muted leading-relaxed">
                 All AI requests flow through one gateway. Swap providers without changing a line of
                 application code.
               </p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-foreground mb-2 font-body">Middleware Pipeline</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2 font-body">
+                Middleware Pipeline
+              </h3>
               <p className="text-sm text-muted leading-relaxed">
                 Authentication, caching, rate limiting, and routing happen transparently in the
                 request pipeline.
               </p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-foreground mb-2 font-body">Provider Agnostic</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2 font-body">
+                Provider Agnostic
+              </h3>
               <p className="text-sm text-muted leading-relaxed">
                 Automatic failover, load balancing, and model mapping across all supported
                 providers.

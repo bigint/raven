@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 import { ChevronDown } from 'lucide-react'
-import { forwardRef, type SelectHTMLAttributes } from 'react'
+import { type SelectHTMLAttributes, forwardRef, useId } from 'react'
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   readonly label?: string
@@ -9,14 +9,19 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, options, placeholder, className, ...props }, ref) => {
+  ({ label, options, placeholder, className, id, ...props }, ref) => {
+    const selectId = id ?? useId()
+
     return (
       <div>
         {label && (
-          <label className="block text-[11px] text-text-tertiary mb-1">{label}</label>
+          <label htmlFor={selectId} className="mb-1 block text-[11px] text-text-tertiary">
+            {label}
+          </label>
         )}
         <div className="relative">
           <select
+            id={selectId}
             ref={ref}
             className={cn(
               'h-8 w-full appearance-none rounded-md border border-border bg-transparent px-2.5 pr-7 text-[13px] text-text-primary',

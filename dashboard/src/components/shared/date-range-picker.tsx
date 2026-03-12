@@ -1,7 +1,7 @@
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Calendar } from 'lucide-react'
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 
 interface DateRangePickerProps {
   readonly value: string
@@ -45,7 +45,9 @@ export const DateRangePicker = ({ value, onChange, className }: DateRangePickerP
           onClick={() => setShowCustom(!showCustom)}
           className={cn(
             'px-3 py-1 text-[11px] font-medium rounded-[5px]',
-            showCustom ? 'bg-surface-active text-text-primary' : 'text-text-tertiary hover:text-text-secondary',
+            showCustom
+              ? 'bg-surface-active text-text-primary'
+              : 'text-text-tertiary hover:text-text-secondary',
           )}
         >
           Custom

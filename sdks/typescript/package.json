@@ -19,7 +19,7 @@
     "dev": "tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "biome check src/",
+    "lint": "biome check --write src/",
     "format": "biome format --write src/"
   },
   "devDependencies": {

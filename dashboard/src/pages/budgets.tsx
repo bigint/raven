@@ -88,11 +88,7 @@ const BudgetsPage = () => {
       render: (item: BudgetConfig) => {
         const pct = item.limit > 0 ? item.current_usage / item.limit : 0
         const barColor =
-          pct > 0.9
-            ? 'bg-error/35'
-            : pct > 0.7
-              ? 'bg-warning/35'
-              : 'bg-surface-active'
+          pct > 0.9 ? 'bg-error/35' : pct > 0.7 ? 'bg-warning/35' : 'bg-surface-active'
         return (
           <div className="flex items-center gap-2">
             <div className="w-20 h-1 rounded-sm bg-surface-hover">

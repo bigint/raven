@@ -75,7 +75,9 @@ export const Sidebar = ({ onOpenPalette, gatewayStatus }: SidebarProps) => {
           <div className="size-[22px] rounded-md bg-accent flex items-center justify-center shrink-0">
             <span className="text-accent-text font-bold text-[10px]">R</span>
           </div>
-          <span className="font-semibold text-text-primary text-[13px] tracking-[-0.3px]">Raven</span>
+          <span className="font-semibold text-text-primary text-[13px] tracking-[-0.3px]">
+            Raven
+          </span>
         </div>
       </div>
 
@@ -101,7 +103,10 @@ export const Sidebar = ({ onOpenPalette, gatewayStatus }: SidebarProps) => {
             </p>
             <ul className="space-y-px">
               {group.items.map((item) => {
-                const isActive = item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path)
+                const isActive =
+                  item.path === '/'
+                    ? location.pathname === '/'
+                    : location.pathname.startsWith(item.path)
                 const Icon = item.icon
 
                 return (
@@ -116,7 +121,12 @@ export const Sidebar = ({ onOpenPalette, gatewayStatus }: SidebarProps) => {
                           : 'text-text-tertiary hover:text-text-secondary hover:bg-surface-hover',
                       )}
                     >
-                      <Icon className={cn('size-[15px] shrink-0', isActive ? 'text-text-primary' : 'text-text-tertiary')} />
+                      <Icon
+                        className={cn(
+                          'size-[15px] shrink-0',
+                          isActive ? 'text-text-primary' : 'text-text-tertiary',
+                        )}
+                      />
                       <span className="flex-1">{item.label}</span>
                       {'shortcut' in item && (
                         <span className="text-[9px] font-mono text-text-muted bg-surface-hover px-1 py-0.5 rounded-[3px]">
@@ -147,7 +157,9 @@ export const Sidebar = ({ onOpenPalette, gatewayStatus }: SidebarProps) => {
         </div>
         <div className="flex items-center justify-between">
           <p className="text-[10px] text-text-muted uppercase tracking-wider">Raven</p>
-          <span className="text-[10px] font-mono text-text-muted bg-surface-hover px-1.5 py-0.5 rounded-[3px]">v0.1.0</span>
+          <span className="text-[10px] font-mono text-text-muted bg-surface-hover px-1.5 py-0.5 rounded-[3px]">
+            v0.1.0
+          </span>
         </div>
       </div>
     </>
@@ -166,7 +178,9 @@ export const Sidebar = ({ onOpenPalette, gatewayStatus }: SidebarProps) => {
 
       {/* Mobile backdrop */}
       {mobileOpen && (
-        <div
+        <button
+          type="button"
+          aria-label="Close navigation"
           className="fixed inset-0 z-30 bg-overlay lg:hidden"
           style={{ animation: 'overlay-in 150ms ease-out' }}
           onClick={() => setMobileOpen(false)}

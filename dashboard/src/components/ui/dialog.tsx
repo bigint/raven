@@ -27,7 +27,9 @@ export const Dialog = ({ open, onClose, children, className }: DialogProps) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
+      <button
+        type="button"
+        aria-label="Close dialog"
         className="fixed inset-0 bg-overlay"
         style={{ animation: 'overlay-in 150ms ease-out' }}
         onClick={onClose}
@@ -52,23 +54,33 @@ export const Dialog = ({ open, onClose, children, className }: DialogProps) => {
   )
 }
 
-export const DialogHeader = ({ className, children }: { readonly className?: string; readonly children: ReactNode }) => {
+export const DialogHeader = ({
+  className,
+  children,
+}: { readonly className?: string; readonly children: ReactNode }) => {
   return <div className={cn('mb-4', className)}>{children}</div>
 }
 
-export const DialogTitle = ({ className, children }: { readonly className?: string; readonly children: ReactNode }) => {
+export const DialogTitle = ({
+  className,
+  children,
+}: { readonly className?: string; readonly children: ReactNode }) => {
   return (
     <h2 className={cn('text-[13px] font-semibold text-text-primary', className)}>{children}</h2>
   )
 }
 
-export const DialogDescription = ({ className, children }: { readonly className?: string; readonly children: ReactNode }) => {
-  return (
-    <p className={cn('mt-1 text-xs text-text-tertiary', className)}>{children}</p>
-  )
+export const DialogDescription = ({
+  className,
+  children,
+}: { readonly className?: string; readonly children: ReactNode }) => {
+  return <p className={cn('mt-1 text-xs text-text-tertiary', className)}>{children}</p>
 }
 
-export const DialogClose = ({ onClick, children }: { readonly onClick: () => void; readonly children: ReactNode }) => {
+export const DialogClose = ({
+  onClick,
+  children,
+}: { readonly onClick: () => void; readonly children: ReactNode }) => {
   return (
     <button type="button" onClick={onClick} className="text-text-secondary hover:text-text-primary">
       {children}
@@ -76,11 +88,12 @@ export const DialogClose = ({ onClick, children }: { readonly onClick: () => voi
   )
 }
 
-export const DialogFooter = ({ className, children }: { readonly className?: string; readonly children: ReactNode }) => {
+export const DialogFooter = ({
+  className,
+  children,
+}: { readonly className?: string; readonly children: ReactNode }) => {
   return (
-    <div
-      className={cn('mt-4 flex justify-end gap-2 border-t border-border pt-3', className)}
-    >
+    <div className={cn('mt-4 flex justify-end gap-2 border-t border-border pt-3', className)}>
       {children}
     </div>
   )
