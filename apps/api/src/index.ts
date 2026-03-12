@@ -10,9 +10,11 @@ import { getRedis } from './lib/redis.js'
 import { createAuthMiddleware } from './middleware/auth.js'
 import { createTenantMiddleware } from './middleware/tenant.js'
 import { createAnalyticsModule } from './modules/analytics/index.js'
+import { createAuditLogsModule } from './modules/audit-logs/index.js'
 import { createAuthModule } from './modules/auth/index.js'
 import { createBillingModule, createBillingWebhookModule } from './modules/billing/index.js'
 import { createBudgetsModule } from './modules/budgets/index.js'
+import { createGuardrailsModule } from './modules/guardrails/index.js'
 import { createKeysModule } from './modules/keys/index.js'
 import { createProvidersModule } from './modules/providers/index.js'
 import { createProxyModule } from './modules/proxy/index.js'
@@ -63,9 +65,11 @@ v1.use('*', createTenantMiddleware(db))
 v1.route('/providers', createProvidersModule(db, env))
 v1.route('/keys', createKeysModule(db))
 v1.route('/budgets', createBudgetsModule(db))
+v1.route('/guardrails', createGuardrailsModule(db))
 v1.route('/analytics', createAnalyticsModule(db))
 v1.route('/teams', createTeamsModule(db))
 v1.route('/billing', createBillingModule(db))
+v1.route('/audit-logs', createAuditLogsModule(db))
 
 app.route('/v1', v1)
 app.route('/v1/proxy', createProxyModule(db, redis, env))
