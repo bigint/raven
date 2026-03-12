@@ -1,8 +1,8 @@
 'use client'
 
 import { api } from '@/lib/api'
-import { useRouter } from 'next/navigation'
 import { AlertTriangle, Building2, CreditCard, Settings, Trash2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
 interface OrgSettings {
@@ -127,7 +127,7 @@ export default function SettingsPage() {
           <div className="rounded-xl border border-border">
             <div className="flex items-center gap-3 border-b border-border px-6 py-4">
               <div className="rounded-lg bg-primary/10 p-2">
-                <Settings className="size-4 text-primary" />
+                <Building2 className="size-4 text-primary" />
               </div>
               <div>
                 <h2 className="text-sm font-semibold">General</h2>

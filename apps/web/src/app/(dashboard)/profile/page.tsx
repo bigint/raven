@@ -30,12 +30,16 @@ interface Invitation {
   expiresAt: string
 }
 
-const ROLE_BADGE: Record<string, { className: string; icon: typeof Crown }> = {
+const DEFAULT_BADGE = { className: 'bg-muted text-muted-foreground', icon: User }
+
+const ROLE_BADGES: Record<string, { className: string; icon: typeof Crown }> = {
   owner: { className: 'bg-primary/10 text-primary', icon: Crown },
   admin: { className: 'bg-blue-500/10 text-blue-600', icon: Shield },
-  member: { className: 'bg-muted text-muted-foreground', icon: User },
-  viewer: { className: 'bg-muted text-muted-foreground', icon: User },
+  member: DEFAULT_BADGE,
+  viewer: DEFAULT_BADGE,
 }
+
+const getRoleBadge = (role: string) => ROLE_BADGES[role] ?? DEFAULT_BADGE
 
 export default function ProfilePage() {
   const { data: session } = useSession()
@@ -77,7 +81,7 @@ export default function ProfilePage() {
       const data = await api.get<Organization[]>('/v1/user/orgs')
       setOrgs(data)
       if (data.length > 0 && !activeOrgId) {
-        setActiveOrgId(data[0].id)
+        setActiveOrgId(data[0]?.id ?? null)
       }
     } catch (err) {
       setOrgsError(err instanceof Error ? err.message : 'Failed to load organizations')
@@ -307,7 +311,7 @@ export default function ProfilePage() {
                   </thead>
                   <tbody>
                     {orgs.map((org, idx) => {
-                      const badge = ROLE_BADGE[org.role] ?? ROLE_BADGE.member
+                      const badge = getRoleBadge(org.role)
                       const RoleIcon = badge.icon
                       const isCurrent = org.id === activeOrgId
                       return (
