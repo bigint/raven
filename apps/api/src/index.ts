@@ -9,6 +9,8 @@ import { AppError } from "./lib/errors";
 import { initEventBus } from "./lib/events";
 import { getRedis } from "./lib/redis";
 import { createAuthMiddleware } from "./middleware/auth";
+import { requestId } from "./middleware/request-id";
+import { requestTiming } from "./middleware/request-timing";
 import { createTenantMiddleware } from "./middleware/tenant";
 import { createAnalyticsModule } from "./modules/analytics/index";
 import { createAuditLogsModule } from "./modules/audit-logs/index";
@@ -37,6 +39,8 @@ const app = new Hono();
 
 // Global middleware
 app.use("*", logger());
+app.use("*", requestId());
+app.use("*", requestTiming());
 app.use(
   "*",
   cors({
