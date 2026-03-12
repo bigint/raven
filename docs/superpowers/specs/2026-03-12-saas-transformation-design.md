@@ -98,7 +98,8 @@ raven/
 │       │   └── lib/
 │       │       ├── redis.ts        # Redis client
 │       │       ├── errors.ts       # Custom error classes
-│       │       └── crypto.ts       # Encryption helpers (AES-256-GCM)
+│       │       ├── crypto.ts       # Encryption helpers (AES-256-GCM)
+│       │       └── validate.ts     # Zod + Hono zValidator helpers
 │       ├── package.json
 │       └── tsconfig.json
 │
@@ -116,6 +117,9 @@ raven/
 │   │   │   │   ├── budgets.ts
 │   │   │   │   ├── subscriptions.ts
 │   │   │   │   ├── invitations.ts
+│   │   │   │   ├── audit-logs.ts
+│   │   │   │   ├── guardrail-rules.ts
+│   │   │   │   ├── sso-configs.ts
 │   │   │   │   └── index.ts
 │   │   │   ├── helpers.ts          # Tenant-scoped query helpers
 │   │   │   ├── migrations/
@@ -449,19 +453,19 @@ Client Request (with rk_live_* key)
   ├─ 2. Rate Limit: check Redis sliding window (per-key RPM/RPD)
   ├─ 3. Tenant: resolve org from key, inject context
   ├─ 4. Budget Check: atomic Redis INCRBYFLOAT on budget counter, reject if would exceed limit
-  ├─ 5. Route: select provider + model based on routing strategy
+  ├─ 5. Guardrails: evaluate rules in priority order (if enabled) — block/warn/log based on rule config
+  ├─ 6. Route: select provider + model based on routing strategy
   │     ├─ Fallback: primary → secondary provider
   │     ├─ Round-robin: distribute across providers
   │     ├─ Cost-based: cheapest provider for the model
   │     └─ Rules-based: custom routing rules
-  ├─ 6. Cache Check: SHA-256 content hash → Redis lookup
+  ├─ 7. Cache Check: SHA-256 content hash → Redis lookup
   │     ├─ HIT: return cached response, log as cache hit
   │     └─ MISS: continue to provider
-  ├─ 7. Forward: proxy request to selected provider
+  ├─ 8. Forward: proxy request to selected provider
   │     ├─ Non-streaming: forward, await response, return
   │     └─ Streaming: SSE passthrough with token counting
-  ├─ 8. Log: write to request_logs (async, non-blocking)
-  ├─ 9. Guardrails: evaluate rules (if enabled) — block/warn/log based on rule config
+  ├─ 9. Log: write to request_logs (async, non-blocking)
   └─ 10. Request Counter: increment monthly request count in Redis (for plan limit enforcement)
 ```
 
@@ -645,21 +649,34 @@ Authorization: Bearer rk_live_xxxxxxxxxxxx
 
 **Webhook-driven architecture:**
 
+All Paddle webhooks are verified using `PADDLE_WEBHOOK_SECRET` signature validation before processing. Invalid signatures are rejected with 400.
+
 ```
 User action → Paddle Checkout → Paddle webhooks → Hono /v1/billing/webhook
   │
-  ├─ subscription.created → Create subscription record, update org plan
+  ├─ subscription.created → Create subscription record (org plan derived from this)
   ├─ subscription.updated → Update seats, plan changes
-  ├─ subscription.cancelled → Mark cancelled, schedule downgrade
-  ├─ subscription.past_due → Send alert email, grace period
+  ├─ subscription.cancelled → Mark cancelled, downgrade at currentPeriodEnd
+  ├─ subscription.past_due → Send alert email, 7-day grace period before downgrade
   └─ transaction.completed → Log payment
 ```
 
+**Cancellation behavior:**
+- Subscription remains active until `currentPeriodEnd` (Paddle handles this)
+- At period end, subscription status becomes `cancelled`
+- Org automatically downgrades to Free tier
+- Resources exceeding Free limits (e.g., 15 virtual keys when Free allows 3) are **soft-disabled** (not deleted). They become read-only — existing keys stop working but data is preserved. User can re-enable by upgrading.
+
+**Request limit enforcement:**
+- Monthly request count tracked in Redis (`requests:count:{orgId}:{YYYY-MM}`)
+- When limit reached, proxy returns `429 Too Many Requests` with `Retry-After` header and upgrade prompt
+- Limit resets at the start of each billing period
+
 ### Pricing Tiers
 
-| Feature | Free | Pro ($29/seat/mo) | Team ($49/seat/mo) | Enterprise (custom) |
+| Feature | Free | Pro ($29/mo) | Team ($49/seat/mo) | Enterprise (custom) |
 |---------|------|-------|------|------------|
-| Seats | 1 | 1 | Up to 20 | Unlimited |
+| Seats | 1 | 1 (single-user) | Up to 20 | Unlimited |
 | Requests/month | 10,000 | 500,000 | 2,000,000 | Unlimited |
 | Providers | 2 | All | All | All + custom |
 | Analytics retention | 7 days | 30 days | 90 days | 1 year |
@@ -677,7 +694,20 @@ User action → Paddle Checkout → Paddle webhooks → Hono /v1/billing/webhook
 ### Feature Gating
 
 ```typescript
-// Feature registry
+// Feature registry — boolean flags for feature access, numeric for quotas
+interface PlanFeatures {
+  readonly maxSeats: number          // Infinity for unlimited
+  readonly maxRequestsPerMonth: number
+  readonly maxProviders: number
+  readonly maxBudgets: number
+  readonly maxVirtualKeys: number
+  readonly analyticsRetentionDays: number
+  readonly hasTeams: boolean
+  readonly hasSSO: boolean
+  readonly hasAuditLogs: boolean
+  readonly hasGuardrails: boolean
+}
+
 const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
   free: {
     maxSeats: 1,
@@ -694,17 +724,27 @@ const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
   // ... pro, team, enterprise
 }
 
-// Middleware check
-function requireFeature(feature: keyof PlanFeatures) {
-  return async (c: Context, next: Next) => {
-    const org = c.get('organization')
-    const features = PLAN_FEATURES[org.plan]
-    if (!features[feature]) {
-      throw new ForbiddenError('Upgrade required', { feature, currentPlan: org.plan })
+// Boolean feature gate — checks has* flags
+const requireFeature = (feature: BooleanFeatureKey) =>
+  async (c: Context, next: Next) => {
+    const plan = await getOrgPlan(c.get('orgId'))
+    if (!PLAN_FEATURES[plan][feature]) {
+      throw new ForbiddenError('Upgrade required', { feature, currentPlan: plan })
     }
     await next()
   }
-}
+
+// Numeric quota gate — checks current count against max* limits
+const requireQuota = (quota: NumericFeatureKey, getCurrentCount: (orgId: string) => Promise<number>) =>
+  async (c: Context, next: Next) => {
+    const plan = await getOrgPlan(c.get('orgId'))
+    const limit = PLAN_FEATURES[plan][quota]
+    const current = await getCurrentCount(c.get('orgId'))
+    if (current >= limit) {
+      throw new ForbiddenError('Quota exceeded', { quota, current, limit, currentPlan: plan })
+    }
+    await next()
+  }
 ```
 
 ---
@@ -718,14 +758,23 @@ function requireFeature(feature: keyof PlanFeatures) {
 - No raw SQL queries without tenant scope (enforced by code review)
 - Virtual keys are scoped to organizations; cross-org access is impossible
 
+### CSRF Protection
+
+Dashboard uses cookie-based session auth to a separate API origin. CSRF protection is required:
+- All state-changing requests (POST/PUT/DELETE) from the dashboard include a CSRF token in the `X-CSRF-Token` header
+- Token is generated per session and stored in a secure, HTTPOnly cookie
+- API middleware validates the token on all mutating requests for session-authenticated users
+- API key-authenticated requests (proxy) are exempt (no cookies involved)
+
 ### Encryption
 
 - **Provider API keys**: AES-256-GCM at rest
   - Encryption key derived from `ENCRYPTION_SECRET` env var via HKDF
-  - Each encrypted value has unique IV
+  - Each encrypted value has unique IV and a `keyVersion` field (integer)
   - Decrypted only at proxy time, never returned to clients
+  - **Key rotation:** When `ENCRYPTION_SECRET` changes, set `ENCRYPTION_SECRET_PREVIOUS` alongside it. A background job re-encrypts all provider keys with the new secret. Both secrets are accepted during migration. Once migration completes, remove the old secret.
 - **Virtual keys**: SHA-256 hash stored, plaintext shown once at creation
-- **Sessions**: HTTPOnly, Secure, SameSite=Lax cookies
+- **Sessions**: HTTPOnly, Secure, SameSite=Strict cookies
 
 ### Security Headers
 
@@ -735,6 +784,22 @@ X-Content-Type-Options: nosniff
 X-Frame-Options: DENY
 Content-Security-Policy: default-src 'self'
 ```
+
+### Provider Key Health Checks
+
+When the proxy receives an auth error (401/403) from a provider, it:
+1. Marks the provider config as `isEnabled: false`
+2. Sends an email notification to org admins
+3. Subsequent proxy requests to that provider return a clear error: "Provider API key is invalid. Please update your key in Settings > Providers."
+4. Admin can re-enable after updating the key (key is validated before saving)
+
+### Multi-Org Session Management
+
+- Active organization is stored in the session record (`activeOrgId`)
+- Dashboard includes an org switcher component
+- On org switch, session's `activeOrgId` is updated via API call
+- If a user is removed from an org while it's their active org, the tenant middleware detects the stale membership and switches them to their next available org (or shows "no org" state)
+- API client sends `X-Org-Id` header; middleware validates the user is a member of that org
 
 ### Rate Limiting
 
@@ -824,11 +889,18 @@ pnpm db:migrate       # Run Drizzle migrations
 pnpm dev              # Runs web + api concurrently
 ```
 
+### Connection Pooling
+
+PostgreSQL connections are managed via Drizzle's built-in pool (based on `node-postgres`). Configuration:
+- `max`: 20 connections per API instance
+- `idleTimeoutMillis`: 30000
+- Railway/Render managed PostgreSQL supports up to 100 concurrent connections. With horizontal scaling, use a connection pooler (PgBouncer or Railway's built-in pooler) when running more than 4 API instances.
+
 ### Scaling Path
 
 1. **Launch**: 1 web instance + 1 api instance
 2. **Growth**: Horizontal scale api instances (stateless, Redis for shared state)
-3. **Scale**: Extract proxy to separate service if proxy traffic dominates
+3. **Scale**: Add connection pooler, extract proxy to separate service if proxy traffic dominates
 4. **Enterprise**: Add read replicas for analytics queries, partition request_logs by month
 
 ---
@@ -868,37 +940,39 @@ Follow the existing STYLEGUIDE.md with these updates for the new stack:
 This transformation is too large for a single implementation plan. It decomposes into these sub-projects, to be built in order:
 
 ### Phase 1: Foundation
-1. **Monorepo scaffold** — pnpm workspace, tsconfig, biome, packages/db, packages/config
-2. **Database schema** — Drizzle schema, migrations, tenant helpers
-3. **Auth system** — Better Auth setup, sign-in/up pages, org creation
+1. **Monorepo scaffold** — pnpm workspace, tsconfig, biome, packages/db, packages/config, docker-compose
+2. **Update STYLEGUIDE.md** — Update for new stack (Next.js App Router, Hono backend conventions, Zod validation patterns)
+3. **Database schema** — Drizzle schema, migrations, tenant helpers
+4. **Auth system** — Better Auth setup, sign-in/up pages, org creation
 
 ### Phase 2: Core Product
-4. **Proxy engine** — Port Go proxy to Hono (providers, routing, streaming)
-5. **Virtual keys** — Key management, hashing, validation
-6. **Rate limiting & caching** — Redis-based rate limiter, response cache
+5. **Proxy engine** — Port Go proxy to Hono (providers, routing, streaming)
+6. **Virtual keys** — Key management, hashing, validation
+7. **Rate limiting & caching** — Redis-based rate limiter, response cache
 
 ### Phase 3: Dashboard
-7. **Dashboard shell** — Layout, navigation, org switcher
-8. **Provider management** — Configure AI provider keys
-9. **Key management** — Create/manage virtual keys
-10. **Request logs** — Log viewer with filters and search
-11. **Analytics** — Usage charts, cost breakdown
+8. **Dashboard shell** — Layout, navigation, org switcher
+9. **Provider management** — Configure AI provider keys
+10. **Key management** — Create/manage virtual keys
+11. **Request logs** — Log viewer with filters and search
+12. **Analytics** — Usage charts, cost breakdown
 
 ### Phase 4: Business Features
-12. **Budget system** — Budget CRUD, enforcement, alerts
-13. **Team management** — Invitations, roles, team CRUD
-14. **Billing integration** — Paddle setup, checkout, webhooks, plan management
-15. **Feature gating** — Plan-based access control
+13. **Budget system** — Budget CRUD, Redis-based enforcement, alerts
+14. **Team management** — Invitations, roles, team CRUD
+15. **Billing integration** — Paddle setup, checkout, webhook verification, plan management
+16. **Feature gating** — Plan-based access control (boolean + quota gates)
 
 ### Phase 5: Polish
-16. **Marketing site** — Landing page, pricing page, docs
-17. **Email system** — React Email templates, Resend integration
-18. **Guardrails** — Content safety rules
-19. **Admin panel** — Internal admin for platform management
+17. **Marketing site** — Landing page, pricing page, docs
+18. **Email system** — React Email templates, Resend integration
+19. **Guardrails** — Content safety rules, proxy integration
+20. **Admin panel** — Internal admin for platform management
+21. **Audit logs** — Enterprise audit logging
 
 ### Phase 6: Production
-20. **Security hardening** — Penetration testing, security headers, audit
-21. **Deployment** — Docker, Railway/Render setup, CI/CD
-22. **Monitoring** — Error tracking, uptime monitoring, alerting
+22. **Security hardening** — CSRF, encryption key rotation, penetration testing, security headers
+23. **Deployment** — Docker, Railway/Render setup, CI/CD, connection pooling
+24. **Monitoring** — Error tracking, uptime monitoring, alerting, data retention cron
 
 Each sub-project gets its own implementation plan via the writing-plans skill.
