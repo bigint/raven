@@ -14,10 +14,12 @@
     "dev:api": "pnpm --filter @raven/api dev",
     "db:generate": "pnpm --filter @raven/db generate",
     "db:migrate": "pnpm --filter @raven/db migrate",
+    "db:seed": "tsx --env-file=.env scripts/seed.ts",
     "db:studio": "pnpm --filter @raven/db studio"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "tsx": "^4.19.0",
     "typescript": "^5.8.3"
   },
   "pnpm": {

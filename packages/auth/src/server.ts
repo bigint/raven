@@ -1,12 +1,22 @@
 import type { Env } from '@raven/config'
 import type { Database } from '@raven/db'
+import * as schema from '@raven/db/schema'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { organization } from 'better-auth/plugins'
 
 export const createAuth = (db: Database, env: Env) => {
   return betterAuth({
-    database: drizzleAdapter(db, { provider: 'pg' }),
+    database: drizzleAdapter(db, {
+      provider: 'pg',
+      schema: {
+        ...schema,
+        user: schema.users,
+        account: schema.accounts,
+        session: schema.sessions,
+        verification: schema.verifications,
+      },
+    }),
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.BETTER_AUTH_URL,
     trustedOrigins: [env.APP_URL],
