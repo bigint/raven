@@ -17,11 +17,7 @@ interface InvitationEmailProps {
   inviteUrl: string
 }
 
-export const InvitationEmail = ({
-  inviterName,
-  orgName,
-  inviteUrl,
-}: InvitationEmailProps) => (
+export const InvitationEmail = ({ inviterName, orgName, inviteUrl }: InvitationEmailProps) => (
   <Html>
     <Head />
     <Preview>
@@ -31,9 +27,8 @@ export const InvitationEmail = ({
       <Container style={container}>
         <Heading style={heading}>You have been invited</Heading>
         <Text style={text}>
-          <strong>{inviterName}</strong> has invited you to join{' '}
-          <strong>{orgName}</strong> on Raven. Accept the invitation below to
-          get started with your team.
+          <strong>{inviterName}</strong> has invited you to join <strong>{orgName}</strong> on
+          Raven. Accept the invitation below to get started with your team.
         </Text>
         <Section style={buttonSection}>
           <Button style={button} href={inviteUrl}>
@@ -42,8 +37,7 @@ export const InvitationEmail = ({
         </Section>
         <Hr style={hr} />
         <Text style={footer}>
-          If you were not expecting this invitation, you can safely ignore this
-          email.
+          If you were not expecting this invitation, you can safely ignore this email.
         </Text>
       </Container>
     </Body>
@@ -52,8 +46,7 @@ export const InvitationEmail = ({
 
 const body = {
   backgroundColor: '#f6f9fc',
-  fontFamily:
-    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
 }
 
 const container = {

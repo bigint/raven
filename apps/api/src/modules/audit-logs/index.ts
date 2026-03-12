@@ -1,8 +1,8 @@
+import type { Database } from '@raven/db'
+import { auditLogs } from '@raven/db'
 import { and, desc, eq, gte, lte } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
-import type { Database } from '@raven/db'
-import { auditLogs } from '@raven/db'
 
 const listQuerySchema = z.object({
   action: z.string().optional(),

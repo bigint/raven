@@ -24,9 +24,8 @@ export const WelcomeEmail = ({ name }: WelcomeEmailProps) => (
         <Heading style={heading}>Welcome to Raven</Heading>
         <Text style={text}>Hi {name},</Text>
         <Text style={text}>
-          Thanks for joining Raven! Your account is set up and ready to go. You
-          can now manage API keys, configure providers, set budgets, and monitor
-          usage from your dashboard.
+          Thanks for joining Raven! Your account is set up and ready to go. You can now manage API
+          keys, configure providers, set budgets, and monitor usage from your dashboard.
         </Text>
         <Section style={buttonSection}>
           <Button style={button} href="https://app.raven.dev">
@@ -35,8 +34,7 @@ export const WelcomeEmail = ({ name }: WelcomeEmailProps) => (
         </Section>
         <Hr style={hr} />
         <Text style={footer}>
-          If you have any questions, reply to this email and we will be happy to
-          help.
+          If you have any questions, reply to this email and we will be happy to help.
         </Text>
       </Container>
     </Body>
@@ -45,8 +43,7 @@ export const WelcomeEmail = ({ name }: WelcomeEmailProps) => (
 
 const body = {
   backgroundColor: '#f6f9fc',
-  fontFamily:
-    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
 }
 
 const container = {

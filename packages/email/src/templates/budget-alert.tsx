@@ -36,9 +36,8 @@ export const BudgetAlertEmail = ({
         <Container style={container}>
           <Heading style={heading}>Budget Alert</Heading>
           <Text style={text}>
-            Your budget <strong>{budgetName}</strong> has reached{' '}
-            <strong>{usagePercent}%</strong> of its limit, exceeding the{' '}
-            {thresholdPercent}% alert threshold.
+            Your budget <strong>{budgetName}</strong> has reached <strong>{usagePercent}%</strong>{' '}
+            of its limit, exceeding the {thresholdPercent}% alert threshold.
           </Text>
 
           <Section style={statsSection}>
@@ -54,9 +53,7 @@ export const BudgetAlertEmail = ({
                 </tr>
                 <tr>
                   <td style={statsLabel}>Remaining</td>
-                  <td style={statsValue}>
-                    ${Math.max(limit - currentUsage, 0).toFixed(2)}
-                  </td>
+                  <td style={statsValue}>${Math.max(limit - currentUsage, 0).toFixed(2)}</td>
                 </tr>
               </tbody>
             </table>
@@ -77,8 +74,8 @@ export const BudgetAlertEmail = ({
 
           <Hr style={hr} />
           <Text style={footer}>
-            Adjust your budget limits or review usage from the Raven dashboard to
-            avoid service interruptions.
+            Adjust your budget limits or review usage from the Raven dashboard to avoid service
+            interruptions.
           </Text>
         </Container>
       </Body>
@@ -88,8 +85,7 @@ export const BudgetAlertEmail = ({
 
 const body = {
   backgroundColor: '#f6f9fc',
-  fontFamily:
-    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
 }
 
 const container = {

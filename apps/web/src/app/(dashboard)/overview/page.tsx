@@ -7,8 +7,10 @@ import { useEffect, useState } from 'react'
 interface OverviewStats {
   totalRequests: number
   totalCost: number
-  activeKeys: number
-  providers: number
+  activeKeys?: number
+  providers?: number
+  avgLatency?: number
+  cacheHitRate?: number
 }
 
 export default function OverviewPage() {
@@ -22,8 +24,8 @@ export default function OverviewPage() {
         setStats({
           totalRequests: data.totalRequests ?? 0,
           totalCost: data.totalCost ?? 0,
-          activeKeys: (data as any).activeKeys ?? 0,
-          providers: (data as any).providers ?? 0,
+          activeKeys: data.activeKeys ?? 0,
+          providers: data.providers ?? 0,
         })
       } catch {
         // Stats API may not return all fields yet, use defaults
@@ -36,10 +38,34 @@ export default function OverviewPage() {
   }, [])
 
   const statCards = [
-    { label: 'Total Requests', value: stats ? stats.totalRequests.toLocaleString() : '—', icon: Activity, bg: 'bg-blue-500/10', color: 'text-blue-500' },
-    { label: 'Total Cost', value: stats ? `$${stats.totalCost.toFixed(2)}` : '—', icon: DollarSign, bg: 'bg-green-500/10', color: 'text-green-500' },
-    { label: 'Active Keys', value: stats ? String(stats.activeKeys) : '—', icon: Key, bg: 'bg-purple-500/10', color: 'text-purple-500' },
-    { label: 'Providers', value: stats ? String(stats.providers) : '—', icon: Network, bg: 'bg-orange-500/10', color: 'text-orange-500' },
+    {
+      label: 'Total Requests',
+      value: stats ? stats.totalRequests.toLocaleString() : '—',
+      icon: Activity,
+      bg: 'bg-blue-500/10',
+      color: 'text-blue-500',
+    },
+    {
+      label: 'Total Cost',
+      value: stats ? `$${stats.totalCost.toFixed(2)}` : '—',
+      icon: DollarSign,
+      bg: 'bg-green-500/10',
+      color: 'text-green-500',
+    },
+    {
+      label: 'Active Keys',
+      value: stats ? String(stats.activeKeys) : '—',
+      icon: Key,
+      bg: 'bg-purple-500/10',
+      color: 'text-purple-500',
+    },
+    {
+      label: 'Providers',
+      value: stats ? String(stats.providers) : '—',
+      icon: Network,
+      bg: 'bg-orange-500/10',
+      color: 'text-orange-500',
+    },
   ]
 
   return (
@@ -75,7 +101,9 @@ export default function OverviewPage() {
       </div>
 
       <div className="mt-8 rounded-xl border border-border p-8 text-center">
-        <p className="text-muted-foreground">Add a provider and create virtual keys to start routing AI requests.</p>
+        <p className="text-muted-foreground">
+          Add a provider and create virtual keys to start routing AI requests.
+        </p>
       </div>
     </div>
   )
