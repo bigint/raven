@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, ChevronDown } from 'lucide-react'
+import { Check, ChevronDown, Search } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 interface SelectOption {
@@ -16,6 +16,7 @@ interface SelectProps {
   disabled?: boolean
   id?: string
   className?: string
+  searchable?: boolean
 }
 
 export function Select({
@@ -26,11 +27,18 @@ export function Select({
   disabled = false,
   id,
   className = '',
+  searchable = false,
 }: SelectProps) {
   const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   const selectedLabel = options.find((o) => o.value === value)?.label ?? placeholder
+
+  const filteredOptions = searchable && search
+    ? options.filter((o) => o.label.toLowerCase().includes(search.toLowerCase()))
+    : options
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -51,6 +59,16 @@ export function Select({
     }
   }, [open])
 
+  useEffect(() => {
+    if (open && searchable) {
+      // Focus search input after dropdown opens
+      requestAnimationFrame(() => searchInputRef.current?.focus())
+    }
+    if (!open) {
+      setSearch('')
+    }
+  }, [open, searchable])
+
   return (
     <div ref={containerRef} className={`relative ${className}`}>
       <button
@@ -67,25 +85,44 @@ export function Select({
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full rounded-lg border border-border bg-popover py-1 shadow-md ring-1 ring-black/5">
-          {options.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => {
-                onChange(option.value)
-                setOpen(false)
-              }}
-              className={`flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground ${
-                option.value === value ? 'text-foreground' : 'text-muted-foreground'
-              }`}
-            >
-              <Check
-                className={`size-3.5 shrink-0 ${option.value === value ? 'opacity-100' : 'opacity-0'}`}
+        <div className="absolute z-50 mt-1 w-full rounded-lg border border-border bg-popover shadow-md ring-1 ring-black/5">
+          {searchable && (
+            <div className="flex items-center gap-2 border-b border-border px-3 py-2">
+              <Search className="size-3.5 text-muted-foreground shrink-0" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search..."
+                className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
               />
-              {option.label}
-            </button>
-          ))}
+            </div>
+          )}
+          <div className="max-h-60 overflow-y-auto py-1">
+            {filteredOptions.length === 0 ? (
+              <p className="px-3 py-2 text-sm text-muted-foreground">No results</p>
+            ) : (
+              filteredOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => {
+                    onChange(option.value)
+                    setOpen(false)
+                  }}
+                  className={`flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground ${
+                    option.value === value ? 'text-foreground' : 'text-muted-foreground'
+                  }`}
+                >
+                  <Check
+                    className={`size-3.5 shrink-0 ${option.value === value ? 'opacity-100' : 'opacity-0'}`}
+                  />
+                  {option.label}
+                </button>
+              ))
+            )}
+          </div>
         </div>
       )}
     </div>

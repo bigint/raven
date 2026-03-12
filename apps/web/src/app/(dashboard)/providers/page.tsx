@@ -338,6 +338,7 @@ export default function ProvidersPage() {
                   onChange={(v) => setForm((f) => ({ ...f, provider: v }))}
                   disabled={modalMode === 'edit'}
                   options={PROVIDER_OPTIONS}
+                  searchable
                 />
               </div>
 
