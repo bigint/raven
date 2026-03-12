@@ -1332,38 +1332,45 @@ git commit -m "feat: add Hono API scaffold with health check, Redis, and error h
 
 - [ ] **Step 3: Create packages/auth/src/server.ts**
 
-Note: Better Auth's exact API may vary by version. Check docs at https://www.better-auth.com before implementing. This is the target configuration:
+Note: Better Auth's exact API may vary by version. Check docs at https://www.better-auth.com before implementing. This is the target configuration.
+
+**Important:** Better Auth manages its own `user`, `session`, `account`, and `verification` tables via the Drizzle adapter. The custom `users` table in `packages/db/src/schema/users.ts` defines the *target* columns. At implementation time, use Better Auth's `user.additionalFields` to add `role` and `avatarUrl` columns to Better Auth's managed user table, rather than creating a competing table. If Better Auth's schema approach has changed, consult the latest docs for the correct way to extend the user model.
 
 ```typescript
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { organization } from 'better-auth/plugins'
 import type { Database } from '@raven/db'
+import type { Env } from '@raven/config'
 
-export const createAuth = (db: Database, options: {
-  secret: string
-  baseURL: string
-  trustedOrigins: readonly string[]
-}) => {
+export const createAuth = (db: Database, env: Env) => {
   return betterAuth({
     database: drizzleAdapter(db, { provider: 'pg' }),
-    secret: options.secret,
-    baseURL: options.baseURL,
-    trustedOrigins: [...options.trustedOrigins],
+    secret: env.BETTER_AUTH_SECRET,
+    baseURL: env.BETTER_AUTH_URL,
+    trustedOrigins: [env.APP_URL],
     emailAndPassword: {
       enabled: true,
     },
+    user: {
+      additionalFields: {
+        role: { type: 'string', defaultValue: 'user' },
+        avatarUrl: { type: 'string', required: false },
+      },
+    },
     socialProviders: {
-      github: {
-        clientId: process.env.GITHUB_CLIENT_ID ?? '',
-        clientSecret: process.env.GITHUB_CLIENT_SECRET ?? '',
-        enabled: !!process.env.GITHUB_CLIENT_ID,
-      },
-      google: {
-        clientId: process.env.GOOGLE_CLIENT_ID ?? '',
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
-        enabled: !!process.env.GOOGLE_CLIENT_ID,
-      },
+      ...(env.GITHUB_CLIENT_ID ? {
+        github: {
+          clientId: env.GITHUB_CLIENT_ID,
+          clientSecret: env.GITHUB_CLIENT_SECRET!,
+        },
+      } : {}),
+      ...(env.GOOGLE_CLIENT_ID ? {
+        google: {
+          clientId: env.GOOGLE_CLIENT_ID,
+          clientSecret: env.GOOGLE_CLIENT_SECRET!,
+        },
+      } : {}),
     },
     session: {
       expiresIn: 30 * 24 * 60 * 60, // 30 days
@@ -1492,18 +1499,14 @@ import { createAuthModule } from './modules/auth/index.js'
 const env = parseEnv()
 const db = createDatabase(env.DATABASE_URL)
 const redis = getRedis(env.REDIS_URL)
-const auth = createAuth(db, {
-  secret: env.BETTER_AUTH_SECRET,
-  baseURL: env.BETTER_AUTH_URL,
-  trustedOrigins: [env.BETTER_AUTH_URL, env.NEXT_PUBLIC_API_URL],
-})
+const auth = createAuth(db, env)
 
 const app = new Hono()
 
 // Global middleware
 app.use('*', logger())
 app.use('*', cors({
-  origin: [env.BETTER_AUTH_URL],
+  origin: [env.APP_URL],
   credentials: true,
 }))
 
@@ -1591,6 +1594,7 @@ git commit -m "feat: mount Better Auth on API with session middleware"
     "react-dom": "^19.1.0",
     "@tanstack/react-query": "^5.75.7",
     "better-auth": "^1.2.0",
+    "@raven/auth": "workspace:*",
     "@raven/types": "workspace:*",
     "clsx": "^2.1.1",
     "tailwind-merge": "^3.3.0",
@@ -1673,14 +1677,14 @@ export default config
 
 - [ ] **Step 7: Create apps/web/src/lib/auth-client.ts**
 
-```typescript
-import { createAuthClient } from 'better-auth/react'
-import { organizationClient } from 'better-auth/client/plugins'
+Uses `@raven/auth/client` rather than duplicating the Better Auth client setup.
 
-export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001',
-  plugins: [organizationClient()],
-})
+```typescript
+import { createBetterAuthClient } from '@raven/auth/client'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
+
+export const authClient = createBetterAuthClient(API_URL)
 
 export const {
   useSession,
