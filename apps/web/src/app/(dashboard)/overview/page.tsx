@@ -1,7 +1,5 @@
 'use client'
 
-import { useEventStream } from '@/hooks/use-event-stream'
-import { api } from '@/lib/api'
 import {
   Activity,
   ArrowRight,
@@ -14,6 +12,8 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
+import { useEventStream } from '@/hooks/use-event-stream'
+import { api } from '@/lib/api'
 
 interface Stats {
   totalRequests: number

@@ -1,7 +1,7 @@
 'use client'
 
-import { API_URL, getOrgId } from '@/lib/api'
 import { useEffect, useRef } from 'react'
+import { API_URL, getOrgId } from '@/lib/api'
 
 type EventHandler = (data: unknown) => void
 

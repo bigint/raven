@@ -8,7 +8,7 @@ import { publishEvent } from '../../lib/events.js'
 const createGuardrailSchema = z.object({
   name: z.string().min(1),
   type: z.enum(['block_topics', 'pii_detection', 'content_filter', 'custom_regex']),
-  config: z.record(z.unknown()),
+  config: z.record(z.string(), z.unknown()),
   action: z.enum(['block', 'warn', 'log']).default('log'),
   isEnabled: z.boolean().default(true),
   priority: z.number().int().min(0).default(0),

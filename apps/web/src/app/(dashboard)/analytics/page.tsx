@@ -1,10 +1,10 @@
 'use client'
 
-import { useEventStream } from '@/hooks/use-event-stream'
-import { api } from '@/lib/api'
 import { Activity, Clock, DollarSign, Zap } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
+import { useEventStream } from '@/hooks/use-event-stream'
+import { api } from '@/lib/api'
 
 interface Stats {
   totalRequests: number

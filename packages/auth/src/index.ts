@@ -1,2 +1,2 @@
-export { createAuth, type Auth } from './server.js'
-export { createBetterAuthClient, type AuthClient } from './client.js'
+export { type AuthClient, createBetterAuthClient } from './client.js'
+export { type Auth, createAuth } from './server.js'

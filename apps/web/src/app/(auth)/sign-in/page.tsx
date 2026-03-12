@@ -1,9 +1,9 @@
 'use client'
 
-import { signIn } from '@/lib/auth-client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { signIn } from '@/lib/auth-client'
 
 export default function SignInPage() {
   const router = useRouter()

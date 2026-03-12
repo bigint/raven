@@ -1,10 +1,10 @@
 'use client'
 
+import { ChevronLeft, ChevronRight, Radio } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Select } from '@/components/select'
 import { useEventStream } from '@/hooks/use-event-stream'
 import { API_URL, api, getOrgId } from '@/lib/api'
-import { ChevronLeft, ChevronRight, Radio } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface RequestLog {
   id: string
@@ -123,12 +123,7 @@ export default function RequestsPage() {
   const eventSourceRef = useRef<EventSource | null>(null)
 
   const fetchRequests = useCallback(
-    async (opts: {
-      page: number
-      provider: string
-      status: string
-      range: DateRange
-    }) => {
+    async (opts: { page: number; provider: string; status: string; range: DateRange }) => {
       try {
         setLoading(true)
         setError(null)

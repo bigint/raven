@@ -1,7 +1,6 @@
 'use client'
 
-import { api, setOrgId } from '@/lib/api'
-import { signOut, useSession } from '@/lib/auth-client'
+import type { LucideIcon } from 'lucide-react'
 import {
   BarChart3,
   Check,
@@ -18,11 +17,11 @@ import {
   User,
   Users,
 } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { redirect } from 'next/navigation'
+import { redirect, usePathname, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { api, setOrgId } from '@/lib/api'
+import { signOut, useSession } from '@/lib/auth-client'
 
 interface Org {
   id: string

@@ -1,11 +1,11 @@
 'use client'
 
-import { Select } from '@/components/select'
-import { useEventStream } from '@/hooks/use-event-stream'
-import { api } from '@/lib/api'
 import { Mail, Pencil, Plus, Trash2, Users, X } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
+import { Select } from '@/components/select'
+import { useEventStream } from '@/hooks/use-event-stream'
+import { api } from '@/lib/api'
 
 interface Member {
   id: string

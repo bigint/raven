@@ -1,7 +1,5 @@
 'use client'
 
-import { api, setOrgId } from '@/lib/api'
-import { useSession } from '@/lib/auth-client'
 import {
   AlertTriangle,
   Building2,
@@ -16,6 +14,8 @@ import {
 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { api, setOrgId } from '@/lib/api'
+import { useSession } from '@/lib/auth-client'
 
 interface Organization {
   id: string

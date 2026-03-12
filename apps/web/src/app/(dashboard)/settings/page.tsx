@@ -1,11 +1,11 @@
 'use client'
 
-import { useEventStream } from '@/hooks/use-event-stream'
-import { api } from '@/lib/api'
 import { AlertTriangle, Building2, CreditCard, Settings, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { useEventStream } from '@/hooks/use-event-stream'
+import { api } from '@/lib/api'
 
 interface OrgSettings {
   name: string

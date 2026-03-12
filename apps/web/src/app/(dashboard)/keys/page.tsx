@@ -1,11 +1,11 @@
 'use client'
 
-import { Select } from '@/components/select'
-import { useEventStream } from '@/hooks/use-event-stream'
-import { api } from '@/lib/api'
 import { AlertTriangle, Check, Copy, Key, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { Select } from '@/components/select'
+import { useEventStream } from '@/hooks/use-event-stream'
+import { api } from '@/lib/api'
 
 interface VirtualKey {
   id: string
