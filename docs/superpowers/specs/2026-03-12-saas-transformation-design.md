@@ -324,18 +324,85 @@ Highest-volume table. Index on (organizationId, createdAt). At scale: partition 
 | acceptedAt | timestamp? | |
 | createdAt | timestamp | |
 
+UNIQUE(organizationId, email) — prevents duplicate invitations to the same email.
+
+**Invitation edge cases:**
+- Accepting an expired invitation: rejected with error, user prompted to request new invite
+- Accepting when org is at seat limit: rejected with error, admin notified
+- Duplicate invite to same email: updates existing pending invitation (new token, reset expiry)
+
+#### audit_logs (Enterprise only)
+| Column | Type | Notes |
+|--------|------|-------|
+| id | text (cuid2) | PK |
+| organizationId | text | FK → organizations |
+| actorId | text | FK → users |
+| action | text | e.g., key.created, member.invited, provider.updated |
+| resourceType | text | e.g., virtual_key, member, provider_config |
+| resourceId | text | ID of affected resource |
+| metadata | jsonb | Additional context (old/new values, IP, user agent) |
+| createdAt | timestamp | Indexed |
+
+Audit events are written asynchronously (fire-and-forget to avoid proxy latency). Retention: 1 year. Actions logged: all CRUD on keys, providers, members, teams, budgets, billing, org settings.
+
+#### guardrail_rules
+| Column | Type | Notes |
+|--------|------|-------|
+| id | text (cuid2) | PK |
+| organizationId | text | FK → organizations |
+| name | text | Human-readable label |
+| type | enum | block_topics, pii_detection, content_filter, custom_regex |
+| config | jsonb | Rule-specific configuration |
+| action | enum | block, warn, log |
+| isEnabled | boolean | |
+| priority | integer | Evaluation order (lower = first) |
+| createdAt | timestamp | |
+| updatedAt | timestamp | |
+
+Guardrails are evaluated in the proxy flow between budget check and provider forward. Rules are evaluated in priority order. On `block`: request rejected with 400. On `warn`: request proceeds, logged with warning. On `log`: request proceeds, logged silently.
+
+#### sso_configs (Enterprise only)
+| Column | Type | Notes |
+|--------|------|-------|
+| id | text (cuid2) | PK |
+| organizationId | text | FK → organizations, UNIQUE |
+| provider | enum | saml, oidc |
+| issuerUrl | text | IdP issuer URL |
+| ssoUrl | text | SSO endpoint |
+| certificate | text | IdP X.509 certificate (encrypted) |
+| isEnabled | boolean | |
+| createdAt | timestamp | |
+| updatedAt | timestamp | |
+
+SSO uses Better Auth's enterprise SSO plugin. When enabled for an org, email/password login is disabled for that org's domain.
+
 ### Tenant Isolation Pattern
+
+Rather than a magic wrapper, tenant isolation uses explicit Drizzle query patterns:
 
 ```typescript
 // packages/db/src/helpers.ts
-function withTenant<T>(
+
+// Helper that creates pre-filtered query builders for a specific org
+export const createTenantQueries = (db: DrizzleClient, orgId: string) => ({
+  keys: () => db.select().from(virtualKeys).where(eq(virtualKeys.organizationId, orgId)),
+  providers: () => db.select().from(providerConfigs).where(eq(providerConfigs.organizationId, orgId)),
+  logs: () => db.select().from(requestLogs).where(eq(requestLogs.organizationId, orgId)),
+  // ... one per tenant-scoped table
+})
+
+// For inserts, helper ensures orgId is always set
+export const insertWithTenant = <T extends TenantTable>(
   db: DrizzleClient,
+  table: T,
   orgId: string,
-  query: (scoped: ScopedClient) => T
-): T
+  values: Omit<InferInsert<T>, 'organizationId'>
+) => db.insert(table).values({ ...values, organizationId: orgId })
 ```
 
-All queries go through `withTenant()` which automatically adds `WHERE organization_id = ?` to every query. Raw queries without tenant scoping are forbidden except in admin/system contexts.
+For joins and aggregations, the `organizationId` filter is applied explicitly at the query level. No magic — every tenant-scoped query has a visible `WHERE organizationId = ?`. Admin/system queries bypass this by using `db` directly (restricted to admin module only).
+
+**Input Validation:** All API request bodies are validated with Zod schemas before reaching business logic. Each module defines its own schemas (e.g., `createKeySchema`, `updateBudgetSchema`). Hono's `zValidator` middleware is used for automatic validation and typed request bodies.
 
 ---
 
@@ -353,8 +420,13 @@ const app = new Hono()
 app.use('*', loggerMiddleware())
 app.use('*', corsMiddleware())
 app.use('/v1/*', rateLimitMiddleware())
-app.use('/v1/*', authMiddleware())
+app.use('/v1/*', authMiddleware())        // Session or API key auth
+app.use('/v1/*', csrfMiddleware())        // CSRF protection for session-based requests
 app.use('/v1/*', tenantMiddleware())
+
+// Admin routes: session auth + platform admin role required
+app.use('/admin/*', authMiddleware())
+app.use('/admin/*', requirePlatformAdmin())
 
 // Mount modules
 app.route('/v1/proxy', proxyModule)
@@ -363,7 +435,7 @@ app.route('/v1/budgets', budgetsModule)
 app.route('/v1/analytics', analyticsModule)
 app.route('/v1/teams', teamsModule)
 app.route('/v1/providers', providersModule)
-app.route('/v1/billing', billingModule)
+app.route('/v1/billing', billingModule)     // Webhook endpoint skips auth (uses Paddle signature verification)
 app.route('/admin', adminModule)
 app.route('/auth', authModule)
 ```
@@ -376,7 +448,7 @@ Client Request (with rk_live_* key)
   ├─ 1. Auth Middleware: validate virtual key (SHA-256 hash lookup)
   ├─ 2. Rate Limit: check Redis sliding window (per-key RPM/RPD)
   ├─ 3. Tenant: resolve org from key, inject context
-  ├─ 4. Budget Check: hierarchical check (key → team → org), reject if exceeded
+  ├─ 4. Budget Check: atomic Redis INCRBYFLOAT on budget counter, reject if would exceed limit
   ├─ 5. Route: select provider + model based on routing strategy
   │     ├─ Fallback: primary → secondary provider
   │     ├─ Round-robin: distribute across providers
@@ -389,7 +461,8 @@ Client Request (with rk_live_* key)
   │     ├─ Non-streaming: forward, await response, return
   │     └─ Streaming: SSE passthrough with token counting
   ├─ 8. Log: write to request_logs (async, non-blocking)
-  └─ 9. Budget Update: increment currentSpend (async)
+  ├─ 9. Guardrails: evaluate rules (if enabled) — block/warn/log based on rule config
+  └─ 10. Request Counter: increment monthly request count in Redis (for plan limit enforcement)
 ```
 
 ### Provider Adapter Pattern
@@ -426,7 +499,7 @@ Two levels:
 Redis-based with content-addressable keys:
 
 ```
-Key: cache:{orgId}:{sha256(provider + model + messages)}
+Key: cache:{orgId}:{sha256(provider + model + messages + temperature + top_p + max_tokens + other_params)}
 TTL: configurable (default 1 hour)
 Value: compressed response body
 ```
