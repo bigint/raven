@@ -8,10 +8,12 @@ import {
   LayoutDashboard,
   Network,
   Receipt,
+  Route,
   ScrollText,
   Settings,
   Shield,
-  Users
+  Users,
+  Webhook
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -28,7 +30,8 @@ const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/budgets", icon: CreditCard, label: "Budgets" },
   { href: "/guardrails", icon: Shield, label: "Guardrails" },
   { href: "/team", icon: Users, label: "Team" },
-  { href: "/billing", icon: Receipt, label: "Billing" }
+  { href: "/billing", icon: Receipt, label: "Billing" },
+  { href: "/webhooks", icon: Webhook, label: "Webhooks" }
 ];
 
 interface SidebarProps {

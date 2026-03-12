@@ -1,0 +1,211 @@
+"use client";
+
+import { Button, Input, Modal, Switch } from "@raven/ui";
+import { useState } from "react";
+import type { Webhook } from "../hooks/use-webhooks";
+import {
+  EVENT_CATEGORIES,
+  useCreateWebhook,
+  useUpdateWebhook
+} from "../hooks/use-webhooks";
+
+interface FormState {
+  url: string;
+  events: string[];
+  isEnabled: boolean;
+}
+
+const DEFAULT_FORM: FormState = {
+  events: [],
+  isEnabled: true,
+  url: ""
+};
+
+interface WebhookFormProps {
+  open: boolean;
+  onClose: () => void;
+  editingWebhook?: Webhook | null;
+}
+
+const WebhookForm = ({ open, onClose, editingWebhook }: WebhookFormProps) => {
+  const isEdit = !!editingWebhook;
+  const [form, setForm] = useState<FormState>(() =>
+    editingWebhook
+      ? {
+          events: [...editingWebhook.events],
+          isEnabled: editingWebhook.isEnabled,
+          url: editingWebhook.url
+        }
+      : DEFAULT_FORM
+  );
+  const [formError, setFormError] = useState<string | null>(null);
+  const createMutation = useCreateWebhook();
+  const updateMutation = useUpdateWebhook();
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+
+  const toggleEvent = (event: string) => {
+    setForm((f) => ({
+      ...f,
+      events: f.events.includes(event)
+        ? f.events.filter((e) => e !== event)
+        : [...f.events, event]
+    }));
+  };
+
+  const toggleCategory = (events: string[]) => {
+    const allSelected = events.every((e) => form.events.includes(e));
+    if (allSelected) {
+      setForm((f) => ({
+        ...f,
+        events: f.events.filter((e) => !events.includes(e))
+      }));
+    } else {
+      setForm((f) => ({
+        ...f,
+        events: [...new Set([...f.events, ...events])]
+      }));
+    }
+  };
+
+  const handleClose = () => {
+    setForm(DEFAULT_FORM);
+    setFormError(null);
+    onClose();
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+
+    if (!form.url.trim()) {
+      setFormError("URL is required");
+      return;
+    }
+
+    try {
+      new URL(form.url);
+    } catch {
+      setFormError("Please enter a valid URL");
+      return;
+    }
+
+    if (form.events.length === 0) {
+      setFormError("Select at least one event");
+      return;
+    }
+
+    try {
+      if (isEdit && editingWebhook) {
+        await updateMutation.mutateAsync({
+          events: form.events,
+          id: editingWebhook.id,
+          isEnabled: form.isEnabled,
+          url: form.url.trim()
+        });
+      } else {
+        await createMutation.mutateAsync({
+          events: form.events,
+          isEnabled: form.isEnabled,
+          url: form.url.trim()
+        });
+      }
+      handleClose();
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "Something went wrong");
+    }
+  };
+
+  return (
+    <Modal
+      onClose={handleClose}
+      open={open}
+      title={isEdit ? "Edit Webhook" : "Add Webhook"}
+    >
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        {formError && (
+          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {formError}
+          </div>
+        )}
+
+        <Input
+          id="webhook-url"
+          label="URL"
+          onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))}
+          placeholder="https://example.com/webhook"
+          type="url"
+          value={form.url}
+        />
+
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium">Events</label>
+          <div className="max-h-60 space-y-3 overflow-y-auto rounded-md border border-border p-3">
+            {Object.entries(EVENT_CATEGORIES).map(([category, events]) => {
+              const allSelected = events.every((e) => form.events.includes(e));
+              const someSelected =
+                !allSelected && events.some((e) => form.events.includes(e));
+
+              return (
+                <div key={category}>
+                  <label className="flex items-center gap-2 text-sm font-medium">
+                    <input
+                      checked={allSelected}
+                      className="accent-primary"
+                      onChange={() => toggleCategory(events)}
+                      ref={(el) => {
+                        if (el) el.indeterminate = someSelected;
+                      }}
+                      type="checkbox"
+                    />
+                    {category}
+                  </label>
+                  <div className="ml-6 mt-1 space-y-1">
+                    {events.map((event) => (
+                      <label
+                        className="flex items-center gap-2 text-sm text-muted-foreground"
+                        key={event}
+                      >
+                        <input
+                          checked={form.events.includes(event)}
+                          className="accent-primary"
+                          onChange={() => toggleEvent(event)}
+                          type="checkbox"
+                        />
+                        {event}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <Switch
+          checked={form.isEnabled}
+          label="Enabled"
+          onCheckedChange={(checked) =>
+            setForm((f) => ({ ...f, isEnabled: checked }))
+          }
+        />
+
+        <div className="flex justify-end gap-2 pt-1">
+          <Button onClick={handleClose} type="button" variant="secondary">
+            Cancel
+          </Button>
+          <Button disabled={isSubmitting} type="submit">
+            {isSubmitting
+              ? isEdit
+                ? "Saving..."
+                : "Adding..."
+              : isEdit
+                ? "Save Changes"
+                : "Add Webhook"}
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
+export { WebhookForm };
