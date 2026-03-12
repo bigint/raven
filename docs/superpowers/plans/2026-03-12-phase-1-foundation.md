@@ -29,6 +29,7 @@ This task removes all Go, Python, Go SDK, and old deployment code. It restructur
 - Delete: `docker-compose.dev.yml`
 - Delete: `dashboard/` (will be replaced by apps/web)
 - Delete: `website/` (will be merged into apps/web)
+- Delete: `scripts/` (build/dev/release scripts for old Go setup — obsolete)
 - Modify: `pnpm-workspace.yaml`
 - Modify: `package.json`
 - Modify: `.gitignore`
@@ -86,7 +87,9 @@ packages:
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "@biomejs/biome"
+      "@biomejs/biome",
+      "esbuild",
+      "sharp"
     ]
   }
 }
@@ -255,7 +258,14 @@ REDIS_URL=redis://localhost:6379
 
 # Auth
 BETTER_AUTH_SECRET=your-secret-here-change-in-production
-BETTER_AUTH_URL=http://localhost:3000
+BETTER_AUTH_URL=http://localhost:3001
+APP_URL=http://localhost:3000
+
+# Social Auth (optional)
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
 
 # Paddle
 PADDLE_API_KEY=
@@ -337,11 +347,16 @@ const envSchema = z.object({
   REDIS_URL: z.string().url(),
   BETTER_AUTH_SECRET: z.string().min(16),
   BETTER_AUTH_URL: z.string().url(),
+  APP_URL: z.string().url(),
   PADDLE_API_KEY: z.string().optional(),
   PADDLE_WEBHOOK_SECRET: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
   ENCRYPTION_SECRET: z.string().min(32),
   ENCRYPTION_SECRET_PREVIOUS: z.string().min(32).optional(),
+  GITHUB_CLIENT_ID: z.string().optional(),
+  GITHUB_CLIENT_SECRET: z.string().optional(),
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
   NEXT_PUBLIC_API_URL: z.string().url(),
   API_PORT: z.coerce.number().default(3001),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -1006,6 +1021,15 @@ export const createTenantQueries = (db: Database, orgId: string) => ({
 })
 
 export type TenantQueries = ReturnType<typeof createTenantQueries>
+
+type TenantTable = typeof members | typeof teams | typeof teamMembers | typeof providerConfigs | typeof virtualKeys | typeof requestLogs | typeof budgets | typeof subscriptions | typeof invitations | typeof auditLogs | typeof guardrailRules | typeof ssoConfigs
+
+export const insertWithTenant = <T extends TenantTable>(
+  db: Database,
+  table: T,
+  orgId: string,
+  values: Omit<T['$inferInsert'], 'organizationId'>,
+) => db.insert(table).values({ ...values, organizationId: orgId } as T['$inferInsert'])
 ```
 
 - [ ] **Step 19: Create packages/db/src/client.ts**
