@@ -6,24 +6,6 @@ node_modules/
 dist/
 .next/
 out/
-.turbo/
-
-# Go
-gateway/raven
-*.exe
-*.dll
-*.so
-*.dylib
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.egg-info/
-.eggs/
-*.egg
-.venv/
-venv/
 
 # Environment
 .env
@@ -48,14 +30,12 @@ Thumbs.db
 
 # Test coverage
 coverage/
-.coverage
-htmlcov/
 
 # Logs
 *.log
 
-# Binary
-raven
+# Drizzle
+drizzle/
 
 # Superpowers
 .superpowers/
