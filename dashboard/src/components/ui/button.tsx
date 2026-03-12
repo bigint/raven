@@ -24,7 +24,7 @@ export const Button = ({ variant = 'secondary', size = 'md', className, children
   return (
     <button
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-md font-medium',
+        'inline-flex items-center gap-1.5 rounded-md font-medium transition-colors duration-150',
         'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-bg',
         'disabled:opacity-40 disabled:cursor-not-allowed',
         variants[variant],

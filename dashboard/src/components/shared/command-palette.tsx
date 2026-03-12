@@ -101,8 +101,15 @@ export const CommandPalette = ({ open, onClose }: CommandPaletteProps) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh]">
-      <div className="fixed inset-0 bg-overlay" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-[560px] rounded-lg border border-border-hover bg-elevated overflow-hidden">
+      <div
+        className="fixed inset-0 bg-overlay"
+        style={{ animation: 'overlay-in 150ms ease-out' }}
+        onClick={onClose}
+      />
+      <div
+        className="relative z-10 w-full max-w-[560px] rounded-lg border border-border-hover bg-elevated overflow-hidden"
+        style={{ animation: 'dialog-in 200ms ease-out' }}
+      >
         <div className="border-b border-border px-4 py-3">
           <input
             ref={inputRef}

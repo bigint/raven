@@ -110,7 +110,7 @@ export const Sidebar = ({ onOpenPalette, gatewayStatus }: SidebarProps) => {
                       to={item.path}
                       onClick={() => setMobileOpen(false)}
                       className={cn(
-                        'flex items-center gap-2 rounded-[5px] px-2.5 py-[6px] text-xs font-medium',
+                        'flex items-center gap-2 rounded-[5px] px-2.5 py-[6px] text-xs font-medium transition-colors duration-150',
                         isActive
                           ? 'bg-surface-active text-text-primary'
                           : 'text-text-tertiary hover:text-text-secondary hover:bg-surface-hover',
@@ -168,6 +168,7 @@ export const Sidebar = ({ onOpenPalette, gatewayStatus }: SidebarProps) => {
       {mobileOpen && (
         <div
           className="fixed inset-0 z-30 bg-overlay lg:hidden"
+          style={{ animation: 'overlay-in 150ms ease-out' }}
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -179,7 +180,10 @@ export const Sidebar = ({ onOpenPalette, gatewayStatus }: SidebarProps) => {
 
       {/* Mobile sidebar */}
       {mobileOpen && (
-        <aside className="fixed top-0 left-0 z-40 h-screen w-[220px] border-r border-border bg-bg flex flex-col lg:hidden">
+        <aside
+          className="fixed top-0 left-0 z-40 h-screen w-[220px] border-r border-border bg-bg flex flex-col lg:hidden"
+          style={{ animation: 'fade-in 150ms ease-out' }}
+        >
           {sidebarContent}
         </aside>
       )}

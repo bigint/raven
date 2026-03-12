@@ -27,12 +27,17 @@ export const Dialog = ({ open, onClose, children, className }: DialogProps) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-overlay" onClick={onClose} />
+      <div
+        className="fixed inset-0 bg-overlay"
+        style={{ animation: 'overlay-in 150ms ease-out' }}
+        onClick={onClose}
+      />
       <div
         className={cn(
           'relative z-10 w-full max-w-[480px] rounded-lg border border-border-hover bg-elevated p-5',
           className,
         )}
+        style={{ animation: 'dialog-in 200ms ease-out' }}
       >
         <button
           type="button"

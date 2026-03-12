@@ -19,13 +19,13 @@ export const ToggleSwitch = ({ checked, onChange, label, disabled, className }: 
         disabled={disabled}
         onClick={() => !disabled && onChange(!checked)}
         className={cn(
-          'relative h-4 w-8 rounded-lg',
+          'relative h-4 w-8 rounded-lg transition-colors duration-150',
           checked ? 'bg-success' : 'bg-border',
         )}
       >
         <span
           className={cn(
-            'absolute top-0.5 size-3 rounded-full bg-accent-text dark:bg-text-primary',
+            'absolute top-0.5 size-3 rounded-full bg-accent-text dark:bg-text-primary transition-[left] duration-150',
             checked ? 'left-[18px]' : 'left-0.5',
           )}
         />

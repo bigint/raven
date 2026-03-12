@@ -31,6 +31,7 @@ export const DropdownMenu = ({ trigger, children, align = 'right', className }: 
             align === 'right' ? 'right-0' : 'left-0',
             className,
           )}
+          style={{ animation: 'dropdown-in 150ms ease-out' }}
         >
           {children}
         </div>

@@ -29,7 +29,7 @@ export const TabsTrigger = ({ value, activeValue, onSelect, children, className 
       type="button"
       onClick={() => onSelect(value)}
       className={cn(
-        'px-3 py-1 text-[11px] font-medium rounded-[5px]',
+        'px-3 py-1 text-[11px] font-medium rounded-[5px] transition-colors duration-150',
         isActive ? 'bg-surface-active text-text-primary' : 'text-text-tertiary hover:text-text-secondary',
         className,
       )}
@@ -48,5 +48,13 @@ interface TabsContentProps {
 
 export const TabsContent = ({ value, activeValue, children, className }: TabsContentProps) => {
   if (value !== activeValue) return null
-  return <div className={cn('mt-3', className)}>{children}</div>
+  return (
+    <div
+      key={value}
+      className={cn('mt-3', className)}
+      style={{ animation: 'fade-in 150ms ease-out' }}
+    >
+      {children}
+    </div>
+  )
 }
