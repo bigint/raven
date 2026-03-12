@@ -124,7 +124,7 @@ export const useLiveRequests = (enabled: boolean) => {
     setIsLoading(true);
     setError(null);
 
-    const orgId = getOrgId();
+    const orgId = useOrgStore.getState().activeOrg?.id ?? null;
     const url = `${API_URL}/v1/analytics/requests/live${orgId ? `?orgId=${orgId}` : ""}`;
     const es = new EventSource(url, { withCredentials: true });
     eventSourceRef.current = es;
