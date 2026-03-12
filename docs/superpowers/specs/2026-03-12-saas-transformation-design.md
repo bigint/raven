@@ -182,11 +182,11 @@ All tenant-scoped tables include `organizationId` foreign key. Queries are scope
 | id | text (cuid2) | PK |
 | name | text | |
 | slug | text | UNIQUE, URL-safe |
-| plan | enum | free, pro, team, enterprise |
 | paddleCustomerId | text? | |
-| paddleSubscriptionId | text? | |
 | createdAt | timestamp | |
 | updatedAt | timestamp | |
+
+**Note:** `plan` is derived from the active subscription record (`subscriptions` table is the source of truth). If no active subscription exists, org defaults to `free`. Helper: `getOrgPlan(orgId)` queries `subscriptions` table.
 
 #### users
 | Column | Type | Notes |
@@ -280,6 +280,8 @@ UNIQUE(organizationId, provider)
 | createdAt | timestamp | Indexed for time-range queries |
 
 Highest-volume table. Index on (organizationId, createdAt). At scale: partition by month, archive old data to cold storage.
+
+**Data Retention:** A daily cron job deletes request_logs older than the org's plan retention limit (7/30/90/365 days). Runs during off-peak hours. Deletes in batches of 10,000 to avoid long-running transactions.
 
 #### budgets
 | Column | Type | Notes |
