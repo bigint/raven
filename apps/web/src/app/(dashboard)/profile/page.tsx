@@ -6,6 +6,7 @@ import { useState } from "react";
 import { PageHeader } from "@raven/ui";
 import { CreateOrgForm } from "./components/create-org-form";
 import { OrgList } from "./components/org-list";
+import { PendingInvitations } from "./components/pending-invitations";
 import { ProfileForm } from "./components/profile-form";
 import {
   orgsQueryOptions,
@@ -58,15 +59,18 @@ export default function ProfilePage() {
 
         <OrgList
           activeOrgId={activeOrgId}
+          onCreateOrg={() => setShowCreateOrgModal(true)}
+          orgs={orgsQuery.data ?? []}
+          orgsError={orgsQuery.isError ? orgsQuery.error.message : null}
+          orgsLoading={orgsQuery.isLoading}
+        />
+
+        <PendingInvitations
           invitations={invitationsQuery.data ?? []}
           invitationsError={invitationsQuery.isError ? invitationsQuery.error.message : null}
           invitationsLoading={invitationsQuery.isLoading}
           onAcceptInvitation={handleAccept}
-          onCreateOrg={() => setShowCreateOrgModal(true)}
           onDeclineInvitation={handleDecline}
-          orgs={orgsQuery.data ?? []}
-          orgsError={orgsQuery.isError ? orgsQuery.error.message : null}
-          orgsLoading={orgsQuery.isLoading}
           respondingTo={respondingTo}
         />
 
