@@ -15,19 +15,25 @@ const app = new Hono()
 
 // Global middleware
 app.use('*', logger())
-app.use('*', cors({
-  origin: env.APP_URL,
-  credentials: true,
-}))
+app.use(
+  '*',
+  cors({
+    origin: env.APP_URL,
+    credentials: true,
+  }),
+)
 
 // Global error handler
 app.onError((err, c) => {
   if (err instanceof AppError) {
-    return c.json({
-      code: err.code,
-      message: err.message,
-      details: err.details,
-    }, err.statusCode as 400)
+    return c.json(
+      {
+        code: err.code,
+        message: err.message,
+        details: err.details,
+      },
+      err.statusCode as 400 | 401 | 403 | 404 | 409 | 429 | 500,
+    )
   }
   console.error('Unhandled error:', err)
   return c.json({ code: 'INTERNAL_ERROR', message: 'Internal server error' }, 500)
@@ -35,6 +41,8 @@ app.onError((err, c) => {
 
 // Health check
 app.get('/health', (c) => c.json({ status: 'ok' }))
+
+app.notFound((c) => c.json({ code: 'NOT_FOUND', message: 'Route not found' }, 404))
 
 serve({ fetch: app.fetch, port: env.API_PORT }, (info) => {
   console.log(`Raven API running on http://localhost:${info.port}`)
