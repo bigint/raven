@@ -21,6 +21,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     redirect("/sign-in");
   }
 
+  if (!isOrgsPending && orgs.length === 0) {
+    redirect("/onboarding");
+  }
+
   return (
     <div className="flex min-h-screen">
       <Sidebar

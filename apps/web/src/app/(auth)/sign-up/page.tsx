@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { api } from "@/lib/api";
 import { signUp } from "@/lib/auth-client";
 
 export default function SignUpPage() {
@@ -21,10 +20,7 @@ export default function SignUpPage() {
 
     try {
       await signUp.email({ email, name, password });
-      // Create a default org for the new user
-      const orgName = name ? `${name}'s Organization` : "My Organization";
-      await api.post("/v1/user/orgs", { name: orgName });
-      router.push("/overview");
+      router.push("/onboarding");
     } catch {
       setError("Failed to create account");
     } finally {
