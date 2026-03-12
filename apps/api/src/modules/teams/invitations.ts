@@ -2,10 +2,12 @@ import type { Database } from "@raven/db";
 import { invitations, members, users } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
+import type { z } from "zod";
 import { ConflictError, ForbiddenError, NotFoundError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { created, success } from "@/lib/response";
 import { logAudit } from "@/modules/audit-logs/index";
+import type { inviteSchema } from "./schema";
 
 export const inviteUser = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
@@ -15,7 +17,9 @@ export const inviteUser = (db: Database) => async (c: Context) => {
     throw new ForbiddenError("Only owners and admins can invite members");
   }
 
-  const { email, role } = c.req.valid("json" as never);
+  const { email, role } = c.req.valid("json" as never) as z.infer<
+    typeof inviteSchema
+  >;
 
   // Check if user is already a member
   const [existingUser] = await db
