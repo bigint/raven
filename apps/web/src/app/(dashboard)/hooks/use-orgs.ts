@@ -1,8 +1,9 @@
 "use client";
 
 import { queryOptions, useQuery } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
-import { api, getOrgId, setOrgId } from "@/lib/api";
+import { useCallback } from "react";
+import { api } from "@/lib/api";
+import { useOrgStore } from "@/stores/org";
 
 interface Org {
   id: string;
@@ -19,24 +20,23 @@ export const orgsQueryOptions = () =>
 
 export const useOrgs = () => {
   const { data: orgs = [], isPending, isError } = useQuery(orgsQueryOptions());
-  const [activeOrg, setActiveOrg] = useState<Org | null>(null);
+  const { activeOrg, setActiveOrg } = useOrgStore();
 
   // Restore saved org or fall back to first
   if (orgs.length > 0 && !activeOrg) {
-    const savedId = getOrgId();
-    const saved = savedId ? orgs.find((o) => o.id === savedId) : null;
-    const org = saved ?? orgs[0];
+    const org = orgs[0];
     if (org) {
-      setOrgId(org.id);
       setActiveOrg(org);
     }
   }
 
-  const switchOrg = useCallback((org: Org) => {
-    setOrgId(org.id);
-    setActiveOrg(org);
-    window.location.reload();
-  }, []);
+  const switchOrg = useCallback(
+    (org: Org) => {
+      setActiveOrg(org);
+      window.location.reload();
+    },
+    [setActiveOrg]
+  );
 
   return { activeOrg, isError, isPending, orgs, switchOrg };
 };

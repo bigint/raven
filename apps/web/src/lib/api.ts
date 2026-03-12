@@ -1,26 +1,17 @@
+import { useOrgStore } from "@/stores/org";
+
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
-let currentOrgId: string | null =
-  typeof window !== "undefined" ? localStorage.getItem("orgId") : null;
+const getOrgId = () => useOrgStore.getState().activeOrg?.id ?? null;
 
-export const setOrgId = (orgId: string | null) => {
-  currentOrgId = orgId;
-  if (typeof window !== "undefined") {
-    if (orgId) {
-      localStorage.setItem("orgId", orgId);
-    } else {
-      localStorage.removeItem("orgId");
-    }
-  }
+const headers = (extra?: Record<string, string>): Record<string, string> => {
+  const orgId = getOrgId();
+  return {
+    ...(orgId ? { "X-Org-Id": orgId } : {}),
+    ...extra
+  };
 };
-
-export const getOrgId = () => currentOrgId;
-
-const headers = (extra?: Record<string, string>): Record<string, string> => ({
-  ...(currentOrgId ? { "X-Org-Id": currentOrgId } : {}),
-  ...extra
-});
 
 const handleResponse = async <T>(res: Response): Promise<T> => {
   if (!res.ok) {

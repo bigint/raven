@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { signOut } from "@/lib/auth-client";
-import { useTheme } from "@/lib/theme";
+import { useThemeStore } from "@/stores/theme";
 
 interface UserMenuProps {
   user: { name?: string | null; email?: string | null };
@@ -15,7 +15,7 @@ export const UserMenu = ({ user }: UserMenuProps) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme } = useThemeStore();
 
   useEffect(() => {
     if (!open) return;
