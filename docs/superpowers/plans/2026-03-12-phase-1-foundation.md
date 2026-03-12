@@ -1646,7 +1646,7 @@ git commit -m "feat: mount Better Auth on API with session middleware"
 
 ---
 
-### Task 8: Set up apps/web (Next.js frontend scaffold)
+### Task 9: Set up apps/web
 
 **Files:**
 - Create: `apps/web/package.json`
@@ -2118,7 +2118,7 @@ git commit -m "feat: add Next.js frontend with auth pages and dashboard shell"
 
 ---
 
-### Task 9: Set up remaining stub packages (email, ui)
+### Task 10: Set up remaining stub packages (email, ui)
 
 **Files:**
 - Create: `packages/email/package.json`
@@ -2282,7 +2282,7 @@ git commit -m "feat: add email and UI stub packages"
 
 ---
 
-### Task 10: Final integration test and pnpm install
+### Task 11: Final integration test
 
 - [ ] **Step 1: Run pnpm install from root**
 
