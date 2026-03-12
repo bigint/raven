@@ -14,23 +14,23 @@ The `@raven/ui` package currently exports only `cn()`. Every page reinvents butt
 
 ### Components
 
-Build a variant-driven component library using `cva` (already installed):
+Build a variant-driven component library using `cva` (already installed). Interactive components (`Modal`, `Select`, `ConfirmDialog`) use **Base UI** (`@base-ui-components/react`) for accessible primitives (focus trap, keyboard navigation, ARIA attributes) — installed as a new dependency in `@raven/ui`.
 
 | Component | Variants | Replaces |
 |-----------|----------|----------|
 | `Button` | `primary`, `secondary`, `destructive`, `ghost` + `sm`, `md`, `lg` | ~40 raw button patterns |
-| `Modal` | sizes (`sm`, `md`, `lg`) + close-on-escape + focus trap | 12+ hand-rolled modals |
+| `Modal` | sizes (`sm`, `md`, `lg`) + close-on-escape + focus trap (Base UI Dialog) | 12+ hand-rolled modals |
 | `DataTable` | sortable headers, empty states, loading skeletons | 6 raw `<table>` implementations |
 | `Badge` | `success`, `warning`, `error`, `neutral` + role badges | Status/role badges in every page |
 | `Input` / `Textarea` | with label, error state, description | Repeated in every form |
-| `Select` | Dropdown select | 143-line custom `select.tsx` |
+| `Select` | Dropdown select (Base UI Select) | 143-line custom `select.tsx` |
 | `EmptyState` | icon + message + optional action | 8+ empty state blocks |
-| `ConfirmDialog` | destructive action confirmation | 4+ delete confirmation modals |
+| `ConfirmDialog` | destructive action confirmation (Base UI AlertDialog) | 4+ delete confirmation modals |
 | `PageHeader` | title + description + action buttons | Every page header |
 | `Tabs` | URL-synced tab groups | Team page tab implementation |
 | `Spinner` | loading indicator | 5+ inline spinner implementations |
 | `Avatar` | initials + image + sizes | User/member avatars |
-| `Switch` | toggle switch | Keys page active toggle |
+| `Switch` | toggle switch (Base UI Switch) | Keys page active toggle |
 
 ### File Structure
 
@@ -56,13 +56,23 @@ packages/ui/src/
 
 ### Design Tokens
 
-Extend `globals.css` with:
+Design tokens live in `apps/web/src/app/globals.css` (the consuming app's CSS, where `@raven/ui` components are rendered). Components in `@raven/ui` reference CSS custom properties — the host app provides the values. Extend with:
+
 - Animation tokens: `--duration-fast: 150ms`, `--duration-normal: 200ms`, `--ease-out: cubic-bezier(0.16, 1, 0.3, 1)`
 - Border radius tokens: `--radius-sm`, `--radius-md`, `--radius-lg`
 - Shadow tokens for elevation layers
 - Additional semantic colors: `--color-warning`, `--color-info`, `--color-card`, `--color-surface`
 
 ## 2. Frontend Page Decomposition
+
+### Conventions
+
+To ensure consistency across all agents:
+
+- **Component syntax:** Arrow functions (`const KeyList = () => {}`) per STYLEGUIDE, not function declarations
+- **Hook filenames:** kebab-case (`use-keys.ts`) — matches existing codebase convention (`use-event-stream.ts`)
+- **Component filenames:** kebab-case (`key-list.tsx`) — per STYLEGUIDE
+- **All components include `"use client"` directive** since they use hooks/interactivity
 
 ### Pattern Per Page
 
@@ -100,32 +110,44 @@ app/(dashboard)/<page>/
 - `UserMenu` component
 - `useOrgs` hook
 
+### Shared Constants Extraction
+
+Duplicated constants across pages (e.g., `PROVIDER_LABELS` in both `overview/page.tsx` and `providers/page.tsx`) are extracted to `@raven/types` so all pages reference a single source of truth.
+
 ### Data Fetching Migration
 
-All pages migrate from raw `useState` + `useEffect` + `useCallback` to **TanStack Query** (already installed, mandated by STYLEGUIDE.md but not yet used):
+All pages migrate from raw `useState` + `useEffect` + `useCallback` to **TanStack Query** using the **query options factory** pattern per STYLEGUIDE:
 
 ```typescript
-export function useKeys() {
-  const queryClient = useQueryClient()
-
-  const query = useQuery({
+// Query options factory — composable, works with preloading
+export const keysQueryOptions = () =>
+  queryOptions({
     queryKey: ['keys'],
     queryFn: () => api.get<VirtualKey[]>('/v1/keys'),
   })
 
-  useEventStream({
-    enabled: query.isSuccess,
-    events: ['key.created', 'key.updated', 'key.deleted'],
-    onEvent: () => queryClient.invalidateQueries({ queryKey: ['keys'] }),
-  })
-
-  const createMutation = useMutation({
+// Mutations as standalone hooks
+export const useCreateKey = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
     mutationFn: (data: CreateKeyInput) => api.post<CreateKeyResponse>('/v1/keys', data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['keys'] }),
   })
-
-  return { ...query, create: createMutation }
 }
+```
+
+Event stream integration uses `useEventStream` to invalidate query caches:
+
+```typescript
+// In the page orchestrator or a thin wrapper hook
+const keysQuery = useQuery(keysQueryOptions())
+const queryClient = useQueryClient()
+
+useEventStream({
+  enabled: keysQuery.isSuccess,
+  events: ['key.created', 'key.updated', 'key.deleted'],
+  onEvent: () => queryClient.invalidateQueries({ queryKey: ['keys'] }),
+})
 ```
 
 ## 3. Backend Hardening
@@ -150,11 +172,14 @@ modules/proxy/
 
 Pipeline: `authenticateKey -> checkRateLimit -> resolveProvider -> forwardUpstream -> logRequest`
 
+**Known gap — streaming token extraction:** Currently streaming responses log `inputTokens: 0, outputTokens: 0, cost: 0`. This is a billing-critical issue for a SaaS. The `token-usage.ts` module should include a `StreamTokenAccumulator` that parses SSE chunks and accumulates token counts from the final `[DONE]` or `message_stop` event. Scoped into this refactor for Backend 1.
+
 ### 3b. Middleware Improvements
 
-- **Error boundary middleware** — centralized error-to-response mapping
+- **Error boundary middleware** — centralized error-to-response mapping. Update the existing error handler in `index.ts` to wrap errors in `{ error: { code, message } }` format
 - **Request ID middleware** — unique ID per request, propagated through logs
 - **Request timing middleware** — standardized latency tracking
+- **Fix tenant middleware type safety** — replace `c.get("user" as never)` cast with properly typed Hono context variables
 
 ### 3c. API Response Consistency
 
@@ -171,6 +196,12 @@ Standardize all responses:
 { data: T[], meta?: { total: number } }
 ```
 
+**Migration order (all in Phase 0, done atomically):**
+1. Update error handler in `index.ts` to wrap errors in `{ error: { ... } }`
+2. Add response envelope middleware that wraps successful responses in `{ data: T }`
+3. Update `apps/web/src/lib/api.ts` client to unwrap `{ data: T }` from responses
+4. Both changes ship together so the frontend and backend stay in sync
+
 ### 3d. Shared Validation Layer
 
 Extract Zod schemas into co-located `schema.ts` files per module, shared with `@raven/types` for frontend form validation reuse.
@@ -182,7 +213,6 @@ Extract Zod schemas into co-located `schema.ts` files per module, shared with `@
 | Pattern | Where | Implementation |
 |---------|-------|----------------|
 | Modal enter/exit | All modals | Scale 95% + fade, 200ms ease-out |
-| Page transitions | Route changes | Fade + subtle upward slide, 150ms |
 | List stagger | Tables, card lists | 30ms stagger delay per row |
 | Hover lift | Cards, table rows | translateY(-1px) + shadow increase |
 | Tab indicator | Tab bars | Animated underline slides (layoutId) |
@@ -190,7 +220,7 @@ Extract Zod schemas into co-located `schema.ts` files per module, shared with `@
 | Skeleton pulse | Loading states | Shimmer animation on placeholders |
 | Button press | All buttons | Scale to 98% on active, spring back |
 
-CSS transitions for simple hover/active. **Framer Motion** (new dependency) for layout animations.
+**Framer Motion** is scoped to **component-level animations only** (modals, lists, tab indicators) — not cross-route page transitions, which are complex with Next.js 15 App Router. Simple CSS transitions handle hover/active states. Page transitions use CSS `@starting-style` + `transition-behavior: allow-discrete` where supported, with graceful degradation.
 
 ### 4b. Visual Hierarchy
 
@@ -220,47 +250,57 @@ CSS transitions for simple hover/active. **Framer Motion** (new dependency) for 
 
 ### 4e. Dark Mode
 
-`@media (prefers-color-scheme: dark)` with inverted token values. Zero component changes needed — all components reference tokens.
+`@media (prefers-color-scheme: dark)` with inverted token values in `globals.css`. All `@raven/ui` components use CSS custom properties exclusively — no hardcoded colors like `bg-blue-500/10`. Any hardcoded color values in existing page code (e.g., `bg-white`, `text-neutral-900`) are migrated to token references during the page decomposition work by frontend agents. The Designer agent audits and catches any remaining hardcoded values.
 
 ## 5. Agent Team Structure
 
 ### Phase 0 — Foundation (Sequential)
 
-| Task | Description |
-|------|-------------|
-| Build `@raven/ui` component library | All 13 components with variants |
-| Add design tokens | Extended palette, animation tokens, dark mode |
-| Add Framer Motion | Install + configure |
-| Set up TanStack Query provider | QueryClientProvider in root layout |
-| Standardize API response envelope | Backend middleware for consistent wrapping |
+| # | Task | Description |
+|---|------|-------------|
+| 1 | Add `@raven/ui` as dependency of `@raven/web` | Add `"@raven/ui": "workspace:*"` to web app's `package.json` |
+| 2 | Install Base UI in `@raven/ui` | `@base-ui-components/react` for accessible primitives |
+| 3 | Install Framer Motion in `@raven/web` | For component-level animations |
+| 4 | Build `@raven/ui` core components | Priority subset: `Button`, `Input`, `Badge`, `Spinner`, `PageHeader`, `Modal`, `ConfirmDialog` |
+| 5 | Build `@raven/ui` remaining components | `DataTable`, `Select`, `EmptyState`, `Tabs`, `Avatar`, `Switch` |
+| 6 | Add design tokens to `globals.css` | Extended palette, animation tokens, radius, shadows, dark mode |
+| 7 | Set up TanStack Query provider | Create `providers.tsx` client component wrapping `QueryClientProvider`, import in root `layout.tsx` |
+| 8 | Standardize API response envelope | Backend middleware + error handler update + `api.ts` client update (atomic) |
+| 9 | Extract shared constants to `@raven/types` | `PROVIDER_LABELS`, role mappings, and other duplicated constants |
 
 ### Phase 1 — Parallel Execution (8 agents in worktrees)
 
-| Agent | Role | Scope |
-|-------|------|-------|
-| Frontend 1 | Frontend Dev | `team`, `keys`, `profile` pages |
-| Frontend 2 | Frontend Dev | `providers`, `budgets`, `requests` pages |
-| Frontend 3 | Frontend Dev | `overview`, `analytics`, `billing`, `settings` + layout |
-| Backend 1 | Backend Dev | Proxy handler decomposition + middleware |
-| Backend 2 | Backend Dev | API response standardization + Zod schemas |
-| Designer | Design Engineer | Motion system, visual polish, dark mode |
-| QA | Quality Assurance | Type checking, lint, integration review |
-| Security | Security Engineer | Crypto audit, auth flows, input validation |
+| Agent | Role | Scope | Owned Files |
+|-------|------|-------|-------------|
+| Frontend 1 | Frontend Dev | Decompose `team`, `keys`, `profile` pages | `app/(dashboard)/team/`, `keys/`, `profile/` |
+| Frontend 2 | Frontend Dev | Decompose `providers`, `budgets`, `requests` pages | `app/(dashboard)/providers/`, `budgets/`, `requests/` |
+| Frontend 3 | Frontend Dev | Decompose `overview`, `analytics`, `billing`, `settings` + dashboard layout | `app/(dashboard)/overview/`, `analytics/`, `billing/`, `settings/`, `(dashboard)/layout.tsx` → `(dashboard)/components/` |
+| Backend 1 | Backend Dev | Proxy handler decomposition + middleware + streaming token extraction | `modules/proxy/`, `middleware/` |
+| Backend 2 | Backend Dev | Zod schema extraction across all modules | `modules/*/schema.ts`, `packages/types/` |
+| Designer | Design Engineer | Motion system, visual polish, dark mode | `globals.css`, `packages/ui/src/components/` styling refinements only |
+| QA | Quality Assurance | Type checking, lint, review all agent outputs | Cross-cutting (read-only, runs after others) |
+| Security | Security Engineer | Audit crypto, auth flows, input validation | Cross-cutting (read-only, runs after others) |
 
-**No-conflict guarantee:** Each agent owns distinct files. Frontend agents split by page directory. Backend agents split by concern. Designer touches CSS and UI styling only. QA/Security review after others complete.
+**Conflict boundaries:**
+- API response envelope and `api.ts` client are finalized in Phase 0 — no agent modifies them in Phase 1
+- Frontend agents import from `@raven/ui` (read-only) and own their page directories exclusively
+- Backend agents split cleanly: Backend 1 owns `modules/proxy/` + `middleware/`, Backend 2 owns `modules/*/schema.ts`
+- Designer modifies only `globals.css` and `packages/ui/src/components/` styling (no structural changes to components)
+- QA and Security are read-only reviewers, run after implementation agents complete
 
 ### Phase 2 — Integration (Sequential)
 
 - Merge all worktree branches
-- Resolve conflicts (minimal due to file ownership)
-- QA: full type check + lint
-- Security: final audit
-- Designer: visual review pass
+- Resolve any conflicts (minimal due to file ownership boundaries)
+- QA: full type check + lint across entire codebase
+- Security: final audit of crypto, auth, and input validation
+- Designer: visual review pass for consistency
 
 ## Dependencies
 
 **New:**
-- `framer-motion` — layout animations, modal transitions, list stagger
+- `framer-motion` — component-level animations (modals, lists, tab indicators)
+- `@base-ui-components/react` — accessible primitives for Modal, Select, ConfirmDialog, Switch
 
 **Already installed but unused:**
 - `@tanstack/react-query` — migrate all data fetching
