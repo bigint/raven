@@ -469,19 +469,24 @@ func (s *PostgresStore) GetKeyByHash(ctx context.Context, hash string) (*Virtual
 
 func (s *PostgresStore) scanKey(row *sql.Row) (*VirtualKey, error) {
 	key := &VirtualKey{}
-	var providersJSON, modelsJSON string
+	var providersJSON, modelsJSON sql.NullString
 	var expiresAt sql.NullTime
-	err := row.Scan(&key.ID, &key.Name, &key.KeyHash, &key.KeyPrefix, &key.OrgID, &key.TeamID,
-		&key.UserID, &providersJSON, &modelsJSON, &key.RPM, &key.TPM, &key.Budget,
-		&key.BudgetPeriod, &key.Status, &expiresAt, &key.CreatedAt, &key.UpdatedAt)
+	var teamID, userID, orgID, budgetPeriod sql.NullString
+	err := row.Scan(&key.ID, &key.Name, &key.KeyHash, &key.KeyPrefix, &orgID, &teamID,
+		&userID, &providersJSON, &modelsJSON, &key.RPM, &key.TPM, &key.Budget,
+		&budgetPeriod, &key.Status, &expiresAt, &key.CreatedAt, &key.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, fmt.Errorf("scanning key: %w", err)
 	}
-	json.Unmarshal([]byte(providersJSON), &key.Providers) //nolint:errcheck
-	json.Unmarshal([]byte(modelsJSON), &key.Models)       //nolint:errcheck
+	key.OrgID = orgID.String
+	key.TeamID = teamID.String
+	key.UserID = userID.String
+	key.BudgetPeriod = budgetPeriod.String
+	json.Unmarshal([]byte(providersJSON.String), &key.Providers) //nolint:errcheck
+	json.Unmarshal([]byte(modelsJSON.String), &key.Models)       //nolint:errcheck
 	if expiresAt.Valid {
 		key.ExpiresAt = &expiresAt.Time
 	}
@@ -524,15 +529,20 @@ func (s *PostgresStore) ListKeys(ctx context.Context, opts ListOpts) ([]*Virtual
 	var keys []*VirtualKey
 	for rows.Next() {
 		key := &VirtualKey{}
-		var providersJSON, modelsJSON string
+		var providersJSON, modelsJSON sql.NullString
 		var expiresAt sql.NullTime
-		if err := rows.Scan(&key.ID, &key.Name, &key.KeyHash, &key.KeyPrefix, &key.OrgID,
-			&key.TeamID, &key.UserID, &providersJSON, &modelsJSON, &key.RPM, &key.TPM,
-			&key.Budget, &key.BudgetPeriod, &key.Status, &expiresAt, &key.CreatedAt, &key.UpdatedAt); err != nil {
+		var teamID, userID, orgID, budgetPeriod sql.NullString
+		if err := rows.Scan(&key.ID, &key.Name, &key.KeyHash, &key.KeyPrefix, &orgID,
+			&teamID, &userID, &providersJSON, &modelsJSON, &key.RPM, &key.TPM,
+			&key.Budget, &budgetPeriod, &key.Status, &expiresAt, &key.CreatedAt, &key.UpdatedAt); err != nil {
 			return nil, 0, fmt.Errorf("scanning key: %w", err)
 		}
-		json.Unmarshal([]byte(providersJSON), &key.Providers) //nolint:errcheck
-		json.Unmarshal([]byte(modelsJSON), &key.Models)       //nolint:errcheck
+		key.OrgID = orgID.String
+		key.TeamID = teamID.String
+		key.UserID = userID.String
+		key.BudgetPeriod = budgetPeriod.String
+		json.Unmarshal([]byte(providersJSON.String), &key.Providers) //nolint:errcheck
+		json.Unmarshal([]byte(modelsJSON.String), &key.Models)       //nolint:errcheck
 		if expiresAt.Valid {
 			key.ExpiresAt = &expiresAt.Time
 		}
@@ -660,13 +670,23 @@ func (s *PostgresStore) ListLogs(ctx context.Context, opts LogQueryOpts) ([]*Req
 	var logs []*RequestLog
 	for rows.Next() {
 		log := &RequestLog{}
-		if err := rows.Scan(&log.ID, &log.KeyID, &log.OrgID, &log.TeamID, &log.UserID,
+		var keyID, orgID, teamID, userID, reqBody, respBody, errMsg, reqHeaders, respHeaders sql.NullString
+		if err := rows.Scan(&log.ID, &keyID, &orgID, &teamID, &userID,
 			&log.Provider, &log.Model, &log.Endpoint, &log.Method, &log.StatusCode,
 			&log.InputTokens, &log.OutputTokens, &log.CachedTokens, &log.Cost, &log.LatencyMs,
-			&log.TTFBMs, &log.Stream, &log.CacheHit, &log.RequestBody, &log.ResponseBody,
-			&log.ErrorMessage, &log.RequestHeaders, &log.ResponseHeaders, &log.CreatedAt); err != nil {
+			&log.TTFBMs, &log.Stream, &log.CacheHit, &reqBody, &respBody,
+			&errMsg, &reqHeaders, &respHeaders, &log.CreatedAt); err != nil {
 			return nil, "", fmt.Errorf("scanning log: %w", err)
 		}
+		log.KeyID = keyID.String
+		log.OrgID = orgID.String
+		log.TeamID = teamID.String
+		log.UserID = userID.String
+		log.RequestBody = reqBody.String
+		log.ResponseBody = respBody.String
+		log.ErrorMessage = errMsg.String
+		log.RequestHeaders = reqHeaders.String
+		log.ResponseHeaders = respHeaders.String
 		logs = append(logs, log)
 	}
 

@@ -358,7 +358,10 @@ func (a *AnthropicAdapter) AuthHeaders(apiKey string) map[string]string {
 	if apiKey == "" {
 		return nil
 	}
-	return map[string]string{"x-api-key": apiKey}
+	return map[string]string{
+		"x-api-key":         apiKey,
+		"anthropic-version": "2023-06-01",
+	}
 }
 
 // Models returns all model IDs for Anthropic.

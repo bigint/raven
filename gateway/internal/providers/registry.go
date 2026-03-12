@@ -282,5 +282,9 @@ func (r *Registry) TestAPIKey(name, apiKey, baseURL string) error {
 		return fmt.Errorf("provider returned status %d", resp.StatusCode)
 	}
 
+	if resp.StatusCode >= 400 {
+		return fmt.Errorf("provider returned status %d", resp.StatusCode)
+	}
+
 	return nil
 }
