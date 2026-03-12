@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
+import { Providers } from "./providers";
 
 const outfit = Outfit({ subsets: ["latin"] });
 
@@ -20,8 +21,10 @@ export default function RootLayout({
       <body
         className={`${outfit.className} min-h-screen bg-background text-foreground antialiased`}
       >
-        {children}
-        <Toaster position="bottom-right" />
+        <Providers>
+          {children}
+          <Toaster position="bottom-right" />
+        </Providers>
       </body>
     </html>
   );
