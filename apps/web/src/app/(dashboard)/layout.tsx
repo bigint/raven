@@ -1,6 +1,7 @@
 'use client'
 
-import { signOut, useSession } from '@/lib/auth-client'
+import { setOrgId } from '@/lib/api'
+import { signOut, useActiveOrganization, useSession } from '@/lib/auth-client'
 import {
   BarChart3,
   CreditCard,
@@ -17,6 +18,7 @@ import type { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { redirect } from 'next/navigation'
+import { useEffect } from 'react'
 
 const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: '/overview', label: 'Overview', icon: LayoutDashboard },
@@ -32,8 +34,15 @@ const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: session, isPending } = useSession()
+  const { data: activeOrg } = useActiveOrganization()
   const pathname = usePathname()
   const router = useRouter()
+
+  useEffect(() => {
+    if (activeOrg?.id) {
+      setOrgId(activeOrg.id)
+    }
+  }, [activeOrg?.id])
 
   if (isPending) {
     return (
