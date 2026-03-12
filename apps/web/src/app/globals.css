@@ -4,6 +4,9 @@
 
 @theme {
   --color-background: #ffffff;
+  --color-foreground: #0a0a0a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #0a0a0a;
   --color-primary: #0a0a0a;
   --color-primary-foreground: #fafafa;
   --color-muted: #f5f5f5;

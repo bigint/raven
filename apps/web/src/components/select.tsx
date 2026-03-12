@@ -67,7 +67,7 @@ export function Select({
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full rounded-lg border border-border bg-popover py-1 shadow-lg animate-in fade-in-0 zoom-in-95">
+        <div className="absolute z-50 mt-1 w-full rounded-lg border border-border bg-popover py-1 shadow-md ring-1 ring-black/5">
           {options.map((option) => (
             <button
               key={option.value}

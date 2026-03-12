@@ -18,6 +18,7 @@ import { createGuardrailsModule } from './modules/guardrails/index.js'
 import { createKeysModule } from './modules/keys/index.js'
 import { createProvidersModule } from './modules/providers/index.js'
 import { createProxyModule } from './modules/proxy/index.js'
+import { createSettingsModule } from './modules/settings/index.js'
 import { createTeamsModule } from './modules/teams/index.js'
 import { createUserModule } from './modules/user/index.js'
 
@@ -82,6 +83,7 @@ v1.route('/budgets', createBudgetsModule(db))
 v1.route('/guardrails', createGuardrailsModule(db))
 v1.route('/analytics', createAnalyticsModule(db))
 v1.route('/teams', createTeamsModule(db))
+v1.route('/settings', createSettingsModule(db))
 v1.route('/billing', createBillingModule(db))
 v1.route('/audit-logs', createAuditLogsModule(db))
 app.route('/v1', v1)
