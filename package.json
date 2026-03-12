@@ -2,6 +2,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.6",
     "@paralleldrive/cuid2": "^3.3.0",
+    "@types/node": "^25.5.0",
     "drizzle-orm": "^0.45.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
