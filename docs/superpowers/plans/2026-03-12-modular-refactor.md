@@ -31,7 +31,15 @@ In `apps/web/package.json`, add to `dependencies`:
 
 In `packages/ui/package.json`, add to `dependencies`:
 ```json
-"@base-ui-components/react": "^1.0.0"
+"@base-ui-components/react": "^1.0.0",
+"motion": "^12.0.0"
+```
+
+Also move `react` from `dependencies` to `peerDependencies` to avoid duplicate React instances:
+```json
+"peerDependencies": {
+  "react": "^19.0.0"
+}
 ```
 
 - [ ] **Step 3: Add Framer Motion to `@raven/web`**
@@ -578,13 +586,17 @@ git commit -m "feat: add Input, Switch, PageHeader components to @raven/ui"
 - Create: `packages/ui/src/components/empty-state.tsx`
 - Modify: `packages/ui/src/index.ts`
 
-- [ ] **Step 1: Create Modal component with Framer Motion animations**
+- [ ] **Step 1: Create Modal component using Base UI Dialog + Framer Motion**
+
+Uses Base UI's `Dialog` for accessibility (focus trap, ARIA roles, escape-to-close) and Framer Motion for enter/exit animations.
 
 ```tsx
 // packages/ui/src/components/modal.tsx
 "use client";
 
-import { useCallback, useEffect, useRef, type ReactNode } from "react";
+import { Dialog } from "@base-ui-components/react/dialog";
+import { AnimatePresence, motion } from "motion/react";
+import type { ReactNode } from "react";
 import { cn } from "../cn";
 
 interface ModalProps {
@@ -609,67 +621,58 @@ const Modal = ({
   children,
   footer,
   size = "md",
-}: ModalProps) => {
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    },
-    [onClose]
-  );
-
-  useEffect(() => {
-    if (open) {
-      document.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
-    }
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
-    };
-  }, [open, handleKeyDown]);
-
-  if (!open) return null;
-
-  return (
-    <div
-      ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-[var(--duration-fast)]"
-      onClick={(e) => {
-        if (e.target === overlayRef.current) onClose();
-      }}
-    >
-      <div
-        ref={contentRef}
-        className={cn(
-          "w-full rounded-xl border border-border bg-background shadow-xl animate-in zoom-in-95 fade-in duration-[var(--duration-normal)]",
-          sizeMap[size]
-        )}
-      >
-        <div className="flex items-center justify-between border-b border-border px-6 py-4">
-          <h2 className="text-base font-semibold">{title}</h2>
-          <button
-            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-            onClick={onClose}
-            type="button"
+}: ModalProps) => (
+  <Dialog.Root open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+    <AnimatePresence>
+      {open && (
+        <Dialog.Portal>
+          <Dialog.Backdrop
+            render={
+              <motion.div
+                className="fixed inset-0 z-50 bg-black/50"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              />
+            }
+          />
+          <Dialog.Popup
+            render={
+              <motion.div
+                className={cn(
+                  "fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-background shadow-xl",
+                  sizeMap[size]
+                )}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              />
+            }
           >
-            <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        <div className="px-6 py-5">{children}</div>
-        {footer && (
-          <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
-            {footer}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+              <Dialog.Title className="text-base font-semibold">
+                {title}
+              </Dialog.Title>
+              <Dialog.Close className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground">
+                <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </Dialog.Close>
+            </div>
+            <div className="px-6 py-5">{children}</div>
+            {footer && (
+              <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
+                {footer}
+              </div>
+            )}
+          </Dialog.Popup>
+        </Dialog.Portal>
+      )}
+    </AnimatePresence>
+  </Dialog.Root>
+);
 
 export { Modal };
 export type { ModalProps };
