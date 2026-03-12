@@ -19,6 +19,7 @@
     "@raven/config": "workspace:*",
     "@raven/auth": "workspace:*",
     "@raven/types": "workspace:*",
+    "drizzle-orm": "^0.44.0",
     "ioredis": "^5.6.0",
     "zod": "^3.25.0",
     "pino": "^9.6.0",

@@ -20,3 +20,18 @@
 body {
   font-feature-settings: "rlig" 1, "calt" 1;
 }
+
+button,
+a,
+select,
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"],
+[role="button"],
+[role="tab"],
+[role="link"],
+[role="menuitem"],
+[role="option"],
+label[for] {
+  cursor: pointer;
+}
