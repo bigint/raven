@@ -18,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${outfit.className} min-h-screen bg-white text-neutral-900 antialiased`}
+        className={`${outfit.className} min-h-screen bg-background text-foreground antialiased`}
       >
         {children}
         <Toaster position="bottom-right" />
