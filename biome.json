@@ -24,11 +24,15 @@
         "noUnusedVariables": "warn"
       },
       "suspicious": {
-        "noArrayIndexKey": "off"
+        "noExplicitAny": "error"
+      },
+      "a11y": {
+        "useButtonType": "error",
+        "useKeyWithClickEvents": "error"
       }
     }
   },
   "files": {
-    "ignore": ["dist/", "node_modules/"]
+    "ignore": ["dist/", "node_modules/", ".next/", "drizzle/"]
   }
 }

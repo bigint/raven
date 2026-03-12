@@ -2,27 +2,29 @@
   "name": "raven",
   "private": true,
   "packageManager": "pnpm@10.27.0",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "build": "pnpm -r build",
+    "lint": "biome check --write .",
+    "format": "biome format --write .",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "dev:web": "pnpm --filter @raven/web dev",
+    "dev:api": "pnpm --filter @raven/api dev",
+    "db:generate": "pnpm --filter @raven/db generate",
+    "db:migrate": "pnpm --filter @raven/db migrate",
+    "db:studio": "pnpm --filter @raven/db studio"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "typescript": "^5.8.3"
+  },
   "pnpm": {
     "onlyBuiltDependencies": [
       "@biomejs/biome",
       "esbuild",
       "sharp"
     ]
-  },
-  "scripts": {
-    "dev": "pnpm -r --parallel dev",
-    "build": "pnpm -r build",
-    "lint": "pnpm -r lint",
-    "format": "pnpm -r format",
-    "test": "pnpm -r test",
-    "dev:dashboard": "pnpm --filter dashboard dev",
-    "dev:website": "pnpm --filter website dev",
-    "build:dashboard": "pnpm --filter dashboard build",
-    "build:website": "pnpm --filter website build",
-    "build:sdk": "pnpm --filter @raven-gateway/sdk build",
-    "build:gateway": "cd gateway && go build -o raven .",
-    "test:gateway": "cd gateway && go test ./...",
-    "test:dashboard": "pnpm --filter dashboard test",
-    "test:sdk": "pnpm --filter @raven-gateway/sdk test"
   }
 }
