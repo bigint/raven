@@ -326,6 +326,19 @@ export default function RequestsPage() {
         </div>
       )}
 
+      {hasNewData && !isLive && (
+        <button
+          type="button"
+          onClick={() => {
+            setHasNewData(false)
+            fetchRequests({ page, provider, status: statusFilter, range: dateRange })
+          }}
+          className="mb-4 flex w-full items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+        >
+          New requests available — click to refresh
+        </button>
+      )}
+
       {error && (
         <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error}
