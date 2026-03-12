@@ -5,10 +5,12 @@ import type { Context } from "hono";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
+import { logAudit } from "@/modules/audit-logs/index";
 import { updateRoutingRuleSchema } from "./schema";
 
 export const updateRoutingRule = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
+  const user = c.get("user" as never) as { id: string };
   const id = c.req.param("id") as string;
   const body = await c.req.json();
   const result = updateRoutingRuleSchema.safeParse(body);
@@ -35,6 +37,15 @@ export const updateRoutingRule = (db: Database) => async (c: Context) => {
     .where(and(eq(routingRules.id, id), eq(routingRules.organizationId, orgId)))
     .returning();
 
-  void publishEvent(orgId, "routing-rule.updated", updated);
-  return success(c, updated);
+  const record = updated as NonNullable<typeof updated>;
+  void publishEvent(orgId, "routing-rule.updated", record);
+  void logAudit(db, {
+    action: "routing-rule.updated",
+    actorId: user.id,
+    metadata: { ...result.data },
+    orgId,
+    resourceId: record.id,
+    resourceType: "routing-rule"
+  });
+  return success(c, record);
 };
