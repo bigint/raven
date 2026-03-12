@@ -2,25 +2,18 @@ import type { Database } from "@raven/db";
 import { auditLogs } from "@raven/db";
 import { and, desc, eq, gte, lte } from "drizzle-orm";
 import type { Context } from "hono";
-import { z } from "zod";
+import type { z } from "zod";
 import { checkFeatureGate } from "@/modules/proxy/plan-gate";
-
-const listQuerySchema = z.object({
-  action: z.string().optional(),
-  actorId: z.string().optional(),
-  from: z.coerce.date().optional(),
-  limit: z.coerce.number().int().min(1).max(100).default(50),
-  offset: z.coerce.number().int().min(0).default(0),
-  resourceType: z.string().optional(),
-  to: z.coerce.date().optional()
-});
+import type { listQuerySchema } from "./schema";
 
 export const listAuditLogs = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
 
   await checkFeatureGate(db, orgId, "hasAuditLogs");
 
-  const query = listQuerySchema.parse(c.req.query());
+  const query = c.req.valid("query" as never) as z.infer<
+    typeof listQuerySchema
+  >;
 
   const conditions = [eq(auditLogs.organizationId, orgId)];
 

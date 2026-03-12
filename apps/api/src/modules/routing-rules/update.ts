@@ -2,24 +2,20 @@ import type { Database } from "@raven/db";
 import { routingRules } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { NotFoundError, ValidationError } from "@/lib/errors";
+import type { z } from "zod";
+import { NotFoundError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
 import { logAudit } from "@/modules/audit-logs/index";
-import { updateRoutingRuleSchema } from "./schema";
+import type { updateRoutingRuleSchema } from "./schema";
 
 export const updateRoutingRule = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
   const user = c.get("user" as never) as { id: string };
   const id = c.req.param("id") as string;
-  const body = await c.req.json();
-  const result = updateRoutingRuleSchema.safeParse(body);
-
-  if (!result.success) {
-    throw new ValidationError("Invalid request body", {
-      errors: result.error.flatten().fieldErrors
-    });
-  }
+  const data = c.req.valid("json" as never) as z.infer<
+    typeof updateRoutingRuleSchema
+  >;
 
   const [existing] = await db
     .select({ id: routingRules.id })
@@ -33,7 +29,7 @@ export const updateRoutingRule = (db: Database) => async (c: Context) => {
 
   const [updated] = await db
     .update(routingRules)
-    .set({ ...result.data, updatedAt: new Date() })
+    .set({ ...data, updatedAt: new Date() })
     .where(and(eq(routingRules.id, id), eq(routingRules.organizationId, orgId)))
     .returning();
 
@@ -42,7 +38,7 @@ export const updateRoutingRule = (db: Database) => async (c: Context) => {
   void logAudit(db, {
     action: "routing-rule.updated",
     actorId: user.id,
-    metadata: { ...result.data },
+    metadata: { ...data },
     orgId,
     resourceId: record.id,
     resourceType: "routing-rule"

@@ -3,9 +3,10 @@ import type { Database } from "@raven/db";
 import { members, organizations } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { UnauthorizedError, ValidationError } from "@/lib/errors";
+import type { z } from "zod";
+import { UnauthorizedError } from "@/lib/errors";
 import { created, success } from "@/lib/response";
-import { createOrgSchema } from "./schema";
+import type { createOrgSchema } from "./schema";
 
 export const listOrgs = (db: Database) => async (c: Context) => {
   const user = c.get("user" as never) as { id: string } | undefined;
@@ -33,17 +34,10 @@ export const createOrg = (db: Database) => async (c: Context) => {
     throw new UnauthorizedError("Not authenticated");
   }
 
-  const body = await c.req.json();
-  const result = createOrgSchema.safeParse(body);
+  const data = c.req.valid("json" as never) as z.infer<typeof createOrgSchema>;
 
-  if (!result.success) {
-    throw new ValidationError("Invalid request body", {
-      errors: result.error.flatten().fieldErrors
-    });
-  }
-
-  const name = result.data.name;
-  const slug = result.data.slug?.trim() || `org-${createId()}`;
+  const name = data.name;
+  const slug = data.slug?.trim() || `org-${createId()}`;
   const orgId = createId();
 
   await db.transaction(async (tx) => {

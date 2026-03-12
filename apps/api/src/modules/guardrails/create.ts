@@ -1,12 +1,12 @@
 import type { Database } from "@raven/db";
 import { guardrailRules } from "@raven/db";
 import type { Context } from "hono";
-import { ValidationError } from "@/lib/errors";
+import type { z } from "zod";
 import { publishEvent } from "@/lib/events";
 import { created } from "@/lib/response";
 import { logAudit } from "@/modules/audit-logs/index";
 import { checkFeatureGate } from "@/modules/proxy/plan-gate";
-import { createGuardrailSchema } from "./schema";
+import type { createGuardrailSchema } from "./schema";
 
 export const createGuardrail = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
@@ -14,16 +14,9 @@ export const createGuardrail = (db: Database) => async (c: Context) => {
 
   await checkFeatureGate(db, orgId, "hasGuardrails");
 
-  const body = await c.req.json();
-  const result = createGuardrailSchema.safeParse(body);
-
-  if (!result.success) {
-    throw new ValidationError("Invalid request body", {
-      errors: result.error.flatten().fieldErrors
-    });
-  }
-
-  const { name, type, config, action, isEnabled, priority } = result.data;
+  const { name, type, config, action, isEnabled, priority } = c.req.valid(
+    "json" as never
+  ) as z.infer<typeof createGuardrailSchema>;
 
   const [record] = await db
     .insert(guardrailRules)

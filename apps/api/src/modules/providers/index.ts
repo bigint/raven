@@ -1,10 +1,12 @@
 import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
+import { jsonValidator } from "@/lib/validation";
 import { createProvider } from "./create";
 import { deleteProvider } from "./delete";
 import { getProvider } from "./get";
 import { listProviders } from "./list";
+import { createProviderSchema, updateProviderSchema } from "./schema";
 import { updateProvider } from "./update";
 
 export const createProvidersModule = (db: Database, env: Env) => {
@@ -12,8 +14,8 @@ export const createProvidersModule = (db: Database, env: Env) => {
 
   app.get("/", listProviders(db));
   app.get("/:id", getProvider(db));
-  app.post("/", createProvider(db, env));
-  app.put("/:id", updateProvider(db, env));
+  app.post("/", jsonValidator(createProviderSchema), createProvider(db, env));
+  app.put("/:id", jsonValidator(updateProviderSchema), updateProvider(db, env));
   app.delete("/:id", deleteProvider(db));
 
   return app;

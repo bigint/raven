@@ -1,28 +1,23 @@
 import type { Database } from "@raven/db";
 import { routingRules } from "@raven/db";
 import type { Context } from "hono";
-import { ValidationError } from "@/lib/errors";
+import type { z } from "zod";
 import { publishEvent } from "@/lib/events";
 import { created } from "@/lib/response";
 import { logAudit } from "@/modules/audit-logs/index";
-import { createRoutingRuleSchema } from "./schema";
+import type { createRoutingRuleSchema } from "./schema";
 
 export const createRoutingRule = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
   const user = c.get("user" as never) as { id: string };
-  const body = await c.req.json();
-  const result = createRoutingRuleSchema.safeParse(body);
-
-  if (!result.success) {
-    throw new ValidationError("Invalid request body", {
-      errors: result.error.flatten().fieldErrors
-    });
-  }
+  const data = c.req.valid("json" as never) as z.infer<
+    typeof createRoutingRuleSchema
+  >;
 
   const [record] = await db
     .insert(routingRules)
     .values({
-      ...result.data,
+      ...data,
       organizationId: orgId
     })
     .returning();
@@ -32,7 +27,7 @@ export const createRoutingRule = (db: Database) => async (c: Context) => {
   void logAudit(db, {
     action: "routing-rule.created",
     actorId: user.id,
-    metadata: { ...result.data },
+    metadata: { ...data },
     orgId,
     resourceId: safe.id,
     resourceType: "routing-rule"

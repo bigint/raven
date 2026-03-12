@@ -1,22 +1,15 @@
 import type { Database } from "@raven/db";
 import { prompts, promptVersions } from "@raven/db";
 import type { Context } from "hono";
-import { ValidationError } from "@/lib/errors";
+import type { z } from "zod";
 import { created } from "@/lib/response";
-import { createPromptSchema } from "./schema";
+import type { createPromptSchema } from "./schema";
 
 export const createPrompt = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
-  const body = await c.req.json();
-  const result = createPromptSchema.safeParse(body);
-
-  if (!result.success) {
-    throw new ValidationError("Invalid request body", {
-      errors: result.error.flatten().fieldErrors
-    });
-  }
-
-  const { name, content, model } = result.data;
+  const { name, content, model } = c.req.valid("json" as never) as z.infer<
+    typeof createPromptSchema
+  >;
 
   const [prompt] = await db
     .insert(prompts)

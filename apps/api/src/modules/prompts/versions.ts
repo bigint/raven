@@ -2,9 +2,10 @@ import type { Database } from "@raven/db";
 import { prompts, promptVersions } from "@raven/db";
 import { and, desc, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { NotFoundError, ValidationError } from "@/lib/errors";
+import type { z } from "zod";
+import { NotFoundError } from "@/lib/errors";
 import { created, success } from "@/lib/response";
-import { createVersionSchema } from "./schema";
+import type { createVersionSchema } from "./schema";
 
 const findPrompt = async (db: Database, id: string, orgId: string) => {
   const [prompt] = await db
@@ -23,18 +24,11 @@ const findPrompt = async (db: Database, id: string, orgId: string) => {
 export const createVersion = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
   const id = c.req.param("id") as string;
-  const body = await c.req.json();
-  const result = createVersionSchema.safeParse(body);
-
-  if (!result.success) {
-    throw new ValidationError("Invalid request body", {
-      errors: result.error.flatten().fieldErrors
-    });
-  }
+  const { content, model } = c.req.valid("json" as never) as z.infer<
+    typeof createVersionSchema
+  >;
 
   await findPrompt(db, id, orgId);
-
-  const { content, model } = result.data;
 
   // Get latest version number
   const [latest] = await db

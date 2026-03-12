@@ -31,8 +31,8 @@ const handleSwitchOrg = (org: Organization) => {
   useOrgStore.getState().setActiveOrg({
     id: org.id,
     name: org.name,
-    slug: org.slug,
-    role: org.role
+    role: org.role,
+    slug: org.slug
   });
   window.location.reload();
 };
@@ -57,7 +57,7 @@ const OrgList = ({
           </p>
         </div>
       </div>
-      <Button onClick={onCreateOrg}>
+      <Button onClick={onCreateOrg} type="button">
         <Building2 className="size-4" />
         Create Organization
       </Button>
@@ -121,6 +121,7 @@ const OrgList = ({
                       <Button
                         onClick={() => handleSwitchOrg(org)}
                         size="sm"
+                        type="button"
                         variant="secondary"
                       >
                         Switch

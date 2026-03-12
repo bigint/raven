@@ -6,7 +6,6 @@ import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
 import { logAudit } from "@/modules/audit-logs/index";
-import { updateOrgSchema } from "./schema";
 
 export const updateSettings = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
@@ -19,16 +18,7 @@ export const updateSettings = (db: Database) => async (c: Context) => {
     );
   }
 
-  const body = await c.req.json();
-  const result = updateOrgSchema.safeParse(body);
-
-  if (!result.success) {
-    throw new ValidationError("Invalid request body", {
-      errors: result.error.flatten().fieldErrors
-    });
-  }
-
-  const { name, slug } = result.data;
+  const { name, slug } = c.req.valid("json" as never);
 
   if (!name && !slug) {
     throw new ValidationError("At least one field must be provided");

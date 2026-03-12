@@ -2,9 +2,10 @@ import type { Database } from "@raven/db";
 import { users } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { UnauthorizedError, ValidationError } from "@/lib/errors";
+import type { z } from "zod";
+import { UnauthorizedError } from "@/lib/errors";
 import { success } from "@/lib/response";
-import { updateProfileSchema } from "./schema";
+import type { updateProfileSchema } from "./schema";
 
 export const updateProfile = (db: Database) => async (c: Context) => {
   const user = c.get("user" as never) as
@@ -14,18 +15,13 @@ export const updateProfile = (db: Database) => async (c: Context) => {
     throw new UnauthorizedError("Not authenticated");
   }
 
-  const body = await c.req.json();
-  const result = updateProfileSchema.safeParse(body);
-
-  if (!result.success) {
-    throw new ValidationError("Invalid request body", {
-      errors: result.error.flatten().fieldErrors
-    });
-  }
+  const data = c.req.valid("json" as never) as z.infer<
+    typeof updateProfileSchema
+  >;
 
   const [updated] = await db
     .update(users)
-    .set({ name: result.data.name, updatedAt: new Date() })
+    .set({ name: data.name, updatedAt: new Date() })
     .where(eq(users.id, user.id))
     .returning();
 

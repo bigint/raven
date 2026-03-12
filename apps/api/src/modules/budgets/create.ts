@@ -2,27 +2,18 @@ import type { Database } from "@raven/db";
 import { budgets } from "@raven/db";
 import { count, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { ValidationError } from "@/lib/errors";
+import type { z } from "zod";
 import { publishEvent } from "@/lib/events";
 import { created } from "@/lib/response";
 import { logAudit } from "@/modules/audit-logs/index";
 import { checkResourceLimit } from "@/modules/proxy/plan-gate";
-import { createBudgetSchema } from "./schema";
+import type { createBudgetSchema } from "./schema";
 
 export const createBudget = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
   const user = c.get("user" as never) as { id: string };
-  const body = await c.req.json();
-  const result = createBudgetSchema.safeParse(body);
-
-  if (!result.success) {
-    throw new ValidationError("Invalid request body", {
-      errors: result.error.flatten().fieldErrors
-    });
-  }
-
   const { entityType, entityId, limitAmount, period, alertThreshold } =
-    result.data;
+    c.req.valid("json" as never) as z.infer<typeof createBudgetSchema>;
 
   const [existing] = await db
     .select({ value: count() })

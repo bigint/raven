@@ -147,10 +147,15 @@ const WebhookForm = ({ open, onClose, editingWebhook }: WebhookFormProps) => {
 
               return (
                 <div key={category}>
-                  <label className="flex items-center gap-2 text-sm font-medium">
+                  <label
+                    className="flex items-center gap-2 text-sm font-medium"
+                    htmlFor={`category-${category}`}
+                  >
                     <input
+                      aria-label={`Select all ${category} events`}
                       checked={allSelected}
                       className="accent-primary"
+                      id={`category-${category}`}
                       onChange={() => toggleCategory(events)}
                       ref={(el) => {
                         if (el) el.indeterminate = someSelected;
@@ -163,11 +168,14 @@ const WebhookForm = ({ open, onClose, editingWebhook }: WebhookFormProps) => {
                     {events.map((event) => (
                       <label
                         className="flex items-center gap-2 text-sm text-muted-foreground"
+                        htmlFor={`event-${event}`}
                         key={event}
                       >
                         <input
+                          aria-label={`Select ${event} event`}
                           checked={form.events.includes(event)}
                           className="accent-primary"
+                          id={`event-${event}`}
                           onChange={() => toggleEvent(event)}
                           type="checkbox"
                         />
