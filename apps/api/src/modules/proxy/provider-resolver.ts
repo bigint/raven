@@ -1,7 +1,7 @@
 import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { decrypt } from "@/lib/crypto";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
 import { getProviderAdapter, type ProviderAdapter } from "./providers/registry";
@@ -65,9 +65,11 @@ export const resolveProvider = async (
       .where(
         and(
           eq(providerConfigs.organizationId, organizationId),
-          eq(providerConfigs.provider, providerName)
+          eq(providerConfigs.provider, providerName),
+          eq(providerConfigs.isEnabled, true)
         )
       )
+      .orderBy(sql`RANDOM()`)
       .limit(1);
     providerConfig = result;
 
