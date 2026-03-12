@@ -9,74 +9,56 @@ export const setOrgId = (orgId: string | null) => {
 
 export const getOrgId = () => currentOrgId;
 
+const headers = (extra?: Record<string, string>): Record<string, string> => ({
+  ...(currentOrgId ? { "X-Org-Id": currentOrgId } : {}),
+  ...extra
+});
+
+const handleResponse = async <T>(res: Response): Promise<T> => {
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    const message = body?.error?.message ?? body?.message ?? "Request failed";
+    throw new Error(message);
+  }
+  const body = await res.json();
+  return body as T;
+};
+
 export const api = {
   async delete<T>(path: string): Promise<T> {
     const res = await fetch(`${API_URL}${path}`, {
       credentials: "include",
-      headers: {
-        ...(currentOrgId ? { "X-Org-Id": currentOrgId } : {})
-      },
+      headers: headers(),
       method: "DELETE"
     });
-    if (!res.ok) {
-      const error = await res
-        .json()
-        .catch(() => ({ message: "Request failed" }));
-      throw new Error(error.message);
-    }
-    return res.json();
+    return handleResponse<T>(res);
   },
+
   async get<T>(path: string): Promise<T> {
     const res = await fetch(`${API_URL}${path}`, {
       credentials: "include",
-      headers: {
-        ...(currentOrgId ? { "X-Org-Id": currentOrgId } : {})
-      }
+      headers: headers()
     });
-    if (!res.ok) {
-      const error = await res
-        .json()
-        .catch(() => ({ message: "Request failed" }));
-      throw new Error(error.message);
-    }
-    return res.json();
+    return handleResponse<T>(res);
   },
 
   async post<T>(path: string, body?: unknown): Promise<T> {
     const res = await fetch(`${API_URL}${path}`, {
       body: body ? JSON.stringify(body) : undefined,
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...(currentOrgId ? { "X-Org-Id": currentOrgId } : {})
-      },
+      headers: headers({ "Content-Type": "application/json" }),
       method: "POST"
     });
-    if (!res.ok) {
-      const error = await res
-        .json()
-        .catch(() => ({ message: "Request failed" }));
-      throw new Error(error.message);
-    }
-    return res.json();
+    return handleResponse<T>(res);
   },
 
   async put<T>(path: string, body?: unknown): Promise<T> {
     const res = await fetch(`${API_URL}${path}`, {
       body: body ? JSON.stringify(body) : undefined,
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...(currentOrgId ? { "X-Org-Id": currentOrgId } : {})
-      },
+      headers: headers({ "Content-Type": "application/json" }),
       method: "PUT"
     });
-    if (!res.ok) {
-      const error = await res
-        .json()
-        .catch(() => ({ message: "Request failed" }));
-      throw new Error(error.message);
-    }
-    return res.json();
+    return handleResponse<T>(res);
   }
 };

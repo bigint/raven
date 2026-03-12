@@ -50,16 +50,18 @@ app.onError((err, c) => {
   if (err instanceof AppError) {
     return c.json(
       {
-        code: err.code,
-        details: err.details,
-        message: err.message
+        error: {
+          code: err.code,
+          message: err.message,
+          ...(err.details ? { details: err.details } : {})
+        }
       },
       err.statusCode as 400 | 401 | 403 | 404 | 409 | 429 | 500
     );
   }
   console.error("Unhandled error:", err);
   return c.json(
-    { code: "INTERNAL_ERROR", message: "Internal server error" },
+    { error: { code: "INTERNAL_ERROR", message: "Internal server error" } },
     500
   );
 });
@@ -99,7 +101,7 @@ v1.route("/events", createEventsModule(redis));
 app.route("/v1", v1);
 
 app.notFound((c) =>
-  c.json({ code: "NOT_FOUND", message: "Route not found" }, 404)
+  c.json({ error: { code: "NOT_FOUND", message: "Route not found" } }, 404)
 );
 
 serve({ fetch: app.fetch, port: env.API_PORT }, (info) => {
