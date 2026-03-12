@@ -45,7 +45,7 @@ app.onError((err, c) => {
 // Health check
 app.get('/health', (c) => c.json({ status: 'ok' }))
 
-app.route('/auth', createAuthModule(auth))
+app.route('/api/auth', createAuthModule(auth))
 
 app.notFound((c) => c.json({ code: 'NOT_FOUND', message: 'Route not found' }, 404))
 

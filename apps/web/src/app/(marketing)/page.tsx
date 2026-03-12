@@ -1,3 +1,4 @@
+import { BarChart3, Key, Shield } from 'lucide-react'
 import Link from 'next/link'
 
 export default function HomePage() {
@@ -61,8 +62,8 @@ export default function HomePage() {
 
         <div className="mt-24 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl w-full">
           <div className="space-y-2">
-            <div className="size-10 rounded-lg bg-muted flex items-center justify-center text-lg">
-              🔑
+            <div className="size-10 rounded-lg bg-muted flex items-center justify-center">
+              <Key className="size-5 text-muted-foreground" />
             </div>
             <h3 className="font-semibold">Virtual Keys</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
@@ -70,8 +71,8 @@ export default function HomePage() {
             </p>
           </div>
           <div className="space-y-2">
-            <div className="size-10 rounded-lg bg-muted flex items-center justify-center text-lg">
-              📊
+            <div className="size-10 rounded-lg bg-muted flex items-center justify-center">
+              <BarChart3 className="size-5 text-muted-foreground" />
             </div>
             <h3 className="font-semibold">Real-time Analytics</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
@@ -79,8 +80,8 @@ export default function HomePage() {
             </p>
           </div>
           <div className="space-y-2">
-            <div className="size-10 rounded-lg bg-muted flex items-center justify-center text-lg">
-              🛡️
+            <div className="size-10 rounded-lg bg-muted flex items-center justify-center">
+              <Shield className="size-5 text-muted-foreground" />
             </div>
             <h3 className="font-semibold">Guardrails</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">

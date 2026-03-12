@@ -1,19 +1,30 @@
 'use client'
 
 import { signOut, useSession } from '@/lib/auth-client'
+import {
+  BarChart3,
+  CreditCard,
+  Key,
+  LayoutDashboard,
+  LogOut,
+  Network,
+  ScrollText,
+  Settings,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { redirect } from 'next/navigation'
 
-const NAV_ITEMS = [
-  { href: '/overview', label: 'Overview', icon: '◉' },
-  { href: '/providers', label: 'Providers', icon: '⚡' },
-  { href: '/keys', label: 'Keys', icon: '🔑' },
-  { href: '/analytics', label: 'Analytics', icon: '📊' },
-  { href: '/requests', label: 'Requests', icon: '↗' },
-  { href: '/budgets', label: 'Budgets', icon: '💰' },
-  { href: '/settings', label: 'Settings', icon: '⚙' },
-] as const
+const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
+  { href: '/overview', label: 'Overview', icon: LayoutDashboard },
+  { href: '/providers', label: 'Providers', icon: Network },
+  { href: '/keys', label: 'Keys', icon: Key },
+  { href: '/analytics', label: 'Analytics', icon: BarChart3 },
+  { href: '/requests', label: 'Requests', icon: ScrollText },
+  { href: '/budgets', label: 'Budgets', icon: CreditCard },
+  { href: '/settings', label: 'Settings', icon: Settings },
+]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: session, isPending } = useSession()
@@ -50,6 +61,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <nav className="flex-1 px-3 py-3 space-y-0.5">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href
+            const Icon = item.icon
             return (
               <Link
                 key={item.href}
@@ -60,7 +72,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                 }`}
               >
-                <span className="text-xs">{item.icon}</span>
+                <Icon className="size-4" />
                 {item.label}
               </Link>
             )
@@ -80,8 +92,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <button
             type="button"
             onClick={handleSignOut}
-            className="mt-1 w-full rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors text-left"
+            className="mt-1 w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors text-left"
           >
+            <LogOut className="size-4" />
             Sign out
           </button>
         </div>
