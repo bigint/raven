@@ -1,14 +1,14 @@
 import type { Database } from '@raven/db'
 import { requestLogs } from '@raven/db'
-import { and, desc, eq, gt } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import type { Context } from 'hono'
 import { streamSSE } from 'hono/streaming'
+import { getEventRedis } from '../../lib/events.js'
 
 export const getRequestsLive = (db: Database) => async (c: Context) => {
   const orgId = c.get('orgId' as never) as string
 
   return streamSSE(c, async (stream) => {
-    let lastId: string | null = null
     let aborted = false
 
     c.req.raw.signal.addEventListener('abort', () => {
@@ -23,48 +23,54 @@ export const getRequestsLive = (db: Database) => async (c: Context) => {
       .orderBy(desc(requestLogs.createdAt))
       .limit(50)
 
-    const firstInitial = initial[0]
-    if (firstInitial) {
-      lastId = firstInitial.id
+    if (initial.length > 0) {
       await stream.writeSSE({
         event: 'init',
         data: JSON.stringify(initial),
       })
     }
 
-    // Poll for new logs every 2 seconds
-    while (!aborted) {
-      await stream.sleep(2000)
-      if (aborted) break
-
-      const conditions = [eq(requestLogs.organizationId, orgId)]
-      if (lastId) {
-        const [lastLog] = await db
-          .select({ createdAt: requestLogs.createdAt })
-          .from(requestLogs)
-          .where(eq(requestLogs.id, lastId))
-          .limit(1)
-
-        if (lastLog) {
-          conditions.push(gt(requestLogs.createdAt, lastLog.createdAt))
-        }
+    // Subscribe to realtime events via Redis pub/sub
+    const redis = getEventRedis()
+    if (!redis) {
+      // Fallback: just keep connection alive without realtime
+      while (!aborted) {
+        await stream.sleep(15000)
       }
-
-      const newRows = await db
-        .select()
-        .from(requestLogs)
-        .where(and(...conditions))
-        .orderBy(desc(requestLogs.createdAt))
-        .limit(50)
-
-      const firstNew = newRows[0]
-      if (firstNew) {
-        lastId = firstNew.id
-        await stream.writeSSE({
-          event: 'new',
-          data: JSON.stringify(newRows),
-        })
-      }
+      return
     }
+
+    const sub = redis.duplicate()
+    const channel = `org:${orgId}:events`
+
+    await sub.subscribe(channel)
+
+    sub.on('message', async (_ch: string, message: string) => {
+      if (aborted) return
+      try {
+        const event = JSON.parse(message)
+        if (event.type === 'request.created') {
+          await stream.writeSSE({
+            event: 'new',
+            data: JSON.stringify([event.data]),
+          })
+        }
+      } catch {
+        // ignore parse errors
+      }
+    })
+
+    // Keep alive with heartbeat
+    while (!aborted) {
+      await stream.sleep(15000)
+      if (aborted) break
+      await stream.writeSSE({
+        event: 'heartbeat',
+        data: '',
+      })
+    }
+
+    await sub.unsubscribe(channel)
+    sub.disconnect()
   })
 }

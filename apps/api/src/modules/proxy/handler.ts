@@ -7,6 +7,7 @@ import type { Context } from 'hono'
 import type { Redis } from 'ioredis'
 import { decrypt } from '../../lib/crypto.js'
 import { RateLimitError, UnauthorizedError } from '../../lib/errors.js'
+import { publishEvent } from '../../lib/events.js'
 import { getProviderAdapter } from './providers/registry.js'
 
 const hashKey = (key: string): string => createHash('sha256').update(key).digest('hex')
@@ -84,25 +85,30 @@ const logRequest = async (
     latencyMs: number
     cacheHit: boolean
   },
-): Promise<void> => {
+): Promise<typeof requestLogs.$inferSelect | null> => {
   try {
-    await db.insert(requestLogs).values({
-      organizationId: data.organizationId,
-      virtualKeyId: data.virtualKeyId,
-      provider: data.provider,
-      model: data.model,
-      method: data.method,
-      path: data.path,
-      statusCode: data.statusCode,
-      inputTokens: data.inputTokens,
-      outputTokens: data.outputTokens,
-      cachedTokens: 0,
-      cost: data.cost.toFixed(6),
-      latencyMs: data.latencyMs,
-      cacheHit: data.cacheHit,
-    })
+    const [row] = await db
+      .insert(requestLogs)
+      .values({
+        organizationId: data.organizationId,
+        virtualKeyId: data.virtualKeyId,
+        provider: data.provider,
+        model: data.model,
+        method: data.method,
+        path: data.path,
+        statusCode: data.statusCode,
+        inputTokens: data.inputTokens,
+        outputTokens: data.outputTokens,
+        cachedTokens: 0,
+        cost: data.cost.toFixed(6),
+        latencyMs: data.latencyMs,
+        cacheHit: data.cacheHit,
+      })
+      .returning()
+    return row ?? null
   } catch (err) {
     console.error('Failed to log request:', err)
+    return null
   }
 }
 
@@ -268,6 +274,8 @@ export const proxyHandler = (
         cost: 0,
         latencyMs,
         cacheHit: false,
+      }).then((row) => {
+        if (row) void publishEvent(vKey.organizationId, 'request.created', row)
       })
 
       // Update lastUsedAt async
@@ -309,6 +317,8 @@ export const proxyHandler = (
       cost,
       latencyMs,
       cacheHit: false,
+    }).then((row) => {
+      if (row) void publishEvent(vKey.organizationId, 'request.created', row)
     })
 
     // Update lastUsedAt async
