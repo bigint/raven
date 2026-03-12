@@ -21,3 +21,4 @@ export {
 } from "./subscriptions";
 export { teamMembers, teamRoleEnum, teams } from "./teams";
 export { platformRoleEnum, users } from "./users";
+export { webhooks } from "./webhooks";

@@ -8,6 +8,7 @@ import { logger } from "hono/logger";
 import { AppError } from "./lib/errors";
 import { initEventBus } from "./lib/events";
 import { getRedis } from "./lib/redis";
+import { initWebhookDispatcher } from "./lib/webhook-dispatcher";
 import { createAuthMiddleware } from "./middleware/auth";
 import { requestId } from "./middleware/request-id";
 import { requestTiming } from "./middleware/request-timing";
@@ -29,11 +30,13 @@ import { createProxyModule } from "./modules/proxy/index";
 import { createSettingsModule } from "./modules/settings/index";
 import { createTeamsModule } from "./modules/teams/index";
 import { createUserModule } from "./modules/user/index";
+import { createWebhooksModule } from "./modules/webhooks/index";
 
 const env = parseEnv();
 export const db = createDatabase(env.DATABASE_URL);
 export const redis = getRedis(env.REDIS_URL);
 initEventBus(redis);
+initWebhookDispatcher(db, redis);
 const auth = createAuth(db, env);
 
 const app = new Hono();
@@ -103,6 +106,7 @@ v1.route("/teams", createTeamsModule(db));
 v1.route("/settings", createSettingsModule(db));
 v1.route("/billing", createBillingModule(db));
 v1.route("/audit-logs", createAuditLogsModule(db));
+v1.route("/webhooks", createWebhooksModule(db));
 v1.route("/events", createEventsModule(redis));
 app.route("/v1", v1);
 
