@@ -10,6 +10,7 @@ import { getRedis } from './lib/redis.js'
 import { createAuthMiddleware } from './middleware/auth.js'
 import { createTenantMiddleware } from './middleware/tenant.js'
 import { createAuthModule } from './modules/auth/index.js'
+import { createKeysModule } from './modules/keys/index.js'
 import { createProvidersModule } from './modules/providers/index.js'
 
 const env = parseEnv()
@@ -55,6 +56,7 @@ const v1 = new Hono()
 v1.use('*', createAuthMiddleware(auth))
 v1.use('*', createTenantMiddleware(db))
 v1.route('/providers', createProvidersModule(db, env))
+v1.route('/keys', createKeysModule(db))
 
 app.route('/v1', v1)
 
