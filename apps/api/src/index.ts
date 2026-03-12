@@ -6,12 +6,14 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { AppError } from './lib/errors.js'
+import { initEventBus } from './lib/events.js'
 import { getRedis } from './lib/redis.js'
 import { createAuthMiddleware } from './middleware/auth.js'
 import { createTenantMiddleware } from './middleware/tenant.js'
 import { createAnalyticsModule } from './modules/analytics/index.js'
 import { createAuditLogsModule } from './modules/audit-logs/index.js'
 import { createAuthModule } from './modules/auth/index.js'
+import { createEventsModule } from './modules/events/index.js'
 import { createBillingModule, createBillingWebhookModule } from './modules/billing/index.js'
 import { createBudgetsModule } from './modules/budgets/index.js'
 import { createGuardrailsModule } from './modules/guardrails/index.js'
@@ -25,6 +27,7 @@ import { createUserModule } from './modules/user/index.js'
 const env = parseEnv()
 export const db = createDatabase(env.DATABASE_URL)
 export const redis = getRedis(env.REDIS_URL)
+initEventBus(redis)
 const auth = createAuth(db, env)
 
 const app = new Hono()
@@ -86,6 +89,7 @@ v1.route('/teams', createTeamsModule(db))
 v1.route('/settings', createSettingsModule(db))
 v1.route('/billing', createBillingModule(db))
 v1.route('/audit-logs', createAuditLogsModule(db))
+v1.route('/events', createEventsModule(redis))
 app.route('/v1', v1)
 
 app.notFound((c) => c.json({ code: 'NOT_FOUND', message: 'Route not found' }, 404))
