@@ -1,6 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
 import type { virtualKeys } from "@raven/db";
-import { z } from "zod";
 
 export const generateKey = (
   environment: "live" | "test"
@@ -25,19 +24,4 @@ export const safeKey = (k: typeof virtualKeys.$inferSelect) => ({
   rateLimitRpd: k.rateLimitRpd,
   rateLimitRpm: k.rateLimitRpm,
   teamId: k.teamId
-});
-
-export const createKeySchema = z.object({
-  environment: z.enum(["live", "test"]).default("live"),
-  expiresAt: z.string().datetime().optional(),
-  name: z.string().min(1).max(100),
-  rateLimitRpd: z.number().int().positive().optional(),
-  rateLimitRpm: z.number().int().positive().optional()
-});
-
-export const updateKeySchema = z.object({
-  isActive: z.boolean().optional(),
-  name: z.string().min(1).max(100).optional(),
-  rateLimitRpd: z.number().int().positive().nullable().optional(),
-  rateLimitRpm: z.number().int().positive().nullable().optional()
 });

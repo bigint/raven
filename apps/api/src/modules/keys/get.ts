@@ -3,6 +3,7 @@ import { virtualKeys } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { NotFoundError } from "@/lib/errors";
+import { success } from "@/lib/response";
 import { safeKey } from "./helpers";
 
 export const getKey = (db: Database) => async (c: Context) => {
@@ -19,5 +20,5 @@ export const getKey = (db: Database) => async (c: Context) => {
     throw new NotFoundError("Virtual key not found");
   }
 
-  return c.json(safeKey(key));
+  return success(c, safeKey(key));
 };

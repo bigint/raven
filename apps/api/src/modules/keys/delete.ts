@@ -4,6 +4,7 @@ import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { NotFoundError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
+import { success } from "@/lib/response";
 
 export const deleteKey = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
@@ -24,5 +25,5 @@ export const deleteKey = (db: Database) => async (c: Context) => {
     .where(and(eq(virtualKeys.id, id), eq(virtualKeys.organizationId, orgId)));
 
   void publishEvent(orgId, "key.deleted", { id });
-  return c.json({ success: true });
+  return success(c, { success: true });
 };

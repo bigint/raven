@@ -3,7 +3,9 @@ import { virtualKeys } from "@raven/db";
 import type { Context } from "hono";
 import { ValidationError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
-import { createKeySchema, generateKey, safeKey } from "./helpers";
+import { created } from "@/lib/response";
+import { generateKey, safeKey } from "./helpers";
+import { createKeySchema } from "./schema";
 
 export const createKey = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
@@ -21,7 +23,7 @@ export const createKey = (db: Database) => async (c: Context) => {
 
   const { key, hash, prefix } = generateKey(environment);
 
-  const [created] = await db
+  const [record] = await db
     .insert(virtualKeys)
     .values({
       environment,
@@ -36,16 +38,10 @@ export const createKey = (db: Database) => async (c: Context) => {
     .returning();
 
   // Return full plaintext key ONLY on creation
-  const record = created as NonNullable<typeof created>;
+  const safe = safeKey(record as NonNullable<typeof record>);
   void publishEvent(orgId, "key.created", {
-    ...safeKey(record),
+    ...safe,
     key: undefined
   });
-  return c.json(
-    {
-      ...safeKey(record),
-      key
-    },
-    201
-  );
+  return created(c, { ...safe, key });
 };
