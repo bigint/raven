@@ -31,6 +31,6 @@
     }
   },
   "files": {
-    "includes": ["**", "!**/dist/**", "!**/node_modules/**", "!**/.next/**", "!**/drizzle/**"]
+    "include": ["**", "!**/dist", "!**/node_modules", "!**/.next", "!**/drizzle"]
   }
 }
