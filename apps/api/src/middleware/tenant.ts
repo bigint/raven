@@ -5,6 +5,12 @@ import { createMiddleware } from "hono/factory";
 
 type TenantContext = {
   Variables: {
+    user: {
+      id: string;
+      email: string;
+      name: string;
+      role: string;
+    };
     orgId: string;
     orgRole: string;
   };
@@ -21,7 +27,7 @@ export const createTenantMiddleware = (db: Database) => {
       );
     }
 
-    const user = c.get("user" as never) as { id: string } | undefined;
+    const user = c.get("user");
 
     if (!user) {
       return c.json(
