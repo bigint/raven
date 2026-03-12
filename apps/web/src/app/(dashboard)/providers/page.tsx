@@ -1,538 +1,95 @@
 "use client";
 
-import {
-  Check,
-  Eye,
-  EyeOff,
-  Loader2,
-  Pencil,
-  Plus,
-  Trash2,
-  X
-} from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { Select } from "@/components/select";
+import { Plus } from "lucide-react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Button, ConfirmDialog, PageHeader } from "@raven/ui";
 import { useEventStream } from "@/hooks/use-event-stream";
-import { api } from "@/lib/api";
+import { ProviderList } from "./components/provider-list";
+import { ProviderForm } from "./components/provider-form";
+import {
+  providersQueryOptions,
+  useDeleteProvider,
+  useUpdateProvider,
+  type Provider
+} from "./hooks/use-providers";
 
-interface Provider {
-  id: string;
-  provider: string;
-  name: string | null;
-  apiKey: string;
-  isEnabled: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+const ProvidersPage = () => {
+  const { data: providers = [], isLoading, error, refetch } = useQuery(
+    providersQueryOptions()
+  );
 
-const PROVIDER_OPTIONS = [
-  { label: "OpenAI", value: "openai" },
-  { label: "Anthropic", value: "anthropic" },
-  { label: "Google", value: "google" },
-  { label: "Azure", value: "azure" },
-  { label: "Cohere", value: "cohere" },
-  { label: "Mistral", value: "mistral" }
-];
-
-const PROVIDER_LABELS: Record<string, string> = {
-  anthropic: "Anthropic",
-  azure: "Azure",
-  cohere: "Cohere",
-  google: "Google",
-  mistral: "Mistral",
-  openai: "OpenAI"
-};
-
-type ModalMode = "add" | "edit" | null;
-
-interface FormState {
-  provider: string;
-  name: string;
-  apiKey: string;
-  isEnabled: boolean;
-}
-
-const DEFAULT_FORM: FormState = {
-  apiKey: "",
-  isEnabled: true,
-  name: "",
-  provider: "openai"
-};
-
-export default function ProvidersPage() {
-  const [providers, setProviders] = useState<Provider[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const [modalMode, setModalMode] = useState<ModalMode>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState<FormState>(DEFAULT_FORM);
-  const [showApiKey, setShowApiKey] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
-
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingProvider, setEditingProvider] = useState<Provider | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState(false);
 
-  const fetchProviders = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await api.get<Provider[]>("/v1/providers");
-      setProviders(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load providers");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchProviders();
-  }, [fetchProviders]);
+  const updateMutation = useUpdateProvider();
+  const deleteMutation = useDeleteProvider();
 
   useEventStream({
-    enabled: !loading,
+    enabled: !isLoading,
     events: ["provider.created", "provider.updated", "provider.deleted"],
-    onEvent: () => fetchProviders()
+    onEvent: () => refetch()
   });
 
-  const openAdd = () => {
-    setForm(DEFAULT_FORM);
-    setShowApiKey(false);
-    setFormError(null);
-    setEditingId(null);
-    setModalMode("add");
-  };
-
-  const openEdit = (provider: Provider) => {
-    setForm({
-      apiKey: "",
-      isEnabled: provider.isEnabled,
-      name: provider.name ?? "",
-      provider: provider.provider
-    });
-    setShowApiKey(false);
-    setFormError(null);
-    setEditingId(provider.id);
-    setModalMode("edit");
-  };
-
-  const closeModal = () => {
-    setModalMode(null);
-    setEditingId(null);
-    setFormError(null);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError(null);
-
-    if (modalMode === "add" && !form.apiKey.trim()) {
-      setFormError("API key is required");
-      return;
-    }
-
-    try {
-      setSubmitting(true);
-
-      if (modalMode === "add") {
-        await api.post<Provider>("/v1/providers", {
-          apiKey: form.apiKey.trim(),
-          isEnabled: form.isEnabled,
-          name: form.name.trim() || undefined,
-          provider: form.provider
-        });
-      } else if (modalMode === "edit" && editingId) {
-        const body: { apiKey?: string; isEnabled?: boolean; name?: string } = {
-          isEnabled: form.isEnabled,
-          name: form.name.trim() || undefined
-        };
-        if (form.apiKey.trim()) {
-          body.apiKey = form.apiKey.trim();
-        }
-        await api.put<Provider>(`/v1/providers/${editingId}`, body);
-      }
-
-      await fetchProviders();
-      closeModal();
-    } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleToggleEnabled = async (provider: Provider) => {
-    try {
-      await api.put<Provider>(`/v1/providers/${provider.id}`, {
-        isEnabled: !provider.isEnabled
-      });
-      setProviders((prev) =>
-        prev.map((p) =>
-          p.id === provider.id ? { ...p, isEnabled: !p.isEnabled } : p
-        )
-      );
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to update provider"
-      );
-    }
+  const handleToggleEnabled = (provider: Provider) => {
+    updateMutation.mutate({ id: provider.id, isEnabled: !provider.isEnabled });
   };
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    try {
-      setDeleting(true);
-      await api.delete(`/v1/providers/${deleteId}`);
-      setProviders((prev) => prev.filter((p) => p.id !== deleteId));
-      setDeleteId(null);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to delete provider"
-      );
-      setDeleteId(null);
-    } finally {
-      setDeleting(false);
-    }
+    await deleteMutation.mutateAsync(deleteId);
+    setDeleteId(null);
   };
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Providers</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Configure your AI provider API keys.
-          </p>
-        </div>
-        <button
-          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-          onClick={openAdd}
-          type="button"
-        >
-          <Plus className="size-4" />
-          Add Provider
-        </button>
-      </div>
+      <PageHeader
+        title="Providers"
+        description="Configure your AI provider API keys."
+        actions={
+          <Button onClick={() => setFormOpen(true)}>
+            <Plus className="size-4" />
+            Add Provider
+          </Button>
+        }
+      />
 
       {error && (
         <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {error}
+          {error.message}
         </div>
       )}
 
-      {loading ? (
-        <div className="rounded-xl border border-border p-12 text-center">
-          <div className="mx-auto size-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
-          <p className="mt-3 text-sm text-muted-foreground">
-            Loading providers...
-          </p>
-        </div>
-      ) : providers.length === 0 ? (
-        <div className="rounded-xl border border-border p-12 text-center">
-          <p className="text-muted-foreground">No providers configured yet.</p>
-          <button
-            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-            onClick={openAdd}
-            type="button"
-          >
-            <Plus className="size-4" />
-            Add your first provider
-          </button>
-        </div>
-      ) : (
-        <div className="rounded-xl border border-border">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Provider
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  API Key
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Status
-                </th>
-                <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {providers.map((provider, idx) => (
-                <tr
-                  className={`transition-colors hover:bg-muted/30 ${idx !== providers.length - 1 ? "border-b border-border" : ""}`}
-                  key={provider.id}
-                >
-                  <td className="px-5 py-4">
-                    <div>
-                      <span className="font-medium">
-                        {PROVIDER_LABELS[provider.provider] ??
-                          provider.provider}
-                      </span>
-                      {provider.name && (
-                        <p className="text-xs text-muted-foreground">
-                          {provider.name}
-                        </p>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-5 py-4 font-mono text-muted-foreground">
-                    {provider.apiKey}
-                  </td>
-                  <td className="px-5 py-4">
-                    <button
-                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
-                        provider.isEnabled
-                          ? "bg-green-500/10 text-green-600 hover:bg-green-500/20"
-                          : "bg-muted text-muted-foreground hover:bg-muted/80"
-                      }`}
-                      onClick={() => handleToggleEnabled(provider)}
-                      type="button"
-                    >
-                      {provider.isEnabled ? (
-                        <>
-                          <Check className="size-3" />
-                          Enabled
-                        </>
-                      ) : (
-                        <>
-                          <X className="size-3" />
-                          Disabled
-                        </>
-                      )}
-                    </button>
-                  </td>
-                  <td className="px-5 py-4">
-                    <div className="flex items-center justify-end gap-1">
-                      <button
-                        className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                        onClick={() => openEdit(provider)}
-                        title="Edit provider"
-                        type="button"
-                      >
-                        <Pencil className="size-4" />
-                      </button>
-                      <button
-                        className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                        onClick={() => setDeleteId(provider.id)}
-                        title="Delete provider"
-                        type="button"
-                      >
-                        <Trash2 className="size-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <ProviderList
+        providers={providers}
+        loading={isLoading}
+        onAdd={() => setFormOpen(true)}
+        onEdit={(p) => setEditingProvider(p)}
+        onDelete={(id) => setDeleteId(id)}
+        onToggleEnabled={handleToggleEnabled}
+      />
 
-      {/* Add / Edit Modal */}
-      {modalMode !== null && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          onClick={closeModal}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") closeModal();
-          }}
-        >
-          <div
-            className="w-full max-w-md rounded-xl border border-border bg-background shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between border-b border-border px-6 py-4">
-              <h2 className="text-base font-semibold">
-                {modalMode === "add" ? "Add Provider" : "Edit Provider"}
-              </h2>
-              <button
-                className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                onClick={closeModal}
-                onKeyDown={(e) => {
-                  if (e.key === "Escape") closeModal();
-                }}
-                type="button"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
+      <ProviderForm
+        open={formOpen || !!editingProvider}
+        onClose={() => {
+          setFormOpen(false);
+          setEditingProvider(null);
+        }}
+        editingProvider={editingProvider}
+      />
 
-            <form className="space-y-4 px-6 py-5" onSubmit={handleSubmit}>
-              {formError && (
-                <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                  {formError}
-                </div>
-              )}
-
-              <div className="space-y-1.5">
-                <label
-                  className="text-sm font-medium"
-                  htmlFor="provider-select"
-                >
-                  Provider
-                </label>
-                <Select
-                  disabled={modalMode === "edit"}
-                  id="provider-select"
-                  onChange={(v) => setForm((f) => ({ ...f, provider: v }))}
-                  options={PROVIDER_OPTIONS}
-                  searchable
-                  value={form.provider}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium" htmlFor="provider-name">
-                  Name{" "}
-                  <span className="text-muted-foreground font-normal">
-                    (optional)
-                  </span>
-                </label>
-                <input
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
-                  id="provider-name"
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, name: e.target.value }))
-                  }
-                  placeholder={`e.g. Production ${PROVIDER_LABELS[form.provider] ?? form.provider}`}
-                  type="text"
-                  value={form.name}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium" htmlFor="api-key-input">
-                  API Key
-                  {modalMode === "edit" && " (leave blank to keep existing)"}
-                </label>
-                <div className="relative">
-                  <input
-                    className="w-full rounded-lg border border-input bg-background px-3 py-2 pr-10 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
-                    id="api-key-input"
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, apiKey: e.target.value }))
-                    }
-                    placeholder={modalMode === "edit" ? "••••••••" : "sk-..."}
-                    type={showApiKey ? "text" : "password"}
-                    value={form.apiKey}
-                  />
-                  <button
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                    onClick={() => setShowApiKey((v) => !v)}
-                    tabIndex={-1}
-                    type="button"
-                  >
-                    {showApiKey ? (
-                      <EyeOff className="size-4" />
-                    ) : (
-                      <Eye className="size-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <button
-                  aria-checked={form.isEnabled}
-                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${
-                    form.isEnabled ? "bg-primary" : "bg-muted"
-                  }`}
-                  onClick={() =>
-                    setForm((f) => ({ ...f, isEnabled: !f.isEnabled }))
-                  }
-                  role="switch"
-                  type="button"
-                >
-                  <span
-                    className={`pointer-events-none inline-block size-4 rounded-full bg-white shadow-sm transition-transform ${
-                      form.isEnabled ? "translate-x-4" : "translate-x-0"
-                    }`}
-                  />
-                </button>
-                <span className="text-sm">Enable this provider</span>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-1">
-                <button
-                  className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent"
-                  onClick={closeModal}
-                  onKeyDown={(e) => {
-                    if (e.key === "Escape") closeModal();
-                  }}
-                  type="button"
-                >
-                  Cancel
-                </button>
-                <button
-                  className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
-                  disabled={submitting}
-                  type="submit"
-                >
-                  {submitting && <Loader2 className="size-3.5 animate-spin" />}
-                  {submitting
-                    ? modalMode === "add"
-                      ? "Validating & adding..."
-                      : "Saving..."
-                    : modalMode === "add"
-                      ? "Add Provider"
-                      : "Save Changes"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {deleteId !== null && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          onClick={() => setDeleteId(null)}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") setDeleteId(null);
-          }}
-        >
-          <div
-            className="w-full max-w-sm rounded-xl border border-border bg-background shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.stopPropagation()}
-          >
-            <div className="px-6 py-5">
-              <h2 className="text-base font-semibold">Delete Provider</h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Are you sure you want to delete this provider? This action
-                cannot be undone.
-              </p>
-            </div>
-            <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
-              <button
-                className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent disabled:opacity-50"
-                disabled={deleting}
-                onClick={() => setDeleteId(null)}
-                onKeyDown={(e) => {
-                  if (e.key === "Escape") setDeleteId(null);
-                }}
-                type="button"
-              >
-                Cancel
-              </button>
-              <button
-                className="rounded-lg bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
-                disabled={deleting}
-                onClick={handleDelete}
-                type="button"
-              >
-                {deleting ? "Deleting..." : "Delete"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={deleteId !== null}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+        title="Delete Provider"
+        description="Are you sure you want to delete this provider? This action cannot be undone."
+        confirmLabel="Delete"
+        loading={deleteMutation.isPending}
+      />
     </div>
   );
-}
+};
+
+export default ProvidersPage;
