@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils'
 import {
   BarChart3,
+  BookOpen,
   Cpu,
   Database,
   Key,
@@ -24,6 +25,7 @@ const navGroups = [
     label: 'Core',
     items: [
       { path: '/', label: 'Overview', icon: LayoutDashboard, shortcut: '⌘1' },
+      { path: '/quickstart', label: 'Quick Start', icon: BookOpen },
       { path: '/requests', label: 'Requests', icon: List, shortcut: '⌘2' },
       { path: '/analytics', label: 'Analytics', icon: BarChart3, shortcut: '⌘3' },
     ],

@@ -12,9 +12,73 @@ import { DropdownItem, DropdownMenu } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { useCreateKey, useDeleteKey, useKeys } from '@/hooks/use-keys'
 import type { VirtualKey } from '@/lib/types'
+import { cn } from '@/lib/utils'
 import { formatDistanceToNow } from 'date-fns'
-import { Copy, MoreVertical, Plus, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { Check, Copy, MoreVertical, Plus, Trash2 } from 'lucide-react'
+import { useCallback, useState } from 'react'
+
+const GATEWAY_URL =
+  import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : '')
+
+type CodeTab = 'curl' | 'python' | 'typescript'
+
+const CopyButton = ({ text }: { readonly text: string }) => {
+  const [copied, setCopied] = useState(false)
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }, [text])
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="absolute top-2 right-2 rounded-md border border-border bg-surface p-1 text-text-muted hover:text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity"
+    >
+      {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
+    </button>
+  )
+}
+
+function getCodeExample(tab: CodeTab, key: string): string {
+  const gatewayUrl = GATEWAY_URL || 'http://localhost:8080'
+  switch (tab) {
+    case 'curl':
+      return `curl ${gatewayUrl}/v1/chat/completions \\
+  -H "Authorization: Bearer ${key}" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'`
+    case 'python':
+      return `from openai import OpenAI
+
+client = OpenAI(
+    api_key="${key}",
+    base_url="${gatewayUrl}/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+print(response.choices[0].message.content)`
+    case 'typescript':
+      return `import OpenAI from 'openai'
+
+const client = new OpenAI({
+  apiKey: '${key}',
+  baseURL: '${gatewayUrl}/v1'
+})
+
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }]
+})
+console.log(response.choices[0].message.content)`
+  }
+}
 
 function relativeTime(dateStr: string | undefined): string {
   if (!dateStr) return 'Never'
@@ -23,6 +87,83 @@ function relativeTime(dateStr: string | undefined): string {
   } catch {
     return '--'
   }
+}
+
+const CreatedKeyDialog = ({
+  keyValue,
+  onClose,
+}: {
+  readonly keyValue: string | null
+  readonly onClose: () => void
+}) => {
+  const [codeTab, setCodeTab] = useState<CodeTab>('curl')
+
+  if (!keyValue) return null
+
+  const tabs: { id: CodeTab; label: string }[] = [
+    { id: 'curl', label: 'cURL' },
+    { id: 'python', label: 'Python' },
+    { id: 'typescript', label: 'TypeScript' },
+  ]
+
+  return (
+    <Dialog open={!!keyValue} onClose={onClose}>
+      <DialogHeader>
+        <DialogTitle>Key Created</DialogTitle>
+        <DialogDescription>
+          This is the only time you'll see this key. Copy it now.
+        </DialogDescription>
+      </DialogHeader>
+
+      <div className="flex items-center gap-2 mt-2">
+        <code className="flex-1 rounded-md border border-border bg-surface px-3 py-2 font-mono text-[11px] text-text-primary break-all">
+          {keyValue}
+        </code>
+        <Button
+          variant="secondary"
+          size="icon"
+          onClick={() => navigator.clipboard.writeText(keyValue)}
+        >
+          <Copy className="size-3.5" />
+        </Button>
+      </div>
+
+      <div className="mt-2">
+        <Badge variant="warning">Store this key securely</Badge>
+      </div>
+
+      <div className="mt-4 pt-4 border-t border-border">
+        <p className="text-[9px] font-medium text-text-muted uppercase tracking-[1px] mb-3">
+          Usage
+        </p>
+        <div className="flex gap-px mb-3 border-b border-border">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setCodeTab(tab.id)}
+              className={cn(
+                'px-3 py-1.5 text-[11px] font-medium border-b-2 -mb-px transition-colors',
+                codeTab === tab.id
+                  ? 'border-accent text-text-primary'
+                  : 'border-transparent text-text-muted hover:text-text-secondary',
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <div className="relative group">
+          <CopyButton text={getCodeExample(codeTab, keyValue)} />
+          <pre className="rounded-md border border-border bg-bg p-3 overflow-x-auto">
+            <code className="text-[11px] leading-relaxed font-mono text-text-secondary">
+              {getCodeExample(codeTab, keyValue)}
+            </code>
+          </pre>
+        </div>
+      </div>
+    </Dialog>
+  )
 }
 
 const KeysPage = () => {
@@ -44,10 +185,6 @@ const KeysPage = () => {
     }
     setNewKeyName('')
     setCreateOpen(false)
-  }
-
-  const handleCopyKey = (key: string) => {
-    navigator.clipboard.writeText(key)
   }
 
   const columns = [
@@ -171,29 +308,7 @@ const KeysPage = () => {
         </DialogFooter>
       </Dialog>
 
-      <Dialog open={!!createdKey} onClose={() => setCreatedKey(null)}>
-        <DialogHeader>
-          <DialogTitle>Key Created</DialogTitle>
-          <DialogDescription>
-            This is the only time you'll see this key. Copy it now.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex items-center gap-2 mt-2">
-          <code className="flex-1 rounded-md border border-border bg-surface px-3 py-2 font-mono text-[11px] text-text-primary break-all">
-            {createdKey}
-          </code>
-          <Button
-            variant="secondary"
-            size="icon"
-            onClick={() => createdKey && handleCopyKey(createdKey)}
-          >
-            <Copy className="size-3.5" />
-          </Button>
-        </div>
-        <div className="mt-3">
-          <Badge variant="warning">Store this key securely</Badge>
-        </div>
-      </Dialog>
+      <CreatedKeyDialog keyValue={createdKey} onClose={() => setCreatedKey(null)} />
     </div>
   )
 }

@@ -311,7 +311,7 @@ const ConfigureProviderDialog = ({
           {isSaving ? (
             <>
               <Loader2 className="size-3.5 animate-spin" />
-              Saving...
+              Validating...
             </>
           ) : (
             'Save'

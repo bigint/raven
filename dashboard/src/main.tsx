@@ -13,6 +13,7 @@ import ModelsPage from '@/pages/models'
 import OverviewPage from '@/pages/overview'
 import PluginsPage from '@/pages/plugins'
 import ProvidersPage from '@/pages/providers'
+import QuickStartPage from '@/pages/quickstart'
 import RequestsPage from '@/pages/requests'
 import SettingsPage from '@/pages/settings'
 import TeamsPage from '@/pages/teams'
@@ -37,6 +38,7 @@ createRoot(root).render(
         <Shell>
           <Routes>
             <Route path="/" element={<OverviewPage />} />
+            <Route path="/quickstart" element={<QuickStartPage />} />
             <Route path="/requests" element={<RequestsPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/providers" element={<ProvidersPage />} />

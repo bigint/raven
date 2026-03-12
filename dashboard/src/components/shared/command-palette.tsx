@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils'
 import {
   BarChart3,
+  BookOpen,
   Cpu,
   Database,
   Key,
@@ -41,6 +42,13 @@ const pageItems: PaletteItem[] = [
     icon: <LayoutDashboard className="size-3.5" />,
     path: '/',
     shortcut: '⌘1',
+  },
+  {
+    id: 'quickstart',
+    label: 'Quick Start',
+    category: 'Pages',
+    icon: <BookOpen className="size-3.5" />,
+    path: '/quickstart',
   },
   {
     id: 'requests',

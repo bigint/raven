@@ -10,9 +10,11 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCacheStats, useCost, useLatency, useUsage } from '@/hooks/use-analytics'
 import { useProviders } from '@/hooks/use-providers'
+import { Button } from '@/components/ui/button'
 import { formatCurrency, formatLatency, formatNumber, formatPercent } from '@/lib/utils'
-import { Server } from 'lucide-react'
+import { BookOpen, Server } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 const OverviewPage = () => {
   const [range, setRange] = useState('24h')
@@ -81,8 +83,16 @@ const OverviewPage = () => {
             ) : (
               <EmptyState
                 title="No requests yet"
-                description="Send your first request to see model usage"
+                description="Send your first request to see model usage."
                 icon={<Server className="size-5" />}
+                action={
+                  <Link to="/quickstart">
+                    <Button variant="secondary" size="sm">
+                      <BookOpen className="size-3.5" />
+                      View Quick Start
+                    </Button>
+                  </Link>
+                }
               />
             )}
           </CardContent>
@@ -125,8 +135,16 @@ const OverviewPage = () => {
             ) : (
               <EmptyState
                 title="No providers configured"
-                description="Go to Providers to add your API keys"
+                description="Configure a provider and create a virtual key to get started."
                 icon={<Server className="size-5" />}
+                action={
+                  <Link to="/quickstart">
+                    <Button variant="secondary" size="sm">
+                      <BookOpen className="size-3.5" />
+                      Quick Start Guide
+                    </Button>
+                  </Link>
+                }
               />
             )}
           </CardContent>
