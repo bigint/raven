@@ -99,6 +99,11 @@ export const inviteUser = (db: Database) => async (c: Context) => {
 
 export const listInvitations = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
+  const orgRole = c.get("orgRole" as never) as string;
+
+  if (orgRole !== "owner" && orgRole !== "admin") {
+    throw new ForbiddenError("Only owners and admins can view invitations");
+  }
 
   const rows = await db
     .select()

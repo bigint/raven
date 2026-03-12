@@ -85,7 +85,7 @@ app.route("/api/auth", createAuthModule(auth));
 app.route("/v1/proxy", createProxyModule(db, redis, env));
 
 // Billing webhooks (no auth)
-app.route("/webhooks/billing", createBillingWebhookModule(db));
+app.route("/webhooks/billing", createBillingWebhookModule(db, env));
 
 // User-level routes (session auth, no tenant)
 const userRoutes = new Hono();
