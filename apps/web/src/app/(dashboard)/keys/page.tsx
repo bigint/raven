@@ -366,8 +366,8 @@ export default function KeysPage() {
 
       {/* Create / Edit Modal */}
       {modalMode !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl border border-border bg-background shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={closeModal}>
+          <div className="w-full max-w-md rounded-xl border border-border bg-background shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-border px-6 py-4">
               <h2 className="text-base font-semibold">
                 {modalMode === 'create' ? 'Create Key' : 'Edit Key'}
@@ -502,8 +502,8 @@ export default function KeysPage() {
 
       {/* New Key Reveal Dialog */}
       {newKeyValue !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl border border-border bg-background shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setNewKeyValue(null)}>
+          <div className="w-full max-w-md rounded-xl border border-border bg-background shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-border px-6 py-4">
               <h2 className="text-base font-semibold">Key Created</h2>
               <button
@@ -558,8 +558,8 @@ export default function KeysPage() {
 
       {/* Delete Confirmation Modal */}
       {deleteId !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-sm rounded-xl border border-border bg-background shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setDeleteId(null)}>
+          <div className="w-full max-w-sm rounded-xl border border-border bg-background shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="px-6 py-5">
               <h2 className="text-base font-semibold">Delete Key</h2>
               <p className="mt-2 text-sm text-muted-foreground">
