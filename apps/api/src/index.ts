@@ -6,10 +6,13 @@ import { parseEnv } from '@raven/config'
 import { createDatabase } from '@raven/db'
 import { getRedis } from './lib/redis.js'
 import { AppError } from './lib/errors.js'
+import { createAuth } from '@raven/auth'
+import { createAuthModule } from './modules/auth/index.js'
 
 const env = parseEnv()
 export const db = createDatabase(env.DATABASE_URL)
 export const redis = getRedis(env.REDIS_URL)
+const auth = createAuth(db, env)
 
 const app = new Hono()
 
@@ -18,7 +21,7 @@ app.use('*', logger())
 app.use(
   '*',
   cors({
-    origin: env.APP_URL,
+    origin: [env.APP_URL],
     credentials: true,
   }),
 )
@@ -42,10 +45,13 @@ app.onError((err, c) => {
 // Health check
 app.get('/health', (c) => c.json({ status: 'ok' }))
 
+app.route('/auth', createAuthModule(auth))
+
 app.notFound((c) => c.json({ code: 'NOT_FOUND', message: 'Route not found' }, 404))
 
 serve({ fetch: app.fetch, port: env.API_PORT }, (info) => {
   console.log(`Raven API running on http://localhost:${info.port}`)
 })
 
+export { auth }
 export default app
