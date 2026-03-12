@@ -118,7 +118,7 @@ export const createAnalyticsModule = (db: Database) => {
 
     const where = and(...filterConditions)
 
-    const [rows, [{ total }]] = await Promise.all([
+    const [rows, countResult] = await Promise.all([
       db
         .select()
         .from(requestLogs)
@@ -128,6 +128,8 @@ export const createAnalyticsModule = (db: Database) => {
         .offset(offset),
       db.select({ total: count() }).from(requestLogs).where(where),
     ])
+
+    const total = countResult[0]?.total ?? 0
 
     return c.json({
       data: rows,

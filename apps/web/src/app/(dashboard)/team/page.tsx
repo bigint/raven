@@ -31,7 +31,7 @@ interface Team {
 const ROLE_OPTIONS = [
   { value: 'member', label: 'Member' },
   { value: 'admin', label: 'Admin' },
-  { value: 'owner', label: 'Owner' },
+  { value: 'viewer', label: 'Viewer' },
 ]
 
 const ROLE_BADGE: Record<string, string> = {

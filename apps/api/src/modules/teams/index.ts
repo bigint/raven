@@ -1,6 +1,6 @@
 import type { Database } from '@raven/db'
 import { invitations, members, teamMembers, teams, users } from '@raven/db'
-import { and, eq } from 'drizzle-orm'
+import { and, count, eq } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '../../lib/errors.js'
@@ -244,11 +244,21 @@ export const createTeamsModule = (db: Database) => {
     return c.json(updated)
   })
 
-  // GET /teams — List teams in org
+  // GET /teams — List teams in org with member counts
   app.get('/teams', async (c) => {
     const orgId = c.get('orgId' as never) as string
 
-    const rows = await db.select().from(teams).where(eq(teams.organizationId, orgId))
+    const rows = await db
+      .select({
+        id: teams.id,
+        name: teams.name,
+        createdAt: teams.createdAt,
+        memberCount: count(teamMembers.id),
+      })
+      .from(teams)
+      .leftJoin(teamMembers, eq(teams.id, teamMembers.teamId))
+      .where(eq(teams.organizationId, orgId))
+      .groupBy(teams.id, teams.name, teams.createdAt)
 
     return c.json(rows)
   })

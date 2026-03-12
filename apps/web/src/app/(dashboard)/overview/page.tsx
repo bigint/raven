@@ -9,8 +9,6 @@ interface OverviewStats {
   totalCost: number
   activeKeys?: number
   providers?: number
-  avgLatency?: number
-  cacheHitRate?: number
 }
 
 export default function OverviewPage() {

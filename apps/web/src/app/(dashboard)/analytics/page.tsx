@@ -86,14 +86,14 @@ export default function AnalyticsPage() {
     },
     {
       label: 'Avg Latency',
-      value: stats ? `${Math.round(stats.avgLatency)}ms` : '—',
+      value: stats ? `${Math.round(Number(stats.avgLatency))}ms` : '—',
       icon: Clock,
       color: 'text-orange-500',
       bg: 'bg-orange-500/10',
     },
     {
       label: 'Cache Hit Rate',
-      value: stats ? `${(stats.cacheHitRate * 100).toFixed(1)}%` : '—',
+      value: stats ? `${(Number(stats.cacheHitRate) * 100).toFixed(1)}%` : '—',
       icon: Zap,
       color: 'text-purple-500',
       bg: 'bg-purple-500/10',
@@ -203,9 +203,9 @@ export default function AnalyticsPage() {
                     <td className="px-5 py-4 font-mono text-sm text-muted-foreground">
                       {row.model}
                     </td>
-                    <td className="px-5 py-4 text-right">{row.requests.toLocaleString()}</td>
-                    <td className="px-5 py-4 text-right">${row.cost.toFixed(4)}</td>
-                    <td className="px-5 py-4 text-right">{row.tokens.toLocaleString()}</td>
+                    <td className="px-5 py-4 text-right">{Number(row.requests).toLocaleString()}</td>
+                    <td className="px-5 py-4 text-right">${Number(row.cost).toFixed(4)}</td>
+                    <td className="px-5 py-4 text-right">{Number(row.tokens).toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>

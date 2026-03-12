@@ -104,8 +104,8 @@ export const createProvidersModule = (db: Database, env: Env) => {
 
     return c.json(
       {
-        ...created,
-        apiKey: maskApiKey(created.apiKey),
+        ...created!,
+        apiKey: maskApiKey(created!.apiKey),
       },
       201,
     )
@@ -155,8 +155,8 @@ export const createProvidersModule = (db: Database, env: Env) => {
       .returning()
 
     return c.json({
-      ...updated,
-      apiKey: maskApiKey(updated.apiKey),
+      ...updated!,
+      apiKey: maskApiKey(updated!.apiKey),
     })
   })
 

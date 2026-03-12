@@ -16,22 +16,19 @@ interface Budget {
 }
 
 const ENTITY_TYPE_OPTIONS = [
-  { value: 'org', label: 'Organization' },
+  { value: 'organization', label: 'Organization' },
   { value: 'team', label: 'Team' },
-  { value: 'user', label: 'User' },
   { value: 'key', label: 'API Key' },
 ]
 
 const PERIOD_OPTIONS = [
   { value: 'daily', label: 'Daily' },
-  { value: 'weekly', label: 'Weekly' },
   { value: 'monthly', label: 'Monthly' },
 ]
 
 const ENTITY_TYPE_LABELS: Record<string, string> = {
-  org: 'Organization',
+  organization: 'Organization',
   team: 'Team',
-  user: 'User',
   key: 'API Key',
 }
 
@@ -97,7 +94,7 @@ export default function BudgetsPage() {
       entityId: budget.entityId,
       limitAmount: String(budget.limitAmount),
       period: budget.period,
-      alertThreshold: String(budget.alertThreshold),
+      alertThreshold: String(Math.round(Number(budget.alertThreshold) * 100)),
     })
     setFormError(null)
     setEditingId(budget.id)
@@ -135,7 +132,7 @@ export default function BudgetsPage() {
         entityId: form.entityId.trim(),
         limitAmount: Number(form.limitAmount),
         period: form.period,
-        alertThreshold: alertVal,
+        alertThreshold: alertVal / 100,
       }
 
       if (modalMode === 'add') {
@@ -247,18 +244,18 @@ export default function BudgetsPage() {
                     </span>
                   </td>
                   <td className="px-5 py-4 font-mono text-muted-foreground">{budget.entityId}</td>
-                  <td className="px-5 py-4 font-medium">${budget.limitAmount.toFixed(2)}</td>
+                  <td className="px-5 py-4 font-medium">${Number(budget.limitAmount).toFixed(2)}</td>
                   <td className="px-5 py-4 capitalize text-muted-foreground">{budget.period}</td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-2">
                       <div className="h-1.5 w-20 rounded-full bg-muted">
                         <div
                           className="h-1.5 rounded-full bg-primary"
-                          style={{ width: `${budget.alertThreshold}%` }}
+                          style={{ width: `${Number(budget.alertThreshold) * 100}%` }}
                         />
                       </div>
                       <span className="text-sm text-muted-foreground">
-                        {budget.alertThreshold}%
+                        {Math.round(Number(budget.alertThreshold) * 100)}%
                       </span>
                     </div>
                   </td>

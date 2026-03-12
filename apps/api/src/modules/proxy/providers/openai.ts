@@ -17,7 +17,7 @@ export const openaiAdapter: ProviderAdapter = {
   },
 
   estimateCost(model, inputTokens, outputTokens) {
-    const pricing = PRICING[model] ?? PRICING['gpt-4o']
+    const pricing = PRICING[model] ?? { input: 2.5, output: 10 }
     const inputCost = (inputTokens / 1_000_000) * pricing.input
     const outputCost = (outputTokens / 1_000_000) * pricing.output
     return inputCost + outputCost

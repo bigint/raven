@@ -155,8 +155,12 @@ export default function SettingsPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setShowDeleteConfirm(false)}
-                className="rounded-lg bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground transition-opacity hover:opacity-90"
+                onClick={() => {
+                  // TODO: implement org deletion API call
+                  setShowDeleteConfirm(false)
+                }}
+                disabled
+                className="rounded-lg bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
               >
                 Delete Organization
               </button>

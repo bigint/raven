@@ -302,10 +302,10 @@ export default function KeysPage() {
                     {key.rateLimitRpm !== null || key.rateLimitRpd !== null ? (
                       <div className="flex flex-col gap-0.5 text-xs">
                         {key.rateLimitRpm !== null && (
-                          <span>{key.rateLimitRpm.toLocaleString()} / min</span>
+                          <span>{Number(key.rateLimitRpm).toLocaleString()} / min</span>
                         )}
                         {key.rateLimitRpd !== null && (
-                          <span>{key.rateLimitRpd.toLocaleString()} / day</span>
+                          <span>{Number(key.rateLimitRpd).toLocaleString()} / day</span>
                         )}
                       </div>
                     ) : (

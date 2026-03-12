@@ -109,7 +109,7 @@ export const createKeysModule = (db: Database) => {
     // Return full plaintext key ONLY on creation
     return c.json(
       {
-        ...safeKey(created),
+        ...safeKey(created!),
         key,
       },
       201,
@@ -165,7 +165,7 @@ export const createKeysModule = (db: Database) => {
       .where(and(eq(virtualKeys.id, id), eq(virtualKeys.organizationId, orgId)))
       .returning()
 
-    return c.json(safeKey(updated))
+    return c.json(safeKey(updated!))
   })
 
   // DELETE /:id — Delete a key

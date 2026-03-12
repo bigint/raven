@@ -169,11 +169,9 @@ export default function PricingPage() {
                       <span className="text-4xl font-bold">Custom</span>
                     </div>
                   )}
-                  {yearly && plan.monthlyPrice !== null && plan.monthlyPrice > 0 && (
+                  {yearly && plan.yearlyPrice !== null && plan.yearlyPrice > 0 && (
                     <p className="text-xs text-muted-foreground mt-1">
-                      Billed annually ($
-                      {(yearly ? (plan.yearlyPrice ?? plan.monthlyPrice) : plan.monthlyPrice) * 12}
-                      /yr)
+                      Billed annually (${plan.yearlyPrice * 12}/yr)
                     </p>
                   )}
                 </div>

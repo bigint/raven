@@ -41,15 +41,17 @@ export const createUserModule = (db: Database) => {
       return c.json({ code: 'VALIDATION_ERROR', message: 'Organization name is required' }, 400)
     }
 
-    const slug = body.slug?.trim() || `org-${Date.now()}`
+    const slug = body.slug?.trim() || `org-${createId()}`
     const orgId = createId()
 
-    await db.insert(organizations).values({ id: orgId, name, slug })
-    await db.insert(members).values({
-      id: createId(),
-      organizationId: orgId,
-      userId: user.id,
-      role: 'owner',
+    await db.transaction(async (tx) => {
+      await tx.insert(organizations).values({ id: orgId, name, slug })
+      await tx.insert(members).values({
+        id: createId(),
+        organizationId: orgId,
+        userId: user.id,
+        role: 'owner',
+      })
     })
 
     return c.json({ id: orgId, name, slug, role: 'owner' }, 201)

@@ -17,7 +17,7 @@ export const anthropicAdapter: ProviderAdapter = {
   },
 
   estimateCost(model, inputTokens, outputTokens) {
-    const pricing = PRICING[model] ?? PRICING['claude-sonnet-4-20250514']
+    const pricing = PRICING[model] ?? { input: 3, output: 15 }
     const inputCost = (inputTokens / 1_000_000) * pricing.input
     const outputCost = (outputTokens / 1_000_000) * pricing.output
     return inputCost + outputCost

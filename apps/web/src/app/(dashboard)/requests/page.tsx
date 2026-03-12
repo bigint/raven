@@ -89,7 +89,9 @@ function getStatusBadge(statusCode: number) {
 }
 
 function formatTime(ts: string) {
+  if (!ts) return '—'
   const d = new Date(ts)
+  if (Number.isNaN(d.getTime())) return '—'
   return d.toLocaleString(undefined, {
     month: 'short',
     day: 'numeric',
@@ -274,7 +276,7 @@ export default function RequestsPage() {
                     </td>
                     <td className="px-5 py-4">{getStatusBadge(req.statusCode)}</td>
                     <td className="px-5 py-4 text-right">{req.latencyMs}ms</td>
-                    <td className="px-5 py-4 text-right">${req.costUsd.toFixed(6)}</td>
+                    <td className="px-5 py-4 text-right">${Number(req.costUsd).toFixed(6)}</td>
                     <td className="px-5 py-4 text-center">
                       {req.cacheHit ? (
                         <span className="inline-flex items-center rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600">

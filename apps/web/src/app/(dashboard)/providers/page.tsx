@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 interface Provider {
   id: string
   provider: string
-  apiKeyMasked: string
+  apiKey: string
   isEnabled: boolean
   createdAt: string
   updatedAt: string
@@ -144,8 +144,8 @@ export default function ProvidersPage() {
       setProviders((prev) =>
         prev.map((p) => (p.id === provider.id ? { ...p, isEnabled: !p.isEnabled } : p)),
       )
-    } catch {
-      // Silently revert — state wasn't changed
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update provider')
     }
   }
 
@@ -233,7 +233,7 @@ export default function ProvidersPage() {
                     {PROVIDER_LABELS[provider.provider] ?? provider.provider}
                   </td>
                   <td className="px-5 py-4 font-mono text-muted-foreground">
-                    {provider.apiKeyMasked}
+                    {provider.apiKey}
                   </td>
                   <td className="px-5 py-4">
                     <button

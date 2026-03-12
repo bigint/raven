@@ -106,8 +106,8 @@ const logRequest = async (
   }
 }
 
-export const proxyHandler = (db: Database, redis: Redis, env: Env) => {
-  return async (c: Context) => {
+export const proxyHandler = (db: Database, redis: Redis, env: Env): ((c: Context) => Promise<Response>) => {
+  return async (c: Context): Promise<Response> => {
     const startTime = Date.now()
 
     // 1. Extract virtual key from Authorization header
@@ -116,7 +116,7 @@ export const proxyHandler = (db: Database, redis: Redis, env: Env) => {
     if (!match) {
       throw new UnauthorizedError('Missing or invalid Authorization header')
     }
-    const rawKey = match[1]
+    const rawKey = match[1]!
     const keyHash = hashKey(rawKey)
 
     // 2. Look up virtual key by SHA-256 hash
@@ -177,7 +177,17 @@ export const proxyHandler = (db: Database, redis: Redis, env: Env) => {
 
     // 6. Decrypt API key and get adapter
     const adapter = getProviderAdapter(providerName)
-    const decryptedApiKey = decrypt(providerConfig.apiKey, env.ENCRYPTION_SECRET)
+    const decryptedApiKey = (() => {
+      try {
+        return decrypt(providerConfig.apiKey, env.ENCRYPTION_SECRET)
+      } catch {
+        return null
+      }
+    })()
+
+    if (!decryptedApiKey) {
+      return c.json({ code: 'INTERNAL_ERROR', message: 'Failed to decrypt provider credentials' }, 500)
+    }
 
     // 7. Build upstream URL
     // Strip /v1/proxy/{provider} prefix, keep the rest
@@ -250,7 +260,7 @@ export const proxyHandler = (db: Database, redis: Redis, env: Env) => {
       })
 
       // Update lastUsedAt async
-      void db.update(virtualKeys).set({ lastUsedAt: new Date() }).where(eq(virtualKeys.id, vKey.id))
+      db.update(virtualKeys).set({ lastUsedAt: new Date() }).where(eq(virtualKeys.id, vKey.id)).catch((err) => console.error('Failed to update lastUsedAt:', err))
 
       return new Response(upstreamResponse.body, {
         status: upstreamResponse.status,
@@ -288,7 +298,7 @@ export const proxyHandler = (db: Database, redis: Redis, env: Env) => {
     })
 
     // Update lastUsedAt async
-    void db.update(virtualKeys).set({ lastUsedAt: new Date() }).where(eq(virtualKeys.id, vKey.id))
+    db.update(virtualKeys).set({ lastUsedAt: new Date() }).where(eq(virtualKeys.id, vKey.id)).catch((err) => console.error('Failed to update lastUsedAt:', err))
 
     const responseHeaders: Record<string, string> = {}
     upstreamResponse.headers.forEach((value, key) => {
