@@ -175,7 +175,7 @@ const ProviderForm = ({
               /chat/completions
             </code>
             <p className="text-xs text-muted-foreground">
-              Without the config ID, requests use the first available key:
+              Without the config ID, a random key for the provider is used:
             </p>
             <code className="block rounded-md bg-background px-3 py-2 text-xs">
               /v1/proxy/{editingProvider.provider}/chat/completions

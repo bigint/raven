@@ -303,7 +303,7 @@ export default function OnboardingPage() {
               </div>
               <div>
                 <label
-                  className="mb-1.5 block text-sm font-medium"
+                  className="mb-1 block text-sm font-medium"
                   htmlFor="provider-select"
                 >
                   Provider
@@ -325,7 +325,7 @@ export default function OnboardingPage() {
               />
               <div>
                 <label
-                  className="mb-1.5 block text-sm font-medium"
+                  className="mb-1 block text-sm font-medium"
                   htmlFor="provider-key"
                 >
                   API Key
