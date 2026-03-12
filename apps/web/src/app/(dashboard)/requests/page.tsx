@@ -1,5 +1,6 @@
 'use client'
 
+import { Select } from '@/components/select'
 import { api } from '@/lib/api'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -158,35 +159,25 @@ export default function RequestsPage() {
 
       {/* Filters */}
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <select
+        <Select
           value={provider}
-          onChange={(e) => {
-            setProvider(e.target.value)
+          onChange={(v) => {
+            setProvider(v)
             handleFilterChange()
           }}
-          className="rounded-lg border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
-        >
-          {PROVIDER_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+          options={PROVIDER_OPTIONS}
+          className="w-44"
+        />
 
-        <select
+        <Select
           value={statusFilter}
-          onChange={(e) => {
-            setStatusFilter(e.target.value)
+          onChange={(v) => {
+            setStatusFilter(v)
             handleFilterChange()
           }}
-          className="rounded-lg border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
-        >
-          {STATUS_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+          options={STATUS_OPTIONS}
+          className="w-40"
+        />
 
         <div className="flex items-center gap-1 rounded-lg border border-border p-1">
           {DATE_RANGE_OPTIONS.map((opt) => (

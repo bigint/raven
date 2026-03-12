@@ -1,5 +1,6 @@
 'use client'
 
+import { Select } from '@/components/select'
 import { api } from '@/lib/api'
 import { Pencil, Plus, Trash2, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -314,18 +315,12 @@ export default function BudgetsPage() {
                 <label htmlFor="entity-type" className="text-sm font-medium">
                   Entity Type
                 </label>
-                <select
+                <Select
                   id="entity-type"
                   value={form.entityType}
-                  onChange={(e) => setForm((f) => ({ ...f, entityType: e.target.value }))}
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
-                >
-                  {ENTITY_TYPE_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(v) => setForm((f) => ({ ...f, entityType: v }))}
+                  options={ENTITY_TYPE_OPTIONS}
+                />
               </div>
 
               <div className="space-y-1.5">
@@ -363,18 +358,12 @@ export default function BudgetsPage() {
                   <label htmlFor="period" className="text-sm font-medium">
                     Period
                   </label>
-                  <select
+                  <Select
                     id="period"
                     value={form.period}
-                    onChange={(e) => setForm((f) => ({ ...f, period: e.target.value }))}
-                    className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
-                  >
-                    {PERIOD_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(v) => setForm((f) => ({ ...f, period: v }))}
+                    options={PERIOD_OPTIONS}
+                  />
                 </div>
               </div>
 

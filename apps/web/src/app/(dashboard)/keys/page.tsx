@@ -1,5 +1,6 @@
 'use client'
 
+import { Select } from '@/components/select'
 import { api } from '@/lib/api'
 import { AlertTriangle, Check, Copy, Key, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -406,17 +407,17 @@ export default function KeysPage() {
                   <label htmlFor="key-environment" className="text-sm font-medium">
                     Environment
                   </label>
-                  <select
+                  <Select
                     id="key-environment"
                     value={form.environment}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, environment: e.target.value as 'live' | 'test' }))
+                    onChange={(v) =>
+                      setForm((f) => ({ ...f, environment: v as 'live' | 'test' }))
                     }
-                    className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
-                  >
-                    <option value="live">Live</option>
-                    <option value="test">Test</option>
-                  </select>
+                    options={[
+                      { value: 'live', label: 'Live' },
+                      { value: 'test', label: 'Test' },
+                    ]}
+                  />
                 </div>
               )}
 

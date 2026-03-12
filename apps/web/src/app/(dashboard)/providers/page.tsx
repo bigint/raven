@@ -1,5 +1,6 @@
 'use client'
 
+import { Select } from '@/components/select'
 import { api } from '@/lib/api'
 import { Check, Eye, EyeOff, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -313,19 +314,13 @@ export default function ProvidersPage() {
                 <label htmlFor="provider-select" className="text-sm font-medium">
                   Provider
                 </label>
-                <select
+                <Select
                   id="provider-select"
                   value={form.provider}
-                  onChange={(e) => setForm((f) => ({ ...f, provider: e.target.value }))}
+                  onChange={(v) => setForm((f) => ({ ...f, provider: v }))}
                   disabled={modalMode === 'edit'}
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {PROVIDER_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
+                  options={PROVIDER_OPTIONS}
+                />
               </div>
 
               <div className="space-y-1.5">

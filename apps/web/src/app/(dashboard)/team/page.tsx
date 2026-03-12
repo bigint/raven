@@ -1,5 +1,6 @@
 'use client'
 
+import { Select } from '@/components/select'
 import { api } from '@/lib/api'
 import { Mail, Pencil, Plus, Trash2, Users, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -523,18 +524,12 @@ export default function TeamPage() {
                 <label htmlFor="invite-role" className="text-sm font-medium">
                   Role
                 </label>
-                <select
+                <Select
                   id="invite-role"
                   value={inviteRole}
-                  onChange={(e) => setInviteRole(e.target.value)}
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
-                >
-                  {ROLE_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
+                  onChange={setInviteRole}
+                  options={ROLE_OPTIONS}
+                />
               </div>
               <div className="flex justify-end gap-2 pt-1">
                 <button
