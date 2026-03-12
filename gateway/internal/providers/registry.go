@@ -6,8 +6,10 @@ import (
 	"embed"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/bigint-studio/raven/pkg/types"
 	"gopkg.in/yaml.v3"
@@ -239,6 +241,45 @@ func (r *Registry) LoadCredentialsFromStore(st CredentialStore) error {
 			BaseURL: cfg.BaseURL,
 		}
 		slog.Debug("loaded provider credentials", "provider", cfg.Name)
+	}
+
+	return nil
+}
+
+// TestAPIKey validates an API key by making a lightweight request to the provider's models endpoint.
+func (r *Registry) TestAPIKey(name, apiKey, baseURL string) error {
+	adapter, ok := r.GetAdapter(name)
+	if !ok {
+		return fmt.Errorf("unknown provider: %s", name)
+	}
+
+	targetURL := baseURL
+	if targetURL == "" {
+		targetURL = adapter.BaseURL()
+	}
+
+	req, err := http.NewRequest(http.MethodGet, targetURL+"/models", nil)
+	if err != nil {
+		return fmt.Errorf("creating request: %w", err)
+	}
+
+	for k, v := range adapter.AuthHeaders(apiKey) {
+		req.Header.Set(k, v)
+	}
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("connecting to provider: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden {
+		return fmt.Errorf("invalid API key")
+	}
+
+	if resp.StatusCode >= 500 {
+		return fmt.Errorf("provider returned status %d", resp.StatusCode)
 	}
 
 	return nil

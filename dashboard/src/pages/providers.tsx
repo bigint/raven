@@ -169,7 +169,16 @@ const ConfigureProviderDialog = ({
       }
       handleClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save configuration')
+      if (err instanceof Error) {
+        try {
+          const parsed = JSON.parse(err.message)
+          setError(parsed?.error?.message ?? err.message)
+        } catch {
+          setError(err.message)
+        }
+      } else {
+        setError('Failed to save configuration')
+      }
     }
   }, [state, apiKey, baseUrl, enabled, createConfig, updateConfig, handleClose])
 

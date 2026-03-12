@@ -495,6 +495,12 @@ func (a *Router) createProviderConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Test the API key before saving.
+	if err := a.registry.TestAPIKey(req.Name, req.APIKey, req.BaseURL); err != nil {
+		types.NewAPIError(http.StatusUnprocessableEntity, "invalid_api_key", "API key validation failed: "+err.Error(), "api_key_invalid").WriteJSON(w)
+		return
+	}
+
 	enabled := true
 	if req.Enabled != nil {
 		enabled = *req.Enabled
@@ -587,8 +593,9 @@ func (a *Router) updateProviderConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if v, ok := req["api_key"].(string); ok && v != "" {
-		existing.APIKey = v
+	newAPIKey, hasNewKey := req["api_key"].(string)
+	if hasNewKey && newAPIKey != "" {
+		existing.APIKey = newAPIKey
 	}
 	if v, ok := req["base_url"].(string); ok {
 		existing.BaseURL = v
@@ -601,6 +608,14 @@ func (a *Router) updateProviderConfig(w http.ResponseWriter, r *http.Request) {
 	}
 	if v, ok := req["enabled"].(bool); ok {
 		existing.Enabled = v
+	}
+
+	// Test the new API key if one was provided.
+	if hasNewKey && newAPIKey != "" {
+		if err := a.registry.TestAPIKey(existing.Name, existing.APIKey, existing.BaseURL); err != nil {
+			types.NewAPIError(http.StatusUnprocessableEntity, "invalid_api_key", "API key validation failed: "+err.Error(), "api_key_invalid").WriteJSON(w)
+			return
+		}
 	}
 
 	if err := a.store.UpdateProviderConfig(r.Context(), existing); err != nil {
