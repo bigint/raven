@@ -14,7 +14,7 @@ import { formatCurrency, formatNumber } from '@/lib/utils'
 import { DollarSign } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
-export default function AnalyticsPage() {
+const AnalyticsPage = () => {
   const [range, setRange] = useState('7d')
   const [tab, setTab] = useState('cost')
   const analyticsOpts = useMemo(() => {
@@ -96,7 +96,7 @@ export default function AnalyticsPage() {
                 <EmptyState
                   title="No cost data yet"
                   description="Cost data will appear once requests are processed"
-                  icon={<DollarSign className="h-5 w-5" />}
+                  icon={<DollarSign className="size-5" />}
                 />
               )}
             </CardContent>
@@ -119,7 +119,7 @@ export default function AnalyticsPage() {
                 <EmptyState
                   title="No team cost data yet"
                   description="Create teams and route requests to see cost breakdowns"
-                  icon={<DollarSign className="h-5 w-5" />}
+                  icon={<DollarSign className="size-5" />}
                 />
               )}
             </CardContent>
@@ -142,7 +142,7 @@ export default function AnalyticsPage() {
                 <EmptyState
                   title="No model cost data yet"
                   description="Send requests through the gateway to see model-level costs"
-                  icon={<DollarSign className="h-5 w-5" />}
+                  icon={<DollarSign className="size-5" />}
                 />
               )}
             </CardContent>
@@ -152,3 +152,5 @@ export default function AnalyticsPage() {
     </div>
   )
 }
+
+export default AnalyticsPage

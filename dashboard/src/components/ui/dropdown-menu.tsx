@@ -2,13 +2,13 @@ import { cn } from '@/lib/utils'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 
 interface DropdownMenuProps {
-  trigger: ReactNode
-  children: ReactNode
-  align?: 'left' | 'right'
-  className?: string
+  readonly trigger: ReactNode
+  readonly children: ReactNode
+  readonly align?: 'left' | 'right'
+  readonly className?: string
 }
 
-export function DropdownMenu({ trigger, children, align = 'right', className }: DropdownMenuProps) {
+export const DropdownMenu = ({ trigger, children, align = 'right', className }: DropdownMenuProps) => {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -40,14 +40,14 @@ export function DropdownMenu({ trigger, children, align = 'right', className }: 
 }
 
 interface DropdownItemProps {
-  children: ReactNode
-  onClick?: () => void
-  disabled?: boolean
-  danger?: boolean
-  className?: string
+  readonly children: ReactNode
+  readonly onClick?: () => void
+  readonly disabled?: boolean
+  readonly danger?: boolean
+  readonly className?: string
 }
 
-export function DropdownItem({ children, onClick, disabled, danger, className }: DropdownItemProps) {
+export const DropdownItem = ({ children, onClick, disabled, danger, className }: DropdownItemProps) => {
   return (
     <button
       type="button"
@@ -67,6 +67,6 @@ export function DropdownItem({ children, onClick, disabled, danger, className }:
   )
 }
 
-export function DropdownSeparator() {
+export const DropdownSeparator = () => {
   return <div className="my-1 h-px bg-border" />
 }

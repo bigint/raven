@@ -17,7 +17,7 @@ import { format } from 'date-fns'
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
 
-export default function TeamsPage() {
+const TeamsPage = () => {
   const [tab, setTab] = useState('orgs')
   const [createOrgOpen, setCreateOrgOpen] = useState(false)
   const [orgName, setOrgName] = useState('')
@@ -124,7 +124,7 @@ export default function TeamsPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-[13px] font-semibold text-text-primary">Teams</h1>
         <Button variant="primary" onClick={() => setCreateOrgOpen(true)}>
-          <Plus className="h-3.5 w-3.5" />
+          <Plus className="size-3.5" />
           Create Org
         </Button>
       </div>
@@ -195,3 +195,5 @@ export default function TeamsPage() {
     </div>
   )
 }
+
+export default TeamsPage

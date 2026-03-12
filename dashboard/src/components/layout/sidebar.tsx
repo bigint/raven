@@ -1,9 +1,6 @@
-import { Tooltip } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import {
   BarChart3,
-  ChevronLeft,
-  ChevronRight,
   Cpu,
   Database,
   Key,
@@ -53,13 +50,11 @@ const navGroups = [
 ]
 
 interface SidebarProps {
-  collapsed: boolean
-  onToggle: () => void
-  onOpenPalette: () => void
-  gatewayStatus: 'connected' | 'disconnected'
+  readonly onOpenPalette: () => void
+  readonly gatewayStatus: 'connected' | 'disconnected'
 }
 
-export function Sidebar({ collapsed, onToggle, onOpenPalette, gatewayStatus }: SidebarProps) {
+export const Sidebar = ({ onOpenPalette, gatewayStatus }: SidebarProps) => {
   const location = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -75,89 +70,39 @@ export function Sidebar({ collapsed, onToggle, onOpenPalette, gatewayStatus }: S
   const sidebarContent = (
     <>
       {/* Logo area */}
-      <div className={cn(
-        'flex h-12 items-center border-b border-border shrink-0',
-        collapsed ? 'justify-center px-0' : 'justify-between px-4',
-      )}>
-        <div className={cn('flex items-center', collapsed ? '' : 'gap-2')}>
-          <div className="h-[22px] w-[22px] rounded-md bg-accent flex items-center justify-center shrink-0">
+      <div className="flex h-12 items-center justify-between px-4 border-b border-border shrink-0">
+        <div className="flex items-center gap-2">
+          <div className="size-[22px] rounded-md bg-accent flex items-center justify-center shrink-0">
             <span className="text-accent-text font-bold text-[10px]">R</span>
           </div>
-          {!collapsed && (
-            <span className="font-semibold text-text-primary text-[13px] tracking-[-0.3px]">Raven</span>
-          )}
+          <span className="font-semibold text-text-primary text-[13px] tracking-[-0.3px]">Raven</span>
         </div>
-        {!collapsed && (
-          <button
-            type="button"
-            onClick={onToggle}
-            className="h-5 w-5 rounded-[4px] flex items-center justify-center bg-surface-hover text-text-tertiary hover:text-text-secondary"
-          >
-            <ChevronLeft className="h-3 w-3" />
-          </button>
-        )}
       </div>
 
       {/* Command palette trigger */}
-      {collapsed ? (
-        <div className="flex justify-center py-3 shrink-0">
-          <button
-            type="button"
-            onClick={onOpenPalette}
-            className="h-8 w-8 rounded-md flex items-center justify-center text-text-tertiary hover:text-text-secondary hover:bg-surface-hover"
-          >
-            <Search className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      ) : (
-        <div className="px-2.5 py-3 shrink-0">
-          <button
-            type="button"
-            onClick={onOpenPalette}
-            className="w-full flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-[11px] text-text-muted hover:border-border-hover"
-          >
-            <Search className="h-3 w-3" />
-            <span>Search...</span>
-            <span className="ml-auto text-[9px] font-mono">⌘K</span>
-          </button>
-        </div>
-      )}
+      <div className="px-2.5 py-3 shrink-0">
+        <button
+          type="button"
+          onClick={onOpenPalette}
+          className="w-full flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-[11px] text-text-muted hover:border-border-hover"
+        >
+          <Search className="size-3" />
+          <span>Search...</span>
+          <span className="ml-auto text-[9px] font-mono">⌘K</span>
+        </button>
+      </div>
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-2 pb-2">
         {navGroups.map((group) => (
           <div key={group.label} className="mb-4 last:mb-0">
-            {!collapsed && (
-              <p className="px-2.5 mb-1.5 text-[9px] font-medium text-text-muted uppercase tracking-[1px]">
-                {group.label}
-              </p>
-            )}
-            {collapsed && <div className="mb-1" />}
+            <p className="px-2.5 mb-1.5 text-[9px] font-medium text-text-muted uppercase tracking-[1px]">
+              {group.label}
+            </p>
             <ul className="space-y-px">
               {group.items.map((item) => {
                 const isActive = item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path)
                 const Icon = item.icon
-
-                if (collapsed) {
-                  return (
-                    <li key={item.path}>
-                      <Tooltip content={`${item.label}${'shortcut' in item ? ` (${item.shortcut})` : ''}`} side="right">
-                        <Link
-                          to={item.path}
-                          onClick={() => setMobileOpen(false)}
-                          className={cn(
-                            'flex items-center justify-center h-8 w-8 mx-auto rounded-[5px]',
-                            isActive
-                              ? 'bg-surface-active text-text-primary'
-                              : 'text-text-tertiary hover:text-text-secondary hover:bg-surface-hover',
-                          )}
-                        >
-                          <Icon className="h-[15px] w-[15px]" />
-                        </Link>
-                      </Tooltip>
-                    </li>
-                  )
-                }
 
                 return (
                   <li key={item.path}>
@@ -171,7 +116,7 @@ export function Sidebar({ collapsed, onToggle, onOpenPalette, gatewayStatus }: S
                           : 'text-text-tertiary hover:text-text-secondary hover:bg-surface-hover',
                       )}
                     >
-                      <Icon className={cn('h-[15px] w-[15px] shrink-0', isActive ? 'text-text-primary' : 'text-text-tertiary')} />
+                      <Icon className={cn('size-[15px] shrink-0', isActive ? 'text-text-primary' : 'text-text-tertiary')} />
                       <span className="flex-1">{item.label}</span>
                       {'shortcut' in item && (
                         <span className="text-[9px] font-mono text-text-muted bg-surface-hover px-1 py-0.5 rounded-[3px]">
@@ -188,45 +133,22 @@ export function Sidebar({ collapsed, onToggle, onOpenPalette, gatewayStatus }: S
       </nav>
 
       {/* Footer */}
-      <div className={cn(
-        'border-t border-border shrink-0',
-        collapsed ? 'py-3 flex flex-col items-center gap-2' : 'px-4 py-3',
-      )}>
-        {collapsed ? (
-          <>
-            <div
-              className={cn(
-                'h-[5px] w-[5px] rounded-full',
-                gatewayStatus === 'connected' ? 'bg-success' : 'bg-error',
-              )}
-            />
-            <button
-              type="button"
-              onClick={onToggle}
-              className="h-6 w-6 rounded-[4px] flex items-center justify-center text-text-muted hover:text-text-secondary hover:bg-surface-hover"
-            >
-              <ChevronRight className="h-3 w-3" />
-            </button>
-          </>
-        ) : (
-          <>
-            <div className="flex items-center gap-1.5 mb-2">
-              <div
-                className={cn(
-                  'h-[5px] w-[5px] rounded-full',
-                  gatewayStatus === 'connected' ? 'bg-success' : 'bg-error',
-                )}
-              />
-              <span className="text-[10px] text-text-tertiary">
-                {gatewayStatus === 'connected' ? 'Connected' : 'Disconnected'}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] text-text-muted uppercase tracking-wider">Raven</p>
-              <span className="text-[10px] font-mono text-text-muted bg-surface-hover px-1.5 py-0.5 rounded-[3px]">v0.1.0</span>
-            </div>
-          </>
-        )}
+      <div className="border-t border-border shrink-0 px-4 py-3">
+        <div className="flex items-center gap-1.5 mb-2">
+          <div
+            className={cn(
+              'size-[5px] rounded-full',
+              gatewayStatus === 'connected' ? 'bg-success' : 'bg-error',
+            )}
+          />
+          <span className="text-[10px] text-text-tertiary">
+            {gatewayStatus === 'connected' ? 'Connected' : 'Disconnected'}
+          </span>
+        </div>
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] text-text-muted uppercase tracking-wider">Raven</p>
+          <span className="text-[10px] font-mono text-text-muted bg-surface-hover px-1.5 py-0.5 rounded-[3px]">v0.1.0</span>
+        </div>
       </div>
     </>
   )
@@ -239,7 +161,7 @@ export function Sidebar({ collapsed, onToggle, onOpenPalette, gatewayStatus }: S
         className="fixed top-3 left-3 z-50 h-7 w-7 rounded-md flex items-center justify-center text-text-secondary hover:bg-surface-hover lg:hidden"
         onClick={() => setMobileOpen(!mobileOpen)}
       >
-        {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+        {mobileOpen ? <X className="size-4" /> : <Menu className="size-4" />}
       </button>
 
       {/* Mobile backdrop */}
@@ -251,13 +173,7 @@ export function Sidebar({ collapsed, onToggle, onOpenPalette, gatewayStatus }: S
       )}
 
       {/* Sidebar */}
-      <aside
-        className={cn(
-          'fixed top-0 left-0 z-40 h-screen border-r border-border bg-bg flex flex-col',
-          collapsed ? 'w-[52px]' : 'w-[220px]',
-          'max-lg:hidden lg:flex',
-        )}
-      >
+      <aside className="fixed top-0 left-0 z-40 h-screen w-[220px] border-r border-border bg-bg flex flex-col max-lg:hidden lg:flex">
         {sidebarContent}
       </aside>
 

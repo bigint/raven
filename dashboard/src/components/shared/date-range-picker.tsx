@@ -4,14 +4,14 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 
 interface DateRangePickerProps {
-  value: string
-  onChange: (value: string) => void
-  className?: string
+  readonly value: string
+  readonly onChange: (value: string) => void
+  readonly className?: string
 }
 
 const presets = ['1h', '24h', '7d', '30d']
 
-export function DateRangePicker({ value, onChange, className }: DateRangePickerProps) {
+export const DateRangePicker = ({ value, onChange, className }: DateRangePickerProps) => {
   const [showCustom, setShowCustom] = useState(false)
   const [customStart, setCustomStart] = useState('')
   const [customEnd, setCustomEnd] = useState('')
@@ -23,7 +23,7 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
 
   return (
     <div className={cn('flex items-center gap-2', className)}>
-      <Calendar className="h-3.5 w-3.5 text-text-muted" />
+      <Calendar className="size-3.5 text-text-muted" />
       <div className="inline-flex rounded-md border border-border bg-surface p-0.5">
         {presets.map((preset) => (
           <button
@@ -80,7 +80,7 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
   )
 }
 
-export function getDateRange(range: string): { start: string; end: string } {
+export const getDateRange = (range: string): { start: string; end: string } => {
   if (range.includes('|')) {
     const [start = '', end = ''] = range.split('|')
     return { start, end }
@@ -99,7 +99,7 @@ export function getDateRange(range: string): { start: string; end: string } {
 
 export type Granularity = 'minute' | 'hour' | 'day' | 'week' | 'month'
 
-export function getGranularity(range: string): Granularity {
+export const getGranularity = (range: string): Granularity => {
   if (range.includes('|')) return 'hour'
   const map: Record<string, Granularity> = {
     '1h': 'minute',

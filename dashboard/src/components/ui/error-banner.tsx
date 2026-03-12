@@ -3,12 +3,12 @@ import { AlertCircle, X } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 interface ErrorBannerProps {
-  children: ReactNode
-  onDismiss?: () => void
-  className?: string
+  readonly children: ReactNode
+  readonly onDismiss?: () => void
+  readonly className?: string
 }
 
-export function ErrorBanner({ children, onDismiss, className }: ErrorBannerProps) {
+export const ErrorBanner = ({ children, onDismiss, className }: ErrorBannerProps) => {
   return (
     <div
       className={cn(
@@ -16,11 +16,11 @@ export function ErrorBanner({ children, onDismiss, className }: ErrorBannerProps
         className,
       )}
     >
-      <AlertCircle className="h-3.5 w-3.5 shrink-0 text-error" />
+      <AlertCircle className="size-3.5 shrink-0 text-error" />
       <span className="flex-1 text-xs text-error">{children}</span>
       {onDismiss && (
         <button type="button" onClick={onDismiss} className="text-text-muted hover:text-text-secondary">
-          <X className="h-3 w-3" />
+          <X className="size-3" />
         </button>
       )}
     </div>

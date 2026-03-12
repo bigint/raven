@@ -19,12 +19,14 @@ export function formatCurrency(n: number): string {
   }).format(n)
 }
 
-export function formatLatency(ms: number): string {
+export function formatLatency(ms: number | undefined | null): string {
+  if (ms == null) return '--'
   if (ms >= 1_000) return `${(ms / 1_000).toFixed(2)}s`
   return `${ms.toFixed(0)}ms`
 }
 
-export function formatPercent(n: number): string {
+export function formatPercent(n: number | undefined | null): string {
+  if (n == null) return '--'
   return `${(n * 100).toFixed(1)}%`
 }
 

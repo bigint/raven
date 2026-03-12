@@ -2,10 +2,10 @@ import { cn } from '@/lib/utils'
 import type { HTMLAttributes, ReactNode } from 'react'
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
-  children: ReactNode
+  readonly children: ReactNode
 }
 
-export function Card({ className, children, ...props }: CardProps) {
+export const Card = ({ className, children, ...props }: CardProps) => {
   return (
     <div
       className={cn('rounded-lg border border-border bg-surface p-4', className)}
@@ -16,7 +16,7 @@ export function Card({ className, children, ...props }: CardProps) {
   )
 }
 
-export function CardHeader({ className, children, ...props }: CardProps) {
+export const CardHeader = ({ className, children, ...props }: CardProps) => {
   return (
     <div className={cn('mb-3 flex items-center justify-between', className)} {...props}>
       {children}
@@ -24,7 +24,7 @@ export function CardHeader({ className, children, ...props }: CardProps) {
   )
 }
 
-export function CardTitle({ className, children, ...props }: CardProps) {
+export const CardTitle = ({ className, children, ...props }: CardProps) => {
   return (
     <h3
       className={cn('text-[9px] font-medium text-text-muted uppercase tracking-[1px]', className)}
@@ -35,7 +35,7 @@ export function CardTitle({ className, children, ...props }: CardProps) {
   )
 }
 
-export function CardContent({ className, children, ...props }: CardProps) {
+export const CardContent = ({ className, children, ...props }: CardProps) => {
   return (
     <div className={cn('', className)} {...props}>
       {children}

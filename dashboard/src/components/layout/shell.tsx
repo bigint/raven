@@ -1,38 +1,17 @@
 import { CommandPalette } from '@/components/shared/command-palette'
-import { cn } from '@/lib/utils'
-import { type ReactNode, useCallback, useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Sidebar } from './sidebar'
 
 interface ShellProps {
-  children: ReactNode
+  readonly children: ReactNode
 }
 
-const COLLAPSED_KEY = 'raven-sidebar-collapsed'
-
-export function Shell({ children }: ShellProps) {
-  const [collapsed, setCollapsed] = useState(() => {
-    try {
-      return localStorage.getItem(COLLAPSED_KEY) === 'true'
-    } catch {
-      return false
-    }
-  })
+export const Shell = ({ children }: ShellProps) => {
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [gatewayStatus, setGatewayStatus] = useState<'connected' | 'disconnected'>('disconnected')
   const navigate = useNavigate()
 
-  const toggleSidebar = useCallback(() => {
-    setCollapsed((prev) => {
-      const next = !prev
-      try {
-        localStorage.setItem(COLLAPSED_KEY, String(next))
-      } catch {}
-      return next
-    })
-  }, [])
-
-  // Gateway health check
   useEffect(() => {
     const check = async () => {
       try {
@@ -47,7 +26,6 @@ export function Shell({ children }: ShellProps) {
     return () => clearInterval(interval)
   }, [])
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const mod = e.metaKey || e.ctrlKey
@@ -73,12 +51,10 @@ export function Shell({ children }: ShellProps) {
   return (
     <div className="min-h-screen bg-bg">
       <Sidebar
-        collapsed={collapsed}
-        onToggle={toggleSidebar}
         onOpenPalette={() => setPaletteOpen(true)}
         gatewayStatus={gatewayStatus}
       />
-      <div className={cn('max-lg:ml-0', collapsed ? 'lg:ml-[52px]' : 'lg:ml-[220px]')}>
+      <div className="max-lg:ml-0 lg:ml-[220px]">
         <main className="p-5">{children}</main>
       </div>
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />

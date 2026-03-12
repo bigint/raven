@@ -3,18 +3,18 @@ import { Inbox } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 interface EmptyStateProps {
-  title: string
-  description?: string
-  icon?: ReactNode
-  action?: ReactNode
-  className?: string
+  readonly title: string
+  readonly description?: string
+  readonly icon?: ReactNode
+  readonly action?: ReactNode
+  readonly className?: string
 }
 
-export function EmptyState({ title, description, icon, action, className }: EmptyStateProps) {
+export const EmptyState = ({ title, description, icon, action, className }: EmptyStateProps) => {
   return (
     <div className={cn('flex flex-col items-center justify-center py-8', className)}>
       <div className="text-text-muted">
-        {icon ?? <Inbox className="h-5 w-5" />}
+        {icon ?? <Inbox className="size-5" />}
       </div>
       <p className="mt-2 text-[13px] font-semibold text-text-secondary">{title}</p>
       {description && (

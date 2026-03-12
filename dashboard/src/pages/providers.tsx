@@ -32,18 +32,18 @@ import {
 import { useCallback, useMemo, useState } from 'react'
 
 interface ConfigDialogState {
-  open: boolean
-  provider: Provider | null
-  isEditing: boolean
+  readonly open: boolean
+  readonly provider: Provider | null
+  readonly isEditing: boolean
 }
 
-function ProviderCard({
+const ProviderCard = ({
   provider,
   onConfigure,
 }: {
-  provider: Provider
-  onConfigure: (provider: Provider, isEditing: boolean) => void
-}) {
+  readonly provider: Provider
+  readonly onConfigure: (provider: Provider, isEditing: boolean) => void
+}) => {
   const { data: health } = useProviderHealth(provider.name)
   const isConfigured = provider.configured || provider.enabled
   const status = provider.healthy ? 'healthy' : provider.configured ? 'degraded' : 'down'
@@ -55,7 +55,7 @@ function ProviderCard({
           <div>
             <div className="flex items-center gap-2">
               <span
-                className={`h-2 w-2 rounded-full ${
+                className={`size-2 rounded-full ${
                   status === 'healthy'
                     ? 'bg-success'
                     : status === 'degraded'
@@ -107,13 +107,13 @@ function ProviderCard({
   )
 }
 
-function ConfigureProviderDialog({
+const ConfigureProviderDialog = ({
   state,
   onClose,
 }: {
-  state: ConfigDialogState
-  onClose: () => void
-}) {
+  readonly state: ConfigDialogState
+  readonly onClose: () => void
+}) => {
   const [apiKey, setApiKey] = useState('')
   const [baseUrl, setBaseUrl] = useState('')
   const [enabled, setEnabled] = useState(true)
@@ -221,7 +221,7 @@ function ConfigureProviderDialog({
               onClick={() => setShowKey((prev) => !prev)}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary"
             >
-              {showKey ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+              {showKey ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
             </button>
           </div>
         </div>
@@ -256,7 +256,7 @@ function ConfigureProviderDialog({
             onClick={() => setShowDeleteConfirm(true)}
             disabled={isDeleting}
           >
-            <Trash2 className="h-3.5 w-3.5" />
+            <Trash2 className="size-3.5" />
             Remove Configuration
           </Button>
         </div>
@@ -275,7 +275,7 @@ function ConfigureProviderDialog({
               <Button variant="danger" size="sm" onClick={handleDelete} disabled={isDeleting}>
                 {isDeleting ? (
                   <>
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <Loader2 className="size-3.5 animate-spin" />
                     Removing...
                   </>
                 ) : (
@@ -302,7 +302,7 @@ function ConfigureProviderDialog({
         <Button variant="primary" onClick={handleSave} disabled={isSaving}>
           {isSaving ? (
             <>
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <Loader2 className="size-3.5 animate-spin" />
               Saving...
             </>
           ) : (
@@ -314,7 +314,7 @@ function ConfigureProviderDialog({
   )
 }
 
-export default function ProvidersPage() {
+const ProvidersPage = () => {
   const { data: providers, isLoading } = useProviders()
   const [dialogState, setDialogState] = useState<ConfigDialogState>({
     open: false,
@@ -342,7 +342,7 @@ export default function ProvidersPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-[13px] font-semibold text-text-primary">Providers</h1>
         <div className="flex items-center gap-2 text-[11px] text-text-tertiary">
-          <Activity className="h-3 w-3" />
+          <Activity className="size-3" />
           Auto-refreshes every 30s
         </div>
       </div>
@@ -363,7 +363,7 @@ export default function ProvidersPage() {
         <EmptyState
           title="No providers available"
           description="No AI providers are registered in the gateway."
-          icon={<Wifi className="h-5 w-5" />}
+          icon={<Wifi className="size-5" />}
         />
       )}
 
@@ -371,3 +371,5 @@ export default function ProvidersPage() {
     </div>
   )
 }
+
+export default ProvidersPage

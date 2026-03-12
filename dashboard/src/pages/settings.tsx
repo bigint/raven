@@ -8,7 +8,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Monitor, Moon, Sun } from 'lucide-react'
 import type { ReactNode } from 'react'
 
-function SettingRow({ label, value }: { label: string; value: ReactNode }) {
+const SettingRow = ({ label, value }: { readonly label: string; readonly value: ReactNode }) => {
   return (
     <div className="flex items-center justify-between py-2">
       <span className="text-xs text-text-secondary">{label}</span>
@@ -23,7 +23,7 @@ const themeOptions = [
   { value: 'system' as const, label: 'System', icon: Monitor },
 ]
 
-export default function SettingsPage() {
+const SettingsPage = () => {
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings'],
     queryFn: () => apiClient.getSettings(),
@@ -70,7 +70,7 @@ export default function SettingsPage() {
                         : 'text-text-tertiary hover:text-text-secondary',
                     )}
                   >
-                    <Icon className="h-3 w-3" />
+                    <Icon className="size-3" />
                     {opt.label}
                   </button>
                 )
@@ -142,3 +142,5 @@ export default function SettingsPage() {
     </div>
   )
 }
+
+export default SettingsPage

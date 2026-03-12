@@ -17,7 +17,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
 
-export default function BudgetsPage() {
+const BudgetsPage = () => {
   const [createOpen, setCreateOpen] = useState(false)
   const [entityType, setEntityType] = useState('')
   const [entityId, setEntityId] = useState('')
@@ -124,7 +124,7 @@ export default function BudgetsPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-[13px] font-semibold text-text-primary">Budgets</h1>
         <Button variant="primary" onClick={() => setCreateOpen(true)}>
-          <Plus className="h-3.5 w-3.5" />
+          <Plus className="size-3.5" />
           Create Budget
         </Button>
       </div>
@@ -203,3 +203,5 @@ export default function BudgetsPage() {
     </div>
   )
 }
+
+export default BudgetsPage

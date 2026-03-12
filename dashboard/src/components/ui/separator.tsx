@@ -1,11 +1,11 @@
 import { cn } from '@/lib/utils'
 
 interface SeparatorProps {
-  orientation?: 'horizontal' | 'vertical'
-  className?: string
+  readonly orientation?: 'horizontal' | 'vertical'
+  readonly className?: string
 }
 
-export function Separator({ orientation = 'horizontal', className }: SeparatorProps) {
+export const Separator = ({ orientation = 'horizontal', className }: SeparatorProps) => {
   return (
     <div
       className={cn(

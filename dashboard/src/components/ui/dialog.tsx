@@ -3,13 +3,13 @@ import { X } from 'lucide-react'
 import { type ReactNode, useEffect } from 'react'
 
 interface DialogProps {
-  open: boolean
-  onClose: () => void
-  children: ReactNode
-  className?: string
+  readonly open: boolean
+  readonly onClose: () => void
+  readonly children: ReactNode
+  readonly className?: string
 }
 
-export function Dialog({ open, onClose, children, className }: DialogProps) {
+export const Dialog = ({ open, onClose, children, className }: DialogProps) => {
   useEffect(() => {
     if (!open) return
     const handler = (e: KeyboardEvent) => {
@@ -39,7 +39,7 @@ export function Dialog({ open, onClose, children, className }: DialogProps) {
           onClick={onClose}
           className="absolute right-4 top-4 text-text-muted hover:text-text-secondary"
         >
-          <X className="h-3.5 w-3.5" />
+          <X className="size-3.5" />
         </button>
         {children}
       </div>
@@ -47,23 +47,23 @@ export function Dialog({ open, onClose, children, className }: DialogProps) {
   )
 }
 
-export function DialogHeader({ className, children }: { className?: string; children: ReactNode }) {
+export const DialogHeader = ({ className, children }: { readonly className?: string; readonly children: ReactNode }) => {
   return <div className={cn('mb-4', className)}>{children}</div>
 }
 
-export function DialogTitle({ className, children }: { className?: string; children: ReactNode }) {
+export const DialogTitle = ({ className, children }: { readonly className?: string; readonly children: ReactNode }) => {
   return (
     <h2 className={cn('text-[13px] font-semibold text-text-primary', className)}>{children}</h2>
   )
 }
 
-export function DialogDescription({ className, children }: { className?: string; children: ReactNode }) {
+export const DialogDescription = ({ className, children }: { readonly className?: string; readonly children: ReactNode }) => {
   return (
     <p className={cn('mt-1 text-xs text-text-tertiary', className)}>{children}</p>
   )
 }
 
-export function DialogClose({ onClick, children }: { onClick: () => void; children: ReactNode }) {
+export const DialogClose = ({ onClick, children }: { readonly onClick: () => void; readonly children: ReactNode }) => {
   return (
     <button type="button" onClick={onClick} className="text-text-secondary hover:text-text-primary">
       {children}
@@ -71,7 +71,7 @@ export function DialogClose({ onClick, children }: { onClick: () => void; childr
   )
 }
 
-export function DialogFooter({ className, children }: { className?: string; children: ReactNode }) {
+export const DialogFooter = ({ className, children }: { readonly className?: string; readonly children: ReactNode }) => {
   return (
     <div
       className={cn('mt-4 flex justify-end gap-2 border-t border-border pt-3', className)}

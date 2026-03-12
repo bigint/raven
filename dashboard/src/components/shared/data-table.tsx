@@ -5,36 +5,36 @@ import { cn } from '@/lib/utils'
 import type { ReactNode } from 'react'
 
 interface Column<T> {
-  key: string
-  header: string
-  sortable?: boolean
-  render?: (row: T) => ReactNode
-  className?: string
+  readonly key: string
+  readonly header: string
+  readonly sortable?: boolean
+  readonly render?: (row: T) => ReactNode
+  readonly className?: string
 }
 
 interface DataTableProps<T> {
-  columns: Column<T>[]
-  data: T[]
-  total?: number
-  page?: number
-  perPage?: number
-  onPageChange?: (page: number) => void
-  onSearch?: (query: string) => void
-  onSort?: (key: string) => void
-  sortBy?: string
-  sortOrder?: 'asc' | 'desc'
-  isLoading?: boolean
-  searchPlaceholder?: string
-  emptyTitle?: string
-  emptyDescription?: string
-  actions?: ReactNode
-  onRowClick?: (row: T) => void
-  getRowKey: (row: T) => string
-  expandedRow?: string | null
-  renderExpandedRow?: (row: T) => ReactNode
+  readonly columns: Column<T>[]
+  readonly data: T[]
+  readonly total?: number
+  readonly page?: number
+  readonly perPage?: number
+  readonly onPageChange?: (page: number) => void
+  readonly onSearch?: (query: string) => void
+  readonly onSort?: (key: string) => void
+  readonly sortBy?: string
+  readonly sortOrder?: 'asc' | 'desc'
+  readonly isLoading?: boolean
+  readonly searchPlaceholder?: string
+  readonly emptyTitle?: string
+  readonly emptyDescription?: string
+  readonly actions?: ReactNode
+  readonly onRowClick?: (row: T) => void
+  readonly getRowKey: (row: T) => string
+  readonly expandedRow?: string | null
+  readonly renderExpandedRow?: (row: T) => ReactNode
 }
 
-export function DataTable<T>({
+export const DataTable = <T,>({
   columns,
   data,
   total,
@@ -53,7 +53,7 @@ export function DataTable<T>({
   getRowKey,
   expandedRow,
   renderExpandedRow,
-}: DataTableProps<T>) {
+}: DataTableProps<T>) => {
   const totalItems = total ?? data.length
   const totalPages = Math.ceil(totalItems / perPage)
   const start = (page - 1) * perPage + 1
@@ -114,7 +114,7 @@ export function DataTable<T>({
                     >
                       {columns.map((col) => (
                         <TableCell key={col.key} className={col.className}>
-                          {col.render ? col.render(row) : (row as any)[col.key]}
+                          {col.render ? col.render(row) : String((row as Record<string, unknown>)[col.key] ?? '')}
                         </TableCell>
                       ))}
                     </TableRow>
@@ -141,7 +141,7 @@ export function DataTable<T>({
                   type="button"
                   disabled={page <= 1}
                   onClick={() => onPageChange(page - 1)}
-                  className="h-6 w-6 rounded-[5px] text-[11px] text-text-secondary hover:bg-surface-hover disabled:opacity-40"
+                  className="size-6 rounded-[5px] text-[11px] text-text-secondary hover:bg-surface-hover disabled:opacity-40"
                 >
                   ‹
                 </button>
@@ -151,7 +151,7 @@ export function DataTable<T>({
                     type="button"
                     onClick={() => onPageChange(p)}
                     className={cn(
-                      'h-6 w-6 rounded-[5px] text-[11px]',
+                      'size-6 rounded-[5px] text-[11px]',
                       p === page ? 'bg-surface-active text-text-primary' : 'text-text-tertiary hover:bg-surface-hover',
                     )}
                   >
@@ -162,7 +162,7 @@ export function DataTable<T>({
                   type="button"
                   disabled={page >= totalPages}
                   onClick={() => onPageChange(page + 1)}
-                  className="h-6 w-6 rounded-[5px] text-[11px] text-text-secondary hover:bg-surface-hover disabled:opacity-40"
+                  className="size-6 rounded-[5px] text-[11px] text-text-secondary hover:bg-surface-hover disabled:opacity-40"
                 >
                   ›
                 </button>

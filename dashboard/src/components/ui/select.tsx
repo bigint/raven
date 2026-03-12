@@ -3,9 +3,9 @@ import { ChevronDown } from 'lucide-react'
 import { forwardRef, type SelectHTMLAttributes } from 'react'
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
-  label?: string
-  options: { value: string; label: string }[]
-  placeholder?: string
+  readonly label?: string
+  readonly options: { value: string; label: string }[]
+  readonly placeholder?: string
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
@@ -36,7 +36,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
               </option>
             ))}
           </select>
-          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-text-muted" />
+          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-3 -translate-y-1/2 text-text-muted" />
         </div>
       </div>
     )

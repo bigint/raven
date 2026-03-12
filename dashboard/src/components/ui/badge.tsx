@@ -2,8 +2,8 @@ import { cn } from '@/lib/utils'
 import type { HTMLAttributes, ReactNode } from 'react'
 
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
-  variant?: 'default' | 'success' | 'warning' | 'error'
-  children: ReactNode
+  readonly variant?: 'default' | 'success' | 'warning' | 'error'
+  readonly children: ReactNode
 }
 
 const variants = {
@@ -13,7 +13,7 @@ const variants = {
   error: 'border-red-500/25 text-error',
 }
 
-export function Badge({ variant = 'default', className, children, ...props }: BadgeProps) {
+export const Badge = ({ variant = 'default', className, children, ...props }: BadgeProps) => {
   return (
     <span
       className={cn(

@@ -8,13 +8,13 @@ import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { useState } from 'react'
 
-function StatusCode({ code }: { code: number }) {
+const StatusCode = ({ code }: { readonly code: number }) => {
   const color =
     code < 300 ? 'text-success' : code < 500 ? 'text-warning' : 'text-error'
   return <span className={`font-mono text-xs font-medium ${color}`}>{code}</span>
 }
 
-function ExpandedRowDetail({ row }: { row: RequestLog }) {
+const ExpandedRowDetail = ({ row }: { readonly row: RequestLog }) => {
   return (
     <div className="px-5 py-4">
       <div className="grid grid-cols-4 gap-x-8 gap-y-4">
@@ -77,7 +77,7 @@ function ExpandedRowDetail({ row }: { row: RequestLog }) {
   )
 }
 
-export default function RequestsPage() {
+const RequestsPage = () => {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState('timestamp')
@@ -238,3 +238,5 @@ export default function RequestsPage() {
     </div>
   )
 }
+
+export default RequestsPage

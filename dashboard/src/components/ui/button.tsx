@@ -2,9 +2,9 @@ import { cn } from '@/lib/utils'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
-  size?: 'sm' | 'md' | 'icon'
-  children: ReactNode
+  readonly variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
+  readonly size?: 'sm' | 'md' | 'icon'
+  readonly children: ReactNode
 }
 
 const variants = {
@@ -20,7 +20,7 @@ const sizes = {
   icon: 'h-7 w-7 p-0 justify-center',
 }
 
-export function Button({ variant = 'secondary', size = 'md', className, children, ...props }: ButtonProps) {
+export const Button = ({ variant = 'secondary', size = 'md', className, children, ...props }: ButtonProps) => {
   return (
     <button
       className={cn(

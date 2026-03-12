@@ -10,31 +10,38 @@ import {
 } from 'recharts'
 
 interface AreaChartProps {
-  data: TimeseriesPoint[]
-  gradientId?: string
-  height?: number
-  valueFormatter?: (value: number) => string
-  xAxisFormatter?: (timestamp: string) => string
+  readonly data: TimeseriesPoint[]
+  readonly gradientId?: string
+  readonly height?: number
+  readonly valueFormatter?: (value: number) => string
+  readonly xAxisFormatter?: (timestamp: string) => string
 }
 
-function ChartTooltip({ active, payload, valueFormatter }: any) {
-  if (!active || !payload?.length) return null
+interface ChartTooltipProps {
+  readonly active?: boolean
+  readonly payload?: { value: number }[]
+  readonly valueFormatter?: (value: number) => string
+}
+
+const ChartTooltip = ({ active, payload, valueFormatter }: ChartTooltipProps) => {
+  const entry = payload?.[0]
+  if (!active || !entry) return null
   return (
     <div className="rounded-[4px] border border-border-hover bg-elevated px-2 py-1">
       <p className="text-[11px] text-text-secondary">
-        {valueFormatter ? valueFormatter(payload[0].value) : payload[0].value}
+        {valueFormatter ? valueFormatter(entry.value) : entry.value}
       </p>
     </div>
   )
 }
 
-export function AreaChart({
+export const AreaChart = ({
   data,
   gradientId = 'areaGrad',
   height = 240,
   valueFormatter,
   xAxisFormatter,
-}: AreaChartProps) {
+}: AreaChartProps) => {
   const formatX = xAxisFormatter ?? ((ts: string) => format(new Date(ts), 'MMM d'))
   const tickFill = 'var(--c-text-muted)'
   const axisStroke = 'var(--c-border)'

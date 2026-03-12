@@ -12,7 +12,7 @@ import { formatBytes, formatCurrency, formatNumber, formatPercent } from '@/lib/
 import { Zap } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
-export default function CachePage() {
+const CachePage = () => {
   const [range, setRange] = useState('24h')
   const analyticsOpts = useMemo(() => {
     const { start, end } = getDateRange(range)
@@ -66,7 +66,7 @@ export default function CachePage() {
             <EmptyState
               title="No cache data yet"
               description="Cache metrics will appear once requests are processed"
-              icon={<Zap className="h-5 w-5" />}
+              icon={<Zap className="size-5" />}
             />
           )}
         </CardContent>
@@ -74,3 +74,5 @@ export default function CachePage() {
     </div>
   )
 }
+
+export default CachePage

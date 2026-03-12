@@ -1,10 +1,10 @@
 import { cn } from '@/lib/utils'
 
-export function Skeleton({ className }: { className?: string }) {
+export const Skeleton = ({ className }: { readonly className?: string }) => {
   return <div className={cn('rounded-md bg-surface-hover', className)} />
 }
 
-export function SkeletonCard() {
+export const SkeletonCard = () => {
   return (
     <div className="rounded-lg border border-border bg-surface p-4">
       <Skeleton className="h-3 w-20 mb-3" />
@@ -14,7 +14,7 @@ export function SkeletonCard() {
   )
 }
 
-export function SkeletonTable({ rows = 5 }: { rows?: number }) {
+export const SkeletonTable = ({ rows = 5 }: { readonly rows?: number }) => {
   return (
     <div className="space-y-0">
       <div className="flex gap-4 h-8 items-center border-b border-border px-3">

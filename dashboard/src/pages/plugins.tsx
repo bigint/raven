@@ -1,7 +1,7 @@
 import { EmptyState } from '@/components/shared/empty-state'
 import { Puzzle } from 'lucide-react'
 
-export default function PluginsPage() {
+const PluginsPage = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-6">
@@ -12,9 +12,11 @@ export default function PluginsPage() {
         <EmptyState
           title="Coming Soon"
           description="Install and manage plugins to extend your gateway"
-          icon={<Puzzle className="h-5 w-5" />}
+          icon={<Puzzle className="size-5" />}
         />
       </div>
     </div>
   )
 }
+
+export default PluginsPage

@@ -5,7 +5,7 @@ import { formatCurrency } from '@/lib/utils'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
-export default function ModelsPage() {
+const ModelsPage = () => {
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
@@ -114,3 +114,5 @@ export default function ModelsPage() {
     </div>
   )
 }
+
+export default ModelsPage

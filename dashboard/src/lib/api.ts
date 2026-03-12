@@ -27,6 +27,21 @@ import type {
   VirtualKey,
 } from './types'
 
+interface RawPaginatedMeta {
+  readonly total?: number
+  readonly page?: number
+  readonly per_page?: number
+}
+
+interface RawPaginatedResponse<T> {
+  readonly data: T[]
+  readonly meta?: RawPaginatedMeta
+}
+
+interface RawListResponse<T> {
+  readonly data?: T[]
+}
+
 class ApiError extends Error {
   constructor(
     public status: number,
@@ -49,17 +64,18 @@ function buildQuery(params: object): string {
   return `?${searchParams.toString()}`
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-function toPaginated<T>(res: any): PaginatedResponse<T> {
+function toPaginated<T>(res: RawPaginatedResponse<T>): PaginatedResponse<T> {
+  const page = res.meta?.page ?? 1
+  const perPage = res.meta?.per_page ?? 20
+  const total = res.meta?.total ?? 0
   return {
     data: res.data ?? [],
-    total: res.meta?.total ?? 0,
-    page: res.meta?.page ?? 1,
-    per_page: res.meta?.per_page ?? 20,
-    has_more: (res.meta?.page ?? 1) * (res.meta?.per_page ?? 20) < (res.meta?.total ?? 0),
+    total,
+    page,
+    per_page: perPage,
+    has_more: page * perPage < total,
   }
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export class ApiClient {
   private baseUrl: string
@@ -89,8 +105,8 @@ export class ApiClient {
 
   // Orgs
   async listOrgs(opts?: ListOpts): Promise<PaginatedResponse<Org>> {
-    const res = await this.request<any>(`/admin/v1/orgs${buildQuery(opts ?? {})}`)
-    return toPaginated<Org>(res)
+    const res = await this.request<RawPaginatedResponse<Org>>(`/admin/v1/orgs${buildQuery(opts ?? {})}`)
+    return toPaginated(res)
   }
 
   async createOrg(data: CreateOrgInput): Promise<Org> {
@@ -117,8 +133,8 @@ export class ApiClient {
 
   // Teams
   async listTeams(orgId: string, opts?: ListOpts): Promise<PaginatedResponse<Team>> {
-    const res = await this.request<any>(`/admin/v1/teams${buildQuery({ org_id: orgId, ...(opts ?? {}) })}`)
-    return toPaginated<Team>(res)
+    const res = await this.request<RawPaginatedResponse<Team>>(`/admin/v1/teams${buildQuery({ org_id: orgId, ...(opts ?? {}) })}`)
+    return toPaginated(res)
   }
 
   async createTeam(orgId: string, data: CreateTeamInput): Promise<Team> {
@@ -130,8 +146,8 @@ export class ApiClient {
 
   // Users
   async listUsers(opts?: ListOpts): Promise<PaginatedResponse<User>> {
-    const res = await this.request<any>(`/admin/v1/users${buildQuery(opts ?? {})}`)
-    return toPaginated<User>(res)
+    const res = await this.request<RawPaginatedResponse<User>>(`/admin/v1/users${buildQuery(opts ?? {})}`)
+    return toPaginated(res)
   }
 
   async createUser(data: CreateUserInput): Promise<User> {
@@ -143,8 +159,8 @@ export class ApiClient {
 
   // Keys
   async listKeys(opts?: ListOpts): Promise<PaginatedResponse<VirtualKey>> {
-    const res = await this.request<any>(`/admin/v1/keys${buildQuery(opts ?? {})}`)
-    return toPaginated<VirtualKey>(res)
+    const res = await this.request<RawPaginatedResponse<VirtualKey>>(`/admin/v1/keys${buildQuery(opts ?? {})}`)
+    return toPaginated(res)
   }
 
   async createKey(data: CreateKeyInput): Promise<VirtualKey> {
@@ -160,7 +176,7 @@ export class ApiClient {
 
   // Providers
   async listProviders(): Promise<Provider[]> {
-    const res = await this.request<any>('/admin/v1/providers')
+    const res = await this.request<Provider[] | RawListResponse<Provider>>('/admin/v1/providers')
     return Array.isArray(res) ? res : res.data ?? []
   }
 
@@ -208,8 +224,8 @@ export class ApiClient {
 
   // Logs
   async listLogs(opts: LogQueryOpts): Promise<PaginatedResponse<RequestLog>> {
-    const res = await this.request<any>(`/admin/v1/logs${buildQuery(opts)}`)
-    return toPaginated<RequestLog>(res)
+    const res = await this.request<RawPaginatedResponse<RequestLog>>(`/admin/v1/logs${buildQuery(opts)}`)
+    return toPaginated(res)
   }
 
   async getLog(id: string): Promise<RequestLog> {
@@ -218,13 +234,13 @@ export class ApiClient {
 
   // Models
   async listModels(): Promise<Model[]> {
-    const res = await this.request<any>('/admin/v1/models')
+    const res = await this.request<Model[] | RawListResponse<Model>>('/admin/v1/models')
     return Array.isArray(res) ? res : res.data ?? []
   }
 
   // Budgets
   async listBudgets(): Promise<BudgetConfig[]> {
-    const res = await this.request<any>('/admin/v1/budgets')
+    const res = await this.request<BudgetConfig[] | RawListResponse<BudgetConfig>>('/admin/v1/budgets')
     return Array.isArray(res) ? res : res.data ?? []
   }
 

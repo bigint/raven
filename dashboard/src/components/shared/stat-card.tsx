@@ -3,13 +3,13 @@ import type { TimeseriesPoint } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
 interface StatCardProps {
-  label: string
-  value: string
-  sparklineData?: TimeseriesPoint[]
-  className?: string
+  readonly label: string
+  readonly value: string
+  readonly sparklineData?: TimeseriesPoint[]
+  readonly className?: string
 }
 
-export function StatCard({ label, value, sparklineData, className }: StatCardProps) {
+export const StatCard = ({ label, value, sparklineData, className }: StatCardProps) => {
   return (
     <div
       className={cn(

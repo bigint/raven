@@ -1,7 +1,7 @@
 import { EmptyState } from '@/components/shared/empty-state'
 import { Shield } from 'lucide-react'
 
-export default function GuardrailsPage() {
+const GuardrailsPage = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-6">
@@ -12,9 +12,11 @@ export default function GuardrailsPage() {
         <EmptyState
           title="Coming Soon"
           description="Content filtering and safety guardrails"
-          icon={<Shield className="h-5 w-5" />}
+          icon={<Shield className="size-5" />}
         />
       </div>
     </div>
   )
 }
+
+export default GuardrailsPage

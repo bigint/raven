@@ -1,14 +1,14 @@
 import { cn } from '@/lib/utils'
 
 interface ToggleSwitchProps {
-  checked: boolean
-  onChange: (checked: boolean) => void
-  label?: string
-  disabled?: boolean
-  className?: string
+  readonly checked: boolean
+  readonly onChange: (checked: boolean) => void
+  readonly label?: string
+  readonly disabled?: boolean
+  readonly className?: string
 }
 
-export function ToggleSwitch({ checked, onChange, label, disabled, className }: ToggleSwitchProps) {
+export const ToggleSwitch = ({ checked, onChange, label, disabled, className }: ToggleSwitchProps) => {
   return (
     <label className={cn('inline-flex items-center gap-2 cursor-pointer', disabled && 'opacity-40 cursor-not-allowed', className)}>
       {label && <span className="text-xs text-text-secondary">{label}</span>}
@@ -25,7 +25,7 @@ export function ToggleSwitch({ checked, onChange, label, disabled, className }: 
       >
         <span
           className={cn(
-            'absolute top-0.5 h-3 w-3 rounded-full bg-accent-text dark:bg-text-primary',
+            'absolute top-0.5 size-3 rounded-full bg-accent-text dark:bg-text-primary',
             checked ? 'left-[18px]' : 'left-0.5',
           )}
         />

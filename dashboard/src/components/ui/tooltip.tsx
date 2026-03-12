@@ -2,10 +2,10 @@ import { cn } from '@/lib/utils'
 import { type ReactNode, useState } from 'react'
 
 interface TooltipProps {
-  content: string
-  children: ReactNode
-  side?: 'top' | 'bottom' | 'left' | 'right'
-  className?: string
+  readonly content: string
+  readonly children: ReactNode
+  readonly side?: 'top' | 'bottom' | 'left' | 'right'
+  readonly className?: string
 }
 
 const positions = {
@@ -15,7 +15,7 @@ const positions = {
   right: 'left-full top-1/2 -translate-y-1/2 ml-1.5',
 }
 
-export function Tooltip({ content, children, side = 'top', className }: TooltipProps) {
+export const Tooltip = ({ content, children, side = 'top', className }: TooltipProps) => {
   const [show, setShow] = useState(false)
   return (
     <div className="relative inline-flex" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>

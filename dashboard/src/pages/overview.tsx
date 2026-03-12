@@ -14,7 +14,7 @@ import { formatCurrency, formatLatency, formatNumber, formatPercent } from '@/li
 import { Server } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
-export default function OverviewPage() {
+const OverviewPage = () => {
   const [range, setRange] = useState('24h')
   const analyticsOpts = useMemo(() => {
     const { start, end } = getDateRange(range)
@@ -77,7 +77,7 @@ export default function OverviewPage() {
               <EmptyState
                 title="No requests yet"
                 description="Send your first request to see model usage"
-                icon={<Server className="h-5 w-5" />}
+                icon={<Server className="size-5" />}
               />
             )}
           </CardContent>
@@ -117,7 +117,7 @@ export default function OverviewPage() {
               <EmptyState
                 title="No providers configured"
                 description="Go to Providers to add your API keys"
-                icon={<Server className="h-5 w-5" />}
+                icon={<Server className="size-5" />}
               />
             )}
           </CardContent>
@@ -126,3 +126,5 @@ export default function OverviewPage() {
     </div>
   )
 }
+
+export default OverviewPage

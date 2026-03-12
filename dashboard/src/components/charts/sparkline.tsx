@@ -2,12 +2,12 @@ import type { TimeseriesPoint } from '@/lib/types'
 import { Area, AreaChart as RechartsAreaChart, ResponsiveContainer } from 'recharts'
 
 interface SparklineProps {
-  data: TimeseriesPoint[]
-  width?: number
-  height?: number
+  readonly data: TimeseriesPoint[]
+  readonly width?: number
+  readonly height?: number
 }
 
-export function Sparkline({ data, width = 64, height = 28 }: SparklineProps) {
+export const Sparkline = ({ data, width = 64, height = 28 }: SparklineProps) => {
   return (
     <ResponsiveContainer width={width} height={height}>
       <RechartsAreaChart data={data} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>

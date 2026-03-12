@@ -9,29 +9,36 @@ import {
 } from 'recharts'
 
 interface BarChartProps {
-  data: { name: string; value: number }[]
-  height?: number
-  valueFormatter?: (value: number) => string
-  layout?: 'vertical' | 'horizontal'
+  readonly data: { name: string; value: number }[]
+  readonly height?: number
+  readonly valueFormatter?: (value: number) => string
+  readonly layout?: 'vertical' | 'horizontal'
 }
 
-function ChartTooltip({ active, payload, valueFormatter }: any) {
-  if (!active || !payload?.length) return null
+interface ChartTooltipProps {
+  readonly active?: boolean
+  readonly payload?: { value: number; payload: { name: string } }[]
+  readonly valueFormatter?: (value: number) => string
+}
+
+const ChartTooltip = ({ active, payload, valueFormatter }: ChartTooltipProps) => {
+  const entry = payload?.[0]
+  if (!active || !entry) return null
   return (
     <div className="rounded-[4px] border border-border-hover bg-elevated px-2 py-1">
       <p className="text-[11px] text-text-secondary">
-        {payload[0].payload.name}: {valueFormatter ? valueFormatter(payload[0].value) : payload[0].value}
+        {entry.payload.name}: {valueFormatter ? valueFormatter(entry.value) : entry.value}
       </p>
     </div>
   )
 }
 
-function getBarOpacity(value: number, max: number): number {
+const getBarOpacity = (value: number, max: number): number => {
   if (max === 0) return 0.04
   return 0.04 + (value / max) * 0.12
 }
 
-export function BarChart({ data, height = 200, valueFormatter, layout = 'vertical' }: BarChartProps) {
+export const BarChart = ({ data, height = 200, valueFormatter, layout = 'vertical' }: BarChartProps) => {
   const max = Math.max(...data.map((d) => d.value), 0)
   const tickFill = 'var(--c-text-muted)'
   const axisStroke = 'var(--c-border)'

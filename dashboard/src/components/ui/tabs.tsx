@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 import type { ReactNode } from 'react'
 
-export function TabsList({ className, children }: { className?: string; children: ReactNode }) {
+export const TabsList = ({ className, children }: { readonly className?: string; readonly children: ReactNode }) => {
   return (
     <div
       className={cn(
@@ -15,14 +15,14 @@ export function TabsList({ className, children }: { className?: string; children
 }
 
 interface TabsTriggerProps {
-  value: string
-  activeValue: string
-  onSelect: (value: string) => void
-  children: ReactNode
-  className?: string
+  readonly value: string
+  readonly activeValue: string
+  readonly onSelect: (value: string) => void
+  readonly children: ReactNode
+  readonly className?: string
 }
 
-export function TabsTrigger({ value, activeValue, onSelect, children, className }: TabsTriggerProps) {
+export const TabsTrigger = ({ value, activeValue, onSelect, children, className }: TabsTriggerProps) => {
   const isActive = value === activeValue
   return (
     <button
@@ -40,13 +40,13 @@ export function TabsTrigger({ value, activeValue, onSelect, children, className 
 }
 
 interface TabsContentProps {
-  value: string
-  activeValue: string
-  children: ReactNode
-  className?: string
+  readonly value: string
+  readonly activeValue: string
+  readonly children: ReactNode
+  readonly className?: string
 }
 
-export function TabsContent({ value, activeValue, children, className }: TabsContentProps) {
+export const TabsContent = ({ value, activeValue, children, className }: TabsContentProps) => {
   if (value !== activeValue) return null
   return <div className={cn('mt-3', className)}>{children}</div>
 }

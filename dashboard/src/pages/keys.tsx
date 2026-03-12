@@ -25,7 +25,7 @@ function relativeTime(dateStr: string | undefined): string {
   }
 }
 
-export default function KeysPage() {
+const KeysPage = () => {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
@@ -113,12 +113,12 @@ export default function KeysPage() {
               type="button"
               className="rounded-md p-1 hover:bg-surface-hover"
             >
-              <MoreVertical className="h-3.5 w-3.5 text-text-tertiary" />
+              <MoreVertical className="size-3.5 text-text-tertiary" />
             </button>
           }
         >
           <DropdownItem danger onClick={() => deleteKey.mutate(item.id)}>
-            <Trash2 className="h-3.5 w-3.5" />
+            <Trash2 className="size-3.5" />
             Delete Key
           </DropdownItem>
         </DropdownMenu>
@@ -131,7 +131,7 @@ export default function KeysPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-[13px] font-semibold text-text-primary">Keys</h1>
         <Button variant="primary" onClick={() => setCreateOpen(true)}>
-          <Plus className="h-3.5 w-3.5" />
+          <Plus className="size-3.5" />
           Create Key
         </Button>
       </div>
@@ -190,7 +190,7 @@ export default function KeysPage() {
             size="icon"
             onClick={() => createdKey && handleCopyKey(createdKey)}
           >
-            <Copy className="h-3.5 w-3.5" />
+            <Copy className="size-3.5" />
           </Button>
         </div>
         <div className="mt-3">
@@ -200,3 +200,5 @@ export default function KeysPage() {
     </div>
   )
 }
+
+export default KeysPage

@@ -7,44 +7,44 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 interface PaletteItem {
-  id: string
-  label: string
-  category: 'Pages' | 'Actions'
-  icon: React.ReactNode
-  path?: string
-  shortcut?: string
-  action?: () => void
+  readonly id: string
+  readonly label: string
+  readonly category: 'Pages' | 'Actions'
+  readonly icon: React.ReactNode
+  readonly path?: string
+  readonly shortcut?: string
+  readonly action?: () => void
 }
 
 const pageItems: PaletteItem[] = [
-  { id: 'overview', label: 'Overview', category: 'Pages', icon: <LayoutDashboard className="h-3.5 w-3.5" />, path: '/', shortcut: '⌘1' },
-  { id: 'requests', label: 'Requests', category: 'Pages', icon: <List className="h-3.5 w-3.5" />, path: '/requests', shortcut: '⌘2' },
-  { id: 'analytics', label: 'Analytics', category: 'Pages', icon: <BarChart3 className="h-3.5 w-3.5" />, path: '/analytics', shortcut: '⌘3' },
-  { id: 'providers', label: 'Providers', category: 'Pages', icon: <Server className="h-3.5 w-3.5" />, path: '/providers' },
-  { id: 'models', label: 'Models', category: 'Pages', icon: <Cpu className="h-3.5 w-3.5" />, path: '/models' },
-  { id: 'keys', label: 'Keys', category: 'Pages', icon: <Key className="h-3.5 w-3.5" />, path: '/keys' },
-  { id: 'teams', label: 'Teams', category: 'Pages', icon: <Users className="h-3.5 w-3.5" />, path: '/teams' },
-  { id: 'budgets', label: 'Budgets', category: 'Pages', icon: <Wallet className="h-3.5 w-3.5" />, path: '/budgets' },
-  { id: 'cache', label: 'Cache', category: 'Pages', icon: <Database className="h-3.5 w-3.5" />, path: '/cache' },
-  { id: 'guardrails', label: 'Guardrails', category: 'Pages', icon: <Shield className="h-3.5 w-3.5" />, path: '/guardrails' },
-  { id: 'plugins', label: 'Plugins', category: 'Pages', icon: <Puzzle className="h-3.5 w-3.5" />, path: '/plugins' },
-  { id: 'settings', label: 'Settings', category: 'Pages', icon: <Settings className="h-3.5 w-3.5" />, path: '/settings' },
+  { id: 'overview', label: 'Overview', category: 'Pages', icon: <LayoutDashboard className="size-3.5" />, path: '/', shortcut: '⌘1' },
+  { id: 'requests', label: 'Requests', category: 'Pages', icon: <List className="size-3.5" />, path: '/requests', shortcut: '⌘2' },
+  { id: 'analytics', label: 'Analytics', category: 'Pages', icon: <BarChart3 className="size-3.5" />, path: '/analytics', shortcut: '⌘3' },
+  { id: 'providers', label: 'Providers', category: 'Pages', icon: <Server className="size-3.5" />, path: '/providers' },
+  { id: 'models', label: 'Models', category: 'Pages', icon: <Cpu className="size-3.5" />, path: '/models' },
+  { id: 'keys', label: 'Keys', category: 'Pages', icon: <Key className="size-3.5" />, path: '/keys' },
+  { id: 'teams', label: 'Teams', category: 'Pages', icon: <Users className="size-3.5" />, path: '/teams' },
+  { id: 'budgets', label: 'Budgets', category: 'Pages', icon: <Wallet className="size-3.5" />, path: '/budgets' },
+  { id: 'cache', label: 'Cache', category: 'Pages', icon: <Database className="size-3.5" />, path: '/cache' },
+  { id: 'guardrails', label: 'Guardrails', category: 'Pages', icon: <Shield className="size-3.5" />, path: '/guardrails' },
+  { id: 'plugins', label: 'Plugins', category: 'Pages', icon: <Puzzle className="size-3.5" />, path: '/plugins' },
+  { id: 'settings', label: 'Settings', category: 'Pages', icon: <Settings className="size-3.5" />, path: '/settings' },
 ]
 
 const actionItems: PaletteItem[] = [
-  { id: 'create-key', label: 'Create Key', category: 'Actions', icon: <Key className="h-3.5 w-3.5" />, path: '/keys' },
-  { id: 'create-org', label: 'Create Org', category: 'Actions', icon: <Users className="h-3.5 w-3.5" />, path: '/teams' },
-  { id: 'create-budget', label: 'Create Budget', category: 'Actions', icon: <Wallet className="h-3.5 w-3.5" />, path: '/budgets' },
+  { id: 'create-key', label: 'Create Key', category: 'Actions', icon: <Key className="size-3.5" />, path: '/keys' },
+  { id: 'create-org', label: 'Create Org', category: 'Actions', icon: <Users className="size-3.5" />, path: '/teams' },
+  { id: 'create-budget', label: 'Create Budget', category: 'Actions', icon: <Wallet className="size-3.5" />, path: '/budgets' },
 ]
 
 const allItems = [...pageItems, ...actionItems]
 
 interface CommandPaletteProps {
-  open: boolean
-  onClose: () => void
+  readonly open: boolean
+  readonly onClose: () => void
 }
 
-export function CommandPalette({ open, onClose }: CommandPaletteProps) {
+export const CommandPalette = ({ open, onClose }: CommandPaletteProps) => {
   const [query, setQuery] = useState('')
   const [activeIndex, setActiveIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
