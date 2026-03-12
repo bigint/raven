@@ -389,7 +389,7 @@ export default function ProfilePage() {
             ) : (
               <div className="space-y-3">
                 {invitations.map((inv) => {
-                  const badge = ROLE_BADGE[inv.role] ?? ROLE_BADGE.member
+                  const badge = getRoleBadge(inv.role)
                   const RoleIcon = badge.icon
                   return (
                     <div

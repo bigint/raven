@@ -34,7 +34,10 @@ export default function SettingsPage() {
   const [editName, setEditName] = useState('')
   const [editSlug, setEditSlug] = useState('')
   const [saving, setSaving] = useState(false)
-  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [saveMessage, setSaveMessage] = useState<{
+    type: 'success' | 'error'
+    text: string
+  } | null>(null)
 
   // Delete modal
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -118,7 +121,7 @@ export default function SettingsPage() {
 
       {loading ? (
         <div className="rounded-xl border border-border p-12 text-center">
-          <div className="mx-auto size-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+          <Settings className="mx-auto size-6 animate-spin text-muted-foreground/50" />
           <p className="mt-3 text-sm text-muted-foreground">Loading settings...</p>
         </div>
       ) : settings !== null ? (
@@ -220,7 +223,9 @@ export default function SettingsPage() {
               </div>
               <div>
                 <h2 className="text-sm font-semibold">Plan & Subscription</h2>
-                <p className="text-xs text-muted-foreground">Your current plan and billing status</p>
+                <p className="text-xs text-muted-foreground">
+                  Your current plan and billing status
+                </p>
               </div>
             </div>
             <div className="px-6 py-5">
@@ -263,7 +268,9 @@ export default function SettingsPage() {
                 </div>
                 <div>
                   <h2 className="text-sm font-semibold text-destructive">Danger Zone</h2>
-                  <p className="text-xs text-muted-foreground">Irreversible and destructive actions</p>
+                  <p className="text-xs text-muted-foreground">
+                    Irreversible and destructive actions
+                  </p>
                 </div>
               </div>
               <div className="px-6 py-5">
@@ -320,8 +327,7 @@ export default function SettingsPage() {
                 and all associated data including providers, keys, budgets, and request logs.
               </p>
               <p className="mt-3 text-sm text-muted-foreground">
-                Type{' '}
-                <span className="font-mono font-medium text-foreground">{settings?.name}</span>{' '}
+                Type <span className="font-mono font-medium text-foreground">{settings?.name}</span>{' '}
                 to confirm.
               </p>
               <input
