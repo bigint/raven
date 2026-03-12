@@ -21,7 +21,7 @@ const handleResponse = async <T>(res: Response): Promise<T> => {
     throw new Error(message);
   }
   const body = await res.json();
-  return body as T;
+  return (body?.data !== undefined ? body.data : body) as T;
 };
 
 export const api = {
