@@ -39,8 +39,6 @@ const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: '/budgets', label: 'Budgets', icon: CreditCard },
   { href: '/team', label: 'Team', icon: Users },
   { href: '/billing', label: 'Billing', icon: Receipt },
-  { href: '/settings', label: 'Settings', icon: Settings },
-  { href: '/profile', label: 'Profile', icon: User },
 ]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -49,7 +47,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [orgs, setOrgs] = useState<Org[]>([])
   const [activeOrg, setActiveOrg] = useState<Org | null>(null)
   const [orgDropdownOpen, setOrgDropdownOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
   const orgDropdownRef = useRef<HTMLDivElement>(null)
+  const userMenuRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
   const router = useRouter()
 
@@ -79,11 +79,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       if (orgDropdownRef.current && !orgDropdownRef.current.contains(e.target as Node)) {
         setOrgDropdownOpen(false)
       }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false)
+      }
     }
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOrgDropdownOpen(false)
+      if (e.key === 'Escape') {
+        setOrgDropdownOpen(false)
+        setUserMenuOpen(false)
+      }
     }
-    if (orgDropdownOpen) {
+    if (orgDropdownOpen || userMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside)
       document.addEventListener('keydown', handleEscape)
     }
@@ -91,7 +97,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       document.removeEventListener('mousedown', handleClickOutside)
       document.removeEventListener('keydown', handleEscape)
     }
-  }, [orgDropdownOpen])
+  }, [orgDropdownOpen, userMenuOpen])
 
   if (isPending || (!orgReady && session)) {
     return (
@@ -191,23 +197,51 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           })}
         </nav>
 
-        <div className="border-t border-border px-3 py-3">
-          <div className="flex items-center gap-3 rounded-lg px-3 py-2">
+        <div ref={userMenuRef} className="relative border-t border-border px-3 py-3">
+          {userMenuOpen && (
+            <div className="absolute bottom-full left-2 right-2 mb-1 rounded-lg border border-border bg-popover py-1 shadow-md ring-1 ring-black/5">
+              <Link
+                href="/profile"
+                onClick={() => setUserMenuOpen(false)}
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              >
+                <User className="size-4" />
+                Profile
+              </Link>
+              <Link
+                href="/settings"
+                onClick={() => setUserMenuOpen(false)}
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              >
+                <Settings className="size-4" />
+                Settings
+              </Link>
+              <div className="border-t border-border my-1" />
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive transition-colors hover:bg-destructive/10 text-left"
+              >
+                <LogOut className="size-4" />
+                Sign out
+              </button>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => setUserMenuOpen(!userMenuOpen)}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-accent"
+          >
             <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium">
               {session.user?.name?.charAt(0)?.toUpperCase() ?? '?'}
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 text-left">
               <p className="text-sm font-medium truncate">{session.user?.name}</p>
               <p className="text-xs text-muted-foreground truncate">{session.user?.email}</p>
             </div>
-          </div>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="mt-1 w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors text-left"
-          >
-            <LogOut className="size-4" />
-            Sign out
+            <ChevronDown
+              className={`size-4 text-muted-foreground transition-transform ${userMenuOpen ? 'rotate-180' : ''}`}
+            />
           </button>
         </div>
       </aside>
