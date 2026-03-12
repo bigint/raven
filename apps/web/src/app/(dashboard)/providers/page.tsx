@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, Eye, EyeOff, Pencil, Plus, Trash2, X } from 'lucide-react'
+import { Check, Eye, EyeOff, Loader2, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Select } from '@/components/select'
 import { useEventStream } from '@/hooks/use-event-stream'
@@ -9,6 +9,7 @@ import { api } from '@/lib/api'
 interface Provider {
   id: string
   provider: string
+  name: string | null
   apiKey: string
   isEnabled: boolean
   createdAt: string
@@ -37,12 +38,14 @@ type ModalMode = 'add' | 'edit' | null
 
 interface FormState {
   provider: string
+  name: string
   apiKey: string
   isEnabled: boolean
 }
 
 const DEFAULT_FORM: FormState = {
   provider: 'openai',
+  name: '',
   apiKey: '',
   isEnabled: true,
 }
@@ -94,7 +97,12 @@ export default function ProvidersPage() {
   }
 
   const openEdit = (provider: Provider) => {
-    setForm({ provider: provider.provider, apiKey: '', isEnabled: provider.isEnabled })
+    setForm({
+      provider: provider.provider,
+      name: provider.name ?? '',
+      apiKey: '',
+      isEnabled: provider.isEnabled,
+    })
     setShowApiKey(false)
     setFormError(null)
     setEditingId(provider.id)
@@ -122,12 +130,14 @@ export default function ProvidersPage() {
       if (modalMode === 'add') {
         await api.post<Provider>('/v1/providers', {
           provider: form.provider,
+          name: form.name.trim() || undefined,
           apiKey: form.apiKey.trim(),
           isEnabled: form.isEnabled,
         })
       } else if (modalMode === 'edit' && editingId) {
-        const body: { apiKey?: string; isEnabled?: boolean } = {
+        const body: { apiKey?: string; isEnabled?: boolean; name?: string } = {
           isEnabled: form.isEnabled,
+          name: form.name.trim() || undefined,
         }
         if (form.apiKey.trim()) {
           body.apiKey = form.apiKey.trim()
@@ -237,8 +247,15 @@ export default function ProvidersPage() {
                   key={provider.id}
                   className={`transition-colors hover:bg-muted/30 ${idx !== providers.length - 1 ? 'border-b border-border' : ''}`}
                 >
-                  <td className="px-5 py-4 font-medium">
-                    {PROVIDER_LABELS[provider.provider] ?? provider.provider}
+                  <td className="px-5 py-4">
+                    <div>
+                      <span className="font-medium">
+                        {PROVIDER_LABELS[provider.provider] ?? provider.provider}
+                      </span>
+                      {provider.name && (
+                        <p className="text-xs text-muted-foreground">{provider.name}</p>
+                      )}
+                    </div>
                   </td>
                   <td className="px-5 py-4 font-mono text-muted-foreground">{provider.apiKey}</td>
                   <td className="px-5 py-4">
@@ -343,6 +360,20 @@ export default function ProvidersPage() {
               </div>
 
               <div className="space-y-1.5">
+                <label htmlFor="provider-name" className="text-sm font-medium">
+                  Name <span className="text-muted-foreground font-normal">(optional)</span>
+                </label>
+                <input
+                  id="provider-name"
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  placeholder={`e.g. Production ${PROVIDER_LABELS[form.provider] ?? form.provider}`}
+                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+
+              <div className="space-y-1.5">
                 <label htmlFor="api-key-input" className="text-sm font-medium">
                   API Key{modalMode === 'edit' && ' (leave blank to keep existing)'}
                 </label>
@@ -399,11 +430,12 @@ export default function ProvidersPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
                 >
+                  {submitting && <Loader2 className="size-3.5 animate-spin" />}
                   {submitting
                     ? modalMode === 'add'
-                      ? 'Adding...'
+                      ? 'Validating & adding...'
                       : 'Saving...'
                     : modalMode === 'add'
                       ? 'Add Provider'

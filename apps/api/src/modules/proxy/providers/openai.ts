@@ -1,4 +1,7 @@
+import { PROVIDERS } from '../../../lib/providers.js'
 import type { ProviderAdapter } from './registry.js'
+
+const config = PROVIDERS.openai!
 
 const PRICING: Record<string, { input: number; output: number }> = {
   'gpt-4o': { input: 2.5, output: 10 },
@@ -7,12 +10,12 @@ const PRICING: Record<string, { input: number; output: number }> = {
 
 export const openaiAdapter: ProviderAdapter = {
   name: 'openai',
-  baseUrl: 'https://api.openai.com/v1',
+  baseUrl: config.baseUrl,
 
   transformHeaders(apiKey, headers) {
     return {
       ...headers,
-      Authorization: `Bearer ${apiKey}`,
+      ...config.authHeaders(apiKey),
     }
   },
 

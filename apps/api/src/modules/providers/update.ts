@@ -6,7 +6,7 @@ import type { Context } from 'hono'
 import { encrypt } from '../../lib/crypto.js'
 import { NotFoundError, ValidationError } from '../../lib/errors.js'
 import { publishEvent } from '../../lib/events.js'
-import { maskApiKey, updateProviderSchema } from './helpers.js'
+import { maskApiKey, updateProviderSchema, validateApiKey } from './helpers.js'
 
 export const updateProvider = (db: Database, env: Env) => async (c: Context) => {
   const orgId = c.get('orgId' as never) as string
@@ -30,13 +30,18 @@ export const updateProvider = (db: Database, env: Env) => async (c: Context) => 
     throw new NotFoundError('Provider not found')
   }
 
-  const { apiKey, isEnabled } = result.data
+  const { name, apiKey, isEnabled } = result.data
 
   const updates: Partial<typeof providerConfigs.$inferInsert> = {
     updatedAt: new Date(),
   }
 
+  if (name !== undefined) {
+    updates.name = name || null
+  }
+
   if (apiKey !== undefined) {
+    await validateApiKey(existing.provider, apiKey)
     updates.apiKey = encrypt(apiKey, env.ENCRYPTION_SECRET)
   }
 

@@ -1,12 +1,11 @@
 import type { Env } from '@raven/config'
 import type { Database } from '@raven/db'
 import { providerConfigs } from '@raven/db'
-import { and, eq } from 'drizzle-orm'
 import type { Context } from 'hono'
 import { encrypt } from '../../lib/crypto.js'
-import { ConflictError, ValidationError } from '../../lib/errors.js'
+import { ValidationError } from '../../lib/errors.js'
 import { publishEvent } from '../../lib/events.js'
-import { createProviderSchema, maskApiKey } from './helpers.js'
+import { createProviderSchema, maskApiKey, validateApiKey } from './helpers.js'
 
 export const createProvider = (db: Database, env: Env) => async (c: Context) => {
   const orgId = c.get('orgId' as never) as string
@@ -19,18 +18,10 @@ export const createProvider = (db: Database, env: Env) => async (c: Context) => 
     })
   }
 
-  const { provider, apiKey, isEnabled } = result.data
+  const { provider, name, apiKey, isEnabled } = result.data
 
-  // Check for duplicate provider in org
-  const [existing] = await db
-    .select({ id: providerConfigs.id })
-    .from(providerConfigs)
-    .where(and(eq(providerConfigs.organizationId, orgId), eq(providerConfigs.provider, provider)))
-    .limit(1)
-
-  if (existing) {
-    throw new ConflictError(`Provider '${provider}' is already configured for this organization`)
-  }
+  // Validate the API key against the provider before saving
+  await validateApiKey(provider, apiKey)
 
   const encryptedKey = encrypt(apiKey, env.ENCRYPTION_SECRET)
 
@@ -39,6 +30,7 @@ export const createProvider = (db: Database, env: Env) => async (c: Context) => 
     .values({
       organizationId: orgId,
       provider,
+      name: name ?? null,
       apiKey: encryptedKey,
       isEnabled,
     })

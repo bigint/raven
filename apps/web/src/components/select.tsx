@@ -36,9 +36,10 @@ export function Select({
 
   const selectedLabel = options.find((o) => o.value === value)?.label ?? placeholder
 
-  const filteredOptions = searchable && search
-    ? options.filter((o) => o.label.toLowerCase().includes(search.toLowerCase()))
-    : options
+  const filteredOptions =
+    searchable && search
+      ? options.filter((o) => o.label.toLowerCase().includes(search.toLowerCase()))
+      : options
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

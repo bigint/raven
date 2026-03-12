@@ -1,4 +1,7 @@
+import { PROVIDERS } from '../../../lib/providers.js'
 import type { ProviderAdapter } from './registry.js'
+
+const config = PROVIDERS.anthropic!
 
 const PRICING: Record<string, { input: number; output: number }> = {
   'claude-sonnet-4-20250514': { input: 3, output: 15 },
@@ -6,13 +9,12 @@ const PRICING: Record<string, { input: number; output: number }> = {
 
 export const anthropicAdapter: ProviderAdapter = {
   name: 'anthropic',
-  baseUrl: 'https://api.anthropic.com/v1',
+  baseUrl: config.baseUrl,
 
   transformHeaders(apiKey, headers) {
     return {
       ...headers,
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
+      ...config.authHeaders(apiKey),
     }
   },
 
