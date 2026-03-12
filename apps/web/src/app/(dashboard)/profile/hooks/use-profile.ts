@@ -5,7 +5,8 @@ import {
   useMutation,
   useQueryClient
 } from "@tanstack/react-query";
-import { api, setOrgId } from "@/lib/api";
+import { api } from "@/lib/api";
+import { useOrgStore } from "@/stores/org";
 
 export interface Organization {
   id: string;
@@ -45,7 +46,12 @@ export const useCreateOrg = () => {
       api.post<Organization>("/v1/user/orgs", data),
     onSuccess: (created) => {
       queryClient.invalidateQueries({ queryKey: ["user", "orgs"] });
-      setOrgId(created.id);
+      useOrgStore.getState().setActiveOrg({
+        id: created.id,
+        name: created.name,
+        slug: created.slug,
+        role: "owner"
+      });
       window.location.reload();
     }
   });
