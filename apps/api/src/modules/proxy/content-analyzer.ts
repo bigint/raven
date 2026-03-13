@@ -3,6 +3,7 @@ export interface ContentAnalysis {
   imageCount: number;
   hasToolUse: boolean;
   toolCount: number;
+  toolNames: string[];
   sessionId: string | null;
 }
 
@@ -35,7 +36,8 @@ export const analyzeContent = (
     hasToolUse: false,
     imageCount: 0,
     sessionId: null,
-    toolCount: 0
+    toolCount: 0,
+    toolNames: []
   };
 
   if (!body || typeof body !== "object") return result;
@@ -52,9 +54,26 @@ export const analyzeContent = (
   if (Array.isArray(b.tools)) {
     result.hasToolUse = true;
     result.toolCount = b.tools.length;
+    for (const tool of b.tools) {
+      const t = tool as Record<string, unknown>;
+      // OpenAI: tools[].function.name
+      const fn = t.function as Record<string, unknown> | undefined;
+      if (fn && typeof fn.name === "string") {
+        result.toolNames.push(fn.name);
+      // Anthropic: tools[].name
+      } else if (typeof t.name === "string") {
+        result.toolNames.push(t.name);
+      }
+    }
   } else if (Array.isArray(b.functions)) {
     result.hasToolUse = true;
     result.toolCount = b.functions.length;
+    for (const fn of b.functions) {
+      const f = fn as Record<string, unknown>;
+      if (typeof f.name === "string") {
+        result.toolNames.push(f.name);
+      }
+    }
   }
 
   // Extract session ID from header or body metadata

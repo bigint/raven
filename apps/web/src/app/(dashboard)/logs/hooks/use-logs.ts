@@ -36,6 +36,7 @@ export interface SessionRequest {
   method: string;
   path: string;
   toolCount: number;
+  toolNames: string[] | null;
   sessionId: string | null;
   userAgent: string | null;
   virtualKeyId: string;

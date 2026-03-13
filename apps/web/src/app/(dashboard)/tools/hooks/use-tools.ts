@@ -3,6 +3,8 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
+import type { SessionRequest } from "@/app/(dashboard)/logs/hooks/use-logs";
+import { sessionDetailQueryOptions } from "@/app/(dashboard)/logs/hooks/use-logs";
 
 export interface ToolDailyStats {
   date: string;
@@ -67,6 +69,8 @@ export const toolSessionsQueryOptions = (range: DateRange, page: number) =>
       ),
     queryKey: ["tools", "sessions", range, page]
   });
+
+export { sessionDetailQueryOptions, type SessionRequest };
 
 export const useTools = () => {
   const searchParams = useSearchParams();

@@ -1,9 +1,20 @@
 "use client";
 
-import { Button, Spinner } from "@raven/ui";
-import { ChevronLeft, ChevronRight, MessageSquare, Wrench } from "lucide-react";
+import { Badge, Button, Spinner } from "@raven/ui";
+import { useQuery } from "@tanstack/react-query";
+import {
+  ChevronLeft,
+  ChevronRight,
+  MessageSquare,
+  Wrench
+} from "lucide-react";
+import { useState } from "react";
 import { ModelIcon } from "@/components/model-icon";
 import type { ToolSession } from "../hooks/use-tools";
+import {
+  sessionDetailQueryOptions,
+  type SessionRequest
+} from "../hooks/use-tools";
 
 interface ToolSessionsTableProps {
   sessions: ToolSession[];
@@ -22,6 +33,147 @@ const formatTimeAgo = (ts: string): string => {
   if (hrs < 24) return `${hrs}h ago`;
   const days = Math.floor(hrs / 24);
   return `${days}d ago`;
+};
+
+const ToolSessionRow = ({ session }: { session: ToolSession }) => {
+  const [expanded, setExpanded] = useState(false);
+
+  const { data: requests } = useQuery({
+    ...sessionDetailQueryOptions(session.sessionId ?? ""),
+    enabled: expanded && !!session.sessionId
+  });
+
+  const toolRequests = (requests ?? []).filter(
+    (r: SessionRequest) =>
+      r.toolCount > 0 || (r.toolNames && r.toolNames.length > 0)
+  );
+
+  return (
+    <>
+      <tr
+        className="cursor-pointer border-b border-border transition-colors hover:bg-muted/30"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <td className="px-5 py-4">
+          <ChevronRight
+            className={`size-4 text-muted-foreground transition-transform ${expanded ? "rotate-90" : ""}`}
+          />
+        </td>
+        <td className="px-5 py-4 font-medium text-primary">
+          {session.keyName}
+        </td>
+        <td className="px-5 py-4 text-sm text-muted-foreground">
+          {session.userAgent ?? "\u2014"}
+        </td>
+        <td className="px-5 py-4 text-right tabular-nums">
+          <span className="inline-flex items-center gap-1.5">
+            {session.requestCount.toLocaleString()}
+            <MessageSquare className="size-3.5 text-muted-foreground" />
+          </span>
+        </td>
+        <td className="px-5 py-4 text-sm">
+          {session.models.map((m) => (
+            <div
+              className="flex items-center gap-1.5 whitespace-nowrap"
+              key={m}
+            >
+              <ModelIcon model={m} size={14} />
+              {m}
+            </div>
+          ))}
+        </td>
+        <td className="px-5 py-4 text-right tabular-nums">
+          <span className="inline-flex items-center gap-1.5">
+            {session.toolUses.toLocaleString()}
+            <Wrench className="size-3.5 text-muted-foreground" />
+          </span>
+        </td>
+        <td className="px-5 py-4 text-right text-sm text-muted-foreground whitespace-nowrap">
+          {formatTimeAgo(session.endTime)}
+        </td>
+      </tr>
+
+      {expanded && (
+        <tr>
+          <td className="bg-muted/20 px-0 py-0" colSpan={7}>
+            <div className="px-8 py-4">
+              {!requests ? (
+                <p className="py-4 text-center text-sm text-muted-foreground">
+                  Loading requests...
+                </p>
+              ) : toolRequests.length === 0 ? (
+                <p className="py-4 text-center text-sm text-muted-foreground">
+                  No tool usage details available for this session.
+                </p>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border/50">
+                      <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Time
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Model
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Tools
+                      </th>
+                      <th className="px-3 py-2 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Tool Calls
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {toolRequests.map((req: SessionRequest) => (
+                      <tr
+                        className="border-b border-border/30"
+                        key={req.id}
+                      >
+                        <td className="px-3 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                          {new Date(req.createdAt).toLocaleString(undefined, {
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            month: "short",
+                            second: "2-digit"
+                          })}
+                        </td>
+                        <td className="px-3 py-2.5 font-mono text-xs">
+                          <span className="inline-flex items-center gap-1.5">
+                            <ModelIcon model={req.model} size={14} />
+                            {req.model}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <div className="flex flex-wrap gap-1">
+                            {req.toolNames && req.toolNames.length > 0 ? (
+                              req.toolNames.map((name) => (
+                                <Badge key={name} variant="neutral">
+                                  {name}
+                                </Badge>
+                              ))
+                            ) : (
+                              <span className="text-xs text-muted-foreground">
+                                {req.toolCount} tool
+                                {req.toolCount !== 1 ? "s" : ""}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2.5 text-right tabular-nums">
+                          {req.toolCount}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
+  );
 };
 
 export const ToolSessionsTable = ({
@@ -59,6 +211,7 @@ export const ToolSessionsTable = ({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border">
+              <th className="w-10 px-5 py-3" />
               <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Key
               </th>
@@ -80,44 +233,8 @@ export const ToolSessionsTable = ({
             </tr>
           </thead>
           <tbody>
-            {sessions.map((s, idx) => (
-              <tr
-                className={`transition-colors hover:bg-muted/30 ${idx !== sessions.length - 1 ? "border-b border-border" : ""}`}
-                key={s.sessionId}
-              >
-                <td className="px-5 py-4 font-medium text-primary">
-                  {s.keyName}
-                </td>
-                <td className="px-5 py-4 text-sm text-muted-foreground">
-                  {s.userAgent ?? "\u2014"}
-                </td>
-                <td className="px-5 py-4 text-right tabular-nums">
-                  <span className="inline-flex items-center gap-1.5">
-                    {s.requestCount.toLocaleString()}
-                    <MessageSquare className="size-3.5 text-muted-foreground" />
-                  </span>
-                </td>
-                <td className="px-5 py-4 text-sm">
-                  {s.models.map((m) => (
-                    <div
-                      className="flex items-center gap-1.5 whitespace-nowrap"
-                      key={m}
-                    >
-                      <ModelIcon model={m} size={14} />
-                      {m}
-                    </div>
-                  ))}
-                </td>
-                <td className="px-5 py-4 text-right tabular-nums">
-                  <span className="inline-flex items-center gap-1.5">
-                    {s.toolUses.toLocaleString()}
-                    <Wrench className="size-3.5 text-muted-foreground" />
-                  </span>
-                </td>
-                <td className="px-5 py-4 text-right text-sm text-muted-foreground whitespace-nowrap">
-                  {formatTimeAgo(s.endTime)}
-                </td>
-              </tr>
+            {sessions.map((s) => (
+              <ToolSessionRow key={s.sessionId} session={s} />
             ))}
           </tbody>
         </table>

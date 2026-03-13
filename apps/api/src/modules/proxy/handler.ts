@@ -162,6 +162,7 @@ export const proxyHandler = (
         sessionId: cacheAnalysis.sessionId,
         statusCode: 200,
         toolCount: cacheAnalysis.toolCount,
+        toolNames: cacheAnalysis.toolNames,
         virtualKeyId: virtualKey.id
       };
 
@@ -261,6 +262,7 @@ export const proxyHandler = (
       sessionId: contentAnalysis.sessionId,
       statusCode: upstreamResult.response.status,
       toolCount: contentAnalysis.toolCount,
+      toolNames: [...contentAnalysis.toolNames],
       virtualKeyId: virtualKey.id
     };
 
@@ -288,6 +290,7 @@ export const proxyHandler = (
       if (responseAnalysis.hasToolCalls) {
         logData.hasToolUse = true;
         logData.toolCount += responseAnalysis.toolCallCount;
+        logData.toolNames.push(...responseAnalysis.toolCallNames);
       }
 
       // Cache successful non-streaming responses

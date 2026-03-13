@@ -23,6 +23,7 @@ export interface LogData {
   imageCount: number;
   hasToolUse: boolean;
   toolCount: number;
+  toolNames: string[];
   sessionId: string | null;
   guardrailMatches?: Array<{
     ruleName: string;
@@ -58,6 +59,7 @@ export const logProxyRequest = async (
         sessionId: data.sessionId,
         statusCode: data.statusCode,
         toolCount: data.toolCount,
+        toolNames: data.toolNames.length > 0 ? data.toolNames : undefined,
         virtualKeyId: data.virtualKeyId
       })
       .returning();

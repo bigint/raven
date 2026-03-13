@@ -3,6 +3,7 @@ import {
   boolean,
   index,
   integer,
+  jsonb,
   numeric,
   pgTable,
   text,
@@ -43,6 +44,7 @@ export const requestLogs = pgTable(
     sessionId: text("session_id"),
     statusCode: integer("status_code").notNull(),
     toolCount: integer("tool_count").notNull().default(0),
+    toolNames: jsonb("tool_names").$type<string[]>().default([]),
     userAgent: text("user_agent"),
     virtualKeyId: text("virtual_key_id")
       .notNull()
