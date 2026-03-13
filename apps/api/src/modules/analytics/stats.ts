@@ -23,7 +23,11 @@ export const getStats =
         cacheHits: sum(
           sql<number>`CASE WHEN ${requestLogs.cacheHit} THEN 1 ELSE 0 END`
         ),
+        totalCachedTokens: sum(requestLogs.cachedTokens),
         totalCost: sum(requestLogs.cost),
+        totalInputTokens: sum(requestLogs.inputTokens),
+        totalOutputTokens: sum(requestLogs.outputTokens),
+        totalReasoningTokens: sum(requestLogs.reasoningTokens),
         totalRequests: count()
       })
       .from(requestLogs)
@@ -31,6 +35,10 @@ export const getStats =
 
     const totalRequests = Number(row?.totalRequests ?? 0);
     const cacheHits = Number(row?.cacheHits ?? 0);
+    const totalInputTokens = Number(row?.totalInputTokens ?? 0);
+    const totalOutputTokens = Number(row?.totalOutputTokens ?? 0);
+    const totalCachedTokens = Number(row?.totalCachedTokens ?? 0);
+    const totalReasoningTokens = Number(row?.totalReasoningTokens ?? 0);
 
     return c.json({
       data: {
@@ -39,8 +47,17 @@ export const getStats =
           : "0.00",
         cacheHitRate:
           totalRequests > 0 ? (cacheHits / totalRequests).toFixed(4) : "0.0000",
+        totalCachedTokens,
         totalCost: row?.totalCost ?? "0",
-        totalRequests
+        totalInputTokens,
+        totalOutputTokens,
+        totalReasoningTokens,
+        totalRequests,
+        totalTokens:
+          totalInputTokens +
+          totalOutputTokens +
+          totalCachedTokens +
+          totalReasoningTokens
       }
     });
   };

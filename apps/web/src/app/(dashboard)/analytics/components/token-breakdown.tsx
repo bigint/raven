@@ -19,7 +19,7 @@ const LoadingState = () => (
 
 export const TokenBreakdown = ({ usage, loading }: TokenBreakdownProps) => (
   <div>
-    <h2 className="mb-4 text-base font-semibold">Usage by Provider & Model</h2>
+    <h2 className="mb-4 text-base font-semibold">Metrics by Model</h2>
     {loading ? (
       <LoadingState />
     ) : usage.length === 0 ? (
@@ -28,13 +28,10 @@ export const TokenBreakdown = ({ usage, loading }: TokenBreakdownProps) => (
         title="No usage data yet"
       />
     ) : (
-      <div className="rounded-xl border border-border">
+      <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border">
-              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Provider
-              </th>
               <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Model
               </th>
@@ -42,10 +39,16 @@ export const TokenBreakdown = ({ usage, loading }: TokenBreakdownProps) => (
                 Requests
               </th>
               <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Cost
+                Input
               </th>
               <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Tokens
+                Output
+              </th>
+              <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Cached
+              </th>
+              <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Reasoning
               </th>
             </tr>
           </thead>
@@ -55,31 +58,27 @@ export const TokenBreakdown = ({ usage, loading }: TokenBreakdownProps) => (
                 className={`transition-colors hover:bg-muted/30 ${idx !== usage.length - 1 ? "border-b border-border" : ""}`}
                 key={`${row.provider}-${row.model}-${idx}`}
               >
-                <td className="px-5 py-4 font-medium">
-                  {row.providerConfigName ? (
-                    <div>
-                      <div>{row.providerConfigName}</div>
-                      <div className="text-xs font-normal text-muted-foreground">
-                        {PROVIDER_LABELS[row.provider] ?? row.provider}
-                      </div>
-                    </div>
-                  ) : (
-                    (PROVIDER_LABELS[row.provider] ?? row.provider)
-                  )}
+                <td className="px-5 py-4">
+                  <div className="font-medium">{row.model}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {row.providerConfigName ??
+                      (PROVIDER_LABELS[row.provider] ?? row.provider)}
+                  </div>
                 </td>
-                <td className="px-5 py-4 font-mono text-sm text-muted-foreground">
-                  {row.model}
-                </td>
-                <td className="px-5 py-4 text-right">
+                <td className="px-5 py-4 text-right tabular-nums">
                   {Number(row.totalRequests).toLocaleString()}
                 </td>
-                <td className="px-5 py-4 text-right">
-                  ${Number(row.totalCost).toFixed(4)}
+                <td className="px-5 py-4 text-right tabular-nums">
+                  {Number(row.totalInputTokens).toLocaleString()}
                 </td>
-                <td className="px-5 py-4 text-right">
-                  {(
-                    Number(row.totalInputTokens) + Number(row.totalOutputTokens)
-                  ).toLocaleString()}
+                <td className="px-5 py-4 text-right tabular-nums">
+                  {Number(row.totalOutputTokens).toLocaleString()}
+                </td>
+                <td className="px-5 py-4 text-right tabular-nums">
+                  {Number(row.totalCachedTokens).toLocaleString()}
+                </td>
+                <td className="px-5 py-4 text-right tabular-nums">
+                  {Number(row.totalReasoningTokens).toLocaleString()}
                 </td>
               </tr>
             ))}

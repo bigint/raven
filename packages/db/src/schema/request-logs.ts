@@ -34,6 +34,7 @@ export const requestLogs = pgTable(
       .references(() => organizations.id, { onDelete: "cascade" }),
     outputTokens: integer("output_tokens").notNull().default(0),
     path: text("path").notNull(),
+    reasoningTokens: integer("reasoning_tokens").notNull().default(0),
     provider: text("provider").notNull(),
     providerConfigId: text("provider_config_id").references(
       () => providerConfigs.id,
