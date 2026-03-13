@@ -22,3 +22,18 @@ export const sessionsQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   to: z.string().optional()
 });
+
+export const logsQuerySchema = z.object({
+  from: z.string().optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  model: z.string().optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  to: z.string().optional(),
+  virtualKeyId: z.string().optional()
+});
+
+export const adoptionQuerySchema = z.object({
+  from: z.string().optional(),
+  groupBy: z.enum(["key", "model"]).default("key"),
+  to: z.string().optional()
+});

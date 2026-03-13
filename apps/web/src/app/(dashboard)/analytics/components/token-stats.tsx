@@ -35,7 +35,9 @@ const buildTokenCards = (stats: Stats | null): TokenCard[] => [
   },
   {
     label: "Reasoning Tokens",
-    value: stats ? Number(stats.totalReasoningTokens).toLocaleString() : "\u2014"
+    value: stats
+      ? Number(stats.totalReasoningTokens).toLocaleString()
+      : "\u2014"
   }
 ];
 

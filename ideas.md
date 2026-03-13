@@ -1,1 +1,0 @@
-in analaytics also show how much tokens used, total tokens, input tokens, output tokens, cached tokens, resoning tokens
