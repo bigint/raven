@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { ModelIcon } from "@/components/model-icon";
 import type { SessionRequest } from "../hooks/use-logs";
 
 interface RequestDetailProps {
@@ -58,7 +59,16 @@ export const RequestDetail = ({ request, onClose }: RequestDetailProps) => (
                 label="Timestamp"
                 value={new Date(request.createdAt).toLocaleString()}
               />
-              <Field label="Model" value={request.model} />
+              <div>
+                <p className="text-xs text-muted-foreground">Model</p>
+                <p className="mt-0.5 flex items-center gap-1.5 text-sm font-medium">
+                  <ModelIcon
+                    model={request.model}
+                    provider={request.provider}
+                  />
+                  {request.model}
+                </p>
+              </div>
               <Field
                 label="Duration"
                 value={`${request.latencyMs.toLocaleString()} ms`}

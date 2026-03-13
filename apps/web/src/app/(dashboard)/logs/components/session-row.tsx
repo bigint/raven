@@ -4,6 +4,7 @@ import { Badge } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, MessageSquare, Wrench } from "lucide-react";
 import { useState } from "react";
+import { ModelIcon } from "@/components/model-icon";
 import type { LogSession } from "../hooks/use-logs";
 import { sessionDetailQueryOptions } from "../hooks/use-logs";
 
@@ -70,7 +71,11 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
         </td>
         <td className="px-5 py-4 text-sm">
           {session.models.map((m) => (
-            <div className="whitespace-nowrap" key={m}>
+            <div
+              className="flex items-center gap-1.5 whitespace-nowrap"
+              key={m}
+            >
+              <ModelIcon model={m} size={14} />
               {m}
             </div>
           ))}
@@ -153,7 +158,10 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
                           })}
                         </td>
                         <td className="px-3 py-2.5 font-mono text-xs">
-                          {req.model}
+                          <span className="inline-flex items-center gap-1.5">
+                            <ModelIcon model={req.model} size={14} />
+                            {req.model}
+                          </span>
                         </td>
                         <td className="px-3 py-2.5 text-center">
                           {getStatusBadge(req.statusCode)}

@@ -2,6 +2,7 @@
 
 import { Button, Spinner } from "@raven/ui";
 import { ChevronLeft, ChevronRight, MessageSquare, Wrench } from "lucide-react";
+import { ModelIcon } from "@/components/model-icon";
 import type { ToolSession } from "../hooks/use-tools";
 
 interface ToolSessionsTableProps {
@@ -98,7 +99,11 @@ export const ToolSessionsTable = ({
                 </td>
                 <td className="px-5 py-4 text-sm">
                   {s.models.map((m) => (
-                    <div className="whitespace-nowrap" key={m}>
+                    <div
+                      className="flex items-center gap-1.5 whitespace-nowrap"
+                      key={m}
+                    >
+                      <ModelIcon model={m} size={14} />
                       {m}
                     </div>
                   ))}

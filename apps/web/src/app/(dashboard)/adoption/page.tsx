@@ -115,7 +115,11 @@ const AdoptionPage = () => {
       </div>
 
       {viewTab === "table" ? (
-        <UsageTable data={breakdownData} loading={isLoading} />
+        <UsageTable
+          data={breakdownData}
+          groupBy={groupBy}
+          loading={isLoading}
+        />
       ) : (
         <UsageBars data={breakdownData} metric={metric} />
       )}

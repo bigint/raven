@@ -3,6 +3,7 @@
 import { PROVIDER_LABELS } from "@raven/types";
 import { EmptyState, Spinner } from "@raven/ui";
 import { BarChart3 } from "lucide-react";
+import { ModelIcon, ProviderIcon } from "@/components/model-icon";
 import type { UsageRow } from "../hooks/use-analytics";
 
 interface TokenBreakdownProps {
@@ -59,8 +60,12 @@ export const TokenBreakdown = ({ usage, loading }: TokenBreakdownProps) => (
                 key={`${row.provider}-${row.model}-${idx}`}
               >
                 <td className="px-5 py-4">
-                  <div className="font-medium">{row.model}</div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="flex items-center gap-2 font-medium">
+                    <ModelIcon model={row.model} provider={row.provider} />
+                    {row.model}
+                  </div>
+                  <div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <ProviderIcon provider={row.provider} />
                     {row.providerConfigName ??
                       PROVIDER_LABELS[row.provider] ??
                       row.provider}

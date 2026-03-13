@@ -3,6 +3,7 @@
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
 import { Activity, ChevronLeft, ChevronRight } from "lucide-react";
+import { ModelIcon } from "@/components/model-icon";
 import type { RequestLog } from "../hooks/use-requests";
 import { PAGE_SIZE, PROVIDER_LABELS } from "../hooks/use-requests";
 
@@ -69,7 +70,12 @@ const columns: Column<RequestLog>[] = [
     className: "font-mono text-xs text-muted-foreground",
     header: "Model",
     key: "model",
-    render: (req) => req.model
+    render: (req) => (
+      <span className="inline-flex items-center gap-1.5">
+        <ModelIcon model={req.model} provider={req.provider} size={14} />
+        {req.model}
+      </span>
+    )
   },
   {
     header: "Status",

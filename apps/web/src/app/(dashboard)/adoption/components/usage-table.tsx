@@ -2,14 +2,16 @@
 
 import { Spinner } from "@raven/ui";
 import { BarChart2 } from "lucide-react";
+import { ModelIcon } from "@/components/model-icon";
 import type { BreakdownRow } from "../hooks/use-adoption";
 
 interface UsageTableProps {
   data: BreakdownRow[];
   loading: boolean;
+  groupBy?: "key" | "model";
 }
 
-export const UsageTable = ({ data, loading }: UsageTableProps) => {
+export const UsageTable = ({ data, loading, groupBy }: UsageTableProps) => {
   if (loading) {
     return (
       <div className="rounded-xl border border-border p-12 text-center">
@@ -62,7 +64,12 @@ export const UsageTable = ({ data, loading }: UsageTableProps) => {
               key={row.label}
             >
               <td className="px-5 py-4 font-medium text-primary">
-                {row.label}
+                <span className="inline-flex items-center gap-2">
+                  {groupBy === "model" && (
+                    <ModelIcon model={row.label} size={16} />
+                  )}
+                  {row.label}
+                </span>
               </td>
               <td className="px-5 py-4 text-right tabular-nums">
                 {row.cachedTokens.toLocaleString()}

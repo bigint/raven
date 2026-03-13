@@ -1,15 +1,6 @@
 import type { Database } from "@raven/db";
 import { requestLogs, virtualKeys } from "@raven/db";
-import {
-  and,
-  count,
-  eq,
-  gt,
-  isNotNull,
-  max,
-  sql,
-  sum
-} from "drizzle-orm";
+import { and, count, eq, gt, isNotNull, max, sql, sum } from "drizzle-orm";
 import type { z } from "zod";
 import type { AppContextWithQuery } from "@/lib/types";
 
