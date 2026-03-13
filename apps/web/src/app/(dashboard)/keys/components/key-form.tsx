@@ -3,6 +3,7 @@
 import { ENVIRONMENT_OPTIONS } from "@raven/types";
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
 import { useState } from "react";
+import { TextMorph } from "torph/react";
 import type { VirtualKey } from "../hooks/use-keys";
 
 interface FormState {
@@ -158,13 +159,15 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
             Cancel
           </Button>
           <Button disabled={submitting} type="submit">
-            {submitting
-              ? mode === "create"
-                ? "Creating..."
-                : "Saving..."
-              : mode === "create"
-                ? "Create Key"
-                : "Save Changes"}
+            <TextMorph>
+              {submitting
+                ? mode === "create"
+                  ? "Creating..."
+                  : "Saving..."
+                : mode === "create"
+                  ? "Create Key"
+                  : "Save Changes"}
+            </TextMorph>
           </Button>
         </div>
       </form>

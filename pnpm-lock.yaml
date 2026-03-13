@@ -123,6 +123,9 @@ importers:
       tailwind-merge:
         specifier: ^3.5.0
         version: 3.5.0
+      torph:
+        specifier: ^0.0.9
+        version: 0.0.9(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       zustand:
         specifier: ^5.0.11
         version: 5.0.11(@types/react@19.2.14)(immer@11.1.4)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
@@ -2534,6 +2537,23 @@ packages:
     resolution: {integrity: sha512-Bf+ILmBgretUrdJxzXM0SgXLZ3XfiaUuOj/IKQHuTXip+05Xn+uyEYdVg0kYDipTBcLrCVyUzAPz7QmArb0mmw==}
     engines: {node: '>=14.0.0'}
 
+  torph@0.0.9:
+    resolution: {integrity: sha512-WrFMtJwqXCfIXbLNuTOwHWff0XVm/Ewctb+71bFis3HykPvCXl1CHXapU0r67pQhAI323fsA1L2pGPeqxXeRRA==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+      svelte: '>=5'
+      vue: '>=3'
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
+
   tr46@5.1.1:
     resolution: {integrity: sha512-hdF5ZgjTqgAntKkklYw0R03MG2x/bSzTtkxmIRw/sTNV8YXsCJ1tfLAX23lhxhHJlEf3CRCOCGGWw3vI3GaSPw==}
     engines: {node: '>=18'}
@@ -4455,6 +4475,11 @@ snapshots:
       picomatch: 4.0.3
 
   tinyrainbow@3.1.0: {}
+
+  torph@0.0.9(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+    optionalDependencies:
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
 
   tr46@5.1.1:
     dependencies:

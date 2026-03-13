@@ -3,6 +3,7 @@
 import { ROLE_OPTIONS } from "@raven/types";
 import { Button, Input, Modal, Select } from "@raven/ui";
 import { useState } from "react";
+import { TextMorph } from "torph/react";
 
 interface InviteFormProps {
   onClose: () => void;
@@ -68,7 +69,9 @@ const InviteForm = ({ onClose, onSubmit, open }: InviteFormProps) => {
             Cancel
           </Button>
           <Button disabled={submitting} type="submit">
-            {submitting ? "Sending..." : "Send Invitation"}
+            <TextMorph>
+              {submitting ? "Sending..." : "Send Invitation"}
+            </TextMorph>
           </Button>
         </div>
       </form>

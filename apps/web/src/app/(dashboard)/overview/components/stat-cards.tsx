@@ -2,6 +2,7 @@
 
 import type { LucideIcon } from "lucide-react";
 import { Activity, Clock, DollarSign, Zap } from "lucide-react";
+import { TextMorph } from "torph/react";
 import type { Stats } from "../hooks/use-overview";
 
 interface StatCardsProps {
@@ -83,9 +84,9 @@ export const StatCards = ({ stats, activeKeys, loading }: StatCardsProps) => {
               {loading ? (
                 <div className="h-7 w-20 animate-pulse rounded-md bg-muted" />
               ) : (
-                <span className="text-2xl font-bold tabular-nums">
+                <TextMorph className="text-2xl font-bold tabular-nums">
                   {stat.value}
-                </span>
+                </TextMorph>
               )}
             </div>
             <p className="mt-1 text-xs text-muted-foreground">{stat.sub}</p>

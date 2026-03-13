@@ -4,6 +4,7 @@ import { Button, Input } from "@raven/ui";
 import { User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { TextMorph } from "torph/react";
 import { useSession } from "@/lib/auth-client";
 import { useUpdateProfile } from "../hooks/use-profile";
 
@@ -76,7 +77,9 @@ const ProfileForm = () => {
             }
             onClick={handleSave}
           >
-            {updateProfile.isPending ? "Saving..." : "Save Changes"}
+            <TextMorph>
+              {updateProfile.isPending ? "Saving..." : "Save Changes"}
+            </TextMorph>
           </Button>
         </div>
       </div>

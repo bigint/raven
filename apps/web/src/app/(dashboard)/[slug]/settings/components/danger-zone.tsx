@@ -2,6 +2,7 @@
 
 import { Button, Input } from "@raven/ui";
 import { AlertTriangle, Trash2 } from "lucide-react";
+import { TextMorph } from "torph/react";
 
 interface DangerZoneProps {
   orgName: string;
@@ -131,7 +132,9 @@ export const DangerZone = ({
               type="button"
               variant="destructive"
             >
-              {deleting ? "Deleting..." : "Delete Organization"}
+              <TextMorph>
+                {deleting ? "Deleting..." : "Delete Organization"}
+              </TextMorph>
             </Button>
           </div>
         </div>

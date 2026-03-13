@@ -2,6 +2,7 @@
 
 import { Button, Input, Modal, Select, Switch, Textarea } from "@raven/ui";
 import { useState } from "react";
+import { TextMorph } from "torph/react";
 import type { Guardrail } from "../hooks/use-guardrails";
 import {
   ACTION_OPTIONS,
@@ -255,13 +256,15 @@ const GuardrailForm = ({
             Cancel
           </Button>
           <Button disabled={isSubmitting} type="submit">
-            {isSubmitting
-              ? isEdit
-                ? "Saving..."
-                : "Adding..."
-              : isEdit
-                ? "Save Changes"
-                : "Add Guardrail"}
+            <TextMorph>
+              {isSubmitting
+                ? isEdit
+                  ? "Saving..."
+                  : "Adding..."
+                : isEdit
+                  ? "Save Changes"
+                  : "Add Guardrail"}
+            </TextMorph>
           </Button>
         </div>
       </form>

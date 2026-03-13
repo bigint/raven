@@ -3,6 +3,7 @@
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
 import { Pencil, Plus, Shield, Trash2 } from "lucide-react";
+import { TextMorph } from "torph/react";
 import type { Guardrail } from "../hooks/use-guardrails";
 import { ACTION_LABELS, TYPE_LABELS } from "../hooks/use-guardrails";
 
@@ -56,7 +57,7 @@ const columns: Column<Guardrail>[] = [
     key: "isEnabled",
     render: (guardrail) => (
       <Badge variant={guardrail.isEnabled ? "success" : "neutral"}>
-        {guardrail.isEnabled ? "On" : "Off"}
+        <TextMorph>{guardrail.isEnabled ? "On" : "Off"}</TextMorph>
       </Badge>
     )
   }

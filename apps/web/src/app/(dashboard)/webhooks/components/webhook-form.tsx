@@ -2,6 +2,7 @@
 
 import { Button, Input, Modal, Switch } from "@raven/ui";
 import { useState } from "react";
+import { TextMorph } from "torph/react";
 import type { Webhook } from "../hooks/use-webhooks";
 import {
   EVENT_CATEGORIES,
@@ -203,13 +204,15 @@ const WebhookForm = ({ open, onClose, editingWebhook }: WebhookFormProps) => {
             Cancel
           </Button>
           <Button disabled={isSubmitting} type="submit">
-            {isSubmitting
-              ? isEdit
-                ? "Saving..."
-                : "Adding..."
-              : isEdit
-                ? "Save Changes"
-                : "Add Webhook"}
+            <TextMorph>
+              {isSubmitting
+                ? isEdit
+                  ? "Saving..."
+                  : "Adding..."
+                : isEdit
+                  ? "Save Changes"
+                  : "Add Webhook"}
+            </TextMorph>
           </Button>
         </div>
       </form>

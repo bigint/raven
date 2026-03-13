@@ -2,6 +2,7 @@
 
 import { Button, Input, Modal, Select } from "@raven/ui";
 import { useState } from "react";
+import { TextMorph } from "torph/react";
 import type { Budget } from "../hooks/use-budgets";
 import {
   ENTITY_TYPE_OPTIONS,
@@ -181,13 +182,15 @@ const BudgetForm = ({ open, onClose, editingBudget }: BudgetFormProps) => {
             Cancel
           </Button>
           <Button disabled={isSubmitting} type="submit">
-            {isSubmitting
-              ? isEdit
-                ? "Saving..."
-                : "Adding..."
-              : isEdit
-                ? "Save Changes"
-                : "Add Budget"}
+            <TextMorph>
+              {isSubmitting
+                ? isEdit
+                  ? "Saving..."
+                  : "Adding..."
+                : isEdit
+                  ? "Save Changes"
+                  : "Add Budget"}
+            </TextMorph>
           </Button>
         </div>
       </form>

@@ -3,6 +3,7 @@
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
 import { GitBranch, Pencil, Plus, Trash2 } from "lucide-react";
+import { TextMorph } from "torph/react";
 import type { RoutingRule } from "../hooks/use-routing-rules";
 import { CONDITION_LABELS } from "../hooks/use-routing-rules";
 
@@ -59,7 +60,7 @@ const columns: Column<RoutingRule>[] = [
     key: "isEnabled",
     render: (rule) => (
       <Badge variant={rule.isEnabled ? "success" : "neutral"}>
-        {rule.isEnabled ? "Yes" : "No"}
+        <TextMorph>{rule.isEnabled ? "Yes" : "No"}</TextMorph>
       </Badge>
     )
   }

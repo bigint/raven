@@ -3,6 +3,7 @@
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
 import { Pencil, Plus, Trash2, Webhook as WebhookIcon } from "lucide-react";
+import { TextMorph } from "torph/react";
 import type { Webhook } from "../hooks/use-webhooks";
 
 interface WebhookListProps {
@@ -45,7 +46,7 @@ const columns: Column<Webhook>[] = [
     key: "isEnabled",
     render: (webhook) => (
       <Badge variant={webhook.isEnabled ? "success" : "neutral"}>
-        {webhook.isEnabled ? "Enabled" : "Disabled"}
+        <TextMorph>{webhook.isEnabled ? "Enabled" : "Disabled"}</TextMorph>
       </Badge>
     )
   }

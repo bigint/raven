@@ -2,6 +2,7 @@
 
 import { Button, Input, Modal } from "@raven/ui";
 import { useState } from "react";
+import { TextMorph } from "torph/react";
 
 interface TeamFormProps {
   onClose: () => void;
@@ -56,7 +57,7 @@ const TeamForm = ({ onClose, onSubmit, open }: TeamFormProps) => {
             Cancel
           </Button>
           <Button disabled={submitting} type="submit">
-            {submitting ? "Creating..." : "Create Team"}
+            <TextMorph>{submitting ? "Creating..." : "Create Team"}</TextMorph>
           </Button>
         </div>
       </form>

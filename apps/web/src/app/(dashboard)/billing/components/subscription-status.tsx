@@ -1,6 +1,7 @@
 "use client";
 
 import { CreditCard } from "lucide-react";
+import { TextMorph } from "torph/react";
 import type { Subscription } from "../hooks/use-billing";
 
 const STATUS_BADGE: Record<string, string> = {
@@ -38,7 +39,7 @@ export const SubscriptionStatus = ({
             <span
               className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium capitalize ${STATUS_BADGE[subscription.status] ?? "bg-muted text-muted-foreground"}`}
             >
-              {subscription.status.replace("_", " ")}
+              <TextMorph>{subscription.status.replace("_", " ")}</TextMorph>
             </span>
           </div>
           {subscription.planId !== "free" && (

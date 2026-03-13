@@ -4,6 +4,7 @@ import { Button } from "@raven/ui";
 import { Database, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { TextMorph } from "torph/react";
 import { api } from "@/lib/api";
 
 interface FlushResult {
@@ -103,7 +104,9 @@ export const CacheManagement = () => {
                 type="button"
                 variant="destructive"
               >
-                {flushing ? "Flushing..." : "Flush Cache"}
+                <TextMorph>
+                  {flushing ? "Flushing..." : "Flush Cache"}
+                </TextMorph>
               </Button>
             </div>
           </div>

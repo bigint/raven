@@ -3,6 +3,7 @@
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { TextMorph } from "torph/react";
 import { ProviderIcon } from "@/components/model-icon";
 import type { Provider } from "../hooks/use-providers";
 import {
@@ -201,13 +202,15 @@ const ProviderForm = ({
           </Button>
           <Button disabled={isSubmitting} type="submit">
             {isSubmitting && <Loader2 className="size-3.5 animate-spin" />}
-            {isSubmitting
-              ? isEdit
-                ? "Saving..."
-                : "Validating & adding..."
-              : isEdit
-                ? "Save Changes"
-                : "Add Provider"}
+            <TextMorph>
+              {isSubmitting
+                ? isEdit
+                  ? "Saving..."
+                  : "Validating & adding..."
+                : isEdit
+                  ? "Save Changes"
+                  : "Add Provider"}
+            </TextMorph>
           </Button>
         </div>
       </form>

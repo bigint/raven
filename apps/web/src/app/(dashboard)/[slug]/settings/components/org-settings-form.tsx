@@ -2,6 +2,7 @@
 
 import { Button, Input } from "@raven/ui";
 import { Building2 } from "lucide-react";
+import { TextMorph } from "torph/react";
 import type { OrgSettings } from "../hooks/use-org-settings";
 
 interface OrgSettingsFormProps {
@@ -114,7 +115,7 @@ export const OrgSettingsForm = ({
             onClick={onSave}
             type="button"
           >
-            {saving ? "Saving..." : "Save Changes"}
+            <TextMorph>{saving ? "Saving..." : "Save Changes"}</TextMorph>
           </Button>
         </div>
       )}

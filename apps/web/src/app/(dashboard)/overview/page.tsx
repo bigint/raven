@@ -2,6 +2,7 @@
 
 import { Key, Network, TrendingUp } from "lucide-react";
 import Link from "next/link";
+import { TextMorph } from "torph/react";
 import { RecentRequests } from "./components/recent-requests";
 import { StatCards } from "./components/stat-cards";
 import { UsageChart } from "./components/usage-chart";
@@ -46,11 +47,11 @@ const OverviewPage = () => {
               <Network className="size-4 text-orange-500" />
             </div>
             <div>
-              <p className="text-sm font-medium">
+              <TextMorph className="text-sm font-medium">
                 {providerCount > 0
                   ? `${providerCount} Providers`
                   : "Add Provider"}
-              </p>
+              </TextMorph>
               <p className="text-xs text-muted-foreground">
                 {providerCount > 0
                   ? "Manage configurations"
@@ -66,9 +67,9 @@ const OverviewPage = () => {
               <Key className="size-4 text-purple-500" />
             </div>
             <div>
-              <p className="text-sm font-medium">
+              <TextMorph className="text-sm font-medium">
                 {activeKeys > 0 ? `${activeKeys} Active Keys` : "Create Key"}
-              </p>
+              </TextMorph>
               <p className="text-xs text-muted-foreground">
                 {activeKeys > 0
                   ? "Manage virtual keys"

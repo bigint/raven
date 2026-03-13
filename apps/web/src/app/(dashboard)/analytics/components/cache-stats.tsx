@@ -1,6 +1,7 @@
 "use client";
 
 import { Database, HardDrive, TrendingUp, XCircle } from "lucide-react";
+import { TextMorph } from "torph/react";
 import type { CacheStats as CacheStatsData } from "../hooks/use-analytics";
 
 interface CacheStatsProps {
@@ -61,7 +62,9 @@ export const CacheStats = ({ cache, loading }: CacheStatsProps) => {
                 {loading ? (
                   <div className="h-7 w-20 animate-pulse rounded-md bg-muted" />
                 ) : (
-                  <span className="text-2xl font-bold">{card.value}</span>
+                  <TextMorph className="text-2xl font-bold tabular-nums">
+                    {card.value}
+                  </TextMorph>
                 )}
               </div>
             </div>

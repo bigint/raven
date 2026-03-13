@@ -2,6 +2,7 @@
 
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
 import { useState } from "react";
+import { TextMorph } from "torph/react";
 import type { RoutingRule } from "../hooks/use-routing-rules";
 import {
   CONDITION_OPTIONS,
@@ -210,13 +211,15 @@ const RoutingRuleForm = ({
             Cancel
           </Button>
           <Button disabled={isSubmitting} type="submit">
-            {isSubmitting
-              ? isEdit
-                ? "Saving..."
-                : "Adding..."
-              : isEdit
-                ? "Save Changes"
-                : "Add Rule"}
+            <TextMorph>
+              {isSubmitting
+                ? isEdit
+                  ? "Saving..."
+                  : "Adding..."
+                : isEdit
+                  ? "Save Changes"
+                  : "Add Rule"}
+            </TextMorph>
           </Button>
         </div>
       </form>

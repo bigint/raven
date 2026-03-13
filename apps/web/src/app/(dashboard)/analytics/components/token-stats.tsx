@@ -1,5 +1,6 @@
 "use client";
 
+import { TextMorph } from "torph/react";
 import type { Stats } from "../hooks/use-analytics";
 
 interface TokenStatsProps {
@@ -55,9 +56,9 @@ export const TokenStats = ({ stats, loading }: TokenStatsProps) => {
               {loading ? (
                 <div className="h-8 w-28 animate-pulse rounded-md bg-muted" />
               ) : (
-                <span className="text-3xl font-bold tabular-nums">
+                <TextMorph className="text-3xl font-bold tabular-nums">
                   {card.value}
-                </span>
+                </TextMorph>
               )}
             </div>
           </div>
