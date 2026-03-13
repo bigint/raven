@@ -6,7 +6,6 @@ import {
   useQueryClient
 } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { useOrgStore } from "@/stores/org";
 
 export interface Organization {
   id: string;
@@ -38,24 +37,6 @@ export const useUpdateProfile = () =>
   useMutation({
     mutationFn: (data: { name: string }) => api.put("/v1/user/profile", data)
   });
-
-export const useCreateOrg = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (data: { name: string }) =>
-      api.post<Organization>("/v1/user/orgs", data),
-    onSuccess: (created) => {
-      queryClient.invalidateQueries({ queryKey: ["user", "orgs"] });
-      useOrgStore.getState().setActiveOrg({
-        id: created.id,
-        name: created.name,
-        role: "owner",
-        slug: created.slug
-      });
-      window.location.reload();
-    }
-  });
-};
 
 export const useAcceptInvitation = () => {
   const queryClient = useQueryClient();

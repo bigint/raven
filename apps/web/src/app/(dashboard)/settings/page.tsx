@@ -3,8 +3,8 @@
 import { PageHeader } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { CreateOrgForm } from "../profile/components/create-org-form";
 import { OrgList } from "../profile/components/org-list";
 import { PendingInvitations } from "../profile/components/pending-invitations";
 import { ProfileForm } from "../profile/components/profile-form";
@@ -12,19 +12,17 @@ import {
   orgsQueryOptions,
   profileInvitationsQueryOptions,
   useAcceptInvitation,
-  useCreateOrg,
   useDeclineInvitation
 } from "../profile/hooks/use-profile";
 
 const SettingsPage = () => {
+  const router = useRouter();
   const orgsQuery = useQuery(orgsQueryOptions());
   const invitationsQuery = useQuery(profileInvitationsQueryOptions());
 
-  const createOrg = useCreateOrg();
   const acceptInvitation = useAcceptInvitation();
   const declineInvitation = useDeclineInvitation();
 
-  const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
 
   const handleAccept = async (id: string) => {
@@ -59,7 +57,7 @@ const SettingsPage = () => {
 
         <OrgList
           activeOrgId={activeOrgId}
-          onCreateOrg={() => setShowCreateOrgModal(true)}
+          onCreateOrg={() => router.push("/onboarding")}
           orgs={orgsQuery.data ?? []}
           orgsError={orgsQuery.isError ? orgsQuery.error.message : null}
           orgsLoading={orgsQuery.isLoading}
@@ -112,14 +110,6 @@ const SettingsPage = () => {
           </div>
         </div>
       </div>
-
-      <CreateOrgForm
-        onClose={() => setShowCreateOrgModal(false)}
-        onSubmit={async (data) => {
-          await createOrg.mutateAsync(data);
-        }}
-        open={showCreateOrgModal}
-      />
     </div>
   );
 };
