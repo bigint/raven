@@ -32,8 +32,7 @@ export const inviteUser =
       .select({ value: count() })
       .from(invitations)
       .where(eq(invitations.organizationId, orgId));
-    const totalSeats =
-      (memberCount?.value ?? 0) + (inviteCount?.value ?? 0);
+    const totalSeats = (memberCount?.value ?? 0) + (inviteCount?.value ?? 0);
     await checkResourceLimit(db, orgId, "maxSeats", totalSeats);
 
     // Check if user is already a member

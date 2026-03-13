@@ -60,7 +60,7 @@ export const analyzeContent = (
       const fn = t.function as Record<string, unknown> | undefined;
       if (fn && typeof fn.name === "string") {
         result.toolNames.push(fn.name);
-      // Anthropic: tools[].name
+        // Anthropic: tools[].name
       } else if (typeof t.name === "string") {
         result.toolNames.push(t.name);
       }

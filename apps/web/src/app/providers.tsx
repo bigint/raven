@@ -9,9 +9,9 @@ const Providers = ({ children }: { children: ReactNode }) => {
       new QueryClient({
         defaultOptions: {
           queries: {
+            refetchOnWindowFocus: "always",
             retry: 1,
-            staleTime: 30_000,
-            refetchOnWindowFocus: "always"
+            staleTime: 30_000
           }
         }
       })

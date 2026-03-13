@@ -36,9 +36,7 @@ export const clampAnalyticsRetention = async (
   const plan = await getOrgPlan(db, orgId);
   const retentionDays = PLAN_FEATURES[plan].analyticsRetentionDays;
 
-  const earliest = new Date(
-    Date.now() - retentionDays * 24 * 60 * 60 * 1000
-  );
+  const earliest = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
 
   if (!from) return earliest.toISOString();
 

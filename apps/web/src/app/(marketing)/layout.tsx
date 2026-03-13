@@ -6,11 +6,7 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
-export default function MarketingLayout({
-  children
-}: {
-  children: ReactNode;
-}) {
+export default function MarketingLayout({ children }: { children: ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (

@@ -1,8 +1,8 @@
 "use client";
 
 import { motion } from "motion/react";
-import type { ReactNode } from "react";
 import { redirect, usePathname } from "next/navigation";
+import type { ReactNode } from "react";
 import { useSession } from "@/lib/auth-client";
 import { Sidebar } from "./components/sidebar";
 import { useOrgs } from "./hooks/use-orgs";

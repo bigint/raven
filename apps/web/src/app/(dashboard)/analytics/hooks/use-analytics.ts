@@ -1,7 +1,7 @@
 "use client";
 
-import { PLAN_FEATURES } from "@raven/types";
 import type { Plan } from "@raven/types";
+import { PLAN_FEATURES } from "@raven/types";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { subscriptionQueryOptions } from "@/app/(dashboard)/billing/hooks/use-billing";

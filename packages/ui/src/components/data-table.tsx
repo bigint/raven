@@ -87,10 +87,7 @@ const DataTable = <T,>({
                 >
                   {columns.map((col) => (
                     <td
-                      className={cn(
-                        "px-3 py-3 sm:px-5 sm:py-4",
-                        col.className
-                      )}
+                      className={cn("px-3 py-3 sm:px-5 sm:py-4", col.className)}
                       key={col.key}
                     >
                       {col.render(item, idx)}
