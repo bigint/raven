@@ -21,7 +21,7 @@ export const PlanSubscription = ({ settings }: PlanSubscriptionProps) => {
 
   return (
     <div className="rounded-xl border border-border">
-      <div className="flex items-center gap-3 border-b border-border px-6 py-4">
+      <div className="flex items-center gap-3 border-b border-border px-4 py-4 sm:px-6">
         <div className="rounded-lg bg-primary/10 p-2">
           <CreditCard className="size-4 text-primary" />
         </div>
@@ -32,8 +32,8 @@ export const PlanSubscription = ({ settings }: PlanSubscriptionProps) => {
           </p>
         </div>
       </div>
-      <div className="px-6 py-5">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="px-4 py-4 sm:px-6 sm:py-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
             <div className="space-y-1">
               <span className="text-sm font-medium text-muted-foreground">

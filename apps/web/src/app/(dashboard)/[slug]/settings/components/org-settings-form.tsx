@@ -34,7 +34,7 @@ export const OrgSettingsForm = ({
   onSave
 }: OrgSettingsFormProps) => (
   <div className="rounded-xl border border-border">
-    <div className="flex items-center gap-3 border-b border-border px-6 py-4">
+    <div className="flex items-center gap-3 border-b border-border px-4 py-4 sm:px-6">
       <div className="rounded-lg bg-primary/10 p-2">
         <Building2 className="size-4 text-primary" />
       </div>
@@ -45,7 +45,7 @@ export const OrgSettingsForm = ({
         </p>
       </div>
     </div>
-    <div className="space-y-4 px-6 py-5">
+    <div className="space-y-4 px-4 py-4 sm:px-6 sm:py-5">
       {saveError && (
         <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {saveError}

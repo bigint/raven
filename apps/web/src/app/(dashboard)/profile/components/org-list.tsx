@@ -45,7 +45,7 @@ const OrgList = ({
   orgsLoading
 }: OrgListProps) => (
   <div className="rounded-xl border border-border">
-    <div className="flex items-center justify-between border-b border-border px-6 py-4">
+    <div className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
       <div className="flex items-center gap-3">
         <div className="rounded-lg bg-primary/10 p-2">
           <Building2 className="size-4 text-primary" />
@@ -62,7 +62,7 @@ const OrgList = ({
         Create Organization
       </Button>
     </div>
-    <div className="px-6 py-5">
+    <div className="px-4 py-4 sm:px-6 sm:py-5">
       {orgsError && (
         <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {orgsError}

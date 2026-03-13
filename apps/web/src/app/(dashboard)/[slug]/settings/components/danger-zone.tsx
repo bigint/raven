@@ -30,7 +30,7 @@ export const DangerZone = ({
 }: DangerZoneProps) => (
   <>
     <div className="rounded-xl border border-destructive/30">
-      <div className="flex items-center gap-3 border-b border-destructive/30 px-6 py-4">
+      <div className="flex items-center gap-3 border-b border-destructive/30 px-4 py-4 sm:px-6">
         <div className="rounded-lg bg-destructive/10 p-2">
           <AlertTriangle className="size-4 text-destructive" />
         </div>
@@ -43,8 +43,8 @@ export const DangerZone = ({
           </p>
         </div>
       </div>
-      <div className="px-6 py-5">
-        <div className="flex items-center justify-between rounded-md border border-destructive/20 bg-destructive/5 px-4 py-4">
+      <div className="px-4 py-4 sm:px-6 sm:py-5">
+        <div className="flex flex-col gap-3 rounded-md border border-destructive/20 bg-destructive/5 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-medium">Delete Organization</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
@@ -53,7 +53,7 @@ export const DangerZone = ({
             </p>
           </div>
           <Button
-            className="ml-4 shrink-0"
+            className="shrink-0"
             onClick={onOpenConfirm}
             type="button"
             variant="destructive"
@@ -79,7 +79,7 @@ export const DangerZone = ({
           onKeyDown={(e) => e.stopPropagation()}
           role="dialog"
         >
-          <div className="px-6 py-5">
+          <div className="px-4 py-4 sm:px-6 sm:py-5">
             <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-destructive/10">
               <Trash2 className="size-5 text-destructive" />
             </div>
@@ -113,7 +113,7 @@ export const DangerZone = ({
               </div>
             )}
           </div>
-          <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
+          <div className="flex justify-end gap-2 border-t border-border px-4 py-4 sm:px-6">
             <Button
               disabled={deleting}
               onClick={onCloseConfirm}

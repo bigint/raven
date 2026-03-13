@@ -44,7 +44,7 @@ const EmptyState = () => (
 
 export const RecentRequests = ({ requests, loading }: RecentRequestsProps) => (
   <div className="rounded-xl border border-border">
-    <div className="flex items-center justify-between border-b border-border px-6 py-4">
+    <div className="flex items-center justify-between border-b border-border px-4 py-4 sm:px-6">
       <div className="flex items-center gap-3">
         <div className="rounded-lg bg-primary/10 p-2">
           <Activity className="size-4 text-primary" />
@@ -59,7 +59,7 @@ export const RecentRequests = ({ requests, loading }: RecentRequestsProps) => (
         <ArrowRight className="size-3" />
       </Link>
     </div>
-    <div className="px-6 py-4">
+    <div className="px-4 py-4 sm:px-6">
       {loading ? (
         <LoadingSkeleton />
       ) : requests.length === 0 ? (

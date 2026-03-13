@@ -26,7 +26,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen flex-col overflow-hidden md:flex-row">
       <Sidebar
         activeOrg={activeOrg}
         onSwitchOrg={switchOrg}

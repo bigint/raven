@@ -23,7 +23,7 @@ const PendingInvitations = ({
   respondingTo
 }: PendingInvitationsProps) => (
   <div className="rounded-xl border border-border">
-    <div className="flex items-center gap-3 border-b border-border px-6 py-4">
+    <div className="flex items-center gap-3 border-b border-border px-4 py-4 sm:px-6">
       <div className="rounded-lg bg-primary/10 p-2">
         <Mail className="size-4 text-primary" />
       </div>
@@ -34,7 +34,7 @@ const PendingInvitations = ({
         </p>
       </div>
     </div>
-    <div className="px-6 py-5">
+    <div className="px-4 py-4 sm:px-6 sm:py-5">
       {invitationsError && (
         <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {invitationsError}
@@ -54,7 +54,7 @@ const PendingInvitations = ({
             const RoleIcon = badge.icon;
             return (
               <div
-                className="flex items-center justify-between rounded-lg border border-border px-4 py-4"
+                className="flex flex-col gap-3 rounded-lg border border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
                 key={inv.id}
               >
                 <div className="flex items-center gap-4">

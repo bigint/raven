@@ -30,7 +30,7 @@ export const CacheManagement = () => {
   return (
     <>
       <div className="rounded-xl border border-border">
-        <div className="flex items-center gap-3 border-b border-border px-6 py-4">
+        <div className="flex items-center gap-3 border-b border-border px-4 py-4 sm:px-6">
           <div className="rounded-lg bg-primary/10 p-2">
             <Database className="size-4 text-primary" />
           </div>
@@ -41,8 +41,8 @@ export const CacheManagement = () => {
             </p>
           </div>
         </div>
-        <div className="px-6 py-5">
-          <div className="flex items-center justify-between rounded-md border border-border bg-muted/30 px-4 py-4">
+        <div className="px-4 py-4 sm:px-6 sm:py-5">
+          <div className="flex flex-col gap-3 rounded-md border border-border bg-muted/30 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-medium">Flush Cache</p>
               <p className="mt-0.5 text-xs text-muted-foreground">
@@ -51,7 +51,7 @@ export const CacheManagement = () => {
               </p>
             </div>
             <Button
-              className="ml-4 shrink-0"
+              className="shrink-0"
               onClick={() => setShowConfirm(true)}
               type="button"
               variant="destructive"
@@ -77,7 +77,7 @@ export const CacheManagement = () => {
             onKeyDown={(e) => e.stopPropagation()}
             role="dialog"
           >
-            <div className="px-6 py-5">
+            <div className="px-4 py-4 sm:px-6 sm:py-5">
               <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-destructive/10">
                 <Trash2 className="size-5 text-destructive" />
               </div>
@@ -88,7 +88,7 @@ export const CacheManagement = () => {
                 responses are cached.
               </p>
             </div>
-            <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
+            <div className="flex justify-end gap-2 border-t border-border px-4 py-4 sm:px-6">
               <Button
                 disabled={flushing}
                 onClick={() => setShowConfirm(false)}
