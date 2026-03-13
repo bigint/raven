@@ -50,14 +50,14 @@ const DataTable = <T,>({
   }
 
   return (
-    <div className="rounded-xl border border-border">
-      <table className="w-full text-sm">
+    <div className="rounded-xl border border-border overflow-x-auto">
+      <table className="w-full min-w-[600px] text-sm">
         <thead>
           <tr className="border-b border-border">
             {columns.map((col) => (
               <th
                 className={cn(
-                  "px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground",
+                  "px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-5 sm:py-3",
                   col.headerClassName
                 )}
                 key={col.key}
@@ -77,7 +77,7 @@ const DataTable = <T,>({
               key={keyExtractor(item)}
             >
               {columns.map((col) => (
-                <td className={cn("px-5 py-4", col.className)} key={col.key}>
+                <td className={cn("px-3 py-3 sm:px-5 sm:py-4", col.className)} key={col.key}>
                   {col.render(item, idx)}
                 </td>
               ))}

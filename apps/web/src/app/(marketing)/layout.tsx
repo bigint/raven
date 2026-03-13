@@ -1,4 +1,8 @@
+"use client";
+
+import { Menu, X } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function MarketingLayout({
@@ -6,10 +10,12 @@ export default function MarketingLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-center gap-8">
             <Link className="flex items-center gap-2.5" href="/">
               <div className="flex size-8 items-center justify-center rounded-lg bg-foreground">
@@ -35,25 +41,70 @@ export default function MarketingLayout({
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <Link
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className="hidden rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
               href="/sign-in"
             >
               Sign in
             </Link>
             <Link
-              className="rounded-lg bg-foreground px-4 py-1.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
+              className="hidden rounded-lg bg-foreground px-4 py-1.5 text-sm font-medium text-background transition-opacity hover:opacity-90 sm:inline-flex"
               href="/sign-up"
             >
               Get Started
             </Link>
+            <button
+              className="inline-flex items-center justify-center rounded-lg p-1.5 text-muted-foreground transition-colors hover:text-foreground sm:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              type="button"
+            >
+              {mobileMenuOpen ? (
+                <X className="size-5" />
+              ) : (
+                <Menu className="size-5" />
+              )}
+            </button>
           </div>
         </div>
+        {mobileMenuOpen && (
+          <div className="border-t border-border px-4 py-4 sm:hidden">
+            <nav className="flex flex-col gap-2">
+              <Link
+                className="rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                href="/pricing"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Pricing
+              </Link>
+              <Link
+                className="rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                href="/docs"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Docs
+              </Link>
+              <Link
+                className="rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:text-foreground"
+                href="/sign-in"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Sign in
+              </Link>
+              <Link
+                className="rounded-lg bg-foreground px-4 py-2 text-center text-sm font-medium text-background transition-opacity hover:opacity-90"
+                href="/sign-up"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Get Started
+              </Link>
+            </nav>
+          </div>
+        )}
       </header>
 
       <main className="flex-1">{children}</main>
 
       <footer className="border-t border-border">
-        <div className="mx-auto max-w-6xl px-6 py-12">
+        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
             <div className="col-span-2 sm:col-span-1">
               <div className="flex items-center gap-2.5">

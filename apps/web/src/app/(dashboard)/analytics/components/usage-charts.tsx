@@ -64,17 +64,17 @@ export const UsageCharts = ({
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold">Analytics</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Track usage, costs, and performance across providers.
           </p>
         </div>
-        <div className="flex items-center gap-1 rounded-lg border border-border p-1">
+        <div className="flex items-center gap-1 overflow-x-auto rounded-lg border border-border p-1">
           {dateRangeOptions.map((opt) => (
             <button
-              className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+              className={`shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                 dateRange === opt.value
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground"

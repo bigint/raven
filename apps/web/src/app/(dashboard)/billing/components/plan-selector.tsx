@@ -30,11 +30,11 @@ export const PlanSelector = ({
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-base font-semibold">Available Plans</h2>
         <div className="flex items-center gap-1 rounded-lg border border-border p-1">
           <button
-            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+            className={`shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
               billingInterval === "monthly"
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:text-foreground"
@@ -45,7 +45,7 @@ export const PlanSelector = ({
             Monthly
           </button>
           <button
-            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+            className={`shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
               billingInterval === "yearly"
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:text-foreground"

@@ -61,7 +61,7 @@ export default function HomePage() {
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-muted/50 to-background" />
-        <div className="mx-auto max-w-4xl px-6 pb-20 pt-24 text-center sm:pt-32 lg:pt-40">
+        <div className="mx-auto max-w-4xl px-4 pb-16 pt-16 text-center sm:px-6 sm:pb-20 sm:pt-32 lg:pt-40">
           <FadeIn>
             <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-1.5 text-sm text-muted-foreground">
               <span className="size-2 rounded-full bg-success animate-pulse" />
@@ -70,7 +70,7 @@ export default function HomePage() {
           </FadeIn>
 
           <FadeIn delay={0.05}>
-            <h1 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
+            <h1 className="text-3xl font-bold tracking-tight sm:text-5xl lg:text-7xl">
               One gateway for{" "}
               <span className="bg-gradient-to-r from-foreground to-foreground/40 bg-clip-text text-transparent">
                 all your AI
@@ -87,7 +87,7 @@ export default function HomePage() {
           </FadeIn>
 
           <FadeIn delay={0.15}>
-            <div className="mt-10 flex items-center justify-center gap-4">
+            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
               <Link
                 className="inline-flex items-center gap-2 rounded-lg bg-foreground px-6 py-3 text-sm font-medium text-background transition-opacity hover:opacity-90"
                 href="/sign-up"
@@ -117,7 +117,7 @@ export default function HomePage() {
                   Terminal
                 </span>
               </div>
-              <div className="p-5 text-left font-mono text-sm leading-relaxed">
+              <div className="overflow-x-auto p-4 text-left font-mono text-xs leading-relaxed sm:p-5 sm:text-sm">
                 <p className="text-muted-foreground">
                   <span className="text-foreground/50"># </span>Just change your
                   base URL
@@ -155,7 +155,7 @@ export default function HomePage() {
 
       {/* Providers */}
       <section className="border-y border-border bg-muted/30 py-12">
-        <div className="mx-auto max-w-4xl px-6 text-center">
+        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
           <p className="mb-6 text-sm font-medium text-muted-foreground">
             Works with every major AI provider
           </p>
@@ -174,7 +174,7 @@ export default function HomePage() {
 
       {/* Features */}
       <section className="py-24">
-        <div className="mx-auto max-w-5xl px-6">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="mb-14 text-center">
             <FadeIn>
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
@@ -212,7 +212,7 @@ export default function HomePage() {
 
       {/* How it works */}
       <section className="border-t border-border bg-muted/20 py-24">
-        <div className="mx-auto max-w-4xl px-6">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <div className="mb-14 text-center">
             <FadeIn>
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
@@ -249,7 +249,7 @@ export default function HomePage() {
 
       {/* Stats */}
       <section className="py-24">
-        <div className="mx-auto max-w-4xl px-6">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <FadeIn>
             <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
               {[
@@ -274,12 +274,12 @@ export default function HomePage() {
 
       {/* CTA */}
       <section className="border-t border-border bg-muted/30 py-24">
-        <div className="mx-auto max-w-2xl px-6 text-center">
+        <div className="mx-auto max-w-2xl px-4 text-center sm:px-6">
           <FadeIn>
             <div className="mb-6 inline-flex rounded-lg bg-foreground/5 p-3">
               <Zap className="size-6 text-foreground" />
             </div>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
               Ready to simplify your AI stack?
             </h2>
             <p className="mx-auto mt-4 max-w-md text-muted-foreground">

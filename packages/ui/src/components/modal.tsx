@@ -53,7 +53,7 @@ const Modal = ({
               <motion.div
                 animate={{ opacity: 1, scale: 1 }}
                 className={cn(
-                  "fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-background shadow-xl",
+                  "fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-background shadow-xl max-h-[calc(100vh-4rem)] overflow-y-auto",
                   sizeMap[size]
                 )}
                 exit={{ opacity: 0, scale: 0.95 }}

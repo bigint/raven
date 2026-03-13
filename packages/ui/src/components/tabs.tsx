@@ -15,11 +15,11 @@ interface TabsProps {
 }
 
 const Tabs = ({ tabs, value, onChange }: TabsProps) => (
-  <div className="mb-6 flex gap-1 border-b border-border">
+  <div className="mb-6 flex gap-1 overflow-x-auto border-b border-border">
     {tabs.map((tab) => (
       <button
         className={cn(
-          "flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors",
+          "flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-4 py-2 text-sm font-medium transition-colors",
           value === tab.value
             ? "border-primary text-foreground"
             : "border-transparent text-muted-foreground hover:text-foreground"

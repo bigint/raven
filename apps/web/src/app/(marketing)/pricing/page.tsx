@@ -152,10 +152,10 @@ export default function PricingPage() {
   const [yearly, setYearly] = useState(false);
 
   return (
-    <div className="px-8 py-24">
+    <div className="px-4 py-16 sm:px-8 sm:py-24">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-16">
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
             Simple, transparent pricing
           </h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
@@ -266,7 +266,7 @@ export default function PricingPage() {
             Compare plans
           </h2>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[600px] text-sm">
               <thead>
                 <tr className="border-b border-border">
                   <th className="text-left py-3 pr-4 font-medium text-muted-foreground">

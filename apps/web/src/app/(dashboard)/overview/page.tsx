@@ -17,7 +17,7 @@ const OverviewPage = () => {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">Overview</h1>
+        <h1 className="text-xl font-bold sm:text-2xl">Overview</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Here&apos;s what&apos;s happening across your organization.
         </p>

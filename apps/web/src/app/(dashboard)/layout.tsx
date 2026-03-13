@@ -34,7 +34,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         user={session.user}
       />
       <main className="flex-1 overflow-auto overscroll-contain">
-        <div className="px-8 py-6">{children}</div>
+        <div className="px-4 py-4 md:px-8 md:py-6">{children}</div>
       </main>
     </div>
   );
