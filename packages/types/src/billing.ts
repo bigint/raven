@@ -27,6 +27,42 @@ export type NumericFeatureKey = {
   [K in keyof PlanFeatures]: PlanFeatures[K] extends number ? K : never;
 }[keyof PlanFeatures];
 
+export interface PlanDetails {
+  readonly name: string;
+  readonly description: string;
+  readonly priceMonthly: number;
+  readonly priceYearly: number;
+  readonly isPopular?: boolean;
+}
+
+export const PLAN_DETAILS: Record<Plan, PlanDetails> = {
+  free: {
+    description: "For individuals and small experiments.",
+    name: "Free",
+    priceMonthly: 0,
+    priceYearly: 0
+  },
+  pro: {
+    description: "For professionals who need more power.",
+    isPopular: true,
+    name: "Pro",
+    priceMonthly: 10,
+    priceYearly: 96
+  },
+  team: {
+    description: "For growing teams with advanced needs.",
+    name: "Team",
+    priceMonthly: 20,
+    priceYearly: 192
+  },
+  enterprise: {
+    description: "For organizations that need everything.",
+    name: "Enterprise",
+    priceMonthly: 100,
+    priceYearly: 960
+  }
+};
+
 export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
   enterprise: {
     analyticsRetentionDays: 365,

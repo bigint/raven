@@ -1,47 +1,12 @@
 import type { Database } from "@raven/db";
-import { PLAN_FEATURES } from "@raven/types";
+import { PLAN_DETAILS, PLAN_FEATURES } from "@raven/types";
 import type { Context } from "hono";
 
-export const PLAN_DETAILS: Record<
-  string,
-  {
-    name: string;
-    description: string;
-    priceMonthly: number;
-    priceYearly: number;
-    isPopular?: boolean;
-  }
-> = {
-  enterprise: {
-    description: "For organizations that need everything.",
-    name: "Enterprise",
-    priceMonthly: 100,
-    priceYearly: 960
-  },
-  free: {
-    description: "For individuals and small experiments.",
-    name: "Free",
-    priceMonthly: 0,
-    priceYearly: 0
-  },
-  pro: {
-    description: "For professionals who need more power.",
-    isPopular: true,
-    name: "Pro",
-    priceMonthly: 10,
-    priceYearly: 96
-  },
-  team: {
-    description: "For growing teams with advanced needs.",
-    name: "Team",
-    priceMonthly: 20,
-    priceYearly: 192
-  }
-};
+export { PLAN_DETAILS };
 
 export const getPlans = (_db: Database) => async (c: Context) => {
   const plans = Object.entries(PLAN_FEATURES).map(([plan, features]) => {
-    const details = PLAN_DETAILS[plan];
+    const details = PLAN_DETAILS[plan as keyof typeof PLAN_DETAILS];
     const featureList = [
       {
         included: true,

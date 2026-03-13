@@ -1,5 +1,6 @@
 "use client";
 
+import { PLAN_DETAILS } from "@raven/types";
 import { Check } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -8,23 +9,17 @@ const plans = [
   {
     cta: "Get started free",
     ctaHref: "/sign-up",
-    description: "For individuals exploring AI integrations.",
     features: [
       "1,000 requests/mo",
       "1 provider",
       "1 virtual key",
       "Community support"
     ],
-    monthlyPrice: 0,
-    name: "Free",
-    popular: false,
-    unit: "/mo",
-    yearlyPrice: 0
+    plan: "free" as const
   },
   {
     cta: "Start free trial",
     ctaHref: "/sign-up?plan=pro",
-    description: "For developers shipping AI-powered products.",
     features: [
       "50,000 requests/mo",
       "Unlimited providers",
@@ -32,16 +27,11 @@ const plans = [
       "Email support",
       "Analytics dashboard"
     ],
-    monthlyPrice: 10,
-    name: "Pro",
-    popular: true,
-    unit: "/mo",
-    yearlyPrice: 8
+    plan: "pro" as const
   },
   {
     cta: "Start free trial",
     ctaHref: "/sign-up?plan=team",
-    description: "For teams that need collaboration and control.",
     features: [
       "200,000 requests/mo",
       "Unlimited providers",
@@ -50,16 +40,11 @@ const plans = [
       "Audit logs",
       "Team management"
     ],
-    monthlyPrice: 20,
-    name: "Team",
-    popular: false,
-    unit: "/mo",
-    yearlyPrice: 16
+    plan: "team" as const
   },
   {
     cta: "Contact sales",
     ctaHref: "mailto:sales@raven.dev",
-    description: "For organizations with custom requirements.",
     features: [
       "Unlimited requests",
       "Unlimited providers",
@@ -69,11 +54,7 @@ const plans = [
       "Custom contracts",
       "On-prem option"
     ],
-    monthlyPrice: null,
-    name: "Enterprise",
-    popular: false,
-    unit: "",
-    yearlyPrice: null
+    plan: "enterprise" as const
   }
 ];
 
@@ -191,72 +172,88 @@ export default function PricingPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {plans.map((plan) => (
-            <div
-              className={`relative rounded-xl border p-6 flex flex-col ${
-                plan.popular ? "border-primary shadow-lg" : "border-border"
-              }`}
-              key={plan.name}
-            >
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full">
-                    Most Popular
-                  </span>
-                </div>
-              )}
+          {plans.map((plan) => {
+            const details = PLAN_DETAILS[plan.plan];
+            const monthlyPrice = details.priceMonthly;
+            const yearlyPerMonth = Math.round(details.priceYearly / 12);
+            const displayPrice = yearly ? yearlyPerMonth : monthlyPrice;
+            const isCustom = plan.plan === "enterprise";
 
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold">{plan.name}</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {plan.description}
-                </p>
-                <div className="mt-4">
-                  {plan.monthlyPrice !== null ? (
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-bold">
-                        ${yearly ? plan.yearlyPrice : plan.monthlyPrice}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        {plan.unit}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex items-baseline">
-                      <span className="text-4xl font-bold">Custom</span>
-                    </div>
-                  )}
-                  {yearly &&
-                    plan.yearlyPrice !== null &&
-                    plan.yearlyPrice > 0 && (
+            return (
+              <div
+                className={`relative rounded-xl border p-6 flex flex-col ${
+                  details.isPopular
+                    ? "border-primary shadow-lg"
+                    : "border-border"
+                }`}
+                key={plan.plan}
+              >
+                {details.isPopular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full">
+                      Most Popular
+                    </span>
+                  </div>
+                )}
+
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold">{details.name}</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {details.description}
+                  </p>
+                  <div className="mt-4">
+                    {!isCustom ? (
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-bold">
+                          ${displayPrice}
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          /mo
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-bold">
+                          ${displayPrice}
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          /mo
+                        </span>
+                      </div>
+                    )}
+                    {yearly && details.priceYearly > 0 && (
                       <p className="text-xs text-muted-foreground mt-1">
-                        Billed annually (${plan.yearlyPrice * 12}/yr)
+                        Billed annually (${details.priceYearly}/yr)
                       </p>
                     )}
+                  </div>
                 </div>
+
+                <ul className="space-y-3 mb-8 flex-1">
+                  {plan.features.map((feature) => (
+                    <li
+                      className="flex items-start gap-2 text-sm"
+                      key={feature}
+                    >
+                      <Check className="size-4 text-success shrink-0 mt-0.5" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  className={`block text-center px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${
+                    details.isPopular
+                      ? "bg-primary text-primary-foreground hover:opacity-90"
+                      : "border border-border hover:bg-muted"
+                  }`}
+                  href={plan.ctaHref}
+                >
+                  {plan.cta}
+                </Link>
               </div>
-
-              <ul className="space-y-3 mb-8 flex-1">
-                {plan.features.map((feature) => (
-                  <li className="flex items-start gap-2 text-sm" key={feature}>
-                    <Check className="size-4 text-success shrink-0 mt-0.5" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                className={`block text-center px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${
-                  plan.popular
-                    ? "bg-primary text-primary-foreground hover:opacity-90"
-                    : "border border-border hover:bg-muted"
-                }`}
-                href={plan.ctaHref}
-              >
-                {plan.cta}
-              </Link>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="mt-24">

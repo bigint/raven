@@ -81,7 +81,6 @@ export const OrgSettingsForm = ({
         <div className="space-y-1.5">
           {isAdmin ? (
             <Input
-              className="font-mono"
               description="Lowercase letters, numbers, and hyphens. 3-50 characters."
               error={editSlug && !isSlugValid ? "Invalid slug" : null}
               id="org-slug"
@@ -101,7 +100,7 @@ export const OrgSettingsForm = ({
               >
                 Slug
               </label>
-              <div className="rounded-md border border-input bg-muted/50 px-3 py-2 font-mono text-sm">
+              <div className="rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">
                 {settings.slug}
               </div>
             </>
