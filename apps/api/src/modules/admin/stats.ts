@@ -25,7 +25,11 @@ export const getAdminStats = (db: Database) => async (c: Context) => {
         .groupBy(subscriptions.plan),
       db
         .select({
+          totalCachedTokens: sum(requestLogs.cachedTokens),
           totalCost: sum(requestLogs.cost),
+          totalInputTokens: sum(requestLogs.inputTokens),
+          totalOutputTokens: sum(requestLogs.outputTokens),
+          totalReasoningTokens: sum(requestLogs.reasoningTokens),
           totalRequests: count()
         })
         .from(requestLogs)
@@ -46,9 +50,13 @@ export const getAdminStats = (db: Database) => async (c: Context) => {
   return c.json({
     data: {
       planDistribution,
+      totalCachedTokens: Number(requestStats?.totalCachedTokens ?? 0),
       totalCost: requestStats?.totalCost ?? "0",
       totalDomains: domainCount?.value ?? 0,
+      totalInputTokens: Number(requestStats?.totalInputTokens ?? 0),
       totalOrgs: orgCount?.value ?? 0,
+      totalOutputTokens: Number(requestStats?.totalOutputTokens ?? 0),
+      totalReasoningTokens: Number(requestStats?.totalReasoningTokens ?? 0),
       totalRequests: requestStats?.totalRequests ?? 0,
       totalUsers: userCount?.value ?? 0
     }

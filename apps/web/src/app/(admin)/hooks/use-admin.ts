@@ -10,6 +10,10 @@ export interface AdminStats {
   totalRequests: number;
   totalCost: string;
   totalDomains: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalReasoningTokens: number;
+  totalCachedTokens: number;
 }
 
 export interface AdminUser {

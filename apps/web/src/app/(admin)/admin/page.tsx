@@ -91,6 +91,36 @@ const AdminOverviewPage = () => {
         })}
       </div>
 
+      <div className="mt-8 rounded-xl border border-border p-5">
+        <h2 className="mb-4 text-sm font-semibold">Token Usage (30d)</h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          {[
+            { label: "Input", value: stats?.totalInputTokens ?? 0 },
+            { label: "Output", value: stats?.totalOutputTokens ?? 0 },
+            { label: "Reasoning", value: stats?.totalReasoningTokens ?? 0 },
+            { label: "Cached", value: stats?.totalCachedTokens ?? 0 },
+            {
+              label: "Total",
+              value:
+                (stats?.totalInputTokens ?? 0) +
+                (stats?.totalOutputTokens ?? 0) +
+                (stats?.totalReasoningTokens ?? 0)
+            }
+          ].map((item) => (
+            <div key={item.label}>
+              <p className="text-xs text-muted-foreground">{item.label}</p>
+              {isPending ? (
+                <div className="mt-1 h-6 w-16 animate-pulse rounded-md bg-muted" />
+              ) : (
+                <p className="mt-1 text-lg font-semibold tabular-nums">
+                  {item.value.toLocaleString()}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
       {Object.keys(planDistribution).length > 0 && (
         <div className="mt-8 rounded-xl border border-border p-5">
           <h2 className="mb-4 text-sm font-semibold">Plan Distribution</h2>
