@@ -44,6 +44,9 @@ importers:
       '@raven/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@raven/email':
+        specifier: workspace:*
+        version: link:../../packages/email
       '@raven/types':
         specifier: workspace:*
         version: link:../../packages/types

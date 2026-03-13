@@ -1,4 +1,8 @@
+import { render } from "@react-email/components";
 import { Resend } from "resend";
+import { BudgetAlertEmail } from "./templates/budget-alert";
+import { InvitationEmail } from "./templates/invitation";
+import { WelcomeEmail } from "./templates/welcome";
 
 let resend: Resend | null = null;
 
@@ -22,5 +26,47 @@ export const sendEmail = async (options: {
     html: options.html,
     subject: options.subject,
     to: options.to
+  });
+};
+
+export const sendWelcomeEmail = async (
+  to: string,
+  name: string,
+  dashboardUrl?: string
+): Promise<void> => {
+  const html = await render(WelcomeEmail({ dashboardUrl, name }));
+  await sendEmail({ html, subject: "Welcome to Raven", to });
+};
+
+export const sendInvitationEmail = async (
+  to: string,
+  inviterName: string,
+  orgName: string,
+  inviteUrl: string
+): Promise<void> => {
+  const html = await render(
+    InvitationEmail({ inviteUrl, inviterName, orgName })
+  );
+  await sendEmail({
+    html,
+    subject: `${inviterName} invited you to ${orgName} on Raven`,
+    to
+  });
+};
+
+export const sendBudgetAlertEmail = async (
+  to: string,
+  budgetName: string,
+  currentUsage: number,
+  limit: number,
+  threshold: number
+): Promise<void> => {
+  const html = await render(
+    BudgetAlertEmail({ budgetName, currentUsage, limit, threshold })
+  );
+  await sendEmail({
+    html,
+    subject: `Budget alert: ${budgetName} has reached its threshold`,
+    to
   });
 };

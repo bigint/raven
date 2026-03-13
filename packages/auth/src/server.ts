@@ -5,7 +5,11 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { organization } from "better-auth/plugins";
 
-export const createAuth = (db: Database, env: Env) => {
+interface AuthOptions {
+  onUserCreated?: (user: { id: string; name: string; email: string }) => void;
+}
+
+export const createAuth = (db: Database, env: Env, options?: AuthOptions) => {
   return betterAuth({
     baseURL: env.BETTER_AUTH_URL,
     database: drizzleAdapter(db, {
@@ -21,6 +25,21 @@ export const createAuth = (db: Database, env: Env) => {
         verification: schema.verifications
       }
     }),
+    databaseHooks: {
+      user: {
+        create: {
+          after: async (user) => {
+            if (options?.onUserCreated) {
+              options.onUserCreated({
+                email: user.email,
+                id: user.id,
+                name: user.name
+              });
+            }
+          }
+        }
+      }
+    },
     emailAndPassword: {
       enabled: true
     },
