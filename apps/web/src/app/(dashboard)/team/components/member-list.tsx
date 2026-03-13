@@ -19,7 +19,7 @@ interface MemberListProps {
 const MemberList = ({ members, onDelete }: MemberListProps) => {
   if (members.length === 0) {
     return (
-      <EmptyState icon={<Users className="size-8" />} title="No members yet." />
+      <EmptyState icon={<Users className="size-8" />} title="No members yet" />
     );
   }
 

@@ -1,6 +1,8 @@
 "use client";
 
+import { EmptyState, Spinner } from "@raven/ui";
 import { PROVIDER_LABELS } from "@raven/types";
+import { BarChart3 } from "lucide-react";
 import type { UsageRow } from "../hooks/use-analytics";
 
 interface TokenBreakdownProps {
@@ -10,14 +12,8 @@ interface TokenBreakdownProps {
 
 const LoadingState = () => (
   <div className="rounded-xl border border-border p-12 text-center">
-    <div className="mx-auto size-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+    <Spinner className="mx-auto" />
     <p className="mt-3 text-sm text-muted-foreground">Loading analytics...</p>
-  </div>
-);
-
-const EmptyState = () => (
-  <div className="rounded-xl border border-border p-12 text-center">
-    <p className="text-muted-foreground">No usage data for this period.</p>
   </div>
 );
 
@@ -27,7 +23,10 @@ export const TokenBreakdown = ({ usage, loading }: TokenBreakdownProps) => (
     {loading ? (
       <LoadingState />
     ) : usage.length === 0 ? (
-      <EmptyState />
+      <EmptyState
+        icon={<BarChart3 className="size-8" />}
+        title="No usage data yet"
+      />
     ) : (
       <div className="rounded-xl border border-border">
         <table className="w-full text-sm">

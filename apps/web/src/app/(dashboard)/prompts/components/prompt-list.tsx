@@ -2,7 +2,7 @@
 
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
-import { Eye, Pencil, Plus, Trash2 } from "lucide-react";
+import { Eye, MessageSquare, Pencil, Plus, Trash2 } from "lucide-react";
 import type { Prompt } from "../hooks/use-prompts";
 
 interface PromptListProps {
@@ -112,7 +112,8 @@ const PromptList = ({
           Add your first prompt
         </Button>
       }
-      emptyTitle="No prompts created yet."
+      emptyIcon={<MessageSquare className="size-8" />}
+      emptyTitle="No prompts yet"
       keyExtractor={(p) => p.id}
       loading={loading}
       loadingMessage="Loading prompts..."

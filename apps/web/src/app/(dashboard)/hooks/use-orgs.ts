@@ -1,7 +1,7 @@
 "use client";
 
 import { queryOptions, useQuery } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { api } from "@/lib/api";
 import { useOrgStore } from "@/stores/org";
 
@@ -23,12 +23,14 @@ export const useOrgs = () => {
   const { activeOrg, setActiveOrg } = useOrgStore();
 
   // Restore saved org or fall back to first
-  if (orgs.length > 0 && !activeOrg) {
-    const org = orgs[0];
-    if (org) {
-      setActiveOrg(org);
+  useEffect(() => {
+    if (orgs.length > 0 && !activeOrg) {
+      const org = orgs[0];
+      if (org) {
+        setActiveOrg(org);
+      }
     }
-  }
+  }, [orgs, activeOrg, setActiveOrg]);
 
   const switchOrg = useCallback(
     (org: Org) => {

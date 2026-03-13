@@ -2,7 +2,7 @@
 
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Activity, ChevronLeft, ChevronRight } from "lucide-react";
 import type { RequestLog } from "../hooks/use-requests";
 import { PAGE_SIZE, PROVIDER_LABELS } from "../hooks/use-requests";
 
@@ -108,7 +108,7 @@ const RequestTable = ({
   requests,
   loading,
   loadingMessage = "Loading requests...",
-  emptyMessage = "No requests found for the selected filters.",
+  emptyMessage = "No requests yet",
   total,
   page,
   onPageChange,
@@ -121,6 +121,7 @@ const RequestTable = ({
       <DataTable
         columns={columns}
         data={requests}
+        emptyIcon={<Activity className="size-8" />}
         emptyTitle={emptyMessage}
         keyExtractor={(r) => r.id}
         loading={loading}

@@ -22,7 +22,7 @@ const TeamList = ({ onCreateTeam, onDelete, teams }: TeamListProps) => {
           </Button>
         }
         icon={<Users className="size-8" />}
-        title="No teams created yet."
+        title="No teams yet"
       />
     );
   }

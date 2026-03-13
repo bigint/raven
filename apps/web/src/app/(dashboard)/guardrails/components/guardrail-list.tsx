@@ -2,7 +2,7 @@
 
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Shield, Trash2 } from "lucide-react";
 import type { Guardrail } from "../hooks/use-guardrails";
 import { ACTION_LABELS, TYPE_LABELS } from "../hooks/use-guardrails";
 
@@ -110,7 +110,8 @@ const GuardrailList = ({
           Add your first guardrail
         </Button>
       }
-      emptyTitle="No guardrails configured yet."
+      emptyIcon={<Shield className="size-8" />}
+      emptyTitle="No guardrails yet"
       keyExtractor={(g) => g.id}
       loading={loading}
       loadingMessage="Loading guardrails..."

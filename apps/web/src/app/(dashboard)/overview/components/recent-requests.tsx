@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyState } from "@raven/ui";
 import { PROVIDER_LABELS } from "@raven/types";
 import { Activity, ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -35,11 +36,12 @@ const LoadingSkeleton = () => (
   </div>
 );
 
-const EmptyState = () => (
-  <div className="py-6 text-center">
-    <Activity className="mx-auto size-8 text-muted-foreground/30" />
-    <p className="mt-2 text-sm text-muted-foreground">No requests yet</p>
-  </div>
+const RequestsEmptyState = () => (
+  <EmptyState
+    bordered={false}
+    icon={<Activity className="size-8" />}
+    title="No requests yet"
+  />
 );
 
 export const RecentRequests = ({ requests, loading }: RecentRequestsProps) => (
@@ -63,7 +65,7 @@ export const RecentRequests = ({ requests, loading }: RecentRequestsProps) => (
       {loading ? (
         <LoadingSkeleton />
       ) : requests.length === 0 ? (
-        <EmptyState />
+        <RequestsEmptyState />
       ) : (
         <div className="space-y-2">
           {requests.map((req) => (

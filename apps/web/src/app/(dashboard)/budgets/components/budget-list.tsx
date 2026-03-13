@@ -2,7 +2,7 @@
 
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { DollarSign, Pencil, Plus, Trash2 } from "lucide-react";
 import type { Budget } from "../hooks/use-budgets";
 import { ENTITY_TYPE_LABELS } from "../hooks/use-budgets";
 
@@ -109,7 +109,8 @@ const BudgetList = ({
           Add your first budget
         </Button>
       }
-      emptyTitle="No budgets configured yet."
+      emptyIcon={<DollarSign className="size-8" />}
+      emptyTitle="No budgets yet"
       keyExtractor={(b) => b.id}
       loading={loading}
       loadingMessage="Loading budgets..."

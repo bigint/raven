@@ -38,7 +38,7 @@ const InvitationList = ({
           </Button>
         }
         icon={<Mail className="size-8" />}
-        title="No pending invitations."
+        title="No pending invitations yet"
       />
     );
   }

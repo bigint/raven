@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, Button, Spinner } from "@raven/ui";
+import { Badge, Button, EmptyState, Spinner } from "@raven/ui";
 import { Building2, Check, Clock, Mail, X } from "lucide-react";
 import type { ProfileInvitation } from "../hooks/use-profile";
 import { getRoleBadge } from "./org-list";
@@ -43,10 +43,11 @@ const PendingInvitations = ({
       {invitationsLoading ? (
         <Spinner />
       ) : invitations.length === 0 ? (
-        <div className="py-8 text-center">
-          <Mail className="mx-auto size-8 text-muted-foreground/50" />
-          <p className="mt-3 text-muted-foreground">No pending invitations.</p>
-        </div>
+        <EmptyState
+          bordered={false}
+          icon={<Mail className="size-8" />}
+          title="No pending invitations yet"
+        />
       ) : (
         <div className="space-y-3">
           {invitations.map((inv) => {

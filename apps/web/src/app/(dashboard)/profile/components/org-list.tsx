@@ -1,7 +1,7 @@
 "use client";
 
 import type { Column } from "@raven/ui";
-import { Badge, Button, DataTable, Spinner } from "@raven/ui";
+import { Badge, Button, DataTable, EmptyState, Spinner } from "@raven/ui";
 import { Building2, Check, Crown, Shield, User } from "lucide-react";
 import { useOrgStore } from "@/stores/org";
 import type { Organization } from "../hooks/use-profile";
@@ -71,10 +71,11 @@ const OrgList = ({
       {orgsLoading ? (
         <Spinner />
       ) : orgs.length === 0 ? (
-        <div className="py-8 text-center">
-          <Building2 className="mx-auto size-8 text-muted-foreground/50" />
-          <p className="mt-3 text-muted-foreground">No organizations yet.</p>
-        </div>
+        <EmptyState
+          bordered={false}
+          icon={<Building2 className="size-8" />}
+          title="No organizations yet"
+        />
       ) : (
         <DataTable
           columns={

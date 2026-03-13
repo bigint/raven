@@ -2,7 +2,7 @@
 
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { GitBranch, Pencil, Plus, Trash2 } from "lucide-react";
 import type { RoutingRule } from "../hooks/use-routing-rules";
 import { CONDITION_LABELS } from "../hooks/use-routing-rules";
 
@@ -113,7 +113,8 @@ const RoutingRuleList = ({
           Add your first routing rule
         </Button>
       }
-      emptyTitle="No routing rules configured yet."
+      emptyIcon={<GitBranch className="size-8" />}
+      emptyTitle="No routing rules yet"
       keyExtractor={(r) => r.id}
       loading={loading}
       loadingMessage="Loading routing rules..."

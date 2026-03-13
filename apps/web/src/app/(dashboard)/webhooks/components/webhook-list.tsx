@@ -2,7 +2,7 @@
 
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2, Webhook as WebhookIcon } from "lucide-react";
 import type { Webhook } from "../hooks/use-webhooks";
 
 interface WebhookListProps {
@@ -99,7 +99,8 @@ const WebhookList = ({
           Add your first webhook
         </Button>
       }
-      emptyTitle="No webhooks configured yet."
+      emptyIcon={<WebhookIcon className="size-8" />}
+      emptyTitle="No webhooks yet"
       keyExtractor={(w) => w.id}
       loading={loading}
       loadingMessage="Loading webhooks..."

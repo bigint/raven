@@ -32,7 +32,7 @@ const KeyList = ({ keys, onCreate, onDelete, onEdit }: KeyListProps) => {
           </Button>
         }
         icon={<Key className="size-8" />}
-        title="No keys created yet."
+        title="No keys yet"
       />
     );
   }

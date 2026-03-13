@@ -1,14 +1,16 @@
 import type { ReactNode } from "react";
+import { cn } from "../cn";
 
 interface EmptyStateProps {
   icon?: ReactNode;
   title: string;
   description?: string;
   action?: ReactNode;
+  bordered?: boolean;
 }
 
-const EmptyState = ({ icon, title, description, action }: EmptyStateProps) => (
-  <div className="rounded-xl border border-border p-12 text-center">
+const EmptyState = ({ icon, title, description, action, bordered = true }: EmptyStateProps) => (
+  <div className={cn("p-12 text-center", bordered && "rounded-xl border border-border")}>
     {icon && (
       <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
         {icon}

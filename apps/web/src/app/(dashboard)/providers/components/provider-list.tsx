@@ -2,7 +2,7 @@
 
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
-import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Check, Pencil, Plug, Plus, Trash2, X } from "lucide-react";
 import type { Provider } from "../hooks/use-providers";
 import { PROVIDER_LABELS } from "../hooks/use-providers";
 
@@ -112,7 +112,8 @@ const ProviderList = ({
           Add your first provider
         </Button>
       }
-      emptyTitle="No providers configured yet."
+      emptyIcon={<Plug className="size-8" />}
+      emptyTitle="No providers yet"
       keyExtractor={(p) => p.id}
       loading={loading}
       loadingMessage="Loading providers..."
