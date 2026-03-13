@@ -85,9 +85,7 @@ export const sessionDetailQueryOptions = (sessionId: string) =>
   queryOptions({
     enabled: !!sessionId,
     queryFn: () =>
-      api.get<{ data: SessionRequest[] }>(
-        `/v1/analytics/sessions/${sessionId}`
-      ),
+      api.get<SessionRequest[]>(`/v1/analytics/sessions/${sessionId}`),
     queryKey: ["session", sessionId]
   });
 

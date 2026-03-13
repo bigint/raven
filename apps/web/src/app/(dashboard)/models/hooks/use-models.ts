@@ -39,9 +39,7 @@ const rangeToFrom = (range: DateRange): string =>
 export const modelsQueryOptions = (range: DateRange) =>
   queryOptions({
     queryFn: () =>
-      api.get<{ data: ModelRow[] }>(
-        `/v1/analytics/models?from=${rangeToFrom(range)}`
-      ),
+      api.get<ModelRow[]>(`/v1/analytics/models?from=${rangeToFrom(range)}`),
     queryKey: ["models", range]
   });
 
@@ -62,7 +60,7 @@ export const useModels = () => {
   const query = useQuery(modelsQueryOptions(dateRange));
 
   return {
-    data: query.data?.data ?? [],
+    data: query.data ?? [],
     dateRange,
     dateRangeOptions: DATE_RANGE_OPTIONS,
     error: query.error?.message ?? null,

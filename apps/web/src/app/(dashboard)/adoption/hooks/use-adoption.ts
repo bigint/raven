@@ -49,7 +49,7 @@ const rangeToFrom = (range: DateRange): string =>
 export const adoptionChartQueryOptions = (range: DateRange) =>
   queryOptions({
     queryFn: () =>
-      api.get<{ data: ChartDataPoint[] }>(
+      api.get<ChartDataPoint[]>(
         `/v1/analytics/adoption/chart?from=${rangeToFrom(range)}`
       ),
     queryKey: ["adoption", "chart", range]
@@ -61,7 +61,7 @@ export const adoptionBreakdownQueryOptions = (
 ) =>
   queryOptions({
     queryFn: () =>
-      api.get<{ data: BreakdownRow[] }>(
+      api.get<BreakdownRow[]>(
         `/v1/analytics/adoption/breakdown?from=${rangeToFrom(range)}&groupBy=${groupBy}`
       ),
     queryKey: ["adoption", "breakdown", range, groupBy]
@@ -97,8 +97,8 @@ export const useAdoption = () => {
   );
 
   return {
-    breakdownData: breakdownQuery.data?.data ?? [],
-    chartData: chartQuery.data?.data ?? [],
+    breakdownData: breakdownQuery.data ?? [],
+    chartData: chartQuery.data ?? [],
     dateRange,
     dateRangeOptions: DATE_RANGE_OPTIONS,
     error: chartQuery.error?.message ?? breakdownQuery.error?.message ?? null,

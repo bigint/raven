@@ -44,7 +44,7 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
     enabled: expanded && !!session.sessionId
   });
 
-  const requests = detail?.data ?? [];
+  const requests = detail ?? [];
 
   return (
     <>

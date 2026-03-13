@@ -37,7 +37,7 @@ const LogsPage = () => {
 
   const handleRequestClick = (requestId: string, sessionId: string) => {
     setActiveSessionId(sessionId);
-    const requests = sessionDetail?.data ?? [];
+    const requests = sessionDetail ?? [];
     const req = requests.find((r) => r.id === requestId);
     if (req) {
       setSelectedRequest(req);

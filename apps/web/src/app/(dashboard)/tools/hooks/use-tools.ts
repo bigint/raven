@@ -53,7 +53,7 @@ const rangeToFrom = (range: DateRange): string =>
 export const toolStatsQueryOptions = (range: DateRange) =>
   queryOptions({
     queryFn: () =>
-      api.get<{ data: ToolDailyStats[] }>(
+      api.get<ToolDailyStats[]>(
         `/v1/analytics/tools/stats?from=${rangeToFrom(range)}`
       ),
     queryKey: ["tools", "stats", range]
@@ -96,7 +96,7 @@ export const useTools = () => {
   const sessionsQuery = useQuery(toolSessionsQueryOptions(dateRange, page));
 
   return {
-    chartData: statsQuery.data?.data ?? [],
+    chartData: statsQuery.data ?? [],
     dateRange,
     dateRangeOptions: DATE_RANGE_OPTIONS,
     error: statsQuery.error?.message ?? sessionsQuery.error?.message ?? null,
