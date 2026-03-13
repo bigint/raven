@@ -2,7 +2,7 @@
 
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Provider } from "../hooks/use-providers";
 import {
   PROVIDER_LABELS,
@@ -49,19 +49,6 @@ const ProviderForm = ({
   );
   const [showApiKey, setShowApiKey] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (editingProvider) {
-      setForm({
-        apiKey: "",
-        isEnabled: editingProvider.isEnabled,
-        name: editingProvider.name ?? "",
-        provider: editingProvider.provider
-      });
-    } else {
-      setForm(DEFAULT_FORM);
-    }
-  }, [editingProvider]);
 
   const createMutation = useCreateProvider();
   const updateMutation = useUpdateProvider();

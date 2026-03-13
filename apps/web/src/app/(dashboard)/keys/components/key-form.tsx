@@ -2,7 +2,7 @@
 
 import { ENVIRONMENT_OPTIONS } from "@raven/types";
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { VirtualKey } from "../hooks/use-keys";
 
 interface FormState {
@@ -58,29 +58,6 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
   });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (editingKey && mode === "edit") {
-      setForm({
-        environment: editingKey.environment,
-        expiresAt: editingKey.expiresAt
-          ? new Date(editingKey.expiresAt).toISOString().slice(0, 16)
-          : "",
-        isActive: editingKey.isActive,
-        name: editingKey.name,
-        rateLimitRpd:
-          editingKey.rateLimitRpd !== null
-            ? String(editingKey.rateLimitRpd)
-            : "",
-        rateLimitRpm:
-          editingKey.rateLimitRpm !== null
-            ? String(editingKey.rateLimitRpm)
-            : ""
-      });
-    } else {
-      setForm(DEFAULT_FORM);
-    }
-  }, [editingKey, mode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -158,6 +135,7 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
           />
         </div>
         <Input
+          disabled={mode === "edit" && !!editingKey?.expiresAt}
           id="key-expires"
           label="Expiration Date"
           onChange={(e) =>

@@ -75,6 +75,7 @@ const ProvidersPage = () => {
 
       <ProviderForm
         editingProvider={editingProvider}
+        key={editingProvider?.id ?? "create"}
         onClose={() => {
           setFormOpen(false);
           setEditingProvider(null);

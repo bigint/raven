@@ -130,6 +130,7 @@ export default function KeysPage() {
 
       <KeyForm
         editingKey={editingKey}
+        key={editingKey?.id ?? modalMode}
         mode={modalMode}
         onClose={() => {
           setModalMode(null);

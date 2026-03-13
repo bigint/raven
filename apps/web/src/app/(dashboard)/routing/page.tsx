@@ -72,6 +72,7 @@ const RoutingPage = () => {
 
       <RoutingRuleForm
         editingRule={editingRule}
+        key={editingRule?.id ?? "create"}
         onClose={() => {
           setFormOpen(false);
           setEditingRule(null);

@@ -41,16 +41,18 @@ export const SubscriptionStatus = ({
               {subscription.status.replace("_", " ")}
             </span>
           </div>
-          <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
-            <span className="text-muted-foreground">Period start</span>
-            <span>
-              {new Date(subscription.currentPeriodStart).toLocaleDateString()}
-            </span>
-            <span className="text-muted-foreground">Period end</span>
-            <span>
-              {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
-            </span>
-          </div>
+          {subscription.planId !== "free" && (
+            <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
+              <span className="text-muted-foreground">Period start</span>
+              <span>
+                {new Date(subscription.currentPeriodStart).toLocaleDateString()}
+              </span>
+              <span className="text-muted-foreground">Period end</span>
+              <span>
+                {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+              </span>
+            </div>
+          )}
           {subscription.cancelAtPeriodEnd && (
             <p className="text-sm text-yellow-600">
               Your subscription will cancel at the end of the current period.

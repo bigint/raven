@@ -2,7 +2,7 @@
 
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useEventStream } from "@/hooks/use-event-stream";
 import { api } from "@/lib/api";
@@ -43,11 +43,13 @@ export const useOrgSettings = () => {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  if (settings && !isInitialized) {
-    setEditName(settings.name);
-    setEditSlug(settings.slug);
-    setIsInitialized(true);
-  }
+  useEffect(() => {
+    if (settings && !isInitialized) {
+      setEditName(settings.name);
+      setEditSlug(settings.slug);
+      setIsInitialized(true);
+    }
+  }, [settings, isInitialized]);
 
   useEventStream({
     enabled: !isLoading,

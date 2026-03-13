@@ -68,6 +68,7 @@ const WebhooksPage = () => {
 
       <WebhookForm
         editingWebhook={editingWebhook}
+        key={editingWebhook?.id ?? "create"}
         onClose={() => {
           setFormOpen(false);
           setEditingWebhook(null);

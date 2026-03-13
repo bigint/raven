@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { RoutingRule } from "../hooks/use-routing-rules";
 import {
   CONDITION_OPTIONS,
@@ -55,22 +55,6 @@ const RoutingRuleForm = ({
       : DEFAULT_FORM
   );
   const [formError, setFormError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (editingRule) {
-      setForm({
-        condition: editingRule.condition,
-        conditionValue: editingRule.conditionValue,
-        isEnabled: editingRule.isEnabled,
-        name: editingRule.name,
-        priority: String(editingRule.priority),
-        sourceModel: editingRule.sourceModel,
-        targetModel: editingRule.targetModel
-      });
-    } else {
-      setForm(DEFAULT_FORM);
-    }
-  }, [editingRule]);
 
   const createMutation = useCreateRoutingRule();
   const updateMutation = useUpdateRoutingRule();

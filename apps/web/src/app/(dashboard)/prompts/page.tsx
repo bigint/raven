@@ -71,6 +71,7 @@ const PromptsPage = () => {
 
       <PromptForm
         editingPrompt={editingPrompt}
+        key={editingPrompt?.id ?? "create"}
         onClose={() => {
           setFormOpen(false);
           setEditingPrompt(null);

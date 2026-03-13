@@ -68,6 +68,7 @@ const BudgetsPage = () => {
 
       <BudgetForm
         editingBudget={editingBudget}
+        key={editingBudget?.id ?? "create"}
         onClose={() => {
           setFormOpen(false);
           setEditingBudget(null);

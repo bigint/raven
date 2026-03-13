@@ -70,6 +70,7 @@ const GuardrailsPage = () => {
 
       <GuardrailForm
         editingGuardrail={editingGuardrail}
+        key={editingGuardrail?.id ?? "create"}
         onClose={() => {
           setFormOpen(false);
           setEditingGuardrail(null);
