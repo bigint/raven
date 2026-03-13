@@ -10,9 +10,11 @@ import { initEventBus } from "./lib/events";
 import { getRedis } from "./lib/redis";
 import { initWebhookDispatcher } from "./lib/webhook-dispatcher";
 import { createAuthMiddleware } from "./middleware/auth";
+import { platformAdminMiddleware } from "./middleware/platform-admin";
 import { requestId } from "./middleware/request-id";
 import { requestTiming } from "./middleware/request-timing";
 import { createTenantMiddleware } from "./middleware/tenant";
+import { createAdminModule } from "./modules/admin/index";
 import { createAnalyticsModule } from "./modules/analytics/index";
 import { createAuditLogsModule } from "./modules/audit-logs/index";
 import { createAuthModule } from "./modules/auth/index";
@@ -95,6 +97,13 @@ const userRoutes = new Hono();
 userRoutes.use("*", createAuthMiddleware(auth));
 userRoutes.route("/", createUserModule(db));
 app.route("/v1/user", userRoutes);
+
+// Admin routes (session auth + platform admin check)
+const adminRoutes = new Hono();
+adminRoutes.use("*", createAuthMiddleware(auth));
+adminRoutes.use("*", platformAdminMiddleware);
+adminRoutes.route("/", createAdminModule(db));
+app.route("/v1/admin", adminRoutes);
 
 // Protected API routes (session auth + tenant)
 const v1 = new Hono();

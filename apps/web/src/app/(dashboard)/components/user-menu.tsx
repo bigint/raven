@@ -1,13 +1,13 @@
 "use client";
 
-import { ChevronDown, LogOut, Moon, Settings, Sun } from "lucide-react";
+import { ChevronDown, LogOut, Moon, Settings, ShieldCheck, Sun } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { signOut } from "@/lib/auth-client";
 import { useThemeStore } from "@/stores/theme";
 
 interface UserMenuProps {
-  user: { name?: string | null; email?: string | null };
+  user: { name?: string | null; email?: string | null; role?: string };
 }
 
 export const UserMenu = ({ user }: UserMenuProps) => {
@@ -44,6 +44,16 @@ export const UserMenu = ({ user }: UserMenuProps) => {
     <div className="relative border-t border-border px-3 py-3" ref={ref}>
       {open && (
         <div className="absolute bottom-full left-2 right-2 mb-1 rounded-md border border-border bg-popover py-1 shadow-md ring-1 ring-black/5">
+          {user.role === "admin" && (
+            <Link
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              href="/admin"
+              onClick={() => setOpen(false)}
+            >
+              <ShieldCheck className="size-4" />
+              Admin Panel
+            </Link>
+          )}
           <Link
             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
             href="/settings"
