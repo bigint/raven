@@ -9,6 +9,8 @@ interface PillTabOption<T extends string = string> {
   value: T;
   label: string;
   extra?: ReactNode;
+  disabled?: boolean;
+  tooltip?: string;
 }
 
 interface PillTabsProps<T extends string = string> {
@@ -36,12 +38,17 @@ const PillTabs = <T extends string = string>({
       >
         {options.map((opt) => (
           <button
-            className="relative shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
+            className={cn(
+              "relative shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+              opt.disabled && "cursor-not-allowed opacity-50"
+            )}
+            disabled={opt.disabled}
             key={opt.value}
-            onClick={() => onChange(opt.value)}
+            onClick={() => !opt.disabled && onChange(opt.value)}
+            title={opt.tooltip}
             type="button"
           >
-            {value === opt.value && (
+            {value === opt.value && !opt.disabled && (
               <motion.div
                 className="absolute inset-0 rounded-md bg-primary"
                 layoutId="pill-indicator"
@@ -55,9 +62,11 @@ const PillTabs = <T extends string = string>({
             <span
               className={cn(
                 "relative z-10",
-                value === opt.value
-                  ? "text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                opt.disabled
+                  ? "text-muted-foreground"
+                  : value === opt.value
+                    ? "text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
               )}
             >
               {opt.label}

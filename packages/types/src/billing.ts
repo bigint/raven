@@ -94,7 +94,7 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
 
     hasTeams: false,
     maxBudgets: 10,
-    maxProviders: Number.POSITIVE_INFINITY,
+    maxProviders: 10,
     maxRequestsPerMonth: 500_000,
     maxSeats: 1,
     maxVirtualKeys: 20
@@ -108,7 +108,7 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     maxBudgets: Number.POSITIVE_INFINITY,
     maxProviders: Number.POSITIVE_INFINITY,
     maxRequestsPerMonth: 2_000_000,
-    maxSeats: 20,
+    maxSeats: 30,
     maxVirtualKeys: Number.POSITIVE_INFINITY
   }
 } as const;

@@ -1,5 +1,6 @@
 "use client";
 
+import type { PillTabOption } from "@raven/ui";
 import { PillTabs } from "@raven/ui";
 import type { LucideIcon } from "lucide-react";
 import { Activity, Clock, DollarSign, Zap } from "lucide-react";
@@ -9,7 +10,7 @@ interface UsageChartsProps {
   stats: Stats | null;
   loading: boolean;
   dateRange: DateRange;
-  dateRangeOptions: { value: DateRange; label: string }[];
+  dateRangeOptions: PillTabOption<DateRange>[];
   onDateRangeChange: (range: DateRange) => void;
 }
 

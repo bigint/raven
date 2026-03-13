@@ -1,12 +1,13 @@
 import type { Database } from "@raven/db";
 import { invitations, members, users } from "@raven/db";
-import { and, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import type { z } from "zod";
 import { ConflictError, ForbiddenError, NotFoundError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { created, success } from "@/lib/response";
 import type { AppContext, AppContextWithJson } from "@/lib/types";
 import { logAudit } from "@/modules/audit-logs/index";
+import { checkResourceLimit } from "@/modules/proxy/plan-gate";
 import type { inviteSchema } from "./schema";
 
 type InviteBody = z.infer<typeof inviteSchema>;
@@ -21,6 +22,19 @@ export const inviteUser =
     }
 
     const { email, role } = c.req.valid("json");
+
+    // Check seat limit (members + pending invitations)
+    const [memberCount] = await db
+      .select({ value: count() })
+      .from(members)
+      .where(eq(members.organizationId, orgId));
+    const [inviteCount] = await db
+      .select({ value: count() })
+      .from(invitations)
+      .where(eq(invitations.organizationId, orgId));
+    const totalSeats =
+      (memberCount?.value ?? 0) + (inviteCount?.value ?? 0);
+    await checkResourceLimit(db, orgId, "maxSeats", totalSeats);
 
     // Check if user is already a member
     const [existingUser] = await db

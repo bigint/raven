@@ -1,7 +1,10 @@
 "use client";
 
+import { PLAN_FEATURES } from "@raven/types";
+import type { Plan } from "@raven/types";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
+import { subscriptionQueryOptions } from "@/app/(dashboard)/billing/hooks/use-billing";
 import { api } from "@/lib/api";
 
 interface Stats {
@@ -45,6 +48,12 @@ interface CacheStats {
 }
 
 type DateRange = "7d" | "30d" | "90d";
+
+const RANGE_DAYS: Record<DateRange, number> = {
+  "7d": 7,
+  "30d": 30,
+  "90d": 90
+};
 
 const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
   { label: "Last 7 days", value: "7d" },
@@ -90,15 +99,31 @@ export const useAnalytics = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  const subscriptionQuery = useQuery(subscriptionQueryOptions());
+  const currentPlan = (subscriptionQuery.data?.planId as Plan) ?? "free";
+  const retentionDays = PLAN_FEATURES[currentPlan].analyticsRetentionDays;
+
   const rangeParam = searchParams.get("range") as DateRange | null;
   const dateRange =
-    rangeParam && VALID_RANGES.includes(rangeParam) ? rangeParam : "30d";
+    rangeParam && VALID_RANGES.includes(rangeParam) ? rangeParam : "7d";
 
   const setDateRange = (range: DateRange) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("range", range);
     router.replace(`?${params.toString()}`);
   };
+
+  const dateRangeOptions = DATE_RANGE_OPTIONS.map((opt) => {
+    const days = RANGE_DAYS[opt.value];
+    const allowed = days <= retentionDays;
+    return {
+      ...opt,
+      disabled: !allowed,
+      tooltip: allowed
+        ? undefined
+        : `Upgrade to access ${opt.label.toLowerCase()} analytics`
+    };
+  });
 
   const statsQuery = useQuery({
     ...analyticsStatsQueryOptions(dateRange),
@@ -124,7 +149,7 @@ export const useAnalytics = () => {
   return {
     cache: cacheQuery.data ?? null,
     dateRange,
-    dateRangeOptions: DATE_RANGE_OPTIONS,
+    dateRangeOptions,
     error,
     isLoading,
     setDateRange,
