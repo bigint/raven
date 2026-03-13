@@ -1,6 +1,6 @@
 "use client";
 
-import { PageHeader, Tabs } from "@raven/ui";
+import { PageHeader, PillTabs, Tabs } from "@raven/ui";
 import { useState } from "react";
 import { TokenChart } from "./components/token-chart";
 import { UsageBars } from "./components/usage-bars";
@@ -47,22 +47,12 @@ const AdoptionPage = () => {
         </div>
       )}
 
-      <div className="mb-6 flex items-center gap-1 overflow-x-auto rounded-lg border border-border p-1 w-fit">
-        {dateRangeOptions.map((opt) => (
-          <button
-            className={`shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              dateRange === opt.value
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-            key={opt.value}
-            onClick={() => setDateRange(opt.value)}
-            type="button"
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
+      <PillTabs
+        className="mb-6"
+        onChange={setDateRange}
+        options={dateRangeOptions}
+        value={dateRange}
+      />
 
       <TokenChart data={chartData} />
 
@@ -78,22 +68,11 @@ const AdoptionPage = () => {
       <div className="mb-6 flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Group by:</span>
-          <div className="flex items-center gap-1 rounded-lg border border-border p-1">
-            {groupByOptions.map((opt) => (
-              <button
-                className={`rounded-md px-3 py-1 text-sm font-medium transition-colors ${
-                  groupBy === opt.value
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-                key={opt.value}
-                onClick={() => setGroupBy(opt.value as GroupBy)}
-                type="button"
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
+          <PillTabs
+            onChange={(v) => setGroupBy(v as GroupBy)}
+            options={groupByOptions}
+            value={groupBy}
+          />
         </div>
 
         {viewTab === "bars" && (

@@ -1,6 +1,6 @@
 "use client";
 
-import { Select } from "@raven/ui";
+import { PillTabs, Select } from "@raven/ui";
 import {
   DATE_RANGE_OPTIONS,
   type DateRange,
@@ -42,22 +42,11 @@ const RequestFilters = ({
       value={statusFilter}
     />
 
-    <div className="flex items-center gap-1 overflow-x-auto rounded-lg border border-border p-1">
-      {DATE_RANGE_OPTIONS.map((opt) => (
-        <button
-          className={`shrink-0 rounded-md px-3 py-1 text-sm font-medium transition-colors ${
-            dateRange === opt.value
-              ? "bg-primary text-primary-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-          key={opt.value}
-          onClick={() => onDateRangeChange(opt.value)}
-          type="button"
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
+    <PillTabs
+      onChange={onDateRangeChange}
+      options={DATE_RANGE_OPTIONS}
+      value={dateRange}
+    />
 
     {total > 0 && (
       <span className="ml-auto text-sm text-muted-foreground">

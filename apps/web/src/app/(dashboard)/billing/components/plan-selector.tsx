@@ -1,5 +1,6 @@
 "use client";
 
+import { PillTabs } from "@raven/ui";
 import { Check, Zap } from "lucide-react";
 import type { BillingInterval, Plan, Subscription } from "../hooks/use-billing";
 
@@ -32,33 +33,22 @@ export const PlanSelector = ({
     <div>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-base font-semibold">Available Plans</h2>
-        <div className="flex items-center gap-1 rounded-lg border border-border p-1">
-          <button
-            className={`shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              billingInterval === "monthly"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-            onClick={() => onIntervalChange("monthly")}
-            type="button"
-          >
-            Monthly
-          </button>
-          <button
-            className={`shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              billingInterval === "yearly"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-            onClick={() => onIntervalChange("yearly")}
-            type="button"
-          >
-            Yearly
-            <span className="ml-1.5 rounded-full bg-green-500/10 px-1.5 py-0.5 text-xs text-green-600">
-              Save 20%
-            </span>
-          </button>
-        </div>
+        <PillTabs
+          onChange={(v) => onIntervalChange(v as BillingInterval)}
+          options={[
+            { label: "Monthly", value: "monthly" },
+            {
+              extra: (
+                <span className="ml-1.5 rounded-full bg-green-500/10 px-1.5 py-0.5 text-xs text-green-600">
+                  Save 20%
+                </span>
+              ),
+              label: "Yearly",
+              value: "yearly"
+            }
+          ]}
+          value={billingInterval}
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">

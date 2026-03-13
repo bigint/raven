@@ -17,6 +17,11 @@ export { Modal, type ModalProps } from "./components/modal";
 export { FadeIn, StaggerItem, StaggerList } from "./components/motion";
 export { PageHeader, type PageHeaderProps } from "./components/page-header";
 export {
+  type PillTabOption,
+  PillTabs,
+  type PillTabsProps
+} from "./components/pill-tabs";
+export {
   Select,
   type SelectOption,
   type SelectProps

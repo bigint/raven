@@ -1,6 +1,6 @@
 "use client";
 
-import { PageHeader } from "@raven/ui";
+import { PageHeader, PillTabs } from "@raven/ui";
 import { ModelsTable } from "./components/models-table";
 import { useModels } from "./hooks/use-models";
 
@@ -21,22 +21,12 @@ const ModelsPage = () => {
         </div>
       )}
 
-      <div className="mb-6 flex items-center gap-1 overflow-x-auto rounded-lg border border-border p-1 w-fit">
-        {dateRangeOptions.map((opt) => (
-          <button
-            className={`shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              dateRange === opt.value
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-            key={opt.value}
-            onClick={() => setDateRange(opt.value)}
-            type="button"
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
+      <PillTabs
+        className="mb-6"
+        onChange={setDateRange}
+        options={dateRangeOptions}
+        value={dateRange}
+      />
 
       <ModelsTable data={data} loading={isLoading} />
     </div>
