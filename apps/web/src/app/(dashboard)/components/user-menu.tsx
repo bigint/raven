@@ -2,7 +2,6 @@
 
 import { ChevronDown, LogOut, Moon, Settings, Sun } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { signOut } from "@/lib/auth-client";
 import { useThemeStore } from "@/stores/theme";
@@ -14,7 +13,6 @@ interface UserMenuProps {
 export const UserMenu = ({ user }: UserMenuProps) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const router = useRouter();
   const { theme, toggleTheme } = useThemeStore();
 
   useEffect(() => {
@@ -39,7 +37,7 @@ export const UserMenu = ({ user }: UserMenuProps) => {
 
   const handleSignOut = async () => {
     await signOut();
-    router.push("/");
+    window.location.href = "/";
   };
 
   return (
