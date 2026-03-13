@@ -172,7 +172,6 @@ export const proxyHandler = (
       logData.inputTokens = inputTokens;
       logData.outputTokens = outputTokens;
       logData.model = model;
-      logData.cost = adapter.estimateCost(model, inputTokens, outputTokens);
 
       logAndPublish(db, logData, { redis, teamId: virtualKey.teamId });
       updateLastUsed(db, virtualKey.id);
