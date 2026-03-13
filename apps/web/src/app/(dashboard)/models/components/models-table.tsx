@@ -3,7 +3,7 @@
 import { PROVIDER_LABELS } from "@raven/types";
 import { Spinner } from "@raven/ui";
 import { Cpu } from "lucide-react";
-import { ModelIcon, ProviderIcon } from "@/components/model-icon";
+import { ModelIcon } from "@/components/model-icon";
 import type { ModelRow } from "../hooks/use-models";
 
 interface ModelsTableProps {
@@ -89,8 +89,7 @@ export const ModelsTable = ({ data, loading }: ModelsTableProps) => {
                   <ModelIcon model={row.model} provider={row.provider} />
                   {row.model}
                 </div>
-                <div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <ProviderIcon provider={row.provider} />
+                <div className="mt-0.5 text-xs text-muted-foreground">
                   {PROVIDER_LABELS[row.provider] ?? row.provider}
                 </div>
               </td>
