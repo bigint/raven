@@ -2,7 +2,7 @@ import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import type { Context } from "hono";
 import type { Redis } from "ioredis";
-import { GuardrailError } from "@/lib/errors";
+import { ForbiddenError, GuardrailError } from "@/lib/errors";
 import { authenticateKey } from "./auth";
 import { checkBudgets } from "./budget-check";
 import { checkCache, storeCache } from "./cache";
@@ -36,6 +36,14 @@ export const proxyHandler = (
     // 1. Authenticate virtual key
     const authHeader = c.req.header("Authorization") ?? "";
     const { virtualKey } = await authenticateKey(db, authHeader);
+
+    // Verify key belongs to custom domain's org if present
+    const domainOrgId = c.get("domainOrgId") as string | undefined;
+    if (domainOrgId && virtualKey.organizationId !== domainOrgId) {
+      throw new ForbiddenError(
+        "Virtual key does not belong to this domain's organization"
+      );
+    }
 
     // 2. Rate limit check
     await checkRateLimit(

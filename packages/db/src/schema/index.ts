@@ -1,6 +1,7 @@
 export { auditLogs } from "./audit-logs";
 export { accounts, sessions, verifications } from "./auth";
 export { budgetEntityTypeEnum, budgetPeriodEnum, budgets } from "./budgets";
+export { customDomains, domainStatusEnum } from "./custom-domains";
 export {
   guardrailActionEnum,
   guardrailRules,

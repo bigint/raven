@@ -10,10 +10,12 @@ export interface PlanFeatures {
   readonly maxSeats: number;
   readonly maxRequestsPerMonth: number;
   readonly maxProviders: number;
+  readonly maxCustomDomains: number;
   readonly maxBudgets: number;
   readonly maxVirtualKeys: number;
   readonly analyticsRetentionDays: number;
   readonly hasTeams: boolean;
+  readonly hasCustomDomains: boolean;
   readonly hasAuditLogs: boolean;
   readonly hasGuardrails: boolean;
 }
@@ -66,10 +68,11 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
   enterprise: {
     analyticsRetentionDays: 365,
     hasAuditLogs: true,
+    hasCustomDomains: true,
     hasGuardrails: true,
-
     hasTeams: true,
     maxBudgets: Number.POSITIVE_INFINITY,
+    maxCustomDomains: Number.POSITIVE_INFINITY,
     maxProviders: Number.POSITIVE_INFINITY,
     maxRequestsPerMonth: Number.POSITIVE_INFINITY,
     maxSeats: Number.POSITIVE_INFINITY,
@@ -78,10 +81,11 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
   free: {
     analyticsRetentionDays: 7,
     hasAuditLogs: false,
+    hasCustomDomains: false,
     hasGuardrails: false,
-
     hasTeams: false,
     maxBudgets: 1,
+    maxCustomDomains: 0,
     maxProviders: 2,
     maxRequestsPerMonth: 10_000,
     maxSeats: 1,
@@ -90,10 +94,11 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
   pro: {
     analyticsRetentionDays: 30,
     hasAuditLogs: false,
+    hasCustomDomains: true,
     hasGuardrails: true,
-
     hasTeams: false,
     maxBudgets: 10,
+    maxCustomDomains: 1,
     maxProviders: 10,
     maxRequestsPerMonth: 500_000,
     maxSeats: 1,
@@ -102,10 +107,11 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
   team: {
     analyticsRetentionDays: 90,
     hasAuditLogs: false,
+    hasCustomDomains: true,
     hasGuardrails: true,
-
     hasTeams: true,
     maxBudgets: Number.POSITIVE_INFINITY,
+    maxCustomDomains: 3,
     maxProviders: Number.POSITIVE_INFINITY,
     maxRequestsPerMonth: 2_000_000,
     maxSeats: 30,

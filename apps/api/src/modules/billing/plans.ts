@@ -34,7 +34,8 @@ export const getPlans = (_db: Database) => async (c: Context) => {
       },
       { included: features.hasTeams, text: "Team management" },
       { included: features.hasAuditLogs, text: "Audit logs" },
-      { included: features.hasGuardrails, text: "Guardrails" }
+      { included: features.hasGuardrails, text: "Guardrails" },
+      { included: features.hasCustomDomains, text: "Custom domains" }
     ];
 
     return {

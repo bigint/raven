@@ -22,10 +22,13 @@ import {
 } from "./modules/billing/index";
 import { createBudgetsModule } from "./modules/budgets/index";
 import { createCacheModule } from "./modules/cache/index";
+import { createDomainsModule } from "./modules/domains/index";
 import { createGuardrailsModule } from "./modules/guardrails/index";
 import { createKeysModule } from "./modules/keys/index";
 import { createPromptsModule } from "./modules/prompts/index";
 import { createProvidersModule } from "./modules/providers/index";
+import { resolveCustomDomain } from "./modules/proxy/domain-resolver";
+import { proxyHandler } from "./modules/proxy/handler";
 import { createProxyModule } from "./modules/proxy/index";
 import { createRoutingRulesModule } from "./modules/routing-rules/index";
 import { createSettingsModule } from "./modules/settings/index";
@@ -106,11 +109,33 @@ v1.route("/guardrails", createGuardrailsModule(db));
 v1.route("/analytics", createAnalyticsModule(db));
 v1.route("/teams", createTeamsModule(db));
 v1.route("/settings", createSettingsModule(db));
+v1.route("/domains", createDomainsModule(db, env, redis));
 v1.route("/billing", createBillingModule(db));
 v1.route("/audit-logs", createAuditLogsModule(db));
 v1.route("/webhooks", createWebhooksModule(db));
 v1.route("/routing-rules", createRoutingRulesModule(db));
 app.route("/v1", v1);
+
+// Custom domain proxy catch-all
+app.all("/*", async (c) => {
+  const host = (c.req.header("host") ?? "").split(":")[0] ?? "";
+  const apiHost = new URL(env.BETTER_AUTH_URL).hostname;
+  if (host === apiHost || host === "localhost") {
+    return c.json(
+      { error: { code: "NOT_FOUND", message: "Route not found" } },
+      404
+    );
+  }
+  const orgId = await resolveCustomDomain(db, redis, host);
+  if (!orgId) {
+    return c.json(
+      { error: { code: "NOT_FOUND", message: "Unknown custom domain" } },
+      404
+    );
+  }
+  c.set("domainOrgId" as never, orgId as never);
+  return proxyHandler(db, redis, env)(c);
+});
 
 app.notFound((c) =>
   c.json({ error: { code: "NOT_FOUND", message: "Route not found" } }, 404)
