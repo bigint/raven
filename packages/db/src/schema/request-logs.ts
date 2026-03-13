@@ -43,6 +43,7 @@ export const requestLogs = pgTable(
     sessionId: text("session_id"),
     statusCode: integer("status_code").notNull(),
     toolCount: integer("tool_count").notNull().default(0),
+    userAgent: text("user_agent"),
     virtualKeyId: text("virtual_key_id")
       .notNull()
       .references(() => virtualKeys.id, { onDelete: "cascade" })
