@@ -4,7 +4,6 @@ import { Button, ConfirmDialog, PageHeader } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { useEventStream } from "@/hooks/use-event-stream";
 import { GuardrailForm } from "./components/guardrail-form";
 import { GuardrailList } from "./components/guardrail-list";
 import {
@@ -17,8 +16,7 @@ const GuardrailsPage = () => {
   const {
     data: guardrails = [],
     isLoading,
-    error,
-    refetch
+    error
   } = useQuery(guardrailsQueryOptions());
 
   const [formOpen, setFormOpen] = useState(false);
@@ -28,12 +26,6 @@ const GuardrailsPage = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const deleteMutation = useDeleteGuardrail();
-
-  useEventStream({
-    enabled: !isLoading,
-    events: ["guardrail.created", "guardrail.updated", "guardrail.deleted"],
-    onEvent: () => refetch()
-  });
 
   const handleDelete = async () => {
     if (!deleteId) return;

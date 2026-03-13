@@ -4,7 +4,6 @@ import { Button, ConfirmDialog, PageHeader } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { useEventStream } from "@/hooks/use-event-stream";
 import { RoutingRuleForm } from "./components/routing-rule-form";
 import { RoutingRuleList } from "./components/routing-rule-list";
 import {
@@ -17,8 +16,7 @@ const RoutingPage = () => {
   const {
     data: rules = [],
     isLoading,
-    error,
-    refetch
+    error
   } = useQuery(routingRulesQueryOptions());
 
   const [formOpen, setFormOpen] = useState(false);
@@ -26,16 +24,6 @@ const RoutingPage = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const deleteMutation = useDeleteRoutingRule();
-
-  useEventStream({
-    enabled: !isLoading,
-    events: [
-      "routing-rule.created",
-      "routing-rule.updated",
-      "routing-rule.deleted"
-    ],
-    onEvent: () => refetch()
-  });
 
   const handleDelete = async () => {
     if (!deleteId) return;

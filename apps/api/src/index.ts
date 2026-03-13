@@ -22,7 +22,6 @@ import {
 } from "./modules/billing/index";
 import { createBudgetsModule } from "./modules/budgets/index";
 import { createCacheModule } from "./modules/cache/index";
-import { createEventsModule } from "./modules/events/index";
 import { createGuardrailsModule } from "./modules/guardrails/index";
 import { createKeysModule } from "./modules/keys/index";
 import { createPromptsModule } from "./modules/prompts/index";
@@ -111,7 +110,6 @@ v1.route("/billing", createBillingModule(db));
 v1.route("/audit-logs", createAuditLogsModule(db));
 v1.route("/webhooks", createWebhooksModule(db));
 v1.route("/routing-rules", createRoutingRulesModule(db));
-v1.route("/events", createEventsModule(redis));
 app.route("/v1", v1);
 
 app.notFound((c) =>

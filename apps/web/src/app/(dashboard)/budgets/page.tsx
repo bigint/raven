@@ -4,7 +4,6 @@ import { Button, ConfirmDialog, PageHeader } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { useEventStream } from "@/hooks/use-event-stream";
 import { BudgetForm } from "./components/budget-form";
 import { BudgetList } from "./components/budget-list";
 import {
@@ -17,8 +16,7 @@ const BudgetsPage = () => {
   const {
     data: budgets = [],
     isLoading,
-    error,
-    refetch
+    error
   } = useQuery(budgetsQueryOptions());
 
   const [formOpen, setFormOpen] = useState(false);
@@ -26,12 +24,6 @@ const BudgetsPage = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const deleteMutation = useDeleteBudget();
-
-  useEventStream({
-    enabled: !isLoading,
-    events: ["budget.created", "budget.updated", "budget.deleted"],
-    onEvent: () => refetch()
-  });
 
   const handleDelete = async () => {
     if (!deleteId) return;

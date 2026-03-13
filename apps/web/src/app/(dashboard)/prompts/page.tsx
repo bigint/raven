@@ -4,7 +4,6 @@ import { Button, ConfirmDialog, PageHeader } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { useEventStream } from "@/hooks/use-event-stream";
 import { PromptDetail } from "./components/prompt-detail";
 import { PromptForm } from "./components/prompt-form";
 import { PromptList } from "./components/prompt-list";
@@ -18,8 +17,7 @@ const PromptsPage = () => {
   const {
     data: prompts = [],
     isLoading,
-    error,
-    refetch
+    error
   } = useQuery(promptsQueryOptions());
 
   const [formOpen, setFormOpen] = useState(false);
@@ -28,12 +26,6 @@ const PromptsPage = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const deleteMutation = useDeletePrompt();
-
-  useEventStream({
-    enabled: !isLoading,
-    events: ["prompt.created", "prompt.updated", "prompt.deleted"],
-    onEvent: () => refetch()
-  });
 
   const handleDelete = async () => {
     if (!deleteId) return;

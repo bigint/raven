@@ -1,11 +1,10 @@
 "use client";
 
 import { Button, ConfirmDialog, PageHeader, Tabs } from "@raven/ui";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Mail, Plus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { useEventStream } from "@/hooks/use-event-stream";
 import { InvitationList } from "./components/invitation-list";
 import { InviteForm } from "./components/invite-form";
 import { MemberList } from "./components/member-list";
@@ -61,7 +60,6 @@ const TeamPage = () => {
   const membersQuery = useQuery(membersQueryOptions());
   const invitationsQuery = useQuery(invitationsQueryOptions());
   const teamsQuery = useQuery(teamsQueryOptions());
-  const queryClient = useQueryClient();
 
   const inviteMember = useInviteMember();
   const createTeam = useCreateTeam();
@@ -83,25 +81,6 @@ const TeamPage = () => {
   const members = membersQuery.data ?? [];
   const invitations = invitationsQuery.data ?? [];
   const teams = teamsQuery.data ?? [];
-
-  useEventStream({
-    enabled:
-      !membersQuery.isLoading &&
-      !invitationsQuery.isLoading &&
-      !teamsQuery.isLoading,
-    events: [
-      "member.removed",
-      "member.role_changed",
-      "invitation.created",
-      "invitation.revoked",
-      "team.created",
-      "team.updated",
-      "team.deleted",
-      "team_member.added",
-      "team_member.removed"
-    ],
-    onEvent: () => queryClient.invalidateQueries({ queryKey: ["teams"] })
-  });
 
   const handleDelete = async () => {
     if (!deleteTarget) return;

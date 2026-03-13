@@ -4,7 +4,6 @@ import { Button, ConfirmDialog, PageHeader } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { useEventStream } from "@/hooks/use-event-stream";
 import { WebhookForm } from "./components/webhook-form";
 import { WebhookList } from "./components/webhook-list";
 import {
@@ -17,8 +16,7 @@ const WebhooksPage = () => {
   const {
     data: webhooks = [],
     isLoading,
-    error,
-    refetch
+    error
   } = useQuery(webhooksQueryOptions());
 
   const [formOpen, setFormOpen] = useState(false);
@@ -26,12 +24,6 @@ const WebhooksPage = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const deleteMutation = useDeleteWebhook();
-
-  useEventStream({
-    enabled: !isLoading,
-    events: ["webhook.created", "webhook.updated", "webhook.deleted"],
-    onEvent: () => refetch()
-  });
 
   const handleDelete = async () => {
     if (!deleteId) return;

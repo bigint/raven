@@ -3,8 +3,7 @@
 import { Button, PageHeader } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Radio } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useEventStream } from "@/hooks/use-event-stream";
+import { useState } from "react";
 import { RequestFilters } from "./components/request-filters";
 import { RequestTable } from "./components/request-table";
 import {
@@ -19,16 +18,16 @@ const RequestsPage = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [dateRange, setDateRange] = useState<DateRange>("24h");
   const [isLive, setIsLive] = useState(false);
-  const [hasNewData, setHasNewData] = useState(false);
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error } = useQuery({
     ...requestsQueryOptions({
       page,
       provider,
       range: dateRange,
       status: statusFilter
     }),
-    enabled: !isLive
+    enabled: !isLive,
+    refetchInterval: isLive ? false : 30_000
   });
 
   const live = useLiveRequests(isLive);
@@ -36,16 +35,6 @@ const RequestsPage = () => {
   const total = isLive ? live.total : (data?.pagination?.total ?? 0);
   const loading = isLive ? live.isLoading : isLoading;
   const displayError = isLive ? live.error : (error?.message ?? null);
-
-  useEventStream({
-    enabled: !isLive,
-    events: ["request.created"],
-    onEvent: () => setHasNewData(true)
-  });
-  useEffect(
-    () => setHasNewData(false),
-    [page, provider, statusFilter, dateRange]
-  );
 
   const handleFilterChange = (
     setter: (value: string) => void,
@@ -105,19 +94,6 @@ const RequestsPage = () => {
             Streaming live — {requests.length} requests
           </span>
         </div>
-      )}
-
-      {hasNewData && !isLive && (
-        <button
-          className="mb-4 flex w-full items-center justify-center gap-2 rounded-md border border-primary/30 bg-primary/5 px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
-          onClick={() => {
-            setHasNewData(false);
-            refetch();
-          }}
-          type="button"
-        >
-          New requests available — click to refresh
-        </button>
       )}
 
       {displayError && (

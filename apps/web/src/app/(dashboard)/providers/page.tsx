@@ -4,7 +4,6 @@ import { Button, ConfirmDialog, PageHeader } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { useEventStream } from "@/hooks/use-event-stream";
 import { ProviderForm } from "./components/provider-form";
 import { ProviderList } from "./components/provider-list";
 import {
@@ -18,8 +17,7 @@ const ProvidersPage = () => {
   const {
     data: providers = [],
     isLoading,
-    error,
-    refetch
+    error
   } = useQuery(providersQueryOptions());
 
   const [formOpen, setFormOpen] = useState(false);
@@ -28,12 +26,6 @@ const ProvidersPage = () => {
 
   const updateMutation = useUpdateProvider();
   const deleteMutation = useDeleteProvider();
-
-  useEventStream({
-    enabled: !isLoading,
-    events: ["provider.created", "provider.updated", "provider.deleted"],
-    onEvent: () => refetch()
-  });
 
   const handleToggleEnabled = (provider: Provider) => {
     updateMutation.mutate({ id: provider.id, isEnabled: !provider.isEnabled });
