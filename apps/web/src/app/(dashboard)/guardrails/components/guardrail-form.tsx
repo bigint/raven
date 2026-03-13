@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Input, Modal, Select, Switch, Textarea } from "@raven/ui";
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import { TextMorph } from "torph/react";
 import type { Guardrail } from "../hooks/use-guardrails";
 import {
@@ -107,7 +107,7 @@ const GuardrailForm = ({
     onClose();
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setFormError(null);
 

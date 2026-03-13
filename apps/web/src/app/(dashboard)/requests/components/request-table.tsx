@@ -16,6 +16,7 @@ interface RequestTableProps {
   page: number;
   onPageChange: (page: number) => void;
   showPagination: boolean;
+  animateRows?: boolean;
 }
 
 const getStatusBadge = (statusCode: number) => {
@@ -118,13 +119,15 @@ const RequestTable = ({
   total,
   page,
   onPageChange,
-  showPagination
+  showPagination,
+  animateRows = false
 }: RequestTableProps) => {
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
     <>
       <DataTable
+        animateRows={animateRows}
         columns={columns}
         data={requests}
         emptyIcon={<Activity className="size-8" />}

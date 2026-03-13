@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatePresence, motion } from "motion/react";
 import type { ReactNode } from "react";
 import { cn } from "../cn";
 import { EmptyState } from "./empty-state";
@@ -22,6 +23,7 @@ interface DataTableProps<T> {
   emptyIcon?: ReactNode;
   emptyTitle?: string;
   emptyAction?: ReactNode;
+  animateRows?: boolean;
 }
 
 const DataTable = <T,>({
@@ -32,7 +34,8 @@ const DataTable = <T,>({
   loadingMessage = "Loading...",
   emptyIcon,
   emptyTitle = "No data",
-  emptyAction
+  emptyAction,
+  animateRows = false
 }: DataTableProps<T>) => {
   if (loading) {
     return (
@@ -68,24 +71,54 @@ const DataTable = <T,>({
           </tr>
         </thead>
         <tbody>
-          {data.map((item, idx) => (
-            <tr
-              className={cn(
-                "transition-colors hover:bg-muted/30",
-                idx !== data.length - 1 && "border-b border-border"
-              )}
-              key={keyExtractor(item)}
-            >
-              {columns.map((col) => (
-                <td
-                  className={cn("px-3 py-3 sm:px-5 sm:py-4", col.className)}
-                  key={col.key}
+          {animateRows ? (
+            <AnimatePresence initial={false}>
+              {data.map((item, idx) => (
+                <motion.tr
+                  animate={{ opacity: 1, y: 0 }}
+                  className={cn(
+                    "transition-colors hover:bg-muted/30",
+                    idx !== data.length - 1 && "border-b border-border"
+                  )}
+                  exit={{ opacity: 0 }}
+                  initial={{ opacity: 0, y: -8 }}
+                  key={keyExtractor(item)}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
                 >
-                  {col.render(item, idx)}
-                </td>
+                  {columns.map((col) => (
+                    <td
+                      className={cn(
+                        "px-3 py-3 sm:px-5 sm:py-4",
+                        col.className
+                      )}
+                      key={col.key}
+                    >
+                      {col.render(item, idx)}
+                    </td>
+                  ))}
+                </motion.tr>
               ))}
-            </tr>
-          ))}
+            </AnimatePresence>
+          ) : (
+            data.map((item, idx) => (
+              <tr
+                className={cn(
+                  "transition-colors hover:bg-muted/30",
+                  idx !== data.length - 1 && "border-b border-border"
+                )}
+                key={keyExtractor(item)}
+              >
+                {columns.map((col) => (
+                  <td
+                    className={cn("px-3 py-3 sm:px-5 sm:py-4", col.className)}
+                    key={col.key}
+                  >
+                    {col.render(item, idx)}
+                  </td>
+                ))}
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

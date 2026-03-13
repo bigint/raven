@@ -1,3 +1,4 @@
+import type { HTMLAttributes } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../cn";
 
@@ -34,7 +35,7 @@ const dotColorMap: Record<string, string> = {
   warning: "bg-warning"
 };
 
-type BadgeProps = React.HTMLAttributes<HTMLSpanElement> &
+type BadgeProps = HTMLAttributes<HTMLSpanElement> &
   VariantProps<typeof badgeVariants>;
 
 const Badge = ({ className, variant, dot, children, ...props }: BadgeProps) => (

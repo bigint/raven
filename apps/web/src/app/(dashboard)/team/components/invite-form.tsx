@@ -2,7 +2,7 @@
 
 import { ROLE_OPTIONS } from "@raven/types";
 import { Button, Input, Modal, Select } from "@raven/ui";
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import { TextMorph } from "torph/react";
 
 interface InviteFormProps {
@@ -17,7 +17,7 @@ const InviteForm = ({ onClose, onSubmit, open }: InviteFormProps) => {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Input, Modal, Select } from "@raven/ui";
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import { TextMorph } from "torph/react";
 import type { Budget } from "../hooks/use-budgets";
 import {
@@ -62,7 +62,7 @@ const BudgetForm = ({ open, onClose, editingBudget }: BudgetFormProps) => {
     onClose();
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setFormError(null);
     if (!form.limitAmount.trim() || Number.isNaN(Number(form.limitAmount))) {

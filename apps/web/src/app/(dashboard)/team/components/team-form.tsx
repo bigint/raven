@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Input, Modal } from "@raven/ui";
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import { TextMorph } from "torph/react";
 
 interface TeamFormProps {
@@ -15,7 +15,7 @@ const TeamForm = ({ onClose, onSubmit, open }: TeamFormProps) => {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 

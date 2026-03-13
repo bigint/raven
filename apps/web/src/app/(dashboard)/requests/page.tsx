@@ -103,6 +103,7 @@ const RequestsPage = () => {
       )}
 
       <RequestTable
+        animateRows={isLive}
         emptyMessage={
           isLive
             ? "Waiting for new requests..."

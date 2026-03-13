@@ -3,7 +3,7 @@
 import { Badge, Button, Input, Modal, Textarea } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import type { Prompt } from "../hooks/use-prompts";
 import {
   promptQueryOptions,
@@ -36,7 +36,7 @@ const PromptDetail = ({ prompt, open, onClose }: PromptDetailProps) => {
     });
   };
 
-  const handleCreateVersion = async (e: React.FormEvent) => {
+  const handleCreateVersion = async (e: FormEvent) => {
     e.preventDefault();
     setFormError(null);
 

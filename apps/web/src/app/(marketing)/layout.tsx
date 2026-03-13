@@ -2,13 +2,14 @@
 
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function MarketingLayout({
   children
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 

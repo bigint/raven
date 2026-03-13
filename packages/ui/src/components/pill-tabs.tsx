@@ -1,13 +1,14 @@
 "use client";
 
 import { LayoutGroup, motion } from "motion/react";
+import type { ReactNode } from "react";
 import { useId } from "react";
 import { cn } from "../cn";
 
 interface PillTabOption<T extends string = string> {
   value: T;
   label: string;
-  extra?: React.ReactNode;
+  extra?: ReactNode;
 }
 
 interface PillTabsProps<T extends string = string> {

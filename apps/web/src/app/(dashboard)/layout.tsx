@@ -1,12 +1,13 @@
 "use client";
 
 import { motion } from "motion/react";
+import type { ReactNode } from "react";
 import { redirect, usePathname } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { Sidebar } from "./components/sidebar";
 import { useOrgs } from "./hooks/use-orgs";
 
-const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
   const { data: session, isPending: isSessionPending } = useSession();
   const { orgs, activeOrg, isPending: isOrgsPending, switchOrg } = useOrgs();

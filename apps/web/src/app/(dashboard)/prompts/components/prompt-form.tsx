@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Input, Modal, Textarea } from "@raven/ui";
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import { TextMorph } from "torph/react";
 import type { Prompt } from "../hooks/use-prompts";
 import { useCreatePrompt, useUpdatePrompt } from "../hooks/use-prompts";
@@ -49,7 +49,7 @@ const PromptForm = ({ open, onClose, editingPrompt }: PromptFormProps) => {
     onClose();
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setFormError(null);
 
