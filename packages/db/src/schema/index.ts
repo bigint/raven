@@ -14,7 +14,6 @@ export { prompts, promptVersions } from "./prompts";
 export { providerConfigs } from "./providers";
 export { requestLogs } from "./request-logs";
 export { routingRules } from "./routing-rules";
-export { ssoConfigs, ssoProviderEnum } from "./sso-configs";
 export {
   planEnum,
   subscriptionStatusEnum,

@@ -14,7 +14,6 @@ export interface PlanFeatures {
   readonly maxVirtualKeys: number;
   readonly analyticsRetentionDays: number;
   readonly hasTeams: boolean;
-  readonly hasSSO: boolean;
   readonly hasAuditLogs: boolean;
   readonly hasGuardrails: boolean;
 }
@@ -68,7 +67,7 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     analyticsRetentionDays: 365,
     hasAuditLogs: true,
     hasGuardrails: true,
-    hasSSO: true,
+
     hasTeams: true,
     maxBudgets: Number.POSITIVE_INFINITY,
     maxProviders: Number.POSITIVE_INFINITY,
@@ -80,7 +79,7 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     analyticsRetentionDays: 7,
     hasAuditLogs: false,
     hasGuardrails: false,
-    hasSSO: false,
+
     hasTeams: false,
     maxBudgets: 1,
     maxProviders: 2,
@@ -92,7 +91,7 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     analyticsRetentionDays: 30,
     hasAuditLogs: false,
     hasGuardrails: true,
-    hasSSO: false,
+
     hasTeams: false,
     maxBudgets: 10,
     maxProviders: Number.POSITIVE_INFINITY,
@@ -104,7 +103,7 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     analyticsRetentionDays: 90,
     hasAuditLogs: false,
     hasGuardrails: true,
-    hasSSO: false,
+
     hasTeams: true,
     maxBudgets: Number.POSITIVE_INFINITY,
     maxProviders: Number.POSITIVE_INFINITY,

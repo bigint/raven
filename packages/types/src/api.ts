@@ -10,8 +10,6 @@ export type GuardrailType =
   | "content_filter"
   | "custom_regex";
 export type GuardrailAction = "block" | "warn" | "log";
-export type SsoProvider = "saml" | "oidc";
-
 export interface ApiError {
   readonly code: string;
   readonly message: string;
