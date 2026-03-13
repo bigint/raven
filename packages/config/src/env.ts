@@ -5,6 +5,8 @@ const envSchema = z.object({
   APP_URL: z.string().url(),
   BETTER_AUTH_SECRET: z.string().min(16),
   BETTER_AUTH_URL: z.string().url(),
+  CLOUDFLARE_API_TOKEN: z.string().optional(),
+  CLOUDFLARE_ZONE_ID: z.string().optional(),
   DATABASE_URL: z.string().url(),
   ENCRYPTION_SECRET: z.string().min(32),
   ENCRYPTION_SECRET_PREVIOUS: z.string().min(32).optional(),

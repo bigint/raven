@@ -3,7 +3,7 @@ import { and, eq } from 'drizzle-orm'
 import { createAuth } from '../packages/auth/src/server'
 import { parseEnv } from '../packages/config/src/env'
 import { createDatabase } from '../packages/db/src/client'
-import { members, organizations, subscriptions } from '../packages/db/src/schema/index'
+import { members, organizations, subscriptions, users } from '../packages/db/src/schema/index'
 
 const env = parseEnv()
 const db = createDatabase(env.DATABASE_URL)
@@ -45,6 +45,15 @@ async function seed() {
         throw err
       }
     }
+  }
+
+  // Set admin@raven.dev as platform admin
+  if (userIds[0]) {
+    await db
+      .update(users)
+      .set({ role: 'admin' })
+      .where(eq(users.id, userIds[0]))
+    console.log(`\nSet admin@raven.dev as platform admin`)
   }
 
   // Create one org per plan

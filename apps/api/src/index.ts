@@ -10,9 +10,11 @@ import { initEventBus } from "./lib/events";
 import { getRedis } from "./lib/redis";
 import { initWebhookDispatcher } from "./lib/webhook-dispatcher";
 import { createAuthMiddleware } from "./middleware/auth";
+import { platformAdminMiddleware } from "./middleware/platform-admin";
 import { requestId } from "./middleware/request-id";
 import { requestTiming } from "./middleware/request-timing";
 import { createTenantMiddleware } from "./middleware/tenant";
+import { createAdminModule } from "./modules/admin/index";
 import { createAnalyticsModule } from "./modules/analytics/index";
 import { createAuditLogsModule } from "./modules/audit-logs/index";
 import { createAuthModule } from "./modules/auth/index";
@@ -22,10 +24,13 @@ import {
 } from "./modules/billing/index";
 import { createBudgetsModule } from "./modules/budgets/index";
 import { createCacheModule } from "./modules/cache/index";
+import { createDomainsModule } from "./modules/domains/index";
 import { createGuardrailsModule } from "./modules/guardrails/index";
 import { createKeysModule } from "./modules/keys/index";
 import { createPromptsModule } from "./modules/prompts/index";
 import { createProvidersModule } from "./modules/providers/index";
+import { resolveCustomDomain } from "./modules/proxy/domain-resolver";
+import { proxyHandler } from "./modules/proxy/handler";
 import { createProxyModule } from "./modules/proxy/index";
 import { createRoutingRulesModule } from "./modules/routing-rules/index";
 import { createSettingsModule } from "./modules/settings/index";
@@ -93,6 +98,13 @@ userRoutes.use("*", createAuthMiddleware(auth));
 userRoutes.route("/", createUserModule(db));
 app.route("/v1/user", userRoutes);
 
+// Admin routes (session auth + platform admin check)
+const adminRoutes = new Hono();
+adminRoutes.use("*", createAuthMiddleware(auth));
+adminRoutes.use("*", platformAdminMiddleware);
+adminRoutes.route("/", createAdminModule(db));
+app.route("/v1/admin", adminRoutes);
+
 // Protected API routes (session auth + tenant)
 const v1 = new Hono();
 v1.use("*", createAuthMiddleware(auth));
@@ -106,11 +118,33 @@ v1.route("/guardrails", createGuardrailsModule(db));
 v1.route("/analytics", createAnalyticsModule(db));
 v1.route("/teams", createTeamsModule(db));
 v1.route("/settings", createSettingsModule(db));
+v1.route("/domains", createDomainsModule(db, env, redis));
 v1.route("/billing", createBillingModule(db));
 v1.route("/audit-logs", createAuditLogsModule(db));
 v1.route("/webhooks", createWebhooksModule(db));
 v1.route("/routing-rules", createRoutingRulesModule(db));
 app.route("/v1", v1);
+
+// Custom domain proxy catch-all
+app.all("/*", async (c) => {
+  const host = (c.req.header("host") ?? "").split(":")[0] ?? "";
+  const apiHost = new URL(env.BETTER_AUTH_URL).hostname;
+  if (host === apiHost || host === "localhost") {
+    return c.json(
+      { error: { code: "NOT_FOUND", message: "Route not found" } },
+      404
+    );
+  }
+  const orgId = await resolveCustomDomain(db, redis, host);
+  if (!orgId) {
+    return c.json(
+      { error: { code: "NOT_FOUND", message: "Unknown custom domain" } },
+      404
+    );
+  }
+  c.set("domainOrgId" as never, orgId as never);
+  return proxyHandler(db, redis, env)(c);
+});
 
 app.notFound((c) =>
   c.json({ error: { code: "NOT_FOUND", message: "Route not found" } }, 404)

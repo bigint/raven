@@ -3,6 +3,7 @@
 import { PageHeader } from "@raven/ui";
 import { Settings } from "lucide-react";
 import { CacheManagement } from "./components/cache-management";
+import { CustomDomains } from "./components/custom-domains";
 import { DangerZone } from "./components/danger-zone";
 import { OrgSettingsForm } from "./components/org-settings-form";
 import { PlanSubscription } from "./components/plan-subscription";
@@ -74,6 +75,8 @@ const OrgSettingsPage = () => {
           />
 
           <PlanSubscription settings={settings} />
+
+          {isAdmin && <CustomDomains plan={settings.plan} />}
 
           {isAdmin && <CacheManagement />}
 

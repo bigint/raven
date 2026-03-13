@@ -2,12 +2,19 @@
 
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { useState } from "react";
+import { useSession } from "@/lib/auth-client";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function MarketingLayout({ children }: { children: ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: session, isPending } = useSession();
+
+  if (!isPending && session) {
+    redirect("/overview");
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
