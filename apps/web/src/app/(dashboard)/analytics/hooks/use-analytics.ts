@@ -1,8 +1,7 @@
 "use client";
 
-import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEventStream } from "@/hooks/use-event-stream";
 import { api } from "@/lib/api";
 
 interface Stats {
@@ -85,10 +84,11 @@ export const analyticsCacheQueryOptions = (range: DateRange) =>
     queryKey: ["analytics", "cache", range]
   });
 
+const POLL_INTERVAL = 30_000;
+
 export const useAnalytics = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const rangeParam = searchParams.get("range") as DateRange | null;
   const dateRange =
@@ -100,9 +100,18 @@ export const useAnalytics = () => {
     router.replace(`?${params.toString()}`);
   };
 
-  const statsQuery = useQuery(analyticsStatsQueryOptions(dateRange));
-  const usageQuery = useQuery(analyticsUsageQueryOptions(dateRange));
-  const cacheQuery = useQuery(analyticsCacheQueryOptions(dateRange));
+  const statsQuery = useQuery({
+    ...analyticsStatsQueryOptions(dateRange),
+    refetchInterval: POLL_INTERVAL
+  });
+  const usageQuery = useQuery({
+    ...analyticsUsageQueryOptions(dateRange),
+    refetchInterval: POLL_INTERVAL
+  });
+  const cacheQuery = useQuery({
+    ...analyticsCacheQueryOptions(dateRange),
+    refetchInterval: POLL_INTERVAL
+  });
 
   const isLoading =
     statsQuery.isPending || usageQuery.isPending || cacheQuery.isPending;
@@ -111,40 +120,6 @@ export const useAnalytics = () => {
     usageQuery.error?.message ??
     cacheQuery.error?.message ??
     null;
-
-  useEventStream({
-    enabled: !isLoading,
-    events: ["request.created"],
-    onEvent: (data) => {
-      const req = data as { provider: string; model: string; cost: string };
-      queryClient.setQueryData<Stats>(
-        ["analytics", "stats", dateRange],
-        (prev) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            totalCost: (Number(prev.totalCost) + Number(req.cost)).toString(),
-            totalRequests: prev.totalRequests + 1
-          };
-        }
-      );
-      queryClient.setQueryData<UsageRow[]>(
-        ["analytics", "usage", dateRange],
-        (prev) =>
-          prev?.map((row) =>
-            row.provider === req.provider && row.model === req.model
-              ? {
-                  ...row,
-                  totalCost: (
-                    Number(row.totalCost) + Number(req.cost)
-                  ).toString(),
-                  totalRequests: row.totalRequests + 1
-                }
-              : row
-          )
-      );
-    }
-  });
 
   return {
     cache: cacheQuery.data ?? null,

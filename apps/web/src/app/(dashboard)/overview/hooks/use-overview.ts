@@ -1,7 +1,6 @@
 "use client";
 
-import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEventStream } from "@/hooks/use-event-stream";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
 interface Stats {
@@ -72,12 +71,21 @@ export const overviewKeysQueryOptions = () =>
     queryKey: ["overview", "keys"]
   });
 
-export const useOverview = () => {
-  const queryClient = useQueryClient();
+const POLL_INTERVAL = 30_000;
 
-  const statsQuery = useQuery(overviewStatsQueryOptions());
-  const usageQuery = useQuery(overviewUsageQueryOptions());
-  const requestsQuery = useQuery(overviewRequestsQueryOptions());
+export const useOverview = () => {
+  const statsQuery = useQuery({
+    ...overviewStatsQueryOptions(),
+    refetchInterval: POLL_INTERVAL
+  });
+  const usageQuery = useQuery({
+    ...overviewUsageQueryOptions(),
+    refetchInterval: POLL_INTERVAL
+  });
+  const requestsQuery = useQuery({
+    ...overviewRequestsQueryOptions(),
+    refetchInterval: POLL_INTERVAL
+  });
   const keysQuery = useQuery(overviewKeysQueryOptions());
 
   const isLoading =
@@ -85,26 +93,6 @@ export const useOverview = () => {
     usageQuery.isPending ||
     requestsQuery.isPending ||
     keysQuery.isPending;
-
-  useEventStream({
-    enabled: !isLoading,
-    events: ["request.created"],
-    onEvent: (data) => {
-      const req = data as RecentRequest;
-      queryClient.setQueryData<RecentRequest[]>(
-        ["overview", "requests"],
-        (prev) => (prev ? [req, ...prev].slice(0, 5) : [req])
-      );
-      queryClient.setQueryData<Stats>(["overview", "stats"], (prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          totalCost: (Number(prev.totalCost) + Number(req.cost)).toString(),
-          totalRequests: prev.totalRequests + 1
-        };
-      });
-    }
-  });
 
   return {
     isLoading,

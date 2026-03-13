@@ -1,9 +1,8 @@
 "use client";
 
-import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { useEventStream } from "@/hooks/use-event-stream";
 import { api } from "@/lib/api";
 
 interface Subscription {
@@ -49,7 +48,6 @@ export const plansQueryOptions = () =>
 export const useBilling = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const intervalParam = searchParams.get("interval") as BillingInterval | null;
   const billingInterval =
@@ -71,14 +69,6 @@ export const useBilling = () => {
   const isLoading = subscriptionQuery.isPending || plansQuery.isPending;
   const error =
     subscriptionQuery.error?.message ?? plansQuery.error?.message ?? null;
-
-  useEventStream({
-    enabled: !isLoading,
-    events: ["subscription.updated"],
-    onEvent: () => {
-      queryClient.invalidateQueries({ queryKey: ["billing"] });
-    }
-  });
 
   const handlePlanAction = async (planId: string) => {
     try {

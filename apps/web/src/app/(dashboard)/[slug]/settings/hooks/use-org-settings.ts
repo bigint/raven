@@ -4,7 +4,6 @@ import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useEventStream } from "@/hooks/use-event-stream";
 import { api } from "@/lib/api";
 
 interface OrgSettings {
@@ -50,14 +49,6 @@ export const useOrgSettings = () => {
       setIsInitialized(true);
     }
   }, [settings, isInitialized]);
-
-  useEventStream({
-    enabled: !isLoading,
-    events: ["settings.updated"],
-    onEvent: () => {
-      queryClient.invalidateQueries({ queryKey: ["org-settings"] });
-    }
-  });
 
   const isAdmin =
     settings?.userRole === "owner" || settings?.userRole === "admin";

@@ -1,8 +1,7 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { useEventStream } from "@/hooks/use-event-stream";
 import type { FormState } from "../components/key-form";
 import {
   keysQueryOptions,
@@ -13,7 +12,6 @@ import {
 
 export const useKeyActions = () => {
   const keysQuery = useQuery(keysQueryOptions());
-  const queryClient = useQueryClient();
 
   const createKey = useCreateKey();
   const updateKey = useUpdateKey();
@@ -21,12 +19,6 @@ export const useKeyActions = () => {
 
   const [newKeyValue, setNewKeyValue] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-
-  useEventStream({
-    enabled: keysQuery.isSuccess,
-    events: ["key.created", "key.updated", "key.deleted"],
-    onEvent: () => queryClient.invalidateQueries({ queryKey: ["keys"] })
-  });
 
   const handleFormSubmit = async (
     mode: "create" | "edit",
