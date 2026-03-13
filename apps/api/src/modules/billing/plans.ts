@@ -15,8 +15,8 @@ export const PLAN_DETAILS: Record<
   enterprise: {
     description: "For organizations that need everything.",
     name: "Enterprise",
-    priceMonthly: 299,
-    priceYearly: 2870
+    priceMonthly: 100,
+    priceYearly: 960
   },
   free: {
     description: "For individuals and small experiments.",
@@ -28,14 +28,14 @@ export const PLAN_DETAILS: Record<
     description: "For professionals who need more power.",
     isPopular: true,
     name: "Pro",
-    priceMonthly: 29,
-    priceYearly: 278
+    priceMonthly: 10,
+    priceYearly: 96
   },
   team: {
     description: "For growing teams with advanced needs.",
     name: "Team",
-    priceMonthly: 79,
-    priceYearly: 758
+    priceMonthly: 20,
+    priceYearly: 192
   }
 };
 
@@ -68,7 +68,6 @@ export const getPlans = (_db: Database) => async (c: Context) => {
         text: `${features.analyticsRetentionDays}-day analytics retention`
       },
       { included: features.hasTeams, text: "Team management" },
-      { included: features.hasSSO, text: "SSO authentication" },
       { included: features.hasAuditLogs, text: "Audit logs" },
       { included: features.hasGuardrails, text: "Guardrails" }
     ];

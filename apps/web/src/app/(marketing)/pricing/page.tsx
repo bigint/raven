@@ -32,11 +32,11 @@ const plans = [
       "Email support",
       "Analytics dashboard"
     ],
-    monthlyPrice: 29,
+    monthlyPrice: 10,
     name: "Pro",
     popular: true,
     unit: "/mo",
-    yearlyPrice: 23
+    yearlyPrice: 8
   },
   {
     cta: "Start free trial",
@@ -47,15 +47,14 @@ const plans = [
       "Unlimited providers",
       "Unlimited virtual keys",
       "Priority support",
-      "SSO",
       "Audit logs",
       "Team management"
     ],
-    monthlyPrice: 49,
+    monthlyPrice: 20,
     name: "Team",
     popular: false,
-    unit: "/seat/mo",
-    yearlyPrice: 39
+    unit: "/mo",
+    yearlyPrice: 16
   },
   {
     cta: "Contact sales",
@@ -122,7 +121,6 @@ const comparisonFeatures = [
     pro: false,
     team: false
   },
-  { enterprise: true, free: false, name: "SSO", pro: false, team: true },
   { enterprise: true, free: false, name: "Audit logs", pro: false, team: true },
   {
     enterprise: true,
