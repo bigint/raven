@@ -23,9 +23,11 @@ export const getUsage =
         model: requestLogs.model,
         provider: requestLogs.provider,
         providerConfigName: providerConfigs.name,
+        totalCachedTokens: sum(requestLogs.cachedTokens),
         totalCost: sum(requestLogs.cost),
         totalInputTokens: sum(requestLogs.inputTokens),
         totalOutputTokens: sum(requestLogs.outputTokens),
+        totalReasoningTokens: sum(requestLogs.reasoningTokens),
         totalRequests: count()
       })
       .from(requestLogs)

@@ -29,6 +29,10 @@ export const getSessions =
       db
         .select({
           endTime: max(requestLogs.createdAt).as("end_time"),
+          models:
+            sql<string>`string_agg(DISTINCT ${requestLogs.model}, ',')`.as(
+              "session_models"
+            ),
           providers:
             sql<string>`string_agg(DISTINCT ${requestLogs.provider}, ',')`.as(
               "providers"
@@ -36,13 +40,20 @@ export const getSessions =
           requestCount: count().as("request_count"),
           sessionId: requestLogs.sessionId,
           startTime: min(requestLogs.createdAt).as("start_time"),
+          totalCachedTokens: sum(requestLogs.cachedTokens).as(
+            "total_cached_tokens"
+          ),
           totalCost: sum(requestLogs.cost).as("total_cost"),
           totalInputTokens: sum(requestLogs.inputTokens).as(
             "total_input_tokens"
           ),
           totalOutputTokens: sum(requestLogs.outputTokens).as(
             "total_output_tokens"
-          )
+          ),
+          totalReasoningTokens: sum(requestLogs.reasoningTokens).as(
+            "total_reasoning_tokens"
+          ),
+          totalToolUses: sum(requestLogs.toolCount).as("total_tool_uses")
         })
         .from(requestLogs)
         .where(where)
@@ -65,13 +76,17 @@ export const getSessions =
     return c.json({
       data: rows.map((row) => ({
         endTime: row.endTime,
+        models: row.models ? row.models.split(",") : [],
         providers: row.providers ? row.providers.split(",") : [],
         requestCount: Number(row.requestCount),
         sessionId: row.sessionId,
         startTime: row.startTime,
+        totalCachedTokens: Number(row.totalCachedTokens ?? 0),
         totalCost: row.totalCost ?? "0",
         totalInputTokens: Number(row.totalInputTokens ?? 0),
-        totalOutputTokens: Number(row.totalOutputTokens ?? 0)
+        totalOutputTokens: Number(row.totalOutputTokens ?? 0),
+        totalReasoningTokens: Number(row.totalReasoningTokens ?? 0),
+        totalToolUses: Number(row.totalToolUses ?? 0)
       })),
       pagination: {
         limit,

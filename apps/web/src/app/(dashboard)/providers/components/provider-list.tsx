@@ -3,6 +3,7 @@
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
 import { Check, Pencil, Plug, Plus, Trash2, X } from "lucide-react";
+import { ProviderIcon } from "@/components/model-icon";
 import type { Provider } from "../hooks/use-providers";
 import { PROVIDER_LABELS } from "../hooks/use-providers";
 
@@ -21,7 +22,8 @@ const columns: Column<Provider>[] = [
     key: "provider",
     render: (provider) => (
       <div>
-        <span className="font-medium">
+        <span className="flex items-center gap-2 font-medium">
+          <ProviderIcon provider={provider.provider} size={16} />
           {PROVIDER_LABELS[provider.provider] ?? provider.provider}
         </span>
         {provider.name && (

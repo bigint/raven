@@ -10,6 +10,11 @@ interface Stats {
   totalCost: string;
   avgLatencyMs: string;
   cacheHitRate: string;
+  totalTokens: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalCachedTokens: number;
+  totalReasoningTokens: number;
 }
 
 interface UsageRow {
@@ -20,6 +25,8 @@ interface UsageRow {
   totalCost: string;
   totalInputTokens: string;
   totalOutputTokens: string;
+  totalCachedTokens: string;
+  totalReasoningTokens: string;
   avgLatencyMs: string;
 }
 

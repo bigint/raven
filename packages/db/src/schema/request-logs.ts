@@ -39,9 +39,11 @@ export const requestLogs = pgTable(
       () => providerConfigs.id,
       { onDelete: "set null" }
     ),
+    reasoningTokens: integer("reasoning_tokens").notNull().default(0),
     sessionId: text("session_id"),
     statusCode: integer("status_code").notNull(),
     toolCount: integer("tool_count").notNull().default(0),
+    userAgent: text("user_agent"),
     virtualKeyId: text("virtual_key_id")
       .notNull()
       .references(() => virtualKeys.id, { onDelete: "cascade" })

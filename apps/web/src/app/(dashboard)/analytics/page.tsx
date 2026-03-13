@@ -2,6 +2,7 @@
 
 import { CacheStats } from "./components/cache-stats";
 import { TokenBreakdown } from "./components/token-breakdown";
+import { TokenStats } from "./components/token-stats";
 import { UsageCharts } from "./components/usage-charts";
 import { useAnalytics } from "./hooks/use-analytics";
 
@@ -32,6 +33,8 @@ const AnalyticsPage = () => {
         onDateRangeChange={setDateRange}
         stats={stats}
       />
+
+      <TokenStats loading={isLoading} stats={stats} />
 
       <CacheStats cache={cache} loading={isLoading} />
 

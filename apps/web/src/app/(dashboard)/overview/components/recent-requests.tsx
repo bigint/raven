@@ -4,6 +4,7 @@ import { PROVIDER_LABELS } from "@raven/types";
 import { EmptyState } from "@raven/ui";
 import { Activity, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { ModelIcon } from "@/components/model-icon";
 import type { RecentRequest } from "../hooks/use-overview";
 
 const timeAgo = (dateStr: string): string => {
@@ -78,7 +79,12 @@ export const RecentRequests = ({ requests, loading }: RecentRequestsProps) => (
                   className={`inline-flex size-2 rounded-full ${getStatusColor(req.statusCode)}`}
                 />
                 <div>
-                  <p className="text-sm font-medium">
+                  <p className="flex items-center gap-1.5 text-sm font-medium">
+                    <ModelIcon
+                      model={req.model}
+                      provider={req.provider}
+                      size={14}
+                    />
                     {PROVIDER_LABELS[req.provider] ?? req.provider}{" "}
                     <span className="text-muted-foreground">{req.model}</span>
                   </p>

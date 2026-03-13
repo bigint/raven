@@ -2,7 +2,9 @@
 
 import type { LucideIcon } from "lucide-react";
 import {
+  Activity,
   BarChart3,
+  Cpu,
   CreditCard,
   FileText,
   Key,
@@ -14,8 +16,10 @@ import {
   ScrollText,
   Settings,
   Shield,
+  TrendingUp,
   Users,
   Webhook,
+  Wrench,
   X
 } from "lucide-react";
 import Link from "next/link";
@@ -31,8 +35,12 @@ const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/keys", icon: Key, label: "Keys" },
   { href: "/prompts", icon: FileText, label: "Prompts" },
   { href: "/analytics", icon: BarChart3, label: "Analytics" },
+  { href: "/logs", icon: ScrollText, label: "Logs" },
+  { href: "/tools", icon: Wrench, label: "Tool Use" },
+  { href: "/adoption", icon: TrendingUp, label: "Adoption" },
+  { href: "/models", icon: Cpu, label: "Models" },
   { href: "/routing", icon: Route, label: "Routing" },
-  { href: "/requests", icon: ScrollText, label: "Requests" },
+  { href: "/requests", icon: Activity, label: "Requests" },
   { href: "/budgets", icon: CreditCard, label: "Budgets" },
   { href: "/guardrails", icon: Shield, label: "Guardrails" },
   { href: "/team", icon: Users, label: "Team" },
