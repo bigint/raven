@@ -24,6 +24,10 @@ export const PlanSelector = ({
 }: PlanSelectorProps) => {
   if (plans.length === 0) return null;
 
+  const sortedPlans = [...plans].sort(
+    (a, b) => a.priceMonthly - b.priceMonthly
+  );
+
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
@@ -57,8 +61,8 @@ export const PlanSelector = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {plans.map((plan) => {
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {sortedPlans.map((plan) => {
           const isCurrent = subscription?.planId === plan.id;
           const price =
             billingInterval === "monthly"
