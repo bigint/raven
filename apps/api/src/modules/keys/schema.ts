@@ -9,6 +9,7 @@ export const createKeySchema = z.object({
 });
 
 export const updateKeySchema = z.object({
+  expiresAt: z.string().datetime().nullable().optional(),
   isActive: z.boolean().optional(),
   name: z.string().min(1).max(100).optional(),
   rateLimitRpd: z.number().int().positive().nullable().optional(),

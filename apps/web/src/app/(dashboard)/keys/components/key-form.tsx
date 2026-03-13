@@ -8,6 +8,7 @@ import type { VirtualKey } from "../hooks/use-keys";
 interface FormState {
   name: string;
   environment: "live" | "test";
+  expiresAt: string;
   rateLimitRpm: string;
   rateLimitRpd: string;
   isActive: boolean;
@@ -15,6 +16,7 @@ interface FormState {
 
 const DEFAULT_FORM: FormState = {
   environment: "live",
+  expiresAt: "",
   isActive: true,
   name: "",
   rateLimitRpd: "",
@@ -37,6 +39,9 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
     if (editingKey && mode === "edit") {
       return {
         environment: editingKey.environment,
+        expiresAt: editingKey.expiresAt
+          ? new Date(editingKey.expiresAt).toISOString().slice(0, 16)
+          : "",
         isActive: editingKey.isActive,
         name: editingKey.name,
         rateLimitRpd:
@@ -58,6 +63,9 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
     if (editingKey && mode === "edit") {
       setForm({
         environment: editingKey.environment,
+        expiresAt: editingKey.expiresAt
+          ? new Date(editingKey.expiresAt).toISOString().slice(0, 16)
+          : "",
         isActive: editingKey.isActive,
         name: editingKey.name,
         rateLimitRpd:
@@ -149,6 +157,15 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
             value={form.rateLimitRpd}
           />
         </div>
+        <Input
+          id="key-expires"
+          label="Expiration Date"
+          onChange={(e) =>
+            setForm((f) => ({ ...f, expiresAt: e.target.value }))
+          }
+          type="datetime-local"
+          value={form.expiresAt}
+        />
         {mode === "edit" && (
           <Switch
             checked={form.isActive}

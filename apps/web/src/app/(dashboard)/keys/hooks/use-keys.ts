@@ -27,12 +27,14 @@ export interface CreateKeyResponse extends VirtualKey {
 export interface CreateKeyInput {
   name: string;
   environment: "live" | "test";
+  expiresAt?: string;
   rateLimitRpm?: number;
   rateLimitRpd?: number;
 }
 
 export interface UpdateKeyInput {
   name?: string;
+  expiresAt?: string | null;
   rateLimitRpm?: number | null;
   rateLimitRpd?: number | null;
   isActive?: boolean;

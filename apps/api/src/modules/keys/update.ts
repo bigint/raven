@@ -14,7 +14,7 @@ export const updateKey = (db: Database) => async (c: Context) => {
   const orgId = c.get("orgId" as never) as string;
   const user = c.get("user" as never) as { id: string };
   const id = c.req.param("id") as string;
-  const { name, rateLimitRpm, rateLimitRpd, isActive } = c.req.valid(
+  const { name, rateLimitRpm, rateLimitRpd, isActive, expiresAt } = c.req.valid(
     "json" as never
   ) as z.infer<typeof updateKeySchema>;
 
@@ -46,6 +46,10 @@ export const updateKey = (db: Database) => async (c: Context) => {
     updates.isActive = isActive;
   }
 
+  if (expiresAt !== undefined) {
+    updates.expiresAt = expiresAt ? new Date(expiresAt) : null;
+  }
+
   const [updated] = await db
     .update(virtualKeys)
     .set(updates)
@@ -57,7 +61,7 @@ export const updateKey = (db: Database) => async (c: Context) => {
   void logAudit(db, {
     action: "key.updated",
     actorId: user.id,
-    metadata: { isActive, name, rateLimitRpd, rateLimitRpm },
+    metadata: { expiresAt, isActive, name, rateLimitRpd, rateLimitRpm },
     orgId,
     resourceId: id,
     resourceType: "key"

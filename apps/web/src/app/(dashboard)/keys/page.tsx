@@ -55,12 +55,15 @@ export default function KeysPage() {
       const body: {
         name: string;
         environment: "live" | "test";
+        expiresAt?: string;
         rateLimitRpm?: number;
         rateLimitRpd?: number;
       } = {
         environment: form.environment,
         name: form.name.trim()
       };
+      if (form.expiresAt.trim())
+        body.expiresAt = new Date(form.expiresAt).toISOString();
       if (form.rateLimitRpm.trim())
         body.rateLimitRpm = Number(form.rateLimitRpm);
       if (form.rateLimitRpd.trim())
@@ -70,6 +73,9 @@ export default function KeysPage() {
     } else if (mode === "edit" && keyId) {
       await updateKey.mutateAsync({
         data: {
+          expiresAt: form.expiresAt.trim()
+            ? new Date(form.expiresAt).toISOString()
+            : null,
           isActive: form.isActive,
           name: form.name.trim(),
           rateLimitRpd: form.rateLimitRpd.trim()

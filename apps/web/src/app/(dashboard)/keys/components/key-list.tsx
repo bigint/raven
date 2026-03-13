@@ -83,6 +83,30 @@ const KeyList = ({ keys, onCreate, onDelete, onEdit }: KeyListProps) => {
             }
           },
           {
+            header: "Expires",
+            key: "expiresAt",
+            render: (key) => {
+              if (!key.expiresAt) {
+                return (
+                  <span className="text-muted-foreground/50">{"\u2014"}</span>
+                );
+              }
+              const isExpired = new Date(key.expiresAt) < new Date();
+              return (
+                <span
+                  className={
+                    isExpired
+                      ? "text-sm text-destructive"
+                      : "text-sm text-muted-foreground"
+                  }
+                >
+                  {isExpired ? "Expired " : ""}
+                  {formatDate(key.expiresAt)}
+                </span>
+              );
+            }
+          },
+          {
             header: "Status",
             key: "status",
             render: (key) => (
