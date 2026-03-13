@@ -2,7 +2,8 @@
 
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { ProviderIcon } from "@/components/model-icon";
 import type { Provider } from "../hooks/use-providers";
 import {
   PROVIDER_LABELS,
@@ -49,6 +50,15 @@ const ProviderForm = ({
   );
   const [showApiKey, setShowApiKey] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  const providerOptionsWithIcons = useMemo(
+    () =>
+      PROVIDER_OPTIONS.map((opt) => ({
+        ...opt,
+        icon: <ProviderIcon provider={opt.value} size={16} />
+      })),
+    []
+  );
 
   const createMutation = useCreateProvider();
   const updateMutation = useUpdateProvider();
@@ -114,7 +124,8 @@ const ProviderForm = ({
             disabled={isEdit}
             id="provider-select"
             onChange={(v) => update("provider", v)}
-            options={PROVIDER_OPTIONS}
+            options={providerOptionsWithIcons}
+            searchable
             value={form.provider}
           />
         </div>
