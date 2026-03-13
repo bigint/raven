@@ -4,7 +4,7 @@ import type { AppEnv } from "@/lib/types";
 import { queryValidator } from "@/lib/validation";
 import { getAdoptionBreakdown, getAdoptionChart } from "./adoption";
 import { getCache } from "./cache";
-import { enforceAnalyticsRetention } from "./helpers";
+import { clampAnalyticsRetention } from "./helpers";
 import { getLogs } from "./logs";
 import { getModels } from "./models";
 import { getRequests } from "./requests";
@@ -24,13 +24,17 @@ import { getUsage } from "./usage";
 export const createAnalyticsModule = (db: Database) => {
   const app = new Hono<AppEnv>();
 
-  // Enforce analytics retention based on org plan
+  // Clamp analytics date range to plan retention limit
   app.use("*", async (c, next) => {
-    // Skip retention check for live streaming endpoint
     if (c.req.path.endsWith("/requests/live")) return next();
     const orgId = c.get("orgId");
     const from = c.req.query("from");
-    await enforceAnalyticsRetention(db, orgId, from);
+    const clamped = await clampAnalyticsRetention(db, orgId, from);
+    if (clamped) {
+      const url = new URL(c.req.url);
+      url.searchParams.set("from", clamped);
+      c.req.raw = new Request(url, c.req.raw);
+    }
     return next();
   });
 

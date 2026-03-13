@@ -104,8 +104,14 @@ export const useAnalytics = () => {
   const retentionDays = PLAN_FEATURES[currentPlan].analyticsRetentionDays;
 
   const rangeParam = searchParams.get("range") as DateRange | null;
+  const maxAllowedRange =
+    VALID_RANGES.filter((r) => RANGE_DAYS[r] <= retentionDays).pop() ?? "7d";
   const dateRange =
-    rangeParam && VALID_RANGES.includes(rangeParam) ? rangeParam : "7d";
+    rangeParam &&
+    VALID_RANGES.includes(rangeParam) &&
+    RANGE_DAYS[rangeParam] <= retentionDays
+      ? rangeParam
+      : maxAllowedRange;
 
   const setDateRange = (range: DateRange) => {
     const params = new URLSearchParams(searchParams.toString());
