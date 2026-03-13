@@ -1,7 +1,7 @@
 "use client";
 
 import type { Column } from "@raven/ui";
-import { Badge, Button, DataTable, EmptyState } from "@raven/ui";
+import { Badge, Button, DataTable, EmptyState, Spinner } from "@raven/ui";
 import { Mail, Trash2 } from "lucide-react";
 import type { Invitation } from "../hooks/use-team-data";
 
@@ -19,15 +19,21 @@ const STATUS_BADGE_VARIANT: Record<string, "warning" | "success" | "neutral"> =
 
 interface InvitationListProps {
   invitations: Invitation[];
+  isLoading: boolean;
   onDelete: (id: string) => void;
   onInvite: () => void;
 }
 
 const InvitationList = ({
   invitations,
+  isLoading,
   onDelete,
   onInvite
 }: InvitationListProps) => {
+  if (isLoading) {
+    return <Spinner />;
+  }
+
   if (invitations.length === 0) {
     return (
       <EmptyState

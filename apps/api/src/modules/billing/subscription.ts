@@ -1,11 +1,11 @@
 import type { Database } from "@raven/db";
 import { subscriptions } from "@raven/db";
 import { eq } from "drizzle-orm";
-import type { Context } from "hono";
+import type { AppContext } from "@/lib/types";
 import { PLAN_DETAILS } from "./plans";
 
-export const getSubscription = (db: Database) => async (c: Context) => {
-  const orgId = c.get("orgId" as never) as string;
+export const getSubscription = (db: Database) => async (c: AppContext) => {
+  const orgId = c.get("orgId");
 
   const [subscription] = await db
     .select()

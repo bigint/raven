@@ -202,7 +202,7 @@ export default function PricingPage() {
                     {details.description}
                   </p>
                   <div className="mt-4">
-                    {!isCustom ? (
+                    {isCustom ? (
                       <div className="flex items-baseline gap-1">
                         <span className="text-4xl font-bold">
                           ${displayPrice}

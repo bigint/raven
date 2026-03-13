@@ -1,40 +1,30 @@
 "use client";
 
 import { Button, ConfirmDialog, PageHeader, Spinner } from "@raven/ui";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { useEventStream } from "@/hooks/use-event-stream";
-import type { FormState } from "./components/key-form";
 import { KeyForm } from "./components/key-form";
 import { KeyList } from "./components/key-list";
 import { KeyReveal } from "./components/key-reveal";
+import { useKeyActions } from "./hooks/use-key-actions";
 import type { VirtualKey } from "./hooks/use-keys";
-import {
-  keysQueryOptions,
-  useCreateKey,
-  useDeleteKey,
-  useUpdateKey
-} from "./hooks/use-keys";
 
-export default function KeysPage() {
-  const keysQuery = useQuery(keysQueryOptions());
-  const queryClient = useQueryClient();
-
-  const createKey = useCreateKey();
-  const updateKey = useUpdateKey();
-  const deleteKey = useDeleteKey();
+const KeysPage = () => {
+  const {
+    clearDeleteId,
+    clearNewKeyValue,
+    deleteId,
+    deleteKey,
+    handleDelete,
+    handleFormSubmit,
+    keys,
+    keysQuery,
+    newKeyValue,
+    setDeleteId
+  } = useKeyActions();
 
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [editingKey, setEditingKey] = useState<VirtualKey | null>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [newKeyValue, setNewKeyValue] = useState<string | null>(null);
-
-  useEventStream({
-    enabled: keysQuery.isSuccess,
-    events: ["key.created", "key.updated", "key.deleted"],
-    onEvent: () => queryClient.invalidateQueries({ queryKey: ["keys"] })
-  });
 
   const openCreate = () => {
     setEditingKey(null);
@@ -45,58 +35,6 @@ export default function KeysPage() {
     setEditingKey(key);
     setModalMode("edit");
   };
-
-  const handleFormSubmit = async (
-    mode: "create" | "edit",
-    form: FormState,
-    keyId?: string
-  ) => {
-    if (mode === "create") {
-      const body: {
-        name: string;
-        environment: "live" | "test";
-        expiresAt?: string;
-        rateLimitRpm?: number;
-        rateLimitRpd?: number;
-      } = {
-        environment: form.environment,
-        name: form.name.trim()
-      };
-      if (form.expiresAt.trim())
-        body.expiresAt = new Date(form.expiresAt).toISOString();
-      if (form.rateLimitRpm.trim())
-        body.rateLimitRpm = Number(form.rateLimitRpm);
-      if (form.rateLimitRpd.trim())
-        body.rateLimitRpd = Number(form.rateLimitRpd);
-      const created = await createKey.mutateAsync(body);
-      setNewKeyValue(created.key);
-    } else if (mode === "edit" && keyId) {
-      await updateKey.mutateAsync({
-        data: {
-          expiresAt: form.expiresAt.trim()
-            ? new Date(form.expiresAt).toISOString()
-            : null,
-          isActive: form.isActive,
-          name: form.name.trim(),
-          rateLimitRpd: form.rateLimitRpd.trim()
-            ? Number(form.rateLimitRpd)
-            : null,
-          rateLimitRpm: form.rateLimitRpm.trim()
-            ? Number(form.rateLimitRpm)
-            : null
-        },
-        id: keyId
-      });
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!deleteId) return;
-    await deleteKey.mutateAsync(deleteId);
-    setDeleteId(null);
-  };
-
-  const keys = keysQuery.data ?? [];
 
   return (
     <div>
@@ -138,16 +76,18 @@ export default function KeysPage() {
         }}
         onSubmit={handleFormSubmit}
       />
-      <KeyReveal keyValue={newKeyValue} onClose={() => setNewKeyValue(null)} />
+      <KeyReveal keyValue={newKeyValue} onClose={clearNewKeyValue} />
       <ConfirmDialog
         confirmLabel={deleteKey.isPending ? "Deleting..." : "Delete"}
         description="Are you sure you want to delete this key? Any applications using it will lose access. This action cannot be undone."
         loading={deleteKey.isPending}
-        onClose={() => setDeleteId(null)}
+        onClose={clearDeleteId}
         onConfirm={handleDelete}
         open={deleteId !== null}
         title="Delete Key"
       />
     </div>
   );
-}
+};
+
+export default KeysPage;

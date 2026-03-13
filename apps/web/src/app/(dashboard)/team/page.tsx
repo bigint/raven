@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, ConfirmDialog, PageHeader, Spinner, Tabs } from "@raven/ui";
+import { Button, ConfirmDialog, PageHeader, Tabs } from "@raven/ui";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Mail, Plus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -46,7 +46,7 @@ const DELETE_CONFIG = {
   }
 };
 
-export default function TeamPage() {
+const TeamPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const tabParam = searchParams.get("tab") as ActiveTab | null;
@@ -76,10 +76,6 @@ export default function TeamPage() {
     id: string;
   } | null>(null);
 
-  const isLoading =
-    membersQuery.isLoading ||
-    invitationsQuery.isLoading ||
-    teamsQuery.isLoading;
   const isDeleting =
     deleteMember.isPending ||
     deleteInvitation.isPending ||
@@ -89,7 +85,10 @@ export default function TeamPage() {
   const teams = teamsQuery.data ?? [];
 
   useEventStream({
-    enabled: !isLoading,
+    enabled:
+      !membersQuery.isLoading &&
+      !invitationsQuery.isLoading &&
+      !teamsQuery.isLoading,
     events: [
       "member.removed",
       "member.role_changed",
@@ -157,31 +156,28 @@ export default function TeamPage() {
         ]}
         value={activeTab}
       />
-      {isLoading ? (
-        <Spinner />
-      ) : (
-        <>
-          {activeTab === "members" && (
-            <MemberList
-              members={members}
-              onDelete={(id) => setDeleteTarget({ id, type: "member" })}
-            />
-          )}
-          {activeTab === "invitations" && (
-            <InvitationList
-              invitations={invitations}
-              onDelete={(id) => setDeleteTarget({ id, type: "invitation" })}
-              onInvite={() => setShowInviteModal(true)}
-            />
-          )}
-          {activeTab === "teams" && (
-            <TeamList
-              onCreateTeam={() => setShowTeamModal(true)}
-              onDelete={(id) => setDeleteTarget({ id, type: "team" })}
-              teams={teams}
-            />
-          )}
-        </>
+      {activeTab === "members" && (
+        <MemberList
+          isLoading={membersQuery.isLoading}
+          members={members}
+          onDelete={(id) => setDeleteTarget({ id, type: "member" })}
+        />
+      )}
+      {activeTab === "invitations" && (
+        <InvitationList
+          invitations={invitations}
+          isLoading={invitationsQuery.isLoading}
+          onDelete={(id) => setDeleteTarget({ id, type: "invitation" })}
+          onInvite={() => setShowInviteModal(true)}
+        />
+      )}
+      {activeTab === "teams" && (
+        <TeamList
+          isLoading={teamsQuery.isLoading}
+          onCreateTeam={() => setShowTeamModal(true)}
+          onDelete={(id) => setDeleteTarget({ id, type: "team" })}
+          teams={teams}
+        />
       )}
       <InviteForm
         onClose={() => setShowInviteModal(false)}
@@ -206,4 +202,6 @@ export default function TeamPage() {
       />
     </div>
   );
-}
+};
+
+export default TeamPage;

@@ -6,8 +6,8 @@ export const organizations = pgTable("organizations", {
     .notNull()
     .defaultNow(),
   id: text("id").primaryKey().$defaultFn(createId),
-  name: text("name").notNull(),
   lemonSqueezyCustomerId: text("lemonsqueezy_customer_id"),
+  name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()

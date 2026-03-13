@@ -2,24 +2,24 @@ import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { and, eq } from "drizzle-orm";
-import type { Context } from "hono";
 import type { z } from "zod";
 import { encrypt } from "@/lib/crypto";
 import { NotFoundError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
+import type { AppContextWithJson } from "@/lib/types";
 import { logAudit } from "@/modules/audit-logs/index";
 import { maskApiKey, validateApiKey } from "./helpers";
 import type { updateProviderSchema } from "./schema";
 
+type Body = z.infer<typeof updateProviderSchema>;
+
 export const updateProvider =
-  (db: Database, env: Env) => async (c: Context) => {
-    const orgId = c.get("orgId" as never) as string;
-    const user = c.get("user" as never) as { id: string };
+  (db: Database, env: Env) => async (c: AppContextWithJson<Body>) => {
+    const orgId = c.get("orgId");
+    const user = c.get("user");
     const id = c.req.param("id") as string;
-    const { name, apiKey, isEnabled } = c.req.valid("json" as never) as z.infer<
-      typeof updateProviderSchema
-    >;
+    const { name, apiKey, isEnabled } = c.req.valid("json");
 
     const [existing] = await db
       .select()

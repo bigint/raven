@@ -1,12 +1,12 @@
 import type { Database } from "@raven/db";
 import { providerConfigs, requestLogs } from "@raven/db";
 import { desc, eq } from "drizzle-orm";
-import type { Context } from "hono";
 import { streamSSE } from "hono/streaming";
 import { getEventRedis } from "@/lib/events";
+import type { AppContext } from "@/lib/types";
 
-export const getRequestsLive = (db: Database) => async (c: Context) => {
-  const orgId = c.get("orgId" as never) as string;
+export const getRequestsLive = (db: Database) => async (c: AppContext) => {
+  const orgId = c.get("orgId");
 
   return streamSSE(c, async (stream) => {
     let aborted = false;

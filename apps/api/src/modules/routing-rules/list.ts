@@ -1,11 +1,11 @@
 import type { Database } from "@raven/db";
 import { routingRules } from "@raven/db";
 import { eq } from "drizzle-orm";
-import type { Context } from "hono";
 import { success } from "@/lib/response";
+import type { AppContext } from "@/lib/types";
 
-export const listRoutingRules = (db: Database) => async (c: Context) => {
-  const orgId = c.get("orgId" as never) as string;
+export const listRoutingRules = (db: Database) => async (c: AppContext) => {
+  const orgId = c.get("orgId");
 
   const rows = await db
     .select()

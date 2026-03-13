@@ -1,7 +1,7 @@
 "use client";
 
 import type { Column } from "@raven/ui";
-import { Avatar, Badge, DataTable, EmptyState } from "@raven/ui";
+import { Avatar, Badge, DataTable, EmptyState, Spinner } from "@raven/ui";
 import { Trash2, Users } from "lucide-react";
 import type { Member } from "../hooks/use-team-data";
 
@@ -12,11 +12,16 @@ const ROLE_BADGE_VARIANT: Record<string, "primary" | "neutral"> = {
 };
 
 interface MemberListProps {
+  isLoading: boolean;
   members: Member[];
   onDelete: (id: string) => void;
 }
 
-const MemberList = ({ members, onDelete }: MemberListProps) => {
+const MemberList = ({ isLoading, members, onDelete }: MemberListProps) => {
+  if (isLoading) {
+    return <Spinner />;
+  }
+
   if (members.length === 0) {
     return (
       <EmptyState icon={<Users className="size-8" />} title="No members yet" />

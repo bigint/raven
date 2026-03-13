@@ -1,13 +1,13 @@
-import type { Context } from "hono";
 import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
 import type { Redis } from "ioredis";
+import type { AppEnv } from "@/lib/types";
 
 export const createEventsModule = (redis: Redis) => {
-  const app = new Hono();
+  const app = new Hono<AppEnv>();
 
-  app.get("/stream", async (c: Context) => {
-    const orgId = c.get("orgId" as never) as string;
+  app.get("/stream", async (c) => {
+    const orgId = c.get("orgId");
 
     return streamSSE(c, async (stream) => {
       let aborted = false;

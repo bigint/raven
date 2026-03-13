@@ -2,14 +2,14 @@ import { createId } from "@paralleldrive/cuid2";
 import type { Database } from "@raven/db";
 import { members, organizations } from "@raven/db";
 import { eq } from "drizzle-orm";
-import type { Context } from "hono";
 import type { z } from "zod";
 import { UnauthorizedError } from "@/lib/errors";
 import { created, success } from "@/lib/response";
+import type { AuthContext, AuthContextWithJson } from "@/lib/types";
 import type { createOrgSchema } from "./schema";
 
-export const listOrgs = (db: Database) => async (c: Context) => {
-  const user = c.get("user" as never) as { id: string } | undefined;
+export const listOrgs = (db: Database) => async (c: AuthContext) => {
+  const user = c.get("user");
   if (!user) {
     throw new UnauthorizedError("Not authenticated");
   }
@@ -28,27 +28,30 @@ export const listOrgs = (db: Database) => async (c: Context) => {
   return success(c, userMembers);
 };
 
-export const createOrg = (db: Database) => async (c: Context) => {
-  const user = c.get("user" as never) as { id: string } | undefined;
-  if (!user) {
-    throw new UnauthorizedError("Not authenticated");
-  }
+type Body = z.infer<typeof createOrgSchema>;
 
-  const data = c.req.valid("json" as never) as z.infer<typeof createOrgSchema>;
+export const createOrg =
+  (db: Database) => async (c: AuthContextWithJson<Body>) => {
+    const user = c.get("user");
+    if (!user) {
+      throw new UnauthorizedError("Not authenticated");
+    }
 
-  const name = data.name;
-  const slug = data.slug?.trim() || `org-${createId()}`;
-  const orgId = createId();
+    const data = c.req.valid("json");
 
-  await db.transaction(async (tx) => {
-    await tx.insert(organizations).values({ id: orgId, name, slug });
-    await tx.insert(members).values({
-      id: createId(),
-      organizationId: orgId,
-      role: "owner",
-      userId: user.id
+    const name = data.name;
+    const slug = data.slug?.trim() || `org-${createId()}`;
+    const orgId = createId();
+
+    await db.transaction(async (tx) => {
+      await tx.insert(organizations).values({ id: orgId, name, slug });
+      await tx.insert(members).values({
+        id: createId(),
+        organizationId: orgId,
+        role: "owner",
+        userId: user.id
+      });
     });
-  });
 
-  return created(c, { id: orgId, name, role: "owner", slug });
-};
+    return created(c, { id: orgId, name, role: "owner", slug });
+  };

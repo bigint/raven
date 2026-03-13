@@ -2,14 +2,12 @@ import { createId } from "@paralleldrive/cuid2";
 import type { Database } from "@raven/db";
 import { invitations, members, organizations } from "@raven/db";
 import { and, eq } from "drizzle-orm";
-import type { Context } from "hono";
 import { AppError, NotFoundError, UnauthorizedError } from "@/lib/errors";
 import { created, success } from "@/lib/response";
+import type { AuthContext } from "@/lib/types";
 
-export const listInvitations = (db: Database) => async (c: Context) => {
-  const user = c.get("user" as never) as
-    | { id: string; email: string }
-    | undefined;
+export const listInvitations = (db: Database) => async (c: AuthContext) => {
+  const user = c.get("user");
   if (!user) {
     throw new UnauthorizedError("Not authenticated");
   }
@@ -31,10 +29,8 @@ export const listInvitations = (db: Database) => async (c: Context) => {
   return success(c, pending);
 };
 
-export const acceptInvitation = (db: Database) => async (c: Context) => {
-  const user = c.get("user" as never) as
-    | { id: string; email: string }
-    | undefined;
+export const acceptInvitation = (db: Database) => async (c: AuthContext) => {
+  const user = c.get("user");
   if (!user) {
     throw new UnauthorizedError("Not authenticated");
   }
@@ -84,10 +80,8 @@ export const acceptInvitation = (db: Database) => async (c: Context) => {
   });
 };
 
-export const declineInvitation = (db: Database) => async (c: Context) => {
-  const user = c.get("user" as never) as
-    | { id: string; email: string }
-    | undefined;
+export const declineInvitation = (db: Database) => async (c: AuthContext) => {
+  const user = c.get("user");
   if (!user) {
     throw new UnauthorizedError("Not authenticated");
   }

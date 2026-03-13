@@ -1,12 +1,12 @@
 import type { Database } from "@raven/db";
 import { prompts, promptVersions } from "@raven/db";
 import { and, asc, eq } from "drizzle-orm";
-import type { Context } from "hono";
 import { NotFoundError } from "@/lib/errors";
 import { success } from "@/lib/response";
+import type { AppContext } from "@/lib/types";
 
-export const getPrompt = (db: Database) => async (c: Context) => {
-  const orgId = c.get("orgId" as never) as string;
+export const getPrompt = (db: Database) => async (c: AppContext) => {
+  const orgId = c.get("orgId");
   const id = c.req.param("id") as string;
 
   const [prompt] = await db

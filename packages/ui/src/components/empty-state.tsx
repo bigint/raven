@@ -9,8 +9,19 @@ interface EmptyStateProps {
   bordered?: boolean;
 }
 
-const EmptyState = ({ icon, title, description, action, bordered = true }: EmptyStateProps) => (
-  <div className={cn("p-12 text-center", bordered && "rounded-xl border border-border")}>
+const EmptyState = ({
+  icon,
+  title,
+  description,
+  action,
+  bordered = true
+}: EmptyStateProps) => (
+  <div
+    className={cn(
+      "p-12 text-center",
+      bordered && "rounded-xl border border-border"
+    )}
+  >
     {icon && (
       <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
         {icon}

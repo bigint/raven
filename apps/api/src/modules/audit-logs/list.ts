@@ -1,49 +1,50 @@
 import type { Database } from "@raven/db";
 import { auditLogs } from "@raven/db";
 import { and, desc, eq, gte, lte } from "drizzle-orm";
-import type { Context } from "hono";
 import type { z } from "zod";
+import type { AppContextWithQuery } from "@/lib/types";
 import { checkFeatureGate } from "@/modules/proxy/plan-gate";
 import type { listQuerySchema } from "./schema";
 
-export const listAuditLogs = (db: Database) => async (c: Context) => {
-  const orgId = c.get("orgId" as never) as string;
+type Query = z.infer<typeof listQuerySchema>;
 
-  await checkFeatureGate(db, orgId, "hasAuditLogs");
+export const listAuditLogs =
+  (db: Database) => async (c: AppContextWithQuery<Query>) => {
+    const orgId = c.get("orgId");
 
-  const query = c.req.valid("query" as never) as z.infer<
-    typeof listQuerySchema
-  >;
+    await checkFeatureGate(db, orgId, "hasAuditLogs");
 
-  const conditions = [eq(auditLogs.organizationId, orgId)];
+    const query = c.req.valid("query");
 
-  if (query.action) {
-    conditions.push(eq(auditLogs.action, query.action));
-  }
+    const conditions = [eq(auditLogs.organizationId, orgId)];
 
-  if (query.resourceType) {
-    conditions.push(eq(auditLogs.resourceType, query.resourceType));
-  }
+    if (query.action) {
+      conditions.push(eq(auditLogs.action, query.action));
+    }
 
-  if (query.actorId) {
-    conditions.push(eq(auditLogs.actorId, query.actorId));
-  }
+    if (query.resourceType) {
+      conditions.push(eq(auditLogs.resourceType, query.resourceType));
+    }
 
-  if (query.from) {
-    conditions.push(gte(auditLogs.createdAt, query.from));
-  }
+    if (query.actorId) {
+      conditions.push(eq(auditLogs.actorId, query.actorId));
+    }
 
-  if (query.to) {
-    conditions.push(lte(auditLogs.createdAt, query.to));
-  }
+    if (query.from) {
+      conditions.push(gte(auditLogs.createdAt, query.from));
+    }
 
-  const rows = await db
-    .select()
-    .from(auditLogs)
-    .where(and(...conditions))
-    .orderBy(desc(auditLogs.createdAt))
-    .limit(query.limit)
-    .offset(query.offset);
+    if (query.to) {
+      conditions.push(lte(auditLogs.createdAt, query.to));
+    }
 
-  return c.json(rows);
-};
+    const rows = await db
+      .select()
+      .from(auditLogs)
+      .where(and(...conditions))
+      .orderBy(desc(auditLogs.createdAt))
+      .limit(query.limit)
+      .offset(query.offset);
+
+    return c.json(rows);
+  };

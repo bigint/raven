@@ -1,13 +1,13 @@
 import type { Database } from "@raven/db";
 import { organizations, subscriptions } from "@raven/db";
 import { eq } from "drizzle-orm";
-import type { Context } from "hono";
 import { NotFoundError } from "@/lib/errors";
 import { success } from "@/lib/response";
+import type { AppContext } from "@/lib/types";
 
-export const getSettings = (db: Database) => async (c: Context) => {
-  const orgId = c.get("orgId" as never) as string;
-  const orgRole = c.get("orgRole" as never) as string;
+export const getSettings = (db: Database) => async (c: AppContext) => {
+  const orgId = c.get("orgId");
+  const orgRole = c.get("orgRole");
 
   const [org] = await db
     .select({

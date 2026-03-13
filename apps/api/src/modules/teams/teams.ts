@@ -1,11 +1,11 @@
 import type { Database } from "@raven/db";
 import { members, teamMembers, teams } from "@raven/db";
 import { and, count, eq } from "drizzle-orm";
-import type { Context } from "hono";
 import type { z } from "zod";
 import { ConflictError, ForbiddenError, NotFoundError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { created, success } from "@/lib/response";
+import type { AppContext, AppContextWithJson } from "@/lib/types";
 import { logAudit } from "@/modules/audit-logs/index";
 import { checkFeatureGate } from "@/modules/proxy/plan-gate";
 import type {
@@ -14,8 +14,8 @@ import type {
   updateTeamSchema
 } from "./schema";
 
-export const listTeams = (db: Database) => async (c: Context) => {
-  const orgId = c.get("orgId" as never) as string;
+export const listTeams = (db: Database) => async (c: AppContext) => {
+  const orgId = c.get("orgId");
 
   const rows = await db
     .select({
@@ -32,84 +32,90 @@ export const listTeams = (db: Database) => async (c: Context) => {
   return success(c, rows);
 };
 
-export const createTeam = (db: Database) => async (c: Context) => {
-  const orgId = c.get("orgId" as never) as string;
-  const orgRole = c.get("orgRole" as never) as string;
-  const user = c.get("user" as never) as { id: string };
+type CreateTeamBody = z.infer<typeof createTeamSchema>;
 
-  if (orgRole !== "owner" && orgRole !== "admin") {
-    throw new ForbiddenError("Only owners and admins can create teams");
-  }
+export const createTeam =
+  (db: Database) => async (c: AppContextWithJson<CreateTeamBody>) => {
+    const orgId = c.get("orgId");
+    const orgRole = c.get("orgRole");
+    const user = c.get("user");
 
-  await checkFeatureGate(db, orgId, "hasTeams");
+    if (orgRole !== "owner" && orgRole !== "admin") {
+      throw new ForbiddenError("Only owners and admins can create teams");
+    }
 
-  const data = c.req.valid("json" as never) as z.infer<typeof createTeamSchema>;
+    await checkFeatureGate(db, orgId, "hasTeams");
 
-  const [record] = await db
-    .insert(teams)
-    .values({
-      name: data.name,
-      organizationId: orgId
-    })
-    .returning();
+    const data = c.req.valid("json");
 
-  const safe = record as NonNullable<typeof record>;
-  void publishEvent(orgId, "team.created", safe);
-  void logAudit(db, {
-    action: "team.created",
-    actorId: user.id,
-    metadata: { name: data.name },
-    orgId,
-    resourceId: safe.id,
-    resourceType: "team"
-  });
-  return created(c, safe);
-};
+    const [record] = await db
+      .insert(teams)
+      .values({
+        name: data.name,
+        organizationId: orgId
+      })
+      .returning();
 
-export const updateTeam = (db: Database) => async (c: Context) => {
-  const orgId = c.get("orgId" as never) as string;
-  const orgRole = c.get("orgRole" as never) as string;
-  const user = c.get("user" as never) as { id: string };
-  const id = c.req.param("id") as string;
+    const safe = record as NonNullable<typeof record>;
+    void publishEvent(orgId, "team.created", safe);
+    void logAudit(db, {
+      action: "team.created",
+      actorId: user.id,
+      metadata: { name: data.name },
+      orgId,
+      resourceId: safe.id,
+      resourceType: "team"
+    });
+    return created(c, safe);
+  };
 
-  if (orgRole !== "owner" && orgRole !== "admin") {
-    throw new ForbiddenError("Only owners and admins can update teams");
-  }
+type UpdateTeamBody = z.infer<typeof updateTeamSchema>;
 
-  const data = c.req.valid("json" as never) as z.infer<typeof updateTeamSchema>;
+export const updateTeam =
+  (db: Database) => async (c: AppContextWithJson<UpdateTeamBody>) => {
+    const orgId = c.get("orgId");
+    const orgRole = c.get("orgRole");
+    const user = c.get("user");
+    const id = c.req.param("id") as string;
 
-  const [existing] = await db
-    .select({ id: teams.id })
-    .from(teams)
-    .where(and(eq(teams.id, id), eq(teams.organizationId, orgId)))
-    .limit(1);
+    if (orgRole !== "owner" && orgRole !== "admin") {
+      throw new ForbiddenError("Only owners and admins can update teams");
+    }
 
-  if (!existing) {
-    throw new NotFoundError("Team not found");
-  }
+    const data = c.req.valid("json");
 
-  const [updated] = await db
-    .update(teams)
-    .set({ name: data.name })
-    .where(and(eq(teams.id, id), eq(teams.organizationId, orgId)))
-    .returning();
+    const [existing] = await db
+      .select({ id: teams.id })
+      .from(teams)
+      .where(and(eq(teams.id, id), eq(teams.organizationId, orgId)))
+      .limit(1);
 
-  void publishEvent(orgId, "team.updated", updated);
-  void logAudit(db, {
-    action: "team.updated",
-    actorId: user.id,
-    metadata: { name: data.name },
-    orgId,
-    resourceId: id,
-    resourceType: "team"
-  });
-  return success(c, updated);
-};
+    if (!existing) {
+      throw new NotFoundError("Team not found");
+    }
 
-export const deleteTeam = (db: Database) => async (c: Context) => {
-  const orgId = c.get("orgId" as never) as string;
-  const orgRole = c.get("orgRole" as never) as string;
-  const user = c.get("user" as never) as { id: string };
+    const [updated] = await db
+      .update(teams)
+      .set({ name: data.name })
+      .where(and(eq(teams.id, id), eq(teams.organizationId, orgId)))
+      .returning();
+
+    void publishEvent(orgId, "team.updated", updated);
+    void logAudit(db, {
+      action: "team.updated",
+      actorId: user.id,
+      metadata: { name: data.name },
+      orgId,
+      resourceId: id,
+      resourceType: "team"
+    });
+    return success(c, updated);
+  };
+
+export const deleteTeam = (db: Database) => async (c: AppContext) => {
+  const orgId = c.get("orgId");
+  const orgRole = c.get("orgRole");
+  const user = c.get("user");
   const id = c.req.param("id") as string;
 
   if (orgRole !== "owner" && orgRole !== "admin") {
@@ -141,86 +147,89 @@ export const deleteTeam = (db: Database) => async (c: Context) => {
   return success(c, { success: true });
 };
 
-export const addTeamMember = (db: Database) => async (c: Context) => {
-  const orgId = c.get("orgId" as never) as string;
-  const orgRole = c.get("orgRole" as never) as string;
-  const user = c.get("user" as never) as { id: string };
-  const id = c.req.param("id") as string;
+type AddTeamMemberBody = z.infer<typeof addTeamMemberSchema>;
 
-  if (orgRole !== "owner" && orgRole !== "admin") {
-    throw new ForbiddenError("Only owners and admins can add team members");
-  }
+export const addTeamMember =
+  (db: Database) => async (c: AppContextWithJson<AddTeamMemberBody>) => {
+    const orgId = c.get("orgId");
+    const orgRole = c.get("orgRole");
+    const user = c.get("user");
+    const id = c.req.param("id") as string;
 
-  const data = c.req.valid("json" as never) as z.infer<
-    typeof addTeamMemberSchema
-  >;
+    if (orgRole !== "owner" && orgRole !== "admin") {
+      throw new ForbiddenError("Only owners and admins can add team members");
+    }
 
-  const [team] = await db
-    .select({ id: teams.id })
-    .from(teams)
-    .where(and(eq(teams.id, id), eq(teams.organizationId, orgId)))
-    .limit(1);
+    const data = c.req.valid("json");
 
-  if (!team) {
-    throw new NotFoundError("Team not found");
-  }
+    const [team] = await db
+      .select({ id: teams.id })
+      .from(teams)
+      .where(and(eq(teams.id, id), eq(teams.organizationId, orgId)))
+      .limit(1);
 
-  // Ensure user is an org member
-  const [orgMembership] = await db
-    .select({ id: members.id })
-    .from(members)
-    .where(
-      and(eq(members.organizationId, orgId), eq(members.userId, data.userId))
-    )
-    .limit(1);
+    if (!team) {
+      throw new NotFoundError("Team not found");
+    }
 
-  if (!orgMembership) {
-    throw new NotFoundError("User is not a member of this organization");
-  }
+    // Ensure user is an org member
+    const [orgMembership] = await db
+      .select({ id: members.id })
+      .from(members)
+      .where(
+        and(eq(members.organizationId, orgId), eq(members.userId, data.userId))
+      )
+      .limit(1);
 
-  // Check for existing team membership
-  const [existingTeamMember] = await db
-    .select({ id: teamMembers.id })
-    .from(teamMembers)
-    .where(and(eq(teamMembers.teamId, id), eq(teamMembers.userId, data.userId)))
-    .limit(1);
+    if (!orgMembership) {
+      throw new NotFoundError("User is not a member of this organization");
+    }
 
-  if (existingTeamMember) {
-    throw new ConflictError("User is already a member of this team");
-  }
+    // Check for existing team membership
+    const [existingTeamMember] = await db
+      .select({ id: teamMembers.id })
+      .from(teamMembers)
+      .where(
+        and(eq(teamMembers.teamId, id), eq(teamMembers.userId, data.userId))
+      )
+      .limit(1);
 
-  const [record] = await db
-    .insert(teamMembers)
-    .values({
-      role: data.role,
+    if (existingTeamMember) {
+      throw new ConflictError("User is already a member of this team");
+    }
+
+    const [record] = await db
+      .insert(teamMembers)
+      .values({
+        role: data.role,
+        teamId: id,
+        userId: data.userId
+      })
+      .returning();
+
+    void publishEvent(orgId, "team_member.added", {
       teamId: id,
       userId: data.userId
-    })
-    .returning();
+    });
+    void logAudit(db, {
+      action: "member.added",
+      actorId: user.id,
+      metadata: {
+        role: data.role,
+        teamId: id,
+        userId: data.userId
+      },
+      orgId,
+      resourceId: id,
+      resourceType: "team"
+    });
+    return created(c, record);
+  };
 
-  void publishEvent(orgId, "team_member.added", {
-    teamId: id,
-    userId: data.userId
-  });
-  void logAudit(db, {
-    action: "member.added",
-    actorId: user.id,
-    metadata: {
-      role: data.role,
-      teamId: id,
-      userId: data.userId
-    },
-    orgId,
-    resourceId: id,
-    resourceType: "team"
-  });
-  return created(c, record);
-};
-
-export const removeTeamMember = (db: Database) => async (c: Context) => {
-  const orgId = c.get("orgId" as never) as string;
-  const orgRole = c.get("orgRole" as never) as string;
-  const user = c.get("user" as never) as { id: string };
+export const removeTeamMember = (db: Database) => async (c: AppContext) => {
+  const orgId = c.get("orgId");
+  const orgRole = c.get("orgRole");
+  const user = c.get("user");
   const id = c.req.param("id") as string;
   const userId = c.req.param("userId") as string;
 

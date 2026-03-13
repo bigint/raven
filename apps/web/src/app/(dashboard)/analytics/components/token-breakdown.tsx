@@ -1,7 +1,7 @@
 "use client";
 
-import { EmptyState, Spinner } from "@raven/ui";
 import { PROVIDER_LABELS } from "@raven/types";
+import { EmptyState, Spinner } from "@raven/ui";
 import { BarChart3 } from "lucide-react";
 import type { UsageRow } from "../hooks/use-analytics";
 

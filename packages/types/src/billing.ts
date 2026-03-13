@@ -35,6 +35,12 @@ export interface PlanDetails {
 }
 
 export const PLAN_DETAILS: Record<Plan, PlanDetails> = {
+  enterprise: {
+    description: "For organizations that need everything.",
+    name: "Enterprise",
+    priceMonthly: 100,
+    priceYearly: 960
+  },
   free: {
     description: "For individuals and small experiments.",
     name: "Free",
@@ -53,12 +59,6 @@ export const PLAN_DETAILS: Record<Plan, PlanDetails> = {
     name: "Team",
     priceMonthly: 20,
     priceYearly: 192
-  },
-  enterprise: {
-    description: "For organizations that need everything.",
-    name: "Enterprise",
-    priceMonthly: 100,
-    priceYearly: 960
   }
 };
 

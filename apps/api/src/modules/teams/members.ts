@@ -1,16 +1,16 @@
 import type { Database } from "@raven/db";
 import { members, users } from "@raven/db";
 import { and, eq } from "drizzle-orm";
-import type { Context } from "hono";
 import type { z } from "zod";
 import { ForbiddenError, NotFoundError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
+import type { AppContext, AppContextWithJson } from "@/lib/types";
 import { logAudit } from "@/modules/audit-logs/index";
 import type { changeRoleSchema } from "./schema";
 
-export const listMembers = (db: Database) => async (c: Context) => {
-  const orgId = c.get("orgId" as never) as string;
+export const listMembers = (db: Database) => async (c: AppContext) => {
+  const orgId = c.get("orgId");
 
   const rows = await db
     .select({
@@ -38,10 +38,10 @@ export const listMembers = (db: Database) => async (c: Context) => {
   );
 };
 
-export const removeMember = (db: Database) => async (c: Context) => {
-  const orgId = c.get("orgId" as never) as string;
-  const orgRole = c.get("orgRole" as never) as string;
-  const currentUser = c.get("user" as never) as { id: string };
+export const removeMember = (db: Database) => async (c: AppContext) => {
+  const orgId = c.get("orgId");
+  const orgRole = c.get("orgRole");
+  const currentUser = c.get("user");
   const id = c.req.param("id") as string;
 
   if (orgRole !== "owner" && orgRole !== "admin") {
@@ -84,48 +84,53 @@ export const removeMember = (db: Database) => async (c: Context) => {
   return success(c, { success: true });
 };
 
-export const changeRole = (db: Database) => async (c: Context) => {
-  const orgId = c.get("orgId" as never) as string;
-  const orgRole = c.get("orgRole" as never) as string;
-  const user = c.get("user" as never) as { id: string };
-  const id = c.req.param("id") as string;
+type ChangeRoleBody = z.infer<typeof changeRoleSchema>;
 
-  if (orgRole !== "owner" && orgRole !== "admin") {
-    throw new ForbiddenError("Only owners and admins can change member roles");
-  }
+export const changeRole =
+  (db: Database) => async (c: AppContextWithJson<ChangeRoleBody>) => {
+    const orgId = c.get("orgId");
+    const orgRole = c.get("orgRole");
+    const user = c.get("user");
+    const id = c.req.param("id") as string;
 
-  const data = c.req.valid("json" as never) as z.infer<typeof changeRoleSchema>;
+    if (orgRole !== "owner" && orgRole !== "admin") {
+      throw new ForbiddenError(
+        "Only owners and admins can change member roles"
+      );
+    }
 
-  const [membership] = await db
-    .select()
-    .from(members)
-    .where(and(eq(members.id, id), eq(members.organizationId, orgId)))
-    .limit(1);
+    const data = c.req.valid("json");
 
-  if (!membership) {
-    throw new NotFoundError("Member not found");
-  }
+    const [membership] = await db
+      .select()
+      .from(members)
+      .where(and(eq(members.id, id), eq(members.organizationId, orgId)))
+      .limit(1);
 
-  if (membership.role === "owner") {
-    throw new ForbiddenError(
-      "Cannot change the role of the organization owner"
-    );
-  }
+    if (!membership) {
+      throw new NotFoundError("Member not found");
+    }
 
-  const [updated] = await db
-    .update(members)
-    .set({ role: data.role })
-    .where(and(eq(members.id, id), eq(members.organizationId, orgId)))
-    .returning();
+    if (membership.role === "owner") {
+      throw new ForbiddenError(
+        "Cannot change the role of the organization owner"
+      );
+    }
 
-  void publishEvent(orgId, "member.role_changed", updated);
-  void logAudit(db, {
-    action: "member.updated",
-    actorId: user.id,
-    metadata: { memberId: id, newRole: data.role },
-    orgId,
-    resourceId: id,
-    resourceType: "member"
-  });
-  return success(c, updated);
-};
+    const [updated] = await db
+      .update(members)
+      .set({ role: data.role })
+      .where(and(eq(members.id, id), eq(members.organizationId, orgId)))
+      .returning();
+
+    void publishEvent(orgId, "member.role_changed", updated);
+    void logAudit(db, {
+      action: "member.updated",
+      actorId: user.id,
+      metadata: { memberId: id, newRole: data.role },
+      orgId,
+      resourceId: id,
+      resourceType: "member"
+    });
+    return success(c, updated);
+  };

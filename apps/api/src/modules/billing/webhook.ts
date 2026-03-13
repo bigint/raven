@@ -61,10 +61,7 @@ export const handleWebhook =
 
     switch (eventName) {
       case "subscription_created": {
-        console.log(
-          "Lemon Squeezy event: subscription_created",
-          body.data?.id
-        );
+        console.log("Lemon Squeezy event: subscription_created", body.data?.id);
         if (orgId) {
           void publishEvent(orgId, "subscription.updated", body.data);
         }
@@ -72,10 +69,7 @@ export const handleWebhook =
       }
 
       case "subscription_updated": {
-        console.log(
-          "Lemon Squeezy event: subscription_updated",
-          body.data?.id
-        );
+        console.log("Lemon Squeezy event: subscription_updated", body.data?.id);
         if (orgId) {
           void publishEvent(orgId, "subscription.updated", body.data);
         }

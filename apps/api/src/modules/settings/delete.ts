@@ -1,16 +1,16 @@
 import type { Database } from "@raven/db";
 import { organizations } from "@raven/db";
 import { eq } from "drizzle-orm";
-import type { Context } from "hono";
 import { ForbiddenError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
+import type { AppContext } from "@/lib/types";
 import { logAudit } from "@/modules/audit-logs/index";
 
-export const deleteSettings = (db: Database) => async (c: Context) => {
-  const orgId = c.get("orgId" as never) as string;
-  const orgRole = c.get("orgRole" as never) as string;
-  const user = c.get("user" as never) as { id: string };
+export const deleteSettings = (db: Database) => async (c: AppContext) => {
+  const orgId = c.get("orgId");
+  const orgRole = c.get("orgRole");
+  const user = c.get("user");
 
   if (orgRole !== "owner") {
     throw new ForbiddenError("Only the owner can delete the organization");

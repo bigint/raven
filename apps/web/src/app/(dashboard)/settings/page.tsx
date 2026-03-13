@@ -16,7 +16,7 @@ import {
   useDeclineInvitation
 } from "../profile/hooks/use-profile";
 
-export default function SettingsPage() {
+const SettingsPage = () => {
   const orgsQuery = useQuery(orgsQueryOptions());
   const invitationsQuery = useQuery(profileInvitationsQueryOptions());
 
@@ -122,4 +122,6 @@ export default function SettingsPage() {
       />
     </div>
   );
-}
+};
+
+export default SettingsPage;

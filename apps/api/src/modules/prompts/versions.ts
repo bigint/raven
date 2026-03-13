@@ -1,10 +1,10 @@
 import type { Database } from "@raven/db";
 import { prompts, promptVersions } from "@raven/db";
 import { and, desc, eq } from "drizzle-orm";
-import type { Context } from "hono";
 import type { z } from "zod";
 import { NotFoundError } from "@/lib/errors";
 import { created, success } from "@/lib/response";
+import type { AppContext, AppContextWithJson } from "@/lib/types";
 import type { createVersionSchema } from "./schema";
 
 const findPrompt = async (db: Database, id: string, orgId: string) => {
@@ -21,48 +21,49 @@ const findPrompt = async (db: Database, id: string, orgId: string) => {
   return prompt;
 };
 
-export const createVersion = (db: Database) => async (c: Context) => {
-  const orgId = c.get("orgId" as never) as string;
-  const id = c.req.param("id") as string;
-  const { content, model } = c.req.valid("json" as never) as z.infer<
-    typeof createVersionSchema
-  >;
+type Body = z.infer<typeof createVersionSchema>;
 
-  await findPrompt(db, id, orgId);
+export const createVersion =
+  (db: Database) => async (c: AppContextWithJson<Body>) => {
+    const orgId = c.get("orgId");
+    const id = c.req.param("id") as string;
+    const { content, model } = c.req.valid("json");
 
-  // Get latest version number
-  const [latest] = await db
-    .select({ version: promptVersions.version })
-    .from(promptVersions)
-    .where(eq(promptVersions.promptId, id))
-    .orderBy(desc(promptVersions.version))
-    .limit(1);
+    await findPrompt(db, id, orgId);
 
-  const nextVersion = latest ? latest.version + 1 : 1;
+    // Get latest version number
+    const [latest] = await db
+      .select({ version: promptVersions.version })
+      .from(promptVersions)
+      .where(eq(promptVersions.promptId, id))
+      .orderBy(desc(promptVersions.version))
+      .limit(1);
 
-  // Deactivate all existing versions
-  await db
-    .update(promptVersions)
-    .set({ isActive: false })
-    .where(eq(promptVersions.promptId, id));
+    const nextVersion = latest ? latest.version + 1 : 1;
 
-  // Create new active version
-  const [version] = await db
-    .insert(promptVersions)
-    .values({
-      content,
-      isActive: true,
-      model: model ?? null,
-      promptId: id,
-      version: nextVersion
-    })
-    .returning();
+    // Deactivate all existing versions
+    await db
+      .update(promptVersions)
+      .set({ isActive: false })
+      .where(eq(promptVersions.promptId, id));
 
-  return created(c, version);
-};
+    // Create new active version
+    const [version] = await db
+      .insert(promptVersions)
+      .values({
+        content,
+        isActive: true,
+        model: model ?? null,
+        promptId: id,
+        version: nextVersion
+      })
+      .returning();
 
-export const activateVersion = (db: Database) => async (c: Context) => {
-  const orgId = c.get("orgId" as never) as string;
+    return created(c, version);
+  };
+
+export const activateVersion = (db: Database) => async (c: AppContext) => {
+  const orgId = c.get("orgId");
   const id = c.req.param("id") as string;
   const versionId = c.req.param("versionId") as string;
 

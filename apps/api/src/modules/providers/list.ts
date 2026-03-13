@@ -1,12 +1,12 @@
 import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { eq } from "drizzle-orm";
-import type { Context } from "hono";
 import { success } from "@/lib/response";
+import type { AppContext } from "@/lib/types";
 import { maskApiKey } from "./helpers";
 
-export const listProviders = (db: Database) => async (c: Context) => {
-  const orgId = c.get("orgId" as never) as string;
+export const listProviders = (db: Database) => async (c: AppContext) => {
+  const orgId = c.get("orgId");
 
   const providers = await db
     .select()

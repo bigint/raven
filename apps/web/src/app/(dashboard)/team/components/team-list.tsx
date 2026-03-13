@@ -1,17 +1,27 @@
 "use client";
 
 import type { Column } from "@raven/ui";
-import { Button, DataTable, EmptyState } from "@raven/ui";
+import { Button, DataTable, EmptyState, Spinner } from "@raven/ui";
 import { Pencil, Plus, Trash2, Users } from "lucide-react";
 import type { Team } from "../hooks/use-team-data";
 
 interface TeamListProps {
+  isLoading: boolean;
   onCreateTeam: () => void;
   onDelete: (id: string) => void;
   teams: Team[];
 }
 
-const TeamList = ({ onCreateTeam, onDelete, teams }: TeamListProps) => {
+const TeamList = ({
+  isLoading,
+  onCreateTeam,
+  onDelete,
+  teams
+}: TeamListProps) => {
+  if (isLoading) {
+    return <Spinner />;
+  }
+
   if (teams.length === 0) {
     return (
       <EmptyState

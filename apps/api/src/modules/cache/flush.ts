@@ -1,15 +1,16 @@
-import type { Context } from "hono";
 import type { Redis } from "ioredis";
 import { ForbiddenError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
+import type { AppContext } from "@/lib/types";
 import { logAudit } from "@/modules/audit-logs/index";
 
 export const flushCache =
-  (db: Parameters<typeof logAudit>[0], redis: Redis) => async (c: Context) => {
-    const orgId = c.get("orgId" as never) as string;
-    const orgRole = c.get("orgRole" as never) as string;
-    const user = c.get("user" as never) as { id: string };
+  (db: Parameters<typeof logAudit>[0], redis: Redis) =>
+  async (c: AppContext) => {
+    const orgId = c.get("orgId");
+    const orgRole = c.get("orgRole");
+    const user = c.get("user");
 
     if (orgRole !== "owner" && orgRole !== "admin") {
       throw new ForbiddenError("Only admins can flush the cache");

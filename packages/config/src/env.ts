@@ -12,12 +12,12 @@ const envSchema = z.object({
   GITHUB_CLIENT_SECRET: z.string().optional(),
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
+  LEMONSQUEEZY_API_KEY: z.string().optional(),
+  LEMONSQUEEZY_WEBHOOK_SECRET: z.string().optional(),
   NEXT_PUBLIC_API_URL: z.string().url(),
   NODE_ENV: z
     .enum(["development", "production", "test"])
     .default("development"),
-  LEMONSQUEEZY_API_KEY: z.string().optional(),
-  LEMONSQUEEZY_WEBHOOK_SECRET: z.string().optional(),
   REDIS_URL: z.string().url(),
   RESEND_API_KEY: z.string().optional()
 });

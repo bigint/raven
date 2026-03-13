@@ -2,23 +2,23 @@ import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { count, eq } from "drizzle-orm";
-import type { Context } from "hono";
 import type { z } from "zod";
 import { encrypt } from "@/lib/crypto";
 import { publishEvent } from "@/lib/events";
 import { created } from "@/lib/response";
+import type { AppContextWithJson } from "@/lib/types";
 import { logAudit } from "@/modules/audit-logs/index";
 import { checkResourceLimit } from "@/modules/proxy/plan-gate";
 import { maskApiKey, validateApiKey } from "./helpers";
 import type { createProviderSchema } from "./schema";
 
+type Body = z.infer<typeof createProviderSchema>;
+
 export const createProvider =
-  (db: Database, env: Env) => async (c: Context) => {
-    const orgId = c.get("orgId" as never) as string;
-    const user = c.get("user" as never) as { id: string };
-    const { provider, name, apiKey, isEnabled } = c.req.valid(
-      "json" as never
-    ) as z.infer<typeof createProviderSchema>;
+  (db: Database, env: Env) => async (c: AppContextWithJson<Body>) => {
+    const orgId = c.get("orgId");
+    const user = c.get("user");
+    const { provider, name, apiKey, isEnabled } = c.req.valid("json");
 
     const [existing] = await db
       .select({ value: count() })

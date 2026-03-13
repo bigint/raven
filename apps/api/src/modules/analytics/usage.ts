@@ -1,36 +1,41 @@
 import type { Database } from "@raven/db";
 import { providerConfigs, requestLogs } from "@raven/db";
 import { and, avg, count, eq, sum } from "drizzle-orm";
-import type { Context } from "hono";
+import type { z } from "zod";
+import type { AppContextWithQuery } from "@/lib/types";
 
 import { parseDateRange } from "./helpers";
+import type { dateRangeQuerySchema } from "./schema";
 
-export const getUsage = (db: Database) => async (c: Context) => {
-  const orgId = c.get("orgId" as never) as string;
-  const { from, to } = c.req.query();
+type Query = z.infer<typeof dateRangeQuerySchema>;
 
-  const dateConditions = parseDateRange(from, to);
-  const where = and(eq(requestLogs.organizationId, orgId), ...dateConditions);
+export const getUsage =
+  (db: Database) => async (c: AppContextWithQuery<Query>) => {
+    const orgId = c.get("orgId");
+    const { from, to } = c.req.valid("query");
 
-  const rows = await db
-    .select({
-      avgLatencyMs: avg(requestLogs.latencyMs),
-      model: requestLogs.model,
-      provider: requestLogs.provider,
-      providerConfigName: providerConfigs.name,
-      totalCost: sum(requestLogs.cost),
-      totalInputTokens: sum(requestLogs.inputTokens),
-      totalOutputTokens: sum(requestLogs.outputTokens),
-      totalRequests: count()
-    })
-    .from(requestLogs)
-    .leftJoin(
-      providerConfigs,
-      eq(requestLogs.providerConfigId, providerConfigs.id)
-    )
-    .where(where)
-    .groupBy(requestLogs.provider, requestLogs.model, providerConfigs.name)
-    .orderBy(requestLogs.provider, requestLogs.model);
+    const dateConditions = parseDateRange(from, to);
+    const where = and(eq(requestLogs.organizationId, orgId), ...dateConditions);
 
-  return c.json(rows);
-};
+    const rows = await db
+      .select({
+        avgLatencyMs: avg(requestLogs.latencyMs),
+        model: requestLogs.model,
+        provider: requestLogs.provider,
+        providerConfigName: providerConfigs.name,
+        totalCost: sum(requestLogs.cost),
+        totalInputTokens: sum(requestLogs.inputTokens),
+        totalOutputTokens: sum(requestLogs.outputTokens),
+        totalRequests: count()
+      })
+      .from(requestLogs)
+      .leftJoin(
+        providerConfigs,
+        eq(requestLogs.providerConfigId, providerConfigs.id)
+      )
+      .where(where)
+      .groupBy(requestLogs.provider, requestLogs.model, providerConfigs.name)
+      .orderBy(requestLogs.provider, requestLogs.model);
+
+    return c.json({ data: rows });
+  };

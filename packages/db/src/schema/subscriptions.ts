@@ -21,10 +21,12 @@ export const subscriptions = pgTable("subscriptions", {
     withTimezone: true
   }).notNull(),
   id: text("id").primaryKey().$defaultFn(createId),
+  lemonSqueezySubscriptionId: text("lemonsqueezy_subscription_id")
+    .notNull()
+    .unique(),
   organizationId: text("organization_id")
     .notNull()
     .references(() => organizations.id, { onDelete: "cascade" }),
-  lemonSqueezySubscriptionId: text("lemonsqueezy_subscription_id").notNull().unique(),
   plan: planEnum("plan").notNull().default("free"),
   seats: integer("seats").notNull().default(1),
   status: subscriptionStatusEnum("status").notNull().default("active"),
