@@ -54,54 +54,56 @@ export const Sidebar = ({
   onSwitchOrg
 }: SidebarProps) => {
   const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const orgSettingsHref = activeOrg
     ? `/${activeOrg.slug}/settings`
     : "/settings";
 
-  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
+  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
   useEffect(() => {
-    closeSidebar();
-  }, [pathname, closeSidebar]);
+    closeDrawer();
+  }, [pathname, closeDrawer]);
 
-  const navContent = (
+  useEffect(() => {
+    if (!drawerOpen) return;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [drawerOpen]);
+
+  const navLinks = (
     <>
-      <OrgSwitcher activeOrg={activeOrg} onSwitch={onSwitchOrg} orgs={orgs} />
-
-      <nav className="flex-1 px-3 py-3 space-y-0.5">
-        {NAV_ITEMS.map((item) => {
-          const isActive = pathname === item.href;
-          const Icon = item.icon;
-          return (
-            <Link
-              className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
-                isActive
-                  ? "bg-primary text-primary-foreground font-medium"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-              }`}
-              href={item.href}
-              key={item.href}
-            >
-              <Icon className="size-4" />
-              {item.label}
-            </Link>
-          );
-        })}
-        <Link
-          className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
-            pathname === orgSettingsHref
-              ? "bg-primary text-primary-foreground font-medium"
-              : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-          }`}
-          href={orgSettingsHref}
-        >
-          <Settings className="size-4" />
-          Settings
-        </Link>
-      </nav>
-
-      <UserMenu user={user} />
+      {NAV_ITEMS.map((item) => {
+        const isActive = pathname === item.href;
+        const Icon = item.icon;
+        return (
+          <Link
+            className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
+              isActive
+                ? "bg-primary text-primary-foreground font-medium"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            }`}
+            href={item.href}
+            key={item.href}
+          >
+            <Icon className="size-4" />
+            {item.label}
+          </Link>
+        );
+      })}
+      <Link
+        className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
+          pathname === orgSettingsHref
+            ? "bg-primary text-primary-foreground font-medium"
+            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+        }`}
+        href={orgSettingsHref}
+      >
+        <Settings className="size-4" />
+        Settings
+      </Link>
     </>
   );
 
@@ -109,46 +111,78 @@ export const Sidebar = ({
     <>
       {/* Mobile header */}
       <div className="flex md:hidden items-center justify-between border-b border-border bg-muted/50 px-4 py-3">
-        <div className="flex items-center gap-2 text-sm font-medium truncate">
-          {activeOrg ? activeOrg.name : "Raven"}
+        <div className="flex items-center gap-2">
+          <div className="size-6 rounded-md bg-primary flex items-center justify-center">
+            <span className="text-[10px] font-bold text-primary-foreground">
+              {activeOrg?.name?.charAt(0)?.toUpperCase() ?? "R"}
+            </span>
+          </div>
+          <span className="text-sm font-semibold truncate">
+            {activeOrg?.name ?? "Raven"}
+          </span>
         </div>
         <button
           aria-label="Open menu"
           className="p-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-          onClick={() => setSidebarOpen(true)}
+          onClick={() => setDrawerOpen(true)}
           type="button"
         >
           <Menu className="size-5" />
         </button>
       </div>
 
-      {/* Mobile overlay sidebar */}
-      {sidebarOpen && (
+      {/* Mobile bottom drawer */}
+      {drawerOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
             aria-hidden="true"
             className="fixed inset-0 bg-black/50"
-            onClick={closeSidebar}
+            onClick={closeDrawer}
           />
-          <aside className="relative z-50 flex h-full w-60 flex-col bg-muted/50 border-r border-border">
-            <div className="flex items-center justify-end px-3 pt-3">
+          <div className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] flex-col rounded-t-2xl border-t border-border bg-background shadow-xl">
+            {/* Drawer handle */}
+            <div className="flex justify-center py-2">
+              <div className="h-1 w-8 rounded-full bg-muted-foreground/30" />
+            </div>
+
+            {/* Drawer header */}
+            <div className="flex items-center justify-between px-4 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="size-7 rounded-lg bg-primary flex items-center justify-center">
+                  <span className="text-xs font-bold text-primary-foreground">
+                    {activeOrg?.name?.charAt(0)?.toUpperCase() ?? "R"}
+                  </span>
+                </div>
+                <span className="font-semibold truncate">
+                  {activeOrg?.name ?? "Raven"}
+                </span>
+              </div>
               <button
                 aria-label="Close menu"
                 className="p-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-                onClick={closeSidebar}
+                onClick={closeDrawer}
                 type="button"
               >
                 <X className="size-5" />
               </button>
             </div>
-            {navContent}
-          </aside>
+
+            {/* Nav items */}
+            <nav className="flex-1 overflow-y-auto px-3 pb-3 space-y-0.5">
+              {navLinks}
+            </nav>
+
+            {/* User menu at bottom */}
+            <UserMenu user={user} />
+          </div>
         </div>
       )}
 
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-60 border-r border-border bg-muted/50 flex-col shrink-0">
-        {navContent}
+        <OrgSwitcher activeOrg={activeOrg} onSwitch={onSwitchOrg} orgs={orgs} />
+        <nav className="flex-1 px-3 py-3 space-y-0.5">{navLinks}</nav>
+        <UserMenu user={user} />
       </aside>
     </>
   );
