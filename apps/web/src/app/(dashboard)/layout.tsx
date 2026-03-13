@@ -1,11 +1,13 @@
 "use client";
 
-import { redirect } from "next/navigation";
+import { motion } from "motion/react";
+import { redirect, usePathname } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { Sidebar } from "./components/sidebar";
 import { useOrgs } from "./hooks/use-orgs";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+  const pathname = usePathname();
   const { data: session, isPending: isSessionPending } = useSession();
   const { orgs, activeOrg, isPending: isOrgsPending, switchOrg } = useOrgs();
 
@@ -34,7 +36,15 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         user={session.user}
       />
       <main className="flex-1 overflow-auto overscroll-contain">
-        <div className="px-4 py-4 md:px-8 md:py-6">{children}</div>
+        <motion.div
+          animate={{ opacity: 1 }}
+          className="px-4 py-4 md:px-8 md:py-6"
+          initial={{ opacity: 0 }}
+          key={pathname}
+          transition={{ duration: 0.15, ease: "easeOut" }}
+        >
+          {children}
+        </motion.div>
       </main>
     </div>
   );

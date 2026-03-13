@@ -83,7 +83,9 @@ export const StatCards = ({ stats, activeKeys, loading }: StatCardsProps) => {
               {loading ? (
                 <div className="h-7 w-20 animate-pulse rounded-md bg-muted" />
               ) : (
-                <span className="text-2xl font-bold">{stat.value}</span>
+                <span className="text-2xl font-bold tabular-nums">
+                  {stat.value}
+                </span>
               )}
             </div>
             <p className="mt-1 text-xs text-muted-foreground">{stat.sub}</p>

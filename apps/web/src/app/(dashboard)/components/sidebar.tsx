@@ -22,6 +22,7 @@ import {
   Wrench,
   X
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -140,51 +141,63 @@ export const Sidebar = ({
       </div>
 
       {/* Mobile bottom drawer */}
-      {drawerOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div
-            aria-hidden="true"
-            className="fixed inset-0 bg-black/50"
-            onClick={closeDrawer}
-          />
-          <div className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] flex-col rounded-t-2xl border-t border-border bg-background shadow-xl">
-            {/* Drawer handle */}
-            <div className="flex justify-center py-2">
-              <div className="h-1 w-8 rounded-full bg-muted-foreground/30" />
-            </div>
+      <AnimatePresence>
+        {drawerOpen && (
+          <div className="fixed inset-0 z-50 md:hidden">
+            <motion.div
+              animate={{ opacity: 1 }}
+              aria-hidden="true"
+              className="fixed inset-0 bg-black/50"
+              exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }}
+              onClick={closeDrawer}
+              transition={{ duration: 0.15 }}
+            />
+            <motion.div
+              animate={{ y: 0 }}
+              className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] flex-col rounded-t-2xl border-t border-border bg-background shadow-xl"
+              exit={{ y: "100%" }}
+              initial={{ y: "100%" }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {/* Drawer handle */}
+              <div className="flex justify-center py-2">
+                <div className="h-1 w-8 rounded-full bg-muted-foreground/30" />
+              </div>
 
-            {/* Drawer header */}
-            <div className="flex items-center justify-between px-4 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="size-7 rounded-lg bg-primary flex items-center justify-center">
-                  <span className="text-xs font-bold text-primary-foreground">
-                    {activeOrg?.name?.charAt(0)?.toUpperCase() ?? "R"}
+              {/* Drawer header */}
+              <div className="flex items-center justify-between px-4 pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="size-7 rounded-lg bg-primary flex items-center justify-center">
+                    <span className="text-xs font-bold text-primary-foreground">
+                      {activeOrg?.name?.charAt(0)?.toUpperCase() ?? "R"}
+                    </span>
+                  </div>
+                  <span className="font-semibold truncate">
+                    {activeOrg?.name ?? "Raven"}
                   </span>
                 </div>
-                <span className="font-semibold truncate">
-                  {activeOrg?.name ?? "Raven"}
-                </span>
+                <button
+                  aria-label="Close menu"
+                  className="p-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                  onClick={closeDrawer}
+                  type="button"
+                >
+                  <X className="size-5" />
+                </button>
               </div>
-              <button
-                aria-label="Close menu"
-                className="p-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-                onClick={closeDrawer}
-                type="button"
-              >
-                <X className="size-5" />
-              </button>
-            </div>
 
-            {/* Nav items */}
-            <nav className="flex-1 overflow-y-auto px-3 pb-3 space-y-0.5">
-              {navLinks}
-            </nav>
+              {/* Nav items */}
+              <nav className="flex-1 overflow-y-auto px-3 pb-3 space-y-0.5">
+                {navLinks}
+              </nav>
 
-            {/* User menu at bottom */}
-            <UserMenu user={user} />
+              {/* User menu at bottom */}
+              <UserMenu user={user} />
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-60 border-r border-border bg-muted/50 flex-col shrink-0">
