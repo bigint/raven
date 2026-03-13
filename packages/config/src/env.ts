@@ -16,8 +16,8 @@ const envSchema = z.object({
   NODE_ENV: z
     .enum(["development", "production", "test"])
     .default("development"),
-  PADDLE_API_KEY: z.string().optional(),
-  PADDLE_WEBHOOK_SECRET: z.string().optional(),
+  LEMONSQUEEZY_API_KEY: z.string().optional(),
+  LEMONSQUEEZY_WEBHOOK_SECRET: z.string().optional(),
   REDIS_URL: z.string().url(),
   RESEND_API_KEY: z.string().optional()
 });

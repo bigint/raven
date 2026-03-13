@@ -24,7 +24,7 @@ export const subscriptions = pgTable("subscriptions", {
   organizationId: text("organization_id")
     .notNull()
     .references(() => organizations.id, { onDelete: "cascade" }),
-  paddleSubscriptionId: text("paddle_subscription_id").notNull().unique(),
+  lemonSqueezySubscriptionId: text("lemonsqueezy_subscription_id").notNull().unique(),
   plan: planEnum("plan").notNull().default("free"),
   seats: integer("seats").notNull().default(1),
   status: subscriptionStatusEnum("status").notNull().default("active"),

@@ -4,32 +4,21 @@ import type { Database } from "@raven/db";
 import type { Context } from "hono";
 import { publishEvent } from "@/lib/events";
 
-const verifyPaddleSignature = (
+const verifyLemonSqueezySignature = (
   signature: string,
   rawBody: string,
   secret: string
 ): boolean => {
-  const parts = signature.split(";").reduce(
-    (acc, part) => {
-      const [key, value] = part.split("=");
-      if (key && value) acc[key] = value;
-      return acc;
-    },
-    {} as Record<string, string>
-  );
-
-  const ts = parts["ts"];
-  const h1 = parts["h1"];
-  if (!ts || !h1) return false;
-
-  const signedPayload = `${ts}:${rawBody}`;
   const expected = crypto
     .createHmac("sha256", secret)
-    .update(signedPayload)
+    .update(rawBody)
     .digest("hex");
 
   try {
-    return crypto.timingSafeEqual(Buffer.from(h1), Buffer.from(expected));
+    return crypto.timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(expected)
+    );
   } catch {
     return false;
   }
@@ -37,13 +26,13 @@ const verifyPaddleSignature = (
 
 export const handleWebhook =
   (_db: Database, env: Env) => async (c: Context) => {
-    const signature = c.req.header("Paddle-Signature");
+    const signature = c.req.header("X-Signature");
 
     if (!signature) {
       return c.json(
         {
           code: "VALIDATION_ERROR",
-          message: "Missing Paddle-Signature header"
+          message: "Missing X-Signature header"
         },
         400
       );
@@ -51,9 +40,13 @@ export const handleWebhook =
 
     const rawBody = await c.req.text();
 
-    if (env.PADDLE_WEBHOOK_SECRET) {
+    if (env.LEMONSQUEEZY_WEBHOOK_SECRET) {
       if (
-        !verifyPaddleSignature(signature, rawBody, env.PADDLE_WEBHOOK_SECRET)
+        !verifyLemonSqueezySignature(
+          signature,
+          rawBody,
+          env.LEMONSQUEEZY_WEBHOOK_SECRET
+        )
       ) {
         return c.json(
           { code: "VALIDATION_ERROR", message: "Invalid webhook signature" },
@@ -63,36 +56,48 @@ export const handleWebhook =
     }
 
     const body = JSON.parse(rawBody);
-    const eventType: string = body?.event_type ?? "";
-    const orgId: string | undefined = body?.data?.custom_data?.org_id;
+    const eventName: string = body?.meta?.event_name ?? "";
+    const orgId: string | undefined = body?.meta?.custom_data?.org_id;
 
-    switch (eventType) {
-      case "subscription.created": {
-        console.log("Paddle event: subscription.created", body.data?.id);
+    switch (eventName) {
+      case "subscription_created": {
+        console.log(
+          "Lemon Squeezy event: subscription_created",
+          body.data?.id
+        );
         if (orgId) {
           void publishEvent(orgId, "subscription.updated", body.data);
         }
         break;
       }
 
-      case "subscription.updated": {
-        console.log("Paddle event: subscription.updated", body.data?.id);
+      case "subscription_updated": {
+        console.log(
+          "Lemon Squeezy event: subscription_updated",
+          body.data?.id
+        );
         if (orgId) {
           void publishEvent(orgId, "subscription.updated", body.data);
         }
         break;
       }
 
-      case "subscription.cancelled": {
-        console.log("Paddle event: subscription.cancelled", body.data?.id);
+      case "subscription_cancelled": {
+        console.log(
+          "Lemon Squeezy event: subscription_cancelled",
+          body.data?.id
+        );
         if (orgId) {
           void publishEvent(orgId, "subscription.updated", body.data);
         }
         break;
       }
 
-      case "subscription.past_due": {
-        console.log("Paddle event: subscription.past_due", body.data?.id);
+      case "subscription_payment_failed": {
+        console.log(
+          "Lemon Squeezy event: subscription_payment_failed",
+          body.data?.id
+        );
         if (orgId) {
           void publishEvent(orgId, "subscription.updated", body.data);
         }
@@ -100,7 +105,7 @@ export const handleWebhook =
       }
 
       default: {
-        console.log("Paddle event (unhandled):", eventType);
+        console.log("Lemon Squeezy event (unhandled):", eventName);
         break;
       }
     }
