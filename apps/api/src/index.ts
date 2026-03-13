@@ -6,8 +6,10 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { AppError } from "./lib/errors";
+import { initEmailDispatcher } from "./lib/email-dispatcher";
 import { initEventBus } from "./lib/events";
 import { getRedis } from "./lib/redis";
+import { sendWelcomeEmail } from "./lib/send-welcome-email";
 import { initWebhookDispatcher } from "./lib/webhook-dispatcher";
 import { createAuthMiddleware } from "./middleware/auth";
 import { platformAdminMiddleware } from "./middleware/platform-admin";
@@ -43,7 +45,10 @@ export const db = createDatabase(env.DATABASE_URL);
 export const redis = getRedis(env.REDIS_URL);
 initEventBus(redis);
 initWebhookDispatcher(db, redis);
-const auth = createAuth(db, env);
+initEmailDispatcher(db, redis, env.APP_URL);
+const auth = createAuth(db, env, {
+  onUserCreated: (user) => void sendWelcomeEmail(user, env.APP_URL)
+});
 
 const app = new Hono();
 

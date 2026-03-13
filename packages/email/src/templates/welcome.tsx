@@ -13,9 +13,13 @@ import {
 
 interface WelcomeEmailProps {
   name: string;
+  dashboardUrl?: string;
 }
 
-export const WelcomeEmail = ({ name }: WelcomeEmailProps) => (
+export const WelcomeEmail = ({
+  name,
+  dashboardUrl = "https://app.raven.dev"
+}: WelcomeEmailProps) => (
   <Html>
     <Head />
     <Preview>Welcome to Raven — your AI gateway is ready</Preview>
@@ -29,7 +33,7 @@ export const WelcomeEmail = ({ name }: WelcomeEmailProps) => (
           usage from your dashboard.
         </Text>
         <Section style={buttonSection}>
-          <Button href="https://app.raven.dev" style={button}>
+          <Button href={dashboardUrl} style={button}>
             Go to Dashboard
           </Button>
         </Section>

@@ -17,6 +17,7 @@
     "@raven/auth": "workspace:*",
     "@raven/config": "workspace:*",
     "@raven/db": "workspace:*",
+    "@raven/email": "workspace:*",
     "@raven/types": "workspace:*",
     "better-auth": "^1.5.5",
     "drizzle-orm": "^0.45.1",
