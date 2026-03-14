@@ -18,7 +18,7 @@ import {
   Wrench,
   Zap
 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ModelIcon } from "@/components/model-icon";
 import { api } from "@/lib/api";
 import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
@@ -187,7 +187,6 @@ export const ModelCatalog = () => {
   }, [models]);
 
   const filtered = useMemo(() => {
-    setVisibleCount(24);
     const query = search.toLowerCase().trim();
     return models.filter((m) => {
       if (category !== "all" && m.category !== category) return false;
@@ -203,6 +202,10 @@ export const ModelCatalog = () => {
       return true;
     });
   }, [search, category, provider, models]);
+
+  useEffect(() => {
+    setVisibleCount(24);
+  }, [search, category, provider]);
 
   const visible = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
