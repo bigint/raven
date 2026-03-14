@@ -249,6 +249,8 @@ export const seedDefaultProviders = async (db: Database): Promise<void> => {
 
   await db.insert(syncedProviders).values([
     { isEnabled: true, name: "OpenAI", slug: "openai" },
-    { isEnabled: true, name: "Anthropic", slug: "anthropic" }
+    { isEnabled: true, name: "Anthropic", slug: "anthropic" },
+    { isEnabled: true, name: "Mistral AI", slug: "mistralai" },
+    { isEnabled: true, name: "xAI", slug: "x-ai" }
   ]);
 };

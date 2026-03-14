@@ -10,11 +10,13 @@ const PROVIDER_ICON_MAP: Record<string, string> = {
   huggingface: "huggingface-color",
   meta: "meta-color",
   mistral: "mistral-color",
+  mistralai: "mistral-color",
   ollama: "ollama",
   openai: "openai",
   perplexity: "perplexity-color",
   replicate: "replicate",
-  together: "together-color"
+  together: "together-color",
+  "x-ai": "grok"
 };
 
 const MODEL_ICON_RULES: [RegExp, string][] = [

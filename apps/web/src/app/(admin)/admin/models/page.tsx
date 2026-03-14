@@ -2,8 +2,7 @@
 
 import { Badge } from "@raven/ui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Loader2, RefreshCw, Trash2 } from "lucide-react";
 import { ProviderIcon } from "@/components/model-icon";
 import { API_URL, api } from "@/lib/api";
 import {
@@ -14,8 +13,6 @@ import {
 const AdminModelsPage = () => {
   const queryClient = useQueryClient();
   const { data: providers = [], isPending } = useAdminSyncedProviders();
-  const [newSlug, setNewSlug] = useState("");
-  const [newName, setNewName] = useState("");
 
   const syncMutation = useMutation({
     mutationFn: () => api.post<SyncResult>("/v1/admin/models/sync"),
@@ -182,43 +179,6 @@ const AdminModelsPage = () => {
           </div>
         )}
 
-        <div className="border-t border-border px-5 py-4">
-          <p className="mb-3 text-xs font-medium text-muted-foreground">
-            Add Provider
-          </p>
-          <form
-            className="flex items-center gap-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (newSlug && newName) {
-                addMutation.mutate({ name: newName, slug: newSlug });
-              }
-            }}
-          >
-            <input
-              className="h-9 w-36 rounded-md border border-border bg-background px-3 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground/30"
-              onChange={(e) => setNewSlug(e.target.value)}
-              placeholder="slug (e.g. google)"
-              type="text"
-              value={newSlug}
-            />
-            <input
-              className="h-9 w-44 rounded-md border border-border bg-background px-3 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground/30"
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder="Display name"
-              type="text"
-              value={newName}
-            />
-            <button
-              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-muted px-3 text-sm font-medium transition-colors hover:bg-accent disabled:opacity-50"
-              disabled={!newSlug || !newName || addMutation.isPending}
-              type="submit"
-            >
-              <Plus className="size-3.5" />
-              Add
-            </button>
-          </form>
-        </div>
       </div>
     </div>
   );
