@@ -11,6 +11,7 @@ interface OrgResponse {
   name: string;
   slug: string;
   role: string;
+  plan: string;
 }
 
 interface KeyResponse {
@@ -57,6 +58,7 @@ export const useOnboarding = () => {
       setActiveOrg({
         id: org.id,
         name: org.name,
+        plan: org.plan,
         role: org.role,
         slug: org.slug
       });

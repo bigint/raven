@@ -1,5 +1,7 @@
 "use client";
 
+import type { Plan } from "@raven/types";
+import { PLAN_FEATURES } from "@raven/types";
 import type { LucideIcon } from "lucide-react";
 import {
   Activity,
@@ -25,12 +27,19 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Org } from "../hooks/use-orgs";
 import { OrgSwitcher } from "./org-switcher";
 import { UserMenu } from "./user-menu";
 
-const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
+interface NavItem {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  gate?: (plan: Plan) => boolean;
+}
+
+const NAV_ITEMS: NavItem[] = [
   { href: "/overview", icon: LayoutDashboard, label: "Overview" },
   { href: "/analytics", icon: BarChart3, label: "Analytics" },
   { href: "/providers", icon: Network, label: "Providers" },
@@ -44,9 +53,19 @@ const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/requests", icon: Activity, label: "Requests" },
   { href: "/budgets", icon: CreditCard, label: "Budgets" },
   { href: "/guardrails", icon: Shield, label: "Guardrails" },
-  { href: "/team", icon: Users, label: "Team" },
+  {
+    gate: (plan) => PLAN_FEATURES[plan].hasTeams,
+    href: "/team",
+    icon: Users,
+    label: "Team"
+  },
   { href: "/billing", icon: Receipt, label: "Billing" },
-  { href: "/webhooks", icon: Webhook, label: "Webhooks" }
+  {
+    gate: (plan) => PLAN_FEATURES[plan].hasWebhooks,
+    href: "/webhooks",
+    icon: Webhook,
+    label: "Webhooks"
+  }
 ];
 
 interface SidebarProps {
@@ -67,6 +86,12 @@ export const Sidebar = ({
   const orgSettingsHref = activeOrg
     ? `/${activeOrg.slug}/settings`
     : "/settings";
+  const plan = (activeOrg?.plan ?? "free") as Plan;
+
+  const visibleItems = useMemo(
+    () => NAV_ITEMS.filter((item) => !item.gate || item.gate(plan)),
+    [plan]
+  );
 
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
@@ -84,7 +109,7 @@ export const Sidebar = ({
 
   const navLinks = (
     <>
-      {NAV_ITEMS.map((item) => {
+      {visibleItems.map((item) => {
         const isActive = pathname === item.href;
         const Icon = item.icon;
         return (

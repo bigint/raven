@@ -1,6 +1,7 @@
 import { createId } from "@paralleldrive/cuid2";
 import type { Database } from "@raven/db";
-import { members, organizations } from "@raven/db";
+import { members, organizations, subscriptions } from "@raven/db";
+import type { Plan } from "@raven/types";
 import { eq } from "drizzle-orm";
 import type { z } from "zod";
 import { UnauthorizedError } from "@/lib/errors";
@@ -18,14 +19,24 @@ export const listOrgs = (db: Database) => async (c: AuthContext) => {
     .select({
       id: organizations.id,
       name: organizations.name,
+      plan: subscriptions.plan,
       role: members.role,
       slug: organizations.slug
     })
     .from(members)
     .innerJoin(organizations, eq(members.organizationId, organizations.id))
+    .leftJoin(
+      subscriptions,
+      eq(subscriptions.organizationId, organizations.id)
+    )
     .where(eq(members.userId, user.id));
 
-  return success(c, userMembers);
+  const result = userMembers.map((m) => ({
+    ...m,
+    plan: (m.plan ?? "free") as Plan
+  }));
+
+  return success(c, result);
 };
 
 type Body = z.infer<typeof createOrgSchema>;

@@ -12,6 +12,7 @@ export interface Organization {
   name: string;
   slug: string;
   role: string;
+  plan: string;
 }
 
 export interface ProfileInvitation {

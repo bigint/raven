@@ -102,6 +102,13 @@ const comparisonFeatures = [
     pro: false,
     team: false
   },
+  {
+    enterprise: true,
+    free: false,
+    name: "Webhooks",
+    pro: true,
+    team: true
+  },
   { enterprise: true, free: false, name: "Audit logs", pro: false, team: true },
   {
     enterprise: true,

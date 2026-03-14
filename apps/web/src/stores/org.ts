@@ -6,6 +6,7 @@ export interface Org {
   name: string;
   slug: string;
   role: string;
+  plan: string;
 }
 
 interface OrgState {

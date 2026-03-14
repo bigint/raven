@@ -31,6 +31,7 @@ const handleSwitchOrg = (org: Organization) => {
   useOrgStore.getState().setActiveOrg({
     id: org.id,
     name: org.name,
+    plan: org.plan,
     role: org.role,
     slug: org.slug
   });
