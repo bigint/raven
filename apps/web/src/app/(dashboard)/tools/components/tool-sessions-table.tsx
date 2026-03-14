@@ -2,7 +2,7 @@
 
 import { Badge, Spinner } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
-import { MessageSquare, Wrench } from "lucide-react";
+import { ChevronRight, MessageSquare, Wrench } from "lucide-react";
 import { useState } from "react";
 import { ModelIcon } from "@/components/model-icon";
 import type { ToolSession } from "../hooks/use-tools";
@@ -226,7 +226,5 @@ export const ToolSessionsTable = ({
           </tbody>
         </table>
       </div>
-
-    </div>
   );
 };

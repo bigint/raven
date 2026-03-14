@@ -1,6 +1,6 @@
 import { PROVIDER_FILTER_OPTIONS, PROVIDER_LABELS } from "@raven/types";
 import { useEffect, useRef, useState } from "react";
-import { API_URL, api } from "@/lib/api";
+import { API_URL } from "@/lib/api";
 import { useOrgStore } from "@/stores/org";
 
 export interface RequestLog {
