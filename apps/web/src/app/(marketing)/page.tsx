@@ -9,7 +9,7 @@ import {
   Shield,
   Zap
 } from "lucide-react";
-import { useInView } from "motion/react";
+import { motion, useInView } from "motion/react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { TextMorph } from "torph/react";
@@ -74,18 +74,16 @@ const steps = [
 
 function AnimatedNumber({ value }: { value: string }) {
   const match = value.match(/^([<>]?)(\d+\.?\d*)(.*)/);
-  if (!match) return <span>{value}</span>;
-
-  const prefix = match[1] ?? "";
-  const numStr = match[2] ?? "0";
-  const suffix = match[3] ?? "";
+  const prefix = match?.[1] ?? "";
+  const numStr = match?.[2] ?? "0";
+  const suffix = match?.[3] ?? "";
   const target = Number.parseFloat(numStr);
   const [current, setCurrent] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true });
 
   useEffect(() => {
-    if (!inView) return;
+    if (!inView || !match) return;
     const duration = 1200;
     const start = Date.now();
     let rafId: number;
@@ -98,7 +96,9 @@ function AnimatedNumber({ value }: { value: string }) {
     };
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [inView, target]);
+  }, [inView, match, target]);
+
+  if (!match) return <span>{value}</span>;
 
   return (
     <span ref={ref}>
@@ -125,15 +125,16 @@ export default function HomePage() {
       <section className="relative overflow-hidden">
         {/* Ambient glow */}
         <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute left-1/2 top-0 size-[800px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-blue-500/[0.06] blur-[120px] dark:bg-blue-500/[0.08]" />
-          <div className="absolute right-0 top-1/3 size-[500px] translate-x-1/4 rounded-full bg-purple-500/[0.04] blur-[100px] dark:bg-purple-500/[0.06]" />
+          <div className="absolute left-1/2 top-0 size-[1000px] -translate-x-1/2 -translate-y-1/4 rounded-full bg-linear-to-b from-blue-500/8 to-violet-500/3 blur-[150px] dark:from-blue-500/12 dark:to-violet-500/5" />
+          <div className="absolute -right-20 top-1/4 size-[400px] rounded-full bg-cyan-500/5 blur-[100px] dark:bg-cyan-500/7" />
+          <div className="absolute -left-20 top-1/2 size-[300px] rounded-full bg-indigo-500/4 blur-[80px] dark:bg-indigo-500/6" />
         </div>
         {/* Dot grid with vignette */}
-        <div className="pointer-events-none absolute inset-0 -z-10 [mask-image:radial-gradient(ellipse_60%_50%_at_50%_30%,black_40%,transparent_100%)]">
-          <div className="size-full bg-[radial-gradient(circle,#00000008_1px,transparent_1px)] bg-[length:24px_24px] dark:bg-[radial-gradient(circle,#ffffff08_1px,transparent_1px)]" />
+        <div className="pointer-events-none absolute inset-0 -z-10 mask-[radial-gradient(ellipse_80%_50%_at_50%_30%,black_30%,transparent_100%)]">
+          <div className="size-full bg-[radial-gradient(circle,#00000008_1px,transparent_1px)] bg-size-[24px_24px] dark:bg-[radial-gradient(circle,#ffffff06_1px,transparent_1px)]" />
         </div>
 
-        <div className="mx-auto max-w-4xl px-4 pb-20 pt-20 text-center sm:px-6 sm:pb-28 sm:pt-36 lg:pt-44">
+        <div className="mx-auto max-w-5xl px-4 pb-24 pt-20 text-center sm:px-6 sm:pb-32 sm:pt-36 lg:pt-44">
           <FadeIn>
             <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-4 py-1.5 text-sm text-muted-foreground shadow-xs backdrop-blur-sm">
               <span className="size-2 animate-pulse rounded-full bg-success" />
@@ -143,8 +144,10 @@ export default function HomePage() {
 
           <FadeIn delay={0.05}>
             <h1 className="text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
-              One gateway for{" "}
-              <TextMorph as="span">{heroWords[wordIndex]}</TextMorph>
+              <span className="block">One gateway for</span>
+              <span className="block">
+                <TextMorph as="span">{heroWords[wordIndex]}</TextMorph>
+              </span>
             </h1>
           </FadeIn>
 
@@ -173,53 +176,122 @@ export default function HomePage() {
             </div>
           </FadeIn>
 
-          {/* Code preview */}
+          {/* Terminal */}
           <FadeIn delay={0.2}>
-            <div className="mx-auto mt-16 max-w-2xl overflow-hidden rounded-2xl border border-border/60 bg-card shadow-lg ring-1 ring-black/[0.03] dark:ring-white/[0.03]">
-              <div className="flex items-center gap-2 border-b border-border/60 bg-muted/40 px-4 py-3">
-                <div className="flex gap-1.5">
-                  <div className="size-3 rounded-full bg-red-400/60 dark:bg-red-400/40" />
-                  <div className="size-3 rounded-full bg-yellow-400/60 dark:bg-yellow-400/40" />
-                  <div className="size-3 rounded-full bg-green-400/60 dark:bg-green-400/40" />
+            <div className="relative mx-auto mt-20 max-w-2xl">
+              {/* Terminal glow */}
+              <div className="pointer-events-none absolute -inset-6 -z-10 rounded-3xl bg-linear-to-b from-blue-500/7 via-transparent to-transparent blur-2xl dark:from-blue-500/10" />
+
+              <div className="overflow-hidden rounded-2xl border border-white/8 bg-[#0a0a0a] shadow-2xl ring-1 ring-white/5">
+                {/* Header */}
+                <div className="flex items-center gap-2 border-b border-white/6 px-4 py-3">
+                  <div className="flex gap-1.5">
+                    <div className="size-3 rounded-full bg-[#ff5f57]" />
+                    <div className="size-3 rounded-full bg-[#febc2e]" />
+                    <div className="size-3 rounded-full bg-[#28c840]" />
+                  </div>
+                  <span className="ml-2 text-xs text-neutral-500">
+                    Terminal
+                  </span>
                 </div>
-                <span className="ml-2 text-xs text-muted-foreground">
-                  Terminal
-                </span>
-              </div>
-              <div className="overflow-x-auto p-5 text-left font-mono text-xs leading-relaxed sm:p-6 sm:text-sm">
-                <p className="text-muted-foreground">
-                  <span className="text-foreground/40"># </span>Just change your
-                  base URL
-                </p>
-                <p className="mt-3">
-                  <span className="text-blue-500 dark:text-blue-400">
-                    curl{" "}
-                  </span>
-                  <span className="text-foreground">
-                    https://api.raven.dev/v1/chat/completions \
-                  </span>
-                </p>
-                <p className="pl-4 text-foreground">
-                  -H{" "}
-                  <span className="text-emerald-600 dark:text-emerald-400">
-                    &quot;Authorization: Bearer rk_live_...&quot;
-                  </span>{" "}
-                  \
-                </p>
-                <p className="pl-4 text-foreground">
-                  -H{" "}
-                  <span className="text-emerald-600 dark:text-emerald-400">
-                    &quot;Content-Type: application/json&quot;
-                  </span>{" "}
-                  \
-                </p>
-                <p className="pl-4 text-foreground">
-                  -d{" "}
-                  <span className="text-amber-600 dark:text-amber-400">
-                    &apos;&#123;&quot;model&quot;: &quot;gpt-4o&quot;,
-                    &quot;messages&quot;: [...]&#125;&apos;
-                  </span>
-                </p>
+
+                {/* Body */}
+                <div className="overflow-x-auto p-5 text-left font-mono text-xs leading-relaxed sm:p-6 sm:text-sm">
+                  <motion.div
+                    animate={{ opacity: 1 }}
+                    initial={{ opacity: 0 }}
+                    transition={{ delay: 0.5, duration: 0.3 }}
+                  >
+                    <p className="text-neutral-500">
+                      <span className="text-neutral-600"># </span>Just change
+                      your base URL
+                    </p>
+                  </motion.div>
+
+                  <motion.div
+                    animate={{ opacity: 1 }}
+                    initial={{ opacity: 0 }}
+                    transition={{ delay: 0.8, duration: 0.3 }}
+                  >
+                    <p className="mt-3">
+                      <span className="text-blue-400">curl </span>
+                      <span className="text-neutral-200">
+                        https://api.raven.dev/v1/chat/completions \
+                      </span>
+                    </p>
+                  </motion.div>
+
+                  <motion.div
+                    animate={{ opacity: 1 }}
+                    initial={{ opacity: 0 }}
+                    transition={{ delay: 1.0, duration: 0.3 }}
+                  >
+                    <p className="pl-4 text-neutral-200">
+                      -H{" "}
+                      <span className="text-emerald-400">
+                        &quot;Authorization: Bearer rk_live_...&quot;
+                      </span>{" "}
+                      \
+                    </p>
+                  </motion.div>
+
+                  <motion.div
+                    animate={{ opacity: 1 }}
+                    initial={{ opacity: 0 }}
+                    transition={{ delay: 1.2, duration: 0.3 }}
+                  >
+                    <p className="pl-4 text-neutral-200">
+                      -H{" "}
+                      <span className="text-emerald-400">
+                        &quot;Content-Type: application/json&quot;
+                      </span>{" "}
+                      \
+                    </p>
+                  </motion.div>
+
+                  <motion.div
+                    animate={{ opacity: 1 }}
+                    initial={{ opacity: 0 }}
+                    transition={{ delay: 1.4, duration: 0.3 }}
+                  >
+                    <p className="pl-4 text-neutral-200">
+                      -d{" "}
+                      <span className="text-amber-400">
+                        &apos;&#123;&quot;model&quot;: &quot;gpt-4o&quot;,
+                        &quot;messages&quot;: [...]&#125;&apos;
+                      </span>
+                    </p>
+                  </motion.div>
+
+                  {/* Response */}
+                  <motion.div
+                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, y: 4 }}
+                    transition={{
+                      delay: 2.0,
+                      duration: 0.5,
+                      ease: [0.16, 1, 0.3, 1]
+                    }}
+                  >
+                    <div className="mt-4 border-t border-white/6 pt-4">
+                      <p>
+                        <span className="text-emerald-400">✓ 200 OK</span>
+                        <span className="text-neutral-600">
+                          {" "}
+                          · 847ms · gpt-4o
+                        </span>
+                      </p>
+                      <p className="mt-2 text-neutral-500">{"{"}</p>
+                      <p className="pl-4 text-neutral-300">
+                        &quot;content&quot;:{" "}
+                        <span className="text-amber-400">
+                          &quot;Hello! How can I help you today?&quot;
+                        </span>
+                      </p>
+                      <p className="text-neutral-500">{"}"}</p>
+                    </div>
+                  </motion.div>
+                </div>
               </div>
             </div>
           </FadeIn>
@@ -272,9 +344,9 @@ export default function HomePage() {
             {features.map((feature) => (
               <StaggerItem key={feature.title}>
                 <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-7 transition-all duration-300 hover:-translate-y-0.5 hover:border-border hover:shadow-md">
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-muted/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-muted/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                   <div className="relative">
-                    <div className="mb-5 inline-flex rounded-xl bg-gradient-to-br from-muted to-muted/60 p-3">
+                    <div className="mb-5 inline-flex rounded-xl bg-linear-to-br from-muted to-muted/60 p-3">
                       <feature.icon className="size-5 text-foreground" />
                     </div>
                     <h3 className="text-base font-semibold">{feature.title}</h3>
@@ -291,7 +363,7 @@ export default function HomePage() {
 
       {/* How it works */}
       <section className="relative border-t border-border/60 py-28">
-        <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-muted/30 via-transparent to-muted/20" />
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-linear-to-b from-muted/30 via-transparent to-muted/20" />
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <div className="mb-16 text-center">
             <FadeIn>
@@ -314,7 +386,7 @@ export default function HomePage() {
             staggerDelay={0.1}
           >
             {/* Connecting line */}
-            <div className="pointer-events-none absolute left-0 right-0 top-6 hidden h-px bg-gradient-to-r from-transparent via-border to-transparent sm:block" />
+            <div className="pointer-events-none absolute left-0 right-0 top-6 hidden h-px bg-linear-to-r from-transparent via-border to-transparent sm:block" />
 
             {steps.map((step, i) => (
               <StaggerItem key={step.title}>
@@ -363,11 +435,11 @@ export default function HomePage() {
       {/* CTA */}
       <section className="relative overflow-hidden border-t border-border/60 py-28">
         <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute left-1/2 top-1/2 size-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/[0.04] blur-[100px] dark:bg-blue-500/[0.06]" />
+          <div className="absolute left-1/2 top-1/2 size-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/4 blur-[100px] dark:bg-blue-500/6" />
         </div>
         <div className="mx-auto max-w-2xl px-4 text-center sm:px-6">
           <FadeIn>
-            <div className="mb-6 inline-flex rounded-2xl bg-foreground/[0.05] p-4">
+            <div className="mb-6 inline-flex rounded-2xl bg-foreground/5 p-4">
               <Zap className="size-6 text-foreground" />
             </div>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
