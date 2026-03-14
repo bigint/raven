@@ -240,17 +240,22 @@ export const syncModels = async (
   return { removed, synced };
 };
 
+const DEFAULT_PROVIDERS = [
+  { isEnabled: true, name: "OpenAI", slug: "openai" },
+  { isEnabled: true, name: "Anthropic", slug: "anthropic" },
+  { isEnabled: true, name: "Mistral AI", slug: "mistralai" },
+  { isEnabled: true, name: "xAI", slug: "x-ai" }
+];
+
 /**
- * Seed default providers (openai, anthropic) if none exist.
+ * Seed default providers, inserting any that are missing.
  */
 export const seedDefaultProviders = async (db: Database): Promise<void> => {
   const existing = await db.select().from(syncedProviders);
-  if (existing.length > 0) return;
+  const existingSlugs = new Set(existing.map((p) => p.slug));
+  const missing = DEFAULT_PROVIDERS.filter((p) => !existingSlugs.has(p.slug));
 
-  await db.insert(syncedProviders).values([
-    { isEnabled: true, name: "OpenAI", slug: "openai" },
-    { isEnabled: true, name: "Anthropic", slug: "anthropic" },
-    { isEnabled: true, name: "Mistral AI", slug: "mistralai" },
-    { isEnabled: true, name: "xAI", slug: "x-ai" }
-  ]);
+  if (missing.length === 0) return;
+
+  await db.insert(syncedProviders).values(missing);
 };
