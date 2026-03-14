@@ -55,3 +55,7 @@ export const updateWebhookSchema = z.object({
   isEnabled: z.boolean().optional(),
   url: safeUrl.optional()
 });
+
+export const testWebhookSchema = z.object({
+  url: safeUrl
+});

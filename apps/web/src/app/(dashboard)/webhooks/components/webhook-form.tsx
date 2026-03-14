@@ -7,6 +7,7 @@ import type { Webhook } from "../hooks/use-webhooks";
 import {
   EVENT_CATEGORIES,
   useCreateWebhook,
+  useTestWebhook,
   useUpdateWebhook
 } from "../hooks/use-webhooks";
 
@@ -43,7 +44,12 @@ const WebhookForm = ({ open, onClose, editingWebhook }: WebhookFormProps) => {
 
   const createMutation = useCreateWebhook();
   const updateMutation = useUpdateWebhook();
+  const testMutation = useTestWebhook();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
+  const [testResult, setTestResult] = useState<{
+    ok: boolean;
+    status: number;
+  } | null>(null);
 
   const toggleEvent = (event: string) => {
     setForm((f) => ({
@@ -69,9 +75,34 @@ const WebhookForm = ({ open, onClose, editingWebhook }: WebhookFormProps) => {
     }
   };
 
+  const handleTest = async () => {
+    setTestResult(null);
+    setFormError(null);
+
+    if (!form.url.trim()) {
+      setFormError("URL is required");
+      return;
+    }
+
+    try {
+      new URL(form.url);
+    } catch {
+      setFormError("Please enter a valid URL");
+      return;
+    }
+
+    try {
+      const result = await testMutation.mutateAsync(form.url.trim());
+      setTestResult(result);
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "Test failed");
+    }
+  };
+
   const handleClose = () => {
     setForm(DEFAULT_FORM);
     setFormError(null);
+    setTestResult(null);
     onClose();
   };
 
@@ -130,14 +161,43 @@ const WebhookForm = ({ open, onClose, editingWebhook }: WebhookFormProps) => {
           </div>
         )}
 
-        <Input
-          id="webhook-url"
-          label="URL"
-          onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))}
-          placeholder="https://example.com/webhook"
-          type="url"
-          value={form.url}
-        />
+        <div className="space-y-2">
+          <Input
+            id="webhook-url"
+            label="URL"
+            onChange={(e) => {
+              setForm((f) => ({ ...f, url: e.target.value }));
+              setTestResult(null);
+            }}
+            placeholder="https://example.com/webhook"
+            type="url"
+            value={form.url}
+          />
+          <div className="flex items-center gap-2">
+            <Button
+              disabled={testMutation.isPending || !form.url.trim()}
+              onClick={handleTest}
+              size="sm"
+              type="button"
+              variant="secondary"
+            >
+              <TextMorph>
+                {testMutation.isPending ? "Testing..." : "Test URL"}
+              </TextMorph>
+            </Button>
+            {testResult && (
+              <span
+                className={`text-xs font-medium ${testResult.ok ? "text-success" : "text-destructive"}`}
+              >
+                {testResult.ok
+                  ? `Connected (${testResult.status})`
+                  : testResult.status > 0
+                    ? `Failed (${testResult.status})`
+                    : "Unreachable"}
+              </span>
+            )}
+          </div>
+        </div>
 
         <div className="space-y-1.5">
           <label className="text-sm font-medium">Events</label>

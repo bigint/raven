@@ -4,7 +4,12 @@ import { jsonValidator } from "@/lib/validation";
 import { createWebhook } from "./create";
 import { deleteWebhook } from "./delete";
 import { listWebhooks } from "./list";
-import { createWebhookSchema, updateWebhookSchema } from "./schema";
+import {
+  createWebhookSchema,
+  testWebhookSchema,
+  updateWebhookSchema
+} from "./schema";
+import { testWebhook } from "./test";
 import { updateWebhook } from "./update";
 
 export const createWebhooksModule = (db: Database) => {
@@ -12,6 +17,7 @@ export const createWebhooksModule = (db: Database) => {
 
   app.get("/", listWebhooks(db));
   app.post("/", jsonValidator(createWebhookSchema), createWebhook(db));
+  app.post("/test", jsonValidator(testWebhookSchema), testWebhook());
   app.put("/:id", jsonValidator(updateWebhookSchema), updateWebhook(db));
   app.delete("/:id", deleteWebhook(db));
 

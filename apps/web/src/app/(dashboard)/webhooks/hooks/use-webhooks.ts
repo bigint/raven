@@ -106,3 +106,14 @@ export const useDeleteWebhook = () => {
     }
   });
 };
+
+interface TestWebhookResult {
+  ok: boolean;
+  status: number;
+}
+
+export const useTestWebhook = () =>
+  useMutation({
+    mutationFn: (url: string) =>
+      api.post<TestWebhookResult>("/v1/webhooks/test", { url })
+  });
