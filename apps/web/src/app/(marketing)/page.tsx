@@ -9,9 +9,9 @@ import {
   Shield,
   Zap
 } from "lucide-react";
-import { motion, useInView } from "motion/react";
+import { motion } from "motion/react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { TextMorph } from "torph/react";
 
 const heroWords = [
@@ -71,43 +71,6 @@ const steps = [
     title: "Monitor everything"
   }
 ];
-
-function AnimatedNumber({ value }: { value: string }) {
-  const match = value.match(/^([<>]?)(\d+\.?\d*)(.*)/);
-  const prefix = match?.[1] ?? "";
-  const numStr = match?.[2] ?? "0";
-  const suffix = match?.[3] ?? "";
-  const target = Number.parseFloat(numStr);
-  const [current, setCurrent] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true });
-
-  useEffect(() => {
-    if (!inView || !match) return;
-    const duration = 1200;
-    const start = Date.now();
-    let rafId: number;
-    const tick = () => {
-      const elapsed = Date.now() - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - (1 - progress) ** 3;
-      setCurrent(eased * target);
-      if (progress < 1) rafId = requestAnimationFrame(tick);
-    };
-    rafId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafId);
-  }, [inView, match, target]);
-
-  if (!match) return <span>{value}</span>;
-
-  return (
-    <span ref={ref}>
-      {prefix}
-      {numStr.includes(".") ? current.toFixed(1) : Math.round(current)}
-      {suffix}
-    </span>
-  );
-}
 
 export default function HomePage() {
   const [wordIndex, setWordIndex] = useState(0);
@@ -402,33 +365,6 @@ export default function HomePage() {
               </StaggerItem>
             ))}
           </StaggerList>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="py-28">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          <FadeIn>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
-              {[
-                { label: "Providers supported", value: "10+" },
-                { label: "API compatibility", value: "100%" },
-                { label: "Avg latency added", value: "<5ms" }
-              ].map((stat) => (
-                <div
-                  className="rounded-2xl border border-border/60 bg-card p-6 text-center transition-colors hover:border-border"
-                  key={stat.label}
-                >
-                  <p className="text-3xl font-bold tracking-tight sm:text-4xl">
-                    <AnimatedNumber value={stat.value} />
-                  </p>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {stat.label}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </FadeIn>
         </div>
       </section>
 
