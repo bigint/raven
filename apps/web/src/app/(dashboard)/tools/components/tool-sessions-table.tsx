@@ -136,8 +136,8 @@ const ToolSessionRow = ({ session }: { session: ToolSession }) => {
                           <td className="px-3 py-2.5">
                             <div className="flex flex-wrap gap-1">
                               {req.toolNames && req.toolNames.length > 0 ? (
-                                req.toolNames.map((name) => (
-                                  <Badge key={name} variant="neutral">
+                                req.toolNames.map((name, i) => (
+                                  <Badge key={`${name}-${i}`} variant="neutral">
                                     {name}
                                   </Badge>
                                 ))
