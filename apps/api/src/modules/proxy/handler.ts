@@ -136,7 +136,7 @@ export const proxyHandler = (
     const requestBody = parsedBody;
 
     // 8. Check cache before forwarding
-    const cacheResult = await checkCache(redis, providerName, requestBody);
+    const cacheResult = await checkCache(redis, virtualKey.organizationId, providerName, requestBody);
 
     if (cacheResult.hit) {
       const latencyMs = Date.now() - startTime;
@@ -305,6 +305,7 @@ export const proxyHandler = (
       if (upstreamResult.response.ok) {
         void storeCache(
           redis,
+          virtualKey.organizationId,
           finalProviderName,
           requestBody,
           proxyResponse.text
