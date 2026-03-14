@@ -67,19 +67,19 @@ const handleBudgetAlert = async (
     .select({ email: users.email })
     .from(members)
     .innerJoin(users, eq(users.id, members.userId))
-    .where(
-      and(eq(members.organizationId, orgId), eq(members.role, "owner"))
-    );
+    .where(and(eq(members.organizationId, orgId), eq(members.role, "owner")));
 
-  for (const admin of orgAdmins) {
-    await sendBudgetAlertEmail(
-      admin.email,
-      budgetName,
-      spent,
-      limitAmount,
-      threshold
-    );
-  }
+  await Promise.all(
+    orgAdmins.map((admin) =>
+      sendBudgetAlertEmail(
+        admin.email,
+        budgetName,
+        spent,
+        limitAmount,
+        threshold
+      )
+    )
+  );
 };
 
 export const initEmailDispatcher = (

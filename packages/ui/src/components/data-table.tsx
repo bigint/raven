@@ -122,5 +122,5 @@ const DataTable = <T,>({
   );
 };
 
+export type { Column, DataTableProps };
 export { DataTable };
-export type { DataTableProps, Column };

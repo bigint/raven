@@ -41,11 +41,13 @@ const evaluateBlockTopics = (
   const topics = config.topics as string[] | undefined;
   if (!topics?.length) return null;
 
+  const lowerTopics = topics.map((t) => t.toLowerCase());
+
   for (const content of contents) {
     const lower = content.toLowerCase();
-    for (const topic of topics) {
-      if (lower.includes(topic.toLowerCase())) {
-        return topic;
+    for (let i = 0; i < lowerTopics.length; i++) {
+      if (lower.includes(lowerTopics[i] as string)) {
+        return topics[i] as string;
       }
     }
   }
@@ -70,11 +72,13 @@ const evaluateContentFilter = (
   const categories = config.categories as string[] | undefined;
   if (!categories?.length) return null;
 
+  const lowerCategories = categories.map((c) => c.toLowerCase());
+
   for (const content of contents) {
     const lower = content.toLowerCase();
-    for (const category of categories) {
-      if (lower.includes(category.toLowerCase())) {
-        return category;
+    for (let i = 0; i < lowerCategories.length; i++) {
+      if (lower.includes(lowerCategories[i] as string)) {
+        return categories[i] as string;
       }
     }
   }
@@ -88,10 +92,16 @@ const evaluateCustomRegex = (
   const pattern = config.pattern as string | undefined;
   if (!pattern) return null;
 
+  // Limit pattern length to prevent abuse
+  if (pattern.length > 500) return null;
+
   try {
     const regex = new RegExp(pattern);
     for (const content of contents) {
-      const match = regex.exec(content);
+      // Limit content length evaluated per regex to prevent ReDoS
+      const truncated =
+        content.length > 10_000 ? content.slice(0, 10_000) : content;
+      const match = regex.exec(truncated);
       if (match) {
         return match[0];
       }

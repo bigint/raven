@@ -102,7 +102,7 @@ export const CacheStats = ({ cache, loading }: CacheStatsProps) => {
                     : "0.0";
                 return (
                   <tr
-                    className={`transition-colors hover:bg-muted/30 ${idx !== cache.daily.length - 1 ? "border-b border-border" : ""}`}
+                    className={`transition-colors hover:bg-muted/30 ${idx === cache.daily.length - 1 ? "" : "border-b border-border"}`}
                     key={row.date}
                   >
                     <td className="px-5 py-4 font-medium">{row.date}</td>

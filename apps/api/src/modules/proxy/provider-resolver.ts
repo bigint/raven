@@ -92,7 +92,8 @@ export const resolveProvider = async (
           eq(providerConfigs.provider, providerName),
           eq(providerConfigs.isEnabled, true)
         )
-      );
+      )
+      .limit(10);
 
     if (allConfigs.length === 0) {
       throw new NotFoundError(`No provider config found for '${providerName}'`);

@@ -15,13 +15,10 @@ export const updateLatency = async (
   const key = `latency:${configId}`;
   const existing = await redis.get(key);
 
-  let newAvg: number;
-  if (existing === null) {
-    newAvg = latencyMs;
-  } else {
-    const oldAvg = Number.parseFloat(existing);
-    newAvg = ALPHA * latencyMs + (1 - ALPHA) * oldAvg;
-  }
+  const newAvg =
+    existing === null
+      ? latencyMs
+      : ALPHA * latencyMs + (1 - ALPHA) * Number.parseFloat(existing);
 
   await redis.set(key, newAvg.toFixed(2), "EX", TTL_SECONDS);
 };
@@ -40,7 +37,39 @@ export const updateCost = async (
   const monthKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
   const key = `cost:${configId}:${monthKey}`;
 
-  await redis.incrbyfloat(key, cost);
-  // Expire after ~35 days so old monthly keys clean up
-  await redis.expire(key, 86400 * 35);
+  const pipeline = redis.pipeline();
+  pipeline.incrbyfloat(key, cost);
+  pipeline.expire(key, 86400 * 35);
+  await pipeline.exec();
+};
+
+/**
+ * Combined metrics update — single call from handler instead of two separate void calls.
+ */
+export const updateMetrics = async (
+  redis: Redis,
+  configId: string,
+  latencyMs: number,
+  cost: number
+): Promise<void> => {
+  const latencyKey = `latency:${configId}`;
+  const existing = await redis.get(latencyKey);
+
+  const newAvg =
+    existing === null
+      ? latencyMs
+      : ALPHA * latencyMs + (1 - ALPHA) * Number.parseFloat(existing);
+
+  const pipeline = redis.pipeline();
+  pipeline.set(latencyKey, newAvg.toFixed(2), "EX", TTL_SECONDS);
+
+  if (cost > 0) {
+    const now = new Date();
+    const monthKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+    const costKey = `cost:${configId}:${monthKey}`;
+    pipeline.incrbyfloat(costKey, cost);
+    pipeline.expire(costKey, 86400 * 35);
+  }
+
+  await pipeline.exec();
 };

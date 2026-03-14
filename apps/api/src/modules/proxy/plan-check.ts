@@ -1,9 +1,8 @@
 import type { Database } from "@raven/db";
-import { subscriptions } from "@raven/db";
 import { PLAN_FEATURES, type Plan } from "@raven/types";
-import { eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
 import { PlanLimitError } from "@/lib/errors";
+import { getOrgPlan } from "./plan-gate";
 
 const getCurrentMonth = (): string => {
   const now = new Date();
@@ -15,13 +14,7 @@ export const checkPlanLimit = async (
   redis: Redis,
   orgId: string
 ): Promise<void> => {
-  const [subscription] = await db
-    .select({ plan: subscriptions.plan, status: subscriptions.status })
-    .from(subscriptions)
-    .where(eq(subscriptions.organizationId, orgId))
-    .limit(1);
-
-  const plan: Plan = subscription?.plan ?? "free";
+  const plan: Plan = await getOrgPlan(db, orgId, redis);
 
   if (plan === "enterprise") {
     return;

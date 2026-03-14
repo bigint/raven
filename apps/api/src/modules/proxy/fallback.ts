@@ -30,7 +30,8 @@ export const withFallback = async (
         eq(providerConfigs.isEnabled, true),
         ne(providerConfigs.id, primaryConfigId)
       )
-    );
+    )
+    .limit(10);
 
   for (const config of fallbackConfigs) {
     try {

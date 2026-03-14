@@ -10,6 +10,7 @@ export {
 export { invitations } from "./invitations";
 export { keyEnvironmentEnum, virtualKeys } from "./keys";
 export { members } from "./members";
+export { models } from "./models";
 export { organizations } from "./organizations";
 export { prompts, promptVersions } from "./prompts";
 export { providerConfigs } from "./providers";
@@ -20,6 +21,7 @@ export {
   subscriptionStatusEnum,
   subscriptions
 } from "./subscriptions";
+export { syncedProviders } from "./synced-providers";
 export { teamMembers, teamRoleEnum, teams } from "./teams";
 export { platformRoleEnum, users } from "./users";
 export { webhooks } from "./webhooks";

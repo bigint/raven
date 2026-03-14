@@ -65,5 +65,5 @@ const Tabs = ({ tabs, value, onChange }: TabsProps) => {
   );
 };
 
+export type { Tab, TabsProps };
 export { Tabs };
-export type { TabsProps, Tab };

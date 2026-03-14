@@ -46,13 +46,13 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
         isActive: editingKey.isActive,
         name: editingKey.name,
         rateLimitRpd:
-          editingKey.rateLimitRpd !== null
-            ? String(editingKey.rateLimitRpd)
-            : "",
+          editingKey.rateLimitRpd === null
+            ? ""
+            : String(editingKey.rateLimitRpd),
         rateLimitRpm:
-          editingKey.rateLimitRpm !== null
-            ? String(editingKey.rateLimitRpm)
-            : ""
+          editingKey.rateLimitRpm === null
+            ? ""
+            : String(editingKey.rateLimitRpm)
       };
     }
     return DEFAULT_FORM;
@@ -175,5 +175,5 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
   );
 };
 
-export { KeyForm };
 export type { FormState };
+export { KeyForm };

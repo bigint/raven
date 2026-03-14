@@ -5,9 +5,11 @@ import { createDatabase } from "@raven/db";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import { AppError } from "./lib/errors";
 import { initEmailDispatcher } from "./lib/email-dispatcher";
+import { AppError } from "./lib/errors";
 import { initEventBus } from "./lib/events";
+import { seedDefaultProviders, syncModels } from "./lib/model-sync";
+import { refreshPricingCache } from "./lib/pricing-cache";
 import { getRedis } from "./lib/redis";
 import { sendWelcomeEmail } from "./lib/send-welcome-email";
 import { initWebhookDispatcher } from "./lib/webhook-dispatcher";
@@ -29,11 +31,13 @@ import { createCacheModule } from "./modules/cache/index";
 import { createDomainsModule } from "./modules/domains/index";
 import { createGuardrailsModule } from "./modules/guardrails/index";
 import { createKeysModule } from "./modules/keys/index";
+import { createModelsModule } from "./modules/models/index";
 import { createPromptsModule } from "./modules/prompts/index";
 import { createProvidersModule } from "./modules/providers/index";
 import { resolveCustomDomain } from "./modules/proxy/domain-resolver";
 import { proxyHandler } from "./modules/proxy/handler";
 import { createProxyModule } from "./modules/proxy/index";
+import { flushLastUsed } from "./modules/proxy/logger";
 import { createRoutingRulesModule } from "./modules/routing-rules/index";
 import { createSettingsModule } from "./modules/settings/index";
 import { createTeamsModule } from "./modules/teams/index";
@@ -46,6 +50,31 @@ export const redis = getRedis(env.REDIS_URL);
 initEventBus(redis);
 initWebhookDispatcher(db, redis);
 initEmailDispatcher(db, redis, env.APP_URL);
+
+// Flush buffered lastUsedAt timestamps every 60 seconds
+setInterval(() => {
+  void flushLastUsed(db, redis);
+}, 60_000);
+
+// Seed default providers and run initial model sync
+void (async () => {
+  try {
+    await seedDefaultProviders(db);
+    await syncModels(db);
+  } catch (err) {
+    console.error("Initial model sync failed:", err);
+    // Load pricing cache from DB even if sync fails
+    await refreshPricingCache(db).catch(() => {});
+  }
+})();
+
+// Sync models from OpenRouter every 5 minutes
+setInterval(() => {
+  void syncModels(db).catch((err) =>
+    console.error("Scheduled model sync failed:", err)
+  );
+}, 5 * 60_000);
+
 const auth = createAuth(db, env, {
   onUserCreated: (user) => void sendWelcomeEmail(user, env.APP_URL)
 });
@@ -54,6 +83,21 @@ const app = new Hono();
 
 // Global middleware
 app.use("*", logger());
+
+// Request body size limit (10MB)
+app.use("*", async (c, next) => {
+  const contentLength = c.req.header("content-length");
+  if (contentLength && Number.parseInt(contentLength, 10) > 10 * 1024 * 1024) {
+    return c.json(
+      {
+        error: { code: "PAYLOAD_TOO_LARGE", message: "Request body too large" }
+      },
+      413
+    );
+  }
+  return next();
+});
+
 app.use("*", requestId());
 app.use("*", requestTiming());
 app.use(
@@ -63,6 +107,16 @@ app.use(
     origin: [env.APP_URL]
   })
 );
+
+// Security headers
+app.use("*", async (c, next) => {
+  await next();
+  c.header("X-Content-Type-Options", "nosniff");
+  c.header("X-Frame-Options", "DENY");
+  c.header("X-XSS-Protection", "0");
+  c.header("Referrer-Policy", "strict-origin-when-cross-origin");
+  c.header("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+});
 
 // Global error handler
 app.onError((err, c) => {
@@ -96,6 +150,9 @@ app.route("/v1/proxy", createProxyModule(db, redis, env));
 
 // Billing webhooks (no auth)
 app.route("/webhooks/billing", createBillingWebhookModule(db, env));
+
+// Public models catalog (no auth required)
+app.route("/v1/models", createModelsModule(db));
 
 // User-level routes (session auth, no tenant)
 const userRoutes = new Hono();

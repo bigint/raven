@@ -96,7 +96,7 @@ export const toolSessionsQueryOptions = (range: DateRange, page: number) =>
     queryKey: ["tools", "sessions", range, page]
   });
 
-export { sessionDetailQueryOptions, type SessionRequest };
+export { type SessionRequest, sessionDetailQueryOptions };
 
 export const useTools = () => {
   const searchParams = useSearchParams();

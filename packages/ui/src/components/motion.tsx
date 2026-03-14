@@ -56,4 +56,4 @@ const StaggerItem = ({ children, ...props }: FadeInProps) => (
   </motion.div>
 );
 
-export { FadeIn, StaggerList, StaggerItem };
+export { FadeIn, StaggerItem, StaggerList };

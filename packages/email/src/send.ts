@@ -45,7 +45,7 @@ export const sendInvitationEmail = async (
   inviteUrl: string
 ): Promise<void> => {
   const html = await render(
-    InvitationEmail({ inviteUrl, inviterName, orgName })
+    InvitationEmail({ inviterName, inviteUrl, orgName })
   );
   await sendEmail({
     html,

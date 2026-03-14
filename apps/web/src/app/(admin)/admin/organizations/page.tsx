@@ -1,7 +1,7 @@
 "use client";
 
-import { Badge, DataTable } from "@raven/ui";
 import type { Column } from "@raven/ui";
+import { Badge, DataTable } from "@raven/ui";
 import { Building2 } from "lucide-react";
 import type { AdminOrg } from "../../hooks/use-admin";
 import { useAdminOrgs } from "../../hooks/use-admin";
@@ -26,9 +26,7 @@ const columns: Column<AdminOrg>[] = [
     header: "Slug",
     key: "slug",
     render: (o) => (
-      <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
-        {o.slug}
-      </code>
+      <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{o.slug}</code>
     )
   },
   {
@@ -36,9 +34,7 @@ const columns: Column<AdminOrg>[] = [
     key: "plan",
     render: (o) => {
       const plan = o.plan ?? "free";
-      return (
-        <Badge variant={PLAN_VARIANT[plan] ?? "neutral"}>{plan}</Badge>
-      );
+      return <Badge variant={PLAN_VARIANT[plan] ?? "neutral"}>{plan}</Badge>;
     }
   },
   {

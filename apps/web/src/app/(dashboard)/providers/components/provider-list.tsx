@@ -34,10 +34,18 @@ const columns: Column<Provider>[] = [
     )
   },
   {
-    className: "font-mono text-muted-foreground",
     header: "API Key",
     key: "apiKey",
-    render: (provider) => provider.apiKey
+    render: (provider) => {
+      const key = provider.apiKey;
+      if (!key || key.length < 4) return "••••••••";
+      const last4 = key.slice(-4);
+      return (
+        <span className="font-mono text-xs text-muted-foreground">
+          {"••••••••" + last4}
+        </span>
+      );
+    }
   }
 ];
 

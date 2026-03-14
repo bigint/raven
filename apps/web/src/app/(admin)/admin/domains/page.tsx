@@ -1,7 +1,7 @@
 "use client";
 
-import { Badge, DataTable } from "@raven/ui";
 import type { Column } from "@raven/ui";
+import { Badge, DataTable } from "@raven/ui";
 import { Globe } from "lucide-react";
 import type { AdminDomain } from "../../hooks/use-admin";
 import { useAdminDomains } from "../../hooks/use-admin";
@@ -34,9 +34,7 @@ const columns: Column<AdminDomain>[] = [
   {
     header: "Organization",
     key: "orgName",
-    render: (d) => (
-      <span className="text-muted-foreground">{d.orgName}</span>
-    )
+    render: (d) => <span className="text-muted-foreground">{d.orgName}</span>
   },
   {
     header: "Created",

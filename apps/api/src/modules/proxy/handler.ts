@@ -10,7 +10,7 @@ import { analyzeContent } from "./content-analyzer";
 import { evaluateRoutingRules } from "./content-router";
 import { withFallback } from "./fallback";
 import { evaluateGuardrails, type GuardrailMatch } from "./guardrails";
-import { updateCost, updateLatency } from "./latency-tracker";
+import { updateMetrics } from "./latency-tracker";
 import { logAndPublish, updateLastUsed } from "./logger";
 import { checkPlanLimit } from "./plan-check";
 import { resolveProvider } from "./provider-resolver";
@@ -35,7 +35,7 @@ export const proxyHandler = (
 
     // 1. Authenticate virtual key
     const authHeader = c.req.header("Authorization") ?? "";
-    const { virtualKey } = await authenticateKey(db, authHeader);
+    const { virtualKey } = await authenticateKey(db, authHeader, redis);
 
     // Verify key belongs to custom domain's org if present
     const domainOrgId = c.get("domainOrgId") as string | undefined;
@@ -70,14 +70,25 @@ export const proxyHandler = (
     const hasBody = method !== "GET" && method !== "HEAD";
     const bodyText = hasBody ? await c.req.text() : undefined;
 
+    // Parse body once for all downstream consumers
+    let parsedBody: Record<string, unknown> = {};
+    if (bodyText) {
+      try {
+        parsedBody = JSON.parse(bodyText);
+      } catch {
+        // Non-JSON body — leave as empty object
+      }
+    }
+
     let guardrailWarnings: string[] = [];
     let guardrailMatches: GuardrailMatch[] = [];
 
-    if (bodyText) {
-      try {
-        const parsed = JSON.parse(bodyText);
-        const messages = Array.isArray(parsed.messages) ? parsed.messages : [];
-        if (messages.length > 0) {
+    if (Object.keys(parsedBody).length > 0) {
+      const messages = Array.isArray(parsedBody.messages)
+        ? parsedBody.messages
+        : [];
+      if (messages.length > 0) {
+        try {
           const result = await evaluateGuardrails(
             db,
             virtualKey.organizationId,
@@ -85,32 +96,24 @@ export const proxyHandler = (
           );
           guardrailWarnings = result.warnings;
           guardrailMatches = result.matches;
+        } catch (err) {
+          if (err instanceof GuardrailError) throw err;
         }
-      } catch (err) {
-        if (err instanceof GuardrailError) throw err;
-        // Non-JSON body or missing messages - skip guardrail evaluation
       }
     }
 
     // 5b. Content-based routing: evaluate routing rules to potentially switch model
     let finalBodyText = bodyText;
-    if (bodyText) {
-      try {
-        const parsed = JSON.parse(bodyText);
-        if (typeof parsed.model === "string") {
-          const routingResult = await evaluateRoutingRules(
-            db,
-            virtualKey.organizationId,
-            parsed.model,
-            parsed
-          );
-          if (routingResult.ruleApplied) {
-            parsed.model = routingResult.model;
-            finalBodyText = JSON.stringify(parsed);
-          }
-        }
-      } catch {
-        // Non-JSON or missing model, skip content routing
+    if (typeof parsedBody.model === "string") {
+      const routingResult = await evaluateRoutingRules(
+        db,
+        virtualKey.organizationId,
+        parsedBody.model,
+        parsedBody
+      );
+      if (routingResult.ruleApplied) {
+        parsedBody.model = routingResult.model;
+        finalBodyText = JSON.stringify(parsedBody);
       }
     }
 
@@ -129,18 +132,16 @@ export const proxyHandler = (
       redis
     );
 
-    // 7. Parse request body for cache lookup
-    let requestBody: Record<string, unknown> = {};
-    if (bodyText) {
-      try {
-        requestBody = JSON.parse(bodyText);
-      } catch {
-        requestBody = {};
-      }
-    }
+    // 7. Use pre-parsed body for cache lookup
+    const requestBody = parsedBody;
 
     // 8. Check cache before forwarding
-    const cacheResult = await checkCache(redis, providerName, requestBody);
+    const cacheResult = await checkCache(
+      redis,
+      virtualKey.organizationId,
+      providerName,
+      requestBody
+    );
 
     if (cacheResult.hit) {
       const latencyMs = Date.now() - startTime;
@@ -185,7 +186,7 @@ export const proxyHandler = (
       logData.model = model;
 
       logAndPublish(db, logData, { redis, teamId: virtualKey.teamId });
-      updateLastUsed(db, virtualKey.id);
+      updateLastUsed(redis, virtualKey.id);
 
       const cacheHeaders: Record<string, string> = {
         "content-type": "application/json"
@@ -309,6 +310,7 @@ export const proxyHandler = (
       if (upstreamResult.response.ok) {
         void storeCache(
           redis,
+          virtualKey.organizationId,
           finalProviderName,
           requestBody,
           proxyResponse.text
@@ -316,11 +318,10 @@ export const proxyHandler = (
       }
 
       logAndPublish(db, logData, { redis, teamId: virtualKey.teamId });
-      updateLastUsed(db, virtualKey.id);
+      updateLastUsed(redis, virtualKey.id);
 
       // Track latency and cost for routing strategies
-      void updateLatency(redis, finalProviderConfigId, latencyMs);
-      void updateCost(redis, finalProviderConfigId, logData.cost);
+      void updateMetrics(redis, finalProviderConfigId, latencyMs, logData.cost);
 
       return new Response(proxyResponse.text, {
         headers: proxyResponse.headers,
@@ -343,9 +344,9 @@ export const proxyHandler = (
         const { inputTokens, outputTokens, reasoningTokens } =
           accumulator.getUsage();
         const model =
-          accumulator.getModel() !== "unknown"
-            ? accumulator.getModel()
-            : upstreamResult.requestedModel;
+          accumulator.getModel() === "unknown"
+            ? upstreamResult.requestedModel
+            : accumulator.getModel();
         logData.inputTokens = inputTokens;
         logData.outputTokens = outputTokens;
         logData.reasoningTokens = reasoningTokens;
@@ -353,10 +354,14 @@ export const proxyHandler = (
         logData.cost = adapter.estimateCost(model, inputTokens, outputTokens);
 
         logAndPublish(db, logData, { redis, teamId: virtualKey.teamId });
-        updateLastUsed(db, virtualKey.id);
+        updateLastUsed(redis, virtualKey.id);
 
-        void updateLatency(redis, finalProviderConfigId, latencyMs);
-        void updateCost(redis, finalProviderConfigId, logData.cost);
+        void updateMetrics(
+          redis,
+          finalProviderConfigId,
+          latencyMs,
+          logData.cost
+        );
       },
       transform(chunk, controller) {
         controller.enqueue(chunk);

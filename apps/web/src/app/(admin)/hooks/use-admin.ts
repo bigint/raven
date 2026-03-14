@@ -86,8 +86,30 @@ export const adminAuditLogsQueryOptions = () =>
     queryKey: ["admin", "audit-logs"]
   });
 
+export interface SyncedProvider {
+  slug: string;
+  name: string;
+  isEnabled: boolean;
+  lastSyncedAt: string | null;
+  createdAt: string;
+  modelCount: number;
+}
+
+export interface SyncResult {
+  synced: number;
+  removed: number;
+}
+
+export const adminSyncedProvidersQueryOptions = () =>
+  queryOptions({
+    queryFn: () => api.get<SyncedProvider[]>("/v1/admin/synced-providers"),
+    queryKey: ["admin", "synced-providers"]
+  });
+
 export const useAdminStats = () => useQuery(adminStatsQueryOptions());
 export const useAdminUsers = () => useQuery(adminUsersQueryOptions());
 export const useAdminOrgs = () => useQuery(adminOrgsQueryOptions());
 export const useAdminDomains = () => useQuery(adminDomainsQueryOptions());
 export const useAdminAuditLogs = () => useQuery(adminAuditLogsQueryOptions());
+export const useAdminSyncedProviders = () =>
+  useQuery(adminSyncedProvidersQueryOptions());

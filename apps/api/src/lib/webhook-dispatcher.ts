@@ -80,7 +80,12 @@ export const initWebhookDispatcher = (db: Database, redis: Redis): void => {
     void (async () => {
       try {
         const matchingWebhooks = await db
-          .select()
+          .select({
+            events: webhooks.events,
+            id: webhooks.id,
+            secret: webhooks.secret,
+            url: webhooks.url
+          })
           .from(webhooks)
           .where(
             and(

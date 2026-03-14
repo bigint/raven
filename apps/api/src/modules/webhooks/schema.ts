@@ -15,6 +15,34 @@ const isPrivateHost = (hostname: string): boolean => {
   if (hostname.endsWith(".local") || hostname.endsWith(".internal"))
     return true;
 
+  // Strip brackets from IPv6
+  const cleaned =
+    hostname.startsWith("[") && hostname.endsWith("]")
+      ? hostname.slice(1, -1)
+      : hostname;
+  const lower = cleaned.toLowerCase();
+
+  // IPv6 loopback
+  if (lower === "::1" || lower === "0:0:0:0:0:0:0:1") return true;
+
+  // IPv6 link-local (fe80::/10)
+  if (lower.startsWith("fe80:")) return true;
+
+  // IPv6 unique local (fc00::/7)
+  if (lower.startsWith("fc") || lower.startsWith("fd")) return true;
+
+  // IPv4-mapped IPv6 (::ffff:x.x.x.x)
+  const mappedMatch = lower.match(/^::ffff:(\d+)\.(\d+)\.\d+\.\d+$/);
+  if (mappedMatch) {
+    const a = Number.parseInt(mappedMatch[1] as string, 10);
+    const b = Number.parseInt(mappedMatch[2] as string, 10);
+    if (a === 10) return true;
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    if (a === 127) return true;
+    if (a === 0) return true;
+  }
+
   // Block private IPv4 ranges
   const ipv4Match = hostname.match(/^(\d+)\.(\d+)\.\d+\.\d+$/);
   if (ipv4Match) {

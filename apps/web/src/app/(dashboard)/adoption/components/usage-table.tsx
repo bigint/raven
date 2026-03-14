@@ -60,7 +60,7 @@ export const UsageTable = ({ data, loading, groupBy }: UsageTableProps) => {
         <tbody>
           {data.map((row, idx) => (
             <tr
-              className={`transition-colors hover:bg-muted/30 ${idx !== data.length - 1 ? "border-b border-border" : ""}`}
+              className={`transition-colors hover:bg-muted/30 ${idx === data.length - 1 ? "" : "border-b border-border"}`}
               key={row.label}
             >
               <td className="px-5 py-4 font-medium text-primary">

@@ -40,5 +40,5 @@ const Switch = ({
   </div>
 );
 
-export { Switch };
 export type { SwitchProps };
+export { Switch };

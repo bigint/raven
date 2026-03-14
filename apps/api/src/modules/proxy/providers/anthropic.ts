@@ -1,21 +1,14 @@
+import { getModelPricing } from "@/lib/pricing-cache";
 import { PROVIDERS } from "@/lib/providers";
 import type { ProviderAdapter } from "./registry";
 
 const config = PROVIDERS.anthropic!;
 
-const PRICING: Record<string, { input: number; output: number }> = {
-  "claude-3-5-haiku-20241022": { input: 1, output: 5 },
-  "claude-3-5-sonnet-20241022": { input: 3, output: 15 },
-  "claude-haiku-3.5": { input: 0.8, output: 4 },
-  "claude-opus-4-20250514": { input: 15, output: 75 },
-  "claude-sonnet-4-20250514": { input: 3, output: 15 }
-};
-
 export const anthropicAdapter: ProviderAdapter = {
   baseUrl: config.baseUrl,
 
   estimateCost(model, inputTokens, outputTokens) {
-    const pricing = PRICING[model] ?? { input: 3, output: 15 };
+    const pricing = getModelPricing(model, "anthropic");
     const inputCost = (inputTokens / 1_000_000) * pricing.input;
     const outputCost = (outputTokens / 1_000_000) * pricing.output;
     return inputCost + outputCost;

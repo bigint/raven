@@ -2,6 +2,8 @@ import { createHash } from "node:crypto";
 import type { Database } from "@raven/db";
 import { virtualKeys } from "@raven/db";
 import { eq } from "drizzle-orm";
+import type { Redis } from "ioredis";
+import { cachedQuery, cacheKeys } from "@/lib/cache-utils";
 import { UnauthorizedError } from "@/lib/errors";
 
 export type VirtualKey = typeof virtualKeys.$inferSelect;
@@ -15,7 +17,8 @@ const hashKey = (key: string): string =>
 
 export const authenticateKey = async (
   db: Database,
-  authHeader: string
+  authHeader: string,
+  redis?: Redis
 ): Promise<AuthResult> => {
   const match = authHeader.match(/^Bearer (rk_(?:live|test)_.+)$/);
   if (!match) {
@@ -25,11 +28,18 @@ export const authenticateKey = async (
   const rawKey = match[1] as string;
   const keyHash = hashKey(rawKey);
 
-  const [vKey] = await db
-    .select()
-    .from(virtualKeys)
-    .where(eq(virtualKeys.keyHash, keyHash))
-    .limit(1);
+  const queryFn = async () => {
+    const [vKey] = await db
+      .select()
+      .from(virtualKeys)
+      .where(eq(virtualKeys.keyHash, keyHash))
+      .limit(1);
+    return vKey ?? null;
+  };
+
+  const vKey = redis
+    ? await cachedQuery(redis, cacheKeys.virtualKey(keyHash), 60, queryFn)
+    : await queryFn();
 
   if (!vKey) {
     throw new UnauthorizedError("Invalid virtual key");

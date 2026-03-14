@@ -1,13 +1,7 @@
 "use client";
 
 import { Badge } from "@raven/ui";
-import {
-  Activity,
-  Building2,
-  DollarSign,
-  Globe,
-  Users
-} from "lucide-react";
+import { Activity, Building2, DollarSign, Globe, Users } from "lucide-react";
 import { TextMorph } from "torph/react";
 import { useAdminStats } from "../hooks/use-admin";
 

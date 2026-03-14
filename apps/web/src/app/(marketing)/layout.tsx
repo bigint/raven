@@ -5,8 +5,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { useSession } from "@/lib/auth-client";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useSession } from "@/lib/auth-client";
 
 export default function MarketingLayout({ children }: { children: ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

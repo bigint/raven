@@ -1,7 +1,7 @@
 "use client";
 
-import { Badge, DataTable } from "@raven/ui";
 import type { Column } from "@raven/ui";
+import { Badge, DataTable } from "@raven/ui";
 import { Users } from "lucide-react";
 import type { AdminUser } from "../../hooks/use-admin";
 import { useAdminUsers } from "../../hooks/use-admin";
@@ -15,17 +15,13 @@ const columns: Column<AdminUser>[] = [
   {
     header: "Email",
     key: "email",
-    render: (u) => (
-      <span className="text-muted-foreground">{u.email}</span>
-    )
+    render: (u) => <span className="text-muted-foreground">{u.email}</span>
   },
   {
     header: "Role",
     key: "role",
     render: (u) => (
-      <Badge variant={u.role === "admin" ? "error" : "neutral"}>
-        {u.role}
-      </Badge>
+      <Badge variant={u.role === "admin" ? "error" : "neutral"}>{u.role}</Badge>
     )
   },
   {
