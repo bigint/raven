@@ -47,70 +47,110 @@ export const MODEL_CATEGORIES: Record<
 };
 
 export const MODEL_CATALOG: readonly ModelDefinition[] = [
-  // ── Anthropic ──────────────────────────────────────────────
+  // ── Anthropic — Latest ─────────────────────────────────────
   {
-    capabilities: ["chat", "vision", "function_calling", "streaming"],
+    capabilities: ["chat", "vision", "function_calling", "reasoning", "streaming"],
+    category: "flagship",
+    contextWindow: 1_000_000,
+    description:
+      "The most intelligent Claude model. Exceptional at building agents, complex coding, and multi-step reasoning with extended thinking.",
+    id: "claude-opus-4-6",
+    inputPrice: 5,
+    maxOutput: 128_000,
+    name: "Claude Opus 4.6",
+    outputPrice: 25,
+    provider: "anthropic"
+  },
+  {
+    capabilities: ["chat", "vision", "function_calling", "reasoning", "streaming"],
+    category: "balanced",
+    contextWindow: 1_000_000,
+    description:
+      "Best combination of speed and intelligence. Ideal for high-throughput tasks requiring strong reasoning and extended thinking.",
+    id: "claude-sonnet-4-6",
+    inputPrice: 3,
+    maxOutput: 64_000,
+    name: "Claude Sonnet 4.6",
+    outputPrice: 15,
+    provider: "anthropic"
+  },
+  {
+    capabilities: ["chat", "vision", "function_calling", "reasoning", "streaming"],
+    category: "fast",
+    contextWindow: 200_000,
+    description:
+      "Fastest Claude model with near-frontier intelligence. Extended thinking support at the lowest Claude price point.",
+    id: "claude-haiku-4-5-20251001",
+    inputPrice: 1,
+    maxOutput: 64_000,
+    name: "Claude Haiku 4.5",
+    outputPrice: 5,
+    provider: "anthropic"
+  },
+  // ── Anthropic — Legacy ─────────────────────────────────────
+  {
+    capabilities: ["chat", "vision", "function_calling", "reasoning", "streaming"],
+    category: "balanced",
+    contextWindow: 1_000_000,
+    description:
+      "Previous generation balanced model. Strong at coding, analysis, and content generation with extended thinking.",
+    id: "claude-sonnet-4-5-20250929",
+    inputPrice: 3,
+    maxOutput: 64_000,
+    name: "Claude Sonnet 4.5",
+    outputPrice: 15,
+    provider: "anthropic"
+  },
+  {
+    capabilities: ["chat", "vision", "function_calling", "reasoning", "streaming"],
     category: "flagship",
     contextWindow: 200_000,
     description:
-      "Most powerful Claude model. Excels at complex analysis, multi-step reasoning, and nuanced content creation.",
-    id: "claude-opus-4-20250514",
+      "Previous generation flagship. Powerful reasoning and extended thinking capabilities.",
+    id: "claude-opus-4-5-20251101",
+    inputPrice: 5,
+    maxOutput: 64_000,
+    name: "Claude Opus 4.5",
+    outputPrice: 25,
+    provider: "anthropic"
+  },
+  {
+    capabilities: ["chat", "vision", "function_calling", "reasoning", "streaming"],
+    category: "flagship",
+    contextWindow: 200_000,
+    description:
+      "Legacy flagship model. Excels at complex analysis and nuanced content creation.",
+    id: "claude-opus-4-1-20250805",
     inputPrice: 15,
     maxOutput: 32_000,
-    name: "Claude Opus 4",
+    name: "Claude Opus 4.1",
     outputPrice: 75,
     provider: "anthropic"
   },
   {
-    capabilities: ["chat", "vision", "function_calling", "streaming"],
+    capabilities: ["chat", "vision", "function_calling", "reasoning", "streaming"],
     category: "balanced",
-    contextWindow: 200_000,
+    contextWindow: 1_000_000,
     description:
-      "Best combination of performance and speed. Ideal for high-throughput tasks requiring strong reasoning.",
+      "Legacy balanced model. Good performance for high-throughput tasks with extended thinking.",
     id: "claude-sonnet-4-20250514",
     inputPrice: 3,
-    maxOutput: 16_000,
+    maxOutput: 64_000,
     name: "Claude Sonnet 4",
     outputPrice: 15,
     provider: "anthropic"
   },
   {
-    capabilities: ["chat", "vision", "function_calling", "streaming"],
-    category: "balanced",
+    capabilities: ["chat", "vision", "function_calling", "reasoning", "streaming"],
+    category: "flagship",
     contextWindow: 200_000,
     description:
-      "Previous generation balanced model. Strong at coding, analysis, and content generation.",
-    id: "claude-3-5-sonnet-20241022",
-    inputPrice: 3,
-    maxOutput: 8_192,
-    name: "Claude 3.5 Sonnet",
-    outputPrice: 15,
-    provider: "anthropic"
-  },
-  {
-    capabilities: ["chat", "vision", "function_calling", "streaming"],
-    category: "fast",
-    contextWindow: 200_000,
-    description:
-      "Fastest Claude model. Optimized for quick responses at low cost while maintaining quality.",
-    id: "claude-3-5-haiku-20241022",
-    inputPrice: 1,
-    maxOutput: 8_192,
-    name: "Claude 3.5 Haiku",
-    outputPrice: 5,
-    provider: "anthropic"
-  },
-  {
-    capabilities: ["chat", "vision", "function_calling", "streaming"],
-    category: "fast",
-    contextWindow: 200_000,
-    description:
-      "Updated Haiku with improved performance. Great for high-volume, latency-sensitive workloads.",
-    id: "claude-haiku-3.5",
-    inputPrice: 0.8,
-    maxOutput: 8_192,
-    name: "Claude Haiku 3.5",
-    outputPrice: 4,
+      "Original Claude 4 flagship. Strong reasoning capabilities with extended thinking support.",
+    id: "claude-opus-4-20250514",
+    inputPrice: 15,
+    maxOutput: 32_000,
+    name: "Claude Opus 4",
+    outputPrice: 75,
     provider: "anthropic"
   },
 
