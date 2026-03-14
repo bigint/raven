@@ -8,7 +8,7 @@ import {
   type ModelCategory,
   type ModelDefinition
 } from "@raven/types";
-import { Badge } from "@raven/ui";
+import { Badge, Select } from "@raven/ui";
 import {
   Brain,
   DollarSign,
@@ -196,33 +196,18 @@ export const ModelCatalog = () => {
         </div>
 
         <div className="flex gap-2">
-          <select
-            className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none transition-colors focus:border-foreground/30"
-            onChange={(e) =>
-              setProvider(e.target.value)
-            }
+          <Select
+            className="w-40"
+            onChange={setProvider}
+            options={PROVIDER_OPTIONS}
             value={provider}
-          >
-            {PROVIDER_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-
-          <select
-            className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none transition-colors focus:border-foreground/30"
-            onChange={(e) =>
-              setCategory(e.target.value as ModelCategory | "all")
-            }
+          />
+          <Select
+            className="w-36"
+            onChange={(v) => setCategory(v as ModelCategory | "all")}
+            options={CATEGORY_OPTIONS}
             value={category}
-          >
-            {CATEGORY_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+          />
         </div>
       </div>
 
