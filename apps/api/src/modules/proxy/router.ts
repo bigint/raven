@@ -29,7 +29,8 @@ export const resolveWithStrategy = async (
         eq(providerConfigs.provider, providerName),
         eq(providerConfigs.isEnabled, true)
       )
-    );
+    )
+    .limit(50);
 
   if (configs.length === 0) {
     throw new Error(`No enabled configs for provider '${providerName}'`);

@@ -52,6 +52,8 @@ export const evaluateRoutingRules = async (
   const tokenCount = estimateTokens(messagesText);
   const messageCount = getMessageCount(body);
 
+  const lowerMessagesText = messagesText.toLowerCase();
+
   for (const rule of rules) {
     let matches = false;
 
@@ -72,9 +74,12 @@ export const evaluateRoutingRules = async (
         break;
       }
       case "keyword_match": {
-        const keywords: string[] = JSON.parse(rule.conditionValue);
-        const lowerText = messagesText.toLowerCase();
-        matches = keywords.some((kw) => lowerText.includes(kw.toLowerCase()));
+        try {
+          const keywords: string[] = JSON.parse(rule.conditionValue);
+          matches = keywords.some((kw) => lowerMessagesText.includes(kw.toLowerCase()));
+        } catch {
+          matches = false;
+        }
         break;
       }
     }

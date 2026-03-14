@@ -1,5 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
-import { numeric, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { index, numeric, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { organizations } from "./organizations";
 
 export const budgetEntityTypeEnum = pgEnum("budget_entity_type", [
@@ -27,4 +27,6 @@ export const budgets = pgTable("budgets", {
   periodStart: timestamp("period_start", { withTimezone: true })
     .notNull()
     .defaultNow()
-});
+}, (t) => [
+  index("budgets_org_entity_idx").on(t.organizationId, t.entityId)
+]);

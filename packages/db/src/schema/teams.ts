@@ -1,5 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
-import { pgEnum, pgTable, text, timestamp, unique } from "drizzle-orm/pg-core";
+import { index, pgEnum, pgTable, text, timestamp, unique } from "drizzle-orm/pg-core";
 import { organizations } from "./organizations";
 import { users } from "./users";
 
@@ -14,7 +14,9 @@ export const teams = pgTable("teams", {
   organizationId: text("organization_id")
     .notNull()
     .references(() => organizations.id, { onDelete: "cascade" })
-});
+}, (t) => [
+  index("teams_org_idx").on(t.organizationId)
+]);
 
 export const teamMembers = pgTable(
   "team_members",

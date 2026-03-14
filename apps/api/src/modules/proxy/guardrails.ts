@@ -41,11 +41,13 @@ const evaluateBlockTopics = (
   const topics = config.topics as string[] | undefined;
   if (!topics?.length) return null;
 
+  const lowerTopics = topics.map((t) => t.toLowerCase());
+
   for (const content of contents) {
     const lower = content.toLowerCase();
-    for (const topic of topics) {
-      if (lower.includes(topic.toLowerCase())) {
-        return topic;
+    for (let i = 0; i < lowerTopics.length; i++) {
+      if (lower.includes(lowerTopics[i] as string)) {
+        return topics[i] as string;
       }
     }
   }
@@ -70,11 +72,13 @@ const evaluateContentFilter = (
   const categories = config.categories as string[] | undefined;
   if (!categories?.length) return null;
 
+  const lowerCategories = categories.map((c) => c.toLowerCase());
+
   for (const content of contents) {
     const lower = content.toLowerCase();
-    for (const category of categories) {
-      if (lower.includes(category.toLowerCase())) {
-        return category;
+    for (let i = 0; i < lowerCategories.length; i++) {
+      if (lower.includes(lowerCategories[i] as string)) {
+        return categories[i] as string;
       }
     }
   }

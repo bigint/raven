@@ -1,5 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
-import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { organizations } from "./organizations";
 
 export const webhooks = pgTable("webhooks", {
@@ -17,4 +17,6 @@ export const webhooks = pgTable("webhooks", {
     .notNull()
     .defaultNow(),
   url: text("url").notNull()
-});
+}, (t) => [
+  index("webhooks_org_enabled_idx").on(t.organizationId, t.isEnabled)
+]);

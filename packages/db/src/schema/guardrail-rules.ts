@@ -1,6 +1,7 @@
 import { createId } from "@paralleldrive/cuid2";
 import {
   boolean,
+  index,
   integer,
   jsonb,
   pgEnum,
@@ -39,4 +40,6 @@ export const guardrailRules = pgTable("guardrail_rules", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow()
-});
+}, (t) => [
+  index("guardrail_rules_org_enabled_idx").on(t.organizationId, t.isEnabled)
+]);

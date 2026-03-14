@@ -1,5 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
-import { pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { index, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { organizations } from "./organizations";
 
 export const domainStatusEnum = pgEnum("domain_status", [
@@ -22,4 +22,6 @@ export const customDomains = pgTable("custom_domains", {
   status: domainStatusEnum("status").notNull().default("pending_verification"),
   verificationToken: text("verification_token").notNull(),
   verifiedAt: timestamp("verified_at", { withTimezone: true })
-});
+}, (t) => [
+  index("custom_domains_domain_status_idx").on(t.domain, t.status)
+]);

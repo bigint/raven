@@ -1,6 +1,7 @@
 import { createId } from "@paralleldrive/cuid2";
 import {
   boolean,
+  index,
   integer,
   pgTable,
   text,
@@ -26,4 +27,6 @@ export const routingRules = pgTable("routing_rules", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow()
-});
+}, (t) => [
+  index("routing_rules_org_model_enabled_idx").on(t.organizationId, t.sourceModel, t.isEnabled)
+]);

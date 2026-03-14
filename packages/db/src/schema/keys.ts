@@ -1,6 +1,7 @@
 import { createId } from "@paralleldrive/cuid2";
 import {
   boolean,
+  index,
   integer,
   pgEnum,
   pgTable,
@@ -30,4 +31,7 @@ export const virtualKeys = pgTable("virtual_keys", {
   rateLimitRpd: integer("rate_limit_rpd"),
   rateLimitRpm: integer("rate_limit_rpm"),
   teamId: text("team_id").references(() => teams.id, { onDelete: "set null" })
-});
+}, (t) => [
+  index("virtual_keys_key_hash_idx").on(t.keyHash),
+  index("virtual_keys_org_active_idx").on(t.organizationId, t.isActive)
+]);

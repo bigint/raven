@@ -51,6 +51,9 @@ export const requestLogs = pgTable(
       .references(() => virtualKeys.id, { onDelete: "cascade" })
   },
   (t) => [
-    index("request_logs_org_created_idx").on(t.organizationId, t.createdAt)
+    index("request_logs_org_created_idx").on(t.organizationId, t.createdAt),
+    index("request_logs_org_key_created_idx").on(t.organizationId, t.virtualKeyId, t.createdAt),
+    index("request_logs_org_session_created_idx").on(t.organizationId, t.sessionId, t.createdAt),
+    index("request_logs_provider_model_org_created_idx").on(t.provider, t.model, t.organizationId, t.createdAt)
   ]
 );

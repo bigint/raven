@@ -71,15 +71,17 @@ const handleBudgetAlert = async (
       and(eq(members.organizationId, orgId), eq(members.role, "owner"))
     );
 
-  for (const admin of orgAdmins) {
-    await sendBudgetAlertEmail(
-      admin.email,
-      budgetName,
-      spent,
-      limitAmount,
-      threshold
-    );
-  }
+  await Promise.all(
+    orgAdmins.map((admin) =>
+      sendBudgetAlertEmail(
+        admin.email,
+        budgetName,
+        spent,
+        limitAmount,
+        threshold
+      )
+    )
+  );
 };
 
 export const initEmailDispatcher = (

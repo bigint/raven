@@ -11,6 +11,7 @@ import { initEventBus } from "./lib/events";
 import { getRedis } from "./lib/redis";
 import { sendWelcomeEmail } from "./lib/send-welcome-email";
 import { initWebhookDispatcher } from "./lib/webhook-dispatcher";
+import { flushLastUsed } from "./modules/proxy/logger";
 import { createAuthMiddleware } from "./middleware/auth";
 import { platformAdminMiddleware } from "./middleware/platform-admin";
 import { requestId } from "./middleware/request-id";
@@ -46,6 +47,12 @@ export const redis = getRedis(env.REDIS_URL);
 initEventBus(redis);
 initWebhookDispatcher(db, redis);
 initEmailDispatcher(db, redis, env.APP_URL);
+
+// Flush buffered lastUsedAt timestamps every 60 seconds
+setInterval(() => {
+  void flushLastUsed(db, redis);
+}, 60_000);
+
 const auth = createAuth(db, env, {
   onUserCreated: (user) => void sendWelcomeEmail(user, env.APP_URL)
 });
