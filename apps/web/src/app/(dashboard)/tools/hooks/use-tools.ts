@@ -52,12 +52,38 @@ const RANGE_MS: Record<DateRange, number> = {
 const rangeToFrom = (range: DateRange): string =>
   new Date(Date.now() - RANGE_MS[range]).toISOString();
 
+const fillToolGaps = (
+  data: ToolDailyStats[],
+  range: DateRange
+): ToolDailyStats[] => {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const from = new Date(Date.now() - RANGE_MS[range]);
+  from.setHours(0, 0, 0, 0);
+
+  const dataMap = new Map(data.map((d) => [d.date, d]));
+  const result: ToolDailyStats[] = [];
+  const current = new Date(from);
+
+  while (current <= now) {
+    const key = current.toISOString().slice(0, 10);
+    result.push(
+      dataMap.get(key) ?? { date: key, totalRequests: 0, totalToolUses: 0 }
+    );
+    current.setDate(current.getDate() + 1);
+  }
+
+  return result;
+};
+
 export const toolStatsQueryOptions = (range: DateRange) =>
   queryOptions({
-    queryFn: () =>
-      api.get<ToolDailyStats[]>(
+    queryFn: async () => {
+      const data = await api.get<ToolDailyStats[]>(
         `/v1/analytics/tools/stats?from=${rangeToFrom(range)}`
-      ),
+      );
+      return fillToolGaps(data, range);
+    },
     queryKey: ["tools", "stats", range]
   });
 

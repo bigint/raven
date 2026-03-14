@@ -46,12 +46,38 @@ const RANGE_MS: Record<DateRange, number> = {
 const rangeToFrom = (range: DateRange): string =>
   new Date(Date.now() - RANGE_MS[range]).toISOString();
 
+const fillChartGaps = (
+  data: ChartDataPoint[],
+  range: DateRange
+): ChartDataPoint[] => {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const from = new Date(Date.now() - RANGE_MS[range]);
+  from.setHours(0, 0, 0, 0);
+
+  const dataMap = new Map(data.map((d) => [d.date, d]));
+  const result: ChartDataPoint[] = [];
+  const current = new Date(from);
+
+  while (current <= now) {
+    const key = current.toISOString().slice(0, 10);
+    result.push(
+      dataMap.get(key) ?? { cached: 0, date: key, input: 0, output: 0, reasoning: 0 }
+    );
+    current.setDate(current.getDate() + 1);
+  }
+
+  return result;
+};
+
 export const adoptionChartQueryOptions = (range: DateRange) =>
   queryOptions({
-    queryFn: () =>
-      api.get<ChartDataPoint[]>(
+    queryFn: async () => {
+      const data = await api.get<ChartDataPoint[]>(
         `/v1/analytics/adoption/chart?from=${rangeToFrom(range)}`
-      ),
+      );
+      return fillChartGaps(data, range);
+    },
     queryKey: ["adoption", "chart", range]
   });
 

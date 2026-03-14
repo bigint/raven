@@ -28,8 +28,6 @@ const formatNumber = (n: number): string => {
 };
 
 export const TokenChart = ({ data }: TokenChartProps) => {
-  if (data.length === 0) return null;
-
   return (
     <div className="mb-8 rounded-xl border border-border p-5">
       <ResponsiveContainer height={300} width="100%">
