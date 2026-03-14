@@ -92,10 +92,15 @@ const evaluateCustomRegex = (
   const pattern = config.pattern as string | undefined;
   if (!pattern) return null;
 
+  // Limit pattern length to prevent abuse
+  if (pattern.length > 500) return null;
+
   try {
     const regex = new RegExp(pattern);
     for (const content of contents) {
-      const match = regex.exec(content);
+      // Limit content length evaluated per regex to prevent ReDoS
+      const truncated = content.length > 10_000 ? content.slice(0, 10_000) : content;
+      const match = regex.exec(truncated);
       if (match) {
         return match[0];
       }

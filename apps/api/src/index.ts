@@ -61,6 +61,19 @@ const app = new Hono();
 
 // Global middleware
 app.use("*", logger());
+
+// Request body size limit (10MB)
+app.use("*", async (c, next) => {
+  const contentLength = c.req.header("content-length");
+  if (contentLength && Number.parseInt(contentLength, 10) > 10 * 1024 * 1024) {
+    return c.json(
+      { error: { code: "PAYLOAD_TOO_LARGE", message: "Request body too large" } },
+      413
+    );
+  }
+  return next();
+});
+
 app.use("*", requestId());
 app.use("*", requestTiming());
 app.use(
@@ -70,6 +83,16 @@ app.use(
     origin: [env.APP_URL]
   })
 );
+
+// Security headers
+app.use("*", async (c, next) => {
+  await next();
+  c.header("X-Content-Type-Options", "nosniff");
+  c.header("X-Frame-Options", "DENY");
+  c.header("X-XSS-Protection", "0");
+  c.header("Referrer-Policy", "strict-origin-when-cross-origin");
+  c.header("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+});
 
 // Global error handler
 app.onError((err, c) => {
