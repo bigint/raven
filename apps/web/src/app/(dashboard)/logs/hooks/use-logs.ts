@@ -1,6 +1,6 @@
 "use client";
 
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions, useInfiniteQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 
@@ -73,15 +73,6 @@ const rangeToFrom = (range: DateRange): string =>
 
 const PAGE_SIZE = 20;
 
-export const logsQueryOptions = (range: DateRange, page: number) =>
-  queryOptions({
-    queryFn: () =>
-      api.get<LogsResponse>(
-        `/v1/analytics/logs?from=${rangeToFrom(range)}&page=${page}&limit=${PAGE_SIZE}`
-      ),
-    queryKey: ["logs", range, page]
-  });
-
 export const sessionDetailQueryOptions = (sessionId: string) =>
   queryOptions({
     enabled: !!sessionId,
@@ -98,33 +89,34 @@ export const useLogs = () => {
   const dateRange =
     rangeParam && VALID_RANGES.includes(rangeParam) ? rangeParam : "30d";
 
-  const pageParam = searchParams.get("page");
-  const page = pageParam ? Math.max(1, Number.parseInt(pageParam, 10)) : 1;
-
   const setDateRange = (range: DateRange) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("range", range);
-    params.delete("page");
     router.replace(`?${params.toString()}`);
   };
 
-  const setPage = (p: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", String(p));
-    router.replace(`?${params.toString()}`);
-  };
-
-  const query = useQuery(logsQueryOptions(dateRange, page));
+  const query = useInfiniteQuery({
+    getNextPageParam: (lastPage: LogsResponse) => {
+      const { page, totalPages } = lastPage.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) =>
+      api.get<LogsResponse>(
+        `/v1/analytics/logs?from=${rangeToFrom(dateRange)}&page=${pageParam}&limit=${PAGE_SIZE}`
+      ),
+    queryKey: ["logs", dateRange]
+  });
 
   return {
-    data: query.data?.data ?? [],
+    data: query.data?.pages.flatMap((p) => p.data) ?? [],
     dateRange,
     dateRangeOptions: DATE_RANGE_OPTIONS,
     error: query.error?.message ?? null,
+    fetchNextPage: query.fetchNextPage,
+    hasNextPage: query.hasNextPage,
+    isFetchingNextPage: query.isFetchingNextPage,
     isLoading: query.isPending,
-    page,
-    pagination: query.data?.pagination ?? null,
-    setDateRange,
-    setPage
+    setDateRange
   };
 };

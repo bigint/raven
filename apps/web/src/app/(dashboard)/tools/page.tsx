@@ -1,6 +1,7 @@
 "use client";
 
-import { PageHeader, PillTabs } from "@raven/ui";
+import { PageHeader, PillTabs, Spinner } from "@raven/ui";
+import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
 import { ToolChart } from "./components/tool-chart";
 import { ToolSessionsTable } from "./components/tool-sessions-table";
 import { useTools } from "./hooks/use-tools";
@@ -11,13 +12,18 @@ const ToolsPage = () => {
     dateRange,
     dateRangeOptions,
     error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     isLoading,
-    page,
-    pagination,
     sessions,
-    setDateRange,
-    setPage
+    setDateRange
   } = useTools();
+
+  const sentinelRef = useInfiniteScroll(
+    () => fetchNextPage(),
+    hasNextPage && !isFetchingNextPage
+  );
 
   return (
     <div>
@@ -43,11 +49,14 @@ const ToolsPage = () => {
 
       <ToolSessionsTable
         loading={isLoading}
-        onPageChange={setPage}
-        page={page}
         sessions={sessions}
-        totalPages={pagination?.totalPages ?? 1}
       />
+
+      {hasNextPage && (
+        <div ref={sentinelRef} className="flex justify-center py-6">
+          {isFetchingNextPage && <Spinner className="size-5" />}
+        </div>
+      )}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { SessionRequest } from "@/app/(dashboard)/logs/hooks/use-logs";
 import { sessionDetailQueryOptions } from "@/app/(dashboard)/logs/hooks/use-logs";
@@ -52,6 +52,8 @@ const RANGE_MS: Record<DateRange, number> = {
 const rangeToFrom = (range: DateRange): string =>
   new Date(Date.now() - RANGE_MS[range]).toISOString();
 
+const PAGE_SIZE = 20;
+
 const fillToolGaps = (
   data: ToolDailyStats[],
   range: DateRange
@@ -87,15 +89,6 @@ export const toolStatsQueryOptions = (range: DateRange) =>
     queryKey: ["tools", "stats", range]
   });
 
-export const toolSessionsQueryOptions = (range: DateRange, page: number) =>
-  queryOptions({
-    queryFn: () =>
-      api.get<ToolSessionsResponse>(
-        `/v1/analytics/tools/sessions?from=${rangeToFrom(range)}&page=${page}&limit=20`
-      ),
-    queryKey: ["tools", "sessions", range, page]
-  });
-
 export { type SessionRequest, sessionDetailQueryOptions };
 
 export const useTools = () => {
@@ -106,35 +99,37 @@ export const useTools = () => {
   const dateRange =
     rangeParam && VALID_RANGES.includes(rangeParam) ? rangeParam : "30d";
 
-  const pageParam = searchParams.get("page");
-  const page = pageParam ? Math.max(1, Number.parseInt(pageParam, 10)) : 1;
-
   const setDateRange = (range: DateRange) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("range", range);
-    params.delete("page");
-    router.replace(`?${params.toString()}`);
-  };
-
-  const setPage = (p: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", String(p));
     router.replace(`?${params.toString()}`);
   };
 
   const statsQuery = useQuery(toolStatsQueryOptions(dateRange));
-  const sessionsQuery = useQuery(toolSessionsQueryOptions(dateRange, page));
+
+  const sessionsQuery = useInfiniteQuery({
+    getNextPageParam: (lastPage: ToolSessionsResponse) => {
+      const { page, totalPages } = lastPage.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) =>
+      api.get<ToolSessionsResponse>(
+        `/v1/analytics/tools/sessions?from=${rangeToFrom(dateRange)}&page=${pageParam}&limit=${PAGE_SIZE}`
+      ),
+    queryKey: ["tools", "sessions", dateRange]
+  });
 
   return {
     chartData: statsQuery.data ?? [],
     dateRange,
     dateRangeOptions: DATE_RANGE_OPTIONS,
     error: statsQuery.error?.message ?? sessionsQuery.error?.message ?? null,
+    fetchNextPage: sessionsQuery.fetchNextPage,
+    hasNextPage: sessionsQuery.hasNextPage,
+    isFetchingNextPage: sessionsQuery.isFetchingNextPage,
     isLoading: statsQuery.isPending || sessionsQuery.isPending,
-    page,
-    pagination: sessionsQuery.data?.pagination ?? null,
-    sessions: sessionsQuery.data?.data ?? [],
-    setDateRange,
-    setPage
+    sessions: sessionsQuery.data?.pages.flatMap((p) => p.data) ?? [],
+    setDateRange
   };
 };

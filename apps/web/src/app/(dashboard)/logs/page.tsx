@@ -1,8 +1,9 @@
 "use client";
 
-import { PageHeader } from "@raven/ui";
+import { PageHeader, Spinner } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
 import { LogsFilters } from "./components/logs-filters";
 import { LogsTable } from "./components/logs-table";
 import { RequestDetail } from "./components/request-detail";
@@ -18,11 +19,11 @@ const LogsPage = () => {
     dateRange,
     dateRangeOptions,
     error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     isLoading,
-    page,
-    pagination,
-    setDateRange,
-    setPage
+    setDateRange
   } = useLogs();
 
   const [selectedRequest, setSelectedRequest] = useState<SessionRequest | null>(
@@ -34,6 +35,11 @@ const LogsPage = () => {
     ...sessionDetailQueryOptions(activeSessionId),
     enabled: !!activeSessionId
   });
+
+  const sentinelRef = useInfiniteScroll(
+    () => fetchNextPage(),
+    hasNextPage && !isFetchingNextPage
+  );
 
   const handleRequestClick = (requestId: string, sessionId: string) => {
     setActiveSessionId(sessionId);
@@ -66,11 +72,16 @@ const LogsPage = () => {
       <LogsTable
         data={data}
         loading={isLoading}
-        onPageChange={setPage}
         onRequestClick={handleRequestClick}
-        page={page}
-        totalPages={pagination?.totalPages ?? 1}
       />
+
+      {hasNextPage && (
+        <div ref={sentinelRef} className="flex justify-center py-6">
+          {isFetchingNextPage && (
+            <Spinner className="size-5" />
+          )}
+        </div>
+      )}
 
       <RequestDetail
         onClose={() => setSelectedRequest(null)}

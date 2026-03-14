@@ -1,21 +1,17 @@
 "use client";
 
 import type { Column } from "@raven/ui";
-import { Badge, Button, DataTable } from "@raven/ui";
-import { Activity, ChevronLeft, ChevronRight } from "lucide-react";
+import { Badge, DataTable } from "@raven/ui";
+import { Activity } from "lucide-react";
 import { ModelIcon } from "@/components/model-icon";
 import type { RequestLog } from "../hooks/use-requests";
-import { PAGE_SIZE, PROVIDER_LABELS } from "../hooks/use-requests";
+import { PROVIDER_LABELS } from "../hooks/use-requests";
 
 interface RequestTableProps {
   requests: RequestLog[];
   loading: boolean;
   loadingMessage?: string;
   emptyMessage?: string;
-  total: number;
-  page: number;
-  onPageChange: (page: number) => void;
-  showPagination: boolean;
   animateRows?: boolean;
 }
 
@@ -116,55 +112,19 @@ const RequestTable = ({
   loading,
   loadingMessage = "Loading requests...",
   emptyMessage = "No requests yet",
-  total,
-  page,
-  onPageChange,
-  showPagination,
   animateRows = false
 }: RequestTableProps) => {
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-
   return (
-    <>
-      <DataTable
-        animateRows={animateRows}
-        columns={columns}
-        data={requests}
-        emptyIcon={<Activity className="size-8" />}
-        emptyTitle={emptyMessage}
-        keyExtractor={(r) => r.id}
-        loading={loading}
-        loadingMessage={loadingMessage}
-      />
-
-      {showPagination && requests.length > 0 && !loading && (
-        <div className="mt-4 flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Page {page} of {totalPages}
-          </p>
-          <div className="flex items-center gap-2">
-            <Button
-              disabled={page === 1}
-              onClick={() => onPageChange(Math.max(1, page - 1))}
-              size="sm"
-              variant="secondary"
-            >
-              <ChevronLeft className="size-4" />
-              Prev
-            </Button>
-            <Button
-              disabled={page === totalPages}
-              onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-              size="sm"
-              variant="secondary"
-            >
-              Next
-              <ChevronRight className="size-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-    </>
+    <DataTable
+      animateRows={animateRows}
+      columns={columns}
+      data={requests}
+      emptyIcon={<Activity className="size-8" />}
+      emptyTitle={emptyMessage}
+      keyExtractor={(r) => r.id}
+      loading={loading}
+      loadingMessage={loadingMessage}
+    />
   );
 };
 

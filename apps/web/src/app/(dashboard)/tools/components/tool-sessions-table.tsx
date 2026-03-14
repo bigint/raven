@@ -1,8 +1,8 @@
 "use client";
 
-import { Badge, Button, Spinner } from "@raven/ui";
+import { Badge, Spinner } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, MessageSquare, Wrench } from "lucide-react";
+import { MessageSquare, Wrench } from "lucide-react";
 import { useState } from "react";
 import { ModelIcon } from "@/components/model-icon";
 import type { ToolSession } from "../hooks/use-tools";
@@ -14,9 +14,6 @@ import {
 interface ToolSessionsTableProps {
   sessions: ToolSession[];
   loading: boolean;
-  page: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
 }
 
 const formatTimeAgo = (ts: string): string => {
@@ -172,10 +169,7 @@ const ToolSessionRow = ({ session }: { session: ToolSession }) => {
 
 export const ToolSessionsTable = ({
   sessions,
-  loading,
-  page,
-  totalPages,
-  onPageChange
+  loading
 }: ToolSessionsTableProps) => {
   if (loading) {
     return (
@@ -200,7 +194,6 @@ export const ToolSessionsTable = ({
   }
 
   return (
-    <>
       <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full text-sm">
           <thead>
@@ -234,33 +227,6 @@ export const ToolSessionsTable = ({
         </table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Page {page} of {totalPages}
-          </p>
-          <div className="flex items-center gap-2">
-            <Button
-              disabled={page === 1}
-              onClick={() => onPageChange(Math.max(1, page - 1))}
-              size="sm"
-              variant="secondary"
-            >
-              <ChevronLeft className="size-4" />
-              Prev
-            </Button>
-            <Button
-              disabled={page === totalPages}
-              onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-              size="sm"
-              variant="secondary"
-            >
-              Next
-              <ChevronRight className="size-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-    </>
+    </div>
   );
 };

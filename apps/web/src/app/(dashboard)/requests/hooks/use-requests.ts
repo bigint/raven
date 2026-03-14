@@ -1,5 +1,4 @@
 import { PROVIDER_FILTER_OPTIONS, PROVIDER_LABELS } from "@raven/types";
-import { queryOptions } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { API_URL, api } from "@/lib/api";
 import { useOrgStore } from "@/stores/org";
@@ -60,34 +59,28 @@ interface RequestsQueryParams {
   range: DateRange;
 }
 
-export const requestsQueryOptions = (params: RequestsQueryParams) =>
-  queryOptions({
-    queryFn: () => {
-      const now = new Date();
-      const from = new Date(
-        now.getTime() - RANGE_MS[params.range]
-      ).toISOString();
-      const searchParams = new URLSearchParams({
-        from,
-        limit: String(PAGE_SIZE),
-        page: String(params.page)
-      });
-      if (params.provider) searchParams.set("provider", params.provider);
-      if (params.status) {
-        const codeMap: Record<string, string> = {
-          "2xx": "200",
-          "4xx": "400",
-          "5xx": "500"
-        };
-        const code = codeMap[params.status];
-        if (code) searchParams.set("statusCode", code);
-      }
-      return api.get<RequestsResponse>(
-        `/v1/analytics/requests?${searchParams.toString()}`
-      );
-    },
-    queryKey: ["requests", params]
+export const buildRequestsUrl = (params: RequestsQueryParams): string => {
+  const now = new Date();
+  const from = new Date(
+    now.getTime() - RANGE_MS[params.range]
+  ).toISOString();
+  const searchParams = new URLSearchParams({
+    from,
+    limit: String(PAGE_SIZE),
+    page: String(params.page)
   });
+  if (params.provider) searchParams.set("provider", params.provider);
+  if (params.status) {
+    const codeMap: Record<string, string> = {
+      "2xx": "200",
+      "4xx": "400",
+      "5xx": "500"
+    };
+    const code = codeMap[params.status];
+    if (code) searchParams.set("statusCode", code);
+  }
+  return `/v1/analytics/requests?${searchParams.toString()}`;
+};
 
 /** Custom hook for live SSE streaming of requests (DOM API: EventSource) */
 export const useLiveRequests = (enabled: boolean) => {

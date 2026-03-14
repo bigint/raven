@@ -18,9 +18,10 @@ import {
   Wrench,
   Zap
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ModelIcon } from "@/components/model-icon";
 import { api } from "@/lib/api";
+import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
 
 const CAPABILITY_ICONS: Record<string, typeof MessageSquare> = {
   chat: MessageSquare,
@@ -170,6 +171,7 @@ export const ModelCatalog = () => {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<ModelCategory | "all">("all");
   const [provider, setProvider] = useState("all");
+  const [visibleCount, setVisibleCount] = useState(24);
 
   const { data: models = [], isPending } = useQuery({
     queryFn: () => api.get<ModelDefinition[]>("/v1/models"),
@@ -185,6 +187,7 @@ export const ModelCatalog = () => {
   }, [models]);
 
   const filtered = useMemo(() => {
+    setVisibleCount(24);
     const query = search.toLowerCase().trim();
     return models.filter((m) => {
       if (category !== "all" && m.category !== category) return false;
@@ -200,6 +203,15 @@ export const ModelCatalog = () => {
       return true;
     });
   }, [search, category, provider, models]);
+
+  const visible = filtered.slice(0, visibleCount);
+  const hasMore = visibleCount < filtered.length;
+
+  const loadMore = useCallback(() => {
+    setVisibleCount((prev) => prev + 24);
+  }, []);
+
+  const sentinelRef = useInfiniteScroll(loadMore, hasMore);
 
   if (isPending) {
     return (
@@ -260,11 +272,13 @@ export const ModelCatalog = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {filtered.map((model) => (
+          {visible.map((model) => (
             <ModelCard key={model.id} model={model} />
           ))}
         </div>
       )}
+
+      {hasMore && <div ref={sentinelRef} className="h-px" />}
     </div>
   );
 };

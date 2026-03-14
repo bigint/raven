@@ -1,51 +1,65 @@
 "use client";
 
-import { Button, PageHeader } from "@raven/ui";
-import { useQuery } from "@tanstack/react-query";
+import { Button, PageHeader, Spinner } from "@raven/ui";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { Radio } from "lucide-react";
 import { useState } from "react";
+import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
+import { api } from "@/lib/api";
 import { RequestFilters } from "./components/request-filters";
 import { RequestTable } from "./components/request-table";
 import {
   type DateRange,
-  requestsQueryOptions,
+  type RequestsResponse,
+  buildRequestsUrl,
   useLiveRequests
 } from "./hooks/use-requests";
 
 const RequestsPage = () => {
-  const [page, setPage] = useState(1);
   const [provider, setProvider] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [dateRange, setDateRange] = useState<DateRange>("24h");
   const [isLive, setIsLive] = useState(false);
 
-  const { data, isLoading, error } = useQuery({
-    ...requestsQueryOptions({
-      page,
-      provider,
-      range: dateRange,
-      status: statusFilter
-    }),
+  const query = useInfiniteQuery({
     enabled: !isLive,
+    getNextPageParam: (lastPage: RequestsResponse) => {
+      const { page, totalPages } = lastPage.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) =>
+      api.get<RequestsResponse>(
+        buildRequestsUrl({
+          page: pageParam as number,
+          provider,
+          range: dateRange,
+          status: statusFilter
+        })
+      ),
+    queryKey: ["requests", { provider, range: dateRange, status: statusFilter }],
     refetchInterval: isLive ? false : 30_000
   });
 
   const live = useLiveRequests(isLive);
-  const requests = isLive ? live.requests : (data?.data ?? []);
-  const total = isLive ? live.total : (data?.pagination?.total ?? 0);
-  const loading = isLive ? live.isLoading : isLoading;
-  const displayError = isLive ? live.error : (error?.message ?? null);
+  const requests = isLive
+    ? live.requests
+    : (query.data?.pages.flatMap((p) => p.data) ?? []);
+  const total = isLive
+    ? live.total
+    : (query.data?.pages[0]?.pagination?.total ?? 0);
+  const loading = isLive ? live.isLoading : query.isPending;
+  const displayError = isLive
+    ? live.error
+    : (query.error?.message ?? null);
 
-  const handleFilterChange = (
-    setter: (value: string) => void,
-    value: string
-  ) => {
-    setter(value);
-    setPage(1);
-  };
+  const sentinelRef = useInfiniteScroll(
+    () => query.fetchNextPage(),
+    !isLive && query.hasNextPage && !query.isFetchingNextPage
+  );
+
   const toggleLive = () => {
     setIsLive((prev) => !prev);
-    setPage(1);
   };
 
   return (
@@ -72,12 +86,9 @@ const RequestsPage = () => {
       {!isLive && (
         <RequestFilters
           dateRange={dateRange}
-          onDateRangeChange={(v) => {
-            setDateRange(v);
-            setPage(1);
-          }}
-          onProviderChange={(v) => handleFilterChange(setProvider, v)}
-          onStatusChange={(v) => handleFilterChange(setStatusFilter, v)}
+          onDateRangeChange={setDateRange}
+          onProviderChange={setProvider}
+          onStatusChange={setStatusFilter}
           provider={provider}
           statusFilter={statusFilter}
           total={total}
@@ -113,12 +124,14 @@ const RequestsPage = () => {
         loadingMessage={
           isLive ? "Connecting to live stream..." : "Loading requests..."
         }
-        onPageChange={setPage}
-        page={page}
         requests={requests}
-        showPagination={!isLive}
-        total={total}
       />
+
+      {!isLive && query.hasNextPage && (
+        <div ref={sentinelRef} className="flex justify-center py-6">
+          {query.isFetchingNextPage && <Spinner className="size-5" />}
+        </div>
+      )}
     </div>
   );
 };

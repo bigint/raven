@@ -1,16 +1,13 @@
 "use client";
 
-import { Button, Spinner } from "@raven/ui";
-import { ChevronLeft, ChevronRight, ScrollText } from "lucide-react";
+import { Spinner } from "@raven/ui";
+import { ScrollText } from "lucide-react";
 import type { LogSession } from "../hooks/use-logs";
 import { SessionRow } from "./session-row";
 
 interface LogsTableProps {
   data: LogSession[];
   loading: boolean;
-  page: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
   onRequestClick: (requestId: string, sessionId: string) => void;
 }
 
@@ -31,9 +28,6 @@ const TABLE_HEADERS = [
 export const LogsTable = ({
   data,
   loading,
-  page,
-  totalPages,
-  onPageChange,
   onRequestClick
 }: LogsTableProps) => {
   if (loading) {
@@ -59,60 +53,30 @@ export const LogsTable = ({
   }
 
   return (
-    <>
-      <div className="overflow-x-auto rounded-xl border border-border">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border">
-              {TABLE_HEADERS.map((h, i) => (
-                <th
-                  className={`px-5 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground ${h.className}`}
-                  key={h.label || `expand-${i}`}
-                >
-                  {h.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((session) => (
-              <SessionRow
-                key={session.sessionId}
-                onRequestClick={onRequestClick}
-                session={session}
-              />
+    <div className="overflow-x-auto rounded-xl border border-border">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-border">
+            {TABLE_HEADERS.map((h, i) => (
+              <th
+                className={`px-5 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground ${h.className}`}
+                key={h.label || `expand-${i}`}
+              >
+                {h.label}
+              </th>
             ))}
-          </tbody>
-        </table>
-      </div>
-
-      {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Page {page} of {totalPages}
-          </p>
-          <div className="flex items-center gap-2">
-            <Button
-              disabled={page === 1}
-              onClick={() => onPageChange(Math.max(1, page - 1))}
-              size="sm"
-              variant="secondary"
-            >
-              <ChevronLeft className="size-4" />
-              Prev
-            </Button>
-            <Button
-              disabled={page === totalPages}
-              onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-              size="sm"
-              variant="secondary"
-            >
-              Next
-              <ChevronRight className="size-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-    </>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((session) => (
+            <SessionRow
+              key={session.sessionId}
+              onRequestClick={onRequestClick}
+              session={session}
+            />
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
