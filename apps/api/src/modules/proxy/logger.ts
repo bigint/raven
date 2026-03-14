@@ -86,7 +86,7 @@ export const flushLastUsed = async (
   db: Database,
   redis: Redis
 ): Promise<void> => {
-  const stream = redis.scanStream({ match: "lastused:*", count: 100 });
+  const stream = redis.scanStream({ count: 100, match: "lastused:*" });
 
   const updates: { keyId: string; timestamp: Date }[] = [];
 

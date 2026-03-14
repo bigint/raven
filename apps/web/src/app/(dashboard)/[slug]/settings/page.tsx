@@ -57,7 +57,7 @@ const OrgSettingsPage = () => {
             Loading settings...
           </p>
         </div>
-      ) : settings !== null ? (
+      ) : settings === null ? null : (
         <div className="space-y-6">
           <OrgSettingsForm
             editName={editName}
@@ -95,7 +95,7 @@ const OrgSettingsPage = () => {
             />
           )}
         </div>
-      ) : null}
+      )}
     </div>
   );
 };

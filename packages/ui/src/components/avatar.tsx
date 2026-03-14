@@ -39,5 +39,5 @@ const Avatar = ({ name, src, size = "md", className }: AvatarProps) => {
   );
 };
 
-export { Avatar };
 export type { AvatarProps };
+export { Avatar };

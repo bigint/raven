@@ -76,7 +76,9 @@ export const evaluateRoutingRules = async (
       case "keyword_match": {
         try {
           const keywords: string[] = JSON.parse(rule.conditionValue);
-          matches = keywords.some((kw) => lowerMessagesText.includes(kw.toLowerCase()));
+          matches = keywords.some((kw) =>
+            lowerMessagesText.includes(kw.toLowerCase())
+          );
         } catch {
           matches = false;
         }

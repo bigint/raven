@@ -142,4 +142,4 @@ const OrgList = ({
   </div>
 );
 
-export { OrgList, getRoleBadge };
+export { getRoleBadge, OrgList };

@@ -27,8 +27,8 @@ export const invalidateCache = async (
 
 // Cache key builders
 export const cacheKeys = {
-  virtualKey: (keyHash: string) => `vk:${keyHash}`,
   orgPlan: (orgId: string) => `plan:${orgId}`,
   providerConfigs: (orgId: string, provider: string) =>
-    `pc:${orgId}:${provider}`
+    `pc:${orgId}:${provider}`,
+  virtualKey: (keyHash: string) => `vk:${keyHash}`
 } as const;

@@ -144,7 +144,7 @@ const ToolSessionRow = ({ session }: { session: ToolSession }) => {
                               ) : (
                                 <span className="text-xs text-muted-foreground">
                                   {req.toolCount} tool
-                                  {req.toolCount !== 1 ? "s" : ""}
+                                  {req.toolCount === 1 ? "" : "s"}
                                 </span>
                               )}
                             </div>

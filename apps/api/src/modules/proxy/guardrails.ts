@@ -99,7 +99,8 @@ const evaluateCustomRegex = (
     const regex = new RegExp(pattern);
     for (const content of contents) {
       // Limit content length evaluated per regex to prevent ReDoS
-      const truncated = content.length > 10_000 ? content.slice(0, 10_000) : content;
+      const truncated =
+        content.length > 10_000 ? content.slice(0, 10_000) : content;
       const match = regex.exec(truncated);
       if (match) {
         return match[0];

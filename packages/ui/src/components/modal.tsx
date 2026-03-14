@@ -95,5 +95,5 @@ const Modal = ({
   </Dialog.Root>
 );
 
-export { Modal };
 export type { ModalProps };
+export { Modal };

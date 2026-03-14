@@ -52,5 +52,5 @@ const Badge = ({ className, variant, dot, children, ...props }: BadgeProps) => (
   </span>
 );
 
-export { Badge, badgeVariants };
 export type { BadgeProps };
+export { Badge, badgeVariants };

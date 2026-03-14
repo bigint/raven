@@ -6,22 +6,19 @@ import type { Context } from "hono";
 export const getAdminAuditLogs = (db: Database) => async (c: Context) => {
   const rows = await db
     .select({
-      id: auditLogs.id,
       action: auditLogs.action,
-      resourceType: auditLogs.resourceType,
-      resourceId: auditLogs.resourceId,
-      metadata: auditLogs.metadata,
-      createdAt: auditLogs.createdAt,
-      actorName: users.name,
       actorEmail: users.email,
-      orgName: organizations.name
+      actorName: users.name,
+      createdAt: auditLogs.createdAt,
+      id: auditLogs.id,
+      metadata: auditLogs.metadata,
+      orgName: organizations.name,
+      resourceId: auditLogs.resourceId,
+      resourceType: auditLogs.resourceType
     })
     .from(auditLogs)
     .leftJoin(users, eq(users.id, auditLogs.actorId))
-    .leftJoin(
-      organizations,
-      eq(organizations.id, auditLogs.organizationId)
-    )
+    .leftJoin(organizations, eq(organizations.id, auditLogs.organizationId))
     .orderBy(desc(auditLogs.createdAt))
     .limit(200);
 

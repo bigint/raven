@@ -16,9 +16,10 @@ const isPrivateHost = (hostname: string): boolean => {
     return true;
 
   // Strip brackets from IPv6
-  const cleaned = hostname.startsWith("[") && hostname.endsWith("]")
-    ? hostname.slice(1, -1)
-    : hostname;
+  const cleaned =
+    hostname.startsWith("[") && hostname.endsWith("]")
+      ? hostname.slice(1, -1)
+      : hostname;
   const lower = cleaned.toLowerCase();
 
   // IPv6 loopback

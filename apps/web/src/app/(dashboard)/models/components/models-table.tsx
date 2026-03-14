@@ -81,7 +81,7 @@ export const ModelsTable = ({ data, loading }: ModelsTableProps) => {
         <tbody>
           {data.map((row, idx) => (
             <tr
-              className={`transition-colors hover:bg-muted/30 ${idx !== data.length - 1 ? "border-b border-border" : ""}`}
+              className={`transition-colors hover:bg-muted/30 ${idx === data.length - 1 ? "" : "border-b border-border"}`}
               key={`${row.provider}-${row.model}`}
             >
               <td className="px-5 py-4">

@@ -35,5 +35,5 @@ const EmptyState = ({
   </div>
 );
 
-export { EmptyState };
 export type { EmptyStateProps };
+export { EmptyState };

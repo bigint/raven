@@ -62,7 +62,13 @@ const fillChartGaps = (
   while (current <= now) {
     const key = current.toISOString().slice(0, 10);
     result.push(
-      dataMap.get(key) ?? { cached: 0, date: key, input: 0, output: 0, reasoning: 0 }
+      dataMap.get(key) ?? {
+        cached: 0,
+        date: key,
+        input: 0,
+        output: 0,
+        reasoning: 0
+      }
     );
     current.setDate(current.getDate() + 1);
   }

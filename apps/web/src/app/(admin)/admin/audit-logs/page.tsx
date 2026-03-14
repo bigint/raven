@@ -1,7 +1,7 @@
 "use client";
 
-import { DataTable } from "@raven/ui";
 import type { Column } from "@raven/ui";
+import { DataTable } from "@raven/ui";
 import { ScrollText } from "lucide-react";
 import type { AdminAuditLog } from "../../hooks/use-admin";
 import { useAdminAuditLogs } from "../../hooks/use-admin";
@@ -11,9 +11,7 @@ const columns: Column<AdminAuditLog>[] = [
     header: "Action",
     key: "action",
     render: (l) => (
-      <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
-        {l.action}
-      </code>
+      <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{l.action}</code>
     )
   },
   {
@@ -36,9 +34,7 @@ const columns: Column<AdminAuditLog>[] = [
   {
     header: "Organization",
     key: "orgName",
-    render: (l) => (
-      <span className="text-muted-foreground">{l.orgName}</span>
-    )
+    render: (l) => <span className="text-muted-foreground">{l.orgName}</span>
   },
   {
     header: "Time",

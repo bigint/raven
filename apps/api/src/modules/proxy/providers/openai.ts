@@ -1,4 +1,4 @@
-import { getModelPricing } from "@raven/types";
+import { getModelPricing } from "@/lib/pricing-cache";
 import { PROVIDERS } from "@/lib/providers";
 import type { ProviderAdapter } from "./registry";
 

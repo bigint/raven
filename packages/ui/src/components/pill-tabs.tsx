@@ -79,5 +79,5 @@ const PillTabs = <T extends string = string>({
   );
 };
 
-export { PillTabs };
 export type { PillTabOption, PillTabsProps };
+export { PillTabs };

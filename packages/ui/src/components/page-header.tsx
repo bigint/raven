@@ -20,5 +20,5 @@ const PageHeader = ({ title, description, actions }: PageHeaderProps) => (
   </div>
 );
 
-export { PageHeader };
 export type { PageHeaderProps };
+export { PageHeader };

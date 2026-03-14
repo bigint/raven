@@ -129,7 +129,7 @@ export const RequestDetail = ({ request, onClose }: RequestDetailProps) => (
             ) : (
               <p className="mt-3 text-sm text-muted-foreground">
                 {request.toolCount} tool call
-                {request.toolCount !== 1 ? "s" : ""} in this request.
+                {request.toolCount === 1 ? "" : "s"} in this request.
               </p>
             )}
           </div>

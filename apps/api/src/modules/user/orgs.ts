@@ -25,10 +25,7 @@ export const listOrgs = (db: Database) => async (c: AuthContext) => {
     })
     .from(members)
     .innerJoin(organizations, eq(members.organizationId, organizations.id))
-    .leftJoin(
-      subscriptions,
-      eq(subscriptions.organizationId, organizations.id)
-    )
+    .leftJoin(subscriptions, eq(subscriptions.organizationId, organizations.id))
     .where(eq(members.userId, user.id));
 
   const result = userMembers.map((m) => ({

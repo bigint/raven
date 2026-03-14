@@ -6,19 +6,16 @@ import type { Context } from "hono";
 export const getAdminDomains = (db: Database) => async (c: Context) => {
   const rows = await db
     .select({
-      id: customDomains.id,
-      domain: customDomains.domain,
-      status: customDomains.status,
       createdAt: customDomains.createdAt,
-      verifiedAt: customDomains.verifiedAt,
+      domain: customDomains.domain,
+      id: customDomains.id,
       orgName: organizations.name,
-      orgSlug: organizations.slug
+      orgSlug: organizations.slug,
+      status: customDomains.status,
+      verifiedAt: customDomains.verifiedAt
     })
     .from(customDomains)
-    .leftJoin(
-      organizations,
-      eq(organizations.id, customDomains.organizationId)
-    )
+    .leftJoin(organizations, eq(organizations.id, customDomains.organizationId))
     .orderBy(desc(customDomains.createdAt));
 
   return c.json({ data: rows });

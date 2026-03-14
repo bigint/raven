@@ -2,13 +2,12 @@
 
 import {
   CAPABILITY_LABELS,
-  MODEL_CATALOG,
   MODEL_CATEGORIES,
-  PROVIDER_LABELS,
   type ModelCategory,
   type ModelDefinition
 } from "@raven/types";
 import { Badge, Select } from "@raven/ui";
+import { useQuery } from "@tanstack/react-query";
 import {
   Brain,
   DollarSign,
@@ -21,6 +20,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ModelIcon } from "@/components/model-icon";
+import { api } from "@/lib/api";
 
 const CAPABILITY_ICONS: Record<string, typeof MessageSquare> = {
   chat: MessageSquare,
@@ -83,8 +83,8 @@ const ModelCard = ({ model }: { model: ModelDefinition }) => {
           </div>
           <div>
             <h3 className="font-semibold">{model.name}</h3>
-            <p className="text-xs text-muted-foreground">
-              {PROVIDER_LABELS[model.provider] ?? model.provider}
+            <p className="text-xs capitalize text-muted-foreground">
+              {model.provider}
             </p>
           </div>
         </div>
@@ -164,9 +164,14 @@ export const ModelCatalog = () => {
   const [category, setCategory] = useState<ModelCategory | "all">("all");
   const [provider, setProvider] = useState("all");
 
+  const { data: models = [], isPending } = useQuery({
+    queryFn: () => api.get<ModelDefinition[]>("/v1/models"),
+    queryKey: ["models", "catalog"]
+  });
+
   const filtered = useMemo(() => {
     const query = search.toLowerCase().trim();
-    return MODEL_CATALOG.filter((m) => {
+    return models.filter((m) => {
       if (category !== "all" && m.category !== category) return false;
       if (provider !== "all" && m.provider !== provider) return false;
       if (query) {
@@ -179,7 +184,20 @@ export const ModelCatalog = () => {
       }
       return true;
     });
-  }, [search, category, provider]);
+  }, [search, category, provider, models]);
+
+  if (isPending) {
+    return (
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            className="h-64 animate-pulse rounded-xl border border-border bg-muted/50"
+            key={i}
+          />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -212,7 +230,7 @@ export const ModelCatalog = () => {
       </div>
 
       <p className="mb-4 text-sm text-muted-foreground">
-        {filtered.length} model{filtered.length !== 1 ? "s" : ""}
+        {filtered.length} model{filtered.length === 1 ? "" : "s"}
         {category !== "all" || provider !== "all" || search
           ? " matching filters"
           : " available"}

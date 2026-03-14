@@ -1,12 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
-  transpilePackages: ["@raven/types", "@raven/ui"],
   async headers() {
     return [
       {
-        source: "/(.*)",
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
@@ -19,10 +16,13 @@ const nextConfig: NextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()"
           }
-        ]
+        ],
+        source: "/(.*)"
       }
     ];
-  }
+  },
+  output: "standalone",
+  transpilePackages: ["@raven/types", "@raven/ui"]
 };
 
 export default nextConfig;

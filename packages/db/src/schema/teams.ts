@@ -1,22 +1,31 @@
 import { createId } from "@paralleldrive/cuid2";
-import { index, pgEnum, pgTable, text, timestamp, unique } from "drizzle-orm/pg-core";
+import {
+  index,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  unique
+} from "drizzle-orm/pg-core";
 import { organizations } from "./organizations";
 import { users } from "./users";
 
 export const teamRoleEnum = pgEnum("team_role", ["lead", "member"]);
 
-export const teams = pgTable("teams", {
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  id: text("id").primaryKey().$defaultFn(createId),
-  name: text("name").notNull(),
-  organizationId: text("organization_id")
-    .notNull()
-    .references(() => organizations.id, { onDelete: "cascade" })
-}, (t) => [
-  index("teams_org_idx").on(t.organizationId)
-]);
+export const teams = pgTable(
+  "teams",
+  {
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    id: text("id").primaryKey().$defaultFn(createId),
+    name: text("name").notNull(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" })
+  },
+  (t) => [index("teams_org_idx").on(t.organizationId)]
+);
 
 export const teamMembers = pgTable(
   "team_members",

@@ -51,7 +51,7 @@ const TeamList = ({
             key: "members",
             render: (team) => (
               <span className="text-muted-foreground">
-                {team.memberCount} member{team.memberCount !== 1 ? "s" : ""}
+                {team.memberCount} member{team.memberCount === 1 ? "" : "s"}
               </span>
             )
           },

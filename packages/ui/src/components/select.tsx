@@ -187,5 +187,5 @@ const Select = ({
   );
 };
 
+export type { SelectOption, SelectProps };
 export { Select };
-export type { SelectProps, SelectOption };

@@ -136,7 +136,12 @@ export const proxyHandler = (
     const requestBody = parsedBody;
 
     // 8. Check cache before forwarding
-    const cacheResult = await checkCache(redis, virtualKey.organizationId, providerName, requestBody);
+    const cacheResult = await checkCache(
+      redis,
+      virtualKey.organizationId,
+      providerName,
+      requestBody
+    );
 
     if (cacheResult.hit) {
       const latencyMs = Date.now() - startTime;
@@ -339,9 +344,9 @@ export const proxyHandler = (
         const { inputTokens, outputTokens, reasoningTokens } =
           accumulator.getUsage();
         const model =
-          accumulator.getModel() !== "unknown"
-            ? accumulator.getModel()
-            : upstreamResult.requestedModel;
+          accumulator.getModel() === "unknown"
+            ? upstreamResult.requestedModel
+            : accumulator.getModel();
         logData.inputTokens = inputTokens;
         logData.outputTokens = outputTokens;
         logData.reasoningTokens = reasoningTokens;
@@ -351,7 +356,12 @@ export const proxyHandler = (
         logAndPublish(db, logData, { redis, teamId: virtualKey.teamId });
         updateLastUsed(redis, virtualKey.id);
 
-        void updateMetrics(redis, finalProviderConfigId, latencyMs, logData.cost);
+        void updateMetrics(
+          redis,
+          finalProviderConfigId,
+          latencyMs,
+          logData.cost
+        );
       },
       transform(chunk, controller) {
         controller.enqueue(chunk);

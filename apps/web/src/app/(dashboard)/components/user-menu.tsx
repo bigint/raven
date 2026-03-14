@@ -1,6 +1,13 @@
 "use client";
 
-import { ChevronDown, LogOut, Moon, Settings, ShieldCheck, Sun } from "lucide-react";
+import {
+  ChevronDown,
+  LogOut,
+  Moon,
+  Settings,
+  ShieldCheck,
+  Sun
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { signOut } from "@/lib/auth-client";

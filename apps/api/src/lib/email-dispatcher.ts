@@ -67,9 +67,7 @@ const handleBudgetAlert = async (
     .select({ email: users.email })
     .from(members)
     .innerJoin(users, eq(users.id, members.userId))
-    .where(
-      and(eq(members.organizationId, orgId), eq(members.role, "owner"))
-    );
+    .where(and(eq(members.organizationId, orgId), eq(members.role, "owner")));
 
   await Promise.all(
     orgAdmins.map((admin) =>
