@@ -4,6 +4,7 @@ import { PLAN_DETAILS } from "@raven/types";
 import { Check } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { TextMorph } from "torph/react";
 
 const plans = [
   {
@@ -149,11 +150,12 @@ export default function PricingPage() {
           </p>
 
           <div className="flex items-center justify-center gap-3 mt-8">
-            <span
-              className={`text-sm font-medium ${yearly ? "text-muted-foreground" : "text-primary"}`}
+            <TextMorph
+              as="span"
+              className={`text-sm font-medium transition-colors ${yearly ? "text-muted-foreground" : "text-primary"}`}
             >
               Monthly
-            </span>
+            </TextMorph>
             <button
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                 yearly ? "bg-primary" : "bg-border"
@@ -167,14 +169,12 @@ export default function PricingPage() {
                 }`}
               />
             </button>
-            <span
-              className={`text-sm font-medium ${yearly ? "text-primary" : "text-muted-foreground"}`}
+            <TextMorph
+              as="span"
+              className={`text-sm font-medium transition-colors ${yearly ? "text-primary" : "text-muted-foreground"}`}
             >
-              Yearly
-              <span className="ml-1.5 text-xs text-success font-medium">
-                Save 20%
-              </span>
-            </span>
+              {`Yearly${yearly ? " · Save 20%" : ""}`}
+            </TextMorph>
           </div>
         </div>
 
@@ -184,7 +184,6 @@ export default function PricingPage() {
             const monthlyPrice = details.priceMonthly;
             const yearlyPerMonth = Math.round(details.priceYearly / 12);
             const displayPrice = yearly ? yearlyPerMonth : monthlyPrice;
-            const isCustom = plan.plan === "enterprise";
 
             return (
               <div
@@ -209,25 +208,14 @@ export default function PricingPage() {
                     {details.description}
                   </p>
                   <div className="mt-4">
-                    {isCustom ? (
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-4xl font-bold">
-                          ${displayPrice}
-                        </span>
-                        <span className="text-sm text-muted-foreground">
-                          /mo
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-4xl font-bold">
-                          ${displayPrice}
-                        </span>
-                        <span className="text-sm text-muted-foreground">
-                          /mo
-                        </span>
-                      </div>
-                    )}
+                    <div className="flex items-baseline gap-1">
+                      <TextMorph as="span" className="text-4xl font-bold">
+                        {`$${displayPrice}`}
+                      </TextMorph>
+                      <span className="text-sm text-muted-foreground">
+                        /mo
+                      </span>
+                    </div>
                     {yearly && details.priceYearly > 0 && (
                       <p className="text-xs text-muted-foreground mt-1">
                         Billed annually (${details.priceYearly}/yr)

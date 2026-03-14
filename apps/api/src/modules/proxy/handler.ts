@@ -45,25 +45,23 @@ export const proxyHandler = (
       );
     }
 
-    // 2. Rate limit check
-    await checkRateLimit(
-      redis,
-      virtualKey.id,
-      virtualKey.rateLimitRpm,
-      virtualKey.rateLimitRpd
-    );
-
-    // 3. Plan limit check
-    await checkPlanLimit(db, redis, virtualKey.organizationId);
-
-    // 4. Budget check
-    await checkBudgets(
-      db,
-      redis,
-      virtualKey.organizationId,
-      virtualKey.teamId,
-      virtualKey.id
-    );
+    // 2-4. Run independent gate checks in parallel
+    await Promise.all([
+      checkRateLimit(
+        redis,
+        virtualKey.id,
+        virtualKey.rateLimitRpm,
+        virtualKey.rateLimitRpd
+      ),
+      checkPlanLimit(db, redis, virtualKey.organizationId),
+      checkBudgets(
+        db,
+        redis,
+        virtualKey.organizationId,
+        virtualKey.teamId,
+        virtualKey.id
+      )
+    ]);
 
     // 5. Extract body and evaluate guardrails
     const method = c.req.method;
@@ -82,39 +80,43 @@ export const proxyHandler = (
 
     let guardrailWarnings: string[] = [];
     let guardrailMatches: GuardrailMatch[] = [];
+    let finalBodyText = bodyText;
 
-    if (Object.keys(parsedBody).length > 0) {
-      const messages = Array.isArray(parsedBody.messages)
-        ? parsedBody.messages
-        : [];
-      if (messages.length > 0) {
-        try {
-          const result = await evaluateGuardrails(
+    // 5a-5b. Run guardrails and content routing in parallel
+    const messages = Array.isArray(parsedBody.messages)
+      ? parsedBody.messages
+      : [];
+    const hasMessages =
+      Object.keys(parsedBody).length > 0 && messages.length > 0;
+    const hasModel = typeof parsedBody.model === "string";
+
+    const [guardrailResult, routingResult] = await Promise.all([
+      hasMessages
+        ? evaluateGuardrails(db, virtualKey.organizationId, messages).catch(
+            (err: unknown) => {
+              if (err instanceof GuardrailError) throw err;
+              return null;
+            }
+          )
+        : null,
+      hasModel
+        ? evaluateRoutingRules(
             db,
             virtualKey.organizationId,
-            messages
-          );
-          guardrailWarnings = result.warnings;
-          guardrailMatches = result.matches;
-        } catch (err) {
-          if (err instanceof GuardrailError) throw err;
-        }
-      }
+            parsedBody.model as string,
+            parsedBody
+          )
+        : null
+    ]);
+
+    if (guardrailResult) {
+      guardrailWarnings = guardrailResult.warnings;
+      guardrailMatches = guardrailResult.matches;
     }
 
-    // 5b. Content-based routing: evaluate routing rules to potentially switch model
-    let finalBodyText = bodyText;
-    if (typeof parsedBody.model === "string") {
-      const routingResult = await evaluateRoutingRules(
-        db,
-        virtualKey.organizationId,
-        parsedBody.model,
-        parsedBody
-      );
-      if (routingResult.ruleApplied) {
-        parsedBody.model = routingResult.model;
-        finalBodyText = JSON.stringify(parsedBody);
-      }
+    if (routingResult?.ruleApplied) {
+      parsedBody.model = routingResult.model;
+      finalBodyText = JSON.stringify(parsedBody);
     }
 
     // 6. Resolve provider and decrypt credentials
@@ -285,47 +287,53 @@ export const proxyHandler = (
     }
 
     if (proxyResponse.kind === "buffered") {
-      const { inputTokens, outputTokens, reasoningTokens } = extractTokenUsage(
-        proxyResponse.body
-      );
-      const model = extractModel(
-        proxyResponse.body,
-        upstreamResult.requestedModel
-      );
-      logData.inputTokens = inputTokens;
-      logData.outputTokens = outputTokens;
-      logData.reasoningTokens = reasoningTokens;
-      logData.model = model;
-      logData.cost = adapter.estimateCost(model, inputTokens, outputTokens);
+      const responseStatus = proxyResponse.response.status;
+      const responseOk = upstreamResult.response.ok;
+      const responseText = proxyResponse.text;
+      const responseBody = proxyResponse.body;
+      const requestedModel = upstreamResult.requestedModel;
 
-      // Analyze response for tool calls
-      const responseAnalysis = analyzeResponse(proxyResponse.body);
-      if (responseAnalysis.hasToolCalls) {
-        logData.hasToolUse = true;
-        logData.toolCount += responseAnalysis.toolCallCount;
-        logData.toolNames.push(...responseAnalysis.toolCallNames);
-      }
+      // Defer all post-processing — none of it affects the response
+      void (() => {
+        const { inputTokens, outputTokens, reasoningTokens } =
+          extractTokenUsage(responseBody);
+        const model = extractModel(responseBody, requestedModel);
+        logData.inputTokens = inputTokens;
+        logData.outputTokens = outputTokens;
+        logData.reasoningTokens = reasoningTokens;
+        logData.model = model;
+        logData.cost = adapter.estimateCost(model, inputTokens, outputTokens);
 
-      // Cache successful non-streaming responses
-      if (upstreamResult.response.ok) {
-        void storeCache(
+        const responseAnalysis = analyzeResponse(responseBody);
+        if (responseAnalysis.hasToolCalls) {
+          logData.hasToolUse = true;
+          logData.toolCount += responseAnalysis.toolCallCount;
+          logData.toolNames.push(...responseAnalysis.toolCallNames);
+        }
+
+        if (responseOk) {
+          void storeCache(
+            redis,
+            virtualKey.organizationId,
+            finalProviderName,
+            requestBody,
+            responseText
+          );
+        }
+
+        logAndPublish(db, logData, { redis, teamId: virtualKey.teamId });
+        updateLastUsed(redis, virtualKey.id);
+        void updateMetrics(
           redis,
-          virtualKey.organizationId,
-          finalProviderName,
-          requestBody,
-          proxyResponse.text
+          finalProviderConfigId,
+          latencyMs,
+          logData.cost
         );
-      }
+      })();
 
-      logAndPublish(db, logData, { redis, teamId: virtualKey.teamId });
-      updateLastUsed(redis, virtualKey.id);
-
-      // Track latency and cost for routing strategies
-      void updateMetrics(redis, finalProviderConfigId, latencyMs, logData.cost);
-
-      return new Response(proxyResponse.text, {
+      return new Response(responseText, {
         headers: proxyResponse.headers,
-        status: proxyResponse.response.status
+        status: responseStatus
       });
     }
 

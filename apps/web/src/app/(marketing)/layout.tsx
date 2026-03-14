@@ -1,11 +1,11 @@
 "use client";
 
 import { Menu, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { useSession } from "@/lib/auth-client";
 
 export default function MarketingLayout({ children }: { children: ReactNode }) {
@@ -43,7 +43,6 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
             </nav>
           </div>
           <div className="flex items-center gap-2">
-            <ThemeToggle />
             <Link
               className="hidden rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
               href="/sign-in"
@@ -69,40 +68,48 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
             </button>
           </div>
         </div>
-        {mobileMenuOpen && (
-          <div className="border-t border-border px-4 py-4 sm:hidden">
-            <nav className="flex flex-col gap-2">
-              <Link
-                className="rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                href="/pricing"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Pricing
-              </Link>
-              <Link
-                className="rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                href="/docs"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Docs
-              </Link>
-              <Link
-                className="rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:text-foreground"
-                href="/sign-in"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Sign in
-              </Link>
-              <Link
-                className="rounded-lg bg-foreground px-4 py-2 text-center text-sm font-medium text-background transition-opacity hover:opacity-90"
-                href="/sign-up"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Get Started
-              </Link>
-            </nav>
-          </div>
-        )}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              animate={{ height: "auto", opacity: 1 }}
+              className="overflow-hidden border-t border-border sm:hidden"
+              exit={{ height: 0, opacity: 0 }}
+              initial={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <nav className="flex flex-col gap-2 px-4 py-4">
+                <Link
+                  className="rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  href="/pricing"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Pricing
+                </Link>
+                <Link
+                  className="rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  href="/docs"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Docs
+                </Link>
+                <Link
+                  className="rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:text-foreground"
+                  href="/sign-in"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Sign in
+                </Link>
+                <Link
+                  className="rounded-xl bg-foreground px-4 py-2 text-center text-sm font-medium text-background transition-opacity hover:opacity-90"
+                  href="/sign-up"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Get Started
+                </Link>
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       <main className="flex-1">{children}</main>
@@ -167,10 +174,20 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
               <h4 className="text-sm font-medium">Legal</h4>
               <ul className="mt-3 space-y-2">
                 <li>
-                  <span className="text-sm text-muted-foreground">Privacy</span>
+                  <Link
+                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    href="/privacy"
+                  >
+                    Privacy
+                  </Link>
                 </li>
                 <li>
-                  <span className="text-sm text-muted-foreground">Terms</span>
+                  <Link
+                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    href="/terms"
+                  >
+                    Terms
+                  </Link>
                 </li>
               </ul>
             </div>
