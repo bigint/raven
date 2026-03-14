@@ -443,6 +443,36 @@ export const MODEL_CATALOG: readonly ModelDefinition[] = [
   }
 ] as const;
 
+/**
+ * Pricing lookup derived from MODEL_CATALOG — single source of truth.
+ * Keyed by model ID, returns input/output price per 1M tokens.
+ */
+export const MODEL_PRICING: Record<
+  string,
+  { input: number; output: number }
+> = Object.fromEntries(
+  MODEL_CATALOG.map((m) => [m.id, { input: m.inputPrice, output: m.outputPrice }])
+);
+
+/**
+ * Get pricing for a model, with a per-provider fallback for unknown model IDs.
+ */
+export const getModelPricing = (
+  modelId: string,
+  provider?: string
+): { input: number; output: number } => {
+  const exact = MODEL_PRICING[modelId];
+  if (exact) return exact;
+
+  // Fallback defaults per provider
+  const PROVIDER_DEFAULTS: Record<string, { input: number; output: number }> = {
+    anthropic: { input: 3, output: 15 },
+    openai: { input: 2.5, output: 10 }
+  };
+
+  return provider ? (PROVIDER_DEFAULTS[provider] ?? { input: 3, output: 15 }) : { input: 3, output: 15 };
+};
+
 export const CAPABILITY_LABELS: Record<string, string> = {
   chat: "Chat",
   embedding: "Embedding",
