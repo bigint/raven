@@ -32,10 +32,10 @@ import { UserMenu } from "./user-menu";
 
 const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/overview", icon: LayoutDashboard, label: "Overview" },
+  { href: "/analytics", icon: BarChart3, label: "Analytics" },
   { href: "/providers", icon: Network, label: "Providers" },
   { href: "/keys", icon: Key, label: "Keys" },
   { href: "/prompts", icon: FileText, label: "Prompts" },
-  { href: "/analytics", icon: BarChart3, label: "Analytics" },
   { href: "/logs", icon: ScrollText, label: "Logs" },
   { href: "/tools", icon: Wrench, label: "Tool Use" },
   { href: "/adoption", icon: TrendingUp, label: "Adoption" },

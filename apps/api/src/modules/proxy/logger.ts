@@ -16,6 +16,7 @@ export interface LogData {
   statusCode: number;
   inputTokens: number;
   outputTokens: number;
+  reasoningTokens: number;
   cost: number;
   latencyMs: number;
   cacheHit: boolean;
@@ -56,6 +57,7 @@ export const logProxyRequest = async (
         path: data.path,
         provider: data.provider,
         providerConfigId: data.providerConfigId,
+        reasoningTokens: data.reasoningTokens,
         sessionId: data.sessionId,
         statusCode: data.statusCode,
         toolCount: data.toolCount,

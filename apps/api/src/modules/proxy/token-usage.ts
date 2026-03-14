@@ -1,13 +1,14 @@
 export interface TokenUsage {
   inputTokens: number;
   outputTokens: number;
+  reasoningTokens: number;
 }
 
 export const extractTokenUsage = (
   body: Record<string, unknown>
 ): TokenUsage => {
   const usage = body.usage as Record<string, unknown> | undefined;
-  if (!usage) return { inputTokens: 0, outputTokens: 0 };
+  if (!usage) return { inputTokens: 0, outputTokens: 0, reasoningTokens: 0 };
 
   // OpenAI format: prompt_tokens / completion_tokens
   // Anthropic format: input_tokens / output_tokens
@@ -16,7 +17,13 @@ export const extractTokenUsage = (
   const outputTokens =
     (usage.output_tokens as number) ?? (usage.completion_tokens as number) ?? 0;
 
-  return { inputTokens, outputTokens };
+  // OpenAI: completion_tokens_details.reasoning_tokens
+  const completionDetails = usage.completion_tokens_details as
+    | Record<string, unknown>
+    | undefined;
+  const reasoningTokens = (completionDetails?.reasoning_tokens as number) ?? 0;
+
+  return { inputTokens, outputTokens, reasoningTokens };
 };
 
 export const extractModel = (
@@ -33,7 +40,11 @@ export const extractModel = (
  * Anthropic sends usage in the message_delta event before message_stop.
  */
 export class StreamTokenAccumulator {
-  private usage: TokenUsage = { inputTokens: 0, outputTokens: 0 };
+  private usage: TokenUsage = {
+    inputTokens: 0,
+    outputTokens: 0,
+    reasoningTokens: 0
+  };
   private model = "unknown";
 
   getUsage(): TokenUsage {
@@ -70,6 +81,15 @@ export class StreamTokenAccumulator {
       }
       if (typeof usage.completion_tokens === "number") {
         this.usage.outputTokens = usage.completion_tokens;
+      }
+      const completionDetails = usage.completion_tokens_details as
+        | Record<string, unknown>
+        | undefined;
+      if (
+        completionDetails &&
+        typeof completionDetails.reasoning_tokens === "number"
+      ) {
+        this.usage.reasoningTokens = completionDetails.reasoning_tokens;
       }
     }
 

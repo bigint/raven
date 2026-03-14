@@ -167,6 +167,7 @@ export const proxyHandler = (
         path: upstreamPath,
         provider: providerName,
         providerConfigId,
+        reasoningTokens: 0,
         sessionId: cacheAnalysis.sessionId,
         statusCode: 200,
         toolCount: cacheAnalysis.toolCount,
@@ -174,12 +175,13 @@ export const proxyHandler = (
         virtualKeyId: virtualKey.id
       };
 
-      const { inputTokens, outputTokens } = extractTokenUsage(
+      const { inputTokens, outputTokens, reasoningTokens } = extractTokenUsage(
         cacheResult.parsed
       );
       const model = extractModel(cacheResult.parsed, requestedModel);
       logData.inputTokens = inputTokens;
       logData.outputTokens = outputTokens;
+      logData.reasoningTokens = reasoningTokens;
       logData.model = model;
 
       logAndPublish(db, logData, { redis, teamId: virtualKey.teamId });
@@ -267,6 +269,7 @@ export const proxyHandler = (
       path: upstreamPath,
       provider: finalProviderName,
       providerConfigId: finalProviderConfigId,
+      reasoningTokens: 0,
       sessionId: contentAnalysis.sessionId,
       statusCode: upstreamResult.response.status,
       toolCount: contentAnalysis.toolCount,
@@ -281,7 +284,7 @@ export const proxyHandler = (
     }
 
     if (proxyResponse.kind === "buffered") {
-      const { inputTokens, outputTokens } = extractTokenUsage(
+      const { inputTokens, outputTokens, reasoningTokens } = extractTokenUsage(
         proxyResponse.body
       );
       const model = extractModel(
@@ -290,6 +293,7 @@ export const proxyHandler = (
       );
       logData.inputTokens = inputTokens;
       logData.outputTokens = outputTokens;
+      logData.reasoningTokens = reasoningTokens;
       logData.model = model;
       logData.cost = adapter.estimateCost(model, inputTokens, outputTokens);
 
@@ -336,13 +340,15 @@ export const proxyHandler = (
         }
 
         // Fire-and-forget: log accumulated token usage
-        const { inputTokens, outputTokens } = accumulator.getUsage();
+        const { inputTokens, outputTokens, reasoningTokens } =
+          accumulator.getUsage();
         const model =
           accumulator.getModel() !== "unknown"
             ? accumulator.getModel()
             : upstreamResult.requestedModel;
         logData.inputTokens = inputTokens;
         logData.outputTokens = outputTokens;
+        logData.reasoningTokens = reasoningTokens;
         logData.model = model;
         logData.cost = adapter.estimateCost(model, inputTokens, outputTokens);
 
