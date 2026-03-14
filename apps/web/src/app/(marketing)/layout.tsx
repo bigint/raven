@@ -6,7 +6,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { useSession } from "@/lib/auth-client";
 
 export default function MarketingLayout({ children }: { children: ReactNode }) {
@@ -44,7 +43,6 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
             </nav>
           </div>
           <div className="flex items-center gap-2">
-            <ThemeToggle />
             <Link
               className="hidden rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
               href="/sign-in"
