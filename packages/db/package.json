@@ -14,9 +14,9 @@
     }
   },
   "scripts": {
-    "generate": "drizzle-kit generate",
-    "migrate": "drizzle-kit migrate",
-    "studio": "drizzle-kit studio",
+    "generate": "set -a && . ../../.env && set +a && drizzle-kit generate",
+    "migrate": "set -a && . ../../.env && set +a && drizzle-kit migrate",
+    "studio": "set -a && . ../../.env && set +a && drizzle-kit studio",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
