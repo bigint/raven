@@ -102,7 +102,10 @@ const ModelCard = ({ model }: { model: ModelDefinition }) => {
         </Badge>
       </div>
 
-      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+      <p
+        className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground"
+        title={model.description}
+      >
         {model.description}
       </p>
 
