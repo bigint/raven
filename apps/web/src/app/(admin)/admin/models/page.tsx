@@ -4,6 +4,7 @@ import { Badge } from "@raven/ui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { ProviderIcon } from "@/components/model-icon";
 import { API_URL, api } from "@/lib/api";
 import {
   type SyncResult,
@@ -129,6 +130,7 @@ const AdminModelsPage = () => {
                 key={p.slug}
               >
                 <div className="flex items-center gap-3">
+                  <ProviderIcon provider={p.slug} size={20} />
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">{p.name}</span>
