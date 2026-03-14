@@ -60,11 +60,15 @@ const CATEGORY_OPTIONS: { value: ModelCategory | "all"; label: string }[] = [
   { label: "Embedding", value: "embedding" }
 ];
 
-const PROVIDER_OPTIONS: { value: string; label: string }[] = [
-  { label: "All Providers", value: "all" },
-  { label: "OpenAI", value: "openai" },
-  { label: "Anthropic", value: "anthropic" }
-];
+const formatProviderName = (slug: string): string => {
+  const names: Record<string, string> = {
+    anthropic: "Anthropic",
+    mistralai: "Mistral AI",
+    openai: "OpenAI",
+    "x-ai": "xAI"
+  };
+  return names[slug] ?? slug.charAt(0).toUpperCase() + slug.slice(1);
+};
 
 const ModelCard = ({ model }: { model: ModelDefinition }) => {
   const categoryMeta = MODEL_CATEGORIES[model.category];
@@ -172,6 +176,14 @@ export const ModelCatalog = () => {
     queryKey: ["models", "catalog"]
   });
 
+  const providerOptions = useMemo(() => {
+    const slugs = [...new Set(models.map((m) => m.provider))].sort();
+    return [
+      { label: "All Providers", value: "all" },
+      ...slugs.map((s) => ({ label: formatProviderName(s), value: s }))
+    ];
+  }, [models]);
+
   const filtered = useMemo(() => {
     const query = search.toLowerCase().trim();
     return models.filter((m) => {
@@ -220,7 +232,7 @@ export const ModelCatalog = () => {
           <Select
             className="w-40"
             onChange={setProvider}
-            options={PROVIDER_OPTIONS}
+            options={providerOptions}
             value={provider}
           />
           <Select

@@ -155,7 +155,7 @@ export const syncModels = async (
   let synced = 0;
 
   for (const m of filtered) {
-    const provider = m.id.split("/")[0]!;
+    const provider = m.id.split("/")[0] ?? "";
     const slug = m.id.split("/").slice(1).join("/");
     const inputPrice = parseFloat(m.pricing?.prompt ?? "0") * 1_000_000;
     const outputPrice = parseFloat(m.pricing?.completion ?? "0") * 1_000_000;
