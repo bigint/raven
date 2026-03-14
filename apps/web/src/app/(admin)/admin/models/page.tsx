@@ -23,18 +23,6 @@ const AdminModelsPage = () => {
     }
   });
 
-  const addMutation = useMutation({
-    mutationFn: (data: { slug: string; name: string }) =>
-      api.post("/v1/admin/synced-providers", data),
-    onSuccess: () => {
-      setNewSlug("");
-      setNewName("");
-      void queryClient.invalidateQueries({
-        queryKey: ["admin", "synced-providers"]
-      });
-    }
-  });
-
   const toggleMutation = useMutation({
     mutationFn: async ({
       slug,
