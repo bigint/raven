@@ -60,6 +60,7 @@ export const useChat = () => {
   } | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const keyRef = useRef<PlaygroundKey | null>(null);
+  const clientRef = useRef<RavenClient | null>(null);
   const queryClient = useQueryClient();
 
   const ensureKey = async (): Promise<PlaygroundKey> => {
@@ -71,6 +72,10 @@ export const useChat = () => {
     });
     const pk = { id: result.id, key: result.key };
     keyRef.current = pk;
+    clientRef.current = new RavenClient({
+      apiKey: pk.key,
+      baseUrl: API_URL
+    });
     return pk;
   };
 
@@ -97,12 +102,10 @@ export const useChat = () => {
       abortRef.current = abortController;
 
       try {
-        const playgroundKey = await ensureKey();
+        await ensureKey();
 
-        const client = new RavenClient({
-          apiKey: playgroundKey.key,
-          baseUrl: API_URL
-        });
+        const client = clientRef.current;
+        if (!client) return;
 
         const chatMessages: Message[] = [...messages, userMessage].map((m) => ({
           content: m.content,
@@ -119,13 +122,14 @@ export const useChat = () => {
         );
 
         for await (const delta of stream) {
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantMessage.id
-                ? { ...m, content: m.content + delta }
-                : m
-            )
-          );
+          setMessages((prev) => {
+            const idx = prev.length - 1;
+            const msg = prev[idx];
+            if (!msg || msg.id !== assistantMessage.id) return prev;
+            const updated = [...prev];
+            updated[idx] = { ...msg, content: msg.content + delta };
+            return updated;
+          });
         }
       } catch (error) {
         if ((error as Error).name === "AbortError") return;
@@ -158,6 +162,7 @@ export const useChat = () => {
         queryClient.invalidateQueries({ queryKey: ["keys"] });
       });
       keyRef.current = null;
+      clientRef.current = null;
     }
   }, [queryClient]);
 

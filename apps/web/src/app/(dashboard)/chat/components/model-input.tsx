@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@raven/ui";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 interface ModelOption {
   label: string;
@@ -51,21 +51,26 @@ export const ModelInput = ({
     };
   }, [open]);
 
-  const query = search.toLowerCase();
-  const filtered = options.filter(
-    (o) =>
-      o.label.toLowerCase().includes(query) ||
-      o.value.toLowerCase().includes(query) ||
-      o.provider.toLowerCase().includes(query)
-  );
+  const filtered = useMemo(() => {
+    const query = search.toLowerCase();
+    return options.filter(
+      (o) =>
+        o.label.toLowerCase().includes(query) ||
+        o.value.toLowerCase().includes(query) ||
+        o.provider.toLowerCase().includes(query)
+    );
+  }, [options, search]);
 
   // Group by provider
-  const grouped = new Map<string, ModelOption[]>();
-  for (const opt of filtered) {
-    const group = grouped.get(opt.provider) ?? [];
-    group.push(opt);
-    grouped.set(opt.provider, group);
-  }
+  const grouped = useMemo(() => {
+    const map = new Map<string, ModelOption[]>();
+    for (const opt of filtered) {
+      const group = map.get(opt.provider) ?? [];
+      group.push(opt);
+      map.set(opt.provider, group);
+    }
+    return map;
+  }, [filtered]);
 
   return (
     <div className="w-72" ref={containerRef}>

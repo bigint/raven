@@ -29,17 +29,43 @@ import { forwardRequest } from "./upstream";
  * Strip base64 image data from the request body to keep log storage small.
  * Replaces base64 strings with a placeholder while preserving the structure.
  */
-const sanitizeForLog = (
-  body: Record<string, unknown>
-): Record<string, unknown> => {
-  const clone = structuredClone(body);
-  const messages = clone.messages;
-  if (!Array.isArray(messages)) return clone;
+const hasBase64Images = (body: Record<string, unknown>): boolean => {
+  const messages = body.messages;
+  if (!Array.isArray(messages)) return false;
 
   for (const msg of messages) {
     const m = msg as Record<string, unknown>;
     if (!Array.isArray(m.content)) continue;
     for (const block of m.content) {
+      const b = block as Record<string, unknown>;
+      if (b.type === "image_url") {
+        const img = b.image_url as Record<string, unknown> | undefined;
+        if (img && typeof img.url === "string" && img.url.startsWith("data:")) {
+          return true;
+        }
+      }
+      if (b.type === "image") {
+        const src = b.source as Record<string, unknown> | undefined;
+        if (src && src.type === "base64") {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+};
+
+const sanitizeForLog = (
+  body: Record<string, unknown>
+): Record<string, unknown> => {
+  if (!hasBase64Images(body)) return body;
+
+  const clone = structuredClone(body);
+  const messages = clone.messages as Record<string, unknown>[];
+
+  for (const msg of messages) {
+    if (!Array.isArray(msg.content)) continue;
+    for (const block of msg.content) {
       const b = block as Record<string, unknown>;
       // OpenAI: image_url with data URI
       if (b.type === "image_url") {

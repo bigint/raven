@@ -57,6 +57,7 @@ export class TextStreamResult implements AsyncIterable<string> {
   private buffer = "";
   private consumed = false;
   private decoder = new TextDecoder();
+  private finishReasonAccumulator = "stop";
   private finishReasonResolve!: (v: string) => void;
   private reader: ReadableStreamDefaultReader<Uint8Array>;
   private textAccumulator = "";
@@ -151,6 +152,9 @@ export class TextStreamResult implements AsyncIterable<string> {
           if (chunk.type === "tool-call" && chunk.toolCall) {
             this.toolCallsAccumulator.push(chunk.toolCall);
           }
+          if (chunk.type === "finish" && chunk.finishReason) {
+            this.finishReasonAccumulator = chunk.finishReason;
+          }
           if (chunk.usage) {
             this.usageAccumulator = {
               completionTokens:
@@ -175,7 +179,7 @@ export class TextStreamResult implements AsyncIterable<string> {
     this.reader.releaseLock();
     this.textResolve(this.textAccumulator);
     this.usageResolve(this.usageAccumulator);
-    this.finishReasonResolve("stop");
+    this.finishReasonResolve(this.finishReasonAccumulator);
     this.toolCallsResolve(this.toolCallsAccumulator);
   }
 }

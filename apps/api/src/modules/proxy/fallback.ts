@@ -33,35 +33,44 @@ export const withFallback = async (
     )
     .limit(10);
 
-  for (const config of fallbackConfigs) {
-    try {
-      const adapter = getProviderAdapter(config.provider);
-
-      let decryptedApiKey: string;
+  // Decrypt all keys in parallel upfront
+  const prepared = await Promise.all(
+    fallbackConfigs.map(async (config) => {
       try {
-        decryptedApiKey = decrypt(config.apiKey, env.ENCRYPTION_SECRET);
+        const adapter = getProviderAdapter(config.provider);
+        const decryptedApiKey = decrypt(config.apiKey, env.ENCRYPTION_SECRET);
+        return { adapter, config, decryptedApiKey };
       } catch {
         console.error(
           `Failed to decrypt fallback provider credentials: ${config.provider}`
         );
-        continue;
+        return null;
       }
+    })
+  );
 
-      const result = await requestFn({ adapter, decryptedApiKey });
+  for (const entry of prepared) {
+    if (!entry) continue;
+
+    try {
+      const result = await requestFn({
+        adapter: entry.adapter,
+        decryptedApiKey: entry.decryptedApiKey
+      });
 
       if (result.response.ok) {
         console.info(
-          `Fallback succeeded with provider: ${config.provider} (${config.id})`
+          `Fallback succeeded with provider: ${entry.config.provider} (${entry.config.id})`
         );
         return {
-          providerConfigId: config.id,
-          providerName: config.provider,
+          providerConfigId: entry.config.id,
+          providerName: entry.config.provider,
           result
         };
       }
     } catch (err) {
       console.error(
-        `Fallback provider ${config.provider} failed:`,
+        `Fallback provider ${entry.config.provider} failed:`,
         err instanceof Error ? err.message : err
       );
     }
