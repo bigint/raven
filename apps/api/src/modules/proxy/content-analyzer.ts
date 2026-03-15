@@ -1,3 +1,5 @@
+import { createId } from "@paralleldrive/cuid2";
+
 export interface ContentAnalysis {
   hasImages: boolean;
   imageCount: number;
@@ -83,6 +85,8 @@ export const analyzeContent = (
     const metadata = b.metadata as Record<string, unknown> | undefined;
     if (metadata && typeof metadata.session_id === "string") {
       result.sessionId = metadata.session_id;
+    } else {
+      result.sessionId = createId();
     }
   }
 
