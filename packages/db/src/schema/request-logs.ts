@@ -67,6 +67,11 @@ export const requestLogs = pgTable(
       t.model,
       t.organizationId,
       t.createdAt
+    ),
+    index("request_logs_org_status_created_idx").on(
+      t.organizationId,
+      t.statusCode,
+      t.createdAt
     )
   ]
 );

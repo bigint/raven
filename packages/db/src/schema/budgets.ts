@@ -19,7 +19,7 @@ export const budgetPeriodEnum = pgEnum("budget_period", ["daily", "monthly"]);
 export const budgets = pgTable(
   "budgets",
   {
-    alertThreshold: numeric("alert_threshold", { precision: 3, scale: 2 })
+    alertThreshold: numeric("alert_threshold", { precision: 5, scale: 2 })
       .notNull()
       .default("0.80"),
     createdAt: timestamp("created_at", { withTimezone: true })

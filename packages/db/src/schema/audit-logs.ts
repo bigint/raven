@@ -7,9 +7,9 @@ export const auditLogs = pgTable(
   "audit_logs",
   {
     action: text("action").notNull(),
-    actorId: text("actor_id")
-      .notNull()
-      .references(() => users.id),
+    actorId: text("actor_id").references(() => users.id, {
+      onDelete: "set null"
+    }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -21,5 +21,13 @@ export const auditLogs = pgTable(
     resourceId: text("resource_id").notNull(),
     resourceType: text("resource_type").notNull()
   },
-  (t) => [index("audit_logs_org_created_idx").on(t.organizationId, t.createdAt)]
+  (t) => [
+    index("audit_logs_org_created_idx").on(t.organizationId, t.createdAt),
+    index("audit_logs_org_action_idx").on(t.organizationId, t.action),
+    index("audit_logs_org_resource_type_idx").on(
+      t.organizationId,
+      t.resourceType
+    ),
+    index("audit_logs_actor_idx").on(t.actorId)
+  ]
 );
