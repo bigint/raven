@@ -166,7 +166,6 @@ const AdminModelsPage = () => {
             ))}
           </div>
         )}
-
       </div>
     </div>
   );

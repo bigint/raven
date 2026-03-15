@@ -212,9 +212,7 @@ export default function PricingPage() {
                       <TextMorph as="span" className="text-4xl font-bold">
                         {`$${displayPrice}`}
                       </TextMorph>
-                      <span className="text-sm text-muted-foreground">
-                        /mo
-                      </span>
+                      <span className="text-sm text-muted-foreground">/mo</span>
                     </div>
                     {yearly && details.priceYearly > 0 && (
                       <p className="text-xs text-muted-foreground mt-1">

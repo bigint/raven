@@ -1,6 +1,10 @@
 "use client";
 
-import { queryOptions, useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useInfiniteQuery,
+  useQuery
+} from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { SessionRequest } from "@/app/(dashboard)/logs/hooks/use-logs";
 import { sessionDetailQueryOptions } from "@/app/(dashboard)/logs/hooks/use-logs";

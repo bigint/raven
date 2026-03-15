@@ -19,10 +19,10 @@ export default function PrivacyPage() {
               Overview
             </h2>
             <p>
-              Raven (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) operates the
-              Raven platform, an AI gateway service. This Privacy Policy explains
-              how we collect, use, and protect your information when you use our
-              service.
+              Raven (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) operates
+              the Raven platform, an AI gateway service. This Privacy Policy
+              explains how we collect, use, and protect your information when
+              you use our service.
             </p>
           </section>
 
@@ -32,22 +32,28 @@ export default function PrivacyPage() {
             </h2>
             <ul className="list-disc space-y-2 pl-5">
               <li>
-                <strong className="text-foreground">Account information:</strong>{" "}
+                <strong className="text-foreground">
+                  Account information:
+                </strong>{" "}
                 Name, email address, and password when you create an account.
               </li>
               <li>
                 <strong className="text-foreground">Usage data:</strong> API
-                request metadata including timestamps, model names, token counts,
-                and latency. We do not store the content of your API requests or
-                responses.
+                request metadata including timestamps, model names, token
+                counts, and latency. We do not store the content of your API
+                requests or responses.
               </li>
               <li>
-                <strong className="text-foreground">Billing information:</strong>{" "}
+                <strong className="text-foreground">
+                  Billing information:
+                </strong>{" "}
                 Payment details are processed by our third-party payment
                 processor. We do not store your full credit card number.
               </li>
               <li>
-                <strong className="text-foreground">Provider credentials:</strong>{" "}
+                <strong className="text-foreground">
+                  Provider credentials:
+                </strong>{" "}
                 API keys you provide for AI providers are encrypted at rest and
                 used solely to route your requests.
               </li>
@@ -61,10 +67,13 @@ export default function PrivacyPage() {
             <ul className="list-disc space-y-2 pl-5">
               <li>To provide, maintain, and improve the Raven platform.</li>
               <li>
-                To display usage analytics, cost tracking, and performance metrics
-                in your dashboard.
+                To display usage analytics, cost tracking, and performance
+                metrics in your dashboard.
               </li>
-              <li>To enforce rate limits, budgets, and access controls you configure.</li>
+              <li>
+                To enforce rate limits, budgets, and access controls you
+                configure.
+              </li>
               <li>To send transactional emails related to your account.</li>
               <li>To detect and prevent abuse or unauthorized access.</li>
             </ul>
@@ -100,10 +109,10 @@ export default function PrivacyPage() {
               Third-Party Services
             </h2>
             <p>
-              Raven routes your API requests to third-party AI providers (such as
-              OpenAI, Anthropic, and Google) based on your configuration. These
-              providers have their own privacy policies that govern how they
-              handle data. We encourage you to review them.
+              Raven routes your API requests to third-party AI providers (such
+              as OpenAI, Anthropic, and Google) based on your configuration.
+              These providers have their own privacy policies that govern how
+              they handle data. We encourage you to review them.
             </p>
           </section>
 

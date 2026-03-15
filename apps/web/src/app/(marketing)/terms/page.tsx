@@ -19,9 +19,9 @@ export default function TermsPage() {
               Agreement to Terms
             </h2>
             <p>
-              By accessing or using the Raven platform (&quot;Service&quot;), you
-              agree to be bound by these Terms of Service. If you do not agree,
-              do not use the Service.
+              By accessing or using the Raven platform (&quot;Service&quot;),
+              you agree to be bound by these Terms of Service. If you do not
+              agree, do not use the Service.
             </p>
           </section>
 
@@ -30,11 +30,11 @@ export default function TermsPage() {
               Description of Service
             </h2>
             <p>
-              Raven is an AI gateway that routes, monitors, and manages API calls
-              across multiple AI providers. The Service allows you to create
-              virtual API keys, set usage controls, and view analytics for your AI
-              usage. Raven is currently in beta and features may change without
-              notice.
+              Raven is an AI gateway that routes, monitors, and manages API
+              calls across multiple AI providers. The Service allows you to
+              create virtual API keys, set usage controls, and view analytics
+              for your AI usage. Raven is currently in beta and features may
+              change without notice.
             </p>
           </section>
 
@@ -98,10 +98,11 @@ export default function TermsPage() {
             </h2>
             <p>
               You are solely responsible for your relationships with third-party
-              AI providers. By adding provider API keys to Raven, you confirm that
-              you have the right to use those keys and that your usage complies
-              with the respective provider&apos;s terms of service. Raven is not
-              liable for any charges incurred with third-party providers.
+              AI providers. By adding provider API keys to Raven, you confirm
+              that you have the right to use those keys and that your usage
+              complies with the respective provider&apos;s terms of service.
+              Raven is not liable for any charges incurred with third-party
+              providers.
             </p>
           </section>
 
@@ -111,9 +112,9 @@ export default function TermsPage() {
             </h2>
             <p>
               Paid plans are billed in advance on a monthly or annual basis.
-              Charges are non-refundable except as required by law. We reserve the
-              right to modify pricing with 30 days&apos; notice. Free tier usage
-              is subject to the limits described on our pricing page.
+              Charges are non-refundable except as required by law. We reserve
+              the right to modify pricing with 30 days&apos; notice. Free tier
+              usage is subject to the limits described on our pricing page.
             </p>
           </section>
 
@@ -139,7 +140,8 @@ export default function TermsPage() {
               damages, or any loss of profits or revenues, whether incurred
               directly or indirectly, or any loss of data, use, or goodwill. Our
               total liability for any claim arising from the Service shall not
-              exceed the amount you paid us in the 12 months preceding the claim.
+              exceed the amount you paid us in the 12 months preceding the
+              claim.
             </p>
           </section>
 
@@ -149,10 +151,10 @@ export default function TermsPage() {
             </h2>
             <p>
               We may suspend or terminate your account at any time for violation
-              of these Terms. You may delete your account at any time through your
-              account settings. Upon termination, your right to use the Service
-              ceases immediately and we may delete your data after a reasonable
-              retention period.
+              of these Terms. You may delete your account at any time through
+              your account settings. Upon termination, your right to use the
+              Service ceases immediately and we may delete your data after a
+              reasonable retention period.
             </p>
           </section>
 

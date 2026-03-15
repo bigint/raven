@@ -38,12 +38,10 @@ export const extractTokenUsage = (
   const promptDetails = usage.prompt_tokens_details as
     | Record<string, unknown>
     | undefined;
-  const openaiCachedTokens =
-    (promptDetails?.cached_tokens as number) ?? 0;
+  const openaiCachedTokens = (promptDetails?.cached_tokens as number) ?? 0;
 
   // Anthropic: cache_read_input_tokens / cache_creation_input_tokens
-  const anthropicCacheRead =
-    (usage.cache_read_input_tokens as number) ?? 0;
+  const anthropicCacheRead = (usage.cache_read_input_tokens as number) ?? 0;
   const anthropicCacheWrite =
     (usage.cache_creation_input_tokens as number) ?? 0;
 
@@ -132,10 +130,7 @@ export class StreamTokenAccumulator {
       const promptDetails = usage.prompt_tokens_details as
         | Record<string, unknown>
         | undefined;
-      if (
-        promptDetails &&
-        typeof promptDetails.cached_tokens === "number"
-      ) {
+      if (promptDetails && typeof promptDetails.cached_tokens === "number") {
         this.usage.cacheReadTokens = promptDetails.cached_tokens;
         this.usage.cachedTokens =
           this.usage.cacheReadTokens + this.usage.cacheWriteTokens;
@@ -174,8 +169,7 @@ export class StreamTokenAccumulator {
             this.usage.cacheReadTokens = msgUsage.cache_read_input_tokens;
           }
           if (typeof msgUsage.cache_creation_input_tokens === "number") {
-            this.usage.cacheWriteTokens =
-              msgUsage.cache_creation_input_tokens;
+            this.usage.cacheWriteTokens = msgUsage.cache_creation_input_tokens;
           }
           this.usage.cachedTokens =
             this.usage.cacheReadTokens + this.usage.cacheWriteTokens;

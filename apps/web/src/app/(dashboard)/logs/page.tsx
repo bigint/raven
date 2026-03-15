@@ -76,10 +76,8 @@ const LogsPage = () => {
       />
 
       {hasNextPage && (
-        <div ref={sentinelRef} className="flex justify-center py-6">
-          {isFetchingNextPage && (
-            <Spinner className="size-5" />
-          )}
+        <div className="flex justify-center py-6" ref={sentinelRef}>
+          {isFetchingNextPage && <Spinner className="size-5" />}
         </div>
       )}
 
