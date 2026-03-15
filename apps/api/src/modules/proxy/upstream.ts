@@ -4,6 +4,7 @@ const HOP_BY_HOP_HEADERS = new Set([
   "authorization",
   "host",
   "connection",
+  "content-length",
   "transfer-encoding"
 ]);
 
