@@ -60,7 +60,7 @@ const steps = [
   }
 ];
 
-export default function HomePage() {
+const HomePage = () => {
   const [wordIndex, setWordIndex] = useState(0);
 
   useEffect(() => {
@@ -391,4 +391,6 @@ export default function HomePage() {
       </section>
     </div>
   );
-}
+};
+
+export default HomePage;

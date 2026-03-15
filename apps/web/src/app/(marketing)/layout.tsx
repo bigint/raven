@@ -8,7 +8,7 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { useSession } from "@/lib/auth-client";
 
-export default function MarketingLayout({ children }: { children: ReactNode }) {
+const MarketingLayout = ({ children }: { children: ReactNode }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: session, isPending } = useSession();
 
@@ -199,4 +199,6 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
       </footer>
     </div>
   );
-}
+};
+
+export default MarketingLayout;

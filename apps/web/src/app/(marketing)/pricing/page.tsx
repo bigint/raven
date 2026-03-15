@@ -135,7 +135,7 @@ const comparisonFeatures = [
   }
 ];
 
-export default function PricingPage() {
+const PricingPage = () => {
   const [yearly, setYearly] = useState(false);
 
   return (
@@ -303,4 +303,6 @@ export default function PricingPage() {
       </div>
     </div>
   );
-}
+};
+
+export default PricingPage;
