@@ -41,6 +41,7 @@ export const requestLogs = pgTable(
       { onDelete: "set null" }
     ),
     reasoningTokens: integer("reasoning_tokens").notNull().default(0),
+    requestBody: jsonb("request_body").$type<Record<string, unknown>>(),
     sessionId: text("session_id"),
     statusCode: integer("status_code").notNull(),
     toolCount: integer("tool_count").notNull().default(0),

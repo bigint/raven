@@ -25,6 +25,41 @@ import {
 } from "./token-usage";
 import { forwardRequest } from "./upstream";
 
+/**
+ * Strip base64 image data from the request body to keep log storage small.
+ * Replaces base64 strings with a placeholder while preserving the structure.
+ */
+const sanitizeForLog = (
+  body: Record<string, unknown>
+): Record<string, unknown> => {
+  const clone = structuredClone(body);
+  const messages = clone.messages;
+  if (!Array.isArray(messages)) return clone;
+
+  for (const msg of messages) {
+    const m = msg as Record<string, unknown>;
+    if (!Array.isArray(m.content)) continue;
+    for (const block of m.content) {
+      const b = block as Record<string, unknown>;
+      // OpenAI: image_url with data URI
+      if (b.type === "image_url") {
+        const img = b.image_url as Record<string, unknown> | undefined;
+        if (img && typeof img.url === "string" && img.url.startsWith("data:")) {
+          img.url = "[base64 image stripped]";
+        }
+      }
+      // Anthropic: image with base64 source
+      if (b.type === "image") {
+        const src = b.source as Record<string, unknown> | undefined;
+        if (src && src.type === "base64") {
+          src.data = "[base64 image stripped]";
+        }
+      }
+    }
+  }
+  return clone;
+};
+
 export const proxyHandler = (
   db: Database,
   redis: Redis,
@@ -172,6 +207,7 @@ export const proxyHandler = (
         provider: providerName,
         providerConfigId,
         reasoningTokens: 0,
+        requestBody: sanitizeForLog(requestBody),
         sessionId: cacheAnalysis.sessionId,
         statusCode: 200,
         toolCount: cacheAnalysis.toolCount,
@@ -285,6 +321,7 @@ export const proxyHandler = (
       provider: finalProviderName,
       providerConfigId: finalProviderConfigId,
       reasoningTokens: 0,
+      requestBody: sanitizeForLog(requestBody),
       sessionId: contentAnalysis.sessionId,
       statusCode: upstreamResult.response.status,
       toolCount: contentAnalysis.toolCount,
