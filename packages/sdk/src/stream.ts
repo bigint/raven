@@ -5,7 +5,7 @@ const parseSSEChunk = (
   isAnthropic: boolean
 ): TextStreamChunk | null => {
   if (isAnthropic) {
-      if (parsed.type === "content_block_delta") {
+    if (parsed.type === "content_block_delta") {
       const delta = parsed.delta as
         | { text?: string; type?: string }
         | undefined;

@@ -16,7 +16,7 @@ export const models = pgTable("models", {
     .notNull()
     .defaultNow(),
   description: text("description").notNull().default(""),
-  id: text("id").primaryKey(), // OpenRouter ID e.g. "openai/gpt-5"
+  id: text("id").primaryKey(), // e.g. "openai/gpt-5"
   inputPrice: numeric("input_price", { precision: 10, scale: 4 })
     .notNull()
     .default("0"),

@@ -1,70 +1,58 @@
 "use client";
 
-const PROVIDER_ICON_MAP: Record<string, string> = {
+const LOGO_BASE = "https://models.dev/logos";
+
+/** Map our provider slugs to models.dev logo slugs */
+const PROVIDER_LOGO_MAP: Record<string, string> = {
   anthropic: "anthropic",
-  cohere: "cohere-color",
-  deepseek: "deepseek-color",
-  fireworks: "fireworks-color",
-  google: "google",
+  cerebras: "cerebras",
+  deepseek: "deepseek",
+  fireworks: "fireworks",
   groq: "groq",
-  huggingface: "huggingface-color",
-  meta: "meta-color",
-  mistral: "mistral-color",
-  mistralai: "mistral-color",
-  ollama: "ollama",
+  mistralai: "mistral",
   openai: "openai",
-  perplexity: "perplexity-color",
-  replicate: "replicate",
-  together: "together-color",
-  "x-ai": "grok"
+  perplexity: "perplexity",
+  sambanova: "sambanova",
+  together: "togetherai",
+  "x-ai": "xai"
 };
 
-const MODEL_ICON_RULES: [RegExp, string][] = [
-  [/claude/i, "claude-color"],
-  [/gpt|o1|o3|o4/i, "openai"],
-  [/gemini/i, "gemini-color"],
-  [/llama/i, "meta-color"],
-  [/mistral|mixtral|codestral|pixtral/i, "mistral-color"],
-  [/deepseek/i, "deepseek-color"],
-  [/grok/i, "grok"],
-  [/command/i, "cohere-color"],
-  [/qwen/i, "qwen-color"],
-  [/phi/i, "azure"],
-  [/nova/i, "aws-color"],
-  [/titan/i, "aws-color"]
+/** Derive provider from model name for model-level icons */
+const MODEL_PROVIDER_RULES: [RegExp, string][] = [
+  [/claude/i, "anthropic"],
+  [/gpt|o1|o3|o4|codex/i, "openai"],
+  [/grok/i, "xai"],
+  [/mistral|mixtral|codestral|pixtral|devstral/i, "mistral"],
+  [/deepseek/i, "deepseek"],
+  [/llama|gemma/i, "groq"],
+  [/sonar/i, "perplexity"]
 ];
 
-export const getModelIconSlug = (
-  model: string,
-  provider?: string
-): string | null => {
-  const lower = model.toLowerCase();
-  for (const [pattern, slug] of MODEL_ICON_RULES) {
-    if (pattern.test(lower)) return slug;
+const getLogoSlug = (provider: string): string | null =>
+  PROVIDER_LOGO_MAP[provider.toLowerCase()] ?? null;
+
+const getModelLogoSlug = (model: string, provider?: string): string | null => {
+  for (const [pattern, slug] of MODEL_PROVIDER_RULES) {
+    if (pattern.test(model)) return slug;
   }
-  if (provider) {
-    return PROVIDER_ICON_MAP[provider.toLowerCase()] ?? null;
-  }
+  if (provider) return getLogoSlug(provider);
   return null;
 };
 
-export const getProviderIconSlug = (provider: string): string | null =>
-  PROVIDER_ICON_MAP[provider.toLowerCase()] ?? null;
-
 interface ModelIconProps {
+  className?: string;
   model: string;
   provider?: string;
   size?: number;
-  className?: string;
 }
 
 export const ModelIcon = ({
+  className,
   model,
   provider,
-  size = 16,
-  className
+  size = 16
 }: ModelIconProps) => {
-  const slug = getModelIconSlug(model, provider);
+  const slug = getModelLogoSlug(model, provider);
   if (!slug) return null;
 
   return (
@@ -72,24 +60,24 @@ export const ModelIcon = ({
       alt=""
       className={className}
       height={size}
-      src={`https://unpkg.com/@lobehub/icons-static-svg@latest/icons/${slug}.svg`}
+      src={`${LOGO_BASE}/${slug}.svg`}
       width={size}
     />
   );
 };
 
 interface ProviderIconProps {
+  className?: string;
   provider: string;
   size?: number;
-  className?: string;
 }
 
 export const ProviderIcon = ({
+  className,
   provider,
-  size = 14,
-  className
+  size = 14
 }: ProviderIconProps) => {
-  const slug = getProviderIconSlug(provider);
+  const slug = getLogoSlug(provider);
   if (!slug) return null;
 
   return (
@@ -97,7 +85,7 @@ export const ProviderIcon = ({
       alt=""
       className={className}
       height={size}
-      src={`https://unpkg.com/@lobehub/icons-static-svg@latest/icons/${slug}.svg`}
+      src={`${LOGO_BASE}/${slug}.svg`}
       width={size}
     />
   );

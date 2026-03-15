@@ -16,8 +16,6 @@ export const getProxyPath = (provider: string): string =>
     ? `/v1/proxy/${provider}/messages`
     : `/v1/proxy/${provider}/chat/completions`;
 
-// ── Request formatting ───────────────────────────────────────────────
-
 const toOpenAIMessages = (
   messages: Message[],
   system?: string
@@ -125,7 +123,6 @@ export const formatRequest = (
     return body;
   }
 
-  // OpenAI-compatible format
   const body: Record<string, unknown> = {
     messages: toOpenAIMessages(params.messages, params.system),
     model: params.model,
@@ -145,8 +142,6 @@ export const formatRequest = (
 
   return body;
 };
-
-// ── Response parsing ─────────────────────────────────────────────────
 
 const parseOpenAIUsage = (
   usage: Record<string, number> | undefined
@@ -208,7 +203,6 @@ export const parseBufferedResponse = (
     };
   }
 
-  // OpenAI format
   const choices = data.choices as
     | Array<{
         finish_reason?: string;
