@@ -12,6 +12,7 @@ import {
   Key,
   LayoutDashboard,
   Menu,
+  MessageSquare,
   Network,
   Receipt,
   Route,
@@ -51,6 +52,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/overview", icon: LayoutDashboard, label: "Overview" },
+  { href: "/chat", icon: MessageSquare, label: "Chat" },
   { href: "/analytics", icon: BarChart3, label: "Analytics" },
   { href: "/providers", icon: Network, label: "Providers" },
   { href: "/keys", icon: Key, label: "Keys" },

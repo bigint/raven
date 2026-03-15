@@ -36,7 +36,6 @@ import { createPromptsModule } from "./modules/prompts/index";
 import { createProvidersModule } from "./modules/providers/index";
 import { resolveCustomDomain } from "./modules/proxy/domain-resolver";
 import { proxyHandler } from "./modules/proxy/handler";
-import { createProxyModule } from "./modules/proxy/index";
 import { flushLastUsed } from "./modules/proxy/logger";
 import { createRoutingRulesModule } from "./modules/routing-rules/index";
 import { createSettingsModule } from "./modules/settings/index";
@@ -68,7 +67,7 @@ void (async () => {
   }
 })();
 
-// Sync models from OpenRouter every 5 minutes
+// Sync models every 5 minutes
 setInterval(() => {
   void syncModels(db).catch((err) =>
     console.error("Scheduled model sync failed:", err)
@@ -145,8 +144,7 @@ app.get("/health", (c) => c.json({ status: "ok" }));
 // Auth routes (no auth middleware)
 app.route("/api/auth", createAuthModule(auth));
 
-// Proxy routes (virtual key auth, no session auth)
-app.route("/v1/proxy", createProxyModule(db, redis, env));
+app.all("/v1/proxy/*", proxyHandler(db, redis, env));
 
 // Billing webhooks (no auth)
 app.route("/webhooks/billing", createBillingWebhookModule(db, env));

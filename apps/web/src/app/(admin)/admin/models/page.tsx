@@ -63,7 +63,7 @@ const AdminModelsPage = () => {
         <div>
           <h1 className="text-xl font-bold sm:text-2xl">Models</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Manage model providers and sync from OpenRouter.
+            Manage model providers and sync from models.dev.
           </p>
         </div>
         <button
@@ -98,7 +98,7 @@ const AdminModelsPage = () => {
         <div className="border-b border-border px-5 py-4">
           <h2 className="text-sm font-semibold">Synced Providers</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Models are fetched from OpenRouter for enabled providers every 5
+            Models are fetched from models.dev for enabled providers every 5
             minutes.
           </p>
         </div>
