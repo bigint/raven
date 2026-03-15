@@ -45,7 +45,7 @@ export const extractTokenUsage = (
   const anthropicCacheWrite =
     (usage.cache_creation_input_tokens as number) ?? 0;
 
-  const cacheReadTokens = openaiCachedTokens ?? anthropicCacheRead;
+  const cacheReadTokens = openaiCachedTokens || anthropicCacheRead;
   const cacheWriteTokens = anthropicCacheWrite;
   const cachedTokens = cacheReadTokens + cacheWriteTokens;
 
