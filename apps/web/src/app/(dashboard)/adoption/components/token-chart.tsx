@@ -10,22 +10,12 @@ import {
   XAxis,
   YAxis
 } from "recharts";
+import { formatCompactNumber, formatShortDate } from "@/lib/format";
 import type { ChartDataPoint } from "../hooks/use-adoption";
 
 interface TokenChartProps {
   data: ChartDataPoint[];
 }
-
-const formatDate = (date: string): string => {
-  const d = new Date(date);
-  return d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
-};
-
-const formatNumber = (n: number): string => {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return String(n);
-};
 
 export const TokenChart = ({ data }: TokenChartProps) => {
   return (
@@ -42,14 +32,14 @@ export const TokenChart = ({ data }: TokenChartProps) => {
             dataKey="date"
             fontSize={12}
             tick={{ fill: "var(--color-muted-foreground)" }}
-            tickFormatter={formatDate}
+            tickFormatter={formatShortDate}
             tickLine={false}
           />
           <YAxis
             axisLine={false}
             fontSize={12}
             tick={{ fill: "var(--color-muted-foreground)" }}
-            tickFormatter={formatNumber}
+            tickFormatter={formatCompactNumber}
             tickLine={false}
             width={60}
           />
@@ -61,7 +51,7 @@ export const TokenChart = ({ data }: TokenChartProps) => {
               fontSize: "12px"
             }}
             formatter={(value) => Number(value).toLocaleString()}
-            labelFormatter={(label) => formatDate(String(label))}
+            labelFormatter={(label) => formatShortDate(String(label))}
           />
           <Legend
             iconType="circle"

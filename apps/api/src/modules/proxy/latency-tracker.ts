@@ -1,3 +1,4 @@
+import { formatDate } from "date-fns";
 import type { Redis } from "ioredis";
 
 const ALPHA = 0.3;
@@ -34,7 +35,7 @@ export const updateCost = async (
   if (cost <= 0) return;
 
   const now = new Date();
-  const monthKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+  const monthKey = formatDate(now, "yyyy-MM");
   const key = `cost:${configId}:${monthKey}`;
 
   const pipeline = redis.pipeline();
@@ -65,7 +66,7 @@ export const updateMetrics = async (
 
   if (cost > 0) {
     const now = new Date();
-    const monthKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+    const monthKey = formatDate(now, "yyyy-MM");
     const costKey = `cost:${configId}:${monthKey}`;
     pipeline.incrbyfloat(costKey, cost);
     pipeline.expire(costKey, 86400 * 35);

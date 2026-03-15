@@ -1,17 +1,12 @@
 "use client";
 
+import { formatCompactNumber } from "@/lib/format";
 import type { BreakdownRow } from "../hooks/use-adoption";
 
 interface UsageBarsProps {
   data: BreakdownRow[];
   metric: "inputTokens" | "outputTokens" | "cachedTokens" | "requests";
 }
-
-const formatNumber = (n: number): string => {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return String(n);
-};
 
 export const UsageBars = ({ data, metric }: UsageBarsProps) => {
   if (data.length === 0) return null;
@@ -29,7 +24,7 @@ export const UsageBars = ({ data, metric }: UsageBarsProps) => {
             <div className="mb-2 flex items-center justify-between">
               <span className="text-sm font-medium">{row.label}</span>
               <span className="text-sm tabular-nums text-muted-foreground">
-                {formatNumber(value)}
+                {formatCompactNumber(value)}
               </span>
             </div>
             <div className="h-2 w-full rounded-full bg-muted">

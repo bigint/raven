@@ -3,15 +3,13 @@ import type { Database } from "@raven/db";
 import { webhooks } from "@raven/db";
 import { and, arrayOverlaps, eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
+import pRetry from "p-retry";
 
 interface EventPayload {
   data: unknown;
   timestamp: string;
   type: string;
 }
-
-const MAX_RETRIES = 3;
-const BASE_DELAY_MS = 1000;
 
 const signPayload = (payload: string, secret: string): string => {
   return crypto.createHmac("sha256", secret).update(payload).digest("hex");
@@ -24,8 +22,8 @@ const deliverWebhook = async (
 ): Promise<void> => {
   const signature = signPayload(body, secret);
 
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    try {
+  await pRetry(
+    async () => {
       const response = await fetch(url, {
         body,
         headers: {
@@ -36,23 +34,23 @@ const deliverWebhook = async (
         signal: AbortSignal.timeout(10000)
       });
 
-      if (response.ok) {
-        return;
+      if (!response.ok) {
+        throw new Error(`Webhook delivery failed: ${response.status}`);
       }
-
-      if (attempt < MAX_RETRIES) {
-        const delay = BASE_DELAY_MS * 2 ** attempt;
-        await new Promise((resolve) => setTimeout(resolve, delay));
-      }
-    } catch {
-      if (attempt < MAX_RETRIES) {
-        const delay = BASE_DELAY_MS * 2 ** attempt;
-        await new Promise((resolve) => setTimeout(resolve, delay));
+    },
+    {
+      retries: 3,
+      minTimeout: 1000,
+      factor: 2,
+      onFailedAttempt: (ctx) => {
+        console.error(
+          `Webhook attempt ${ctx.attemptNumber} failed for ${url}: ${ctx.error.message}`
+        );
       }
     }
-  }
-
-  console.error(`Webhook delivery failed after ${MAX_RETRIES} retries: ${url}`);
+  ).catch(() => {
+    console.error(`Webhook delivery failed after all retries: ${url}`);
+  });
 };
 
 export const initWebhookDispatcher = (db: Database, redis: Redis): void => {

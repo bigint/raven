@@ -40,10 +40,10 @@ const CATEGORY_COLORS: Record<ModelCategory, string> = {
   reasoning: "warning"
 };
 
-const formatContext = (tokens: number): string => {
-  if (tokens >= 1_000_000) return `${(tokens / 1_000_000).toFixed(0)}M`;
-  return `${(tokens / 1_000).toFixed(0)}K`;
-};
+const formatContext = (tokens: number): string =>
+  tokens >= 1_000_000
+    ? `${(tokens / 1_000_000).toFixed(0)}M`
+    : `${(tokens / 1_000).toFixed(0)}K`;
 
 const formatPrice = (price: number): string => {
   if (price === 0) return "—";

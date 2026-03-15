@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, MessageSquare, Wrench } from "lucide-react";
 import { useState } from "react";
 import { ModelIcon } from "@/components/model-icon";
+import { formatTimeAgo } from "@/lib/format";
 import type { ToolSession } from "../hooks/use-tools";
 import {
   type SessionRequest,
@@ -15,17 +16,6 @@ interface ToolSessionsTableProps {
   sessions: ToolSession[];
   loading: boolean;
 }
-
-const formatTimeAgo = (ts: string): string => {
-  const diff = Date.now() - new Date(ts).getTime();
-  const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  return `${days}d ago`;
-};
 
 const ToolSessionRow = ({ session }: { session: ToolSession }) => {
   const [expanded, setExpanded] = useState(false);

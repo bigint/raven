@@ -1,67 +1,64 @@
+import ky from "ky";
 import { useOrgStore } from "@/stores/org";
 
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
-const getOrgId = () => useOrgStore.getState().activeOrg?.id ?? null;
-
-const headers = (extra?: Record<string, string>): Record<string, string> => {
-  const orgId = getOrgId();
-  return {
-    ...(orgId ? { "X-Org-Id": orgId } : {}),
-    ...extra
-  };
+const unwrapEnvelope = (body: unknown): unknown => {
+  if (
+    body !== null &&
+    typeof body === "object" &&
+    "data" in body &&
+    Object.keys(body).length === 1
+  ) {
+    return (body as Record<string, unknown>).data;
+  }
+  return body;
 };
 
-const handleResponse = async <T>(res: Response): Promise<T> => {
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    const message = body?.error?.message ?? body?.message ?? "Request failed";
-    throw new Error(message);
+const client = ky.create({
+  prefixUrl: API_URL,
+  credentials: "include",
+  hooks: {
+    beforeRequest: [
+      (request) => {
+        const orgId = useOrgStore.getState().activeOrg?.id;
+        if (orgId) {
+          request.headers.set("X-Org-Id", orgId);
+        }
+      }
+    ],
+    beforeError: [
+      async (error) => {
+        const body = await error.response
+          .json()
+          .catch(() => ({}) as Record<string, unknown>);
+        const parsed = body as Record<string, unknown>;
+        const nested = parsed?.error as Record<string, unknown> | undefined;
+        error.message =
+          (nested?.message as string) ??
+          (parsed?.message as string) ??
+          "Request failed";
+        return error;
+      }
+    ]
   }
-  const body = await res.json();
-  // Unwrap { data: T } envelope only when data is the sole key
-  if (body?.data !== undefined && Object.keys(body).length === 1) {
-    return body.data as T;
-  }
-  return body as T;
+});
+
+const request = async <T>(
+  method: "get" | "post" | "put" | "delete",
+  path: string,
+  body?: unknown
+): Promise<T> => {
+  const trimmedPath = path.startsWith("/") ? path.slice(1) : path;
+  const options = body ? { json: body } : {};
+  const json = await client[method](trimmedPath, options).json();
+  return unwrapEnvelope(json) as T;
 };
 
 export const api = {
-  async delete<T>(path: string): Promise<T> {
-    const res = await fetch(`${API_URL}${path}`, {
-      credentials: "include",
-      headers: headers(),
-      method: "DELETE"
-    });
-    return handleResponse<T>(res);
-  },
-
-  async get<T>(path: string): Promise<T> {
-    const res = await fetch(`${API_URL}${path}`, {
-      credentials: "include",
-      headers: headers()
-    });
-    return handleResponse<T>(res);
-  },
-
-  async post<T>(path: string, body?: unknown): Promise<T> {
-    const res = await fetch(`${API_URL}${path}`, {
-      body: body ? JSON.stringify(body) : undefined,
-      credentials: "include",
-      headers: headers({ "Content-Type": "application/json" }),
-      method: "POST"
-    });
-    return handleResponse<T>(res);
-  },
-
-  async put<T>(path: string, body?: unknown): Promise<T> {
-    const res = await fetch(`${API_URL}${path}`, {
-      body: body ? JSON.stringify(body) : undefined,
-      credentials: "include",
-      headers: headers({ "Content-Type": "application/json" }),
-      method: "PUT"
-    });
-    return handleResponse<T>(res);
-  }
+  get: <T>(path: string) => request<T>("get", path),
+  post: <T>(path: string, body?: unknown) => request<T>("post", path, body),
+  put: <T>(path: string, body?: unknown) => request<T>("put", path, body),
+  delete: <T>(path: string) => request<T>("delete", path)
 };

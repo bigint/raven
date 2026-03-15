@@ -1,3 +1,5 @@
+import pRetry from "p-retry";
+
 const RETRYABLE_STATUS_CODES = new Set([429, 500, 502, 503, 504]);
 
 export interface RetryOptions {
@@ -12,21 +14,14 @@ const DEFAULT_OPTIONS: RetryOptions = {
   maxRetries: 2
 };
 
-const sleep = (ms: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, ms));
-
-const computeDelay = (
-  attempt: number,
-  baseDelayMs: number,
-  maxDelayMs: number
-): number => {
-  const exponential = baseDelayMs * 2 ** attempt;
-  const jitter = Math.random() * 100;
-  return Math.min(exponential + jitter, maxDelayMs);
-};
-
 export const isRetryableStatus = (status: number): boolean =>
   RETRYABLE_STATUS_CODES.has(status);
+
+class RetryableResponseError<T> extends Error {
+  constructor(readonly result: T) {
+    super("Retryable status code");
+  }
+}
 
 export const withRetry = async <T extends { response: Response }>(
   fn: () => Promise<T>,
@@ -37,36 +32,30 @@ export const withRetry = async <T extends { response: Response }>(
     ...options
   };
 
-  let lastError: Error | undefined;
-  let lastResult: T | undefined;
+  try {
+    return await pRetry(
+      async () => {
+        const result = await fn();
 
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      const result = await fn();
+        if (isRetryableStatus(result.response.status)) {
+          throw new RetryableResponseError(result);
+        }
 
-      if (!isRetryableStatus(result.response.status)) {
         return result;
+      },
+      {
+        factor: 2,
+        maxRetryTime: Number.POSITIVE_INFINITY,
+        minTimeout: baseDelayMs,
+        maxTimeout: maxDelayMs,
+        randomize: true,
+        retries: maxRetries
       }
-
-      lastResult = result;
-
-      if (attempt < maxRetries) {
-        const delay = computeDelay(attempt, baseDelayMs, maxDelayMs);
-        await sleep(delay);
-      }
-    } catch (err) {
-      lastError = err instanceof Error ? err : new Error(String(err));
-
-      if (attempt < maxRetries) {
-        const delay = computeDelay(attempt, baseDelayMs, maxDelayMs);
-        await sleep(delay);
-      }
+    );
+  } catch (err) {
+    if (err instanceof RetryableResponseError) {
+      return err.result as T;
     }
+    throw err;
   }
-
-  if (lastResult) {
-    return lastResult;
-  }
-
-  throw lastError ?? new Error("All retry attempts failed");
 };

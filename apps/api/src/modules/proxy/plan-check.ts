@@ -1,13 +1,11 @@
+import { formatDate } from "date-fns";
 import type { Database } from "@raven/db";
 import { PLAN_FEATURES, type Plan } from "@raven/types";
 import type { Redis } from "ioredis";
 import { PlanLimitError } from "@/lib/errors";
 import { getOrgPlan } from "./plan-gate";
 
-const getCurrentMonth = (): string => {
-  const now = new Date();
-  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
-};
+const getCurrentMonth = (): string => formatDate(new Date(), "yyyy-MM");
 
 export const checkPlanLimit = async (
   db: Database,
