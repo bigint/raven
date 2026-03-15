@@ -21,4 +21,3 @@ export const PROVIDER_FILTER_OPTIONS: { label: string; value: string }[] = [
   { label: "All Providers", value: "" },
   ...PROVIDER_OPTIONS
 ];
-
