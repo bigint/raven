@@ -44,9 +44,9 @@ const KeysPage = () => {
 
   const filteredKeys = useMemo(
     () =>
-      environment === "all"
-        ? keys
-        : keys.filter((k) => k.environment === environment),
+      keys
+        .filter((k) => !k.expiresAt || new Date(k.expiresAt) > new Date())
+        .filter((k) => environment === "all" || k.environment === environment),
     [keys, environment]
   );
 

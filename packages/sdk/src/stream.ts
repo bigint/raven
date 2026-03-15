@@ -12,7 +12,7 @@ const parseSSEChunk = (
 
   const choice = choices?.[0];
 
-  if (choice?.delta?.content) {
+  if (choice?.delta?.content && typeof choice.delta.content === "string") {
     return { textDelta: choice.delta.content, type: "text-delta" };
   }
 
