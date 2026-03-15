@@ -4,24 +4,13 @@ import { PROVIDER_LABELS } from "@raven/types";
 import { Spinner } from "@raven/ui";
 import { Cpu } from "lucide-react";
 import { ModelIcon } from "@/components/model-icon";
+import { formatTimeAgo } from "@/lib/format";
 import type { ModelRow } from "../hooks/use-models";
 
 interface ModelsTableProps {
   data: ModelRow[];
   loading: boolean;
 }
-
-const formatTimeAgo = (ts: string | null): string => {
-  if (!ts) return "\u2014";
-  const diff = Date.now() - new Date(ts).getTime();
-  const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  return `${days}d ago`;
-};
 
 export const ModelsTable = ({ data, loading }: ModelsTableProps) => {
   if (loading) {

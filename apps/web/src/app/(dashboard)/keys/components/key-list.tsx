@@ -4,16 +4,8 @@ import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable, EmptyState } from "@raven/ui";
 import { Check, Key, Pencil, Plus, Trash2, X } from "lucide-react";
 import { TextMorph } from "torph/react";
+import { formatDate } from "@/lib/format";
 import type { VirtualKey } from "../hooks/use-keys";
-
-const formatDate = (dateStr: string | null): string => {
-  if (!dateStr) return "\u2014";
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    day: "numeric",
-    month: "short",
-    year: "numeric"
-  });
-};
 
 interface KeyListProps {
   keys: VirtualKey[];

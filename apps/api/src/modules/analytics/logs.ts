@@ -2,6 +2,7 @@ import type { Database } from "@raven/db";
 import { requestLogs, virtualKeys } from "@raven/db";
 import { and, count, eq, isNotNull, max, min, sql, sum } from "drizzle-orm";
 import type { z } from "zod";
+import { buildPaginationMeta, getOffset } from "@/lib/pagination";
 import type { AppContextWithQuery } from "@/lib/types";
 
 import { parseDateRange } from "./helpers";
@@ -15,7 +16,7 @@ export const getLogs =
     const query = c.req.valid("query");
 
     const { limit, page } = query;
-    const offset = (page - 1) * limit;
+    const offset = getOffset(page, limit);
 
     const dateConditions = parseDateRange(query.from, query.to);
 
@@ -99,11 +100,6 @@ export const getLogs =
         userAgent: row.userAgent ?? null,
         virtualKeyId: row.virtualKeyId
       })),
-      pagination: {
-        limit,
-        page,
-        total: Number(total),
-        totalPages: Math.ceil(Number(total) / limit)
-      }
+      pagination: buildPaginationMeta({ page, limit }, Number(total))
     });
   };

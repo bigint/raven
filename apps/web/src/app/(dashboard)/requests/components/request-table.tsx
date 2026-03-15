@@ -4,6 +4,7 @@ import type { Column } from "@raven/ui";
 import { Badge, DataTable } from "@raven/ui";
 import { Activity } from "lucide-react";
 import { ModelIcon } from "@/components/model-icon";
+import { formatDateTime } from "@/lib/format";
 import type { RequestLog } from "../hooks/use-requests";
 import { PROVIDER_LABELS } from "../hooks/use-requests";
 
@@ -27,25 +28,12 @@ const getStatusBadge = (statusCode: number) => {
   return <Badge variant={variant}>{statusCode}</Badge>;
 };
 
-const formatTime = (ts: string): string => {
-  if (!ts) return "\u2014";
-  const d = new Date(ts);
-  if (Number.isNaN(d.getTime())) return "\u2014";
-  return d.toLocaleString(undefined, {
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    month: "short",
-    second: "2-digit"
-  });
-};
-
 const columns: Column<RequestLog>[] = [
   {
     className: "text-xs text-muted-foreground whitespace-nowrap",
     header: "Time",
     key: "time",
-    render: (req) => formatTime(req.createdAt)
+    render: (req) => formatDateTime(req.createdAt)
   },
   {
     className: "font-medium",

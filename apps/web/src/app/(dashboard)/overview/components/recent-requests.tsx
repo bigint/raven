@@ -5,18 +5,8 @@ import { EmptyState } from "@raven/ui";
 import { Activity, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { ModelIcon } from "@/components/model-icon";
+import { formatTimeAgo } from "@/lib/format";
 import type { RecentRequest } from "../hooks/use-overview";
-
-const timeAgo = (dateStr: string): string => {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  return `${days}d ago`;
-};
 
 const getStatusColor = (statusCode: number): string => {
   if (statusCode >= 200 && statusCode < 300) return "bg-green-500";
@@ -94,7 +84,7 @@ export const RecentRequests = ({ requests, loading }: RecentRequestsProps) => (
                 </div>
               </div>
               <span className="text-xs text-muted-foreground">
-                {timeAgo(req.createdAt)}
+                {formatTimeAgo(req.createdAt)}
               </span>
             </div>
           ))}

@@ -1,30 +1,24 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useInView } from "react-intersection-observer";
 
 export const useInfiniteScroll = (
   callback: () => void,
   enabled: boolean
 ) => {
-  const sentinelRef = useRef<HTMLDivElement>(null);
   const callbackRef = useRef(callback);
   callbackRef.current = callback;
 
+  const { ref, inView } = useInView({
+    rootMargin: "200px"
+  });
+
   useEffect(() => {
-    if (!enabled) return;
-    const el = sentinelRef.current;
-    if (!el) return;
+    if (inView && enabled) {
+      callbackRef.current();
+    }
+  }, [inView, enabled]);
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) callbackRef.current();
-      },
-      { rootMargin: "200px" }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [enabled]);
-
-  return sentinelRef;
+  return ref;
 };

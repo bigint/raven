@@ -1,13 +1,16 @@
 import type { Database } from "@raven/db";
 import { routingRules } from "@raven/db";
 import { and, asc, eq } from "drizzle-orm";
+import { encodingForModel } from "js-tiktoken";
 
 interface Message {
   content?: string;
   role?: string;
 }
 
-const estimateTokens = (text: string): number => Math.ceil(text.length / 4);
+const encoder = encodingForModel("gpt-4o");
+
+const estimateTokens = (text: string): number => encoder.encode(text).length;
 
 const extractMessagesText = (body: Record<string, unknown>): string => {
   const messages = body.messages;

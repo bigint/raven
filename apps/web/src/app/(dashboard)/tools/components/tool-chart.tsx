@@ -9,16 +9,12 @@ import {
   XAxis,
   YAxis
 } from "recharts";
+import { formatShortDate } from "@/lib/format";
 import type { ToolDailyStats } from "../hooks/use-tools";
 
 interface ToolChartProps {
   data: ToolDailyStats[];
 }
-
-const formatDate = (date: string): string => {
-  const d = new Date(date);
-  return d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
-};
 
 export const ToolChart = ({ data }: ToolChartProps) => {
   return (
@@ -35,7 +31,7 @@ export const ToolChart = ({ data }: ToolChartProps) => {
             dataKey="date"
             fontSize={12}
             tick={{ fill: "var(--color-muted-foreground)" }}
-            tickFormatter={formatDate}
+            tickFormatter={formatShortDate}
             tickLine={false}
           />
           <YAxis
@@ -52,7 +48,7 @@ export const ToolChart = ({ data }: ToolChartProps) => {
               borderRadius: "8px",
               fontSize: "12px"
             }}
-            labelFormatter={(label) => formatDate(String(label))}
+            labelFormatter={(label) => formatShortDate(String(label))}
           />
           <Bar
             dataKey="totalToolUses"
