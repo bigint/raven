@@ -2,6 +2,7 @@ import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
+import { NotFoundError } from "@/lib/errors";
 
 export type RoutingStrategy =
   | "random"
@@ -33,7 +34,7 @@ export const resolveWithStrategy = async (
     .limit(50);
 
   if (configs.length === 0) {
-    throw new Error(`No enabled configs for provider '${providerName}'`);
+    throw new NotFoundError(`No enabled configs for provider '${providerName}'`);
   }
 
   const first = configs[0] as { id: string };

@@ -2,10 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-export const useInfiniteScroll = (
-  callback: () => void,
-  enabled: boolean
-) => {
+export const useInfiniteScroll = (callback: () => void, enabled: boolean) => {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const callbackRef = useRef(callback);
   callbackRef.current = callback;

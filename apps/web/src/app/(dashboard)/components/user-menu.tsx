@@ -9,7 +9,8 @@ import {
   Sun
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { useClickOutside } from "@/hooks/use-click-outside";
 import { signOut } from "@/lib/auth-client";
 import { useThemeStore } from "@/stores/theme";
 
@@ -22,25 +23,7 @@ export const UserMenu = ({ user }: UserMenuProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const { theme, toggleTheme } = useThemeStore();
 
-  useEffect(() => {
-    if (!open) return;
-
-    const handleClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleEscape);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, [open]);
+  useClickOutside(ref, open, () => setOpen(false));
 
   const handleSignOut = async () => {
     await signOut();

@@ -61,9 +61,7 @@ interface RequestsQueryParams {
 
 export const buildRequestsUrl = (params: RequestsQueryParams): string => {
   const now = new Date();
-  const from = new Date(
-    now.getTime() - RANGE_MS[params.range]
-  ).toISOString();
+  const from = new Date(now.getTime() - RANGE_MS[params.range]).toISOString();
   const searchParams = new URLSearchParams({
     from,
     limit: String(PAGE_SIZE),

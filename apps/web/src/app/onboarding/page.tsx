@@ -1,6 +1,5 @@
 "use client";
 
-import { PROVIDER_OPTIONS } from "@raven/types";
 import { Button, Input, Select } from "@raven/ui";
 import {
   ArrowRight,
@@ -24,6 +23,7 @@ const STEPS = [
 
 const OnboardingPage = () => {
   const {
+    availableProviders,
     copied,
     error,
     generatedKey,
@@ -209,7 +209,10 @@ const OnboardingPage = () => {
                 <Select
                   id="provider-select"
                   onChange={setProvider}
-                  options={PROVIDER_OPTIONS}
+                  options={(availableProviders ?? []).map((p) => ({
+                    label: p.name,
+                    value: p.slug
+                  }))}
                   value={provider}
                 />
               </div>
@@ -218,7 +221,7 @@ const OnboardingPage = () => {
                 id="provider-name"
                 label="Name"
                 onChange={(e) => setProviderName(e.target.value)}
-                placeholder={`e.g. Production ${PROVIDER_OPTIONS.find((p) => p.value === provider)?.label ?? ""}`}
+                placeholder={`e.g. Production ${availableProviders?.find((p) => p.slug === provider)?.name ?? ""}`}
                 value={providerName}
               />
               <div>

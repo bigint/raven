@@ -25,6 +25,67 @@ import {
 } from "./token-usage";
 import { forwardRequest } from "./upstream";
 
+/**
+ * Strip base64 image data from the request body to keep log storage small.
+ * Replaces base64 strings with a placeholder while preserving the structure.
+ */
+const hasBase64Images = (body: Record<string, unknown>): boolean => {
+  const messages = body.messages;
+  if (!Array.isArray(messages)) return false;
+
+  for (const msg of messages) {
+    const m = msg as Record<string, unknown>;
+    if (!Array.isArray(m.content)) continue;
+    for (const block of m.content) {
+      const b = block as Record<string, unknown>;
+      if (b.type === "image_url") {
+        const img = b.image_url as Record<string, unknown> | undefined;
+        if (img && typeof img.url === "string" && img.url.startsWith("data:")) {
+          return true;
+        }
+      }
+      if (b.type === "image") {
+        const src = b.source as Record<string, unknown> | undefined;
+        if (src && src.type === "base64") {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+};
+
+const sanitizeForLog = (
+  body: Record<string, unknown>
+): Record<string, unknown> => {
+  if (!hasBase64Images(body)) return body;
+
+  const clone = structuredClone(body);
+  const messages = clone.messages as Record<string, unknown>[];
+
+  for (const msg of messages) {
+    if (!Array.isArray(msg.content)) continue;
+    for (const block of msg.content) {
+      const b = block as Record<string, unknown>;
+      // OpenAI: image_url with data URI
+      if (b.type === "image_url") {
+        const img = b.image_url as Record<string, unknown> | undefined;
+        if (img && typeof img.url === "string" && img.url.startsWith("data:")) {
+          img.url = "[base64 image stripped]";
+        }
+      }
+      // Anthropic: image with base64 source
+      if (b.type === "image") {
+        const src = b.source as Record<string, unknown> | undefined;
+        if (src && src.type === "base64") {
+          src.data = "[base64 image stripped]";
+        }
+      }
+    }
+  }
+  return clone;
+};
+
 export const proxyHandler = (
   db: Database,
   redis: Redis,
@@ -154,6 +215,7 @@ export const proxyHandler = (
         c.req.header("x-session-id")
       );
       const logData = {
+        cachedTokens: 0,
         cacheHit: true,
         cost: 0,
         guardrailMatches:
@@ -171,6 +233,7 @@ export const proxyHandler = (
         provider: providerName,
         providerConfigId,
         reasoningTokens: 0,
+        requestBody: sanitizeForLog(requestBody),
         sessionId: cacheAnalysis.sessionId,
         statusCode: 200,
         toolCount: cacheAnalysis.toolCount,
@@ -178,10 +241,10 @@ export const proxyHandler = (
         virtualKeyId: virtualKey.id
       };
 
-      const { inputTokens, outputTokens, reasoningTokens } = extractTokenUsage(
-        cacheResult.parsed
-      );
+      const { inputTokens, outputTokens, reasoningTokens, cachedTokens } =
+        extractTokenUsage(cacheResult.parsed);
       const model = extractModel(cacheResult.parsed, requestedModel);
+      logData.cachedTokens = cachedTokens;
       logData.inputTokens = inputTokens;
       logData.outputTokens = outputTokens;
       logData.reasoningTokens = reasoningTokens;
@@ -204,6 +267,33 @@ export const proxyHandler = (
       });
     }
 
+    // 8b. Normalize request from OpenAI format to provider-native format
+    if (
+      adapter.normalizeRequest &&
+      parsedBody &&
+      Object.keys(parsedBody).length > 0
+    ) {
+      parsedBody = adapter.normalizeRequest(parsedBody);
+      finalBodyText = JSON.stringify(parsedBody);
+    }
+
+    // 8c. Apply provider-specific optimizations (e.g. cache control)
+    if (
+      adapter.transformBody &&
+      parsedBody &&
+      Object.keys(parsedBody).length > 0
+    ) {
+      const transformed = adapter.transformBody(parsedBody);
+      finalBodyText = JSON.stringify(transformed);
+    }
+
+    // 8d. Override upstream path to provider's chat endpoint when applicable
+    const resolvedUpstreamPath =
+      upstreamPath === "/chat/completions" &&
+      adapter.chatEndpoint !== "/chat/completions"
+        ? adapter.chatEndpoint
+        : upstreamPath;
+
     // 9. Forward request with retry logic
     const forwardInput = {
       adapter,
@@ -212,7 +302,7 @@ export const proxyHandler = (
       incomingHeaders: c.req.header(),
       method,
       rawUrl: c.req.url,
-      upstreamPath
+      upstreamPath: resolvedUpstreamPath
     };
 
     let upstreamResult = await withRetry(() => forwardRequest(forwardInput));
@@ -256,6 +346,7 @@ export const proxyHandler = (
 
     // 12. Prepare log data
     const logData = {
+      cachedTokens: 0,
       cacheHit: false,
       cost: 0,
       guardrailMatches:
@@ -273,6 +364,7 @@ export const proxyHandler = (
       provider: finalProviderName,
       providerConfigId: finalProviderConfigId,
       reasoningTokens: 0,
+      requestBody: sanitizeForLog(requestBody),
       sessionId: contentAnalysis.sessionId,
       statusCode: upstreamResult.response.status,
       toolCount: contentAnalysis.toolCount,
@@ -295,14 +387,27 @@ export const proxyHandler = (
 
       // Defer all post-processing — none of it affects the response
       void (() => {
-        const { inputTokens, outputTokens, reasoningTokens } =
-          extractTokenUsage(responseBody);
+        const {
+          inputTokens,
+          outputTokens,
+          reasoningTokens,
+          cachedTokens,
+          cacheReadTokens,
+          cacheWriteTokens
+        } = extractTokenUsage(responseBody);
         const model = extractModel(responseBody, requestedModel);
+        logData.cachedTokens = cachedTokens;
         logData.inputTokens = inputTokens;
         logData.outputTokens = outputTokens;
         logData.reasoningTokens = reasoningTokens;
         logData.model = model;
-        logData.cost = adapter.estimateCost(model, inputTokens, outputTokens);
+        logData.cost = adapter.estimateCost(
+          model,
+          inputTokens,
+          outputTokens,
+          cacheReadTokens,
+          cacheWriteTokens
+        );
 
         const responseAnalysis = analyzeResponse(responseBody);
         if (responseAnalysis.hasToolCalls) {
@@ -349,17 +454,30 @@ export const proxyHandler = (
         }
 
         // Fire-and-forget: log accumulated token usage
-        const { inputTokens, outputTokens, reasoningTokens } =
-          accumulator.getUsage();
+        const {
+          inputTokens,
+          outputTokens,
+          reasoningTokens,
+          cachedTokens,
+          cacheReadTokens,
+          cacheWriteTokens
+        } = accumulator.getUsage();
         const model =
           accumulator.getModel() === "unknown"
             ? upstreamResult.requestedModel
             : accumulator.getModel();
+        logData.cachedTokens = cachedTokens;
         logData.inputTokens = inputTokens;
         logData.outputTokens = outputTokens;
         logData.reasoningTokens = reasoningTokens;
         logData.model = model;
-        logData.cost = adapter.estimateCost(model, inputTokens, outputTokens);
+        logData.cost = adapter.estimateCost(
+          model,
+          inputTokens,
+          outputTokens,
+          cacheReadTokens,
+          cacheWriteTokens
+        );
 
         logAndPublish(db, logData, { redis, teamId: virtualKey.teamId });
         updateLastUsed(redis, virtualKey.id);
@@ -372,20 +490,33 @@ export const proxyHandler = (
         );
       },
       transform(chunk, controller) {
-        controller.enqueue(chunk);
-
-        // Decode the chunk and process SSE lines
         const text = new TextDecoder().decode(chunk);
         const combined = partialLine + text;
         const lines = combined.split("\n");
 
-        // Last element may be incomplete; keep it for next chunk
         partialLine = lines.pop() ?? "";
 
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (trimmed) {
-            accumulator.processChunk(trimmed);
+        if (adapter.normalizeStreamChunk) {
+          const encoder = new TextEncoder();
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (trimmed) {
+              accumulator.processChunk(trimmed);
+              const normalized = adapter.normalizeStreamChunk(trimmed);
+              if (normalized) {
+                controller.enqueue(encoder.encode(`${normalized}\n\n`));
+              }
+            } else {
+              controller.enqueue(encoder.encode("\n"));
+            }
+          }
+        } else {
+          controller.enqueue(chunk);
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (trimmed) {
+              accumulator.processChunk(trimmed);
+            }
           }
         }
       }

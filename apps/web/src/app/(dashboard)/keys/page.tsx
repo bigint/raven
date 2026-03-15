@@ -1,8 +1,23 @@
 "use client";
 
-import { Button, ConfirmDialog, PageHeader, Spinner } from "@raven/ui";
+import {
+  Button,
+  ConfirmDialog,
+  PageHeader,
+  PillTabs,
+  Spinner
+} from "@raven/ui";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+
+type Environment = "all" | "live" | "test";
+
+const TAB_OPTIONS = [
+  { label: "All", value: "all" as Environment },
+  { label: "Live", value: "live" as Environment },
+  { label: "Test", value: "test" as Environment }
+];
+
 import { KeyForm } from "./components/key-form";
 import { KeyList } from "./components/key-list";
 import { KeyReveal } from "./components/key-reveal";
@@ -25,6 +40,15 @@ const KeysPage = () => {
 
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [editingKey, setEditingKey] = useState<VirtualKey | null>(null);
+  const [environment, setEnvironment] = useState<Environment>("all");
+
+  const filteredKeys = useMemo(
+    () =>
+      keys
+        .filter((k) => !k.expiresAt || new Date(k.expiresAt) > new Date())
+        .filter((k) => environment === "all" || k.environment === environment),
+    [keys, environment]
+  );
 
   const openCreate = () => {
     setEditingKey(null);
@@ -54,11 +78,19 @@ const KeysPage = () => {
         </div>
       )}
 
+      <div className="mb-4">
+        <PillTabs
+          onChange={setEnvironment}
+          options={TAB_OPTIONS}
+          value={environment}
+        />
+      </div>
+
       {keysQuery.isLoading ? (
         <Spinner />
       ) : (
         <KeyList
-          keys={keys}
+          keys={filteredKeys}
           onCreate={openCreate}
           onDelete={setDeleteId}
           onEdit={openEdit}

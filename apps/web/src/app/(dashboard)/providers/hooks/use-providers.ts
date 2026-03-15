@@ -1,12 +1,24 @@
-import { PROVIDER_LABELS, PROVIDER_OPTIONS } from "@raven/types";
 import {
   queryOptions,
   useMutation,
+  useQuery,
   useQueryClient
 } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
-export { PROVIDER_LABELS, PROVIDER_OPTIONS };
+export interface AvailableProvider {
+  slug: string;
+  name: string;
+}
+
+export const availableProvidersQueryOptions = () =>
+  queryOptions({
+    queryFn: () => api.get<AvailableProvider[]>("/v1/providers/available"),
+    queryKey: ["providers", "available"]
+  });
+
+export const useAvailableProviders = () =>
+  useQuery(availableProvidersQueryOptions());
 
 export interface Provider {
   id: string;

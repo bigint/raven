@@ -4,7 +4,12 @@ import { providerConfigs } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
 import { decrypt } from "@/lib/crypto";
-import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
+import {
+  ForbiddenError,
+  NotFoundError,
+  UnauthorizedError,
+  ValidationError
+} from "@/lib/errors";
 import { getProviderAdapter, type ProviderAdapter } from "./providers/registry";
 import { type RoutingStrategy, resolveWithStrategy } from "./router";
 
@@ -114,7 +119,7 @@ export const resolveProvider = async (
   try {
     decryptedApiKey = decrypt(resolvedConfig.apiKey, env.ENCRYPTION_SECRET);
   } catch {
-    throw new Error("Failed to decrypt provider credentials");
+    throw new UnauthorizedError("Failed to decrypt provider credentials");
   }
 
   const upstreamPath = `/${pathSegments.slice(1).join("/")}`;

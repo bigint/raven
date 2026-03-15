@@ -1,12 +1,12 @@
 "use client";
 
+import { PROVIDER_LABELS } from "@raven/types";
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
 import { Check, Pencil, Plug, Plus, Trash2, X } from "lucide-react";
 import { TextMorph } from "torph/react";
 import { ProviderIcon } from "@/components/model-icon";
 import type { Provider } from "../hooks/use-providers";
-import { PROVIDER_LABELS } from "../hooks/use-providers";
 
 interface ProviderListProps {
   providers: Provider[];

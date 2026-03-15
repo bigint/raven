@@ -53,7 +53,7 @@ export const addSyncedProvider = (db: Database) => async (c: Context) => {
 };
 
 export const updateSyncedProvider = (db: Database) => async (c: Context) => {
-  const slug = c.req.param("slug")!;
+  const slug = c.req.param("slug") as string;
   const body = await c.req.json<{ isEnabled?: boolean; name?: string }>();
 
   const updates: Record<string, unknown> = { updatedAt: new Date() };
@@ -77,7 +77,7 @@ export const updateSyncedProvider = (db: Database) => async (c: Context) => {
 };
 
 export const deleteSyncedProvider = (db: Database) => async (c: Context) => {
-  const slug = c.req.param("slug")!;
+  const slug = c.req.param("slug") as string;
 
   const [deleted] = await db
     .delete(syncedProviders)

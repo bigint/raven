@@ -2,13 +2,12 @@
 
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { type FormEvent, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { TextMorph } from "torph/react";
 import { ProviderIcon } from "@/components/model-icon";
 import type { Provider } from "../hooks/use-providers";
 import {
-  PROVIDER_LABELS,
-  PROVIDER_OPTIONS,
+  useAvailableProviders,
   useCreateProvider,
   useUpdateProvider
 } from "../hooks/use-providers";
@@ -19,13 +18,6 @@ interface FormState {
   apiKey: string;
   isEnabled: boolean;
 }
-
-const DEFAULT_FORM: FormState = {
-  apiKey: "",
-  isEnabled: true,
-  name: "",
-  provider: "openai"
-};
 
 interface ProviderFormProps {
   open: boolean;
@@ -39,6 +31,9 @@ const ProviderForm = ({
   editingProvider
 }: ProviderFormProps) => {
   const isEdit = !!editingProvider;
+  const { data: availableProviders } = useAvailableProviders();
+  const defaultProvider = availableProviders?.[0]?.slug ?? "";
+
   const [form, setForm] = useState<FormState>(() =>
     editingProvider
       ? {
@@ -47,18 +42,26 @@ const ProviderForm = ({
           name: editingProvider.name ?? "",
           provider: editingProvider.provider
         }
-      : DEFAULT_FORM
+      : { apiKey: "", isEnabled: true, name: "", provider: "" }
   );
+  // Set default provider once available providers load
+  useEffect(() => {
+    if (!isEdit && !form.provider && defaultProvider) {
+      setForm((f) => ({ ...f, provider: defaultProvider }));
+    }
+  }, [defaultProvider, isEdit, form.provider]);
+
   const [showApiKey, setShowApiKey] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   const providerOptionsWithIcons = useMemo(
     () =>
-      PROVIDER_OPTIONS.map((opt) => ({
-        ...opt,
-        icon: <ProviderIcon provider={opt.value} size={16} />
+      (availableProviders ?? []).map((p) => ({
+        icon: <ProviderIcon provider={p.slug} size={16} />,
+        label: p.name,
+        value: p.slug
       })),
-    []
+    [availableProviders]
   );
 
   const createMutation = useCreateProvider();
@@ -68,7 +71,12 @@ const ProviderForm = ({
     setForm((f) => ({ ...f, [field]: value }));
 
   const handleClose = () => {
-    setForm(DEFAULT_FORM);
+    setForm({
+      apiKey: "",
+      isEnabled: true,
+      name: "",
+      provider: defaultProvider
+    });
     setShowApiKey(false);
     setFormError(null);
     onClose();
@@ -136,7 +144,7 @@ const ProviderForm = ({
           id="provider-name"
           label="Name"
           onChange={(e) => update("name", e.target.value)}
-          placeholder={`e.g. Production ${PROVIDER_LABELS[form.provider] ?? form.provider}`}
+          placeholder={`e.g. Production ${availableProviders?.find((p) => p.slug === form.provider)?.name ?? form.provider}`}
           value={form.name}
         />
 

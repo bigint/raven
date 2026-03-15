@@ -22,7 +22,7 @@ export const getOrgPlan = async (
   };
 
   if (redis) {
-    return cachedQuery(redis, cacheKeys.orgPlan(orgId), 300, queryFn);
+    return cachedQuery(redis, cacheKeys.orgPlan(orgId), 3600, queryFn);
   }
   return queryFn();
 };

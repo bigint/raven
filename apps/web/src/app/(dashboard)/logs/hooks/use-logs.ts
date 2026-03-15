@@ -40,6 +40,7 @@ export interface SessionRequest {
   sessionId: string | null;
   userAgent: string | null;
   virtualKeyId: string;
+  requestBody: Record<string, unknown> | null;
 }
 
 interface LogsResponse {

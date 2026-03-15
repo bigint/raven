@@ -3,62 +3,58 @@ import { models, syncedProviders } from "@raven/db";
 import { eq, inArray } from "drizzle-orm";
 import { refreshPricingCache } from "./pricing-cache";
 
-interface OpenRouterModel {
+interface ModelsDevModel {
   id: string;
   name: string;
-  description: string;
-  context_length: number;
-  architecture: {
-    modality: string;
-    input_modalities: string[];
-    output_modalities: string[];
-    tokenizer: string;
-    instruct_type: string | null;
+  family?: string;
+  attachment?: boolean;
+  reasoning?: boolean;
+  tool_call?: boolean;
+  temperature?: boolean;
+  structured_output?: boolean;
+  knowledge?: string;
+  release_date?: string;
+  modalities?: {
+    input?: string[];
+    output?: string[];
   };
-  pricing: {
-    prompt: string;
-    completion: string;
+  open_weights?: boolean;
+  cost?: {
+    input?: number;
+    output?: number;
+    cache_read?: number;
+    cache_write?: number;
   };
-  top_provider: {
-    context_length: number;
-    max_completion_tokens: number;
-    is_moderated: boolean;
+  limit?: {
+    context?: number;
+    output?: number;
+    input?: number;
   };
 }
 
-interface OpenRouterResponse {
-  data: OpenRouterModel[];
+interface ModelsDevProvider {
+  id: string;
+  name: string;
+  models: Record<string, ModelsDevModel>;
 }
 
-const OPENROUTER_API = "https://openrouter.ai/api/v1/models";
+type ModelsDevResponse = Record<string, ModelsDevProvider>;
 
-const deriveCategory = (
-  slug: string,
-  name: string,
-  modality: string,
-  inputPrice: number
-): string => {
-  // Embedding models
-  if (
-    modality.includes("embedding") ||
-    slug.includes("embedding") ||
-    slug.includes("embed")
-  ) {
-    return "embedding";
-  }
+const MODELS_DEV_API = "https://models.dev/api.json";
 
-  // Reasoning models (o1, o3, o4 series)
-  if (
-    /^o[134]/.test(slug) ||
-    slug.startsWith("o1") ||
-    slug.startsWith("o3") ||
-    slug.startsWith("o4")
-  ) {
-    return "reasoning";
-  }
+const PROVIDER_SLUG_MAP: Record<string, string> = {
+  anthropic: "anthropic",
+  mistral: "mistralai",
+  openai: "openai",
+  xai: "x-ai"
+};
 
-  // Fast/cheap models
-  const lowerName = name.toLowerCase();
+const deriveCategory = (model: ModelsDevModel, inputPrice: number): string => {
+  const slug = model.id.toLowerCase();
+
+  if (model.reasoning) return "reasoning";
+
+  const lowerName = model.name.toLowerCase();
   if (
     slug.includes("mini") ||
     slug.includes("nano") ||
@@ -70,7 +66,6 @@ const deriveCategory = (
     return "fast";
   }
 
-  // Flagship models (expensive or "pro"/"opus" in name)
   if (slug.includes("opus") || slug.includes("pro") || inputPrice >= 5) {
     return "flagship";
   }
@@ -78,53 +73,23 @@ const deriveCategory = (
   return "balanced";
 };
 
-const deriveCapabilities = (model: OpenRouterModel, slug: string): string[] => {
-  const caps: string[] = [];
-  const modality = model.architecture?.modality ?? "";
-  const inputMods = model.architecture?.input_modalities ?? [];
+const deriveCapabilities = (model: ModelsDevModel): string[] => {
+  const caps: string[] = ["chat"];
 
-  if (modality.includes("embedding") || slug.includes("embedding")) {
-    caps.push("embedding");
-    return caps;
-  }
-
-  caps.push("chat");
-
-  if (inputMods.includes("image") || modality.includes("image")) {
+  const inputMods = model.modalities?.input ?? [];
+  if (inputMods.includes("image") || inputMods.includes("video")) {
     caps.push("vision");
   }
-
-  // Most modern models support function calling
-  caps.push("function_calling");
-
-  // Most models support streaming (except some pro reasoning models)
-  if (!slug.includes("o1-pro") && !slug.includes("o3-pro")) {
-    caps.push("streaming");
-  }
-
-  // Reasoning models
-  if (
-    /^o[134]/.test(slug) ||
-    slug.startsWith("o1") ||
-    slug.startsWith("o3") ||
-    slug.startsWith("o4")
-  ) {
-    caps.push("reasoning");
-  }
+  if (model.tool_call) caps.push("function_calling");
+  if (model.reasoning) caps.push("reasoning");
+  caps.push("streaming");
 
   return caps;
 };
 
-const cleanModelName = (name: string): string => {
-  // OpenRouter names are like "OpenAI: GPT-5.4" or "Anthropic: Claude Opus 4.6"
-  const colonIndex = name.indexOf(": ");
-  return colonIndex === -1 ? name : name.slice(colonIndex + 2);
-};
-
 export const syncModels = async (
   db: Database
-): Promise<{ synced: number; removed: number }> => {
-  // 1. Get enabled providers
+): Promise<{ removed: number; synced: number }> => {
   const enabledProviders = await db
     .select()
     .from(syncedProviders)
@@ -136,85 +101,75 @@ export const syncModels = async (
 
   const enabledSlugs = new Set(enabledProviders.map((p) => p.slug));
 
-  // 2. Fetch from OpenRouter
-  const res = await fetch(OPENROUTER_API);
+  const res = await fetch(MODELS_DEV_API);
   if (!res.ok) {
-    throw new Error(`OpenRouter API error: ${res.status} ${res.statusText}`);
+    throw new Error(`models.dev API error: ${res.status} ${res.statusText}`);
   }
 
-  const { data: allModels } = (await res.json()) as OpenRouterResponse;
+  const allProviders = (await res.json()) as ModelsDevResponse;
 
-  // 3. Filter to enabled providers
-  const filtered = allModels.filter((m) => {
-    const provider = m.id.split("/")[0];
-    return provider && enabledSlugs.has(provider);
-  });
-
-  // 4. Map and upsert
   const now = new Date();
   let synced = 0;
+  const allIds: string[] = [];
 
-  for (const m of filtered) {
-    const provider = m.id.split("/")[0] ?? "";
-    const slug = m.id.split("/").slice(1).join("/");
-    const inputPrice = parseFloat(m.pricing?.prompt ?? "0") * 1_000_000;
-    const outputPrice = parseFloat(m.pricing?.completion ?? "0") * 1_000_000;
-    const name = cleanModelName(m.name);
-    const category = deriveCategory(
-      slug,
-      name,
-      m.architecture?.modality ?? "",
-      inputPrice
-    );
-    const capabilities = deriveCapabilities(m, slug);
-    const contextWindow =
-      m.top_provider?.context_length ?? m.context_length ?? 0;
-    const maxOutput = m.top_provider?.max_completion_tokens ?? 0;
+  for (const [devSlug, providerData] of Object.entries(allProviders)) {
+    const ourSlug = PROVIDER_SLUG_MAP[devSlug];
+    if (!ourSlug || !enabledSlugs.has(ourSlug)) continue;
 
-    await db
-      .insert(models)
-      .values({
-        capabilities,
-        category,
-        contextWindow,
-        createdAt: now,
-        description: m.description ?? "",
-        id: m.id,
-        inputPrice: inputPrice.toFixed(4),
-        maxOutput,
-        name,
-        outputPrice: outputPrice.toFixed(4),
-        provider,
-        slug,
-        updatedAt: now
-      })
-      .onConflictDoUpdate({
-        set: {
+    for (const model of Object.values(providerData.models ?? {})) {
+      const inputPrice = model.cost?.input ?? 0;
+      const outputPrice = model.cost?.output ?? 0;
+      const id = `${ourSlug}/${model.id}`;
+      const category = deriveCategory(model, inputPrice);
+      const capabilities = deriveCapabilities(model);
+
+      allIds.push(id);
+
+      await db
+        .insert(models)
+        .values({
           capabilities,
           category,
-          contextWindow,
-          description: m.description ?? "",
+          contextWindow: model.limit?.context ?? 0,
+          createdAt: now,
+          description: "",
+          id,
           inputPrice: inputPrice.toFixed(4),
-          maxOutput,
-          name,
+          maxOutput: model.limit?.output ?? 0,
+          name: model.name,
           outputPrice: outputPrice.toFixed(4),
-          provider,
-          slug,
+          provider: ourSlug,
+          slug: model.id,
           updatedAt: now
-        },
-        target: models.id
-      });
+        })
+        .onConflictDoUpdate({
+          set: {
+            capabilities,
+            category,
+            contextWindow: model.limit?.context ?? 0,
+            inputPrice: inputPrice.toFixed(4),
+            maxOutput: model.limit?.output ?? 0,
+            name: model.name,
+            outputPrice: outputPrice.toFixed(4),
+            provider: ourSlug,
+            slug: model.id,
+            updatedAt: now
+          },
+          target: models.id
+        });
 
-    synced++;
+      synced++;
+    }
   }
 
-  // 5. Remove stale models for enabled providers
-  const currentIds = new Set(filtered.map((m) => m.id));
+  // Remove stale models
+  const providerSlugs = [...enabledSlugs];
   const existingModels = await db
     .select({ id: models.id })
     .from(models)
-    .where(inArray(models.provider, [...enabledSlugs]));
+    .where(inArray(models.provider, providerSlugs));
 
+  const currentIds = new Set(allIds);
   const staleIds = existingModels
     .filter((m) => !currentIds.has(m.id))
     .map((m) => m.id);
@@ -225,7 +180,7 @@ export const syncModels = async (
     removed = staleIds.length;
   }
 
-  // 6. Update last_synced_at
+  // Update last_synced_at
   for (const slug of enabledSlugs) {
     await db
       .update(syncedProviders)
@@ -233,7 +188,6 @@ export const syncModels = async (
       .where(eq(syncedProviders.slug, slug));
   }
 
-  // 7. Refresh pricing cache
   await refreshPricingCache(db);
 
   console.log(`Model sync complete: ${synced} synced, ${removed} removed`);
@@ -241,15 +195,12 @@ export const syncModels = async (
 };
 
 const DEFAULT_PROVIDERS = [
-  { isEnabled: true, name: "OpenAI", slug: "openai" },
   { isEnabled: true, name: "Anthropic", slug: "anthropic" },
   { isEnabled: true, name: "Mistral AI", slug: "mistralai" },
+  { isEnabled: true, name: "OpenAI", slug: "openai" },
   { isEnabled: true, name: "xAI", slug: "x-ai" }
 ];
 
-/**
- * Seed default providers, inserting any that are missing.
- */
 export const seedDefaultProviders = async (db: Database): Promise<void> => {
   const existing = await db.select().from(syncedProviders);
   const existingSlugs = new Set(existing.map((p) => p.slug));

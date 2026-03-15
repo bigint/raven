@@ -89,7 +89,7 @@ const steps = [
   }
 ];
 
-export default function DocsPage() {
+const DocsPage = () => {
   return (
     <div className="px-8 py-24">
       <div className="max-w-2xl mx-auto">
@@ -149,4 +149,6 @@ export default function DocsPage() {
       </div>
     </div>
   );
-}
+};
+
+export default DocsPage;

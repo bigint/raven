@@ -4,14 +4,14 @@ import { Button, PageHeader, Spinner } from "@raven/ui";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Radio } from "lucide-react";
 import { useState } from "react";
-import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
 import { api } from "@/lib/api";
+import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
 import { RequestFilters } from "./components/request-filters";
 import { RequestTable } from "./components/request-table";
 import {
+  buildRequestsUrl,
   type DateRange,
   type RequestsResponse,
-  buildRequestsUrl,
   useLiveRequests
 } from "./hooks/use-requests";
 
@@ -37,7 +37,10 @@ const RequestsPage = () => {
           status: statusFilter
         })
       ),
-    queryKey: ["requests", { provider, range: dateRange, status: statusFilter }],
+    queryKey: [
+      "requests",
+      { provider, range: dateRange, status: statusFilter }
+    ],
     refetchInterval: isLive ? false : 30_000
   });
 
@@ -49,9 +52,7 @@ const RequestsPage = () => {
     ? live.total
     : (query.data?.pages[0]?.pagination?.total ?? 0);
   const loading = isLive ? live.isLoading : query.isPending;
-  const displayError = isLive
-    ? live.error
-    : (query.error?.message ?? null);
+  const displayError = isLive ? live.error : (query.error?.message ?? null);
 
   const sentinelRef = useInfiniteScroll(
     () => query.fetchNextPage(),
@@ -128,7 +129,7 @@ const RequestsPage = () => {
       />
 
       {!isLive && query.hasNextPage && (
-        <div ref={sentinelRef} className="flex justify-center py-6">
+        <div className="flex justify-center py-6" ref={sentinelRef}>
           {query.isFetchingNextPage && <Spinner className="size-5" />}
         </div>
       )}

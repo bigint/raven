@@ -1,4 +1,4 @@
-export interface ProviderDefinition {
+interface ProviderDefinition {
   readonly id: string;
   readonly label: string;
 }
@@ -21,19 +21,3 @@ export const PROVIDER_FILTER_OPTIONS: { label: string; value: string }[] = [
   { label: "All Providers", value: "" },
   ...PROVIDER_OPTIONS
 ];
-
-export interface ModelInfo {
-  readonly id: string;
-  readonly name: string;
-  readonly provider: Provider;
-  readonly inputPricePer1m: number;
-  readonly outputPricePer1m: number;
-  readonly contextWindow: number;
-  readonly supportsStreaming: boolean;
-}
-
-export interface TokenCount {
-  readonly inputTokens: number;
-  readonly outputTokens: number;
-  readonly cachedTokens: number;
-}
