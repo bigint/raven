@@ -32,7 +32,8 @@ export const anthropicAdapter: ProviderAdapter = {
       const hasExisting = blocks.some((b) => b.cache_control !== undefined);
 
       if (!hasExisting && blocks.length > 0) {
-        blocks[blocks.length - 1]!.cache_control = { type: "ephemeral" };
+        const last = blocks[blocks.length - 1];
+        if (last) last.cache_control = { type: "ephemeral" };
       }
 
       result.system = blocks;
@@ -46,7 +47,8 @@ export const anthropicAdapter: ProviderAdapter = {
       const hasExisting = tools.some((t) => t.cache_control !== undefined);
 
       if (!hasExisting) {
-        tools[tools.length - 1]!.cache_control = { type: "ephemeral" };
+        const last = tools[tools.length - 1];
+        if (last) last.cache_control = { type: "ephemeral" };
       }
 
       result.tools = tools;
