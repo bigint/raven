@@ -113,7 +113,7 @@ export const RequestDetail = ({ request, onClose }: RequestDetailProps) => (
             </div>
           </div>
 
-          <div className="px-6 py-5">
+          <div className="border-b border-border px-6 py-5">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Tool Use
@@ -130,6 +130,21 @@ export const RequestDetail = ({ request, onClose }: RequestDetailProps) => (
               <p className="mt-3 text-sm text-muted-foreground">
                 {request.toolCount} tool call
                 {request.toolCount === 1 ? "" : "s"} in this request.
+              </p>
+            )}
+          </div>
+
+          <div className="px-6 py-5">
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Request Body
+            </h3>
+            {request.requestBody ? (
+              <pre className="max-h-96 overflow-auto rounded-lg bg-muted p-4 text-xs leading-relaxed">
+                {JSON.stringify(request.requestBody, null, 2)}
+              </pre>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No request body recorded.
               </p>
             )}
           </div>

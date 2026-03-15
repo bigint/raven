@@ -19,12 +19,14 @@ export interface LogData {
   reasoningTokens: number;
   cost: number;
   latencyMs: number;
+  cachedTokens: number;
   cacheHit: boolean;
   hasImages: boolean;
   imageCount: number;
   hasToolUse: boolean;
   toolCount: number;
   toolNames: string[];
+  requestBody?: Record<string, unknown>;
   sessionId: string | null;
   guardrailMatches?: Array<{
     ruleName: string;
@@ -42,7 +44,7 @@ export const logProxyRequest = async (
     const [row] = await db
       .insert(requestLogs)
       .values({
-        cachedTokens: 0,
+        cachedTokens: data.cachedTokens,
         cacheHit: data.cacheHit,
         cost: data.cost.toFixed(6),
         hasImages: data.hasImages,
@@ -58,6 +60,7 @@ export const logProxyRequest = async (
         provider: data.provider,
         providerConfigId: data.providerConfigId,
         reasoningTokens: data.reasoningTokens,
+        requestBody: data.requestBody,
         sessionId: data.sessionId,
         statusCode: data.statusCode,
         toolCount: data.toolCount,

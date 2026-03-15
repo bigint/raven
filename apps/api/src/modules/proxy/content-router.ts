@@ -51,13 +51,26 @@ export const evaluateRoutingRules = async (
     return { model, ruleApplied: null };
   }
 
+  // Pre-parse condition values once after fetching rules
+  const parsedRules = rules.map((rule) => {
+    let parsedKeywords: string[] | null = null;
+    if (rule.condition === "keyword_match") {
+      try {
+        parsedKeywords = JSON.parse(rule.conditionValue) as string[];
+      } catch {
+        parsedKeywords = null;
+      }
+    }
+    return { ...rule, parsedKeywords };
+  });
+
   const messagesText = extractMessagesText(body);
   const tokenCount = estimateTokens(messagesText);
   const messageCount = getMessageCount(body);
 
   const lowerMessagesText = messagesText.toLowerCase();
 
-  for (const rule of rules) {
+  for (const rule of parsedRules) {
     let matches = false;
 
     switch (rule.condition) {
@@ -77,13 +90,10 @@ export const evaluateRoutingRules = async (
         break;
       }
       case "keyword_match": {
-        try {
-          const keywords: string[] = JSON.parse(rule.conditionValue);
-          matches = keywords.some((kw) =>
+        if (rule.parsedKeywords) {
+          matches = rule.parsedKeywords.some((kw) =>
             lowerMessagesText.includes(kw.toLowerCase())
           );
-        } catch {
-          matches = false;
         }
         break;
       }

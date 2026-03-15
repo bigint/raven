@@ -47,13 +47,10 @@ const ToolsPage = () => {
 
       <ToolChart data={chartData} />
 
-      <ToolSessionsTable
-        loading={isLoading}
-        sessions={sessions}
-      />
+      <ToolSessionsTable loading={isLoading} sessions={sessions} />
 
       {hasNextPage && (
-        <div ref={sentinelRef} className="flex justify-center py-6">
+        <div className="flex justify-center py-6" ref={sentinelRef}>
           {isFetchingNextPage && <Spinner className="size-5" />}
         </div>
       )}

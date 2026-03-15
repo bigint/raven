@@ -281,7 +281,7 @@ export const ModelCatalog = () => {
         </div>
       )}
 
-      {hasMore && <div ref={sentinelRef} className="h-px" />}
+      {hasMore && <div className="h-px" ref={sentinelRef} />}
     </div>
   );
 };

@@ -184,37 +184,37 @@ export const ToolSessionsTable = ({
   }
 
   return (
-      <div className="overflow-x-auto rounded-xl border border-border">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border">
-              <th className="w-10 px-5 py-3" />
-              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Key
-              </th>
-              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                User Agent
-              </th>
-              <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Requests
-              </th>
-              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Models
-              </th>
-              <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Tool Uses
-              </th>
-              <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Last Activity
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {sessions.map((s) => (
-              <ToolSessionRow key={s.sessionId} session={s} />
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <div className="overflow-x-auto rounded-xl border border-border">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-border">
+            <th className="w-10 px-5 py-3" />
+            <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Key
+            </th>
+            <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              User Agent
+            </th>
+            <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Requests
+            </th>
+            <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Models
+            </th>
+            <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Tool Uses
+            </th>
+            <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Last Activity
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {sessions.map((s) => (
+            <ToolSessionRow key={s.sessionId} session={s} />
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };

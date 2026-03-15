@@ -1,25 +1,13 @@
 "use client";
 
 import { FadeIn, StaggerItem, StaggerList } from "@raven/ui";
-import {
-  ArrowRight,
-  BarChart3,
-  Key,
-  Network,
-  Shield,
-  Zap
-} from "lucide-react";
+import { ArrowRight, BarChart3, Key, Network, Shield, Zap } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { TextMorph } from "torph/react";
 
-const heroWords = [
-  "all your AI",
-  "every model",
-  "every provider",
-  "your team"
-];
+const heroWords = ["all your AI", "every model", "every provider", "your team"];
 
 const providers = [
   "OpenAI",
@@ -72,7 +60,7 @@ const steps = [
   }
 ];
 
-export default function HomePage() {
+const HomePage = () => {
   const [wordIndex, setWordIndex] = useState(0);
 
   useEffect(() => {
@@ -117,7 +105,8 @@ export default function HomePage() {
           <FadeIn delay={0.1}>
             <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
               Route, monitor, and manage API calls across OpenAI, Anthropic,
-              Google, and more. Built for teams that need control and visibility.
+              Google, and more. Built for teams that need control and
+              visibility.
             </p>
           </FadeIn>
 
@@ -402,4 +391,6 @@ export default function HomePage() {
       </section>
     </div>
   );
-}
+};
+
+export default HomePage;

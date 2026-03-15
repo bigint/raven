@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAvailableProviders } from "@/app/(dashboard)/providers/hooks/use-providers";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 import { useOrgStore } from "@/stores/org";
@@ -34,10 +35,17 @@ export const useOnboarding = () => {
   const [orgName, setOrgName] = useState("");
 
   // Step 2: Provider
-  const [provider, setProvider] = useState("openai");
+  const { data: availableProviders } = useAvailableProviders();
+  const [provider, setProvider] = useState("");
   const [providerName, setProviderName] = useState("");
   const [providerApiKey, setProviderApiKey] = useState("");
   const [showProviderKey, setShowProviderKey] = useState(false);
+
+  useEffect(() => {
+    if (!provider && availableProviders?.[0]) {
+      setProvider(availableProviders[0].slug);
+    }
+  }, [provider, availableProviders]);
 
   // Step 3: Key
   const [keyName, setKeyName] = useState("Default");
@@ -139,6 +147,7 @@ export const useOnboarding = () => {
   };
 
   return {
+    availableProviders,
     copied,
     error,
     generatedKey,

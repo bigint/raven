@@ -12,6 +12,7 @@ import {
   Key,
   LayoutDashboard,
   Menu,
+  MessageSquare,
   Network,
   Receipt,
   Route,
@@ -32,6 +33,16 @@ import type { Org } from "../hooks/use-orgs";
 import { OrgSwitcher } from "./org-switcher";
 import { UserMenu } from "./user-menu";
 
+const useLockBodyScroll = (isLocked: boolean) => {
+  useEffect(() => {
+    if (!isLocked) return;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isLocked]);
+};
+
 interface NavItem {
   href: string;
   label: string;
@@ -41,6 +52,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/overview", icon: LayoutDashboard, label: "Overview" },
+  { href: "/chat", icon: MessageSquare, label: "Chat" },
   { href: "/analytics", icon: BarChart3, label: "Analytics" },
   { href: "/providers", icon: Network, label: "Providers" },
   { href: "/keys", icon: Key, label: "Keys" },
@@ -99,13 +111,7 @@ export const Sidebar = ({
     closeDrawer();
   }, [pathname, closeDrawer]);
 
-  useEffect(() => {
-    if (!drawerOpen) return;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [drawerOpen]);
+  useLockBodyScroll(drawerOpen);
 
   const navLinks = (
     <>

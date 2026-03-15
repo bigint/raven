@@ -3,10 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useInView } from "react-intersection-observer";
 
-export const useInfiniteScroll = (
-  callback: () => void,
-  enabled: boolean
-) => {
+export const useInfiniteScroll = (callback: () => void, enabled: boolean) => {
   const callbackRef = useRef(callback);
   callbackRef.current = callback;
 

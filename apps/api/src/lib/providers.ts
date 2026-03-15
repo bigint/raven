@@ -1,7 +1,8 @@
 export interface ProviderConfig {
   label: string;
   baseUrl: string;
-  /** Endpoint to hit for key validation (GET unless validationMethod is set) */
+  chatEndpoint: string;
+  modelsEndpoint: string;
   validationPath: string;
   validationMethod?: "POST";
   validationBody?: string;
@@ -16,7 +17,9 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
       "x-api-key": apiKey
     }),
     baseUrl: "https://api.anthropic.com/v1",
+    chatEndpoint: "/messages",
     label: "Anthropic",
+    modelsEndpoint: "/models?limit=100",
     validationBody: JSON.stringify({
       max_tokens: 1,
       messages: [{ content: "hi", role: "user" }],
@@ -25,10 +28,28 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
     validationMethod: "POST",
     validationPath: "/messages"
   },
+  mistralai: {
+    authHeaders: (apiKey) => ({ Authorization: `Bearer ${apiKey}` }),
+    baseUrl: "https://api.mistral.ai/v1",
+    chatEndpoint: "/chat/completions",
+    label: "Mistral AI",
+    modelsEndpoint: "/models",
+    validationPath: "/models"
+  },
   openai: {
     authHeaders: (apiKey) => ({ Authorization: `Bearer ${apiKey}` }),
     baseUrl: "https://api.openai.com/v1",
+    chatEndpoint: "/chat/completions",
     label: "OpenAI",
+    modelsEndpoint: "/models",
+    validationPath: "/models"
+  },
+  "x-ai": {
+    authHeaders: (apiKey) => ({ Authorization: `Bearer ${apiKey}` }),
+    baseUrl: "https://api.x.ai/v1",
+    chatEndpoint: "/chat/completions",
+    label: "xAI",
+    modelsEndpoint: "/models",
     validationPath: "/models"
   }
 };
@@ -36,5 +57,3 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
 export const getProviderConfig = (
   provider: string
 ): ProviderConfig | undefined => PROVIDERS[provider];
-
-export const SUPPORTED_PROVIDERS = Object.keys(PROVIDERS);

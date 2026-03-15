@@ -10,16 +10,3 @@ export type GuardrailType =
   | "content_filter"
   | "custom_regex";
 export type GuardrailAction = "block" | "warn" | "log";
-export interface ApiError {
-  readonly code: string;
-  readonly message: string;
-  readonly details?: Record<string, unknown>;
-}
-
-export interface PaginatedResponse<T> {
-  readonly data: readonly T[];
-  readonly total: number;
-  readonly page: number;
-  readonly pageSize: number;
-  readonly hasMore: boolean;
-}

@@ -1,10 +1,20 @@
 import type { ProviderAdapter } from "./providers/registry";
 
-const HOP_BY_HOP_HEADERS = new Set([
+const STRIPPED_HEADERS = new Set([
   "authorization",
-  "host",
   "connection",
-  "transfer-encoding"
+  "content-length",
+  "host",
+  "origin",
+  "referer",
+  "sec-ch-ua",
+  "sec-ch-ua-mobile",
+  "sec-ch-ua-platform",
+  "sec-fetch-dest",
+  "sec-fetch-mode",
+  "sec-fetch-site",
+  "transfer-encoding",
+  "user-agent"
 ]);
 
 export interface ForwardRequestInput {
@@ -44,7 +54,7 @@ export const forwardRequest = async (
 
   const filteredHeaders = Object.fromEntries(
     Object.entries(incomingHeaders).filter(
-      ([k]) => !HOP_BY_HOP_HEADERS.has(k.toLowerCase())
+      ([k]) => !STRIPPED_HEADERS.has(k.toLowerCase())
     )
   );
 

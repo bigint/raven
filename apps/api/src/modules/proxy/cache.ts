@@ -23,7 +23,9 @@ const buildCacheKey = (
 ): string => {
   const content = body.messages ?? body.input ?? [];
   const temperature = body.temperature ?? null;
-  const payload = `${orgId}:${provider}:${model}:${JSON.stringify(content)}:${temperature}`;
+  const system = body.system ?? null;
+  const tools = body.tools ?? null;
+  const payload = `${orgId}:${provider}:${model}:${JSON.stringify(content)}:${temperature}:${JSON.stringify(system)}:${JSON.stringify(tools)}`;
   const hash = createHash("sha256").update(payload).digest("hex");
   return `cache:resp:${hash}`;
 };
