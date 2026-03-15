@@ -90,5 +90,3 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
 export const getProviderConfig = (
   provider: string
 ): ProviderConfig | undefined => PROVIDERS[provider];
-
-export const SUPPORTED_PROVIDERS = Object.keys(PROVIDERS);
