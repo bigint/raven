@@ -2,6 +2,7 @@ import { getModelPricing } from "@/lib/pricing-cache";
 import { PROVIDERS } from "@/lib/providers";
 import type { ProviderAdapter } from "./registry";
 
+// biome-ignore lint/style/noNonNullAssertion: anthropic is always present in PROVIDERS
 const config = PROVIDERS.anthropic!;
 
 export const anthropicAdapter: ProviderAdapter = {

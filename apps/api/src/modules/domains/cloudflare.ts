@@ -1,4 +1,5 @@
 import type { Env } from "@raven/config";
+import { ValidationError } from "@/lib/errors";
 
 interface CloudflareHostnameResponse {
   result: {
@@ -17,7 +18,7 @@ const cfFetch = async (
   const token = env.CLOUDFLARE_API_TOKEN;
   const zoneId = env.CLOUDFLARE_ZONE_ID;
   if (!token || !zoneId) {
-    throw new Error("Cloudflare API token or zone ID not configured");
+    throw new ValidationError("Cloudflare API token or zone ID not configured");
   }
   return fetch(`https://api.cloudflare.com/client/v4/zones/${zoneId}${path}`, {
     ...options,
@@ -48,7 +49,7 @@ export const createCustomHostname = async (
   });
   const data = (await res.json()) as CloudflareHostnameResponse;
   if (!data.success) {
-    throw new Error(
+    throw new ValidationError(
       `Failed to create custom hostname: ${JSON.stringify(data)}`
     );
   }
