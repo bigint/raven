@@ -32,6 +32,16 @@ import type { Org } from "../hooks/use-orgs";
 import { OrgSwitcher } from "./org-switcher";
 import { UserMenu } from "./user-menu";
 
+const useLockBodyScroll = (isLocked: boolean) => {
+  useEffect(() => {
+    if (!isLocked) return;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isLocked]);
+};
+
 interface NavItem {
   href: string;
   label: string;
@@ -99,13 +109,7 @@ export const Sidebar = ({
     closeDrawer();
   }, [pathname, closeDrawer]);
 
-  useEffect(() => {
-    if (!drawerOpen) return;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [drawerOpen]);
+  useLockBodyScroll(drawerOpen);
 
   const navLinks = (
     <>
