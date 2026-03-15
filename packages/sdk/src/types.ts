@@ -86,4 +86,5 @@ export interface TextStreamChunk {
 export interface RavenClientOptions {
   apiKey: string;
   baseUrl: string;
+  headers?: Record<string, string>;
 }

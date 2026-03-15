@@ -6,10 +6,12 @@ import type { GenerateParams, RavenClientOptions, TextResult } from "./types";
 export class RavenClient {
   private apiKey: string;
   private baseUrl: string;
+  private headers: Record<string, string>;
 
   constructor(options: RavenClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/$/, "");
     this.apiKey = options.apiKey;
+    this.headers = options.headers ?? {};
   }
 
   async generateText(
@@ -23,7 +25,8 @@ export class RavenClient {
       body: JSON.stringify(body),
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        ...this.headers
       },
       method: "POST",
       signal
@@ -60,7 +63,8 @@ export class RavenClient {
       body: JSON.stringify(body),
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        ...this.headers
       },
       method: "POST",
       signal: abortController.signal
