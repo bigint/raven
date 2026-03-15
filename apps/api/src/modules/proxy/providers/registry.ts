@@ -8,10 +8,13 @@ export interface ProviderAdapter {
     apiKey: string,
     headers: Record<string, string>
   ): Record<string, string>;
+  transformBody?(body: Record<string, unknown>): Record<string, unknown>;
   estimateCost(
     model: string,
     inputTokens: number,
-    outputTokens: number
+    outputTokens: number,
+    cacheReadTokens?: number,
+    cacheWriteTokens?: number
   ): number;
 }
 

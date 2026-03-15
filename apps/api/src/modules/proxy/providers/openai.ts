@@ -7,11 +7,13 @@ const config = PROVIDERS.openai!;
 export const openaiAdapter: ProviderAdapter = {
   baseUrl: config.baseUrl,
 
-  estimateCost(model, inputTokens, outputTokens) {
+  estimateCost(model, inputTokens, outputTokens, cacheReadTokens = 0) {
     const pricing = getModelPricing(model, "openai");
-    const inputCost = (inputTokens / 1_000_000) * pricing.input;
+    const regularInput = inputTokens - cacheReadTokens;
+    const regularInputCost = (regularInput / 1_000_000) * pricing.input;
+    const cachedInputCost = (cacheReadTokens / 1_000_000) * pricing.input * 0.5;
     const outputCost = (outputTokens / 1_000_000) * pricing.output;
-    return inputCost + outputCost;
+    return regularInputCost + cachedInputCost + outputCost;
   },
   name: "openai",
 
