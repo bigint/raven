@@ -87,6 +87,9 @@ importers:
       '@raven/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@raven/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
       '@raven/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -224,6 +227,12 @@ importers:
       '@types/react':
         specifier: ^19.2.14
         version: 19.2.14
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  packages/sdk:
+    devDependencies:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3

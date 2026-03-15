@@ -8,7 +8,6 @@ Providers removed from the initial release to keep scope focused on OpenAI and A
 |----------|----------|------|
 | Together AI | `https://api.together.xyz/v1` | Bearer |
 | Perplexity | `https://api.perplexity.ai` | Bearer |
-| OpenRouter | `https://openrouter.ai/api/v1` | Bearer |
 | Fireworks AI | `https://api.fireworks.ai/inference/v1` | Bearer |
 | SambaNova | `https://api.sambanova.ai/v1` | Bearer |
 | DeepSeek | `https://api.deepseek.com/v1` | Bearer |

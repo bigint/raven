@@ -10,7 +10,7 @@ The proxy has a hardcoded `ADAPTERS` map with only `anthropic` and `openai`. Any
 
 ### 1. Expand the PROVIDERS map
 
-Add all known providers to `lib/providers.ts`. Each entry has `baseUrl`, `authHeaders`, `validationPath`, and `label`. Provider slugs match `model-sync.ts` DEFAULT_PROVIDERS and OpenRouter slugs.
+Add all known providers to `lib/providers.ts`. Each entry has `baseUrl`, `authHeaders`, `validationPath`, and `label`. Provider slugs match `model-sync.ts` DEFAULT_PROVIDERS.
 
 New entries (all OpenAI-compatible — Bearer auth, `/models` validation):
 

@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@raven/auth": "workspace:*",
+    "@raven/sdk": "workspace:*",
     "@raven/types": "workspace:*",
     "@raven/ui": "workspace:*",
     "@tanstack/react-query": "^5.90.21",
