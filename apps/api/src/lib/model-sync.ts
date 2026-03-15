@@ -44,15 +44,8 @@ const MODELS_DEV_API = "https://models.dev/api.json";
 
 const PROVIDER_SLUG_MAP: Record<string, string> = {
   anthropic: "anthropic",
-  cerebras: "cerebras",
-  deepseek: "deepseek",
-  fireworks: "fireworks",
-  groq: "groq",
   mistral: "mistralai",
   openai: "openai",
-  perplexity: "perplexity",
-  sambanova: "sambanova",
-  togetherai: "together",
   xai: "x-ai"
 };
 
@@ -202,9 +195,9 @@ export const syncModels = async (
 };
 
 const DEFAULT_PROVIDERS = [
-  { isEnabled: true, name: "OpenAI", slug: "openai" },
   { isEnabled: true, name: "Anthropic", slug: "anthropic" },
   { isEnabled: true, name: "Mistral AI", slug: "mistralai" },
+  { isEnabled: true, name: "OpenAI", slug: "openai" },
   { isEnabled: true, name: "xAI", slug: "x-ai" }
 ];
 

@@ -2,30 +2,18 @@
 
 const LOGO_BASE = "https://models.dev/logos";
 
-/** Map our provider slugs to models.dev logo slugs */
 const PROVIDER_LOGO_MAP: Record<string, string> = {
   anthropic: "anthropic",
-  cerebras: "cerebras",
-  deepseek: "deepseek",
-  fireworks: "fireworks",
-  groq: "groq",
   mistralai: "mistral",
   openai: "openai",
-  perplexity: "perplexity",
-  sambanova: "sambanova",
-  together: "togetherai",
   "x-ai": "xai"
 };
 
-/** Derive provider from model name for model-level icons */
 const MODEL_PROVIDER_RULES: [RegExp, string][] = [
   [/claude/i, "anthropic"],
   [/gpt|o1|o3|o4|codex/i, "openai"],
   [/grok/i, "xai"],
-  [/mistral|mixtral|codestral|pixtral|devstral/i, "mistral"],
-  [/deepseek/i, "deepseek"],
-  [/llama|gemma/i, "groq"],
-  [/sonar/i, "perplexity"]
+  [/mistral|mixtral|codestral|pixtral|devstral/i, "mistral"]
 ];
 
 const getLogoSlug = (provider: string): string | null =>
