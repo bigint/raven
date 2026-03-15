@@ -1,11 +1,16 @@
 "use client";
 
-import { cn } from "@raven/ui";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Combobox } from "@base-ui/react/combobox";
+import { useMemo } from "react";
 
 interface ModelOption {
   label: string;
   provider: string;
+  value: string;
+}
+
+interface ModelGroup {
+  items: ModelOption[];
   value: string;
 }
 
@@ -22,111 +27,63 @@ export const ModelInput = ({
   options,
   value
 }: ModelInputProps) => {
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState(value);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setSearch(value);
-  }, [value]);
-
-  useEffect(() => {
-    if (!open) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
-        setOpen(false);
-      }
-    };
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleEscape);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, [open]);
-
-  const filtered = useMemo(() => {
-    const query = search.toLowerCase();
-    return options.filter(
-      (o) =>
-        o.label.toLowerCase().includes(query) ||
-        o.value.toLowerCase().includes(query) ||
-        o.provider.toLowerCase().includes(query)
-    );
-  }, [options, search]);
-
-  // Group by provider
-  const grouped = useMemo(() => {
+  const groups = useMemo(() => {
     const map = new Map<string, ModelOption[]>();
-    for (const opt of filtered) {
+    for (const opt of options) {
       const group = map.get(opt.provider) ?? [];
       group.push(opt);
       map.set(opt.provider, group);
     }
-    return map;
-  }, [filtered]);
+    return [...map.entries()].map(
+      ([provider, items]): ModelGroup => ({ items, value: provider })
+    );
+  }, [options]);
 
   return (
-    <div className="w-72" ref={containerRef}>
-      <div className="relative">
-        <input
-          className={cn(
-            "flex w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
-            !value && "text-muted-foreground"
-          )}
-          disabled={disabled}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            if (!open) setOpen(true);
-          }}
-          onFocus={() => setOpen(true)}
-          placeholder="Search models..."
-          type="text"
-          value={search}
-        />
-
-        {open && filtered.length > 0 && (
-          <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover shadow-md">
-            <div className="max-h-72 overflow-y-auto py-1">
-              {[...grouped.entries()].map(([provider, models]) => (
-                <div key={provider}>
-                  <div className="px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    {provider}
-                  </div>
-                  {models.map((option) => (
-                    <button
-                      className={cn(
-                        "flex w-full items-center justify-between px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
-                        option.value === value
-                          ? "text-foreground"
-                          : "text-muted-foreground"
-                      )}
+    <Combobox.Root<ModelOption>
+      disabled={disabled}
+      itemToStringLabel={(item) => item.value}
+      onValueChange={(val) => {
+        if (!val) return;
+        onChange(val.value, val.provider);
+      }}
+      value={value ? options.find((o) => o.value === value) : undefined}
+    >
+      <Combobox.Input
+        aria-label="Search models"
+        className="w-72 rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+        placeholder="Search models..."
+      />
+      <Combobox.Portal>
+        <Combobox.Positioner className="z-50" sideOffset={4}>
+          <Combobox.Popup className="max-h-72 w-[var(--anchor-width)] overflow-y-auto rounded-md border border-border bg-popover py-1 shadow-md">
+            <Combobox.List>
+              {groups.map((group) => (
+                <Combobox.Group key={group.value}>
+                  <Combobox.GroupLabel className="px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    {group.value}
+                  </Combobox.GroupLabel>
+                  {group.items.map((option) => (
+                    <Combobox.Item
+                      className="flex w-full cursor-default items-center justify-between px-3 py-2 text-sm text-muted-foreground outline-none select-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[selected]:text-foreground"
                       key={`${option.provider}/${option.value}`}
-                      onClick={() => {
-                        onChange(option.value, option.provider);
-                        setSearch(option.value);
-                        setOpen(false);
-                      }}
-                      type="button"
+                      value={option}
                     >
                       <span className="truncate">{option.label}</span>
-                      <span className="ml-2 shrink-0 truncate text-xs opacity-50">
+                      <span className="ml-2 shrink-0 text-xs opacity-50">
                         {option.value}
                       </span>
-                    </button>
+                    </Combobox.Item>
                   ))}
-                </div>
+                </Combobox.Group>
               ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+            </Combobox.List>
+            <Combobox.Empty className="px-3 py-2 text-sm text-muted-foreground">
+              No models found
+            </Combobox.Empty>
+          </Combobox.Popup>
+        </Combobox.Positioner>
+      </Combobox.Portal>
+    </Combobox.Root>
   );
 };

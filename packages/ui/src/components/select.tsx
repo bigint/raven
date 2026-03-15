@@ -1,6 +1,7 @@
 "use client";
 
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { Select as BaseSelect } from "@base-ui/react/select";
+import type { ReactNode } from "react";
 import { cn } from "../cn";
 
 interface SelectOption {
@@ -32,83 +33,32 @@ const Select = ({
   className,
   label,
   error,
-  searchable = false
-}: SelectProps) => {
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const containerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const selected = options.find((o) => o.value === value);
-  const selectedLabel = selected?.label ?? placeholder;
-
-  const filtered = searchable
-    ? options.filter((o) =>
-        o.label.toLowerCase().includes(search.toLowerCase())
-      )
-    : options;
-
-  useEffect(() => {
-    if (!open) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
-        setOpen(false);
-      }
-    };
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleEscape);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, [open]);
-
-  useEffect(() => {
-    if (open && searchable) {
-      inputRef.current?.focus();
-    }
-    if (!open) {
-      setSearch("");
-    }
-  }, [open, searchable]);
-
-  return (
-    <div className={className}>
-      {label && (
-        <label className="mb-1 block text-sm font-medium" htmlFor={id}>
-          {label}
-        </label>
-      )}
-      <div className="relative" ref={containerRef}>
-        <button
-          className={cn(
-            "flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
-            error && "border-destructive focus:ring-destructive"
-          )}
-          disabled={disabled}
-          id={id}
-          onClick={() => setOpen(!open)}
-          type="button"
-        >
-          <span
-            className={cn(
-              "flex items-center gap-2",
-              !value && "text-muted-foreground"
-            )}
-          >
-            {selected?.icon}
-            {selectedLabel}
-          </span>
+  searchable: _searchable = false
+}: SelectProps) => (
+  <div className={className}>
+    {label && (
+      <label className="mb-1 block text-sm font-medium" htmlFor={id}>
+        {label}
+      </label>
+    )}
+    <BaseSelect.Root
+      disabled={disabled}
+      onValueChange={(val) => onChange(val as string)}
+      value={value}
+    >
+      <BaseSelect.Trigger
+        className={cn(
+          "flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+          error && "border-destructive focus:ring-destructive"
+        )}
+        id={id}
+      >
+        <BaseSelect.Value>
+          {value ? options.find((o) => o.value === value)?.label : placeholder}
+        </BaseSelect.Value>
+        <BaseSelect.Icon className="ml-2">
           <svg
-            className={cn(
-              "size-4 text-muted-foreground transition-transform",
-              open && "rotate-180"
-            )}
+            className="size-4 text-muted-foreground"
             fill="none"
             stroke="currentColor"
             strokeWidth={2}
@@ -120,72 +70,43 @@ const Select = ({
               strokeLinejoin="round"
             />
           </svg>
-        </button>
-
-        {open && (
-          <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover shadow-md">
-            {searchable && (
-              <div className="border-b border-border px-3 py-2">
-                <input
-                  className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search..."
-                  ref={inputRef}
-                  type="text"
-                  value={search}
-                />
-              </div>
-            )}
-            <div className="max-h-60 overflow-y-auto py-1">
-              {filtered.length === 0 ? (
-                <p className="px-3 py-2 text-sm text-muted-foreground">
-                  No results
-                </p>
-              ) : (
-                filtered.map((option) => (
-                  <button
-                    className={cn(
-                      "flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
-                      option.value === value
-                        ? "text-foreground"
-                        : "text-muted-foreground"
-                    )}
-                    key={option.value}
-                    onClick={() => {
-                      onChange(option.value);
-                      setOpen(false);
-                    }}
-                    type="button"
+        </BaseSelect.Icon>
+      </BaseSelect.Trigger>
+      <BaseSelect.Portal>
+        <BaseSelect.Positioner className="z-50" sideOffset={4}>
+          <BaseSelect.Popup className="max-h-60 overflow-y-auto rounded-md border border-border bg-popover py-1 shadow-md">
+            {options.map((option) => (
+              <BaseSelect.Item
+                className="flex w-full cursor-default items-center gap-2 px-3 py-2 text-sm text-muted-foreground outline-none select-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[selected]:text-foreground"
+                key={option.value}
+                value={option.value}
+              >
+                <BaseSelect.ItemIndicator className="shrink-0">
+                  <svg
+                    className="size-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    viewBox="0 0 24 24"
                   >
-                    <svg
-                      className={cn(
-                        "size-3.5 shrink-0",
-                        option.value === value ? "opacity-100" : "opacity-0"
-                      )}
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M5 13l4 4L19 7"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    {option.icon}
-                    {option.label}
-                  </button>
-                ))
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-      {error && <p className="mt-1.5 text-xs text-destructive">{error}</p>}
-    </div>
-  );
-};
+                    <path
+                      d="M5 13l4 4L19 7"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </BaseSelect.ItemIndicator>
+                {option.icon}
+                <BaseSelect.ItemText>{option.label}</BaseSelect.ItemText>
+              </BaseSelect.Item>
+            ))}
+          </BaseSelect.Popup>
+        </BaseSelect.Positioner>
+      </BaseSelect.Portal>
+    </BaseSelect.Root>
+    {error && <p className="mt-1.5 text-xs text-destructive">{error}</p>}
+  </div>
+);
 
 export type { SelectOption, SelectProps };
 export { Select };
