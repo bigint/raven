@@ -9,7 +9,7 @@ export const anthropicAdapter: ProviderAdapter = {
 
   estimateCost(model, inputTokens, outputTokens, cacheReadTokens = 0, cacheWriteTokens = 0) {
     const pricing = getModelPricing(model, "anthropic");
-    const regularInput = inputTokens - cacheReadTokens - cacheWriteTokens;
+    const regularInput = Math.max(0, inputTokens - cacheReadTokens - cacheWriteTokens);
     const regularInputCost = (regularInput / 1_000_000) * pricing.input;
     const cacheWriteCost = (cacheWriteTokens / 1_000_000) * pricing.input * 1.25;
     const cacheReadCost = (cacheReadTokens / 1_000_000) * pricing.input * 0.1;

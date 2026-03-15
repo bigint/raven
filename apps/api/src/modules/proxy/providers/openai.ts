@@ -9,7 +9,7 @@ export const openaiAdapter: ProviderAdapter = {
 
   estimateCost(model, inputTokens, outputTokens, cacheReadTokens = 0) {
     const pricing = getModelPricing(model, "openai");
-    const regularInput = inputTokens - cacheReadTokens;
+    const regularInput = Math.max(0, inputTokens - cacheReadTokens);
     const regularInputCost = (regularInput / 1_000_000) * pricing.input;
     const cachedInputCost = (cacheReadTokens / 1_000_000) * pricing.input * 0.5;
     const outputCost = (outputTokens / 1_000_000) * pricing.output;
