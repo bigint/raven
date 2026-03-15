@@ -1,10 +1,5 @@
 import { toRavenError } from "./errors";
-import {
-  formatRequest,
-  getProxyPath,
-  isAnthropicProvider,
-  parseBufferedResponse
-} from "./format";
+import { formatRequest, getProxyPath, parseBufferedResponse } from "./format";
 import { TextStreamResult } from "./stream";
 import type { GenerateParams, RavenClientOptions, TextResult } from "./types";
 
@@ -44,7 +39,7 @@ export class RavenClient {
     }
 
     const data = (await response.json()) as Record<string, unknown>;
-    return parseBufferedResponse(params.provider, data);
+    return parseBufferedResponse(data);
   }
 
   async streamText(
@@ -80,10 +75,6 @@ export class RavenClient {
       throw toRavenError(message, response.status);
     }
 
-    return new TextStreamResult(
-      response,
-      isAnthropicProvider(params.provider),
-      abortController
-    );
+    return new TextStreamResult(response, abortController);
   }
 }

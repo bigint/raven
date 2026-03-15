@@ -9,14 +9,10 @@ import { PROVIDERS } from "@/lib/providers";
 
 interface UpstreamModel {
   id: string;
+  display_name?: string;
+  name?: string;
   object?: string;
   owned_by?: string;
-}
-
-interface AnthropicModel {
-  display_name: string;
-  id: string;
-  type: string;
 }
 
 export const listProviderModels =
@@ -52,36 +48,26 @@ export const listProviderModels =
     }
 
     const headers = providerDef.authHeaders(decryptedKey);
+    const url = `${providerDef.baseUrl}${providerDef.modelsEndpoint}`;
 
-    if (config.provider === "anthropic") {
-      const res = await fetch("https://api.anthropic.com/v1/models?limit=100", {
-        headers
-      });
-      if (!res.ok) {
-        return c.json({ data: [] });
-      }
-      const body = (await res.json()) as { data?: AnthropicModel[] };
-      const models = (body.data ?? []).map((m) => ({
-        id: m.id,
-        name: m.display_name,
-        provider: config.provider
-      }));
-      return c.json({ data: models });
-    }
-
-    const res = await fetch(`${providerDef.baseUrl}/models`, { headers });
+    const res = await fetch(url, { headers });
     if (!res.ok) {
       return c.json({ data: [] });
     }
 
     const body = (await res.json()) as { data?: UpstreamModel[] };
-    const models = (body.data ?? []).map((m) => ({
-      id: m.id,
-      name: m.id,
-      provider: config.provider
-    }));
 
-    models.sort((a, b) => a.id.localeCompare(b.id));
+    const NON_CHAT_PATTERNS =
+      /embed|tts|whisper|dall-e|moderation|realtime|transcri|audio|codex|computer-use|davinci|babbage|search/i;
+
+    const models = (body.data ?? [])
+      .filter((m) => !NON_CHAT_PATTERNS.test(m.id))
+      .map((m) => ({
+        id: m.id,
+        name: m.display_name ?? m.name ?? m.id,
+        provider: config.provider
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id));
 
     return c.json({ data: models });
   };

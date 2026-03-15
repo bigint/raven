@@ -1,7 +1,8 @@
 export interface ProviderConfig {
   label: string;
   baseUrl: string;
-  /** Endpoint to hit for key validation (GET unless validationMethod is set) */
+  chatEndpoint: string;
+  modelsEndpoint: string;
   validationPath: string;
   validationMethod?: "POST";
   validationBody?: string;
@@ -16,7 +17,9 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
       "x-api-key": apiKey
     }),
     baseUrl: "https://api.anthropic.com/v1",
+    chatEndpoint: "/messages",
     label: "Anthropic",
+    modelsEndpoint: "/models?limit=100",
     validationBody: JSON.stringify({
       max_tokens: 1,
       messages: [{ content: "hi", role: "user" }],
@@ -25,64 +28,28 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
     validationMethod: "POST",
     validationPath: "/messages"
   },
-  cerebras: {
-    authHeaders: (apiKey) => ({ Authorization: `Bearer ${apiKey}` }),
-    baseUrl: "https://api.cerebras.ai/v1",
-    label: "Cerebras",
-    validationPath: "/models"
-  },
-  deepseek: {
-    authHeaders: (apiKey) => ({ Authorization: `Bearer ${apiKey}` }),
-    baseUrl: "https://api.deepseek.com/v1",
-    label: "DeepSeek",
-    validationPath: "/models"
-  },
-  fireworks: {
-    authHeaders: (apiKey) => ({ Authorization: `Bearer ${apiKey}` }),
-    baseUrl: "https://api.fireworks.ai/inference/v1",
-    label: "Fireworks AI",
-    validationPath: "/models"
-  },
-  groq: {
-    authHeaders: (apiKey) => ({ Authorization: `Bearer ${apiKey}` }),
-    baseUrl: "https://api.groq.com/openai/v1",
-    label: "Groq",
-    validationPath: "/models"
-  },
   mistralai: {
     authHeaders: (apiKey) => ({ Authorization: `Bearer ${apiKey}` }),
     baseUrl: "https://api.mistral.ai/v1",
+    chatEndpoint: "/chat/completions",
     label: "Mistral AI",
+    modelsEndpoint: "/models",
     validationPath: "/models"
   },
   openai: {
     authHeaders: (apiKey) => ({ Authorization: `Bearer ${apiKey}` }),
     baseUrl: "https://api.openai.com/v1",
+    chatEndpoint: "/chat/completions",
     label: "OpenAI",
-    validationPath: "/models"
-  },
-  perplexity: {
-    authHeaders: (apiKey) => ({ Authorization: `Bearer ${apiKey}` }),
-    baseUrl: "https://api.perplexity.ai",
-    label: "Perplexity",
-    validationPath: "/models"
-  },
-  sambanova: {
-    authHeaders: (apiKey) => ({ Authorization: `Bearer ${apiKey}` }),
-    baseUrl: "https://api.sambanova.ai/v1",
-    label: "SambaNova",
-    validationPath: "/models"
-  },
-  together: {
-    authHeaders: (apiKey) => ({ Authorization: `Bearer ${apiKey}` }),
-    baseUrl: "https://api.together.xyz/v1",
-    label: "Together AI",
+    modelsEndpoint: "/models",
     validationPath: "/models"
   },
   "x-ai": {
     authHeaders: (apiKey) => ({ Authorization: `Bearer ${apiKey}` }),
     baseUrl: "https://api.x.ai/v1",
+    chatEndpoint: "/chat/completions",
     label: "xAI",
+    modelsEndpoint: "/models",
     validationPath: "/models"
   }
 };

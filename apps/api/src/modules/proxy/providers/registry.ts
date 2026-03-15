@@ -5,11 +5,15 @@ import { anthropicAdapter } from "./anthropic";
 export interface ProviderAdapter {
   name: string;
   baseUrl: string;
+  chatEndpoint: string;
+  modelsEndpoint: string;
   transformHeaders(
     apiKey: string,
     headers: Record<string, string>
   ): Record<string, string>;
   transformBody?(body: Record<string, unknown>): Record<string, unknown>;
+  normalizeRequest?(body: Record<string, unknown>): Record<string, unknown>;
+  normalizeStreamChunk?(line: string): string | null;
   estimateCost(
     model: string,
     inputTokens: number,
@@ -28,6 +32,7 @@ const createOpenAICompatibleAdapter = (provider: string): ProviderAdapter => {
 
   return {
     baseUrl: config?.baseUrl ?? "https://api.openai.com/v1",
+    chatEndpoint: config?.chatEndpoint ?? "/chat/completions",
 
     estimateCost(model, inputTokens, outputTokens, cacheReadTokens = 0) {
       const pricing = getModelPricing(model, provider);
@@ -38,6 +43,7 @@ const createOpenAICompatibleAdapter = (provider: string): ProviderAdapter => {
       const outputCost = (outputTokens / 1_000_000) * pricing.output;
       return regularInputCost + cachedInputCost + outputCost;
     },
+    modelsEndpoint: config?.modelsEndpoint ?? "/models",
     name: provider,
 
     transformHeaders(apiKey, headers) {
@@ -51,6 +57,8 @@ const createOpenAICompatibleAdapter = (provider: string): ProviderAdapter => {
 };
 
 export const getProviderAdapter = (provider: string): ProviderAdapter => {
-  if (provider === "anthropic") return anthropicAdapter;
+  if (PROVIDERS[provider]?.chatEndpoint === "/messages") {
+    return anthropicAdapter(provider);
+  }
   return createOpenAICompatibleAdapter(provider);
 };

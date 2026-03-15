@@ -1,69 +1,8 @@
 import type { TextStreamChunk, ToolCall, Usage } from "./types";
 
 const parseSSEChunk = (
-  parsed: Record<string, unknown>,
-  isAnthropic: boolean
+  parsed: Record<string, unknown>
 ): TextStreamChunk | null => {
-  if (isAnthropic) {
-    if (parsed.type === "content_block_delta") {
-      const delta = parsed.delta as
-        | { text?: string; type?: string }
-        | undefined;
-      if (delta?.type === "text_delta" && delta.text) {
-        return { textDelta: delta.text, type: "text-delta" };
-      }
-      if (delta?.type === "input_json_delta") {
-        return null; // handled via content_block_stop
-      }
-    }
-    if (parsed.type === "message_delta") {
-      const delta = parsed.delta as { stop_reason?: string } | undefined;
-      const usage = parsed.usage as Record<string, number> | undefined;
-      return {
-        finishReason: delta?.stop_reason ?? "stop",
-        type: "finish",
-        usage: usage
-          ? {
-              completionTokens: usage.output_tokens ?? 0,
-              promptTokens: 0,
-              totalTokens: usage.output_tokens ?? 0
-            }
-          : undefined
-      };
-    }
-    if (parsed.type === "message_start") {
-      const message = parsed.message as Record<string, unknown> | undefined;
-      const usage = message?.usage as Record<string, number> | undefined;
-      if (usage) {
-        return {
-          type: "finish",
-          usage: {
-            completionTokens: 0,
-            promptTokens: usage.input_tokens ?? 0,
-            totalTokens: usage.input_tokens ?? 0
-          }
-        };
-      }
-    }
-    if (parsed.type === "content_block_start") {
-      const block = parsed.content_block as Record<string, unknown> | undefined;
-      if (block?.type === "tool_use") {
-        return {
-          toolCall: {
-            function: {
-              arguments: "",
-              name: (block.name as string) ?? ""
-            },
-            id: (block.id as string) ?? "",
-            type: "function"
-          },
-          type: "tool-call"
-        };
-      }
-    }
-    return null;
-  }
-
   const choices = parsed.choices as
     | Array<{
         delta?: { content?: string; tool_calls?: ToolCall[] };
@@ -119,7 +58,6 @@ export class TextStreamResult implements AsyncIterable<string> {
   private consumed = false;
   private decoder = new TextDecoder();
   private finishReasonResolve!: (v: string) => void;
-  private isAnthropic: boolean;
   private reader: ReadableStreamDefaultReader<Uint8Array>;
   private textAccumulator = "";
   private textResolve!: (v: string) => void;
@@ -132,24 +70,15 @@ export class TextStreamResult implements AsyncIterable<string> {
   };
   private usageResolve!: (v: Usage) => void;
 
-  /** Resolves to the finish reason after the stream completes. */
   readonly finishReason: Promise<string>;
-  /** Resolves to the full generated text after the stream completes. */
   readonly text: Promise<string>;
-  /** Resolves to all tool calls after the stream completes. */
   readonly toolCalls: Promise<ToolCall[]>;
-  /** Resolves to token usage after the stream completes. */
   readonly usage: Promise<Usage>;
 
-  constructor(
-    response: Response,
-    isAnthropic: boolean,
-    abortController?: AbortController
-  ) {
+  constructor(response: Response, abortController?: AbortController) {
     const body = response.body;
     if (!body) throw new Error("No response body");
     this.reader = body.getReader();
-    this.isAnthropic = isAnthropic;
     this.abortController = abortController ?? null;
 
     this.text = new Promise((resolve) => {
@@ -166,15 +95,10 @@ export class TextStreamResult implements AsyncIterable<string> {
     });
   }
 
-  /** Cancel the stream. */
   abort(): void {
     this.abortController?.abort();
   }
 
-  /**
-   * Iterate over all stream events including text deltas, tool calls,
-   * and finish events with usage.
-   */
   async *fullStream(): AsyncIterable<TextStreamChunk> {
     if (this.consumed) throw new Error("Stream already consumed");
     this.consumed = true;
@@ -186,7 +110,6 @@ export class TextStreamResult implements AsyncIterable<string> {
     }
   }
 
-  /** Iterate over text content deltas only. */
   async *[Symbol.asyncIterator](): AsyncIterator<string> {
     if (this.consumed) throw new Error("Stream already consumed");
     this.consumed = true;
@@ -219,10 +142,9 @@ export class TextStreamResult implements AsyncIterable<string> {
 
         try {
           const parsed = JSON.parse(data) as Record<string, unknown>;
-          const chunk = parseSSEChunk(parsed, this.isAnthropic);
+          const chunk = parseSSEChunk(parsed);
           if (!chunk) continue;
 
-          // Accumulate for deferred properties
           if (chunk.type === "text-delta" && chunk.textDelta) {
             this.textAccumulator += chunk.textDelta;
           }

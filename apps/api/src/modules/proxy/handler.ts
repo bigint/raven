@@ -241,7 +241,17 @@ export const proxyHandler = (
       });
     }
 
-    // 8b. Transform request body for provider-specific optimizations
+    // 8b. Normalize request from OpenAI format to provider-native format
+    if (
+      adapter.normalizeRequest &&
+      parsedBody &&
+      Object.keys(parsedBody).length > 0
+    ) {
+      parsedBody = adapter.normalizeRequest(parsedBody);
+      finalBodyText = JSON.stringify(parsedBody);
+    }
+
+    // 8c. Apply provider-specific optimizations (e.g. cache control)
     if (
       adapter.transformBody &&
       parsedBody &&
@@ -251,6 +261,13 @@ export const proxyHandler = (
       finalBodyText = JSON.stringify(transformed);
     }
 
+    // 8d. Override upstream path to provider's chat endpoint when applicable
+    const resolvedUpstreamPath =
+      upstreamPath === "/chat/completions" &&
+      adapter.chatEndpoint !== "/chat/completions"
+        ? adapter.chatEndpoint
+        : upstreamPath;
+
     // 9. Forward request with retry logic
     const forwardInput = {
       adapter,
@@ -259,7 +276,7 @@ export const proxyHandler = (
       incomingHeaders: c.req.header(),
       method,
       rawUrl: c.req.url,
-      upstreamPath
+      upstreamPath: resolvedUpstreamPath
     };
 
     let upstreamResult = await withRetry(() => forwardRequest(forwardInput));
@@ -447,20 +464,33 @@ export const proxyHandler = (
         );
       },
       transform(chunk, controller) {
-        controller.enqueue(chunk);
-
-        // Decode the chunk and process SSE lines
         const text = new TextDecoder().decode(chunk);
         const combined = partialLine + text;
         const lines = combined.split("\n");
 
-        // Last element may be incomplete; keep it for next chunk
         partialLine = lines.pop() ?? "";
 
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (trimmed) {
-            accumulator.processChunk(trimmed);
+        if (adapter.normalizeStreamChunk) {
+          const encoder = new TextEncoder();
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (trimmed) {
+              accumulator.processChunk(trimmed);
+              const normalized = adapter.normalizeStreamChunk(trimmed);
+              if (normalized) {
+                controller.enqueue(encoder.encode(`${normalized}\n\n`));
+              }
+            } else {
+              controller.enqueue(encoder.encode("\n"));
+            }
+          }
+        } else {
+          controller.enqueue(chunk);
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (trimmed) {
+              accumulator.processChunk(trimmed);
+            }
           }
         }
       }
