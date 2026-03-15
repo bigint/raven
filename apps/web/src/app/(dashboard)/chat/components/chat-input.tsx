@@ -47,7 +47,7 @@ export const ChatInput = ({
     <div className="border-t border-border px-4 py-3 md:px-6">
       <div className="mx-auto flex max-w-3xl items-end gap-2">
         <textarea
-          className="flex-1 resize-none rounded-lg border border-input bg-background px-3 py-2.5 text-sm leading-relaxed placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          className="flex-1 resize-none rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           disabled={isStreaming}
           onChange={(e) => {
             setValue(e.target.value);
@@ -63,11 +63,12 @@ export const ChatInput = ({
           value={value}
         />
         {isStreaming ? (
-          <Button onClick={onStop} size="md" variant="secondary">
+          <Button className="shrink-0" onClick={onStop} size="md" variant="secondary">
             <Square className="size-4" />
           </Button>
         ) : (
           <Button
+            className="shrink-0"
             disabled={!value.trim() || disabled}
             onClick={handleSend}
             size="md"
