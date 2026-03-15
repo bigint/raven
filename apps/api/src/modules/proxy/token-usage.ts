@@ -1,4 +1,7 @@
 export interface TokenUsage {
+  cachedTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
   inputTokens: number;
   outputTokens: number;
   reasoningTokens: number;
@@ -8,7 +11,15 @@ export const extractTokenUsage = (
   body: Record<string, unknown>
 ): TokenUsage => {
   const usage = body.usage as Record<string, unknown> | undefined;
-  if (!usage) return { inputTokens: 0, outputTokens: 0, reasoningTokens: 0 };
+  if (!usage)
+    return {
+      cachedTokens: 0,
+      cacheReadTokens: 0,
+      cacheWriteTokens: 0,
+      inputTokens: 0,
+      outputTokens: 0,
+      reasoningTokens: 0
+    };
 
   // OpenAI format: prompt_tokens / completion_tokens
   // Anthropic format: input_tokens / output_tokens
@@ -23,7 +34,31 @@ export const extractTokenUsage = (
     | undefined;
   const reasoningTokens = (completionDetails?.reasoning_tokens as number) ?? 0;
 
-  return { inputTokens, outputTokens, reasoningTokens };
+  // OpenAI: prompt_tokens_details.cached_tokens
+  const promptDetails = usage.prompt_tokens_details as
+    | Record<string, unknown>
+    | undefined;
+  const openaiCachedTokens =
+    (promptDetails?.cached_tokens as number) ?? 0;
+
+  // Anthropic: cache_read_input_tokens / cache_creation_input_tokens
+  const anthropicCacheRead =
+    (usage.cache_read_input_tokens as number) ?? 0;
+  const anthropicCacheWrite =
+    (usage.cache_creation_input_tokens as number) ?? 0;
+
+  const cacheReadTokens = openaiCachedTokens || anthropicCacheRead;
+  const cacheWriteTokens = anthropicCacheWrite;
+  const cachedTokens = cacheReadTokens + cacheWriteTokens;
+
+  return {
+    cachedTokens,
+    cacheReadTokens,
+    cacheWriteTokens,
+    inputTokens,
+    outputTokens,
+    reasoningTokens
+  };
 };
 
 export const extractModel = (
@@ -41,6 +76,9 @@ export const extractModel = (
  */
 export class StreamTokenAccumulator {
   private usage: TokenUsage = {
+    cachedTokens: 0,
+    cacheReadTokens: 0,
+    cacheWriteTokens: 0,
     inputTokens: 0,
     outputTokens: 0,
     reasoningTokens: 0
@@ -91,6 +129,17 @@ export class StreamTokenAccumulator {
       ) {
         this.usage.reasoningTokens = completionDetails.reasoning_tokens;
       }
+      const promptDetails = usage.prompt_tokens_details as
+        | Record<string, unknown>
+        | undefined;
+      if (
+        promptDetails &&
+        typeof promptDetails.cached_tokens === "number"
+      ) {
+        this.usage.cacheReadTokens = promptDetails.cached_tokens;
+        this.usage.cachedTokens =
+          this.usage.cacheReadTokens + this.usage.cacheWriteTokens;
+      }
     }
 
     // Anthropic: message_delta event contains usage
@@ -98,8 +147,15 @@ export class StreamTokenAccumulator {
       const deltaUsage = (parsed as Record<string, unknown>).usage as
         | Record<string, unknown>
         | undefined;
-      if (deltaUsage && typeof deltaUsage.output_tokens === "number") {
-        this.usage.outputTokens = deltaUsage.output_tokens;
+      if (deltaUsage) {
+        if (typeof deltaUsage.output_tokens === "number") {
+          this.usage.outputTokens = deltaUsage.output_tokens;
+        }
+        if (typeof deltaUsage.cache_read_input_tokens === "number") {
+          this.usage.cacheReadTokens = deltaUsage.cache_read_input_tokens;
+          this.usage.cachedTokens =
+            this.usage.cacheReadTokens + this.usage.cacheWriteTokens;
+        }
       }
     }
 
@@ -110,8 +166,19 @@ export class StreamTokenAccumulator {
         | undefined;
       if (message) {
         const msgUsage = message.usage as Record<string, unknown> | undefined;
-        if (msgUsage && typeof msgUsage.input_tokens === "number") {
-          this.usage.inputTokens = msgUsage.input_tokens;
+        if (msgUsage) {
+          if (typeof msgUsage.input_tokens === "number") {
+            this.usage.inputTokens = msgUsage.input_tokens;
+          }
+          if (typeof msgUsage.cache_read_input_tokens === "number") {
+            this.usage.cacheReadTokens = msgUsage.cache_read_input_tokens;
+          }
+          if (typeof msgUsage.cache_creation_input_tokens === "number") {
+            this.usage.cacheWriteTokens =
+              msgUsage.cache_creation_input_tokens;
+          }
+          this.usage.cachedTokens =
+            this.usage.cacheReadTokens + this.usage.cacheWriteTokens;
         }
         if (typeof message.model === "string") {
           this.model = message.model;
