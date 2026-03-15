@@ -18,6 +18,43 @@ export const anthropicAdapter: ProviderAdapter = {
   },
   name: "anthropic",
 
+  transformBody(body) {
+    const result = { ...body };
+
+    if (result.system !== undefined) {
+      const blocks =
+        typeof result.system === "string"
+          ? [{ type: "text", text: result.system }]
+          : (result.system as Array<Record<string, unknown>>).map((b) => ({
+              ...b
+            }));
+
+      const hasExisting = blocks.some((b) => b.cache_control !== undefined);
+
+      if (!hasExisting && blocks.length > 0) {
+        blocks[blocks.length - 1]!.cache_control = { type: "ephemeral" };
+      }
+
+      result.system = blocks;
+    }
+
+    if (Array.isArray(result.tools) && result.tools.length > 0) {
+      const tools = (result.tools as Array<Record<string, unknown>>).map(
+        (t) => ({ ...t })
+      );
+
+      const hasExisting = tools.some((t) => t.cache_control !== undefined);
+
+      if (!hasExisting) {
+        tools[tools.length - 1]!.cache_control = { type: "ephemeral" };
+      }
+
+      result.tools = tools;
+    }
+
+    return result;
+  },
+
   transformHeaders(apiKey, headers) {
     return {
       ...headers,
