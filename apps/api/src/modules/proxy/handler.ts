@@ -154,6 +154,7 @@ export const proxyHandler = (
         c.req.header("x-session-id")
       );
       const logData = {
+        cachedTokens: 0,
         cacheHit: true,
         cost: 0,
         guardrailMatches:
@@ -178,10 +179,10 @@ export const proxyHandler = (
         virtualKeyId: virtualKey.id
       };
 
-      const { inputTokens, outputTokens, reasoningTokens } = extractTokenUsage(
-        cacheResult.parsed
-      );
+      const { inputTokens, outputTokens, reasoningTokens, cachedTokens } =
+        extractTokenUsage(cacheResult.parsed);
       const model = extractModel(cacheResult.parsed, requestedModel);
+      logData.cachedTokens = cachedTokens;
       logData.inputTokens = inputTokens;
       logData.outputTokens = outputTokens;
       logData.reasoningTokens = reasoningTokens;
@@ -202,6 +203,12 @@ export const proxyHandler = (
         headers: cacheHeaders,
         status: 200
       });
+    }
+
+    // 8b. Transform request body for provider-specific optimizations
+    if (adapter.transformBody && parsedBody && Object.keys(parsedBody).length > 0) {
+      const transformed = adapter.transformBody(parsedBody);
+      finalBodyText = JSON.stringify(transformed);
     }
 
     // 9. Forward request with retry logic
@@ -256,6 +263,7 @@ export const proxyHandler = (
 
     // 12. Prepare log data
     const logData = {
+      cachedTokens: 0,
       cacheHit: false,
       cost: 0,
       guardrailMatches:
@@ -295,14 +303,15 @@ export const proxyHandler = (
 
       // Defer all post-processing — none of it affects the response
       void (() => {
-        const { inputTokens, outputTokens, reasoningTokens } =
+        const { inputTokens, outputTokens, reasoningTokens, cachedTokens, cacheReadTokens, cacheWriteTokens } =
           extractTokenUsage(responseBody);
         const model = extractModel(responseBody, requestedModel);
+        logData.cachedTokens = cachedTokens;
         logData.inputTokens = inputTokens;
         logData.outputTokens = outputTokens;
         logData.reasoningTokens = reasoningTokens;
         logData.model = model;
-        logData.cost = adapter.estimateCost(model, inputTokens, outputTokens);
+        logData.cost = adapter.estimateCost(model, inputTokens, outputTokens, cacheReadTokens, cacheWriteTokens);
 
         const responseAnalysis = analyzeResponse(responseBody);
         if (responseAnalysis.hasToolCalls) {
@@ -349,17 +358,18 @@ export const proxyHandler = (
         }
 
         // Fire-and-forget: log accumulated token usage
-        const { inputTokens, outputTokens, reasoningTokens } =
+        const { inputTokens, outputTokens, reasoningTokens, cachedTokens, cacheReadTokens, cacheWriteTokens } =
           accumulator.getUsage();
         const model =
           accumulator.getModel() === "unknown"
             ? upstreamResult.requestedModel
             : accumulator.getModel();
+        logData.cachedTokens = cachedTokens;
         logData.inputTokens = inputTokens;
         logData.outputTokens = outputTokens;
         logData.reasoningTokens = reasoningTokens;
         logData.model = model;
-        logData.cost = adapter.estimateCost(model, inputTokens, outputTokens);
+        logData.cost = adapter.estimateCost(model, inputTokens, outputTokens, cacheReadTokens, cacheWriteTokens);
 
         logAndPublish(db, logData, { redis, teamId: virtualKey.teamId });
         updateLastUsed(redis, virtualKey.id);

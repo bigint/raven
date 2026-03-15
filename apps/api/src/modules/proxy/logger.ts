@@ -19,6 +19,7 @@ export interface LogData {
   reasoningTokens: number;
   cost: number;
   latencyMs: number;
+  cachedTokens: number;
   cacheHit: boolean;
   hasImages: boolean;
   imageCount: number;
@@ -42,7 +43,7 @@ export const logProxyRequest = async (
     const [row] = await db
       .insert(requestLogs)
       .values({
-        cachedTokens: 0,
+        cachedTokens: data.cachedTokens,
         cacheHit: data.cacheHit,
         cost: data.cost.toFixed(6),
         hasImages: data.hasImages,
