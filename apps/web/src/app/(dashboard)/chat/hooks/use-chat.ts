@@ -74,7 +74,8 @@ export const useChat = () => {
     keyRef.current = pk;
     clientRef.current = new RavenClient({
       apiKey: pk.key,
-      baseUrl: API_URL
+      baseUrl: API_URL,
+      headers: { "x-session-id": crypto.randomUUID() }
     });
     return pk;
   };
