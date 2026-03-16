@@ -1,0 +1,66 @@
+---
+title: "Rate Limiting"
+description: "Protect your infrastructure with per-key rate limits."
+---
+
+Rate limiting prevents abuse and ensures fair resource allocation across all API consumers.
+
+## How It Works
+
+Raven uses a **token bucket algorithm** backed by Redis to enforce rate limits per virtual key:
+
+- **RPM (Requests Per Minute)** — Maximum requests allowed per minute
+- **RPD (Requests Per Day)** — Maximum requests allowed per day
+
+## Configuration
+
+Set rate limits when creating or editing a virtual key:
+
+```json
+{
+  "name": "production-app",
+  "rateLimit": {
+    "rpm": 100,
+    "rpd": 10000
+  }
+}
+```
+
+## Rate Limit Response
+
+When a rate limit is exceeded, Raven returns:
+
+```http
+HTTP/1.1 429 Too Many Requests
+Retry-After: 30
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 1705312800
+```
+
+```json
+{
+  "error": {
+    "type": "rate_limit_exceeded",
+    "message": "Rate limit exceeded. Please retry after 30 seconds."
+  }
+}
+```
+
+## Plan-Level Limits
+
+In addition to per-key limits, each plan has an overall monthly request limit:
+
+| Plan | Monthly Requests |
+|------|------------------|
+| Free | 10,000 |
+| Pro | 500,000 |
+| Team | 2,000,000 |
+| Enterprise | Unlimited |
+
+## Best Practices
+
+- **Set conservative limits** initially and increase as needed
+- **Use different limits** for different environments (higher for production, lower for development)
+- **Monitor 429 responses** in analytics to detect if limits need adjusting
+- **Implement retry logic** with exponential backoff in your application

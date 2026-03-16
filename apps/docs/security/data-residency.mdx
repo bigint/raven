@@ -1,0 +1,35 @@
+---
+title: "Data Residency"
+description: "Control where your data is stored and processed."
+---
+
+Data residency controls let you specify where your data is stored and which providers can process it, helping you meet regulatory requirements.
+
+## Provider-Level Control
+
+Configure which providers are allowed for different types of data:
+
+- **Sensitive data** — Route only to providers with appropriate certifications
+- **Regional restrictions** — Use only providers with data centers in approved regions
+- **Self-hosted models** — Route sensitive requests to Ollama or self-hosted models
+
+## BYOK (Bring Your Own Key)
+
+With Bring Your Own Key, your provider credentials never leave your control:
+
+- API keys are encrypted at rest in Raven's database
+- Keys are decrypted only at request time to authenticate with the provider
+- You can rotate keys at any time
+
+For maximum control with self-hosting, the encryption key (`ENCRYPTION_SECRET`) is entirely under your management.
+
+## Self-Hosting
+
+For the strongest data residency guarantees, self-host Raven on your own infrastructure:
+
+- **All data stays within your network**
+- **No external dependencies** (except the LLM providers themselves)
+- **Full control** over encryption keys, database, and cache
+- **Air-gapped deployments** possible with Ollama for local-only AI
+
+See the [Self-Hosting guide](/getting-started/self-hosting) for setup instructions.

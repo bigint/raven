@@ -1,0 +1,57 @@
+---
+title: "Security Overview"
+description: "How Raven protects your data, credentials, and AI infrastructure."
+---
+
+Security is a core design principle of Raven. Here's how we protect your data and credentials at every layer.
+
+## Credential Security
+
+### Encryption at Rest
+
+All provider API keys are encrypted using AES encryption with a configurable encryption key (`ENCRYPTION_SECRET`). Keys are never stored in plaintext.
+
+### Key Rotation
+
+The `ENCRYPTION_SECRET_PREVIOUS` environment variable supports seamless encryption key rotation without downtime.
+
+### Virtual Key Hashing
+
+Virtual keys are hashed before storage. The full key is shown only once at creation time and cannot be retrieved later.
+
+## Transport Security
+
+- **HTTPS only** — All API traffic is encrypted in transit
+- **Security headers** — `X-Content-Type-Options`, `X-Frame-Options`, CSP
+- **CORS** — Configured to allow only your application's domain
+
+## Authentication
+
+| Method | Used For |
+|--------|----------|
+| **Session-based** | Dashboard access |
+| **API key (Bearer)** | API requests |
+| **OAuth** | GitHub and Google sign-in |
+| **SSO/OIDC** | Enterprise identity providers |
+
+## Request Security
+
+- **Body size limit** — 10 MB maximum request size
+- **Rate limiting** — Per-key RPM and RPD limits via Redis-backed token bucket
+- **IP allowlisting** — CIDR-based IP restrictions
+- **Prompt injection detection** — Automatic detection of injection attempts
+
+## Data Protection
+
+- **Base64 filtering** — Image data is stripped from logs
+- **Request ID tracking** — Every request has a unique ID for tracing
+- **Audit logging** — All administrative actions are logged
+
+## Infrastructure
+
+| Component | Security Feature |
+|-----------|-----------------|
+| **PostgreSQL** | Encrypted connections, role-based access |
+| **Redis** | 256 MB memory limit, LRU eviction |
+| **API** | Hono with security middleware |
+| **Web** | Next.js with CSP headers |
