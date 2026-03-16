@@ -1,0 +1,93 @@
+---
+title: "API Reference"
+description: "Complete reference for the Raven REST API."
+---
+
+The Raven API is organized around REST. It accepts JSON-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes.
+
+## Base URL
+
+```
+https://api.raven.dev
+```
+
+Or your [custom domain](/platform/custom-domains) if configured.
+
+## Versioning
+
+The chat completions endpoint is versioned under `/v1`:
+
+```
+https://api.raven.dev/v1/chat/completions
+```
+
+Management API endpoints are unversioned:
+
+```
+https://api.raven.dev/providers
+https://api.raven.dev/keys
+```
+
+## Request Format
+
+All requests should include:
+
+```http
+Content-Type: application/json
+Authorization: Bearer <your-api-key>
+```
+
+## Response Format
+
+Successful responses return JSON with the relevant data:
+
+```json
+{
+  "id": "prov_abc123",
+  "provider": "openai",
+  "name": "Production OpenAI",
+  "isEnabled": true,
+  "createdAt": "2025-01-15T10:00:00Z"
+}
+```
+
+## Error Format
+
+Errors return a consistent structure:
+
+```json
+{
+  "error": {
+    "type": "validation_error",
+    "message": "Provider name is required"
+  }
+}
+```
+
+## HTTP Status Codes
+
+| Code | Description |
+|------|-------------|
+| `200` | Success |
+| `201` | Created |
+| `400` | Bad request — invalid input |
+| `401` | Unauthorized — missing or invalid API key |
+| `402` | Payment required — budget exceeded |
+| `403` | Forbidden — IP not allowed or insufficient permissions |
+| `404` | Not found |
+| `429` | Rate limited — too many requests |
+| `500` | Internal server error |
+
+## Rate Limits
+
+Rate limits are applied per virtual key. See [Rate Limiting](/security/rate-limiting) for details.
+
+## Request IDs
+
+Every response includes an `X-Request-ID` header for tracing:
+
+```http
+X-Request-ID: req_abc123def456
+```
+
+Include this ID when contacting support about specific requests.

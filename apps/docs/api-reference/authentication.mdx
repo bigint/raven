@@ -1,0 +1,51 @@
+---
+title: "Authentication"
+description: "How to authenticate with the Raven API."
+---
+
+Raven uses API key authentication. Include your virtual key in the `Authorization` header of every request.
+
+## API Key Authentication
+
+```http
+Authorization: Bearer rk_live_abc123...
+```
+
+### Example
+
+```bash
+curl -X GET https://api.raven.dev/providers \
+  -H "Authorization: Bearer rk_live_abc123..."
+```
+
+## Key Types
+
+| Prefix | Environment | Use |
+|--------|-------------|-----|
+| `rk_live_` | Production | Live API requests |
+| `rk_test_` | Test | Development and testing |
+
+## Session Authentication
+
+The dashboard uses session-based authentication via cookies. This is handled automatically by the web application and is not used for API requests.
+
+## OAuth
+
+For signing into the dashboard, Raven supports:
+
+- **Email/password** — Built-in authentication
+- **GitHub OAuth** — Sign in with GitHub
+- **Google OAuth** — Sign in with Google
+- **SSO/OIDC** — Enterprise identity providers
+
+## Security Best Practices
+
+<Warning>
+  Never expose your API keys in client-side code, public repositories, or logs.
+</Warning>
+
+- **Use environment variables** — Store keys in environment variables, not in code
+- **Use test keys for development** — Keep `rk_live_` keys out of development environments
+- **Set expiration dates** — Rotate keys regularly by setting expiration dates
+- **Use IP allowlists** — Restrict keys to specific IP ranges for production
+- **Monitor usage** — Review analytics for unexpected usage patterns
