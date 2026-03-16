@@ -47,7 +47,7 @@ export const ModelInput = ({
         if (!val) return;
         onChange(val.value, val.provider);
       }}
-      value={value ? options.find((o) => o.value === value) : undefined}
+      value={options.find((o) => o.value === value) ?? null}
     >
       <Combobox.Input
         aria-label="Search models"
