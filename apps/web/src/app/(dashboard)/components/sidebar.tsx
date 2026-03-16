@@ -8,7 +8,6 @@ import {
   BarChart3,
   Cpu,
   CreditCard,
-  Download,
   FileText,
   Key,
   LayoutDashboard,
@@ -80,7 +79,6 @@ const NAV_ITEMS: NavItem[] = [
     label: "Team"
   },
   { href: "/billing", icon: Receipt, label: "Billing" },
-  { href: "/exports", icon: Download, label: "Exports" },
   {
     gate: (plan) => PLAN_FEATURES[plan].hasWebhooks,
     href: "/webhooks",
