@@ -11,7 +11,6 @@ import { initEventBus } from "./lib/events";
 import { refreshPricingCache } from "./lib/pricing-cache";
 import { getRedis } from "./lib/redis";
 import { sendWelcomeEmail } from "./lib/send-welcome-email";
-import { telemetry } from "./lib/telemetry";
 import { initWebhookDispatcher } from "./lib/webhook-dispatcher";
 import { createAuthMiddleware } from "./middleware/auth";
 import { platformAdminMiddleware } from "./middleware/platform-admin";
@@ -65,22 +64,6 @@ export const redis = getRedis(env.REDIS_URL);
 initEventBus(redis);
 initWebhookDispatcher(db, redis);
 initEmailDispatcher(db, redis, env.APP_URL);
-
-// Initialize OpenTelemetry
-const otelHeaders: Record<string, string> = {};
-if (process.env.OTEL_EXPORTER_OTLP_HEADERS) {
-  for (const pair of process.env.OTEL_EXPORTER_OTLP_HEADERS.split(",")) {
-    const [key, ...rest] = pair.split("=");
-    if (key && rest.length > 0) {
-      otelHeaders[key.trim()] = rest.join("=").trim();
-    }
-  }
-}
-telemetry.init({
-  enabled: process.env.OTEL_ENABLED === "true",
-  endpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || undefined,
-  headers: otelHeaders
-});
 
 // Flush buffered lastUsedAt timestamps every 60 seconds
 setInterval(() => {

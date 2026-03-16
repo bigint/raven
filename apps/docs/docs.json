@@ -87,8 +87,7 @@
             "pages": [
               "guides/openai-compatibility",
               "guides/streaming",
-              "guides/sdk",
-              "guides/observability"
+              "guides/sdk"
             ]
           }
         ]

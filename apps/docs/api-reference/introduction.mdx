@@ -11,22 +11,44 @@ The Raven API is organized around REST. It accepts JSON-encoded request bodies, 
 https://api.raven.dev
 ```
 
-Or your [custom domain](/platform/custom-domains) if configured.
+Or your [custom domain](/platform/custom-domains) if configured (e.g., `https://ai.yourcompany.com`).
 
-## Versioning
+## Two APIs, One Gateway
 
-The chat completions endpoint is versioned under `/v1`:
+Raven has two distinct API surfaces:
 
+| API | Base Path | Authentication | Purpose |
+|-----|-----------|----------------|---------|
+| **Proxy API** | `/v1/` | Virtual key (Bearer token) | Send LLM requests through the gateway |
+| **Management API** | `/` | Session cookie or Bearer token | Manage providers, keys, guardrails, etc. |
+
+### Proxy API
+
+The proxy API handles AI requests. It is OpenAI-compatible:
+
+```bash
+POST https://api.raven.dev/v1/chat/completions
+Authorization: Bearer rk_live_...
 ```
-https://api.raven.dev/v1/chat/completions
+
+### Management API
+
+The management API handles resource configuration:
+
+```bash
+GET https://api.raven.dev/providers
+Authorization: Bearer rk_live_...
+X-Org-Id: org_abc123
 ```
 
-Management API endpoints are unversioned:
+## Authentication
 
-```
-https://api.raven.dev/providers
-https://api.raven.dev/keys
-```
+Two authentication methods are supported. See [Authentication](/api-reference/authentication) for full details.
+
+| Method | Used For | Header |
+|--------|----------|--------|
+| **Virtual key** | Proxy API and management API | `Authorization: Bearer rk_live_...` |
+| **Session cookie** | Dashboard (web app) | Set automatically by the browser |
 
 ## Request Format
 
@@ -34,10 +56,18 @@ All requests should include:
 
 ```http
 Content-Type: application/json
-Authorization: Bearer <your-api-key>
+Authorization: Bearer <your-virtual-key>
+```
+
+For management API requests, include the organization ID:
+
+```http
+X-Org-Id: <your-organization-id>
 ```
 
 ## Response Format
+
+### Success
 
 Successful responses return JSON with the relevant data:
 
@@ -51,7 +81,16 @@ Successful responses return JSON with the relevant data:
 }
 ```
 
-## Error Format
+List endpoints return arrays:
+
+```json
+[
+  { "id": "prov_abc123", "provider": "openai", "name": "Production" },
+  { "id": "prov_def456", "provider": "anthropic", "name": "Backup" }
+]
+```
+
+### Errors
 
 Errors return a consistent structure:
 
@@ -66,21 +105,40 @@ Errors return a consistent structure:
 
 ## HTTP Status Codes
 
-| Code | Description |
-|------|-------------|
-| `200` | Success |
-| `201` | Created |
-| `400` | Bad request — invalid input |
-| `401` | Unauthorized — missing or invalid API key |
-| `402` | Payment required — budget exceeded |
-| `403` | Forbidden — IP not allowed or insufficient permissions |
-| `404` | Not found |
-| `429` | Rate limited — too many requests |
-| `500` | Internal server error |
+| Code | Description | Common Causes |
+|------|-------------|---------------|
+| `200` | Success | Request completed successfully |
+| `201` | Created | Resource created successfully |
+| `400` | Bad Request | Invalid input, missing required fields, unsupported model |
+| `401` | Unauthorized | Missing or invalid API key |
+| `402` | Payment Required | Budget exceeded |
+| `403` | Forbidden | IP not in allowlist, insufficient permissions, data residency violation |
+| `404` | Not Found | Resource does not exist |
+| `409` | Conflict | Resource already exists (e.g., duplicate domain) |
+| `413` | Payload Too Large | Request body exceeds size limit |
+| `429` | Rate Limited | RPM, RPD, or plan quota exceeded |
+| `500` | Internal Server Error | Unexpected server error |
 
 ## Rate Limits
 
-Rate limits are applied per virtual key. See [Rate Limiting](/security/rate-limiting) for details.
+Rate limits are applied per virtual key. When exceeded, the API returns `429 Too Many Requests`. See [Rate Limiting](/security/rate-limiting) for configuration details.
+
+## Versioning
+
+The chat completions endpoint is versioned under `/v1`:
+
+```
+POST /v1/chat/completions
+```
+
+Management API endpoints are unversioned:
+
+```
+GET  /providers
+POST /providers
+GET  /keys
+POST /keys
+```
 
 ## Request IDs
 
@@ -91,3 +149,39 @@ X-Request-ID: req_abc123def456
 ```
 
 Include this ID when contacting support about specific requests.
+
+## Raven-Specific Headers
+
+Proxy responses include additional headers:
+
+| Header | Description |
+|--------|-------------|
+| `X-Raven-Provider` | Provider that handled the request |
+| `X-Raven-Model` | Model that was used |
+| `X-Raven-Latency-Ms` | Total request latency in milliseconds |
+| `X-Guardrail-Warnings` | Guardrail warnings, if any |
+
+## BYOK (Bring Your Own Key)
+
+You can provide your own provider API key for a request using the `X-Provider-Key` header:
+
+```bash
+curl -X POST https://api.raven.dev/v1/chat/completions \
+  -H "Authorization: Bearer rk_live_..." \
+  -H "X-Provider-Key: sk-your-openai-key" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "gpt-4o", "messages": [...]}'
+```
+
+When `X-Provider-Key` is present, that key is used instead of the organization's stored provider key. All gateway features (logging, guardrails, rate limiting, budgets) still apply.
+
+## Next Steps
+
+<Columns cols={2}>
+  <Card title="Authentication" icon="key" href="/api-reference/authentication">
+    Learn about auth methods and virtual keys.
+  </Card>
+  <Card title="Chat Completions" icon="message" href="/api-reference/endpoints/chat-completions">
+    Send your first LLM request.
+  </Card>
+</Columns>
