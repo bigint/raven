@@ -1,0 +1,77 @@
+---
+title: "Observability"
+description: "Monitor Raven with OpenTelemetry and Prometheus metrics."
+---
+
+Raven includes built-in observability through OpenTelemetry tracing and Prometheus-compatible metrics.
+
+## OpenTelemetry
+
+### Configuration
+
+Enable OpenTelemetry with environment variables:
+
+```env
+OTEL_ENABLED=true
+OTEL_EXPORTER_OTLP_ENDPOINT=https://your-collector.example.com
+OTEL_EXPORTER_OTLP_HEADERS=Authorization=Bearer your-token
+```
+
+### Traces
+
+Raven emits traces for every request, including spans for:
+
+- Authentication and authorization
+- Rate limit checks
+- Guardrail evaluation
+- Cache lookups
+- Provider request/response
+- Token counting and cost calculation
+
+### Compatible Backends
+
+Send traces to any OpenTelemetry-compatible backend:
+
+- **Jaeger** — Open-source distributed tracing
+- **Honeycomb** — Observability platform
+- **Datadog** — Monitoring and analytics
+- **Grafana Tempo** — Trace storage and querying
+- **New Relic** — APM and observability
+
+## Prometheus Metrics
+
+Raven exposes a Prometheus-compatible metrics endpoint for monitoring:
+
+### Available Metrics
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `raven_requests_total` | Counter | Total requests processed |
+| `raven_request_duration_ms` | Histogram | Request latency distribution |
+| `raven_tokens_input_total` | Counter | Total input tokens processed |
+| `raven_tokens_output_total` | Counter | Total output tokens generated |
+| `raven_cost_total` | Counter | Total cost in USD |
+| `raven_cache_hits_total` | Counter | Cache hit count |
+| `raven_cache_misses_total` | Counter | Cache miss count |
+| `raven_guardrail_triggers_total` | Counter | Guardrail trigger count |
+| `raven_rate_limit_exceeded_total` | Counter | Rate limit exceeded count |
+
+## Health Check
+
+The API exposes a health endpoint:
+
+```bash
+curl https://api.raven.dev/health
+```
+
+Returns `200 OK` when the service is healthy, including database and Redis connectivity status.
+
+## Grafana Dashboard
+
+For self-hosted deployments, import the included Grafana dashboard to visualize:
+
+- Request throughput and latency
+- Token usage and costs over time
+- Cache hit rates
+- Error rates by provider
+- Rate limit violations

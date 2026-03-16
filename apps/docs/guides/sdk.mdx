@@ -1,0 +1,108 @@
+---
+title: "TypeScript SDK"
+description: "Use the official Raven TypeScript SDK for type-safe API access."
+---
+
+The `@raven/sdk` package provides a type-safe TypeScript client for the Raven management API.
+
+## Installation
+
+```bash
+npm install @raven/sdk
+```
+
+## Usage
+
+```typescript
+import { RavenClient } from "@raven/sdk";
+
+const raven = new RavenClient({
+  apiKey: "rk_live_...",
+  baseURL: "https://api.raven.dev"
+});
+```
+
+## Management API
+
+The SDK provides methods for managing all Raven resources:
+
+### Providers
+
+```typescript
+// List providers
+const providers = await raven.providers.list();
+
+// Create a provider
+const provider = await raven.providers.create({
+  provider: "openai",
+  apiKey: "sk-...",
+  name: "Production OpenAI"
+});
+
+// Update a provider
+await raven.providers.update(provider.id, {
+  isEnabled: false
+});
+
+// Delete a provider
+await raven.providers.delete(provider.id);
+```
+
+### Virtual Keys
+
+```typescript
+// List keys
+const keys = await raven.keys.list();
+
+// Create a key
+const key = await raven.keys.create({
+  name: "Production App",
+  environment: "live",
+  rateLimitRpm: 100,
+  rateLimitRpd: 10000
+});
+
+// Rotate a key
+const newKey = await raven.keys.rotate(key.id);
+```
+
+### Guardrails
+
+```typescript
+// List guardrails
+const rules = await raven.guardrails.list();
+
+// Create a guardrail
+await raven.guardrails.create({
+  type: "pii",
+  entities: ["email", "phone", "ssn"],
+  action: "block"
+});
+```
+
+### Budgets
+
+```typescript
+// Create a budget
+await raven.budgets.create({
+  name: "Monthly limit",
+  amount: 500,
+  period: "monthly",
+  alertThreshold: 80
+});
+```
+
+### Analytics
+
+```typescript
+// Get usage analytics
+const analytics = await raven.analytics.get({
+  startDate: "2025-01-01",
+  endDate: "2025-01-31",
+  groupBy: "model"
+});
+```
+
+## Chat Completions
+
+For chat completions, use the OpenAI SDK pointed at Raven — see the [OpenAI Compatibility guide](/guides/openai-compatibility).

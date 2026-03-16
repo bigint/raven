@@ -1,0 +1,69 @@
+---
+title: "Streaming"
+description: "Stream LLM responses in real-time with Server-Sent Events."
+---
+
+Raven supports streaming responses using Server-Sent Events (SSE), matching the OpenAI streaming format.
+
+## Enabling Streaming
+
+Set `stream: true` in your request:
+
+<CodeGroup>
+
+```typescript TypeScript
+const stream = await client.chat.completions.create({
+  model: "gpt-4o",
+  messages: [{ role: "user", content: "Write a poem about coding" }],
+  stream: true
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content || "");
+}
+```
+
+```python Python
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a poem about coding"}],
+    stream=True
+)
+
+for chunk in stream:
+    print(chunk.choices[0].delta.content or "", end="")
+```
+
+```bash cURL
+curl -X POST https://api.raven.dev/v1/chat/completions \
+  -H "Authorization: Bearer rk_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Write a poem about coding"}],
+    "stream": true
+  }'
+```
+
+</CodeGroup>
+
+## How Streaming Works in Raven
+
+1. Your application sends a streaming request to Raven
+2. Raven forwards it to the provider with streaming enabled
+3. As the provider streams tokens, Raven forwards them to your application in real-time
+4. Raven accumulates tokens in the background for accurate usage tracking
+5. When the stream completes, Raven logs the full request with token counts and cost
+
+## Token Tracking
+
+Even with streaming, Raven accurately tracks:
+
+- **Input tokens** — Counted from the request
+- **Output tokens** — Accumulated as chunks arrive
+- **Cost** — Calculated from final token counts
+- **Latency** — Time to first token and total time
+
+## Plugins and Streaming
+
+The `on_stream` plugin hook fires for each chunk, enabling real-time content filtering or progress tracking during streaming responses.

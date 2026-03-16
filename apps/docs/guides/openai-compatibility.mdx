@@ -1,0 +1,123 @@
+---
+title: "OpenAI Compatibility"
+description: "Use Raven as a drop-in replacement for the OpenAI API."
+---
+
+Raven provides a fully OpenAI-compatible API endpoint. This means you can switch to Raven by changing just two configuration values — no code changes required.
+
+## Drop-in Replacement
+
+### Before (Direct OpenAI)
+
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "sk-..."
+});
+```
+
+### After (Through Raven)
+
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "rk_live_...",        // Your Raven virtual key
+  baseURL: "https://api.raven.dev/v1"  // Raven endpoint
+});
+```
+
+Everything else stays exactly the same — `client.chat.completions.create()`, streaming, function calling, all work identically.
+
+## Supported Endpoints
+
+| Endpoint | Status |
+|----------|--------|
+| `POST /v1/chat/completions` | Supported |
+
+## Compatible SDKs
+
+Any SDK that supports custom base URLs works with Raven:
+
+<CodeGroup>
+
+```typescript OpenAI Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "rk_live_...",
+  baseURL: "https://api.raven.dev/v1"
+});
+
+const response = await client.chat.completions.create({
+  model: "gpt-4o",
+  messages: [{ role: "user", content: "Hello" }]
+});
+```
+
+```python OpenAI Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="rk_live_...",
+    base_url="https://api.raven.dev/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello"}]
+)
+```
+
+```bash cURL
+curl -X POST https://api.raven.dev/v1/chat/completions \
+  -H "Authorization: Bearer rk_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
+```
+
+</CodeGroup>
+
+## Using Non-OpenAI Models
+
+The magic of Raven is that you use the **same OpenAI-compatible API** to access any provider:
+
+```typescript
+// Access Anthropic models through the OpenAI SDK
+const response = await client.chat.completions.create({
+  model: "claude-sonnet-4-20250514",
+  messages: [{ role: "user", content: "Hello" }]
+});
+```
+
+```typescript
+// Access Google models through the OpenAI SDK
+const response = await client.chat.completions.create({
+  model: "gemini-2.5-pro",
+  messages: [{ role: "user", content: "Hello" }]
+});
+```
+
+Raven automatically resolves the model to the correct provider and translates the request format.
+
+## Feature Support
+
+| Feature | Support |
+|---------|---------|
+| Chat completions | Full |
+| Streaming | Full |
+| Function/tool calling | Full |
+| Vision (image inputs) | Full |
+| System messages | Full |
+| Temperature, top_p, etc. | Full |
+| Stop sequences | Full |
+| Max tokens | Full |
+| Response format (JSON) | Full |
+
+## Custom Domain
+
+For an even more seamless experience, set up a [custom domain](/platform/custom-domains) so your API endpoint looks like `ai.yourcompany.com`.
