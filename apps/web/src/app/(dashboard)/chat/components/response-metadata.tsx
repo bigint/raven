@@ -13,6 +13,9 @@ interface ResponseMeta {
   cost?: number;
   cacheHit?: boolean;
   guardrailWarnings?: string[];
+  routingStrategy?: string;
+  taskType?: string;
+  toolCalls?: number;
 }
 
 interface ResponseMetadataProps {
@@ -56,6 +59,15 @@ const ResponseMetadata = ({ meta, show }: ResponseMetadataProps) => {
             <Badge variant="neutral">${meta.cost.toFixed(4)}</Badge>
           )}
           {meta.cacheHit && <Badge variant="success">cached</Badge>}
+          {meta.routingStrategy && (
+            <Badge variant="info">route: {meta.routingStrategy}</Badge>
+          )}
+          {meta.taskType && <Badge variant="info">task: {meta.taskType}</Badge>}
+          {meta.toolCalls !== undefined && meta.toolCalls > 0 && (
+            <Badge variant="neutral">
+              {meta.toolCalls} tool call{meta.toolCalls > 1 ? "s" : ""}
+            </Badge>
+          )}
           {meta.guardrailWarnings && meta.guardrailWarnings.length > 0 && (
             <Badge variant="warning">
               {meta.guardrailWarnings.length} guardrail warning(s)

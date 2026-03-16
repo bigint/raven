@@ -1,7 +1,7 @@
 "use client";
 
-import { MessageSquare } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { ExamplePrompts } from "./example-prompts";
 import type { ResponseMeta } from "./response-metadata";
 import { ResponseMetadata } from "./response-metadata";
 
@@ -15,12 +15,14 @@ interface ChatMessage {
 interface ChatMessagesProps {
   isStreaming: boolean;
   messages: ChatMessage[];
+  onExampleSelect: (message: string) => void;
   showMetadata: boolean;
 }
 
 export const ChatMessages = ({
   isStreaming,
   messages,
+  onExampleSelect,
   showMetadata
 }: ChatMessagesProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -30,19 +32,7 @@ export const ChatMessages = ({
   }, [messages]);
 
   if (messages.length === 0) {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-3 text-muted-foreground">
-        <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-          <MessageSquare className="size-5" />
-        </div>
-        <div className="text-center">
-          <p className="font-medium text-foreground">No messages yet</p>
-          <p className="mt-1 text-sm">
-            Select a provider and model, then send a message to start.
-          </p>
-        </div>
-      </div>
-    );
+    return <ExamplePrompts onSelect={onExampleSelect} />;
   }
 
   return (

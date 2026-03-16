@@ -42,6 +42,7 @@ export const useChat = () => {
     provider: string;
   } | null>(null);
   const [settings, setSettings] = useState<PlaygroundSettings>({
+    enableTools: false,
     maxTokens: 4096,
     showMetadata: true,
     stream: true,
@@ -125,12 +126,54 @@ export const useChat = () => {
           }))
         ];
 
+        const demoTools = settings.enableTools
+          ? [
+              {
+                function: {
+                  description: "Get the current weather for a location",
+                  name: "get_weather",
+                  parameters: {
+                    properties: {
+                      location: {
+                        description: "City name, e.g. San Francisco",
+                        type: "string"
+                      }
+                    },
+                    required: ["location"],
+                    type: "object"
+                  }
+                },
+                type: "function" as const
+              },
+              {
+                function: {
+                  description:
+                    "Evaluate a math expression and return the result",
+                  name: "calculate",
+                  parameters: {
+                    properties: {
+                      expression: {
+                        description:
+                          "Math expression to evaluate, e.g. 2 + 2 * 3",
+                        type: "string"
+                      }
+                    },
+                    required: ["expression"],
+                    type: "object"
+                  }
+                },
+                type: "function" as const
+              }
+            ]
+          : undefined;
+
         const generateParams = {
           maxTokens: settings.maxTokens,
           messages: chatMessages,
           model: selectedModel.model,
           provider: selectedModel.provider,
-          temperature: settings.temperature
+          temperature: settings.temperature,
+          ...(demoTools ? { tools: demoTools } : {})
         };
 
         if (settings.stream) {

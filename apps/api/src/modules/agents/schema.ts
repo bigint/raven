@@ -10,7 +10,7 @@ export const createAgentSchema = z.object({
   metadata: z.record(z.string(), z.unknown()).optional(),
   name: z.string().min(1).max(255),
   parentAgentId: z.string().optional(),
-  type: z.enum(["autonomous", "supervised", "delegated"]).default("autonomous"),
+  type: z.enum(["autonomous", "semi_autonomous", "tool"]).default("autonomous"),
   virtualKeyId: z.string().optional()
 });
 

@@ -9,6 +9,7 @@ interface PlaygroundSettings {
   maxTokens: number;
   stream: boolean;
   showMetadata: boolean;
+  enableTools: boolean;
 }
 
 interface PlaygroundSettingsPanelProps {
@@ -111,12 +112,31 @@ const PlaygroundSettingsPanel = ({
             onCheckedChange={(v) => update("showMetadata", v)}
           />
         </div>
+
+        <div className="flex items-center justify-between">
+          <label className="text-sm">Tool Use</label>
+          <Switch
+            checked={settings.enableTools}
+            onCheckedChange={(v) => update("enableTools", v)}
+          />
+        </div>
       </div>
+
+      {settings.enableTools && (
+        <div className="rounded-md bg-muted px-3 py-2">
+          <p className="text-[10px] text-muted-foreground">
+            Demo tools enabled:{" "}
+            <span className="font-medium text-foreground">get_weather</span>,{" "}
+            <span className="font-medium text-foreground">calculate</span>. The
+            model can call these tools in its response.
+          </p>
+        </div>
+      )}
 
       <div className="pt-2 border-t border-border">
         <p className="text-[10px] text-muted-foreground">
-          Metadata shows provider, latency, tokens, cost, and cache info for
-          each response.
+          Metadata shows provider, latency, tokens, cost, routing, and cache
+          info for each response.
         </p>
       </div>
     </div>

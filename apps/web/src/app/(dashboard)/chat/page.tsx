@@ -108,6 +108,7 @@ const ChatPage = () => {
         <ChatMessages
           isStreaming={isStreaming}
           messages={messages}
+          onExampleSelect={sendMessage}
           showMetadata={settings.showMetadata}
         />
         <ChatInput
