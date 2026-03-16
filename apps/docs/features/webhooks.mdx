@@ -1,63 +1,151 @@
 ---
 title: "Webhooks"
-description: "Get notified about events in real-time via webhook integrations."
+description: "Receive real-time notifications for events in your Raven organization."
 ---
 
-Webhooks send HTTP POST requests to your endpoints when specific events occur in Raven.
+Webhooks send HTTP POST requests to your endpoints when specific events occur in Raven. Use them to trigger alerts, sync data to external systems, or build custom automation workflows.
 
 ## Creating a Webhook
 
-Navigate to **Webhooks** in the dashboard and click **Create Webhook**.
+<Steps>
+  <Step title="Navigate to Webhooks">
+    Go to **Webhooks** in the dashboard sidebar.
+  </Step>
+  <Step title="Click Create Webhook">
+    Enter the endpoint URL where you want to receive events.
+  </Step>
+  <Step title="Select Events">
+    Choose which event types to subscribe to.
+  </Step>
+  <Step title="Copy the Secret">
+    Save the webhook secret for signature verification. This is only shown once.
+  </Step>
+</Steps>
 
-| Field | Description |
-|-------|-------------|
-| **URL** | The endpoint to receive webhook events |
-| **Events** | Which events to subscribe to |
-| **Secret** | Shared secret for verifying webhook signatures |
+### Via the API
+
+```bash
+curl -X POST https://api.raven.dev/v1/webhooks \
+  -H "Authorization: Bearer rk_live_abc123" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://your-app.com/webhooks/raven",
+    "events": [
+      "request.completed",
+      "budget.exceeded",
+      "guardrail.blocked"
+    ]
+  }'
+```
 
 ## Event Types
 
-Subscribe to any combination of events:
+Subscribe to any combination of events across the system.
+
+### Request Events
 
 | Event | Description |
 |-------|-------------|
-| `request.completed` | A request was successfully processed |
+| `request.started` | A request began processing |
+| `request.completed` | A request was successfully completed |
 | `request.failed` | A request failed |
-| `budget.threshold` | A budget reached its alert threshold |
-| `budget.exceeded` | A budget was exceeded |
-| `guardrail.triggered` | A guardrail rule was triggered |
+| `request.cached` | A request was served from cache |
+| `request.fallback` | A request used a fallback provider |
+
+### Guardrail Events
+
+| Event | Description |
+|-------|-------------|
+| `guardrail.triggered` | A guardrail rule matched content |
+| `guardrail.blocked` | A request was blocked by a guardrail |
+| `guardrail.warned` | A guardrail issued a warning |
+
+### Policy Events
+
+| Event | Description |
+|-------|-------------|
+| `policy.evaluated` | A policy was evaluated against a request |
+| `policy.blocked` | A request was blocked by a policy |
+| `policy.updated` | A policy was updated |
+
+### Budget Events
+
+| Event | Description |
+|-------|-------------|
+| `budget.threshold.reached` | A budget reached its alert threshold |
+| `budget.exceeded` | A budget limit was exceeded |
+| `budget.reset` | A budget was reset for a new period |
+
+### Key Events
+
+| Event | Description |
+|-------|-------------|
+| `key.created` | A virtual key was created |
+| `key.revoked` | A virtual key was revoked |
+| `key.rate_limited` | A key hit its rate limit |
 | `key.expired` | A virtual key expired |
-| `key.rotated` | A virtual key was rotated |
-| `member.invited` | A new member was invited |
-| `member.removed` | A member was removed |
+
+### Provider Events
+
+| Event | Description |
+|-------|-------------|
+| `provider.health.degraded` | A provider's health degraded |
+| `provider.health.recovered` | A provider recovered from degraded health |
+| `provider.outage.detected` | A provider outage was detected |
+
+### Agent Events
+
+| Event | Description |
+|-------|-------------|
+| `agent.registered` | A new agent identity was created |
+| `agent.anomaly.detected` | Anomalous agent behavior was detected |
+| `agent.budget.exceeded` | An agent exceeded its budget |
+| `agent.tool.invoked` | An agent invoked a tool |
+
+### Compliance Events
+
+| Event | Description |
+|-------|-------------|
+| `compliance.drift.detected` | Compliance posture changed |
+| `compliance.audit.generated` | A compliance report was generated |
+
+### Experiment Events
+
+| Event | Description |
+|-------|-------------|
+| `experiment.started` | An experiment began running |
+| `experiment.completed` | An experiment was completed |
+| `experiment.variant.selected` | A request was routed to an experiment variant |
 
 ## Webhook Payload
 
-Each webhook delivers a JSON payload:
+Each webhook delivers a JSON payload with the event details:
 
 ```json
 {
-  "event": "budget.threshold",
-  "timestamp": "2025-01-15T10:30:00Z",
-  "organization_id": "org_abc123",
+  "webhookId": "wh_abc123",
+  "event": "budget.threshold.reached",
+  "timestamp": "2026-03-15T10:30:00Z",
   "data": {
-    "budget_id": "bud_xyz789",
-    "budget_name": "Production API",
-    "current_spend": 450.00,
+    "budgetId": "bud_xyz789",
+    "budgetName": "Production API",
+    "currentSpend": 450.00,
     "limit": 500.00,
     "percentage": 90
   }
 }
 ```
 
-## Verification
+## Signature Verification
 
-Verify webhook authenticity using the signature in the `X-Raven-Signature` header:
+Every webhook request includes an `X-Raven-Signature` header containing an HMAC-SHA256 signature. Verify it to ensure the webhook came from Raven.
 
-```typescript
-import crypto from "crypto";
+<CodeGroup>
 
-function verifyWebhook(payload: string, signature: string, secret: string) {
+```typescript TypeScript
+import crypto from "node:crypto";
+
+function verifyWebhook(payload: string, signature: string, secret: string): boolean {
   const expected = crypto
     .createHmac("sha256", secret)
     .update(payload)
@@ -67,19 +155,62 @@ function verifyWebhook(payload: string, signature: string, secret: string) {
     Buffer.from(expected)
   );
 }
+
+// In your webhook handler
+app.post("/webhooks/raven", (req, res) => {
+  const signature = req.headers["x-raven-signature"];
+  const isValid = verifyWebhook(JSON.stringify(req.body), signature, WEBHOOK_SECRET);
+
+  if (!isValid) {
+    return res.status(401).send("Invalid signature");
+  }
+
+  // Process the event
+  console.log("Event:", req.body.event);
+  res.status(200).send("OK");
+});
 ```
 
-## Retry Policy
+```python Python
+import hmac
+import hashlib
+
+def verify_webhook(payload: str, signature: str, secret: str) -> bool:
+    expected = hmac.new(
+        secret.encode(),
+        payload.encode(),
+        hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(signature, expected)
+```
+
+</CodeGroup>
+
+<Warning>
+  Always verify webhook signatures before processing events. Without verification, an attacker could send fake events to your endpoint.
+</Warning>
+
+## Retry Logic
 
 Failed webhook deliveries are retried with exponential backoff:
 
-- **Attempt 1** — Immediate
-- **Attempt 2** — After 1 minute
-- **Attempt 3** — After 5 minutes
-- **Attempt 4** — After 30 minutes
-- **Attempt 5** — After 2 hours
+| Attempt | Delay |
+|---------|-------|
+| 1 | Immediate |
+| 2 | 1 second |
+| 3 | 2 seconds |
+| 4 | 4 seconds |
 
-After 5 failed attempts, the webhook is marked as failing and can be reviewed in the dashboard.
+After 4 retries (3 retries + the initial attempt), the delivery is abandoned and logged as failed. Each attempt has a 10-second timeout.
+
+## Testing Webhooks
+
+Use the dashboard to send test events to your webhook endpoint:
+
+1. Navigate to the webhook in the dashboard
+2. Click **Send Test Event**
+3. Select the event type to simulate
+4. Check your endpoint for the test payload
 
 ## Plan Availability
 

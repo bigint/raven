@@ -1,48 +1,136 @@
 ---
-title: "Catalog"
-description: "Share and discover models, agents, prompts, and MCP servers across your organization."
+title: "AI Catalog"
+description: "A governed marketplace for discovering and managing approved AI models, agents, and tools."
 ---
 
-The catalog is a shared registry where team members can publish and discover reusable resources.
+The AI Catalog is an organization-wide marketplace for discovering, sharing, and governing AI resources. It provides an approval workflow so that models, agents, MCP servers, prompt templates, and guardrail policies can be vetted before they are used in production.
 
-## Catalog Items
+## Item Types
 
-The catalog supports multiple resource types:
+The catalog supports five resource types.
 
-| Type | Description |
-|------|-------------|
-| **Models** | Curated model configurations with recommended settings |
-| **Agents** | Pre-configured agent definitions |
-| **Prompts** | Shared prompt templates |
-| **MCP Servers** | Published MCP server connections |
+| Type | Description | Example |
+|------|-------------|---------|
+| `model` | Curated model configurations with recommended settings | GPT-4o with specific temperature and system prompt |
+| `agent` | Pre-configured agent identity definitions | Customer support bot with scoped capabilities |
+| `mcp_server` | Published MCP server connections | GitHub tools server, database query server |
+| `prompt_template` | Shared prompt templates | Invoice extraction prompt, email drafting template |
+| `guardrail_policy` | Reusable guardrail and policy configurations | PII detection policy for healthcare use |
 
-## Publishing to Catalog
+## Approval Workflow
 
-Any resource can be published to the organization catalog:
+Every catalog item goes through an approval workflow before it becomes available.
+
+| Status | Description |
+|--------|-------------|
+| `pending_approval` | Item has been submitted and is waiting for review |
+| `approved` | Item has been reviewed and approved for use |
+| `rejected` | Item was reviewed and not approved |
+| `deprecated` | Item was previously approved but is no longer recommended |
 
 <Steps>
-  <Step title="Navigate to the resource">
-    Go to the resource you want to share (agent, prompt, etc.).
+  <Step title="Submit an Item">
+    A team member submits a resource to the catalog with a name, description, and configuration.
   </Step>
-  <Step title="Click Publish to Catalog">
-    Add a description and any usage notes.
+  <Step title="Review">
+    An admin or designated reviewer evaluates the item for quality, security, and compliance.
   </Step>
-  <Step title="Set visibility">
-    Choose who can see and use the resource.
+  <Step title="Approve or Reject">
+    The reviewer approves the item (making it available to the organization) or rejects it with feedback.
+  </Step>
+  <Step title="Publish">
+    Approved items appear in the catalog for all team members to discover and use.
   </Step>
 </Steps>
 
-## Discovering Resources
+### Submitting an Item via API
 
-Browse the catalog to find resources shared by your team:
+```bash
+curl -X POST https://api.raven.dev/v1/catalog \
+  -H "Authorization: Bearer rk_live_abc123" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Invoice Extraction Prompt",
+    "type": "prompt_template",
+    "description": "Extracts structured data from invoice PDFs with 95%+ accuracy",
+    "version": "1.0.0",
+    "tags": ["finance", "extraction", "production-ready"],
+    "config": {
+      "systemPrompt": "You are an invoice parser...",
+      "model": "gpt-4o",
+      "temperature": 0.1
+    }
+  }'
+```
 
-- **Search** by name or description
-- **Filter** by resource type
-- **Sort** by popularity or recency
+## Filtering and Search
+
+Browse the catalog using multiple filters:
+
+| Filter | Description |
+|--------|-------------|
+| **Type** | Filter by resource type (model, agent, mcp_server, etc.) |
+| **Status** | Filter by approval status |
+| **Tags** | Search by tags |
+| **Search** | Full-text search across name and description |
+
+## Catalog Item Details
+
+Each catalog item tracks:
+
+| Field | Description |
+|-------|-------------|
+| `name` | Item display name |
+| `type` | Resource type |
+| `description` | What the item does |
+| `version` | Semantic version number |
+| `status` | Approval status |
+| `tags` | Searchable tags |
+| `config` | Item-specific configuration |
+| `qualityScore` | Quality rating (0-100) |
+| `costEstimate` | Estimated cost per use |
+| `usageCount` | How many times the item has been used |
+| `createdBy` | Who submitted the item |
+| `approvedBy` | Who approved the item |
+| `approvedAt` | When it was approved |
+
+## Usage Tracking
+
+Each catalog item has a `usageCount` that tracks how many times it has been used. This helps identify:
+
+- **Popular items** -- Most-used resources across the org
+- **Underutilized items** -- Resources that may need better documentation or promotion
+- **Deprecated alternatives** -- Old items that should be migrated away from
+
+## Quality Scores
+
+Items can be assigned a quality score (0-100) based on evaluations, user feedback, or manual review. Use quality scores to:
+
+- Surface the best resources in search results
+- Set minimum quality thresholds for production use
+- Track quality improvements across versions
+
+## Cost Estimates
+
+Each item can include a cost estimate to help teams make budget-conscious decisions. For model configurations, this reflects the estimated per-request cost. For agents, it reflects the estimated cost per interaction.
 
 ## Use Cases
 
-- **Standardization** — Share approved model configurations across teams
-- **Knowledge sharing** — Publish battle-tested prompt templates
-- **Onboarding** — New team members can discover existing resources
-- **Governance** — Approve and curate resources centrally
+<CardGroup cols={2}>
+  <Card title="Standardization" icon="check-double">
+    Ensure all teams use approved, vetted model configurations instead of ad-hoc setups.
+  </Card>
+  <Card title="Knowledge Sharing" icon="share-nodes">
+    Publish battle-tested prompts and agent configurations for other teams to reuse.
+  </Card>
+  <Card title="Governance" icon="shield-check">
+    Require approval before new AI resources are used in production.
+  </Card>
+  <Card title="Onboarding" icon="user-plus">
+    New team members can browse the catalog to discover existing resources and best practices.
+  </Card>
+</CardGroup>
+
+<Note>
+  Catalog items are scoped to the organization. Each organization has its own catalog with independent items and approval workflows.
+</Note>

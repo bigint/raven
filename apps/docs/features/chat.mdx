@@ -1,36 +1,115 @@
 ---
-title: "Chat Interface"
-description: "Built-in chat playground for testing models and prompts."
+title: "Playground"
+description: "Test models and prompts directly from the Raven dashboard."
 ---
 
-Raven includes a built-in chat interface for testing models, prompts, and configurations directly in the dashboard.
+The Playground is a built-in chat interface in the Raven dashboard that lets you test models, iterate on prompts, and compare provider responses -- all without writing any code.
 
-## Using the Chat Interface
+## Using the Playground
 
-Navigate to **Chat** in the dashboard to start a conversation.
+<Steps>
+  <Step title="Navigate to Chat">
+    Go to **Chat** in the dashboard sidebar.
+  </Step>
+  <Step title="Select a Provider and Model">
+    Choose from any of your configured providers and their available models.
+  </Step>
+  <Step title="Start a Conversation">
+    Type a message and send it. The response streams in real-time.
+  </Step>
+  <Step title="Iterate">
+    Continue the conversation, adjust the model, or start a new session.
+  </Step>
+</Steps>
 
-### Features
+## Features
 
-- **Model selection** — Choose any model from your configured providers
-- **Conversation history** — All conversations are saved with full message history
-- **Token tracking** — See token counts and costs for each message
-- **Streaming** — Real-time streamed responses
+### Provider and Model Selection
 
-## Conversations
+Switch between any configured provider and model from a dropdown menu. This makes it easy to compare how different models respond to the same prompt.
 
-Each chat session is saved as a conversation with:
+<Tabs>
+  <Tab title="OpenAI">
+    GPT-4o, GPT-4o-mini, GPT-4, and other OpenAI models.
+  </Tab>
+  <Tab title="Anthropic">
+    Claude 4 Opus, Claude 4 Sonnet, Claude 3.5 Sonnet, and other Claude models.
+  </Tab>
+  <Tab title="Google">
+    Gemini 2.5 Pro, Gemini 2.5 Flash, and other Google models.
+  </Tab>
+  <Tab title="Others">
+    Any model from your 26+ configured providers.
+  </Tab>
+</Tabs>
+
+### Streaming Responses
+
+Responses are streamed in real-time, token by token. You see the response as it is generated, just like in production.
+
+### Session Tracking
+
+Each conversation is saved as a session with:
 
 | Field | Description |
 |-------|-------------|
 | **Title** | Auto-generated or custom title |
 | **Model** | The model used for the conversation |
-| **Messages** | Full message history with roles |
-| **Tokens** | Total input and output token counts |
-| **Metadata** | Additional context and tags |
+| **Messages** | Full message history with roles (system, user, assistant) |
+| **Token usage** | Input and output token counts per message |
+| **Cost** | Calculated cost for each message |
+
+### Conversation History
+
+All conversations are automatically saved. Return to any previous session to:
+
+- Review past responses
+- Continue the conversation
+- Replay with a different model
+
+## Token and Cost Tracking
+
+Every message in the playground shows:
+
+- **Input tokens** -- Tokens sent in the prompt (including conversation history)
+- **Output tokens** -- Tokens generated in the response
+- **Cost** -- Calculated cost based on the model's pricing
+
+This helps you understand the real cost of your prompts before deploying them to production.
 
 ## Use Cases
 
-- **Prompt testing** — Iterate on prompt templates before deploying
-- **Model comparison** — Compare responses across different models
-- **Debugging** — Reproduce and debug specific request patterns
-- **Demo** — Showcase AI capabilities to stakeholders
+<CardGroup cols={2}>
+  <Card title="Prompt Testing" icon="flask">
+    Iterate on prompt templates before deploying them to production. Test edge cases and refine system messages.
+  </Card>
+  <Card title="Model Comparison" icon="arrows-rotate">
+    Compare how different models respond to the same prompt. Evaluate quality, style, and accuracy side by side.
+  </Card>
+  <Card title="Debugging" icon="bug">
+    Reproduce specific request patterns to debug issues. Test guardrails and policy behavior interactively.
+  </Card>
+  <Card title="Demos" icon="presentation-screen">
+    Showcase AI capabilities to stakeholders without building a custom interface.
+  </Card>
+</CardGroup>
+
+## How It Works
+
+The playground uses the same proxy pipeline as production API requests. This means:
+
+- **Guardrails** are enforced on playground requests
+- **Budgets** are checked and deducted
+- **Analytics** are recorded for playground usage
+- **Caching** applies to playground requests
+
+<Note>
+  Playground requests are real requests that go through the full gateway pipeline. They count against your usage limits and budgets, and they appear in your analytics.
+</Note>
+
+## Tips
+
+- Use **system messages** to set context before starting a conversation
+- Compare responses by opening multiple sessions with different models
+- Use the playground to test guardrails by sending content that should trigger them
+- Check token counts to estimate production costs before deploying a prompt
