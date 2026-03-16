@@ -47,7 +47,7 @@ export const updatePolicy =
     }
 
     if (scopeTargetId !== undefined) {
-      updates.scopeTargetId = scopeTargetId;
+      updates.scopeId = scopeTargetId;
     }
 
     if (isEnabled !== undefined) {
@@ -66,16 +66,27 @@ export const updatePolicy =
 
       if (rules.length > 0) {
         await db.insert(policyRules).values(
-          rules.map((rule) => ({
-            complianceControl: rule.complianceControl ?? null,
-            complianceFramework: rule.complianceFramework ?? null,
-            conditions: rule.conditions,
-            enforcement: rule.enforcement,
-            isEnabled: rule.isEnabled,
-            name: rule.name,
-            policyId: id,
-            priority: rule.priority
-          }))
+          rules.map((rule) => {
+            const complianceMap: Record<string, string> = {};
+            if (rule.complianceFramework && rule.complianceControl) {
+              complianceMap[rule.complianceFramework] = rule.complianceControl;
+            }
+            return {
+              complianceMap,
+              condition: rule.conditions as Record<string, unknown>,
+              enforcement: rule.enforcement,
+              isEnabled: rule.isEnabled,
+              name: rule.name,
+              policyId: id,
+              priority: rule.priority,
+              type: (rule.conditions.type === "composite"
+                ? "deterministic"
+                : "deterministic") as
+                | "deterministic"
+                | "statistical"
+                | "ml_model"
+            };
+          })
         );
       }
     }

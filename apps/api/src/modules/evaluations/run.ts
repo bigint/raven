@@ -66,13 +66,13 @@ export const runEvaluation =
         const [record] = await db
           .insert(evaluationResults)
           .values({
+            actualOutput: testCase.response,
             evaluationId: id,
-            evaluator: evaluatorName,
             feedback: result.feedback,
+            input: testCase.prompt,
             metrics: result.metrics,
-            prompt: testCase.prompt,
-            response: testCase.response,
-            score: result.score
+            passed: result.passed ? "true" : "false",
+            score: String(result.score)
           })
           .returning();
 
@@ -88,8 +88,8 @@ export const runEvaluation =
       .update(evaluations)
       .set({
         completedAt: new Date(),
+        score: String(avgScore),
         status: "completed",
-        totalScore: avgScore,
         updatedAt: new Date()
       })
       .where(eq(evaluations.id, id));

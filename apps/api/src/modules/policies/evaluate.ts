@@ -37,16 +37,15 @@ interface LoadedPolicy {
   id: string;
   name: string;
   scope: string;
-  scopeTargetId: string | null;
+  scopeId: string | null;
   rules: Array<{
     id: string;
     name: string;
-    conditions: Record<string, unknown>;
+    condition: Record<string, unknown>;
     enforcement: string;
     priority: number;
     isEnabled: boolean;
-    complianceFramework: string | null;
-    complianceControl: string | null;
+    complianceMap: Record<string, string>;
   }>;
 }
 
@@ -80,9 +79,8 @@ const loadPolicies = async (
     // Filter by scope hierarchy: platform > org > team > key
     const applicable = policyRows.filter((p) => {
       if (p.scope === "platform" || p.scope === "organization") return true;
-      if (p.scope === "team" && teamId && p.scopeTargetId === teamId)
-        return true;
-      if (p.scope === "key" && virtualKeyId && p.scopeTargetId === virtualKeyId)
+      if (p.scope === "team" && teamId && p.scopeId === teamId) return true;
+      if (p.scope === "key" && virtualKeyId && p.scopeId === virtualKeyId)
         return true;
       return false;
     });
@@ -126,9 +124,8 @@ const loadPolicies = async (
       id: p.id,
       name: p.name,
       rules: (rulesMap[p.id] ?? []).map((r) => ({
-        complianceControl: r.complianceControl,
-        complianceFramework: r.complianceFramework,
-        conditions: r.conditions,
+        complianceMap: r.complianceMap,
+        condition: r.condition,
         enforcement: r.enforcement,
         id: r.id,
         isEnabled: r.isEnabled,
@@ -136,7 +133,7 @@ const loadPolicies = async (
         priority: r.priority
       })),
       scope: p.scope,
-      scopeTargetId: p.scopeTargetId
+      scopeId: p.scopeId
     }));
   });
 };
@@ -161,8 +158,7 @@ const logEvaluationsAsync = (
         organizationId: orgId,
         policyId: ev.policyId,
         requestId,
-        ruleId: ev.ruleId,
-        ruleName: ev.ruleName
+        ruleId: ev.ruleId
       }))
     )
     .catch((err) => {
@@ -202,11 +198,18 @@ export const evaluatePolicies = async (
     for (const rule of policy.rules) {
       if (!rule.isEnabled) continue;
 
-      const result = evaluateCondition(rule.conditions, context, contents);
+      const result = evaluateCondition(rule.condition, context, contents);
+
+      // Extract first compliance mapping from complianceMap for logging
+      const complianceEntries = Object.entries(rule.complianceMap);
+      const complianceFramework =
+        complianceEntries.length > 0 ? complianceEntries[0]?.[0] : undefined;
+      const complianceControl =
+        complianceEntries.length > 0 ? complianceEntries[0]?.[1] : undefined;
 
       const evaluation = {
-        complianceControl: rule.complianceControl ?? undefined,
-        complianceFramework: rule.complianceFramework ?? undefined,
+        complianceControl,
+        complianceFramework,
         enforcement: rule.enforcement,
         evidence: result.evidence,
         matched: result.matched,

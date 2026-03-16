@@ -27,7 +27,10 @@ export const createMcpServer =
     const [record] = await db
       .insert(mcpServers)
       .values({
-        accessControl: accessControl ?? { allowedKeys: [], allowedTeams: [] },
+        accessControl: {
+          allowedKeys: accessControl?.allowedKeys ?? [],
+          allowedTeams: accessControl?.allowedTeams ?? []
+        },
         capabilities: capabilities ?? [],
         description: description ?? "",
         healthCheckInterval: healthCheckInterval ?? 60,

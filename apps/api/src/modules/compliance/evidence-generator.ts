@@ -89,8 +89,7 @@ const checkCompliancePolicies = async (
   const policyIds = orgPolicies.map((p) => p.id);
   const rules = await db
     .select({
-      complianceControl: policyRules.complianceControl,
-      complianceFramework: policyRules.complianceFramework
+      complianceMap: policyRules.complianceMap
     })
     .from(policyRules)
     .where(
@@ -98,14 +97,13 @@ const checkCompliancePolicies = async (
         policyIds.length === 1
           ? eq(policyRules.policyId, policyIds[0] as string)
           : sql`${policyRules.policyId} IN ${policyIds}`,
-        eq(policyRules.complianceFramework, framework),
         eq(policyRules.isEnabled, true)
       )
     );
 
   return rules
-    .map((r) => r.complianceControl)
-    .filter((c): c is string => c !== null);
+    .map((r) => r.complianceMap[framework])
+    .filter((c): c is string => c !== undefined);
 };
 
 const getRecentEvaluationCount = async (

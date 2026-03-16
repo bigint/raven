@@ -29,16 +29,27 @@ import {
 import { createBudgetsModule } from "./modules/budgets/index";
 import { createCacheModule } from "./modules/cache/index";
 import { createCatalogModule } from "./modules/catalog/index";
+import { createComplianceModule } from "./modules/compliance/index";
+import { createConversationsModule } from "./modules/conversations/index";
 import { createDomainsModule } from "./modules/domains/index";
+import { createEvaluationsModule } from "./modules/evaluations/index";
+import { createEventsModule } from "./modules/events/index";
+import { createExperimentsModule } from "./modules/experiments/index";
+import { createFinOpsModule } from "./modules/finops/index";
 import { createGuardrailsModule } from "./modules/guardrails/index";
+import { createIpAllowlistsModule } from "./modules/ip-allowlists/index";
 import { createKeysModule } from "./modules/keys/index";
 import { createMcpModule } from "./modules/mcp/index";
 import { createModelsModule } from "./modules/models/index";
+import { createObservabilityModule } from "./modules/observability/index";
+import { createPluginsModule } from "./modules/plugins/index";
+import { createPoliciesModule } from "./modules/policies/index";
 import { createPromptsModule } from "./modules/prompts/index";
 import { createProvidersModule } from "./modules/providers/index";
 import { resolveCustomDomain } from "./modules/proxy/domain-resolver";
 import { proxyHandler } from "./modules/proxy/handler";
 import { flushLastUsed } from "./modules/proxy/logger";
+import { createRBACModule } from "./modules/rbac/index";
 import { createRoutingRulesModule } from "./modules/routing-rules/index";
 import { createSettingsModule } from "./modules/settings/index";
 import { createTeamsModule } from "./modules/teams/index";
@@ -174,7 +185,20 @@ v1.route("/routing-rules", createRoutingRulesModule(db));
 v1.route("/mcp", createMcpModule(db));
 v1.route("/agents", createAgentsModule(db));
 v1.route("/catalog", createCatalogModule(db));
+v1.route("/events", createEventsModule());
+v1.route("/experiments", createExperimentsModule(db, redis));
+v1.route("/finops", createFinOpsModule(db, redis));
+v1.route("/compliance", createComplianceModule(db));
+v1.route("/conversations", createConversationsModule(db));
+v1.route("/evaluations", createEvaluationsModule(db));
+v1.route("/ip-allowlists", createIpAllowlistsModule(db));
+v1.route("/plugins", createPluginsModule(db));
+v1.route("/policies", createPoliciesModule(db));
+v1.route("/rbac", createRBACModule());
 app.route("/v1", v1);
+
+// Observability endpoints (no auth - for Prometheus scraping)
+app.route("/", createObservabilityModule());
 
 // Custom domain proxy catch-all
 app.all("/*", async (c) => {

@@ -82,7 +82,7 @@ const testPolicy =
     };
 
     const evaluations = rules.map((rule) => {
-      const result = evaluateCondition(rule.conditions, context, contents);
+      const result = evaluateCondition(rule.condition, context, contents);
       return {
         enforcement: rule.enforcement,
         evidence: result.evidence,

@@ -16,8 +16,7 @@ export const updatePlugin =
     const orgId = c.get("orgId");
     const user = c.get("user");
     const id = c.req.param("id") as string;
-    const { name, pluginType, hook, config, isEnabled, priority, description } =
-      c.req.valid("json");
+    const { name, hook, config, isEnabled, description } = c.req.valid("json");
 
     const [existing] = await db
       .select({ id: plugins.id })
@@ -32,11 +31,9 @@ export const updatePlugin =
     const updates: Partial<typeof plugins.$inferInsert> = {};
 
     if (name !== undefined) updates.name = name;
-    if (pluginType !== undefined) updates.pluginType = pluginType;
-    if (hook !== undefined) updates.hook = hook;
+    if (hook !== undefined) updates.hooks = [hook];
     if (config !== undefined) updates.config = config;
     if (isEnabled !== undefined) updates.isEnabled = isEnabled;
-    if (priority !== undefined) updates.priority = priority;
     if (description !== undefined) updates.description = description;
 
     updates.updatedAt = new Date();
@@ -51,7 +48,7 @@ export const updatePlugin =
     void logAudit(db, {
       action: "plugin.updated",
       actorId: user.id,
-      metadata: { config, hook, isEnabled, name, pluginType, priority },
+      metadata: { config, hook, isEnabled, name },
       orgId,
       resourceId: id,
       resourceType: "plugin"

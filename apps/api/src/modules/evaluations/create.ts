@@ -18,7 +18,9 @@ export const createEvaluation =
     const [record] = await db
       .insert(evaluations)
       .values({
-        metadata: metadata ?? {},
+        config: metadata ?? {},
+        createdBy: user.id,
+        evaluatorType: "default",
         model,
         name,
         organizationId: orgId

@@ -13,20 +13,17 @@ export const createPlugin =
   (db: Database) => async (c: AppContextWithJson<Body>) => {
     const orgId = c.get("orgId");
     const user = c.get("user");
-    const { name, pluginType, hook, config, isEnabled, priority, description } =
-      c.req.valid("json");
+    const { name, hook, config, isEnabled, description } = c.req.valid("json");
 
     const [record] = await db
       .insert(plugins)
       .values({
         config: config ?? {},
         description: description ?? "",
-        hook,
+        hooks: [hook],
         isEnabled,
         name,
-        organizationId: orgId,
-        pluginType,
-        priority
+        organizationId: orgId
       })
       .returning();
 
@@ -35,7 +32,7 @@ export const createPlugin =
     void logAudit(db, {
       action: "plugin.created",
       actorId: user.id,
-      metadata: { hook, name, pluginType },
+      metadata: { hook, name },
       orgId,
       resourceId: safe.id,
       resourceType: "plugin"

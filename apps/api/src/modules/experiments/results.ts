@@ -1,5 +1,5 @@
 import type { Database } from "@raven/db";
-import { experiments } from "@raven/db";
+import { experiments, experimentVariants } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
 import { NotFoundError } from "@/lib/errors";
@@ -21,14 +21,10 @@ export const getExperimentResults =
       throw new NotFoundError("Experiment not found");
     }
 
-    // Gather variant traffic counts from Redis
-    const variants = experiment.variants as Array<{
-      id: string;
-      name: string;
-      model: string;
-      provider?: string;
-      weight: number;
-    }>;
+    const variants = await db
+      .select()
+      .from(experimentVariants)
+      .where(eq(experimentVariants.experimentId, id));
 
     const results = await Promise.all(
       variants.map(async (variant) => {

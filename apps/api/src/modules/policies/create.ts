@@ -24,12 +24,13 @@ export const createPolicy =
     const [policy] = await db
       .insert(policies)
       .values({
+        createdBy: user.id,
         description: description ?? null,
         isEnabled,
         name,
         organizationId: orgId,
         scope,
-        scopeTargetId: scopeTargetId ?? null
+        scopeId: scopeTargetId ?? null
       })
       .returning();
 
@@ -37,16 +38,25 @@ export const createPolicy =
 
     if (rules.length > 0) {
       await db.insert(policyRules).values(
-        rules.map((rule) => ({
-          complianceControl: rule.complianceControl ?? null,
-          complianceFramework: rule.complianceFramework ?? null,
-          conditions: rule.conditions,
-          enforcement: rule.enforcement,
-          isEnabled: rule.isEnabled,
-          name: rule.name,
-          policyId: safe.id,
-          priority: rule.priority
-        }))
+        rules.map((rule) => {
+          const complianceMap: Record<string, string> = {};
+          if (rule.complianceFramework && rule.complianceControl) {
+            complianceMap[rule.complianceFramework] = rule.complianceControl;
+          }
+          return {
+            complianceMap,
+            condition: rule.conditions as Record<string, unknown>,
+            enforcement: rule.enforcement,
+            isEnabled: rule.isEnabled,
+            name: rule.name,
+            policyId: safe.id,
+            priority: rule.priority,
+            type: "deterministic" as
+              | "deterministic"
+              | "statistical"
+              | "ml_model"
+          };
+        })
       );
     }
 
