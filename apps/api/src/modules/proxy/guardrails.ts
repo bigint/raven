@@ -1,6 +1,8 @@
 import type { Database } from "@raven/db";
 import { guardrailRules } from "@raven/db";
 import { and, asc, eq } from "drizzle-orm";
+import type { Redis } from "ioredis";
+import { cachedQuery } from "@/lib/cache-utils";
 import { GuardrailError } from "@/lib/errors";
 
 export interface GuardrailMatch {
@@ -123,18 +125,24 @@ const evaluateCustomRegex = (
 export const evaluateGuardrails = async (
   db: Database,
   organizationId: string,
-  messages: Message[]
+  messages: Message[],
+  redis?: Redis
 ): Promise<GuardrailResult> => {
-  const rules = await db
-    .select()
-    .from(guardrailRules)
-    .where(
-      and(
-        eq(guardrailRules.organizationId, organizationId),
-        eq(guardrailRules.isEnabled, true)
+  const queryFn = () =>
+    db
+      .select()
+      .from(guardrailRules)
+      .where(
+        and(
+          eq(guardrailRules.organizationId, organizationId),
+          eq(guardrailRules.isEnabled, true)
+        )
       )
-    )
-    .orderBy(asc(guardrailRules.priority));
+      .orderBy(asc(guardrailRules.priority));
+
+  const rules = redis
+    ? await cachedQuery(redis, `guardrails:${organizationId}`, 30, queryFn)
+    : await queryFn();
 
   if (!rules.length) {
     return { blocked: false, matches: [], warnings: [] };

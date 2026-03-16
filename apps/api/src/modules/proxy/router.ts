@@ -2,6 +2,7 @@ import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
+import { cachedQuery, cacheKeys } from "@/lib/cache-utils";
 import { NotFoundError } from "@/lib/errors";
 
 export type RoutingStrategy =
@@ -21,17 +22,23 @@ export const resolveWithStrategy = async (
   providerName: string,
   strategy: RoutingStrategy = "random"
 ): Promise<string> => {
-  const configs = await db
-    .select({ id: providerConfigs.id })
-    .from(providerConfigs)
-    .where(
-      and(
-        eq(providerConfigs.organizationId, orgId),
-        eq(providerConfigs.provider, providerName),
-        eq(providerConfigs.isEnabled, true)
-      )
-    )
-    .limit(50);
+  const configs = await cachedQuery(
+    redis,
+    cacheKeys.providerConfigs(orgId, providerName),
+    60,
+    () =>
+      db
+        .select({ id: providerConfigs.id })
+        .from(providerConfigs)
+        .where(
+          and(
+            eq(providerConfigs.organizationId, orgId),
+            eq(providerConfigs.provider, providerName),
+            eq(providerConfigs.isEnabled, true)
+          )
+        )
+        .limit(50)
+  );
 
   if (configs.length === 0) {
     throw new NotFoundError(

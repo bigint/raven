@@ -4,6 +4,7 @@ import { models } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Context } from "hono";
 import type { Redis } from "ioredis";
+import { cachedQuery } from "@/lib/cache-utils";
 import { ForbiddenError, GuardrailError } from "@/lib/errors";
 import { authenticateKey } from "./auth";
 import { checkBudgets } from "./budget-check";
@@ -155,12 +156,15 @@ export const proxyHandler = (
 
     const [guardrailResult, routingResult] = await Promise.all([
       hasMessages
-        ? evaluateGuardrails(db, virtualKey.organizationId, messages).catch(
-            (err: unknown) => {
-              if (err instanceof GuardrailError) throw err;
-              return null;
-            }
-          )
+        ? evaluateGuardrails(
+            db,
+            virtualKey.organizationId,
+            messages,
+            redis
+          ).catch((err: unknown) => {
+            if (err instanceof GuardrailError) throw err;
+            return null;
+          })
         : null,
       hasModel
         ? evaluateRoutingRules(
@@ -182,14 +186,22 @@ export const proxyHandler = (
       finalBodyText = JSON.stringify(parsedBody);
     }
 
-    // 5c. Validate model is enabled in the platform
+    // 5c. Validate model is enabled in the platform (cached 5 min)
     const requestedModelSlug = parsedBody.model as string | undefined;
     if (requestedModelSlug) {
-      const [allowedModel] = await db
-        .select({ id: models.id })
-        .from(models)
-        .where(eq(models.slug, requestedModelSlug))
-        .limit(1);
+      const allowedModel = await cachedQuery(
+        redis,
+        `model:${requestedModelSlug}`,
+        300,
+        async () => {
+          const [row] = await db
+            .select({ id: models.id })
+            .from(models)
+            .where(eq(models.slug, requestedModelSlug))
+            .limit(1);
+          return row ?? null;
+        }
+      );
 
       if (!allowedModel) {
         return c.json(
