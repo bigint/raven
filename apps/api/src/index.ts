@@ -163,7 +163,7 @@ app.route("/v1/admin", adminRoutes);
 const v1 = new Hono();
 v1.use("*", createAuthMiddleware(auth));
 v1.use("*", createTenantMiddleware(db));
-v1.get("/models/available", listAvailableModels(db));
+v1.get("/available-models", listAvailableModels(db));
 v1.route("/providers", createProvidersModule(db, env, redis));
 v1.route("/keys", createKeysModule(db));
 v1.route("/prompts", createPromptsModule(db));

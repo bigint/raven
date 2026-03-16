@@ -174,8 +174,8 @@ export const ModelCatalog = () => {
   const [visibleCount, setVisibleCount] = useState(24);
 
   const { data: models = [], isPending } = useQuery({
-    queryFn: () => api.get<ModelDefinition[]>("/v1/models"),
-    queryKey: ["models", "catalog"]
+    queryFn: () => api.get<ModelDefinition[]>("/v1/available-models"),
+    queryKey: ["available-models"]
   });
 
   const providerOptions = useMemo(() => {
