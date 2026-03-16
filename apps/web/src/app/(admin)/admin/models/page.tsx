@@ -2,7 +2,7 @@
 
 import { Spinner } from "@raven/ui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronRight, RefreshCw } from "lucide-react";
+import { ChevronRight, RefreshCw, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ProviderIcon } from "@/components/model-icon";
@@ -18,6 +18,19 @@ const AdminModelsPage = () => {
     name: string;
   } | null>(null);
 
+  const cleanMutation = useMutation({
+    mutationFn: () =>
+      api.post<{ removedModels: number; removedConfigs: number }>(
+        "/v1/admin/models/clean-dangling"
+      ),
+    onSuccess: (data) => {
+      toast.success(
+        `Removed ${data.removedModels} models and ${data.removedConfigs} provider configs`
+      );
+      void queryClient.invalidateQueries({ queryKey: ["admin", "providers"] });
+    }
+  });
+
   const refreshMutation = useMutation({
     mutationFn: (provider: string) =>
       api.post<{ updated: number }>("/v1/admin/models/refresh-pricing", {
@@ -31,11 +44,22 @@ const AdminModelsPage = () => {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-xl font-bold sm:text-2xl">Models</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Add and manage models from each provider.
-        </p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold sm:text-2xl">Models</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Add and manage models from each provider.
+          </p>
+        </div>
+        <button
+          className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
+          disabled={cleanMutation.isPending}
+          onClick={() => cleanMutation.mutate()}
+          type="button"
+        >
+          <Trash2 className="size-3.5" />
+          Clean Dangling Models
+        </button>
       </div>
 
       <div className="rounded-xl border border-border">

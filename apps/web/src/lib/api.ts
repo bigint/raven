@@ -17,17 +17,8 @@ const unwrapEnvelope = (body: unknown): unknown => {
 };
 
 const client = ky.create({
-  prefixUrl: API_URL,
   credentials: "include",
   hooks: {
-    beforeRequest: [
-      (request) => {
-        const orgId = useOrgStore.getState().activeOrg?.id;
-        if (orgId) {
-          request.headers.set("X-Org-Id", orgId);
-        }
-      }
-    ],
     beforeError: [
       async (error) => {
         const body = await error.response
@@ -41,8 +32,17 @@ const client = ky.create({
           "Request failed";
         return error;
       }
+    ],
+    beforeRequest: [
+      (request) => {
+        const orgId = useOrgStore.getState().activeOrg?.id;
+        if (orgId) {
+          request.headers.set("X-Org-Id", orgId);
+        }
+      }
     ]
-  }
+  },
+  prefixUrl: API_URL
 });
 
 const request = async <T>(
@@ -57,8 +57,8 @@ const request = async <T>(
 };
 
 export const api = {
+  delete: <T>(path: string) => request<T>("delete", path),
   get: <T>(path: string) => request<T>("get", path),
   post: <T>(path: string, body?: unknown) => request<T>("post", path, body),
-  put: <T>(path: string, body?: unknown) => request<T>("put", path, body),
-  delete: <T>(path: string) => request<T>("delete", path)
+  put: <T>(path: string, body?: unknown) => request<T>("put", path, body)
 };

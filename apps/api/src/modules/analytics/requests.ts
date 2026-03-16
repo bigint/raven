@@ -79,6 +79,6 @@ export const getRequests =
 
     return c.json({
       data: rows,
-      pagination: buildPaginationMeta({ page, limit }, Number(total))
+      pagination: buildPaginationMeta({ limit, page }, Number(total))
     });
   };

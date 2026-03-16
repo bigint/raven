@@ -1,12 +1,12 @@
 import type { Database } from "@raven/db";
-import { models } from "@raven/db";
-import { count, eq, inArray } from "drizzle-orm";
+import { models, providerConfigs } from "@raven/db";
+import { count, eq, inArray, notInArray } from "drizzle-orm";
 import type { Context } from "hono";
 import {
-  SUPPORTED_PROVIDERS,
   deriveCapabilities,
   deriveCategory,
   getModelsDevModel,
+  SUPPORTED_PROVIDERS,
   searchModels as searchModelsFromDev
 } from "@/lib/model-sync";
 import { refreshPricingCache } from "@/lib/pricing-cache";
@@ -28,42 +28,41 @@ export const getAdminProviders = (db: Database) => async (c: Context) => {
   return c.json({ data });
 };
 
-export const searchAvailableModels =
-  (db: Database) => async (c: Context) => {
-    const provider = c.req.query("provider") ?? "";
-    const query = c.req.query("q") ?? "";
+export const searchAvailableModels = (db: Database) => async (c: Context) => {
+  const provider = c.req.query("provider") ?? "";
+  const query = c.req.query("q") ?? "";
 
-    if (!provider) {
-      return c.json(
-        {
-          error: {
-            code: "VALIDATION_ERROR",
-            message: "provider is required"
-          }
-        },
-        400
-      );
-    }
+  if (!provider) {
+    return c.json(
+      {
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "provider is required"
+        }
+      },
+      400
+    );
+  }
 
-    const results = await searchModelsFromDev(provider, query);
+  const results = await searchModelsFromDev(provider, query);
 
-    const modelIds = results.map((m) => `${provider}/${m.id}`);
-    const existing =
-      modelIds.length > 0
-        ? await db
-            .select({ id: models.id })
-            .from(models)
-            .where(inArray(models.id, modelIds))
-        : [];
-    const existingIds = new Set(existing.map((m) => m.id));
+  const modelIds = results.map((m) => `${provider}/${m.id}`);
+  const existing =
+    modelIds.length > 0
+      ? await db
+          .select({ id: models.id })
+          .from(models)
+          .where(inArray(models.id, modelIds))
+      : [];
+  const existingIds = new Set(existing.map((m) => m.id));
 
-    const data = results.map((m) => ({
-      ...m,
-      isAdded: existingIds.has(`${provider}/${m.id}`)
-    }));
+  const data = results.map((m) => ({
+    ...m,
+    isAdded: existingIds.has(`${provider}/${m.id}`)
+  }));
 
-    return c.json({ data });
-  };
+  return c.json({ data });
+};
 
 export const addModel = (db: Database) => async (c: Context) => {
   const body = await c.req.json<{ provider: string; modelId: string }>();
@@ -216,4 +215,29 @@ export const refreshModelPricing = (db: Database) => async (c: Context) => {
   await refreshPricingCache(db);
 
   return c.json({ data: { updated } });
+};
+
+export const cleanDanglingModels = (db: Database) => async (c: Context) => {
+  const validSlugs = SUPPORTED_PROVIDERS.map((p) => p.slug);
+
+  const deletedModels = await db
+    .delete(models)
+    .where(notInArray(models.provider, validSlugs))
+    .returning({ id: models.id });
+
+  const deletedConfigs = await db
+    .delete(providerConfigs)
+    .where(notInArray(providerConfigs.provider, validSlugs))
+    .returning({ id: providerConfigs.id });
+
+  if (deletedModels.length > 0) {
+    await refreshPricingCache(db);
+  }
+
+  return c.json({
+    data: {
+      removedConfigs: deletedConfigs.length,
+      removedModels: deletedModels.length
+    }
+  });
 };

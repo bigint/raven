@@ -59,8 +59,8 @@ const evaluatePiiDetection = (
   contents: string[],
   config: Record<string, unknown>
 ): string | null => {
-  const enabledTypes = (config.piiTypes as string[] | undefined) ??
-    Object.keys(PII_PATTERNS);
+  const enabledTypes =
+    (config.piiTypes as string[] | undefined) ?? Object.keys(PII_PATTERNS);
 
   for (const content of contents) {
     for (const piiType of enabledTypes) {

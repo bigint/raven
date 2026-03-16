@@ -1,8 +1,7 @@
 export const SUPPORTED_PROVIDERS = [
   { name: "Anthropic", slug: "anthropic" },
   { name: "Mistral AI", slug: "mistralai" },
-  { name: "OpenAI", slug: "openai" },
-  { name: "OpenRouter", slug: "openrouter" }
+  { name: "OpenAI", slug: "openai" }
 ];
 
 interface ModelsDevModel {
@@ -59,8 +58,7 @@ const CACHE_TTL_MS = 10 * 60 * 1000;
 export const PROVIDER_SLUG_MAP: Record<string, string> = {
   anthropic: "anthropic",
   mistral: "mistralai",
-  openai: "openai",
-  openrouter: "openrouter"
+  openai: "openai"
 };
 
 const REVERSE_SLUG_MAP: Record<string, string> = Object.fromEntries(
@@ -141,19 +139,18 @@ export const searchModels = async (
 
   return Object.values(providerData.models)
     .filter(
-      (m) =>
-        m.id.toLowerCase().includes(q) || m.name.toLowerCase().includes(q)
+      (m) => m.id.toLowerCase().includes(q) || m.name.toLowerCase().includes(q)
     )
     .map((m) => {
       const inputPrice = m.cost?.input ?? 0;
       return {
-        id: m.id,
-        name: m.name,
         capabilities: deriveCapabilities(m),
         category: deriveCategory(m, inputPrice),
         contextWindow: m.limit?.context ?? 0,
-        maxOutput: m.limit?.output ?? 0,
+        id: m.id,
         inputPrice,
+        maxOutput: m.limit?.output ?? 0,
+        name: m.name,
         outputPrice: m.cost?.output ?? 0
       };
     })
@@ -171,4 +168,3 @@ export const getModelsDevModel = async (
   const providerData = data[devSlug];
   return providerData?.models?.[modelId] ?? null;
 };
-

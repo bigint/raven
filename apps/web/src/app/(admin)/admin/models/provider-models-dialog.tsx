@@ -110,9 +110,7 @@ export const ProviderModelsDialog = ({
                         ? "text-destructive hover:bg-destructive/10"
                         : "text-primary hover:bg-primary/10"
                     }`}
-                    disabled={
-                      addMutation.isPending || removeMutation.isPending
-                    }
+                    disabled={addMutation.isPending || removeMutation.isPending}
                     onClick={() =>
                       model.isAdded
                         ? removeMutation.mutate(model.id)

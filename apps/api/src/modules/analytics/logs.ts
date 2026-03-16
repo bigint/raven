@@ -100,6 +100,6 @@ export const getLogs =
         userAgent: row.userAgent ?? null,
         virtualKeyId: row.virtualKeyId
       })),
-      pagination: buildPaginationMeta({ page, limit }, Number(total))
+      pagination: buildPaginationMeta({ limit, page }, Number(total))
     });
   };

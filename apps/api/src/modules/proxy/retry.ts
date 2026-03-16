@@ -46,8 +46,8 @@ export const withRetry = async <T extends { response: Response }>(
       {
         factor: 2,
         maxRetryTime: Number.POSITIVE_INFINITY,
-        minTimeout: baseDelayMs,
         maxTimeout: maxDelayMs,
+        minTimeout: baseDelayMs,
         randomize: true,
         retries: maxRetries
       }

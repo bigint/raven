@@ -89,7 +89,7 @@ export const getSessions =
         totalReasoningTokens: Number(row.totalReasoningTokens ?? 0),
         totalToolUses: Number(row.totalToolUses ?? 0)
       })),
-      pagination: buildPaginationMeta({ page, limit }, Number(total))
+      pagination: buildPaginationMeta({ limit, page }, Number(total))
     });
   };
 

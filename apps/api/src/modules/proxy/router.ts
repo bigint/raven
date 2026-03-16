@@ -34,7 +34,9 @@ export const resolveWithStrategy = async (
     .limit(50);
 
   if (configs.length === 0) {
-    throw new NotFoundError(`No enabled configs for provider '${providerName}'`);
+    throw new NotFoundError(
+      `No enabled configs for provider '${providerName}'`
+    );
   }
 
   const first = configs[0] as { id: string };

@@ -63,7 +63,12 @@ export const ChatInput = ({
           value={value}
         />
         {isStreaming ? (
-          <Button className="shrink-0" onClick={onStop} size="md" variant="secondary">
+          <Button
+            className="shrink-0"
+            onClick={onStop}
+            size="md"
+            variant="secondary"
+          >
             <Square className="size-4" />
           </Button>
         ) : (

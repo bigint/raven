@@ -75,16 +75,16 @@ const extractFormFromGuardrail = (g: Guardrail): FormState => ({
       ? ((g.config as { categories?: string[] }).categories ?? []).join("\n")
       : "",
   isEnabled: g.isEnabled,
-  piiTypes:
-    g.type === "pii_detection"
-      ? ((g.config as { piiTypes?: string[] }).piiTypes ??
-          PII_TYPES.map((t) => t.id))
-      : PII_TYPES.map((t) => t.id),
   name: g.name,
   pattern:
     g.type === "custom_regex"
       ? ((g.config as { pattern?: string }).pattern ?? "")
       : "",
+  piiTypes:
+    g.type === "pii_detection"
+      ? ((g.config as { piiTypes?: string[] }).piiTypes ??
+        PII_TYPES.map((t) => t.id))
+      : PII_TYPES.map((t) => t.id),
   priority: String(g.priority),
   topics:
     g.type === "block_topics"
@@ -243,10 +243,7 @@ const GuardrailForm = ({
           <fieldset className="space-y-2">
             <legend className="text-sm font-medium">PII Types</legend>
             {PII_TYPES.map((pii) => (
-              <label
-                className="flex items-center gap-2 text-sm"
-                key={pii.id}
-              >
+              <label className="flex items-center gap-2 text-sm" key={pii.id}>
                 <input
                   checked={form.piiTypes.includes(pii.id)}
                   className="size-4 rounded border-input accent-primary"

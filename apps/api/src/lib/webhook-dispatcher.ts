@@ -39,14 +39,14 @@ const deliverWebhook = async (
       }
     },
     {
-      retries: 3,
-      minTimeout: 1000,
       factor: 2,
+      minTimeout: 1000,
       onFailedAttempt: (ctx) => {
         console.error(
           `Webhook attempt ${ctx.attemptNumber} failed for ${url}: ${ctx.error.message}`
         );
-      }
+      },
+      retries: 3
     }
   ).catch(() => {
     console.error(`Webhook delivery failed after all retries: ${url}`);

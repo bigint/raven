@@ -6,6 +6,7 @@ import { getAdminOrganizations } from "./organizations";
 import { getAdminStats } from "./stats";
 import {
   addModel,
+  cleanDanglingModels,
   getAdminProviders,
   refreshModelPricing,
   removeModel,
@@ -25,5 +26,6 @@ export const createAdminModule = (db: Database) => {
   app.post("/models", addModel(db));
   app.delete("/models/:id{.+}", removeModel(db));
   app.post("/models/refresh-pricing", refreshModelPricing(db));
+  app.post("/models/clean-dangling", cleanDanglingModels(db));
   return app;
 };
