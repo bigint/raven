@@ -42,6 +42,7 @@ export const useChat = () => {
     provider: string;
   } | null>(null);
   const [settings, setSettings] = useState<PlaygroundSettings>({
+    chatMemory: 5,
     enableTools: false,
     maxTokens: 4096,
     showMetadata: true,
@@ -116,14 +117,19 @@ export const useChat = () => {
         const client = clientRef.current;
         if (!client) return;
 
+        const allMessages = [...messages, userMessage].map((m) => ({
+          content: m.content,
+          role: m.role
+        }));
+
+        // Apply chat memory limit — only send the last N messages
+        const recentMessages = allMessages.slice(-settings.chatMemory);
+
         const chatMessages: Message[] = [
           ...(systemPrompt
             ? [{ content: systemPrompt, role: "system" as const }]
             : []),
-          ...[...messages, userMessage].map((m) => ({
-            content: m.content,
-            role: m.role
-          }))
+          ...recentMessages
         ];
 
         const demoTools = settings.enableTools

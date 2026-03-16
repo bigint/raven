@@ -10,6 +10,7 @@ export interface PlaygroundSettings {
   stream: boolean;
   showMetadata: boolean;
   enableTools: boolean;
+  chatMemory: number;
 }
 
 interface ModelOption {
@@ -18,7 +19,7 @@ interface ModelOption {
   provider: string;
 }
 
-type Popover = "model" | "temperature" | "settings" | null;
+type Popover = "model" | "temperature" | "memory" | "settings" | null;
 
 interface ChatInputProps {
   disabled: boolean;
@@ -194,6 +195,64 @@ export const ChatInput = ({
             >
               {settings.stream ? "Stream" : "Batch"}
             </button>
+
+            <Sep />
+
+            {/* Chat memory */}
+            <div className="relative">
+              <button
+                className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                onClick={() => toggle("memory")}
+                type="button"
+              >
+                <svg
+                  className="size-3"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                {settings.chatMemory}
+              </button>
+
+              {openPopover === "memory" && (
+                <Dropdown onClose={() => setOpenPopover(null)}>
+                  <div className="w-56 p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium">Chat memory</span>
+                      <span className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono text-muted-foreground">
+                        {settings.chatMemory}
+                      </span>
+                    </div>
+                    <input
+                      className="w-full accent-primary"
+                      max="1000"
+                      min="1"
+                      onChange={(e) =>
+                        update(
+                          "chatMemory",
+                          Number.parseInt(e.target.value, 10)
+                        )
+                      }
+                      step="1"
+                      type="range"
+                      value={settings.chatMemory}
+                    />
+                    <p className="text-[10px] text-muted-foreground">
+                      Sends the last {settings.chatMemory} message
+                      {settings.chatMemory === 1 ? "" : "s"} from your
+                      conversation each request.
+                    </p>
+                  </div>
+                </Dropdown>
+              )}
+            </div>
 
             <Sep />
 
