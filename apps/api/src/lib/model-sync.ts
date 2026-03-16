@@ -42,11 +42,25 @@ type ModelsDevResponse = Record<string, ModelsDevProvider>;
 
 const MODELS_DEV_API = "https://models.dev/api.json";
 
+const OPENAI_ALLOWED_MODELS = new Set([
+  "gpt-5.2",
+  "gpt-5.1",
+  "gpt-5",
+  "gpt-5-mini",
+  "gpt-5-nano",
+  "gpt-5.2-chat-latest",
+  "gpt-5.1-chat-latest",
+  "gpt-5-chat-latest",
+  "gpt-5.2-codex",
+  "gpt-5.1-codex-max",
+  "gpt-5.1-codex",
+  "gpt-5-codex"
+]);
+
 const PROVIDER_SLUG_MAP: Record<string, string> = {
   anthropic: "anthropic",
   mistral: "mistralai",
-  openai: "openai",
-  xai: "x-ai"
+  openai: "openai"
 };
 
 const deriveCategory = (model: ModelsDevModel, inputPrice: number): string => {
@@ -117,6 +131,8 @@ export const syncModels = async (
     if (!ourSlug || !enabledSlugs.has(ourSlug)) continue;
 
     for (const model of Object.values(providerData.models ?? {})) {
+      if (ourSlug === "openai" && !OPENAI_ALLOWED_MODELS.has(model.id)) continue;
+
       const inputPrice = model.cost?.input ?? 0;
       const outputPrice = model.cost?.output ?? 0;
       const id = `${ourSlug}/${model.id}`;
@@ -197,8 +213,7 @@ export const syncModels = async (
 const DEFAULT_PROVIDERS = [
   { isEnabled: true, name: "Anthropic", slug: "anthropic" },
   { isEnabled: true, name: "Mistral AI", slug: "mistralai" },
-  { isEnabled: true, name: "OpenAI", slug: "openai" },
-  { isEnabled: true, name: "xAI", slug: "x-ai" }
+  { isEnabled: true, name: "OpenAI", slug: "openai" }
 ];
 
 export const seedDefaultProviders = async (db: Database): Promise<void> => {

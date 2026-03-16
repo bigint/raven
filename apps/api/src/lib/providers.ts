@@ -43,14 +43,6 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
     label: "OpenAI",
     modelsEndpoint: "/models",
     validationPath: "/models"
-  },
-  "x-ai": {
-    authHeaders: (apiKey) => ({ Authorization: `Bearer ${apiKey}` }),
-    baseUrl: "https://api.x.ai/v1",
-    chatEndpoint: "/chat/completions",
-    label: "xAI",
-    modelsEndpoint: "/models",
-    validationPath: "/models"
   }
 };
 

@@ -71,7 +71,7 @@ export const listProviderModels =
         const body = (await res.json()) as { data?: UpstreamModel[] };
 
         const NON_CHAT_PATTERNS =
-          /embed|tts|whisper|dall-e|moderation|realtime|transcri|audio|codex|computer-use|davinci|babbage|search/i;
+          /embed|tts|whisper|dall-e|image|moderation|realtime|transcri|audio|codex|computer-use|davinci|babbage|search/i;
 
         return (body.data ?? [])
           .filter((m) => !NON_CHAT_PATTERNS.test(m.id))
