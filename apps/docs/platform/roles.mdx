@@ -1,0 +1,53 @@
+---
+title: "Roles & Permissions"
+description: "Role-based access control for organization and team management."
+---
+
+Raven uses role-based access control (RBAC) to manage permissions at both the organization and team level.
+
+## Organization Roles
+
+| Role | Description | Key Permissions |
+|------|-------------|-----------------|
+| **Owner** | Full control | All actions, billing, danger zone |
+| **Admin** | Administrative access | Manage members, providers, keys, settings |
+| **Member** | Standard access | Use resources, view analytics |
+| **Viewer** | Read-only access | View dashboard, analytics, logs |
+
+## Permission Matrix
+
+| Action | Owner | Admin | Member | Viewer |
+|--------|-------|-------|--------|--------|
+| Manage billing | Yes | No | No | No |
+| Delete organization | Yes | No | No | No |
+| Invite members | Yes | Yes | No | No |
+| Manage providers | Yes | Yes | No | No |
+| Create/delete keys | Yes | Yes | Yes | No |
+| View analytics | Yes | Yes | Yes | Yes |
+| View request logs | Yes | Yes | Yes | Yes |
+| Make API requests | Yes | Yes | Yes | No |
+| Configure guardrails | Yes | Yes | No | No |
+| Manage budgets | Yes | Yes | No | No |
+| Manage routing rules | Yes | Yes | No | No |
+| Manage webhooks | Yes | Yes | No | No |
+
+## Inviting Members
+
+<Steps>
+  <Step title="Go to Team">
+    Navigate to the **Team** section in the dashboard.
+  </Step>
+  <Step title="Click Invite">
+    Enter the user's email address.
+  </Step>
+  <Step title="Select a role">
+    Choose the appropriate role for the new member.
+  </Step>
+  <Step title="Send invitation">
+    The user receives an email invitation to join the organization.
+  </Step>
+</Steps>
+
+## Changing Roles
+
+Organization owners and admins can change member roles at any time from the Team page.

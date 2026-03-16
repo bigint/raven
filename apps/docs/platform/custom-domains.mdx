@@ -1,0 +1,55 @@
+---
+title: "Custom Domains"
+description: "Use your own domain for the Raven API endpoint."
+---
+
+Custom domains let you serve the Raven API from your own domain (e.g., `ai.yourcompany.com`) instead of `api.raven.dev`.
+
+## Setting Up a Custom Domain
+
+<Steps>
+  <Step title="Navigate to Settings">
+    Go to **Settings > Custom Domains** in the dashboard.
+  </Step>
+  <Step title="Add your domain">
+    Enter your custom domain (e.g., `ai.yourcompany.com`).
+  </Step>
+  <Step title="Configure DNS">
+    Add the CNAME record shown in the dashboard to your DNS provider.
+  </Step>
+  <Step title="Verify">
+    Raven verifies the DNS record and provisions an SSL certificate.
+  </Step>
+</Steps>
+
+## Using Your Custom Domain
+
+Once verified, use your custom domain in API requests:
+
+```bash
+curl -X POST https://ai.yourcompany.com/v1/chat/completions \
+  -H "Authorization: Bearer rk_live_abc123..." \
+  -H "Content-Type: application/json" \
+  -d '{"model": "gpt-4o", "messages": [...]}'
+```
+
+## DNS Configuration
+
+Add a CNAME record pointing to Raven:
+
+| Type | Name | Value |
+|------|------|-------|
+| CNAME | `ai` | `proxy.raven.dev` |
+
+## SSL/TLS
+
+Raven automatically provisions and renews SSL certificates for custom domains via Cloudflare.
+
+## Plan Limits
+
+| Plan | Custom Domains |
+|------|----------------|
+| Free | Not available |
+| Pro | 1 |
+| Team | 3 |
+| Enterprise | Unlimited |

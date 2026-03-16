@@ -1,0 +1,41 @@
+---
+title: "Organizations"
+description: "Workspaces for managing resources, teams, and billing."
+---
+
+Organizations are the top-level workspace in Raven. All resources — providers, keys, budgets, and team members — belong to an organization.
+
+## Creating an Organization
+
+An organization is created automatically when you sign up. You can create additional organizations from the dashboard.
+
+### Organization Properties
+
+| Field | Description |
+|-------|-------------|
+| **Name** | Display name |
+| **Slug** | URL-safe identifier used in the dashboard URL |
+| **Plan** | Subscription tier (Free, Pro, Team, Enterprise) |
+
+## Switching Organizations
+
+If you belong to multiple organizations, switch between them using the organization selector in the sidebar.
+
+## Organization Settings
+
+Navigate to **Settings** to configure:
+
+- **General** — Name, slug, and branding
+- **Billing** — Subscription plan and payment methods
+- **Custom Domains** — Add custom domains for the API
+- **Cache** — Enable/disable semantic caching
+- **Danger Zone** — Delete the organization
+
+## Resource Isolation
+
+Resources are fully isolated between organizations:
+
+- Providers, keys, and budgets are not shared
+- Team members must be invited to each organization
+- Analytics and logs are scoped to the organization
+- Billing is per-organization

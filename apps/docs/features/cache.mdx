@@ -1,0 +1,57 @@
+---
+title: "Semantic Cache"
+description: "Cache similar requests to reduce latency and costs."
+---
+
+Raven's semantic cache stores responses and serves them for similar future requests, reducing latency and saving costs.
+
+## How It Works
+
+1. When a request comes in, Raven computes a semantic fingerprint of the prompt
+2. If a similar request was recently cached, the cached response is returned instantly
+3. If no cache match is found, the request goes to the provider and the response is cached
+
+```
+Request → Cache Check → Hit? → Return cached response (fast, free)
+                      → Miss? → Provider → Cache response → Return
+```
+
+## Cache Benefits
+
+| Benefit | Impact |
+|---------|--------|
+| **Reduced latency** | Cached responses return in milliseconds vs seconds |
+| **Cost savings** | Cached responses don't consume provider tokens |
+| **Reduced load** | Fewer requests to upstream providers |
+
+## Configuration
+
+Configure caching in **Settings > Cache**:
+
+| Setting | Description |
+|---------|-------------|
+| **Enabled** | Toggle caching on/off |
+| **TTL** | How long cached responses remain valid |
+| **Similarity threshold** | How similar a request must be to match (0-1) |
+
+## Cache Metrics
+
+Monitor cache performance in the analytics dashboard:
+
+- **Cache hit rate** — Percentage of requests served from cache
+- **Cost savings** — Estimated money saved from cached responses
+- **Latency improvement** — Average latency reduction from caching
+
+## When Caching Applies
+
+Caching works best for:
+
+- **Repeated queries** — FAQs, common questions
+- **Deterministic tasks** — Classification, extraction, formatting
+- **Batch processing** — Similar items processed in sequence
+
+Caching is less effective for:
+
+- **Creative generation** — Unique content where variety matters
+- **Real-time data** — Queries that depend on current information
+- **Conversations** — Multi-turn chat with unique context
