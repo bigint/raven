@@ -51,6 +51,14 @@ export const useCreateEvaluation = () => {
   });
 };
 
+export const useDeleteEvaluation = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/v1/evaluations/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["evaluations"] })
+  });
+};
+
 export const useRunEvaluation = () => {
   const qc = useQueryClient();
   return useMutation({

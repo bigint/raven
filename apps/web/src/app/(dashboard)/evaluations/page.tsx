@@ -6,7 +6,10 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import { EvaluationForm } from "./components/evaluation-form";
 import { EvaluationList } from "./components/evaluation-list";
-import { evaluationsQueryOptions } from "./hooks/use-evaluations";
+import {
+  evaluationsQueryOptions,
+  useDeleteEvaluation
+} from "./hooks/use-evaluations";
 
 const EvaluationsPage = () => {
   const {
@@ -17,9 +20,11 @@ const EvaluationsPage = () => {
 
   const [formOpen, setFormOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const deleteMutation = useDeleteEvaluation();
 
   const handleDelete = async () => {
     if (!deleteId) return;
+    await deleteMutation.mutateAsync(deleteId);
     setDeleteId(null);
   };
 
@@ -58,7 +63,7 @@ const EvaluationsPage = () => {
       <ConfirmDialog
         confirmLabel="Delete"
         description="Are you sure you want to delete this evaluation? This action cannot be undone."
-        loading={false}
+        loading={deleteMutation.isPending}
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
         open={deleteId !== null}
