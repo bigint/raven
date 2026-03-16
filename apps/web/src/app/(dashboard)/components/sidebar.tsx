@@ -17,7 +17,6 @@ import {
   FileText,
   FlaskConical,
   Key,
-  KeyRound,
   LayoutDashboard,
   Menu,
   MessageCircle,
@@ -119,8 +118,7 @@ const NAV_ITEMS: NavItem[] = [
     icon: Webhook,
     label: "Webhooks"
   },
-  { href: "/plugins", icon: Puzzle, label: "Plugins" },
-  { href: "/sso", icon: KeyRound, label: "SSO" }
+  { href: "/plugins", icon: Puzzle, label: "Plugins" }
 ];
 
 interface SidebarProps {

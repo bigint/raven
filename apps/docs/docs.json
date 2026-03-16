@@ -18,8 +18,7 @@
             "pages": [
               "index",
               "getting-started/quickstart",
-              "getting-started/concepts",
-              "getting-started/self-hosting"
+              "getting-started/concepts"
             ]
           },
           {
@@ -69,7 +68,6 @@
               "platform/organizations",
               "platform/teams",
               "platform/roles",
-              "platform/sso",
               "platform/custom-domains",
               "platform/billing"
             ]

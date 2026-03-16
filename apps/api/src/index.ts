@@ -55,7 +55,6 @@ import { flushLastUsed } from "./modules/proxy/logger";
 import { createRBACModule } from "./modules/rbac/index";
 import { createRoutingRulesModule } from "./modules/routing-rules/index";
 import { createSettingsModule } from "./modules/settings/index";
-import { createSSOModule } from "./modules/sso/index";
 import { createTeamsModule } from "./modules/teams/index";
 import { createUserModule } from "./modules/user/index";
 import { createWebhooksModule } from "./modules/webhooks/index";
@@ -219,7 +218,6 @@ v1.route("/plugins", createPluginsModule(db));
 v1.route("/policies", createPoliciesModule(db));
 v1.route("/rbac", createRBACModule());
 v1.route("/exports", createExportsModule(db));
-v1.route("/sso", createSSOModule(db));
 app.route("/v1", v1);
 
 // Observability endpoints (no auth - for Prometheus scraping)

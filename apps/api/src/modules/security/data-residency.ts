@@ -1,30 +1,10 @@
 export const PROVIDER_REGIONS: Record<string, string[]> = {
   anthropic: ["us"],
-  "azure-openai": ["us", "eu", "ap", "me"],
-  bedrock: ["us", "eu", "ap"],
-  cerebras: ["us"],
-  cohere: ["us", "ca"],
-  deepseek: ["cn"],
-  fireworks: ["us"],
-  google: ["us", "eu"],
-  groq: ["us"],
   mistralai: ["eu"],
-  nvidia: ["us"],
-  ollama: ["local"],
-  openai: ["us"],
-  sambanova: ["us"],
-  together: ["us"]
+  openai: ["us"]
 };
 
-export type DataRegion =
-  | "any"
-  | "ap"
-  | "ca"
-  | "cn"
-  | "eu"
-  | "local"
-  | "me"
-  | "us";
+export type DataRegion = "any" | "eu" | "us";
 
 export interface DataResidencyConfig {
   allowedRegions: DataRegion[];
