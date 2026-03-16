@@ -1,7 +1,8 @@
 export const SUPPORTED_PROVIDERS = [
   { name: "Anthropic", slug: "anthropic" },
   { name: "Mistral AI", slug: "mistralai" },
-  { name: "OpenAI", slug: "openai" }
+  { name: "OpenAI", slug: "openai" },
+  { name: "OpenRouter", slug: "openrouter" }
 ];
 
 interface ModelsDevModel {
@@ -58,7 +59,8 @@ const CACHE_TTL_MS = 10 * 60 * 1000;
 export const PROVIDER_SLUG_MAP: Record<string, string> = {
   anthropic: "anthropic",
   mistral: "mistralai",
-  openai: "openai"
+  openai: "openai",
+  openrouter: "openrouter"
 };
 
 const REVERSE_SLUG_MAP: Record<string, string> = Object.fromEntries(

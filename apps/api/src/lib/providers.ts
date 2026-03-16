@@ -43,6 +43,14 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
     label: "OpenAI",
     modelsEndpoint: "/models",
     validationPath: "/models"
+  },
+  openrouter: {
+    authHeaders: (apiKey) => ({ Authorization: `Bearer ${apiKey}` }),
+    baseUrl: "https://openrouter.ai/api/v1",
+    chatEndpoint: "/chat/completions",
+    label: "OpenRouter",
+    modelsEndpoint: "/models",
+    validationPath: "/models"
   }
 };
 
