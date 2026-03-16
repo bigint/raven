@@ -18,7 +18,9 @@ export interface PlanFeatures {
   readonly hasCustomDomains: boolean;
   readonly hasAuditLogs: boolean;
   readonly hasGuardrails: boolean;
+  readonly hasAdoption: boolean;
   readonly hasWebhooks: boolean;
+  readonly hasIpAllowlists: boolean;
 }
 
 export type BooleanFeatureKey = {
@@ -68,9 +70,11 @@ export const PLAN_DETAILS: Record<Plan, PlanDetails> = {
 export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
   enterprise: {
     analyticsRetentionDays: 365,
+    hasAdoption: true,
     hasAuditLogs: true,
     hasCustomDomains: true,
     hasGuardrails: true,
+    hasIpAllowlists: true,
     hasTeams: true,
     hasWebhooks: true,
     maxBudgets: Number.POSITIVE_INFINITY,
@@ -82,9 +86,11 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
   },
   free: {
     analyticsRetentionDays: 7,
+    hasAdoption: false,
     hasAuditLogs: false,
     hasCustomDomains: false,
     hasGuardrails: false,
+    hasIpAllowlists: false,
     hasTeams: false,
     hasWebhooks: false,
     maxBudgets: 1,
@@ -96,9 +102,11 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
   },
   pro: {
     analyticsRetentionDays: 30,
+    hasAdoption: true,
     hasAuditLogs: false,
     hasCustomDomains: true,
     hasGuardrails: true,
+    hasIpAllowlists: false,
     hasTeams: false,
     hasWebhooks: true,
     maxBudgets: 10,
@@ -110,9 +118,11 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
   },
   team: {
     analyticsRetentionDays: 90,
+    hasAdoption: true,
     hasAuditLogs: false,
     hasCustomDomains: true,
     hasGuardrails: true,
+    hasIpAllowlists: false,
     hasTeams: true,
     hasWebhooks: true,
     maxBudgets: Number.POSITIVE_INFINITY,

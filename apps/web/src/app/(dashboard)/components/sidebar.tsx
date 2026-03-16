@@ -63,7 +63,12 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/requests", icon: Activity, label: "Requests" },
   { href: "/logs", icon: ScrollText, label: "Logs" },
   { href: "/tools", icon: Wrench, label: "Tool Use" },
-  { href: "/adoption", icon: TrendingUp, label: "Adoption" },
+  {
+    gate: (plan) => PLAN_FEATURES[plan].hasAdoption,
+    href: "/adoption",
+    icon: TrendingUp,
+    label: "Adoption"
+  },
   { href: "/budgets", icon: CreditCard, label: "Budgets" },
   {
     gate: (plan) => PLAN_FEATURES[plan].hasGuardrails,
@@ -72,7 +77,7 @@ const NAV_ITEMS: NavItem[] = [
     label: "Guardrails"
   },
   {
-    gate: (plan) => plan === "enterprise",
+    gate: (plan) => PLAN_FEATURES[plan].hasIpAllowlists,
     href: "/ip-allowlists",
     icon: ShieldBan,
     label: "IP Allowlists"

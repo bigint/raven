@@ -32,8 +32,10 @@ const ChatPage = () => {
     catalogModelsQueryOptions()
   );
 
-  // Load system prompt and model from URL params (e.g. from "Test in Playground")
+  // Auto-select first model, or use URL params
   useEffect(() => {
+    if (!models.length || selectedModel) return;
+
     const urlSystem = searchParams.get("system");
     const urlModel = searchParams.get("model");
 
@@ -41,13 +43,20 @@ const ChatPage = () => {
       setSystemPrompt(urlSystem);
     }
 
-    if (urlModel && !selectedModel && models.length > 0) {
+    if (urlModel) {
       const match = models.find(
         (m) => m.slug === urlModel || m.name === urlModel
       );
       if (match) {
         setSelectedModel({ model: match.slug, provider: match.provider });
+        return;
       }
+    }
+
+    // Default to first available model
+    const first = models[0];
+    if (first) {
+      setSelectedModel({ model: first.slug, provider: first.provider });
     }
   }, [
     searchParams,
@@ -69,7 +78,7 @@ const ChatPage = () => {
   );
 
   return (
-    <div className="flex h-[calc(100dvh-6rem)] flex-col">
+    <div className="flex h-[calc(100dvh-var(--spacing)*8)] flex-col md:h-dvh md:-m-6 md:p-6">
       <PageHeader
         actions={
           <div className="flex items-center gap-2">
