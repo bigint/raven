@@ -1,6 +1,8 @@
-import type { Database } from "@raven/db";
-import { models, syncedProviders } from "@raven/db";
-import { notInArray } from "drizzle-orm";
+export const SUPPORTED_PROVIDERS = [
+  { name: "Anthropic", slug: "anthropic" },
+  { name: "Mistral AI", slug: "mistralai" },
+  { name: "OpenAI", slug: "openai" }
+];
 
 interface ModelsDevModel {
   id: string;
@@ -168,29 +170,3 @@ export const getModelsDevModel = async (
   return providerData?.models?.[modelId] ?? null;
 };
 
-const DEFAULT_PROVIDERS = [
-  { isEnabled: true, name: "Anthropic", slug: "anthropic" },
-  { isEnabled: true, name: "Mistral AI", slug: "mistralai" },
-  { isEnabled: true, name: "OpenAI", slug: "openai" }
-];
-
-const VALID_SLUGS = DEFAULT_PROVIDERS.map((p) => p.slug);
-
-export const seedDefaultProviders = async (db: Database): Promise<void> => {
-  // Remove providers not in the hardcoded list (cascades to their models)
-  await db
-    .delete(syncedProviders)
-    .where(notInArray(syncedProviders.slug, VALID_SLUGS));
-
-  // Remove all auto-synced models (users will re-add manually)
-  await db.delete(models);
-
-  // Insert missing default providers
-  const existing = await db.select().from(syncedProviders);
-  const existingSlugs = new Set(existing.map((p) => p.slug));
-  const missing = DEFAULT_PROVIDERS.filter((p) => !existingSlugs.has(p.slug));
-
-  if (missing.length === 0) return;
-
-  await db.insert(syncedProviders).values(missing);
-};

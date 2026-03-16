@@ -7,7 +7,6 @@ import {
   text,
   timestamp
 } from "drizzle-orm/pg-core";
-import { syncedProviders } from "./synced-providers";
 
 export const models = pgTable(
   "models",
@@ -28,9 +27,7 @@ export const models = pgTable(
     outputPrice: numeric("output_price", { precision: 10, scale: 4 })
       .notNull()
       .default("0"),
-    provider: text("provider")
-      .notNull()
-      .references(() => syncedProviders.slug, { onDelete: "cascade" }),
+    provider: text("provider").notNull(),
     slug: text("slug").notNull().unique(), // Short ID e.g. "gpt-5"
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()

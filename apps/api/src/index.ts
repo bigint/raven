@@ -8,7 +8,6 @@ import { logger } from "hono/logger";
 import { initEmailDispatcher } from "./lib/email-dispatcher";
 import { AppError } from "./lib/errors";
 import { initEventBus } from "./lib/events";
-import { seedDefaultProviders } from "./lib/model-sync";
 import { refreshPricingCache } from "./lib/pricing-cache";
 import { getRedis } from "./lib/redis";
 import { sendWelcomeEmail } from "./lib/send-welcome-email";
@@ -55,15 +54,10 @@ setInterval(() => {
   void flushLastUsed(db, redis);
 }, 60_000);
 
-// Seed default providers and load pricing cache
-void (async () => {
-  try {
-    await seedDefaultProviders(db);
-    await refreshPricingCache(db);
-  } catch (err) {
-    console.error("Startup initialization failed:", err);
-  }
-})();
+// Load pricing cache from DB
+void refreshPricingCache(db).catch((err) =>
+  console.error("Failed to load pricing cache:", err)
+);
 
 const auth = createAuth(db, env, {
   onUserCreated: (user) => void sendWelcomeEmail(user, env.APP_URL)

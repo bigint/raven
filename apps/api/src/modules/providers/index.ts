@@ -15,7 +15,7 @@ import { updateProvider } from "./update";
 export const createProvidersModule = (db: Database, env: Env, redis: Redis) => {
   const app = new Hono();
 
-  app.get("/available", listAvailableProviders(db));
+  app.get("/available", listAvailableProviders());
   app.get("/", listProviders(db));
   app.get("/:id/models", listProviderModels(db, env, redis));
   app.get("/:id", getProvider(db));

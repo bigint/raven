@@ -1,8 +1,9 @@
 import type { Database } from "@raven/db";
-import { models, syncedProviders } from "@raven/db";
+import { models } from "@raven/db";
 import { count, eq, inArray } from "drizzle-orm";
 import type { Context } from "hono";
 import {
+  SUPPORTED_PROVIDERS,
   deriveCapabilities,
   deriveCategory,
   getModelsDevModel,
@@ -11,17 +12,20 @@ import {
 import { refreshPricingCache } from "@/lib/pricing-cache";
 
 export const getAdminProviders = (db: Database) => async (c: Context) => {
-  const providers = await db
-    .select({
-      modelCount: count(models.id),
-      name: syncedProviders.name,
-      slug: syncedProviders.slug
-    })
-    .from(syncedProviders)
-    .leftJoin(models, eq(models.provider, syncedProviders.slug))
-    .groupBy(syncedProviders.slug);
+  const counts = await db
+    .select({ modelCount: count(models.id), provider: models.provider })
+    .from(models)
+    .groupBy(models.provider);
 
-  return c.json({ data: providers });
+  const countMap = new Map(counts.map((c) => [c.provider, c.modelCount]));
+
+  const data = SUPPORTED_PROVIDERS.map((p) => ({
+    modelCount: countMap.get(p.slug) ?? 0,
+    name: p.name,
+    slug: p.slug
+  }));
+
+  return c.json({ data });
 };
 
 export const searchAvailableModels =
