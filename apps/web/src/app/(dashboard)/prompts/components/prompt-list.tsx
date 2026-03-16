@@ -2,7 +2,8 @@
 
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
-import { Eye, MessageSquare, Pencil, Plus, Trash2 } from "lucide-react";
+import { Eye, Pencil, Play, Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import type { Prompt } from "../hooks/use-prompts";
 
 interface PromptListProps {
@@ -12,6 +13,7 @@ interface PromptListProps {
   onEdit: (prompt: Prompt) => void;
   onView: (prompt: Prompt) => void;
   onDelete: (id: string) => void;
+  onTest?: (prompt: Prompt) => void;
 }
 
 const columns: Column<Prompt>[] = [
@@ -61,8 +63,24 @@ const PromptList = ({
   onAdd,
   onEdit,
   onView,
-  onDelete
+  onDelete,
+  onTest
 }: PromptListProps) => {
+  const router = useRouter();
+
+  const handleTest = (prompt: Prompt) => {
+    if (onTest) {
+      onTest(prompt);
+      return;
+    }
+    const content = prompt.activeVersion?.content ?? "";
+    const model = prompt.activeVersion?.model ?? "";
+    const params = new URLSearchParams();
+    if (content) params.set("system", content);
+    if (model) params.set("model", model);
+    router.push(`/chat?${params.toString()}`);
+  };
+
   const allColumns: Column<Prompt>[] = [
     ...columns,
     {
@@ -72,6 +90,16 @@ const PromptList = ({
       key: "actions",
       render: (prompt) => (
         <div className="flex items-center justify-end gap-1">
+          {prompt.activeVersion && (
+            <Button
+              onClick={() => handleTest(prompt)}
+              size="sm"
+              title="Test in Playground"
+              variant="ghost"
+            >
+              <Play className="size-4" />
+            </Button>
+          )}
           <Button
             onClick={() => onView(prompt)}
             size="sm"

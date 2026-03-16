@@ -3,7 +3,8 @@
 import { Button, PageHeader, Spinner } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { RotateCcw } from "lucide-react";
-import { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo } from "react";
 import { ChatInput } from "./components/chat-input";
 import { ChatMessages } from "./components/chat-messages";
 import { ModelInput } from "./components/model-input";
@@ -20,8 +21,18 @@ const ChatPage = () => {
     setSelectedModel,
     settings,
     setSettings,
-    stopStreaming
+    setSystemPrompt,
+    stopStreaming,
+    systemPrompt
   } = useChat();
+
+  const searchParams = useSearchParams();
+
+  // Load system prompt from URL (e.g. from "Test in Playground" on Prompts page)
+  useEffect(() => {
+    const urlSystem = searchParams.get("system");
+    if (urlSystem) setSystemPrompt(urlSystem);
+  }, [searchParams, setSystemPrompt]);
 
   const { data: models = [], isLoading: modelsLoading } = useQuery(
     catalogModelsQueryOptions()
@@ -70,7 +81,9 @@ const ChatPage = () => {
       <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border">
         <PlaygroundSettingsPanel
           onSettingsChange={setSettings}
+          onSystemPromptChange={setSystemPrompt}
           settings={settings}
+          systemPrompt={systemPrompt}
         />
         <ChatMessages
           isStreaming={isStreaming}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Input, Switch } from "@raven/ui";
+import { Input, Switch, Textarea } from "@raven/ui";
 import { Settings2 } from "lucide-react";
 import { useState } from "react";
 
@@ -14,11 +14,15 @@ interface PlaygroundSettings {
 interface PlaygroundSettingsPanelProps {
   settings: PlaygroundSettings;
   onSettingsChange: (settings: PlaygroundSettings) => void;
+  systemPrompt: string;
+  onSystemPromptChange: (value: string) => void;
 }
 
 const PlaygroundSettingsPanel = ({
   settings,
-  onSettingsChange
+  onSettingsChange,
+  systemPrompt,
+  onSystemPromptChange
 }: PlaygroundSettingsPanelProps) => {
   const [open, setOpen] = useState(false);
 
@@ -53,7 +57,15 @@ const PlaygroundSettingsPanel = ({
         </button>
       </div>
 
-      <div>
+      <Textarea
+        label="System Prompt"
+        onChange={(e) => onSystemPromptChange(e.target.value)}
+        placeholder="You are a helpful assistant..."
+        rows={4}
+        value={systemPrompt}
+      />
+
+      <div className="border-t border-border pt-4">
         <label className="mb-1 block text-xs font-medium text-muted-foreground">
           Temperature: {settings.temperature}
         </label>

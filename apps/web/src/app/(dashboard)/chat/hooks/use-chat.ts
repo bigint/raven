@@ -36,6 +36,7 @@ export const catalogModelsQueryOptions = () =>
 export const useChat = () => {
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [systemPrompt, setSystemPrompt] = useState<string>("");
   const [selectedModel, setSelectedModel] = useState<{
     model: string;
     provider: string;
@@ -114,10 +115,15 @@ export const useChat = () => {
         const client = clientRef.current;
         if (!client) return;
 
-        const chatMessages: Message[] = [...messages, userMessage].map((m) => ({
-          content: m.content,
-          role: m.role
-        }));
+        const chatMessages: Message[] = [
+          ...(systemPrompt
+            ? [{ content: systemPrompt, role: "system" as const }]
+            : []),
+          ...[...messages, userMessage].map((m) => ({
+            content: m.content,
+            role: m.role
+          }))
+        ];
 
         const generateParams = {
           maxTokens: settings.maxTokens,
@@ -224,7 +230,9 @@ export const useChat = () => {
     sendMessage,
     setSelectedModel,
     setSettings,
+    setSystemPrompt,
     settings,
-    stopStreaming
+    stopStreaming,
+    systemPrompt
   };
 };
