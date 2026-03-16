@@ -28,15 +28,35 @@ const ChatPage = () => {
 
   const searchParams = useSearchParams();
 
-  // Load system prompt from URL (e.g. from "Test in Playground" on Prompts page)
-  useEffect(() => {
-    const urlSystem = searchParams.get("system");
-    if (urlSystem) setSystemPrompt(urlSystem);
-  }, [searchParams, setSystemPrompt]);
-
   const { data: models = [], isLoading: modelsLoading } = useQuery(
     catalogModelsQueryOptions()
   );
+
+  // Load system prompt and model from URL params (e.g. from "Test in Playground")
+  useEffect(() => {
+    const urlSystem = searchParams.get("system");
+    const urlModel = searchParams.get("model");
+
+    if (urlSystem && !systemPrompt) {
+      setSystemPrompt(urlSystem);
+    }
+
+    if (urlModel && !selectedModel && models.length > 0) {
+      const match = models.find(
+        (m) => m.slug === urlModel || m.name === urlModel
+      );
+      if (match) {
+        setSelectedModel({ model: match.slug, provider: match.provider });
+      }
+    }
+  }, [
+    searchParams,
+    models,
+    systemPrompt,
+    selectedModel,
+    setSystemPrompt,
+    setSelectedModel
+  ]);
 
   const modelOptions = useMemo(
     () =>

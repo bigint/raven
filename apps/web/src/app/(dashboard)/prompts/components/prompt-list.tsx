@@ -2,7 +2,7 @@
 
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
-import { Eye, Pencil, Play, Plus, Trash2 } from "lucide-react";
+import { Eye, MessageSquare, Pencil, Play, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { Prompt } from "../hooks/use-prompts";
 
