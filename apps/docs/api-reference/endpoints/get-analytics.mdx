@@ -1,0 +1,58 @@
+---
+title: "Get Analytics"
+description: "Retrieve usage and cost analytics."
+---
+
+## Get Analytics
+
+`GET /analytics`
+
+Returns aggregated usage and cost analytics.
+
+### Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `startDate` | string | Start date (ISO 8601) |
+| `endDate` | string | End date (ISO 8601) |
+| `groupBy` | string | Dimension: `model`, `provider`, `key`, `day` |
+
+### Example Request
+
+```bash
+curl -X GET "https://api.raven.dev/analytics?startDate=2025-01-01&endDate=2025-01-31&groupBy=model" \
+  -H "Authorization: Bearer rk_live_..."
+```
+
+### Example Response
+
+```json
+{
+  "data": [
+    {
+      "group": "gpt-4o",
+      "totalRequests": 15000,
+      "totalInputTokens": 4500000,
+      "totalOutputTokens": 1200000,
+      "totalCost": 18.75,
+      "avgLatencyMs": 1250,
+      "cacheHitRate": 0.12
+    },
+    {
+      "group": "claude-sonnet-4-20250514",
+      "totalRequests": 8000,
+      "totalInputTokens": 3200000,
+      "totalOutputTokens": 800000,
+      "totalCost": 21.60,
+      "avgLatencyMs": 1800,
+      "cacheHitRate": 0.08
+    }
+  ],
+  "summary": {
+    "totalRequests": 23000,
+    "totalCost": 40.35,
+    "totalInputTokens": 7700000,
+    "totalOutputTokens": 2000000
+  }
+}
+```

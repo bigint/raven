@@ -1,73 +1,137 @@
 ---
 title: "Experiments"
-description: "Run A/B tests across models to optimize quality and cost."
+description: "Run A/B tests across models to optimize cost, latency, and quality."
 ---
 
-Experiments let you run A/B tests to compare different models, prompts, or configurations and measure their impact on quality, cost, and latency.
+Experiments let you run A/B tests to compare different models, providers, or configurations. Raven automatically splits traffic between variants and tracks cost, latency, and error metrics so you can make data-driven decisions about which model to use in production.
 
 ## Creating an Experiment
 
-Navigate to **Experiments** in the dashboard.
-
-### Experiment Configuration
-
-| Field | Description |
-|-------|-------------|
-| **Name** | Descriptive name for the experiment |
-| **Status** | `draft`, `running`, `paused`, or `completed` |
-| **Variants** | Two or more configurations to compare |
-| **Traffic split** | Percentage of traffic routed to each variant |
-
-## Variants
-
-Each variant defines a different configuration:
-
-```json
-{
-  "name": "Control",
-  "model": "gpt-4o",
-  "weight": 50
-}
-```
-
-```json
-{
-  "name": "Challenger",
-  "model": "claude-sonnet-4-20250514",
-  "weight": 50
-}
-```
-
-## Running an Experiment
-
 <Steps>
-  <Step title="Create the experiment">
-    Define your variants and traffic split.
+  <Step title="Define the Experiment">
+    Give your experiment a name, description, and select the primary metric you want to optimize (cost, latency, or quality).
   </Step>
-  <Step title="Start the experiment">
-    Set the status to `running`. Traffic is automatically split between variants.
+  <Step title="Add Variants">
+    Create two or more variants, each pointing to a different model. Assign traffic weights to control the split.
   </Step>
-  <Step title="Monitor results">
-    Track cost, latency, and quality metrics for each variant in real-time.
+  <Step title="Set Minimum Samples">
+    Define the minimum number of requests per variant before results are considered statistically meaningful (default: 1,000).
   </Step>
-  <Step title="Analyze and conclude">
-    Compare results and promote the winning variant to production via a routing rule.
+  <Step title="Start the Experiment">
+    Set the status to `running`. Traffic is automatically split between variants based on their weights.
   </Step>
 </Steps>
 
-## Metrics Compared
+## Variants
 
-For each variant, Raven tracks:
+Each variant specifies a model and receives a weighted share of traffic.
 
-- **Average cost** per request
-- **Average latency** (time to first token, total time)
-- **Token efficiency** (output tokens per input token)
-- **Error rate**
-- **User satisfaction** (if evaluation scores are configured)
+```json
+{
+  "variants": [
+    {
+      "name": "Control",
+      "model": "gpt-4o",
+      "provider": "openai",
+      "weight": 50
+    },
+    {
+      "name": "Challenger",
+      "model": "claude-4-sonnet",
+      "provider": "anthropic",
+      "weight": 50
+    }
+  ]
+}
+```
 
-## Use Cases
+### Traffic Splitting
 
-- **Model comparison** — Compare GPT-4o vs Claude Sonnet for your specific use case
-- **Prompt optimization** — Test different prompt templates
-- **Cost/quality tradeoff** — Find the cheapest model that meets your quality bar
-- **Provider evaluation** — Compare the same model across different providers
+Weights determine the percentage of requests routed to each variant. Weights are relative -- a 70/30 split means 70% of requests go to the first variant and 30% to the second.
+
+<Info>
+  You can adjust weights while an experiment is running. Changes take effect immediately on new requests.
+</Info>
+
+## Experiment Statuses
+
+| Status | Description |
+|--------|-------------|
+| `draft` | Experiment is configured but not yet routing traffic |
+| `running` | Experiment is active and splitting traffic between variants |
+| `paused` | Experiment is temporarily stopped; all traffic goes to the default route |
+| `completed` | Experiment has concluded; results are final |
+
+## Metrics Tracked
+
+For each variant, Raven automatically tracks:
+
+| Metric | Description |
+|--------|-------------|
+| **Request count** | Total requests routed to this variant |
+| **Total cost** | Cumulative spend for this variant |
+| **Average cost** | Cost per request |
+| **Total latency** | Cumulative response time |
+| **Average latency** | Response time per request |
+| **Error count** | Number of failed requests |
+| **Error rate** | Percentage of requests that failed |
+
+## Viewing Results
+
+Navigate to **Experiments** in the dashboard to see results in real-time.
+
+The results view shows a side-by-side comparison of all variants with:
+
+- Cost per request comparison
+- Latency comparison (average and percentiles)
+- Error rate comparison
+- Request volume per variant
+- Statistical confidence indicator
+
+## Example: Cost Optimization
+
+Compare a premium model against a budget alternative:
+
+```bash
+curl -X POST https://api.raven.dev/v1/experiments \
+  -H "Authorization: Bearer rk_live_abc123" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "GPT-4o vs GPT-4o-mini for support",
+    "primaryMetric": "cost",
+    "minimumSamples": 500,
+    "variants": [
+      { "name": "Premium", "model": "gpt-4o", "weight": 50 },
+      { "name": "Budget", "model": "gpt-4o-mini", "weight": 50 }
+    ]
+  }'
+```
+
+## Using Experiments with the Proxy
+
+When an experiment is running, Raven automatically routes matching requests to variants based on their weights. No changes to your application code are needed -- the experiment configuration determines which model handles each request.
+
+## Secondary Metrics
+
+In addition to the primary metric, you can track secondary metrics for a more complete picture:
+
+```json
+{
+  "primaryMetric": "cost",
+  "secondaryMetrics": ["latency", "error_rate", "token_efficiency"]
+}
+```
+
+## Lifecycle
+
+<Tabs>
+  <Tab title="Start">
+    Set the experiment status to `running` to begin splitting traffic. Optionally set a `startsAt` date for scheduled start.
+  </Tab>
+  <Tab title="Monitor">
+    Track results in real-time. Wait until each variant reaches the minimum sample count.
+  </Tab>
+  <Tab title="Conclude">
+    Set the status to `completed`. Promote the winning variant by creating a routing rule for the chosen model.
+  </Tab>
+</Tabs>

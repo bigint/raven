@@ -1,35 +1,167 @@
 ---
 title: "Data Residency"
-description: "Control where your data is stored and processed."
+description: "Enforce data residency requirements by controlling which provider regions handle your requests."
 ---
 
-Data residency controls let you specify where your data is stored and which providers can process it, helping you meet regulatory requirements.
+Data residency controls let you restrict which geographic regions can process your AI requests. This is essential for compliance with regulations like GDPR, which require that personal data remains within specific jurisdictions.
 
-## Provider-Level Control
+## How It Works
 
-Configure which providers are allowed for different types of data:
+Raven maintains a mapping of each provider to the regions where they process data. When you configure data residency rules, Raven filters providers to ensure requests only go to providers operating in your allowed regions.
 
-- **Sensitive data** — Route only to providers with appropriate certifications
-- **Regional restrictions** — Use only providers with data centers in approved regions
-- **Self-hosted models** — Route sensitive requests to Ollama or self-hosted models
+## Provider Region Mappings
 
-## BYOK (Bring Your Own Key)
+Raven tracks region information for 15+ providers:
 
-With Bring Your Own Key, your provider credentials never leave your control:
+| Provider | Regions | Notes |
+|----------|---------|-------|
+| **OpenAI** | `us` | US-based processing |
+| **Anthropic** | `us` | US-based processing |
+| **Google** | `us`, `eu` | Multi-region available |
+| **Azure OpenAI** | `us`, `eu`, `ap`, `me` | Broadest regional coverage |
+| **Mistral** | `eu` | EU-based (France) |
+| **Cohere** | `us`, `ca` | North America |
+| **Groq** | `us` | US-based processing |
+| **DeepSeek** | `cn` | China-based processing |
+| **AWS Bedrock** | `us`, `eu`, `ap` | Multi-region via AWS |
+| **Fireworks AI** | `us` | US-based processing |
+| **Together AI** | `us` | US-based processing |
+| **SambaNova** | `us` | US-based processing |
+| **Cerebras** | `us` | US-based processing |
+| **NVIDIA** | `us` | US-based processing |
+| **Ollama** | `local` | Self-hosted, your infrastructure |
 
-- API keys are encrypted at rest in Raven's database
-- Keys are decrypted only at request time to authenticate with the provider
-- You can rotate keys at any time
+### Region Codes
 
-For maximum control with self-hosting, the encryption key (`ENCRYPTION_SECRET`) is entirely under your management.
+| Code | Region |
+|------|--------|
+| `us` | United States |
+| `eu` | European Union |
+| `ap` | Asia Pacific |
+| `ca` | Canada |
+| `cn` | China |
+| `me` | Middle East |
+| `local` | Self-hosted (your infrastructure) |
+| `any` | No restriction (all regions allowed) |
 
-## Self-Hosting
+## Configuring Allowed Regions
 
-For the strongest data residency guarantees, self-host Raven on your own infrastructure:
+Set your allowed regions in the organization settings or via a policy.
 
-- **All data stays within your network**
-- **No external dependencies** (except the LLM providers themselves)
-- **Full control** over encryption keys, database, and cache
-- **Air-gapped deployments** possible with Ollama for local-only AI
+<Steps>
+  <Step title="Navigate to Settings">
+    Go to your organization **Settings** in the dashboard.
+  </Step>
+  <Step title="Select Data Residency">
+    Open the **Data Residency** section.
+  </Step>
+  <Step title="Choose Allowed Regions">
+    Select one or more regions where your data is permitted to be processed.
+  </Step>
+  <Step title="Enable Strict Enforcement">
+    Optionally toggle strict enforcement mode for unknown providers.
+  </Step>
+</Steps>
 
-See the [Self-Hosting guide](/getting-started/self-hosting) for setup instructions.
+## Strict Enforcement Mode
+
+When strict enforcement is **enabled**:
+
+- Providers with **unknown** region mappings are **blocked**
+- Only providers with explicitly mapped regions that match your allowlist are permitted
+- This is the safest option for regulated environments
+
+When strict enforcement is **disabled** (default):
+
+- Providers with unknown region mappings are **allowed**
+- This is more permissive but ensures new providers work without configuration updates
+
+<Warning>
+  Enabling strict enforcement may block requests to newly added providers that Raven has not yet mapped to a region. Monitor your request logs after enabling this setting.
+</Warning>
+
+## Filtering Providers by Region
+
+When data residency is configured, Raven automatically filters the available providers during request routing:
+
+```
+Configured providers:     [openai, anthropic, mistralai, azure-openai, deepseek]
+Allowed regions:          [us, eu]
+
+After data residency filtering:
+  openai       --> us       Allowed
+  anthropic    --> us       Allowed
+  mistralai    --> eu       Allowed
+  azure-openai --> us, eu   Allowed
+  deepseek     --> cn       Blocked
+```
+
+This filtering happens transparently. Your application does not need to be aware of which providers are excluded -- Raven handles routing to compliant providers automatically.
+
+## GDPR Article 44 Compliance
+
+For organizations subject to GDPR, data residency controls help satisfy **Article 44** requirements for cross-border data transfers:
+
+- Restrict processing to `eu` region only to keep data within the EU
+- Use Mistral (France-based) as your primary provider for EU data residency
+- Use Azure OpenAI's EU deployments for OpenAI models within the EU
+- Enable strict enforcement to prevent accidental routing to non-EU regions
+
+### Example: EU-Only Configuration
+
+```json
+{
+  "allowedRegions": ["eu"],
+  "enforceStrictly": true
+}
+```
+
+With this configuration:
+
+| Provider | Region | Result |
+|----------|--------|--------|
+| Mistral | `eu` | Allowed |
+| Azure OpenAI | `us, eu` | Allowed (has EU region) |
+| Google | `us, eu` | Allowed (has EU region) |
+| OpenAI | `us` | Blocked |
+| Anthropic | `us` | Blocked |
+| DeepSeek | `cn` | Blocked |
+| Ollama | `local` | Blocked (strict mode) |
+
+### Example: North America Only
+
+```json
+{
+  "allowedRegions": ["us", "ca"],
+  "enforceStrictly": false
+}
+```
+
+## Combining with Routing Rules
+
+Data residency works alongside [routing rules](/features/routing-rules). When both are configured:
+
+1. Data residency filtering runs first, removing non-compliant providers
+2. Routing rules then operate on the remaining compliant providers
+3. If no compliant providers remain, the request is rejected with an error
+
+<Note>
+  Self-hosted providers using Ollama have the `local` region designation. If you want to allow self-hosted models alongside cloud providers, include `local` in your allowed regions list.
+</Note>
+
+## BYOK and Data Residency
+
+With [Bring Your Own Key](/api-reference/authentication), you can send your own provider API key via the `X-Provider-Key` header. Data residency checks still apply -- even with BYOK, the provider must operate in an allowed region. This prevents circumventing data residency controls.
+
+## Error Responses
+
+When a request is blocked by data residency rules:
+
+```json
+{
+  "error": {
+    "message": "Provider openai operates in us but only eu allowed",
+    "code": "DATA_RESIDENCY_VIOLATION"
+  }
+}
+```

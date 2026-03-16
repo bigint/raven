@@ -1,0 +1,31 @@
+---
+title: "Delete Routing Rule"
+description: "Delete a routing rule."
+---
+
+## Delete Routing Rule
+
+`DELETE /routing-rules/:id`
+
+Permanently deletes a routing rule.
+
+### Path Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `id` | Routing rule ID |
+
+### Example Request
+
+```bash
+curl -X DELETE https://api.raven.dev/routing-rules/rule_abc123 \
+  -H "Authorization: Bearer rk_live_..."
+```
+
+### Example Response
+
+```json
+{
+  "success": true
+}
+```

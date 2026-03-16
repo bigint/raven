@@ -1,0 +1,31 @@
+---
+title: "Delete Budget"
+description: "Delete a budget."
+---
+
+## Delete Budget
+
+`DELETE /budgets/:id`
+
+Permanently deletes a budget.
+
+### Path Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `id` | Budget ID |
+
+### Example Request
+
+```bash
+curl -X DELETE https://api.raven.dev/budgets/bud_abc123 \
+  -H "Authorization: Bearer rk_live_..."
+```
+
+### Example Response
+
+```json
+{
+  "success": true
+}
+```

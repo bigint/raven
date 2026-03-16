@@ -1,0 +1,57 @@
+---
+title: "Create Routing Rule"
+description: "Create a new routing rule."
+---
+
+## Create Routing Rule
+
+`POST /routing-rules`
+
+Creates a new routing rule.
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | string | Yes | Rule name |
+| `priority` | integer | Yes | Evaluation order (lower = higher priority) |
+| `condition` | object | Yes | When to trigger the rule |
+| `targetModel` | string | Yes | Model to route to |
+| `targetProvider` | string | No | Specific provider to use |
+| `isEnabled` | boolean | No | Enable immediately (default: true) |
+
+### Example Request
+
+```bash
+curl -X POST https://api.raven.dev/routing-rules \
+  -H "Authorization: Bearer rk_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Migrate GPT-4 to GPT-4o",
+    "priority": 1,
+    "condition": {
+      "field": "model",
+      "operator": "equals",
+      "value": "gpt-4"
+    },
+    "targetModel": "gpt-4o"
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "id": "rule_abc123",
+  "name": "Migrate GPT-4 to GPT-4o",
+  "priority": 1,
+  "condition": {
+    "field": "model",
+    "operator": "equals",
+    "value": "gpt-4"
+  },
+  "targetModel": "gpt-4o",
+  "isEnabled": true,
+  "createdAt": "2025-01-15T10:00:00Z"
+}
+```

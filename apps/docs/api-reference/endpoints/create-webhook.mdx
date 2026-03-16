@@ -1,0 +1,43 @@
+---
+title: "Create Webhook"
+description: "Create a new webhook endpoint."
+---
+
+## Create Webhook
+
+`POST /webhooks`
+
+Creates a new webhook endpoint.
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `url` | string | Yes | Endpoint URL |
+| `events` | array | Yes | Events to subscribe to |
+| `secret` | string | No | Signing secret for verification |
+
+### Example Request
+
+```bash
+curl -X POST https://api.raven.dev/webhooks \
+  -H "Authorization: Bearer rk_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://example.com/webhook",
+    "events": ["request.completed", "budget.threshold", "guardrail.triggered"],
+    "secret": "whsec_..."
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "id": "wh_abc123",
+  "url": "https://example.com/webhook",
+  "events": ["request.completed", "budget.threshold", "guardrail.triggered"],
+  "isEnabled": true,
+  "createdAt": "2025-01-15T10:00:00Z"
+}
+```

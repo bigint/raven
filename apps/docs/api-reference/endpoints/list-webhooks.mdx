@@ -1,0 +1,31 @@
+---
+title: "List Webhooks"
+description: "List all webhook endpoints."
+---
+
+## List Webhooks
+
+`GET /webhooks`
+
+Returns all webhook endpoints for the organization.
+
+### Example Request
+
+```bash
+curl -X GET https://api.raven.dev/webhooks \
+  -H "Authorization: Bearer rk_live_..."
+```
+
+### Example Response
+
+```json
+[
+  {
+    "id": "wh_abc123",
+    "url": "https://example.com/webhook",
+    "events": ["request.completed", "budget.threshold"],
+    "isEnabled": true,
+    "createdAt": "2025-01-15T10:00:00Z"
+  }
+]
+```

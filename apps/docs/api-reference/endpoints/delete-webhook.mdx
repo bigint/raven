@@ -1,0 +1,31 @@
+---
+title: "Delete Webhook"
+description: "Delete a webhook endpoint."
+---
+
+## Delete Webhook
+
+`DELETE /webhooks/:id`
+
+Permanently deletes a webhook endpoint.
+
+### Path Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `id` | Webhook ID |
+
+### Example Request
+
+```bash
+curl -X DELETE https://api.raven.dev/webhooks/wh_abc123 \
+  -H "Authorization: Bearer rk_live_..."
+```
+
+### Example Response
+
+```json
+{
+  "success": true
+}
+```

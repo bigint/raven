@@ -1,0 +1,29 @@
+---
+title: "Get Organization"
+description: "Get the current organization details."
+---
+
+## Get Organization
+
+`GET /settings`
+
+Returns the current organization's details and settings.
+
+### Example Request
+
+```bash
+curl -X GET https://api.raven.dev/settings \
+  -H "Authorization: Bearer rk_live_..."
+```
+
+### Example Response
+
+```json
+{
+  "id": "org_abc123",
+  "name": "Acme Corp",
+  "slug": "acme-corp",
+  "plan": "team",
+  "createdAt": "2025-01-01T00:00:00Z"
+}
+```

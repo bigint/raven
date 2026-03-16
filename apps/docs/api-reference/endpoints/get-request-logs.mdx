@@ -1,0 +1,53 @@
+---
+title: "Get Request Logs"
+description: "Retrieve detailed request logs."
+---
+
+## Get Request Logs
+
+`GET /analytics/requests`
+
+Returns detailed request logs with filtering and pagination.
+
+### Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `limit` | integer | Number of results (default: 50, max: 100) |
+| `offset` | integer | Pagination offset |
+| `model` | string | Filter by model |
+| `provider` | string | Filter by provider |
+| `status` | integer | Filter by HTTP status code |
+| `keyId` | string | Filter by virtual key ID |
+
+### Example Request
+
+```bash
+curl -X GET "https://api.raven.dev/analytics/requests?limit=10&model=gpt-4o" \
+  -H "Authorization: Bearer rk_live_..."
+```
+
+### Example Response
+
+```json
+{
+  "data": [
+    {
+      "id": "req_abc123",
+      "model": "gpt-4o",
+      "provider": "openai",
+      "status": 200,
+      "inputTokens": 150,
+      "outputTokens": 89,
+      "cost": 0.0013,
+      "latencyMs": 1234,
+      "cacheHit": false,
+      "keyId": "key_xyz789",
+      "createdAt": "2025-01-15T10:30:00Z"
+    }
+  ],
+  "total": 15000,
+  "limit": 10,
+  "offset": 0
+}
+```

@@ -1,0 +1,37 @@
+---
+title: "List Routing Rules"
+description: "List all routing rules."
+---
+
+## List Routing Rules
+
+`GET /routing-rules`
+
+Returns all routing rules for the organization.
+
+### Example Request
+
+```bash
+curl -X GET https://api.raven.dev/routing-rules \
+  -H "Authorization: Bearer rk_live_..."
+```
+
+### Example Response
+
+```json
+[
+  {
+    "id": "rule_abc123",
+    "name": "Cost optimization",
+    "priority": 1,
+    "condition": {
+      "field": "model",
+      "operator": "equals",
+      "value": "gpt-4"
+    },
+    "targetModel": "gpt-4o",
+    "isEnabled": true,
+    "createdAt": "2025-01-15T10:00:00Z"
+  }
+]
+```

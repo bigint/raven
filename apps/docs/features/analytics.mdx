@@ -1,23 +1,29 @@
 ---
 title: "Analytics"
-description: "Monitor usage, costs, and performance across all providers and models."
+description: "Monitor request volumes, token usage, costs, and performance in real-time."
 ---
 
-The analytics dashboard gives you real-time visibility into your AI usage, costs, and performance metrics.
+The analytics dashboard gives you real-time visibility into your AI usage, costs, and performance across all providers and models.
 
 ## Dashboard Overview
 
-Navigate to **Analytics** in the dashboard to see:
+Navigate to **Analytics** in the dashboard to see a real-time view of your gateway activity.
 
-- **Total requests** — Request count over time
-- **Total cost** — Spending trends and breakdowns
-- **Token usage** — Input vs output token consumption
-- **Latency** — Average and p95 response times
-- **Error rate** — Failed request percentage
+<CardGroup cols={3}>
+  <Card title="Requests" icon="chart-line">
+    Total request volume, success rate, and error breakdowns over time.
+  </Card>
+  <Card title="Costs" icon="wallet">
+    Spending trends by provider, model, team, and key.
+  </Card>
+  <Card title="Performance" icon="gauge-high">
+    Latency percentiles, cache hit rates, and throughput metrics.
+  </Card>
+</CardGroup>
 
-## Metrics Tracked
+## Request Metrics
 
-Every request logs the following metrics:
+Every request through the gateway is tracked with detailed metrics.
 
 | Metric | Description |
 |--------|-------------|
@@ -26,33 +32,83 @@ Every request logs the following metrics:
 | **Reasoning tokens** | Extended thinking tokens (e.g., Claude) |
 | **Cached tokens** | Provider-level cached tokens |
 | **Cost** | Calculated cost based on model pricing |
-| **Latency** | End-to-end response time in ms |
+| **Latency** | End-to-end response time in milliseconds |
 | **Status** | HTTP status code |
 | **Cache hit** | Whether the response was served from Raven's cache |
 | **Tool calls** | Number of function/tool calls in the request |
 | **Images** | Number of images in the request |
 
-## Breakdowns
+## Token Tracking
 
-Analyze metrics by different dimensions:
+Raven breaks down token usage into granular categories:
 
-- **By provider** — Compare costs and performance across providers
-- **By model** — See which models are used most and their cost efficiency
-- **By key** — Track usage per virtual key
-- **By time** — View trends over hours, days, or months
+- **Input tokens** -- What you send to the model
+- **Output tokens** -- What the model generates
+- **Reasoning tokens** -- Internal thinking tokens (for models like Claude with extended thinking)
+- **Cached tokens** -- Tokens served from provider-level caching (e.g., OpenAI prompt caching)
+
+## Cost Analytics
+
+Analyze costs across multiple dimensions:
+
+| Dimension | What It Shows |
+|-----------|---------------|
+| By provider | Compare spend across OpenAI, Anthropic, Google, etc. |
+| By model | Identify which models cost the most |
+| By virtual key | Track spend per API key |
+| By team | Attribute costs to specific teams |
+| By time | View daily, weekly, or monthly spending trends |
+
+## Cache Hit Rates
+
+Monitor how effectively the semantic cache is reducing costs and latency:
+
+- **Hit rate** -- Percentage of requests served from cache
+- **Cost savings** -- Estimated spend avoided by cache hits
+- **Latency improvement** -- Average response time reduction
+
+## Latency Monitoring
+
+Track response times across your entire gateway:
+
+- **Average latency** -- Mean response time
+- **P50 / P95 / P99** -- Percentile latency breakdowns
+- **Time to first token** -- Streaming latency measurement
+- **By provider** -- Compare latency across providers
+- **By model** -- Identify slow models
+
+## Tool Use Tracking
+
+For requests that include function calling or tool use:
+
+- **Tool call count** -- How many tools were invoked per request
+- **Tool types** -- Which tools are being called most frequently
+- **Tool latency** -- Time spent in tool execution
+
+## Session Grouping
+
+Requests can be grouped by session to track multi-turn conversations:
+
+- View all requests in a conversation as a single unit
+- Track total cost and token usage per session
+- Identify long-running or expensive sessions
 
 ## Request Logs
 
-Navigate to **Requests** for a detailed log of every request, including:
+Navigate to **Requests** in the dashboard for a detailed log of every request:
 
-- Request and response details
-- Token counts and cost
-- Latency breakdown
+- Full request and response payloads
+- Token counts and cost breakdown
+- Latency timing
 - Provider and model used
-- Cache hit/miss
-- Any guardrail triggers
+- Cache hit/miss status
+- Guardrail triggers and policy evaluations
 
-Filter and search through request logs to debug specific issues.
+Filter and search through request logs to debug specific issues or investigate anomalies.
+
+## Live Request Streaming
+
+The analytics dashboard includes a live view that shows requests flowing through the gateway in real-time. Use this to monitor production traffic and spot issues as they happen.
 
 ## Data Retention
 
@@ -63,6 +119,18 @@ Filter and search through request logs to debug specific issues.
 | Team | 90 days |
 | Enterprise | 365 days |
 
+<Note>
+  After the retention period, detailed request logs are pruned but aggregated metrics (daily totals, cost summaries) may be retained longer for trend analysis.
+</Note>
+
 ## Data Export
 
-Export analytics data for external analysis via the **Exports** feature. Supports CSV and JSON formats.
+Export analytics data for external analysis via the API. Supports JSON format with pagination for large datasets.
+
+```bash
+curl https://api.raven.dev/v1/analytics \
+  -H "Authorization: Bearer rk_live_abc123" \
+  -G \
+  -d "start=2026-03-01" \
+  -d "end=2026-03-15"
+```

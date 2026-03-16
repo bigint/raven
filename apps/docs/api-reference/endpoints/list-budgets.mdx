@@ -1,0 +1,33 @@
+---
+title: "List Budgets"
+description: "List all budgets."
+---
+
+## List Budgets
+
+`GET /budgets`
+
+Returns all budgets for the organization.
+
+### Example Request
+
+```bash
+curl -X GET https://api.raven.dev/budgets \
+  -H "Authorization: Bearer rk_live_..."
+```
+
+### Example Response
+
+```json
+[
+  {
+    "id": "bud_abc123",
+    "name": "Monthly production limit",
+    "amount": 500.00,
+    "period": "monthly",
+    "currentSpend": 142.50,
+    "alertThreshold": 80,
+    "createdAt": "2025-01-01T00:00:00Z"
+  }
+]
+```

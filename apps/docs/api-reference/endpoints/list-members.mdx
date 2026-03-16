@@ -1,0 +1,40 @@
+---
+title: "List Members"
+description: "List all organization members."
+---
+
+## List Members
+
+`GET /teams/members`
+
+Returns all members of the organization.
+
+### Example Request
+
+```bash
+curl -X GET https://api.raven.dev/teams/members \
+  -H "Authorization: Bearer rk_live_..."
+```
+
+### Example Response
+
+```json
+[
+  {
+    "id": "mem_abc123",
+    "userId": "user_xyz789",
+    "email": "alice@example.com",
+    "name": "Alice",
+    "role": "owner",
+    "joinedAt": "2025-01-01T00:00:00Z"
+  },
+  {
+    "id": "mem_def456",
+    "userId": "user_uvw123",
+    "email": "bob@example.com",
+    "name": "Bob",
+    "role": "member",
+    "joinedAt": "2025-01-10T12:00:00Z"
+  }
+]
+```

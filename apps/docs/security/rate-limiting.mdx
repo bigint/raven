@@ -1,66 +1,154 @@
 ---
 title: "Rate Limiting"
-description: "Protect your infrastructure with per-key rate limits."
+description: "Control request throughput with per-key rate limits."
 ---
 
-Rate limiting prevents abuse and ensures fair resource allocation across all API consumers.
+Rate limiting protects your AI infrastructure from excessive usage, runaway scripts, and unexpected cost spikes. Raven enforces rate limits at the virtual key level using Redis-backed counters.
 
 ## How It Works
 
-Raven uses a **token bucket algorithm** backed by Redis to enforce rate limits per virtual key:
+Each virtual key can have two independent rate limits:
 
-- **RPM (Requests Per Minute)** — Maximum requests allowed per minute
-- **RPD (Requests Per Day)** — Maximum requests allowed per day
+| Limit | Window | Purpose |
+|-------|--------|---------|
+| **RPM** (Requests Per Minute) | 60 seconds | Controls burst traffic |
+| **RPD** (Requests Per Day) | 86,400 seconds | Controls total daily usage |
 
-## Configuration
+Both limits are checked **in parallel** when a request arrives. If either limit is exceeded, the request is rejected immediately -- before any guardrail evaluation or provider call is made.
 
-Set rate limits when creating or editing a virtual key:
+<Info>
+  If neither RPM nor RPD is set on a virtual key, rate limiting is skipped entirely for that key. Plan-level monthly quotas still apply.
+</Info>
+
+## Configuring Rate Limits
+
+Set rate limits when creating or updating a virtual key in the dashboard or via the API.
+
+<Steps>
+  <Step title="Navigate to Keys">
+    Go to **Keys** in the dashboard sidebar.
+  </Step>
+  <Step title="Create or Edit a Key">
+    Click **Create Key** or select an existing key to edit.
+  </Step>
+  <Step title="Set RPM and RPD">
+    Enter your desired requests per minute and requests per day values. Leave blank for unlimited.
+  </Step>
+</Steps>
+
+### API Configuration
 
 ```json
 {
   "name": "production-app",
-  "rateLimit": {
-    "rpm": 100,
-    "rpd": 10000
-  }
+  "environment": "live",
+  "rateLimitRpm": 600,
+  "rateLimitRpd": 100000
 }
 ```
 
-## Rate Limit Response
+### Example Configurations
 
-When a rate limit is exceeded, Raven returns:
+| Use Case | RPM | RPD | Rationale |
+|----------|-----|-----|-----------|
+| Development key | 30 | 1,000 | Light usage for testing |
+| Production key | 600 | 100,000 | Typical production workload |
+| Batch processing | 120 | 500,000 | High daily volume, moderate burst |
+| Internal tool | 10 | 500 | Low-frequency, cost-controlled |
 
-```http
-HTTP/1.1 429 Too Many Requests
-Retry-After: 30
-X-RateLimit-Limit: 100
-X-RateLimit-Remaining: 0
-X-RateLimit-Reset: 1705312800
+## Token Bucket via Redis
+
+Rate limits are enforced using the [token bucket algorithm](https://en.wikipedia.org/wiki/Token_bucket) backed by Redis via the `rate-limiter-flexible` library. This provides:
+
+- **Distributed enforcement** -- Works across multiple Raven instances sharing the same Redis
+- **Sub-millisecond latency** -- Redis operations add minimal overhead to each request
+- **Atomic operations** -- No race conditions under high concurrency
+- **Automatic expiry** -- Counters reset naturally when the time window elapses
+
+### How Counters Work
+
 ```
+RPM counter:  rl:rpm:{keyId}  --> points: {rpm}, duration: 60s
+RPD counter:  rl:rpd:{keyId}  --> points: {rpd}, duration: 86400s
+```
+
+Each request consumes one point from the bucket. When the bucket is empty, subsequent requests are rejected until the window elapses and points are replenished.
+
+## 429 Responses
+
+When a rate limit is exceeded, Raven returns a `429 Too Many Requests` response:
 
 ```json
 {
   "error": {
-    "type": "rate_limit_exceeded",
-    "message": "Rate limit exceeded. Please retry after 30 seconds."
+    "message": "Rate limit exceeded (requests per minute)",
+    "code": "RATE_LIMITED"
   }
 }
 ```
 
-## Plan-Level Limits
+Or for daily limits:
 
-In addition to per-key limits, each plan has an overall monthly request limit:
+```json
+{
+  "error": {
+    "message": "Rate limit exceeded (requests per day)",
+    "code": "RATE_LIMITED"
+  }
+}
+```
 
-| Plan | Monthly Requests |
-|------|------------------|
+<Tip>
+  When you receive a 429, wait before retrying. For RPM limits, waiting a few seconds is usually sufficient. For RPD limits, the counter resets 24 hours after the first request in the current window.
+</Tip>
+
+## Plan-Level Quotas
+
+In addition to per-key rate limits, Raven enforces plan-level monthly request quotas:
+
+| Plan | Requests Per Month |
+|------|--------------------|
 | Free | 10,000 |
 | Pro | 500,000 |
 | Team | 2,000,000 |
 | Enterprise | Unlimited |
 
+Plan quotas are checked independently from key-level rate limits. Even if a key has no RPM/RPD limits configured, the organization's plan quota still applies.
+
+## Rate Limits vs. Budgets
+
+Rate limits and [budgets](/features/budgets) serve different purposes:
+
+| Feature | Rate Limits | Budgets |
+|---------|-------------|---------|
+| **Unit** | Request count | Dollar amount |
+| **Scope** | Per virtual key | Org, team, or key |
+| **Window** | Minute / day | Day / week / month |
+| **Purpose** | Throughput control | Cost control |
+
+Use rate limits to prevent traffic spikes. Use budgets to prevent cost overruns.
+
+## Monitoring Rate Limits
+
+Rate limit events are tracked in Raven's observability layer:
+
+- **Prometheus** -- `raven_rate_limit_exceeded_total` counter with `key_id` label
+- **Events** -- `key.rate_limited` events are emitted and available via the event stream
+- **Analytics** -- Rate-limited requests appear in the dashboard analytics with a `429` status code
+
 ## Best Practices
 
-- **Set conservative limits** initially and increase as needed
-- **Use different limits** for different environments (higher for production, lower for development)
-- **Monitor 429 responses** in analytics to detect if limits need adjusting
-- **Implement retry logic** with exponential backoff in your application
+<AccordionGroup>
+  <Accordion title="Set both RPM and RPD">
+    RPM alone does not prevent a key from being used all day at a moderate rate. Combine RPM for burst protection with RPD for daily caps.
+  </Accordion>
+  <Accordion title="Use separate keys for separate workloads">
+    Give each application or team its own virtual key with appropriate limits. This prevents one workload from starving another.
+  </Accordion>
+  <Accordion title="Start conservative, increase as needed">
+    Begin with lower limits and increase them based on observed usage patterns in the analytics dashboard.
+  </Accordion>
+  <Accordion title="Handle 429s gracefully in your application">
+    Implement exponential backoff in your client code. The Raven SDK handles this automatically.
+  </Accordion>
+</AccordionGroup>
