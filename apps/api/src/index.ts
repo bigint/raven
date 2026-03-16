@@ -18,6 +18,7 @@ import { requestId } from "./middleware/request-id";
 import { requestTiming } from "./middleware/request-timing";
 import { createTenantMiddleware } from "./middleware/tenant";
 import { createAdminModule } from "./modules/admin/index";
+import { createAgentsModule } from "./modules/agents/index";
 import { createAnalyticsModule } from "./modules/analytics/index";
 import { createAuditLogsModule } from "./modules/audit-logs/index";
 import { createAuthModule } from "./modules/auth/index";
@@ -27,9 +28,11 @@ import {
 } from "./modules/billing/index";
 import { createBudgetsModule } from "./modules/budgets/index";
 import { createCacheModule } from "./modules/cache/index";
+import { createCatalogModule } from "./modules/catalog/index";
 import { createDomainsModule } from "./modules/domains/index";
 import { createGuardrailsModule } from "./modules/guardrails/index";
 import { createKeysModule } from "./modules/keys/index";
+import { createMcpModule } from "./modules/mcp/index";
 import { createModelsModule } from "./modules/models/index";
 import { createPromptsModule } from "./modules/prompts/index";
 import { createProvidersModule } from "./modules/providers/index";
@@ -168,6 +171,9 @@ v1.route("/billing", createBillingModule(db));
 v1.route("/audit-logs", createAuditLogsModule(db));
 v1.route("/webhooks", createWebhooksModule(db));
 v1.route("/routing-rules", createRoutingRulesModule(db));
+v1.route("/mcp", createMcpModule(db));
+v1.route("/agents", createAgentsModule(db));
+v1.route("/catalog", createCatalogModule(db));
 app.route("/v1", v1);
 
 // Custom domain proxy catch-all
