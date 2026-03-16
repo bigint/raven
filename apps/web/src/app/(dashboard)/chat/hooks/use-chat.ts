@@ -29,8 +29,8 @@ interface PlaygroundKey {
 
 export const catalogModelsQueryOptions = () =>
   queryOptions({
-    queryFn: () => api.get<CatalogModel[]>("/v1/models"),
-    queryKey: ["catalog-models"]
+    queryFn: () => api.get<CatalogModel[]>("/v1/models/available"),
+    queryKey: ["available-models"]
   });
 
 export const useChat = () => {
