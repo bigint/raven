@@ -5,10 +5,13 @@ import { RavenClient } from "@raven/sdk";
 import { queryOptions, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import { API_URL, api } from "@/lib/api";
+import type { PlaygroundSettings } from "../components/playground-settings";
+import type { ResponseMeta } from "../components/response-metadata";
 
 interface DisplayMessage {
   content: string;
   id: string;
+  meta?: ResponseMeta;
   role: "assistant" | "user";
 }
 
@@ -37,6 +40,12 @@ export const useChat = () => {
     model: string;
     provider: string;
   } | null>(null);
+  const [settings, setSettings] = useState<PlaygroundSettings>({
+    maxTokens: 4096,
+    showMetadata: true,
+    stream: true,
+    temperature: 0.7
+  });
   const abortRef = useRef<AbortController | null>(null);
   const keyRef = useRef<PlaygroundKey | null>(null);
   const clientRef = useRef<RavenClient | null>(null);
@@ -57,6 +66,23 @@ export const useChat = () => {
       headers: { "x-session-id": crypto.randomUUID() }
     });
     return pk;
+  };
+
+  const extractHeaderMeta = (response: Response): ResponseMeta => {
+    const meta: ResponseMeta = {};
+    const provider = response.headers.get("x-raven-provider");
+    const model = response.headers.get("x-raven-model");
+    const latency = response.headers.get("x-raven-latency-ms");
+    const cost = response.headers.get("x-raven-cost");
+    const cacheHit = response.headers.get("x-raven-cache-hit");
+
+    if (provider) meta.provider = provider;
+    if (model) meta.model = model;
+    if (latency) meta.latencyMs = Number.parseInt(latency, 10);
+    if (cost) meta.cost = Number.parseFloat(cost);
+    if (cacheHit) meta.cacheHit = cacheHit === "true";
+
+    return meta;
   };
 
   const sendMessage = useCallback(
@@ -80,6 +106,7 @@ export const useChat = () => {
 
       const abortController = new AbortController();
       abortRef.current = abortController;
+      const startTime = performance.now();
 
       try {
         await ensureKey();
@@ -92,24 +119,67 @@ export const useChat = () => {
           role: m.role
         }));
 
-        const stream = await client.streamText(
-          {
-            messages: chatMessages,
-            model: selectedModel.model,
-            provider: selectedModel.provider
-          },
-          abortController.signal
-        );
+        const generateParams = {
+          maxTokens: settings.maxTokens,
+          messages: chatMessages,
+          model: selectedModel.model,
+          provider: selectedModel.provider,
+          temperature: settings.temperature
+        };
 
-        for await (const delta of stream) {
-          setMessages((prev) => {
-            const idx = prev.length - 1;
-            const msg = prev[idx];
-            if (!msg || msg.id !== assistantMessage.id) return prev;
-            const updated = [...prev];
-            updated[idx] = { ...msg, content: msg.content + delta };
-            return updated;
-          });
+        if (settings.stream) {
+          const stream = await client.streamText(
+            generateParams,
+            abortController.signal
+          );
+
+          const headerMeta = extractHeaderMeta(stream.response);
+
+          for await (const delta of stream) {
+            setMessages((prev) => {
+              const idx = prev.length - 1;
+              const msg = prev[idx];
+              if (!msg || msg.id !== assistantMessage.id) return prev;
+              const updated = [...prev];
+              updated[idx] = { ...msg, content: msg.content + delta };
+              return updated;
+            });
+          }
+
+          const usage = await stream.usage;
+          const elapsedMs = Math.round(performance.now() - startTime);
+
+          const meta: ResponseMeta = {
+            ...headerMeta,
+            inputTokens: usage.promptTokens,
+            latencyMs: headerMeta.latencyMs ?? elapsedMs,
+            outputTokens: usage.completionTokens
+          };
+
+          setMessages((prev) =>
+            prev.map((m) => (m.id === assistantMessage.id ? { ...m, meta } : m))
+          );
+        } else {
+          const result = await client.generateText(
+            generateParams,
+            abortController.signal
+          );
+
+          const elapsedMs = Math.round(performance.now() - startTime);
+
+          const meta: ResponseMeta = {
+            inputTokens: result.usage.promptTokens,
+            latencyMs: elapsedMs,
+            outputTokens: result.usage.completionTokens
+          };
+
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMessage.id
+                ? { ...m, content: result.text, meta }
+                : m
+            )
+          );
         }
       } catch (error) {
         if ((error as Error).name === "AbortError") return;
@@ -126,7 +196,7 @@ export const useChat = () => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedModel, messages, isStreaming]
+    [selectedModel, messages, isStreaming, settings]
   );
 
   const stopStreaming = useCallback(() => {
@@ -153,6 +223,8 @@ export const useChat = () => {
     selectedModel,
     sendMessage,
     setSelectedModel,
+    setSettings,
+    settings,
     stopStreaming
   };
 };

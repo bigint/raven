@@ -72,11 +72,13 @@ export class TextStreamResult implements AsyncIterable<string> {
   private usageResolve!: (v: Usage) => void;
 
   readonly finishReason: Promise<string>;
+  readonly response: Response;
   readonly text: Promise<string>;
   readonly toolCalls: Promise<ToolCall[]>;
   readonly usage: Promise<Usage>;
 
   constructor(response: Response, abortController?: AbortController) {
+    this.response = response;
     const body = response.body;
     if (!body) throw new Error("No response body");
     this.reader = body.getReader();

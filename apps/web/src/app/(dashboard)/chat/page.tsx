@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import { ChatInput } from "./components/chat-input";
 import { ChatMessages } from "./components/chat-messages";
 import { ModelInput } from "./components/model-input";
+import { PlaygroundSettingsPanel } from "./components/playground-settings";
 import { catalogModelsQueryOptions, useChat } from "./hooks/use-chat";
 
 const ChatPage = () => {
@@ -17,6 +18,8 @@ const ChatPage = () => {
     selectedModel,
     sendMessage,
     setSelectedModel,
+    settings,
+    setSettings,
     stopStreaming
   } = useChat();
 
@@ -62,10 +65,18 @@ const ChatPage = () => {
           </div>
         }
         description="Test your AI providers and models through the gateway."
-        title="Chat"
+        title="Playground"
       />
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border">
-        <ChatMessages isStreaming={isStreaming} messages={messages} />
+      <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border">
+        <PlaygroundSettingsPanel
+          onSettingsChange={setSettings}
+          settings={settings}
+        />
+        <ChatMessages
+          isStreaming={isStreaming}
+          messages={messages}
+          showMetadata={settings.showMetadata}
+        />
         <ChatInput
           disabled={!selectedModel}
           isStreaming={isStreaming}

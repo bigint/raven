@@ -2,19 +2,27 @@
 
 import { MessageSquare } from "lucide-react";
 import { useEffect, useRef } from "react";
+import type { ResponseMeta } from "./response-metadata";
+import { ResponseMetadata } from "./response-metadata";
 
 interface ChatMessage {
   content: string;
   id: string;
+  meta?: ResponseMeta;
   role: "assistant" | "user";
 }
 
 interface ChatMessagesProps {
   isStreaming: boolean;
   messages: ChatMessage[];
+  showMetadata: boolean;
 }
 
-export const ChatMessages = ({ isStreaming, messages }: ChatMessagesProps) => {
+export const ChatMessages = ({
+  isStreaming,
+  messages,
+  showMetadata
+}: ChatMessagesProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,7 +57,7 @@ export const ChatMessages = ({ isStreaming, messages }: ChatMessagesProps) => {
 
           return (
             <div
-              className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+              className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}
               key={message.id}
             >
               <div
@@ -64,6 +72,9 @@ export const ChatMessages = ({ isStreaming, messages }: ChatMessagesProps) => {
                   <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-current align-text-bottom" />
                 )}
               </div>
+              {!isUser && message.meta && (
+                <ResponseMetadata meta={message.meta} show={showMetadata} />
+              )}
             </div>
           );
         })}
