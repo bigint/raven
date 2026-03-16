@@ -1,7 +1,6 @@
 "use client";
 
-import { Button } from "@raven/ui";
-import { ArrowUp, Square } from "lucide-react";
+import { ArrowUp, Settings2, Square, Thermometer } from "lucide-react";
 import { type KeyboardEvent, useCallback, useRef, useState } from "react";
 
 interface ChatInputProps {
@@ -9,13 +8,21 @@ interface ChatInputProps {
   isStreaming: boolean;
   onSend: (content: string) => void;
   onStop: () => void;
+  model?: string;
+  temperature?: number;
+  stream?: boolean;
+  onSettingsToggle?: () => void;
 }
 
 export const ChatInput = ({
   disabled,
   isStreaming,
   onSend,
-  onStop
+  onStop,
+  model,
+  temperature,
+  stream,
+  onSettingsToggle
 }: ChatInputProps) => {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -44,10 +51,11 @@ export const ChatInput = ({
   };
 
   return (
-    <div className="border-t border-border px-4 py-3 md:px-6">
-      <div className="mx-auto flex max-w-3xl items-end gap-2">
+    <div className="px-4 py-3 md:px-6">
+      <div className="mx-auto max-w-3xl rounded-xl border border-border bg-muted/30 shadow-sm transition-colors focus-within:border-ring focus-within:bg-background">
+        {/* Textarea */}
         <textarea
-          className="flex-1 resize-none rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          className="w-full resize-none bg-transparent px-4 pt-3 pb-2 text-sm placeholder:text-muted-foreground focus:outline-none"
           disabled={isStreaming}
           onChange={(e) => {
             setValue(e.target.value);
@@ -55,32 +63,76 @@ export const ChatInput = ({
           }}
           onKeyDown={handleKeyDown}
           placeholder={
-            disabled ? "Select a provider and model to start" : "Send a message"
+            disabled ? "Loading models..." : "Start a new message..."
           }
           ref={textareaRef}
           rows={1}
           style={{ maxHeight: 200 }}
           value={value}
         />
-        {isStreaming ? (
-          <Button
-            className="shrink-0"
-            onClick={onStop}
-            size="md"
-            variant="secondary"
-          >
-            <Square className="size-4" />
-          </Button>
-        ) : (
-          <Button
-            className="shrink-0"
-            disabled={!value.trim() || disabled}
-            onClick={handleSend}
-            size="md"
-          >
-            <ArrowUp className="size-4" />
-          </Button>
-        )}
+
+        {/* Bottom bar */}
+        <div className="flex items-center justify-between px-3 pb-2">
+          <div className="flex items-center gap-1">
+            {model && (
+              <span className="rounded-md bg-muted px-2 py-1 text-[11px] font-medium text-muted-foreground">
+                {model}
+              </span>
+            )}
+
+            {temperature !== undefined && (
+              <>
+                <span className="mx-1 text-border">|</span>
+                <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <Thermometer className="size-3" />
+                  {temperature}
+                </span>
+              </>
+            )}
+
+            {stream !== undefined && (
+              <>
+                <span className="mx-1 text-border">|</span>
+                <span className="text-[11px] text-muted-foreground">
+                  {stream ? "Stream" : "Batch"}
+                </span>
+              </>
+            )}
+
+            {onSettingsToggle && (
+              <>
+                <span className="mx-1 text-border">|</span>
+                <button
+                  className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                  onClick={onSettingsToggle}
+                  title="Settings"
+                  type="button"
+                >
+                  <Settings2 className="size-3.5" />
+                </button>
+              </>
+            )}
+          </div>
+
+          {isStreaming ? (
+            <button
+              className="rounded-lg bg-muted p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              onClick={onStop}
+              type="button"
+            >
+              <Square className="size-4" />
+            </button>
+          ) : (
+            <button
+              className="rounded-lg bg-primary p-2 text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed"
+              disabled={!value.trim() || disabled}
+              onClick={handleSend}
+              type="button"
+            >
+              <ArrowUp className="size-4" />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

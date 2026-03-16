@@ -1,8 +1,6 @@
 "use client";
 
 import { Input, Switch, Textarea } from "@raven/ui";
-import { Settings2 } from "lucide-react";
-import { useState } from "react";
 
 interface PlaygroundSettings {
   temperature: number;
@@ -17,33 +15,24 @@ interface PlaygroundSettingsPanelProps {
   onSettingsChange: (settings: PlaygroundSettings) => void;
   systemPrompt: string;
   onSystemPromptChange: (value: string) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 const PlaygroundSettingsPanel = ({
   settings,
   onSettingsChange,
   systemPrompt,
-  onSystemPromptChange
+  onSystemPromptChange,
+  open,
+  onOpenChange
 }: PlaygroundSettingsPanelProps) => {
-  const [open, setOpen] = useState(false);
-
   const update = <K extends keyof PlaygroundSettings>(
     key: K,
     value: PlaygroundSettings[K]
   ) => onSettingsChange({ ...settings, [key]: value });
 
-  if (!open) {
-    return (
-      <button
-        className="absolute right-3 top-3 z-10 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-        onClick={() => setOpen(true)}
-        title="Playground Settings"
-        type="button"
-      >
-        <Settings2 className="size-4" />
-      </button>
-    );
-  }
+  if (!open) return null;
 
   return (
     <div className="absolute right-0 top-0 z-20 h-full w-72 border-l border-border bg-background p-4 space-y-4 overflow-y-auto shadow-lg">
@@ -51,7 +40,7 @@ const PlaygroundSettingsPanel = ({
         <h3 className="text-sm font-semibold">Settings</h3>
         <button
           className="rounded-md p-1 text-muted-foreground hover:bg-accent"
-          onClick={() => setOpen(false)}
+          onClick={() => onOpenChange(false)}
           type="button"
         >
           <span className="text-xs">Close</span>
