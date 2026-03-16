@@ -10,6 +10,7 @@ export interface PlaygroundSettings {
   stream: boolean;
   showMetadata: boolean;
   enableTools: boolean;
+  enableWebSearch: boolean;
   chatMemory: number;
 }
 
@@ -326,6 +327,14 @@ export const ChatInput = ({
                       <Switch
                         checked={settings.enableTools}
                         onCheckedChange={(v) => update("enableTools", v)}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs">Web Search</span>
+                      <Switch
+                        checked={settings.enableWebSearch}
+                        onCheckedChange={(v) => update("enableWebSearch", v)}
                       />
                     </div>
                   </div>

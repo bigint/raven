@@ -44,6 +44,7 @@ export const useChat = () => {
   const [settings, setSettings] = useState<PlaygroundSettings>({
     chatMemory: 5,
     enableTools: false,
+    enableWebSearch: false,
     maxTokens: 4096,
     showMetadata: true,
     stream: true,
@@ -125,9 +126,19 @@ export const useChat = () => {
         // Apply chat memory limit — only send the last N messages
         const recentMessages = allMessages.slice(-settings.chatMemory);
 
+        // Build system prompt with optional web search instruction
+        const fullSystemPrompt = [
+          systemPrompt,
+          settings.enableWebSearch
+            ? "You have access to the web. When the user asks about current events, recent information, or anything that requires up-to-date knowledge, search the web and cite your sources with URLs."
+            : ""
+        ]
+          .filter(Boolean)
+          .join("\n\n");
+
         const chatMessages: Message[] = [
-          ...(systemPrompt
-            ? [{ content: systemPrompt, role: "system" as const }]
+          ...(fullSystemPrompt
+            ? [{ content: fullSystemPrompt, role: "system" as const }]
             : []),
           ...recentMessages
         ];
