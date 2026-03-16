@@ -8,23 +8,30 @@ import {
   BarChart3,
   BookOpen,
   Bot,
+  ClipboardCheck,
   Cpu,
   CreditCard,
   DollarSign,
+  Download,
   FileCheck,
   FileText,
   FlaskConical,
   Key,
+  KeyRound,
   LayoutDashboard,
   Menu,
+  MessageCircle,
   MessageSquare,
   Network,
   Plug,
+  Puzzle,
+  Radio,
   Receipt,
   Route,
   ScrollText,
   Settings,
   Shield,
+  ShieldBan,
   ShieldCheck,
   TrendingUp,
   Users,
@@ -60,11 +67,14 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { href: "/overview", icon: LayoutDashboard, label: "Overview" },
   { href: "/chat", icon: MessageSquare, label: "Chat" },
+  { href: "/conversations", icon: MessageCircle, label: "Conversations" },
   { href: "/analytics", icon: BarChart3, label: "Analytics" },
+  { href: "/evaluations", icon: ClipboardCheck, label: "Evaluations" },
   { href: "/providers", icon: Network, label: "Providers" },
   { href: "/keys", icon: Key, label: "Keys" },
   { href: "/prompts", icon: FileText, label: "Prompts" },
   { href: "/logs", icon: ScrollText, label: "Logs" },
+  { href: "/events", icon: Radio, label: "Events" },
   { href: "/tools", icon: Wrench, label: "Tool Use" },
   { href: "/adoption", icon: TrendingUp, label: "Adoption" },
   { href: "/models", icon: Cpu, label: "Models" },
@@ -82,6 +92,7 @@ const NAV_ITEMS: NavItem[] = [
     icon: Shield,
     label: "Guardrails"
   },
+  { href: "/ip-allowlists", icon: ShieldBan, label: "IP Allowlists" },
   {
     gate: (plan) => PLAN_FEATURES[plan].hasGuardrails,
     href: "/policies",
@@ -106,7 +117,8 @@ const NAV_ITEMS: NavItem[] = [
     href: "/webhooks",
     icon: Webhook,
     label: "Webhooks"
-  }
+  },
+  { href: "/plugins", icon: Puzzle, label: "Plugins" }
 ];
 
 interface SidebarProps {
