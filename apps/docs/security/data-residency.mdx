@@ -11,25 +11,13 @@ Raven maintains a mapping of each provider to the regions where they process dat
 
 ## Provider Region Mappings
 
-Raven tracks region information for 15+ providers:
+Raven tracks region information for each supported provider:
 
 | Provider | Regions | Notes |
 |----------|---------|-------|
 | **OpenAI** | `us` | US-based processing |
 | **Anthropic** | `us` | US-based processing |
-| **Google** | `us`, `eu` | Multi-region available |
-| **Azure OpenAI** | `us`, `eu`, `ap`, `me` | Broadest regional coverage |
-| **Mistral** | `eu` | EU-based (France) |
-| **Cohere** | `us`, `ca` | North America |
-| **Groq** | `us` | US-based processing |
-| **DeepSeek** | `cn` | China-based processing |
-| **AWS Bedrock** | `us`, `eu`, `ap` | Multi-region via AWS |
-| **Fireworks AI** | `us` | US-based processing |
-| **Together AI** | `us` | US-based processing |
-| **SambaNova** | `us` | US-based processing |
-| **Cerebras** | `us` | US-based processing |
-| **NVIDIA** | `us` | US-based processing |
-| **Ollama** | `local` | Self-hosted, your infrastructure |
+| **Mistral AI** | `eu` | EU-based (France) |
 
 ### Region Codes
 
@@ -37,11 +25,6 @@ Raven tracks region information for 15+ providers:
 |------|--------|
 | `us` | United States |
 | `eu` | European Union |
-| `ap` | Asia Pacific |
-| `ca` | Canada |
-| `cn` | China |
-| `me` | Middle East |
-| `local` | Self-hosted (your infrastructure) |
 | `any` | No restriction (all regions allowed) |
 
 ## Configuring Allowed Regions
@@ -85,15 +68,13 @@ When strict enforcement is **disabled** (default):
 When data residency is configured, Raven automatically filters the available providers during request routing:
 
 ```
-Configured providers:     [openai, anthropic, mistralai, azure-openai, deepseek]
+Configured providers:     [openai, anthropic, mistralai]
 Allowed regions:          [us, eu]
 
 After data residency filtering:
   openai       --> us       Allowed
   anthropic    --> us       Allowed
   mistralai    --> eu       Allowed
-  azure-openai --> us, eu   Allowed
-  deepseek     --> cn       Blocked
 ```
 
 This filtering happens transparently. Your application does not need to be aware of which providers are excluded -- Raven handles routing to compliant providers automatically.
@@ -103,8 +84,7 @@ This filtering happens transparently. Your application does not need to be aware
 For organizations subject to GDPR, data residency controls help satisfy **Article 44** requirements for cross-border data transfers:
 
 - Restrict processing to `eu` region only to keep data within the EU
-- Use Mistral (France-based) as your primary provider for EU data residency
-- Use Azure OpenAI's EU deployments for OpenAI models within the EU
+- Use Mistral AI (France-based) as your primary provider for EU data residency
 - Enable strict enforcement to prevent accidental routing to non-EU regions
 
 ### Example: EU-Only Configuration
@@ -120,19 +100,15 @@ With this configuration:
 
 | Provider | Region | Result |
 |----------|--------|--------|
-| Mistral | `eu` | Allowed |
-| Azure OpenAI | `us, eu` | Allowed (has EU region) |
-| Google | `us, eu` | Allowed (has EU region) |
+| Mistral AI | `eu` | Allowed |
 | OpenAI | `us` | Blocked |
 | Anthropic | `us` | Blocked |
-| DeepSeek | `cn` | Blocked |
-| Ollama | `local` | Blocked (strict mode) |
 
-### Example: North America Only
+### Example: US Only
 
 ```json
 {
-  "allowedRegions": ["us", "ca"],
+  "allowedRegions": ["us"],
   "enforceStrictly": false
 }
 ```
@@ -144,10 +120,6 @@ Data residency works alongside [routing rules](/features/routing-rules). When bo
 1. Data residency filtering runs first, removing non-compliant providers
 2. Routing rules then operate on the remaining compliant providers
 3. If no compliant providers remain, the request is rejected with an error
-
-<Note>
-  Self-hosted providers using Ollama have the `local` region designation. If you want to allow self-hosted models alongside cloud providers, include `local` in your allowed regions list.
-</Note>
 
 ## BYOK and Data Residency
 

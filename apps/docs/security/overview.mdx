@@ -11,7 +11,7 @@ All sensitive data stored by Raven is encrypted using **AES-256-GCM**, the indus
 
 - **Algorithm** -- `aes-256-gcm` with a 16-byte initialization vector and 16-byte authentication tag
 - **Key derivation** -- PBKDF2 with SHA-512 and 100,000 iterations ensures encryption keys are resistant to brute-force attacks
-- **What is encrypted** -- Provider API keys, SSO secrets, webhook signing keys, and any credentials stored in the platform
+- **What is encrypted** -- Provider API keys, webhook signing keys, and any credentials stored in the platform
 
 <Info>
   AES-256-GCM provides both confidentiality and integrity. The authentication tag ensures that ciphertext cannot be tampered with without detection.
