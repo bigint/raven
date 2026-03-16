@@ -55,10 +55,17 @@ const evaluateBlockTopics = (
   return null;
 };
 
-const evaluatePiiDetection = (contents: string[]): string | null => {
+const evaluatePiiDetection = (
+  contents: string[],
+  config: Record<string, unknown>
+): string | null => {
+  const enabledTypes = (config.piiTypes as string[] | undefined) ??
+    Object.keys(PII_PATTERNS);
+
   for (const content of contents) {
-    for (const [piiType, pattern] of Object.entries(PII_PATTERNS)) {
-      if (pattern.test(content)) {
+    for (const piiType of enabledTypes) {
+      const pattern = PII_PATTERNS[piiType];
+      if (pattern && pattern.test(content)) {
         return piiType;
       }
     }
@@ -149,7 +156,7 @@ export const evaluateGuardrails = async (
         matchedContent = evaluateBlockTopics(contents, rule.config);
         break;
       case "pii_detection":
-        matchedContent = evaluatePiiDetection(contents);
+        matchedContent = evaluatePiiDetection(contents, rule.config);
         break;
       case "content_filter":
         matchedContent = evaluateContentFilter(contents, rule.config);

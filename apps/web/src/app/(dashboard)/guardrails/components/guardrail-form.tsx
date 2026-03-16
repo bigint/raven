@@ -11,6 +11,14 @@ import {
   useUpdateGuardrail
 } from "../hooks/use-guardrails";
 
+const PII_TYPES = [
+  { id: "email", label: "Email" },
+  { id: "phone", label: "Phone" },
+  { id: "ssn", label: "SSN" },
+  { id: "creditCard", label: "Credit Card" },
+  { id: "ipAddress", label: "IP Address" }
+];
+
 interface FormState {
   name: string;
   type: string;
@@ -20,6 +28,7 @@ interface FormState {
   topics: string;
   categories: string;
   pattern: string;
+  piiTypes: string[];
 }
 
 const DEFAULT_FORM: FormState = {
@@ -28,6 +37,7 @@ const DEFAULT_FORM: FormState = {
   isEnabled: true,
   name: "",
   pattern: "",
+  piiTypes: PII_TYPES.map((t) => t.id),
   priority: "0",
   topics: "",
   type: "block_topics"
@@ -43,7 +53,7 @@ const buildConfig = (form: FormState): Record<string, unknown> => {
           .filter(Boolean)
       };
     case "pii_detection":
-      return {};
+      return { piiTypes: form.piiTypes };
     case "content_filter":
       return {
         categories: form.categories
@@ -65,6 +75,11 @@ const extractFormFromGuardrail = (g: Guardrail): FormState => ({
       ? ((g.config as { categories?: string[] }).categories ?? []).join("\n")
       : "",
   isEnabled: g.isEnabled,
+  piiTypes:
+    g.type === "pii_detection"
+      ? ((g.config as { piiTypes?: string[] }).piiTypes ??
+          PII_TYPES.map((t) => t.id))
+      : PII_TYPES.map((t) => t.id),
   name: g.name,
   pattern:
     g.type === "custom_regex"
@@ -225,9 +240,28 @@ const GuardrailForm = ({
         )}
 
         {form.type === "pii_detection" && (
-          <div className="rounded-md border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
-            Built-in patterns for email, phone, SSN, credit card
-          </div>
+          <fieldset className="space-y-2">
+            <legend className="text-sm font-medium">PII Types</legend>
+            {PII_TYPES.map((pii) => (
+              <label
+                className="flex items-center gap-2 text-sm"
+                key={pii.id}
+              >
+                <input
+                  checked={form.piiTypes.includes(pii.id)}
+                  className="size-4 rounded border-input accent-primary"
+                  onChange={(e) => {
+                    const next = e.target.checked
+                      ? [...form.piiTypes, pii.id]
+                      : form.piiTypes.filter((t) => t !== pii.id);
+                    setForm((f) => ({ ...f, piiTypes: next }));
+                  }}
+                  type="checkbox"
+                />
+                {pii.label}
+              </label>
+            ))}
+          </fieldset>
         )}
 
         {form.type === "content_filter" && (
