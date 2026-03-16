@@ -2,7 +2,7 @@
 
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
-import { ClipboardCheck, Plus, Trash2 } from "lucide-react";
+import { ClipboardCheck, Eye, Play, Plus, Trash2 } from "lucide-react";
 import { formatDate } from "@/lib/format";
 import type { Evaluation } from "../hooks/use-evaluations";
 
@@ -11,6 +11,8 @@ interface EvaluationListProps {
   loading: boolean;
   onAdd: () => void;
   onDelete: (id: string) => void;
+  onRun: (evaluation: Evaluation) => void;
+  onView: (evaluation: Evaluation) => void;
 }
 
 const statusVariant = (status: Evaluation["status"]) => {
@@ -82,7 +84,9 @@ const EvaluationList = ({
   evaluations,
   loading,
   onAdd,
-  onDelete
+  onDelete,
+  onRun,
+  onView
 }: EvaluationListProps) => {
   const allColumns: Column<Evaluation>[] = [
     ...columns,
@@ -93,6 +97,26 @@ const EvaluationList = ({
       key: "actions",
       render: (e) => (
         <div className="flex items-center justify-end gap-1">
+          {e.status === "completed" && (
+            <Button
+              onClick={() => onView(e)}
+              size="sm"
+              title="View results"
+              variant="ghost"
+            >
+              <Eye className="size-4" />
+            </Button>
+          )}
+          {(e.status === "pending" || e.status === "completed") && (
+            <Button
+              onClick={() => onRun(e)}
+              size="sm"
+              title="Run evaluation"
+              variant="ghost"
+            >
+              <Play className="size-4" />
+            </Button>
+          )}
           <Button
             className="hover:bg-destructive/10 hover:text-destructive"
             onClick={() => onDelete(e.id)}
