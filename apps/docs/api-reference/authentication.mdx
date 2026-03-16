@@ -3,49 +3,190 @@ title: "Authentication"
 description: "How to authenticate with the Raven API."
 ---
 
-Raven uses API key authentication. Include your virtual key in the `Authorization` header of every request.
+Raven supports two authentication methods: **virtual keys** for API access and **session cookies** for the dashboard. This page covers both methods and best practices for keeping your keys secure.
 
-## API Key Authentication
+## Two Authentication Methods
 
-```http
-Authorization: Bearer rk_live_abc123...
+| Method | Used For | How It Works |
+|--------|----------|--------------|
+| **Virtual key (Bearer token)** | Proxy API and management API | Include in `Authorization` header |
+| **Session cookie** | Dashboard web application | Set automatically by the browser |
+
+## Virtual Keys
+
+Virtual keys are the primary authentication method for the Raven API. They look like this:
+
+```
+rk_live_abc123def456ghi789...
 ```
 
-### Example
+### Key Format
+
+| Prefix | Environment | Description |
+|--------|-------------|-------------|
+| `rk_live_` | Production | For live API requests |
+| `rk_test_` | Test | For development and testing |
+
+<Warning>
+  Test keys (`rk_test_`) and live keys (`rk_live_`) operate on the same resources. The environment prefix is for your organizational clarity, not access isolation.
+</Warning>
+
+### Using a Virtual Key
+
+Include your virtual key in the `Authorization` header as a Bearer token:
+
+```bash
+curl -X POST https://api.raven.dev/v1/chat/completions \
+  -H "Authorization: Bearer rk_live_abc123..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
+```
+
+### Creating a Virtual Key
+
+<Steps>
+  <Step title="Navigate to Keys">
+    Go to **Keys** in the dashboard sidebar.
+  </Step>
+  <Step title="Click Create Key">
+    Enter a name, select the environment, and optionally set rate limits and expiration.
+  </Step>
+  <Step title="Copy the Key">
+    The full key is shown **only once** at creation time. Copy and store it securely.
+  </Step>
+</Steps>
+
+<Info>
+  Virtual keys are hashed before storage. After creation, Raven cannot retrieve or display the full key again. If you lose a key, create a new one and revoke the old one.
+</Info>
+
+## X-Org-Id Header
+
+For management API requests, specify which organization to operate on:
 
 ```bash
 curl -X GET https://api.raven.dev/providers \
-  -H "Authorization: Bearer rk_live_abc123..."
+  -H "Authorization: Bearer rk_live_abc123..." \
+  -H "X-Org-Id: org_abc123"
 ```
 
-## Key Types
+For proxy requests (`/v1/chat/completions`), the organization is determined automatically from the virtual key -- no `X-Org-Id` header is needed.
 
-| Prefix | Environment | Use |
-|--------|-------------|-----|
-| `rk_live_` | Production | Live API requests |
-| `rk_test_` | Test | Development and testing |
+## BYOK via X-Provider-Key
+
+Bring Your Own Key (BYOK) lets you pass your own provider API key for a specific request using the `X-Provider-Key` header:
+
+```bash
+curl -X POST https://api.raven.dev/v1/chat/completions \
+  -H "Authorization: Bearer rk_live_abc123..." \
+  -H "X-Provider-Key: sk-your-openai-key-here" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
+```
+
+When `X-Provider-Key` is present:
+
+- The provided key is used instead of the organization's stored provider key
+- All gateway features still apply: logging, guardrails, rate limiting, budgets, and analytics
+- The provided key is **not** stored by Raven -- it is used only for the current request
+
+This is useful for:
+
+- **Playground keys** -- Let users try the API with their own provider keys
+- **Per-request overrides** -- Use a specific key for certain requests without configuring it as a provider
+- **Testing** -- Try different provider accounts without updating org settings
 
 ## Session Authentication
 
-The dashboard uses session-based authentication via cookies. This is handled automatically by the web application and is not used for API requests.
+The Raven dashboard uses session-based authentication via HTTP cookies. This is handled automatically by the web application and is not used for API requests.
 
-## OAuth
+### Sign-In Methods
 
-For signing into the dashboard, Raven supports:
+| Method | Available On |
+|--------|--------------|
+| **Email/password** | All plans |
+| **GitHub OAuth** | All plans |
+| **Google OAuth** | All plans |
+| **SSO/OIDC** | Enterprise plan |
+| **SAML** | Enterprise plan |
 
-- **Email/password** — Built-in authentication
-- **GitHub OAuth** — Sign in with GitHub
-- **Google OAuth** — Sign in with Google
-- **SSO/OIDC** — Enterprise identity providers
+See [Single Sign-On](/platform/sso) for SSO configuration.
 
 ## Security Best Practices
 
-<Warning>
-  Never expose your API keys in client-side code, public repositories, or logs.
-</Warning>
+<AccordionGroup>
+  <Accordion title="Never expose keys in client-side code">
+    Virtual keys should only be used in server-side code. Never include them in JavaScript that runs in the browser, mobile app bundles, or public repositories.
+  </Accordion>
+  <Accordion title="Use environment variables">
+    Store keys in environment variables, not in source code:
+    ```bash
+    export RAVEN_API_KEY="rk_live_abc123..."
+    ```
+  </Accordion>
+  <Accordion title="Use test keys for development">
+    Use `rk_test_` keys in development and staging environments. Reserve `rk_live_` keys for production.
+  </Accordion>
+  <Accordion title="Set expiration dates">
+    Configure an expiration date when creating keys. This ensures keys are rotated regularly and reduces the risk from leaked credentials.
+  </Accordion>
+  <Accordion title="Use IP allowlists">
+    Restrict virtual keys to specific IP ranges for production environments. See [IP Allowlists](/security/ip-allowlists).
+  </Accordion>
+  <Accordion title="Set rate limits">
+    Configure RPM and RPD limits on every key to prevent abuse. See [Rate Limiting](/security/rate-limiting).
+  </Accordion>
+  <Accordion title="Monitor usage patterns">
+    Review analytics regularly for unexpected usage spikes that might indicate a leaked key.
+  </Accordion>
+  <Accordion title="Rotate keys periodically">
+    Use the key rotation feature to generate a new key and revoke the old one in a single operation.
+  </Accordion>
+</AccordionGroup>
 
-- **Use environment variables** — Store keys in environment variables, not in code
-- **Use test keys for development** — Keep `rk_live_` keys out of development environments
-- **Set expiration dates** — Rotate keys regularly by setting expiration dates
-- **Use IP allowlists** — Restrict keys to specific IP ranges for production
-- **Monitor usage** — Review analytics for unexpected usage patterns
+## Error Responses
+
+### Missing Authentication
+
+```json
+{
+  "error": {
+    "type": "unauthorized",
+    "message": "Missing or invalid API key"
+  }
+}
+```
+
+Status: `401 Unauthorized`
+
+### Invalid Key
+
+```json
+{
+  "error": {
+    "type": "unauthorized",
+    "message": "Invalid API key"
+  }
+}
+```
+
+Status: `401 Unauthorized`
+
+### Expired Key
+
+```json
+{
+  "error": {
+    "type": "unauthorized",
+    "message": "API key has expired"
+  }
+}
+```
+
+Status: `401 Unauthorized`
