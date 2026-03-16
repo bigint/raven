@@ -42,7 +42,7 @@ const columns: Column<Provider>[] = [
       const last4 = key.slice(-4);
       return (
         <span className="font-mono text-xs text-muted-foreground">
-          {"••••••••" + last4}
+          {`••••••••${last4}`}
         </span>
       );
     }

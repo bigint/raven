@@ -1,0 +1,241 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Raven Docs",
+  "colors": {
+    "primary": "#6D28D9",
+    "light": "#8B5CF6",
+    "dark": "#5B21B6"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "index",
+              "getting-started/quickstart",
+              "getting-started/concepts",
+              "getting-started/self-hosting"
+            ]
+          },
+          {
+            "group": "Core Features",
+            "pages": [
+              "features/providers",
+              "features/virtual-keys",
+              "features/models",
+              "features/routing-rules",
+              "features/prompt-management",
+              "features/chat"
+            ]
+          },
+          {
+            "group": "Governance & Safety",
+            "pages": [
+              "features/guardrails",
+              "features/policies",
+              "features/audit-logs",
+              "features/compliance"
+            ]
+          },
+          {
+            "group": "Cost Management",
+            "pages": [
+              "features/budgets",
+              "features/analytics",
+              "features/finops"
+            ]
+          },
+          {
+            "group": "Advanced Features",
+            "pages": [
+              "features/experiments",
+              "features/evaluations",
+              "features/agents",
+              "features/mcp-servers",
+              "features/plugins",
+              "features/webhooks",
+              "features/cache",
+              "features/catalog"
+            ]
+          },
+          {
+            "group": "Platform",
+            "pages": [
+              "platform/organizations",
+              "platform/teams",
+              "platform/roles",
+              "platform/sso",
+              "platform/custom-domains",
+              "platform/billing"
+            ]
+          },
+          {
+            "group": "Security",
+            "pages": [
+              "security/overview",
+              "security/ip-allowlists",
+              "security/rate-limiting",
+              "security/prompt-injection",
+              "security/data-residency"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/openai-compatibility",
+              "guides/streaming",
+              "guides/sdk",
+              "guides/observability"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api-reference/introduction",
+              "api-reference/authentication"
+            ]
+          },
+          {
+            "group": "Chat Completions",
+            "pages": [
+              "api-reference/endpoints/chat-completions"
+            ]
+          },
+          {
+            "group": "Providers",
+            "pages": [
+              "api-reference/endpoints/list-providers",
+              "api-reference/endpoints/create-provider",
+              "api-reference/endpoints/update-provider",
+              "api-reference/endpoints/delete-provider"
+            ]
+          },
+          {
+            "group": "Virtual Keys",
+            "pages": [
+              "api-reference/endpoints/list-keys",
+              "api-reference/endpoints/create-key",
+              "api-reference/endpoints/update-key",
+              "api-reference/endpoints/delete-key",
+              "api-reference/endpoints/rotate-key"
+            ]
+          },
+          {
+            "group": "Models",
+            "pages": [
+              "api-reference/endpoints/list-models",
+              "api-reference/endpoints/get-model"
+            ]
+          },
+          {
+            "group": "Prompts",
+            "pages": [
+              "api-reference/endpoints/list-prompts",
+              "api-reference/endpoints/create-prompt",
+              "api-reference/endpoints/get-prompt",
+              "api-reference/endpoints/create-prompt-version"
+            ]
+          },
+          {
+            "group": "Guardrails",
+            "pages": [
+              "api-reference/endpoints/list-guardrails",
+              "api-reference/endpoints/create-guardrail",
+              "api-reference/endpoints/update-guardrail",
+              "api-reference/endpoints/delete-guardrail"
+            ]
+          },
+          {
+            "group": "Budgets",
+            "pages": [
+              "api-reference/endpoints/list-budgets",
+              "api-reference/endpoints/create-budget",
+              "api-reference/endpoints/update-budget",
+              "api-reference/endpoints/delete-budget"
+            ]
+          },
+          {
+            "group": "Routing Rules",
+            "pages": [
+              "api-reference/endpoints/list-routing-rules",
+              "api-reference/endpoints/create-routing-rule",
+              "api-reference/endpoints/update-routing-rule",
+              "api-reference/endpoints/delete-routing-rule"
+            ]
+          },
+          {
+            "group": "Analytics",
+            "pages": [
+              "api-reference/endpoints/get-analytics",
+              "api-reference/endpoints/get-request-logs"
+            ]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              "api-reference/endpoints/list-webhooks",
+              "api-reference/endpoints/create-webhook",
+              "api-reference/endpoints/delete-webhook"
+            ]
+          },
+          {
+            "group": "Organizations",
+            "pages": [
+              "api-reference/endpoints/get-organization",
+              "api-reference/endpoints/update-organization",
+              "api-reference/endpoints/list-members",
+              "api-reference/endpoints/invite-member"
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "GitHub",
+          "href": "https://github.com/ravenplatform/raven",
+          "icon": "github"
+        },
+        {
+          "anchor": "Community",
+          "href": "https://discord.gg/raven",
+          "icon": "discord"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Support",
+        "href": "mailto:support@raven.dev"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Dashboard",
+      "href": "https://raven.dev"
+    }
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/ravenplatform",
+      "github": "https://github.com/ravenplatform/raven"
+    }
+  }
+}

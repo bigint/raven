@@ -1,0 +1,67 @@
+---
+title: "Plugins"
+description: "Extend request processing with custom pre/post hooks."
+---
+
+Plugins are custom hooks that run at specific points in the request pipeline, allowing you to extend Raven's behavior with your own logic.
+
+## Hook Points
+
+| Hook | When It Runs | Use Case |
+|------|-------------|----------|
+| **pre_request** | Before the request is sent to the provider | Modify requests, add metadata, validate content |
+| **post_response** | After the response is received | Transform responses, extract data, trigger actions |
+| **on_error** | When the provider returns an error | Custom error handling, alerting |
+| **on_stream** | During streaming responses | Real-time content filtering, progress tracking |
+
+## Creating a Plugin
+
+Navigate to **Plugins** in the dashboard.
+
+| Field | Description |
+|-------|-------------|
+| **Name** | Plugin identifier |
+| **Hook** | Which hook point to attach to |
+| **Logic** | The plugin code or webhook URL |
+| **Enabled** | Toggle the plugin on/off |
+
+## Examples
+
+### Add Metadata
+
+A `pre_request` hook that adds tracking metadata:
+
+```json
+{
+  "hook": "pre_request",
+  "action": "add_metadata",
+  "data": {
+    "team": "engineering",
+    "environment": "production"
+  }
+}
+```
+
+### Log to External System
+
+A `post_response` hook that sends response data to an external analytics system:
+
+```json
+{
+  "hook": "post_response",
+  "action": "webhook",
+  "url": "https://analytics.example.com/ingest"
+}
+```
+
+### Custom Error Handling
+
+An `on_error` hook that sends alerts to Slack:
+
+```json
+{
+  "hook": "on_error",
+  "action": "webhook",
+  "url": "https://hooks.slack.com/services/..."
+}
+```

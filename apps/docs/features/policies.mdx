@@ -1,0 +1,51 @@
+---
+title: "Policies"
+description: "Define and enforce compliance policies for AI usage."
+---
+
+Policies are higher-level compliance rules that govern how AI is used within your organization. Unlike guardrails (which filter individual requests), policies define organizational standards and track compliance over time.
+
+## Policy Structure
+
+A policy consists of:
+
+| Field | Description |
+|-------|-------------|
+| **Name** | Policy name (e.g., "Data Privacy Policy") |
+| **Description** | What the policy covers |
+| **Rules** | Individual rules with conditions |
+| **Status** | Active or inactive |
+
+## Policy Rules
+
+Each policy contains one or more rules that define specific conditions:
+
+```json
+{
+  "name": "No external data sharing",
+  "condition": "request contains customer_data AND model.provider != 'internal'",
+  "action": "block",
+  "severity": "high"
+}
+```
+
+## Policy Evaluations
+
+Raven evaluates requests against active policies and records the results:
+
+- **Pass** — Request complies with all policy rules
+- **Fail** — Request violates one or more rules
+- **Warning** — Request is borderline and flagged for review
+
+Evaluation results are stored and available in the compliance dashboard for auditing.
+
+## Use Cases
+
+- **Data residency** — Ensure sensitive data only goes to providers in approved regions
+- **Model restrictions** — Limit which models can be used for certain data types
+- **Usage governance** — Enforce approval workflows for high-cost requests
+- **Regulatory compliance** — Map policies to compliance frameworks (GDPR, HIPAA, SOC 2)
+
+## Compliance Frameworks
+
+Map your policies to industry compliance frameworks to track coverage and demonstrate compliance during audits.

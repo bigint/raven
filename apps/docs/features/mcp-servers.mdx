@@ -1,0 +1,40 @@
+---
+title: "MCP Servers"
+description: "Connect Model Context Protocol servers to extend AI capabilities."
+---
+
+Raven supports the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) — an open standard for connecting AI models to external tools and data sources.
+
+## What is MCP?
+
+MCP is a protocol that lets AI models interact with external systems through a standardized interface. MCP servers expose tools, resources, and prompts that models can use during conversations.
+
+## Adding an MCP Server
+
+Navigate to **MCP Servers** in the dashboard.
+
+| Field | Description |
+|-------|-------------|
+| **Name** | Display name for the server |
+| **URL** | The MCP server endpoint |
+| **Auth** | Authentication credentials (if required) |
+| **Health Check** | Interval for health monitoring |
+
+## Health Monitoring
+
+Raven periodically checks the health of connected MCP servers and displays their status:
+
+- **Healthy** — Server is responding normally
+- **Degraded** — Server is responding but with errors
+- **Unhealthy** — Server is not responding
+
+## Use Cases
+
+- **Database access** — Query databases through MCP tools
+- **File systems** — Read and write files through MCP
+- **API integrations** — Connect to external APIs (Slack, GitHub, Jira)
+- **Custom tools** — Build your own MCP servers for domain-specific tools
+
+## Catalog Integration
+
+MCP servers can be published to the organization catalog for other team members to discover and use.

@@ -1,0 +1,90 @@
+---
+title: "Guardrails"
+description: "Enforce content safety with PII detection, topic blocking, and custom rules."
+---
+
+Guardrails are rules that run on every request to enforce content safety policies. They can block, warn, or log when content matches specific patterns.
+
+## Rule Types
+
+### Topic Blocking
+
+Block requests that contain specific topics:
+
+```json
+{
+  "type": "block_topics",
+  "topics": ["violence", "illegal_activity", "self_harm"],
+  "action": "block"
+}
+```
+
+### PII Detection
+
+Detect and block personally identifiable information:
+
+```json
+{
+  "type": "pii",
+  "entities": ["email", "phone", "ssn", "credit_card"],
+  "action": "block"
+}
+```
+
+### Custom Regex
+
+Create custom pattern matching rules:
+
+```json
+{
+  "type": "custom_regex",
+  "pattern": "\\b(password|secret|api_key)\\s*[:=]\\s*\\S+",
+  "action": "warn"
+}
+```
+
+## Actions
+
+Each guardrail rule has an action that determines what happens when content matches:
+
+| Action | Behavior |
+|--------|----------|
+| **Block** | Reject the request with a 400 error |
+| **Warn** | Allow the request but flag it in logs |
+| **Log** | Silently record the match in audit logs |
+
+## Creating a Guardrail
+
+<Steps>
+  <Step title="Navigate to Guardrails">
+    Go to **Guardrails** in the dashboard.
+  </Step>
+  <Step title="Create a rule">
+    Choose the rule type and configure the parameters.
+  </Step>
+  <Step title="Set the action">
+    Choose whether to block, warn, or log matches.
+  </Step>
+  <Step title="Enable the rule">
+    Toggle the rule to active. It immediately applies to all requests.
+  </Step>
+</Steps>
+
+## How Guardrails Work
+
+Guardrails run in the request pipeline **before** the request is forwarded to the provider:
+
+```
+Request → Auth → Rate Limit → ⚡ Guardrails ⚡ → Route → Provider
+```
+
+If a guardrail blocks a request, the provider never receives it — saving you tokens and cost.
+
+## Plan Availability
+
+| Plan | Guardrails |
+|------|------------|
+| Free | Not available |
+| Pro | Available |
+| Team | Available |
+| Enterprise | Available |

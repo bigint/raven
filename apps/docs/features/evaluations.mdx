@@ -1,0 +1,39 @@
+---
+title: "Evaluations"
+description: "Systematically evaluate model outputs with scoring and pass/fail criteria."
+---
+
+Evaluations let you measure the quality of LLM outputs against defined criteria, either automatically or through manual review.
+
+## Evaluation Types
+
+### Automated Evaluation
+
+Use an LLM to judge the quality of another LLM's output:
+
+| Field | Description |
+|-------|-------------|
+| **Criteria** | What to evaluate (accuracy, helpfulness, safety) |
+| **Scoring** | Numeric score (1-5) or pass/fail |
+| **Sample rate** | Percentage of requests to evaluate |
+
+### Manual Evaluation
+
+Human reviewers assess outputs:
+
+- **Pass/Fail** — Binary quality assessment
+- **Scored** — Numeric rating with comments
+- **Comparative** — Side-by-side comparison of variants
+
+## Evaluation Results
+
+Results are aggregated and displayed:
+
+- **Pass rate** — Percentage of outputs that meet criteria
+- **Average score** — Mean quality score
+- **Score distribution** — Breakdown of scores
+- **Trend analysis** — Quality changes over time
+
+## Integration with Experiments
+
+Evaluations can be attached to experiments to provide quality metrics for each variant, enabling data-driven model selection.

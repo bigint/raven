@@ -1,0 +1,63 @@
+---
+title: "Agents"
+description: "Define autonomous AI agents with budgets, capabilities, and delegation controls."
+---
+
+Agents are named AI identities with configured capabilities, budget limits, and delegation permissions. They're useful for defining reusable AI personas that operate within specific boundaries.
+
+## Creating an Agent
+
+Navigate to **Agents** in the dashboard.
+
+### Agent Configuration
+
+| Field | Description |
+|-------|-------------|
+| **Name** | Agent identifier (e.g., "support-bot", "code-reviewer") |
+| **Model** | Default model for the agent |
+| **Budget** | Maximum spend allowed for this agent |
+| **Capabilities** | What the agent can do (tools, functions) |
+| **Delegation** | Whether the agent can delegate to other agents |
+
+## Agent Budgets
+
+Each agent can have its own budget to prevent runaway costs:
+
+```json
+{
+  "name": "support-bot",
+  "budget": {
+    "amount": 100,
+    "period": "monthly"
+  }
+}
+```
+
+When the budget is exhausted, the agent's requests are blocked until the next period.
+
+## Capabilities
+
+Define what tools and functions an agent can use:
+
+- **Function calling** — Allow the agent to call specific functions
+- **Tool use** — Enable specific tools
+- **Model access** — Restrict which models the agent can use
+
+## Delegation
+
+Configure whether an agent can delegate tasks to other agents, creating hierarchical agent architectures:
+
+```json
+{
+  "name": "orchestrator",
+  "canDelegate": true,
+  "delegateTo": ["researcher", "writer", "reviewer"]
+}
+```
+
+## Use Cases
+
+- **Customer support** — Dedicated agent with guardrails for customer-facing responses
+- **Code review** — Agent with access to code analysis tools
+- **Content generation** — Agent with specific prompt templates and quality guardrails
+- **Data analysis** — Agent with database query capabilities and budget limits

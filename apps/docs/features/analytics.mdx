@@ -1,0 +1,68 @@
+---
+title: "Analytics"
+description: "Monitor usage, costs, and performance across all providers and models."
+---
+
+The analytics dashboard gives you real-time visibility into your AI usage, costs, and performance metrics.
+
+## Dashboard Overview
+
+Navigate to **Analytics** in the dashboard to see:
+
+- **Total requests** — Request count over time
+- **Total cost** — Spending trends and breakdowns
+- **Token usage** — Input vs output token consumption
+- **Latency** — Average and p95 response times
+- **Error rate** — Failed request percentage
+
+## Metrics Tracked
+
+Every request logs the following metrics:
+
+| Metric | Description |
+|--------|-------------|
+| **Input tokens** | Tokens in the prompt |
+| **Output tokens** | Tokens in the response |
+| **Reasoning tokens** | Extended thinking tokens (e.g., Claude) |
+| **Cached tokens** | Provider-level cached tokens |
+| **Cost** | Calculated cost based on model pricing |
+| **Latency** | End-to-end response time in ms |
+| **Status** | HTTP status code |
+| **Cache hit** | Whether the response was served from Raven's cache |
+| **Tool calls** | Number of function/tool calls in the request |
+| **Images** | Number of images in the request |
+
+## Breakdowns
+
+Analyze metrics by different dimensions:
+
+- **By provider** — Compare costs and performance across providers
+- **By model** — See which models are used most and their cost efficiency
+- **By key** — Track usage per virtual key
+- **By time** — View trends over hours, days, or months
+
+## Request Logs
+
+Navigate to **Requests** for a detailed log of every request, including:
+
+- Request and response details
+- Token counts and cost
+- Latency breakdown
+- Provider and model used
+- Cache hit/miss
+- Any guardrail triggers
+
+Filter and search through request logs to debug specific issues.
+
+## Data Retention
+
+| Plan | Analytics Retention |
+|------|---------------------|
+| Free | 7 days |
+| Pro | 30 days |
+| Team | 90 days |
+| Enterprise | 365 days |
+
+## Data Export
+
+Export analytics data for external analysis via the **Exports** feature. Supports CSV and JSON formats.

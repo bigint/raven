@@ -112,13 +112,15 @@ const NAV_ITEMS: NavItem[] = [
     label: "Team"
   },
   { href: "/billing", icon: Receipt, label: "Billing" },
+  { href: "/exports", icon: Download, label: "Exports" },
   {
     gate: (plan) => PLAN_FEATURES[plan].hasWebhooks,
     href: "/webhooks",
     icon: Webhook,
     label: "Webhooks"
   },
-  { href: "/plugins", icon: Puzzle, label: "Plugins" }
+  { href: "/plugins", icon: Puzzle, label: "Plugins" },
+  { href: "/sso", icon: KeyRound, label: "SSO" }
 ];
 
 interface SidebarProps {

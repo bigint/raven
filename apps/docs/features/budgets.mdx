@@ -1,0 +1,73 @@
+---
+title: "Budgets"
+description: "Control AI spending with granular cost budgets."
+---
+
+Budgets let you set spending limits at the organization, team, or virtual key level to prevent unexpected costs.
+
+## Creating a Budget
+
+Navigate to **Budgets** in the dashboard and click **Create Budget**.
+
+| Field | Description |
+|-------|-------------|
+| **Name** | Descriptive name for the budget |
+| **Amount** | Maximum spend in USD |
+| **Period** | `daily` or `monthly` reset cycle |
+| **Scope** | Organization, team, or specific virtual key |
+| **Alert Threshold** | Percentage at which to send an alert (e.g., 80%) |
+
+## Budget Scopes
+
+### Organization Budget
+
+Limits total spending across all teams and keys:
+
+```
+Organization Budget: $500/month
+  └── All requests count toward this budget
+```
+
+### Team Budget
+
+Limits spending for a specific team:
+
+```
+Team "Engineering": $200/month
+  └── Only requests from team members count
+```
+
+### Key Budget
+
+Limits spending for a specific virtual key:
+
+```
+Key "production-app": $50/day
+  └── Only requests using this key count
+```
+
+## How Budgets Work
+
+Budgets are checked in the request pipeline **before** the request is sent to the provider:
+
+1. Raven estimates the request cost based on the model's pricing
+2. If the estimated cost would exceed the budget, the request is **blocked** with a `402` response
+3. After a successful request, the actual cost is recorded against the budget
+
+## Alerts
+
+When spending reaches the configured alert threshold, Raven sends notifications through your configured channels (email, webhooks).
+
+## Budget Reset
+
+- **Daily budgets** reset at midnight UTC
+- **Monthly budgets** reset on the 1st of each month at midnight UTC
+
+## Plan Limits
+
+| Plan | Max Budgets |
+|------|-------------|
+| Free | 1 |
+| Pro | 10 |
+| Team | Unlimited |
+| Enterprise | Unlimited |

@@ -1,0 +1,77 @@
+---
+title: "Providers"
+description: "Connect and manage your LLM provider credentials."
+---
+
+Providers are configured connections to LLM services. You store your provider API keys once in Raven, and it handles routing requests to the correct provider based on the model requested.
+
+## Adding a Provider
+
+<Steps>
+  <Step title="Navigate to Providers">
+    Go to **Providers** in the dashboard sidebar.
+  </Step>
+  <Step title="Click Add Provider">
+    Select your provider from the list of 26+ supported services.
+  </Step>
+  <Step title="Enter Credentials">
+    Paste your provider API key. Raven encrypts it at rest using AES encryption.
+  </Step>
+  <Step title="Configure Options">
+    Optionally set a display name and enable/disable the provider.
+  </Step>
+</Steps>
+
+## Supported Providers
+
+| Provider | Models | Notes |
+|----------|--------|-------|
+| **OpenAI** | GPT-4o, GPT-4, GPT-3.5 | Full support including function calling and vision |
+| **Anthropic** | Claude 4, Claude 3.5, Claude 3 | Supports extended thinking |
+| **Google** | Gemini 2.5, Gemini 2.0 | Google AI Studio API |
+| **Azure OpenAI** | Same as OpenAI | Requires deployment endpoint |
+| **Mistral** | Mistral Large, Medium, Small | European provider |
+| **Cohere** | Command R+ | Includes RAG capabilities |
+| **Groq** | Llama, Mixtral | Ultra-fast inference |
+| **Perplexity** | Sonar models | Search-augmented generation |
+| **xAI** | Grok models | xAI's Grok family |
+| **DeepSeek** | DeepSeek V3, R1 | Reasoning models |
+| **AWS Bedrock** | Multiple providers | AWS-hosted models |
+| **Together AI** | Open-source models | Wide model selection |
+| **Fireworks AI** | Open-source models | Fast inference |
+| **Replicate** | Open-source models | Model hosting platform |
+| **HuggingFace** | Inference API models | Open-source hub |
+| **DeepInfra** | Open-source models | Cost-effective inference |
+| **Cerebras** | Llama models | Fastest inference |
+| **SambaNova** | Open-source models | Custom silicon inference |
+| **Databricks** | DBRX, hosted models | Enterprise platform |
+| **Cloudflare** | Workers AI models | Edge inference |
+| **Ollama** | Local models | Self-hosted, no API key needed |
+| **Modal** | Custom models | Serverless GPU inference |
+| **Lepton AI** | Open-source models | Fast inference |
+| **Anyscale** | Open-source models | Ray-based serving |
+| **Novita AI** | Open-source models | Cost-effective inference |
+| **Voyage AI** | Embedding models | Specialized embeddings |
+
+## Managing Providers
+
+### Enable/Disable
+
+Toggle a provider on or off without deleting it. Disabled providers won't receive requests but their configuration is preserved.
+
+### Multiple Configurations
+
+You can add the same provider multiple times with different API keys. This is useful for:
+
+- **Separate billing accounts** — Route different teams to different provider accounts
+- **Fallback credentials** — Use a backup key if the primary is rate-limited
+- **Region-specific keys** — Use different keys for different regions
+
+## Plan Limits
+
+| Plan | Max Providers |
+|------|---------------|
+| Free | 2 |
+| Pro | 10 |
+| Team | Unlimited |
+| Enterprise | Unlimited |

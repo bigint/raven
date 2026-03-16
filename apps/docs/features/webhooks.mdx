@@ -1,0 +1,91 @@
+---
+title: "Webhooks"
+description: "Get notified about events in real-time via webhook integrations."
+---
+
+Webhooks send HTTP POST requests to your endpoints when specific events occur in Raven.
+
+## Creating a Webhook
+
+Navigate to **Webhooks** in the dashboard and click **Create Webhook**.
+
+| Field | Description |
+|-------|-------------|
+| **URL** | The endpoint to receive webhook events |
+| **Events** | Which events to subscribe to |
+| **Secret** | Shared secret for verifying webhook signatures |
+
+## Event Types
+
+Subscribe to any combination of events:
+
+| Event | Description |
+|-------|-------------|
+| `request.completed` | A request was successfully processed |
+| `request.failed` | A request failed |
+| `budget.threshold` | A budget reached its alert threshold |
+| `budget.exceeded` | A budget was exceeded |
+| `guardrail.triggered` | A guardrail rule was triggered |
+| `key.expired` | A virtual key expired |
+| `key.rotated` | A virtual key was rotated |
+| `member.invited` | A new member was invited |
+| `member.removed` | A member was removed |
+
+## Webhook Payload
+
+Each webhook delivers a JSON payload:
+
+```json
+{
+  "event": "budget.threshold",
+  "timestamp": "2025-01-15T10:30:00Z",
+  "organization_id": "org_abc123",
+  "data": {
+    "budget_id": "bud_xyz789",
+    "budget_name": "Production API",
+    "current_spend": 450.00,
+    "limit": 500.00,
+    "percentage": 90
+  }
+}
+```
+
+## Verification
+
+Verify webhook authenticity using the signature in the `X-Raven-Signature` header:
+
+```typescript
+import crypto from "crypto";
+
+function verifyWebhook(payload: string, signature: string, secret: string) {
+  const expected = crypto
+    .createHmac("sha256", secret)
+    .update(payload)
+    .digest("hex");
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expected)
+  );
+}
+```
+
+## Retry Policy
+
+Failed webhook deliveries are retried with exponential backoff:
+
+- **Attempt 1** — Immediate
+- **Attempt 2** — After 1 minute
+- **Attempt 3** — After 5 minutes
+- **Attempt 4** — After 30 minutes
+- **Attempt 5** — After 2 hours
+
+After 5 failed attempts, the webhook is marked as failing and can be reviewed in the dashboard.
+
+## Plan Availability
+
+| Plan | Webhooks |
+|------|----------|
+| Free | Not available |
+| Pro | Available |
+| Team | Available |
+| Enterprise | Available |

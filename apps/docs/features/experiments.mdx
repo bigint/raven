@@ -1,0 +1,73 @@
+---
+title: "Experiments"
+description: "Run A/B tests across models to optimize quality and cost."
+---
+
+Experiments let you run A/B tests to compare different models, prompts, or configurations and measure their impact on quality, cost, and latency.
+
+## Creating an Experiment
+
+Navigate to **Experiments** in the dashboard.
+
+### Experiment Configuration
+
+| Field | Description |
+|-------|-------------|
+| **Name** | Descriptive name for the experiment |
+| **Status** | `draft`, `running`, `paused`, or `completed` |
+| **Variants** | Two or more configurations to compare |
+| **Traffic split** | Percentage of traffic routed to each variant |
+
+## Variants
+
+Each variant defines a different configuration:
+
+```json
+{
+  "name": "Control",
+  "model": "gpt-4o",
+  "weight": 50
+}
+```
+
+```json
+{
+  "name": "Challenger",
+  "model": "claude-sonnet-4-20250514",
+  "weight": 50
+}
+```
+
+## Running an Experiment
+
+<Steps>
+  <Step title="Create the experiment">
+    Define your variants and traffic split.
+  </Step>
+  <Step title="Start the experiment">
+    Set the status to `running`. Traffic is automatically split between variants.
+  </Step>
+  <Step title="Monitor results">
+    Track cost, latency, and quality metrics for each variant in real-time.
+  </Step>
+  <Step title="Analyze and conclude">
+    Compare results and promote the winning variant to production via a routing rule.
+  </Step>
+</Steps>
+
+## Metrics Compared
+
+For each variant, Raven tracks:
+
+- **Average cost** per request
+- **Average latency** (time to first token, total time)
+- **Token efficiency** (output tokens per input token)
+- **Error rate**
+- **User satisfaction** (if evaluation scores are configured)
+
+## Use Cases
+
+- **Model comparison** — Compare GPT-4o vs Claude Sonnet for your specific use case
+- **Prompt optimization** — Test different prompt templates
+- **Cost/quality tradeoff** — Find the cheapest model that meets your quality bar
+- **Provider evaluation** — Compare the same model across different providers

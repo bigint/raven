@@ -1,0 +1,54 @@
+---
+title: "Audit Logs"
+description: "Track every action in your organization with a complete audit trail."
+---
+
+Audit logs record every significant action taken within your organization, providing a complete trail for security reviews and compliance.
+
+## What's Logged
+
+Every audit log entry includes:
+
+| Field | Description |
+|-------|-------------|
+| **Action** | What happened (e.g., `key.created`, `provider.updated`) |
+| **Actor** | Who performed the action (user ID and email) |
+| **Resource** | What was affected (resource type and ID) |
+| **Metadata** | Additional context about the action |
+| **Timestamp** | When the action occurred |
+| **IP Address** | The IP address of the actor |
+
+## Action Types
+
+Common actions tracked:
+
+| Category | Actions |
+|----------|---------|
+| **Keys** | `key.created`, `key.rotated`, `key.deleted` |
+| **Providers** | `provider.created`, `provider.updated`, `provider.deleted` |
+| **Members** | `member.invited`, `member.removed`, `member.role_changed` |
+| **Guardrails** | `guardrail.created`, `guardrail.updated`, `guardrail.triggered` |
+| **Budgets** | `budget.created`, `budget.exceeded`, `budget.updated` |
+| **Settings** | `settings.updated`, `domain.added`, `domain.removed` |
+
+## Viewing Audit Logs
+
+Navigate to **Logs** in the dashboard. You can filter by:
+
+- **Action type** — Filter to specific action categories
+- **Actor** — Filter by who performed the action
+- **Date range** — Narrow down to a specific time period
+- **Resource** — Filter by affected resource
+
+## Exporting
+
+Export audit logs for external analysis or compliance reporting via the **Exports** feature.
+
+## Plan Availability
+
+| Plan | Audit Logs | Retention |
+|------|------------|-----------|
+| Free | Not available | — |
+| Pro | Not available | — |
+| Team | Available | 90 days |
+| Enterprise | Available | 365 days |
