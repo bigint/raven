@@ -36,30 +36,20 @@
             "group": "Governance & Safety",
             "pages": [
               "features/guardrails",
-              "features/policies",
-              "features/audit-logs",
-              "features/compliance"
+              "features/audit-logs"
             ]
           },
           {
             "group": "Cost Management",
             "pages": [
               "features/budgets",
-              "features/analytics",
-              "features/finops"
+              "features/analytics"
             ]
           },
           {
             "group": "Advanced Features",
             "pages": [
-              "features/experiments",
-              "features/evaluations",
-              "features/agents",
-              "features/mcp-servers",
-              "features/plugins",
-              "features/webhooks",
-              "features/cache",
-              "features/catalog"
+              "features/webhooks"
             ]
           },
           {
@@ -78,8 +68,7 @@
               "security/overview",
               "security/ip-allowlists",
               "security/rate-limiting",
-              "security/prompt-injection",
-              "security/data-residency"
+              "security/prompt-injection"
             ]
           },
           {

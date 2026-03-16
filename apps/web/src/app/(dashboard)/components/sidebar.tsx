@@ -6,30 +6,20 @@ import type { LucideIcon } from "lucide-react";
 import {
   Activity,
   BarChart3,
-  BookOpen,
-  Bot,
-  ClipboardCheck,
   Cpu,
   CreditCard,
-  DollarSign,
   Download,
-  FileCheck,
   FileText,
-  FlaskConical,
   Key,
   LayoutDashboard,
   Menu,
   Network,
-  Plug,
-  Puzzle,
-  Radio,
   Receipt,
   Route,
   ScrollText,
   Settings,
   Shield,
   ShieldBan,
-  ShieldCheck,
   SquareTerminal,
   TrendingUp,
   Users,
@@ -66,23 +56,16 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/overview", icon: LayoutDashboard, label: "Overview" },
   { href: "/chat", icon: SquareTerminal, label: "Playground" },
   { href: "/analytics", icon: BarChart3, label: "Analytics" },
-  { href: "/evaluations", icon: ClipboardCheck, label: "Evaluations" },
   { href: "/providers", icon: Network, label: "Providers" },
   { href: "/keys", icon: Key, label: "Keys" },
   { href: "/prompts", icon: FileText, label: "Prompts" },
-  { href: "/logs", icon: ScrollText, label: "Logs" },
-  { href: "/events", icon: Radio, label: "Events" },
-  { href: "/tools", icon: Wrench, label: "Tool Use" },
-  { href: "/adoption", icon: TrendingUp, label: "Adoption" },
   { href: "/models", icon: Cpu, label: "Models" },
   { href: "/routing", icon: Route, label: "Routing" },
-  { href: "/experiments", icon: FlaskConical, label: "Experiments" },
   { href: "/requests", icon: Activity, label: "Requests" },
+  { href: "/logs", icon: ScrollText, label: "Logs" },
+  { href: "/tools", icon: Wrench, label: "Tool Use" },
+  { href: "/adoption", icon: TrendingUp, label: "Adoption" },
   { href: "/budgets", icon: CreditCard, label: "Budgets" },
-  { href: "/finops", icon: DollarSign, label: "FinOps" },
-  { href: "/agents", icon: Bot, label: "Agents" },
-  { href: "/mcp", icon: Plug, label: "MCP Servers" },
-  { href: "/catalog", icon: BookOpen, label: "Catalog" },
   {
     gate: (plan) => PLAN_FEATURES[plan].hasGuardrails,
     href: "/guardrails",
@@ -90,18 +73,6 @@ const NAV_ITEMS: NavItem[] = [
     label: "Guardrails"
   },
   { href: "/ip-allowlists", icon: ShieldBan, label: "IP Allowlists" },
-  {
-    gate: (plan) => PLAN_FEATURES[plan].hasGuardrails,
-    href: "/policies",
-    icon: ShieldCheck,
-    label: "Policies"
-  },
-  {
-    gate: (plan) => PLAN_FEATURES[plan].hasGuardrails,
-    href: "/compliance",
-    icon: FileCheck,
-    label: "Compliance"
-  },
   {
     gate: (plan) => PLAN_FEATURES[plan].hasTeams,
     href: "/team",
@@ -115,8 +86,7 @@ const NAV_ITEMS: NavItem[] = [
     href: "/webhooks",
     icon: Webhook,
     label: "Webhooks"
-  },
-  { href: "/plugins", icon: Puzzle, label: "Plugins" }
+  }
 ];
 
 interface SidebarProps {

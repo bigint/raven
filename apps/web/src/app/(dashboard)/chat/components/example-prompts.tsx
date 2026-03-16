@@ -1,21 +1,13 @@
 "use client";
 
-import {
-  Code,
-  Globe,
-  Lightbulb,
-  PenLine,
-  Route,
-  Shield,
-  Wrench
-} from "lucide-react";
+import { Code, Globe, Lightbulb, PenLine, Shield, Wrench } from "lucide-react";
 import type { ReactNode } from "react";
 
 interface ExamplePrompt {
   icon: ReactNode;
   label: string;
   message: string;
-  category: "general" | "routing" | "tools" | "guardrails";
+  category: "general" | "tools" | "guardrails";
 }
 
 const EXAMPLES: ExamplePrompt[] = [
@@ -45,13 +37,6 @@ const EXAMPLES: ExamplePrompt[] = [
     label: "Translate text",
     message:
       'Translate "The quick brown fox jumps over the lazy dog" into French, Spanish, and Japanese'
-  },
-  {
-    category: "routing",
-    icon: <Route className="size-4" />,
-    label: "Test smart routing",
-    message:
-      "Write a Python function that calculates the Fibonacci sequence using dynamic programming with memoization"
   },
   {
     category: "tools",
