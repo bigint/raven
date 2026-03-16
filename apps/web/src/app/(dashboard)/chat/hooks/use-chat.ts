@@ -5,7 +5,7 @@ import { RavenClient } from "@raven/sdk";
 import { queryOptions, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import { API_URL, api } from "@/lib/api";
-import type { PlaygroundSettings } from "../components/playground-settings";
+import type { PlaygroundSettings } from "../components/chat-input";
 import type { ResponseMeta } from "../components/response-metadata";
 
 interface DisplayMessage {

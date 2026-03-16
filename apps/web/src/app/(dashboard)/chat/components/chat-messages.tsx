@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { ExamplePrompts } from "./example-prompts";
+import { Markdown } from "./markdown";
 import type { ResponseMeta } from "./response-metadata";
 import { ResponseMetadata } from "./response-metadata";
 
@@ -57,7 +58,11 @@ export const ChatMessages = ({
                     : "bg-muted text-foreground"
                 }`}
               >
-                {message.content}
+                {isUser ? (
+                  message.content
+                ) : (
+                  <Markdown content={message.content} />
+                )}
                 {isCurrentAssistant && (
                   <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-current align-text-bottom" />
                 )}

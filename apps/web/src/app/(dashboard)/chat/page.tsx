@@ -4,10 +4,9 @@ import { Button } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { RotateCcw } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { ChatInput } from "./components/chat-input";
 import { ChatMessages } from "./components/chat-messages";
-import { PlaygroundSettingsPanel } from "./components/playground-settings";
 import { catalogModelsQueryOptions, useChat } from "./hooks/use-chat";
 
 const ChatPage = () => {
@@ -26,11 +25,8 @@ const ChatPage = () => {
   } = useChat();
 
   const searchParams = useSearchParams();
-  const [settingsOpen, setSettingsOpen] = useState(false);
-
   const { data: models = [] } = useQuery(catalogModelsQueryOptions());
 
-  // Auto-select first model, or use URL params
   useEffect(() => {
     if (!models.length || selectedModel) return;
 
@@ -74,11 +70,8 @@ const ChatPage = () => {
     [models]
   );
 
-  const toggleSettings = useCallback(() => setSettingsOpen((o) => !o), []);
-
   return (
     <div className="flex h-[calc(100dvh-var(--spacing)*8)] flex-col md:h-dvh md:-m-6 md:p-6">
-      {/* Minimal header */}
       <div className="flex items-center justify-between pb-4">
         <div>
           <h1 className="text-lg font-semibold">Playground</h1>
@@ -100,14 +93,6 @@ const ChatPage = () => {
       </div>
 
       <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border">
-        <PlaygroundSettingsPanel
-          onOpenChange={setSettingsOpen}
-          onSettingsChange={setSettings}
-          onSystemPromptChange={setSystemPrompt}
-          open={settingsOpen}
-          settings={settings}
-          systemPrompt={systemPrompt}
-        />
         <ChatMessages
           isStreaming={isStreaming}
           messages={messages}
@@ -123,10 +108,11 @@ const ChatPage = () => {
             setSelectedModel({ model, provider })
           }
           onSend={sendMessage}
-          onSettingsToggle={toggleSettings}
+          onSettingsChange={setSettings}
           onStop={stopStreaming}
-          stream={settings.stream}
-          temperature={settings.temperature}
+          onSystemPromptChange={setSystemPrompt}
+          settings={settings}
+          systemPrompt={systemPrompt}
         />
       </div>
     </div>
