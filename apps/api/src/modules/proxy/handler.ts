@@ -1,5 +1,7 @@
 import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
+import { models } from "@raven/db";
+import { eq } from "drizzle-orm";
 import type { Context } from "hono";
 import type { Redis } from "ioredis";
 import { ForbiddenError, GuardrailError } from "@/lib/errors";
@@ -178,6 +180,28 @@ export const proxyHandler = (
     if (routingResult?.ruleApplied) {
       parsedBody.model = routingResult.model;
       finalBodyText = JSON.stringify(parsedBody);
+    }
+
+    // 5c. Validate model is enabled in the platform
+    const requestedModelSlug = parsedBody.model as string | undefined;
+    if (requestedModelSlug) {
+      const [allowedModel] = await db
+        .select({ id: models.id })
+        .from(models)
+        .where(eq(models.slug, requestedModelSlug))
+        .limit(1);
+
+      if (!allowedModel) {
+        return c.json(
+          {
+            error: {
+              code: "MODEL_NOT_SUPPORTED",
+              message: `Model "${requestedModelSlug}" is not supported in Raven. Please contact us at support@raven.ai.`
+            }
+          },
+          400
+        );
+      }
     }
 
     // 6. Resolve provider and decrypt credentials

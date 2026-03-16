@@ -5,11 +5,11 @@ import { getAdminDomains } from "./domains";
 import { getAdminOrganizations } from "./organizations";
 import { getAdminStats } from "./stats";
 import {
-  addSyncedProvider,
-  deleteSyncedProvider,
-  getAdminSyncedProviders,
-  triggerModelSync,
-  updateSyncedProvider
+  addModel,
+  getAdminProviders,
+  refreshModelPricing,
+  removeModel,
+  searchAvailableModels
 } from "./synced-providers";
 import { getAdminUsers } from "./users";
 
@@ -20,10 +20,10 @@ export const createAdminModule = (db: Database) => {
   app.get("/organizations", getAdminOrganizations(db));
   app.get("/domains", getAdminDomains(db));
   app.get("/audit-logs", getAdminAuditLogs(db));
-  app.get("/synced-providers", getAdminSyncedProviders(db));
-  app.post("/synced-providers", addSyncedProvider(db));
-  app.patch("/synced-providers/:slug", updateSyncedProvider(db));
-  app.delete("/synced-providers/:slug", deleteSyncedProvider(db));
-  app.post("/models/sync", triggerModelSync(db));
+  app.get("/providers", getAdminProviders(db));
+  app.get("/models/search", searchAvailableModels(db));
+  app.post("/models", addModel(db));
+  app.delete("/models/:id{.+}", removeModel(db));
+  app.post("/models/refresh-pricing", refreshModelPricing(db));
   return app;
 };

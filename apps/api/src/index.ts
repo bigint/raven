@@ -8,7 +8,7 @@ import { logger } from "hono/logger";
 import { initEmailDispatcher } from "./lib/email-dispatcher";
 import { AppError } from "./lib/errors";
 import { initEventBus } from "./lib/events";
-import { seedDefaultProviders, syncModels } from "./lib/model-sync";
+import { seedDefaultProviders } from "./lib/model-sync";
 import { refreshPricingCache } from "./lib/pricing-cache";
 import { getRedis } from "./lib/redis";
 import { sendWelcomeEmail } from "./lib/send-welcome-email";
@@ -55,24 +55,15 @@ setInterval(() => {
   void flushLastUsed(db, redis);
 }, 60_000);
 
-// Seed default providers and run initial model sync
+// Seed default providers and load pricing cache
 void (async () => {
   try {
     await seedDefaultProviders(db);
-    await syncModels(db);
+    await refreshPricingCache(db);
   } catch (err) {
-    console.error("Initial model sync failed:", err);
-    // Load pricing cache from DB even if sync fails
-    await refreshPricingCache(db).catch(() => {});
+    console.error("Startup initialization failed:", err);
   }
 })();
-
-// Sync models every 5 minutes
-setInterval(() => {
-  void syncModels(db).catch((err) =>
-    console.error("Scheduled model sync failed:", err)
-  );
-}, 5 * 60_000);
 
 const auth = createAuth(db, env, {
   onUserCreated: (user) => void sendWelcomeEmail(user, env.APP_URL)

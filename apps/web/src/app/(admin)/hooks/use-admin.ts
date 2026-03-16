@@ -86,24 +86,28 @@ export const adminAuditLogsQueryOptions = () =>
     queryKey: ["admin", "audit-logs"]
   });
 
-export interface SyncedProvider {
+export interface AdminProvider {
   slug: string;
   name: string;
-  isEnabled: boolean;
-  lastSyncedAt: string | null;
-  createdAt: string;
   modelCount: number;
 }
 
-export interface SyncResult {
-  synced: number;
-  removed: number;
+export interface AvailableModel {
+  id: string;
+  name: string;
+  isAdded: boolean;
+  capabilities: string[];
+  category: string;
+  contextWindow: number;
+  maxOutput: number;
+  inputPrice: number;
+  outputPrice: number;
 }
 
-export const adminSyncedProvidersQueryOptions = () =>
+export const adminProvidersQueryOptions = () =>
   queryOptions({
-    queryFn: () => api.get<SyncedProvider[]>("/v1/admin/synced-providers"),
-    queryKey: ["admin", "synced-providers"]
+    queryFn: () => api.get<AdminProvider[]>("/v1/admin/providers"),
+    queryKey: ["admin", "providers"]
   });
 
 export const useAdminStats = () => useQuery(adminStatsQueryOptions());
@@ -111,5 +115,4 @@ export const useAdminUsers = () => useQuery(adminUsersQueryOptions());
 export const useAdminOrgs = () => useQuery(adminOrgsQueryOptions());
 export const useAdminDomains = () => useQuery(adminDomainsQueryOptions());
 export const useAdminAuditLogs = () => useQuery(adminAuditLogsQueryOptions());
-export const useAdminSyncedProviders = () =>
-  useQuery(adminSyncedProvidersQueryOptions());
+export const useAdminProviders = () => useQuery(adminProvidersQueryOptions());

@@ -1,15 +1,18 @@
 import type { Database } from "@raven/db";
 import { models, syncedProviders } from "@raven/db";
-import { count, eq } from "drizzle-orm";
+import { count, eq, inArray } from "drizzle-orm";
 import type { Context } from "hono";
-import { syncModels } from "@/lib/model-sync";
+import {
+  deriveCapabilities,
+  deriveCategory,
+  getModelsDevModel,
+  searchModels as searchModelsFromDev
+} from "@/lib/model-sync";
+import { refreshPricingCache } from "@/lib/pricing-cache";
 
-export const getAdminSyncedProviders = (db: Database) => async (c: Context) => {
+export const getAdminProviders = (db: Database) => async (c: Context) => {
   const providers = await db
     .select({
-      createdAt: syncedProviders.createdAt,
-      isEnabled: syncedProviders.isEnabled,
-      lastSyncedAt: syncedProviders.lastSyncedAt,
       modelCount: count(models.id),
       name: syncedProviders.name,
       slug: syncedProviders.slug
@@ -21,85 +24,192 @@ export const getAdminSyncedProviders = (db: Database) => async (c: Context) => {
   return c.json({ data: providers });
 };
 
-export const addSyncedProvider = (db: Database) => async (c: Context) => {
-  const body = await c.req.json<{ slug: string; name: string }>();
+export const searchAvailableModels =
+  (db: Database) => async (c: Context) => {
+    const provider = c.req.query("provider") ?? "";
+    const query = c.req.query("q") ?? "";
 
-  if (!body.slug || !body.name) {
+    if (!provider) {
+      return c.json(
+        {
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "provider is required"
+          }
+        },
+        400
+      );
+    }
+
+    const results = await searchModelsFromDev(provider, query);
+
+    const modelIds = results.map((m) => `${provider}/${m.id}`);
+    const existing =
+      modelIds.length > 0
+        ? await db
+            .select({ id: models.id })
+            .from(models)
+            .where(inArray(models.id, modelIds))
+        : [];
+    const existingIds = new Set(existing.map((m) => m.id));
+
+    const data = results.map((m) => ({
+      ...m,
+      isAdded: existingIds.has(`${provider}/${m.id}`)
+    }));
+
+    return c.json({ data });
+  };
+
+export const addModel = (db: Database) => async (c: Context) => {
+  const body = await c.req.json<{ provider: string; modelId: string }>();
+
+  if (!body.provider || !body.modelId) {
     return c.json(
       {
         error: {
           code: "VALIDATION_ERROR",
-          message: "slug and name are required"
+          message: "provider and modelId are required"
         }
       },
       400
     );
   }
 
-  const [provider] = await db
-    .insert(syncedProviders)
-    .values({ name: body.name, slug: body.slug })
+  const model = await getModelsDevModel(body.provider, body.modelId);
+  if (!model) {
+    return c.json(
+      {
+        error: {
+          code: "NOT_FOUND",
+          message: "Model not found on models.dev"
+        }
+      },
+      404
+    );
+  }
+
+  const inputPrice = model.cost?.input ?? 0;
+  const outputPrice = model.cost?.output ?? 0;
+  const id = `${body.provider}/${model.id}`;
+  const now = new Date();
+
+  const [inserted] = await db
+    .insert(models)
+    .values({
+      capabilities: deriveCapabilities(model),
+      category: deriveCategory(model, inputPrice),
+      contextWindow: model.limit?.context ?? 0,
+      createdAt: now,
+      description: "",
+      id,
+      inputPrice: inputPrice.toFixed(4),
+      maxOutput: model.limit?.output ?? 0,
+      name: model.name,
+      outputPrice: outputPrice.toFixed(4),
+      provider: body.provider,
+      slug: model.id,
+      updatedAt: now
+    })
     .onConflictDoNothing()
     .returning();
 
-  if (!provider) {
+  if (!inserted) {
     return c.json(
-      { error: { code: "CONFLICT", message: "Provider already exists" } },
+      { error: { code: "CONFLICT", message: "Model already added" } },
       409
     );
   }
 
-  return c.json({ data: provider }, 201);
+  await refreshPricingCache(db);
+
+  return c.json({ data: inserted }, 201);
 };
 
-export const updateSyncedProvider = (db: Database) => async (c: Context) => {
-  const slug = c.req.param("slug") as string;
-  const body = await c.req.json<{ isEnabled?: boolean; name?: string }>();
+export const removeModel = (db: Database) => async (c: Context) => {
+  const id = c.req.param("id") ?? "";
 
-  const updates: Record<string, unknown> = { updatedAt: new Date() };
-  if (typeof body.isEnabled === "boolean") updates.isEnabled = body.isEnabled;
-  if (typeof body.name === "string") updates.name = body.name;
-
-  const [updated] = await db
-    .update(syncedProviders)
-    .set(updates)
-    .where(eq(syncedProviders.slug, slug))
-    .returning();
-
-  if (!updated) {
+  if (!id) {
     return c.json(
-      { error: { code: "NOT_FOUND", message: "Provider not found" } },
-      404
+      {
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Model ID is required"
+        }
+      },
+      400
     );
   }
 
-  return c.json({ data: updated });
-};
-
-export const deleteSyncedProvider = (db: Database) => async (c: Context) => {
-  const slug = c.req.param("slug") as string;
-
   const [deleted] = await db
-    .delete(syncedProviders)
-    .where(eq(syncedProviders.slug, slug))
+    .delete(models)
+    .where(eq(models.id, id))
     .returning();
 
   if (!deleted) {
     return c.json(
-      { error: { code: "NOT_FOUND", message: "Provider not found" } },
+      { error: { code: "NOT_FOUND", message: "Model not found" } },
       404
     );
   }
 
+  await refreshPricingCache(db);
+
   return c.json({ data: { success: true } });
 };
 
-export const triggerModelSync = (db: Database) => async (c: Context) => {
-  try {
-    const result = await syncModels(db);
-    return c.json({ data: result });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Sync failed";
-    return c.json({ error: { code: "SYNC_ERROR", message } }, 500);
+export const refreshModelPricing = (db: Database) => async (c: Context) => {
+  const body = await c.req.json<{ provider: string }>();
+
+  if (!body.provider) {
+    return c.json(
+      {
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "provider is required"
+        }
+      },
+      400
+    );
   }
+
+  const existingModels = await db
+    .select({ id: models.id, slug: models.slug })
+    .from(models)
+    .where(eq(models.provider, body.provider));
+
+  if (existingModels.length === 0) {
+    return c.json({ data: { updated: 0 } });
+  }
+
+  let updated = 0;
+  const now = new Date();
+
+  for (const existing of existingModels) {
+    const model = await getModelsDevModel(body.provider, existing.slug);
+    if (!model) continue;
+
+    const inputPrice = model.cost?.input ?? 0;
+    const outputPrice = model.cost?.output ?? 0;
+
+    await db
+      .update(models)
+      .set({
+        capabilities: deriveCapabilities(model),
+        category: deriveCategory(model, inputPrice),
+        contextWindow: model.limit?.context ?? 0,
+        inputPrice: inputPrice.toFixed(4),
+        maxOutput: model.limit?.output ?? 0,
+        name: model.name,
+        outputPrice: outputPrice.toFixed(4),
+        updatedAt: now
+      })
+      .where(eq(models.id, existing.id));
+
+    updated++;
+  }
+
+  await refreshPricingCache(db);
+
+  return c.json({ data: { updated } });
 };

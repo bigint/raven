@@ -1,7 +1,6 @@
 import type { Database } from "@raven/db";
 import { models, syncedProviders } from "@raven/db";
-import { eq, inArray } from "drizzle-orm";
-import { refreshPricingCache } from "./pricing-cache";
+import { notInArray } from "drizzle-orm";
 
 interface ModelsDevModel {
   id: string;
@@ -40,30 +39,52 @@ interface ModelsDevProvider {
 
 type ModelsDevResponse = Record<string, ModelsDevProvider>;
 
+export interface SearchResult {
+  id: string;
+  name: string;
+  capabilities: string[];
+  category: string;
+  contextWindow: number;
+  maxOutput: number;
+  inputPrice: number;
+  outputPrice: number;
+}
+
 const MODELS_DEV_API = "https://models.dev/api.json";
+const CACHE_TTL_MS = 10 * 60 * 1000;
 
-const OPENAI_ALLOWED_MODELS = new Set([
-  "gpt-5.2",
-  "gpt-5.1",
-  "gpt-5",
-  "gpt-5-mini",
-  "gpt-5-nano",
-  "gpt-5.2-chat-latest",
-  "gpt-5.1-chat-latest",
-  "gpt-5-chat-latest",
-  "gpt-5.2-codex",
-  "gpt-5.1-codex-max",
-  "gpt-5.1-codex",
-  "gpt-5-codex"
-]);
-
-const PROVIDER_SLUG_MAP: Record<string, string> = {
+export const PROVIDER_SLUG_MAP: Record<string, string> = {
   anthropic: "anthropic",
   mistral: "mistralai",
   openai: "openai"
 };
 
-const deriveCategory = (model: ModelsDevModel, inputPrice: number): string => {
+const REVERSE_SLUG_MAP: Record<string, string> = Object.fromEntries(
+  Object.entries(PROVIDER_SLUG_MAP).map(([dev, ours]) => [ours, dev])
+);
+
+let cachedData: ModelsDevResponse | null = null;
+let cacheTimestamp = 0;
+
+export const fetchModelsDevCached = async (): Promise<ModelsDevResponse> => {
+  if (cachedData && Date.now() - cacheTimestamp < CACHE_TTL_MS) {
+    return cachedData;
+  }
+
+  const res = await fetch(MODELS_DEV_API);
+  if (!res.ok) {
+    throw new Error(`models.dev API error: ${res.status} ${res.statusText}`);
+  }
+
+  cachedData = (await res.json()) as ModelsDevResponse;
+  cacheTimestamp = Date.now();
+  return cachedData;
+};
+
+export const deriveCategory = (
+  model: ModelsDevModel,
+  inputPrice: number
+): string => {
   const slug = model.id.toLowerCase();
 
   if (model.reasoning) return "reasoning";
@@ -87,7 +108,7 @@ const deriveCategory = (model: ModelsDevModel, inputPrice: number): string => {
   return "balanced";
 };
 
-const deriveCapabilities = (model: ModelsDevModel): string[] => {
+export const deriveCapabilities = (model: ModelsDevModel): string[] => {
   const caps: string[] = ["chat"];
 
   const inputMods = model.modalities?.input ?? [];
@@ -101,113 +122,50 @@ const deriveCapabilities = (model: ModelsDevModel): string[] => {
   return caps;
 };
 
-export const syncModels = async (
-  db: Database
-): Promise<{ removed: number; synced: number }> => {
-  const enabledProviders = await db
-    .select()
-    .from(syncedProviders)
-    .where(eq(syncedProviders.isEnabled, true));
+export const searchModels = async (
+  provider: string,
+  query: string
+): Promise<SearchResult[]> => {
+  const data = await fetchModelsDevCached();
+  const devSlug = REVERSE_SLUG_MAP[provider];
+  if (!devSlug) return [];
 
-  if (enabledProviders.length === 0) {
-    return { removed: 0, synced: 0 };
-  }
+  const providerData = data[devSlug];
+  if (!providerData?.models) return [];
 
-  const enabledSlugs = new Set(enabledProviders.map((p) => p.slug));
+  const q = query.toLowerCase();
 
-  const res = await fetch(MODELS_DEV_API);
-  if (!res.ok) {
-    throw new Error(`models.dev API error: ${res.status} ${res.statusText}`);
-  }
+  return Object.values(providerData.models)
+    .filter(
+      (m) =>
+        m.id.toLowerCase().includes(q) || m.name.toLowerCase().includes(q)
+    )
+    .map((m) => {
+      const inputPrice = m.cost?.input ?? 0;
+      return {
+        id: m.id,
+        name: m.name,
+        capabilities: deriveCapabilities(m),
+        category: deriveCategory(m, inputPrice),
+        contextWindow: m.limit?.context ?? 0,
+        maxOutput: m.limit?.output ?? 0,
+        inputPrice,
+        outputPrice: m.cost?.output ?? 0
+      };
+    })
+    .sort((a, b) => a.id.localeCompare(b.id));
+};
 
-  const allProviders = (await res.json()) as ModelsDevResponse;
+export const getModelsDevModel = async (
+  provider: string,
+  modelId: string
+): Promise<ModelsDevModel | null> => {
+  const data = await fetchModelsDevCached();
+  const devSlug = REVERSE_SLUG_MAP[provider];
+  if (!devSlug) return null;
 
-  const now = new Date();
-  let synced = 0;
-  const allIds: string[] = [];
-
-  for (const [devSlug, providerData] of Object.entries(allProviders)) {
-    const ourSlug = PROVIDER_SLUG_MAP[devSlug];
-    if (!ourSlug || !enabledSlugs.has(ourSlug)) continue;
-
-    for (const model of Object.values(providerData.models ?? {})) {
-      if (ourSlug === "openai" && !OPENAI_ALLOWED_MODELS.has(model.id)) continue;
-
-      const inputPrice = model.cost?.input ?? 0;
-      const outputPrice = model.cost?.output ?? 0;
-      const id = `${ourSlug}/${model.id}`;
-      const category = deriveCategory(model, inputPrice);
-      const capabilities = deriveCapabilities(model);
-
-      allIds.push(id);
-
-      await db
-        .insert(models)
-        .values({
-          capabilities,
-          category,
-          contextWindow: model.limit?.context ?? 0,
-          createdAt: now,
-          description: "",
-          id,
-          inputPrice: inputPrice.toFixed(4),
-          maxOutput: model.limit?.output ?? 0,
-          name: model.name,
-          outputPrice: outputPrice.toFixed(4),
-          provider: ourSlug,
-          slug: model.id,
-          updatedAt: now
-        })
-        .onConflictDoUpdate({
-          set: {
-            capabilities,
-            category,
-            contextWindow: model.limit?.context ?? 0,
-            inputPrice: inputPrice.toFixed(4),
-            maxOutput: model.limit?.output ?? 0,
-            name: model.name,
-            outputPrice: outputPrice.toFixed(4),
-            provider: ourSlug,
-            slug: model.id,
-            updatedAt: now
-          },
-          target: models.id
-        });
-
-      synced++;
-    }
-  }
-
-  // Remove stale models
-  const providerSlugs = [...enabledSlugs];
-  const existingModels = await db
-    .select({ id: models.id })
-    .from(models)
-    .where(inArray(models.provider, providerSlugs));
-
-  const currentIds = new Set(allIds);
-  const staleIds = existingModels
-    .filter((m) => !currentIds.has(m.id))
-    .map((m) => m.id);
-
-  let removed = 0;
-  if (staleIds.length > 0) {
-    await db.delete(models).where(inArray(models.id, staleIds));
-    removed = staleIds.length;
-  }
-
-  // Update last_synced_at
-  for (const slug of enabledSlugs) {
-    await db
-      .update(syncedProviders)
-      .set({ lastSyncedAt: now, updatedAt: now })
-      .where(eq(syncedProviders.slug, slug));
-  }
-
-  await refreshPricingCache(db);
-
-  console.log(`Model sync complete: ${synced} synced, ${removed} removed`);
-  return { removed, synced };
+  const providerData = data[devSlug];
+  return providerData?.models?.[modelId] ?? null;
 };
 
 const DEFAULT_PROVIDERS = [
@@ -216,7 +174,18 @@ const DEFAULT_PROVIDERS = [
   { isEnabled: true, name: "OpenAI", slug: "openai" }
 ];
 
+const VALID_SLUGS = DEFAULT_PROVIDERS.map((p) => p.slug);
+
 export const seedDefaultProviders = async (db: Database): Promise<void> => {
+  // Remove providers not in the hardcoded list (cascades to their models)
+  await db
+    .delete(syncedProviders)
+    .where(notInArray(syncedProviders.slug, VALID_SLUGS));
+
+  // Remove all auto-synced models (users will re-add manually)
+  await db.delete(models);
+
+  // Insert missing default providers
   const existing = await db.select().from(syncedProviders);
   const existingSlugs = new Set(existing.map((p) => p.slug));
   const missing = DEFAULT_PROVIDERS.filter((p) => !existingSlugs.has(p.slug));

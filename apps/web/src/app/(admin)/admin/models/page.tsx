@@ -1,111 +1,51 @@
 "use client";
 
-import { Badge } from "@raven/ui";
+import { Spinner } from "@raven/ui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, RefreshCw, Trash2 } from "lucide-react";
+import { ChevronRight, RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { ProviderIcon } from "@/components/model-icon";
-import { API_URL, api } from "@/lib/api";
-import {
-  type SyncResult,
-  useAdminSyncedProviders
-} from "../../hooks/use-admin";
+import { api } from "@/lib/api";
+import { useAdminProviders } from "../../hooks/use-admin";
+import { ProviderModelsDialog } from "./provider-models-dialog";
 
 const AdminModelsPage = () => {
+  const { data: providers = [], isPending } = useAdminProviders();
   const queryClient = useQueryClient();
-  const { data: providers = [], isPending } = useAdminSyncedProviders();
+  const [selectedProvider, setSelectedProvider] = useState<{
+    slug: string;
+    name: string;
+  } | null>(null);
 
-  const syncMutation = useMutation({
-    mutationFn: () => api.post<SyncResult>("/v1/admin/models/sync"),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: ["admin", "synced-providers"]
-      });
-    }
-  });
-
-  const toggleMutation = useMutation({
-    mutationFn: async ({
-      slug,
-      isEnabled
-    }: {
-      slug: string;
-      isEnabled: boolean;
-    }) => {
-      const res = await fetch(`${API_URL}/v1/admin/synced-providers/${slug}`, {
-        body: JSON.stringify({ isEnabled }),
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        method: "PATCH"
-      });
-      if (!res.ok) throw new Error("Failed to update provider");
-      return res.json();
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: ["admin", "synced-providers"]
-      });
-    }
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (slug: string) =>
-      api.delete(`/v1/admin/synced-providers/${slug}`),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: ["admin", "synced-providers"]
-      });
+  const refreshMutation = useMutation({
+    mutationFn: (provider: string) =>
+      api.post<{ updated: number }>("/v1/admin/models/refresh-pricing", {
+        provider
+      }),
+    onSuccess: (data) => {
+      toast.success(`Updated pricing for ${data.updated} models`);
+      void queryClient.invalidateQueries({ queryKey: ["admin", "providers"] });
     }
   });
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold sm:text-2xl">Models</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Manage model providers and sync from models.dev.
-          </p>
-        </div>
-        <button
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
-          disabled={syncMutation.isPending}
-          onClick={() => syncMutation.mutate()}
-          type="button"
-        >
-          {syncMutation.isPending ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <RefreshCw className="size-4" />
-          )}
-          Sync Now
-        </button>
+      <div className="mb-8">
+        <h1 className="text-xl font-bold sm:text-2xl">Models</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Add and manage models from each provider.
+        </p>
       </div>
-
-      {syncMutation.isSuccess && syncMutation.data && (
-        <div className="mb-6 rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-700 dark:text-green-400">
-          Sync complete: {syncMutation.data.synced} models synced,{" "}
-          {syncMutation.data.removed} removed.
-        </div>
-      )}
-
-      {syncMutation.isError && (
-        <div className="mb-6 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          Sync failed: {syncMutation.error.message}
-        </div>
-      )}
 
       <div className="rounded-xl border border-border">
         <div className="border-b border-border px-5 py-4">
-          <h2 className="text-sm font-semibold">Synced Providers</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Models are fetched from models.dev for enabled providers every 5
-            minutes.
-          </p>
+          <h2 className="text-sm font-semibold">Providers</h2>
         </div>
 
         {isPending ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="size-5 animate-spin text-muted-foreground" />
+            <Spinner size="sm" />
           </div>
         ) : (
           <div className="divide-y divide-border">
@@ -114,59 +54,49 @@ const AdminModelsPage = () => {
                 className="flex items-center justify-between px-5 py-4"
                 key={p.slug}
               >
-                <div className="flex items-center gap-3">
+                <button
+                  className="flex flex-1 items-center gap-3 text-left"
+                  onClick={() =>
+                    setSelectedProvider({ name: p.name, slug: p.slug })
+                  }
+                  type="button"
+                >
                   <ProviderIcon provider={p.slug} size={20} />
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">{p.name}</span>
-                      <Badge variant={p.isEnabled ? "success" : "neutral"}>
-                        {p.isEnabled ? "Enabled" : "Disabled"}
-                      </Badge>
-                    </div>
-                    <div className="mt-0.5 flex items-center gap-3 text-xs text-muted-foreground">
-                      <span>{p.modelCount} models</span>
-                      <span>
-                        {p.lastSyncedAt
-                          ? `Last synced ${new Date(p.lastSyncedAt).toLocaleString()}`
-                          : "Never synced"}
-                      </span>
-                    </div>
+                    <span className="text-sm font-medium">{p.name}</span>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {p.modelCount} {p.modelCount === 1 ? "model" : "models"}
+                    </p>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    className="rounded-md px-3 py-1.5 text-xs font-medium transition-colors hover:bg-muted"
-                    onClick={() =>
-                      toggleMutation.mutate({
-                        isEnabled: !p.isEnabled,
-                        slug: p.slug
-                      })
-                    }
-                    type="button"
-                  >
-                    {p.isEnabled ? "Disable" : "Enable"}
-                  </button>
-                  <button
-                    className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                    onClick={() => {
-                      if (
-                        confirm(
-                          `Remove ${p.name}? This will delete all its models.`
-                        )
-                      ) {
-                        deleteMutation.mutate(p.slug);
-                      }
-                    }}
-                    type="button"
-                  >
-                    <Trash2 className="size-4" />
-                  </button>
-                </div>
+                  <ChevronRight className="ml-auto size-4 text-muted-foreground" />
+                </button>
+                <button
+                  className="ml-2 inline-flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted disabled:opacity-50"
+                  disabled={refreshMutation.isPending}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    refreshMutation.mutate(p.slug);
+                  }}
+                  type="button"
+                >
+                  <RefreshCw
+                    className={`size-3.5 ${refreshMutation.isPending && refreshMutation.variables === p.slug ? "animate-spin" : ""}`}
+                  />
+                  Refresh Pricing
+                </button>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {selectedProvider && (
+        <ProviderModelsDialog
+          onClose={() => setSelectedProvider(null)}
+          open={!!selectedProvider}
+          provider={selectedProvider}
+        />
+      )}
     </div>
   );
 };
