@@ -24,7 +24,8 @@ interface Message {
 const PII_PATTERNS: Record<string, RegExp> = {
   creditCard: /\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b/,
   email: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/,
-  phone: /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/,
+  ipAddress: /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/,
+  phone: /\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b/,
   ssn: /\b\d{3}-\d{2}-\d{4}\b/
 };
 

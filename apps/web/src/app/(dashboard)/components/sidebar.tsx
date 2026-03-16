@@ -64,7 +64,12 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/routing", icon: Route, label: "Routing" },
   { href: "/requests", icon: Activity, label: "Requests" },
   { href: "/budgets", icon: CreditCard, label: "Budgets" },
-  { href: "/guardrails", icon: Shield, label: "Guardrails" },
+  {
+    gate: (plan) => PLAN_FEATURES[plan].hasGuardrails,
+    href: "/guardrails",
+    icon: Shield,
+    label: "Guardrails"
+  },
   {
     gate: (plan) => PLAN_FEATURES[plan].hasTeams,
     href: "/team",
