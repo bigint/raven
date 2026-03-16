@@ -4,11 +4,10 @@ import { Button, PageHeader, Spinner } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { RotateCcw } from "lucide-react";
 import { useMemo } from "react";
-import { providersQueryOptions } from "../providers/hooks/use-providers";
 import { ChatInput } from "./components/chat-input";
 import { ChatMessages } from "./components/chat-messages";
 import { ModelInput } from "./components/model-input";
-import { providerModelsQueryOptions, useChat } from "./hooks/use-chat";
+import { catalogModelsQueryOptions, useChat } from "./hooks/use-chat";
 
 const ChatPage = () => {
   const {
@@ -21,15 +20,8 @@ const ChatPage = () => {
     stopStreaming
   } = useChat();
 
-  const { data: providers = [] } = useQuery(providersQueryOptions());
-
-  const enabledProviders = useMemo(
-    () => providers.filter((p) => p.isEnabled),
-    [providers]
-  );
-
   const { data: models = [], isLoading: modelsLoading } = useQuery(
-    providerModelsQueryOptions(enabledProviders)
+    catalogModelsQueryOptions()
   );
 
   const modelOptions = useMemo(
@@ -37,7 +29,7 @@ const ChatPage = () => {
       models.map((m) => ({
         label: m.name,
         provider: m.provider,
-        value: m.id
+        value: m.slug
       })),
     [models]
   );

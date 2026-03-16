@@ -5,7 +5,6 @@ import { RavenClient } from "@raven/sdk";
 import { queryOptions, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import { API_URL, api } from "@/lib/api";
-import type { Provider } from "../../providers/hooks/use-providers";
 
 interface DisplayMessage {
   content: string;
@@ -13,8 +12,9 @@ interface DisplayMessage {
   role: "assistant" | "user";
 }
 
-export interface ProviderModel {
+export interface CatalogModel {
   id: string;
+  slug: string;
   name: string;
   provider: string;
 }
@@ -24,32 +24,11 @@ interface PlaygroundKey {
   key: string;
 }
 
-export const providerModelsQueryOptions = (providers: Provider[]) => {
-  const uniqueBySlug = new Map<string, Provider>();
-  for (const p of providers) {
-    if (!uniqueBySlug.has(p.provider)) uniqueBySlug.set(p.provider, p);
-  }
-  const deduped = [...uniqueBySlug.values()];
-
-  return queryOptions({
-    enabled: deduped.length > 0,
-    queryFn: async () => {
-      const results = await Promise.all(
-        deduped.map((p) =>
-          api.get<ProviderModel[]>(`/v1/providers/${p.id}/models`)
-        )
-      );
-      const seen = new Set<string>();
-      return results.flat().filter((m) => {
-        const key = `${m.provider}/${m.id}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-    },
-    queryKey: ["provider-models", deduped.map((p) => p.id).join(",")]
+export const catalogModelsQueryOptions = () =>
+  queryOptions({
+    queryFn: () => api.get<CatalogModel[]>("/v1/models"),
+    queryKey: ["catalog-models"]
   });
-};
 
 export const useChat = () => {
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
