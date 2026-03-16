@@ -272,10 +272,14 @@ export const Sidebar = ({
       </AnimatePresence>
 
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-60 border-r border-border bg-muted/50 flex-col shrink-0">
-        <OrgSwitcher activeOrg={activeOrg} onSwitch={onSwitchOrg} orgs={orgs} />
-        <nav className="flex-1 px-3 py-3 space-y-0.5">{navLinks}</nav>
-        <UserMenu user={user} />
+      <aside className="hidden md:flex w-60 border-r border-border bg-muted/50 flex-col shrink-0 h-screen sticky top-0">
+        <div className="shrink-0">
+          <OrgSwitcher activeOrg={activeOrg} onSwitch={onSwitchOrg} orgs={orgs} />
+        </div>
+        <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">{navLinks}</nav>
+        <div className="shrink-0 border-t border-border">
+          <UserMenu user={user} />
+        </div>
       </aside>
     </>
   );
