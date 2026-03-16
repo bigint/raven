@@ -1,54 +1,134 @@
 ---
 title: "Audit Logs"
-description: "Track every action in your organization with a complete audit trail."
+description: "Track all actions across your organization with immutable audit trails."
 ---
 
-Audit logs record every significant action taken within your organization, providing a complete trail for security reviews and compliance.
+Audit logs provide an immutable record of every significant action taken in your Raven organization. They track who did what, when, and to which resource -- giving you full visibility for security reviews, compliance audits, and incident investigation.
 
-## What's Logged
+## What Gets Logged
 
-Every audit log entry includes:
+Every create, update, and delete operation across your organization is automatically recorded.
 
-| Field | Description |
-|-------|-------------|
-| **Action** | What happened (e.g., `key.created`, `provider.updated`) |
-| **Actor** | Who performed the action (user ID and email) |
-| **Resource** | What was affected (resource type and ID) |
-| **Metadata** | Additional context about the action |
-| **Timestamp** | When the action occurred |
-| **IP Address** | The IP address of the actor |
+| Action | Description |
+|--------|-------------|
+| `create` | A new resource was created (provider, key, guardrail, etc.) |
+| `update` | An existing resource was modified |
+| `delete` | A resource was removed |
+| `enable` | A resource was enabled |
+| `disable` | A resource was disabled |
+| `rotate` | A virtual key was rotated |
+| `invite` | A member was invited to the organization |
+| `revoke` | A key or agent identity was revoked |
 
-## Action Types
+## Actor Tracking
 
-Common actions tracked:
+Every audit log entry records the actor who performed the action:
 
-| Category | Actions |
-|----------|---------|
-| **Keys** | `key.created`, `key.rotated`, `key.deleted` |
-| **Providers** | `provider.created`, `provider.updated`, `provider.deleted` |
-| **Members** | `member.invited`, `member.removed`, `member.role_changed` |
-| **Guardrails** | `guardrail.created`, `guardrail.updated`, `guardrail.triggered` |
-| **Budgets** | `budget.created`, `budget.exceeded`, `budget.updated` |
-| **Settings** | `settings.updated`, `domain.added`, `domain.removed` |
+- **Actor ID** -- The authenticated user who initiated the action
+- **Timestamp** -- When the action occurred (with timezone)
+- **Organization** -- Which organization the action belongs to
+- **Metadata** -- Additional context about the change (old/new values, request details)
+
+<Info>
+  If a user is deleted, the audit log retains the entry with a null actor reference, preserving the historical record without the personal identifier.
+</Info>
+
+## Resource Types
+
+Audit logs cover every resource type in Raven.
+
+| Resource Type | Examples |
+|--------------|----------|
+| `provider` | Added OpenAI provider, disabled Anthropic |
+| `virtual_key` | Created new key, rotated key, set rate limit |
+| `guardrail` | Created PII detection rule, updated priority |
+| `policy` | Activated compliance policy, archived old policy |
+| `budget` | Set monthly budget, updated alert threshold |
+| `webhook` | Registered webhook endpoint, disabled webhook |
+| `routing_rule` | Created cost-optimized routing, updated fallback |
+| `prompt` | Created prompt template, published new version |
+| `team` | Created team, added member |
+| `organization` | Updated org settings, changed plan |
+| `member` | Invited member, changed role |
+| `agent` | Registered agent identity, suspended agent |
+| `mcp_server` | Registered MCP server, updated access control |
+| `experiment` | Started experiment, completed experiment |
+| `plugin` | Enabled plugin, updated configuration |
 
 ## Viewing Audit Logs
 
-Navigate to **Logs** in the dashboard. You can filter by:
+### Dashboard
 
-- **Action type** — Filter to specific action categories
-- **Actor** — Filter by who performed the action
-- **Date range** — Narrow down to a specific time period
-- **Resource** — Filter by affected resource
+Navigate to **Admin > Audit Logs** in the dashboard to browse the audit trail. You can filter by:
+
+- **Resource type** -- View only provider changes, key operations, etc.
+- **Action** -- Filter to just creates, updates, or deletes
+- **Actor** -- See all actions by a specific team member
+- **Date range** -- Focus on a specific time period
+
+### API
+
+```bash
+curl https://api.raven.dev/v1/admin/audit-logs \
+  -H "Authorization: Bearer rk_live_abc123" \
+  -G \
+  -d "resourceType=virtual_key" \
+  -d "action=create"
+```
+
+## Audit Log Entry Structure
+
+Each audit log entry contains:
+
+```json
+{
+  "id": "clx1abc2def",
+  "action": "create",
+  "resourceType": "guardrail",
+  "resourceId": "clx2ghi3jkl",
+  "actorId": "user_abc123",
+  "metadata": {
+    "name": "Block PII",
+    "type": "pii_detection",
+    "action": "block"
+  },
+  "organizationId": "org_xyz789",
+  "createdAt": "2026-03-15T10:30:00Z"
+}
+```
+
+## Indexing
+
+Audit logs are indexed for fast querying on four dimensions:
+
+| Index | Use Case |
+|-------|----------|
+| Organization + Created At | Browse recent logs for an org |
+| Organization + Action | Filter by action type |
+| Organization + Resource Type | Filter by resource category |
+| Actor ID | Find all actions by a specific user |
 
 ## Exporting
 
-Export audit logs for external analysis or compliance reporting via the **Exports** feature.
+Audit logs can be exported for external analysis or long-term archival:
 
-## Plan Availability
+- **JSON export** -- Download the full audit trail as a JSON file
+- **CSV export** -- Export to CSV for spreadsheet analysis
+- **API pagination** -- Programmatically iterate through all records using cursor-based pagination
 
-| Plan | Audit Logs | Retention |
-|------|------------|-----------|
-| Free | Not available | — |
-| Pro | Not available | — |
-| Team | Available | 90 days |
-| Enterprise | Available | 365 days |
+<Note>
+  Audit logs are append-only and immutable. Once an entry is created, it cannot be modified or deleted -- even by organization admins.
+</Note>
+
+## Retention by Plan
+
+| Plan | Audit Logs Available |
+|------|---------------------|
+| Free | No |
+| Pro | No |
+| Team | No |
+| Enterprise | Yes |
+
+<Warning>
+  Audit logs are an Enterprise feature. Contact sales to enable audit logging for your organization.
+</Warning>

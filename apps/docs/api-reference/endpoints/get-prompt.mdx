@@ -1,0 +1,49 @@
+---
+title: "Get Prompt"
+description: "Get a prompt template with all versions."
+---
+
+## Get Prompt
+
+`GET /prompts/:id`
+
+Returns a prompt template with all its versions.
+
+### Path Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `id` | Prompt ID |
+
+### Example Request
+
+```bash
+curl -X GET https://api.raven.dev/prompts/prompt_abc123 \
+  -H "Authorization: Bearer rk_live_..."
+```
+
+### Example Response
+
+```json
+{
+  "id": "prompt_abc123",
+  "name": "summarizer",
+  "activeVersionId": "ver_xyz789",
+  "versions": [
+    {
+      "id": "ver_xyz789",
+      "content": "You are a concise summarizer. Summarize the following text in 3 bullet points.",
+      "isActive": true,
+      "createdAt": "2025-01-18T14:00:00Z"
+    },
+    {
+      "id": "ver_abc456",
+      "content": "Summarize the text below.",
+      "isActive": false,
+      "createdAt": "2025-01-15T10:00:00Z"
+    }
+  ],
+  "createdAt": "2025-01-15T10:00:00Z",
+  "updatedAt": "2025-01-18T14:00:00Z"
+}
+```

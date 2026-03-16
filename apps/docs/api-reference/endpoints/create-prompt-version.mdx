@@ -1,0 +1,46 @@
+---
+title: "Create Prompt Version"
+description: "Add a new version to a prompt template."
+---
+
+## Create Prompt Version
+
+`POST /prompts/:id/versions`
+
+Adds a new version to an existing prompt template.
+
+### Path Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `id` | Prompt ID |
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `content` | string | Yes | Version content |
+| `isActive` | boolean | No | Set as active version (default: false) |
+
+### Example Request
+
+```bash
+curl -X POST https://api.raven.dev/prompts/prompt_abc123/versions \
+  -H "Authorization: Bearer rk_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "You are a concise summarizer. Create exactly 3 bullet points summarizing the key insights.",
+    "isActive": true
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "id": "ver_new123",
+  "content": "You are a concise summarizer. Create exactly 3 bullet points summarizing the key insights.",
+  "isActive": true,
+  "createdAt": "2025-01-20T10:00:00Z"
+}
+```

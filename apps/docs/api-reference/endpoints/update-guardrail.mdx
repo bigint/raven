@@ -1,0 +1,52 @@
+---
+title: "Update Guardrail"
+description: "Update a guardrail rule."
+---
+
+## Update Guardrail
+
+`PATCH /guardrails/:id`
+
+Updates an existing guardrail rule.
+
+### Path Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `id` | Guardrail ID |
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | string | No | New name |
+| `action` | string | No | New action |
+| `config` | object | No | New configuration |
+| `isEnabled` | boolean | No | Enable or disable |
+
+### Example Request
+
+```bash
+curl -X PATCH https://api.raven.dev/guardrails/guard_abc123 \
+  -H "Authorization: Bearer rk_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "action": "warn"
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "id": "guard_abc123",
+  "name": "Block PII",
+  "type": "pii",
+  "action": "warn",
+  "config": {
+    "entities": ["email", "phone", "ssn", "credit_card"]
+  },
+  "isEnabled": true,
+  "updatedAt": "2025-01-20T14:30:00Z"
+}
+```

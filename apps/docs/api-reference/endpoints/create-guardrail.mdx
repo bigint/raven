@@ -1,0 +1,52 @@
+---
+title: "Create Guardrail"
+description: "Create a new guardrail rule."
+---
+
+## Create Guardrail
+
+`POST /guardrails`
+
+Creates a new guardrail rule.
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | string | Yes | Rule name |
+| `type` | string | Yes | `block_topics`, `pii`, or `custom_regex` |
+| `action` | string | Yes | `block`, `warn`, or `log` |
+| `config` | object | Yes | Type-specific configuration |
+| `isEnabled` | boolean | No | Enable immediately (default: true) |
+
+### Example Request
+
+```bash
+curl -X POST https://api.raven.dev/guardrails \
+  -H "Authorization: Bearer rk_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Block PII",
+    "type": "pii",
+    "action": "block",
+    "config": {
+      "entities": ["email", "phone", "ssn", "credit_card"]
+    }
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "id": "guard_abc123",
+  "name": "Block PII",
+  "type": "pii",
+  "action": "block",
+  "config": {
+    "entities": ["email", "phone", "ssn", "credit_card"]
+  },
+  "isEnabled": true,
+  "createdAt": "2025-01-15T10:00:00Z"
+}
+```
