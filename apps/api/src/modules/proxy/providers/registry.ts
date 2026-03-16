@@ -1,6 +1,8 @@
 import { getModelPricing } from "@/lib/pricing-cache";
 import { PROVIDERS } from "@/lib/providers";
 import { anthropicAdapter } from "./anthropic";
+import { cohereAdapter } from "./cohere";
+import { googleAdapter } from "./google";
 
 export interface ProviderAdapter {
   name: string;
@@ -56,9 +58,14 @@ const createOpenAICompatibleAdapter = (provider: string): ProviderAdapter => {
   };
 };
 
+const ADAPTER_MAP: Record<string, (p: string) => ProviderAdapter> = {
+  anthropic: anthropicAdapter,
+  cohere: cohereAdapter,
+  google: googleAdapter
+};
+
 export const getProviderAdapter = (provider: string): ProviderAdapter => {
-  if (PROVIDERS[provider]?.chatEndpoint === "/messages") {
-    return anthropicAdapter(provider);
-  }
+  const adapterFactory = ADAPTER_MAP[provider];
+  if (adapterFactory) return adapterFactory(provider);
   return createOpenAICompatibleAdapter(provider);
 };

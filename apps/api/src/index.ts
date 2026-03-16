@@ -42,6 +42,7 @@ import { createKeysModule } from "./modules/keys/index";
 import { createMcpModule } from "./modules/mcp/index";
 import { createModelsModule } from "./modules/models/index";
 import { createObservabilityModule } from "./modules/observability/index";
+import { createOpenAICompatModule } from "./modules/openai-compat/index";
 import { createPluginsModule } from "./modules/plugins/index";
 import { createPoliciesModule } from "./modules/policies/index";
 import { createPromptsModule } from "./modules/prompts/index";
@@ -142,6 +143,9 @@ app.get("/health", (c) => c.json({ status: "ok" }));
 
 // Auth routes (no auth middleware)
 app.route("/api/auth", createAuthModule(auth));
+
+// OpenAI-compatible endpoints (before proxy catch-all)
+app.route("/v1", createOpenAICompatModule(db, redis, env));
 
 app.all("/v1/proxy/*", proxyHandler(db, redis, env));
 
