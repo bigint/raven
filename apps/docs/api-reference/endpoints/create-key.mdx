@@ -1,0 +1,54 @@
+---
+title: "Create Key"
+description: "Create a new virtual key."
+---
+
+## Create Virtual Key
+
+`POST /keys`
+
+Creates a new virtual key for the organization.
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | string | Yes | Display name for the key |
+| `environment` | string | No | `live` or `test` (default: `live`) |
+| `rateLimitRpm` | integer | No | Requests per minute limit |
+| `rateLimitRpd` | integer | No | Requests per day limit |
+| `expiresAt` | string | No | ISO 8601 expiration date |
+
+### Example Request
+
+```bash
+curl -X POST https://api.raven.dev/keys \
+  -H "Authorization: Bearer rk_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Production App",
+    "environment": "live",
+    "rateLimitRpm": 100,
+    "rateLimitRpd": 10000
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "id": "key_abc123",
+  "name": "Production App",
+  "key": "rk_live_abc123def456ghi789...",
+  "prefix": "rk_live_abc1",
+  "environment": "live",
+  "rateLimitRpm": 100,
+  "rateLimitRpd": 10000,
+  "expiresAt": null,
+  "createdAt": "2025-01-15T10:00:00Z"
+}
+```
+
+<Warning>
+  The full `key` value is only returned in this response. Store it securely — it cannot be retrieved again.
+</Warning>

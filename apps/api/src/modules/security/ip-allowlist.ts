@@ -127,15 +127,17 @@ const getOrgAllowlist = async (
 };
 
 export const createIpAllowlistMiddleware = (db: Database, redis: Redis) => {
-  return async (c: Context, next: Next): Promise<undefined | Response> => {
+  return async (c: Context, next: Next) => {
     const orgId = c.get("organizationId") as string | undefined;
     if (!orgId) {
-      return next();
+      await next();
+      return;
     }
 
     const allowlist = await getOrgAllowlist(db, redis, orgId);
     if (allowlist.length === 0) {
-      return next();
+      await next();
+      return;
     }
 
     // Extract client IP from standard headers
@@ -159,6 +161,6 @@ export const createIpAllowlistMiddleware = (db: Database, redis: Redis) => {
       throw new ForbiddenError("Request denied: IP address not in allowlist");
     }
 
-    return next();
+    await next();
   };
 };

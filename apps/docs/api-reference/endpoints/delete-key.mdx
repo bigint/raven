@@ -1,0 +1,31 @@
+---
+title: "Delete Key"
+description: "Delete a virtual key."
+---
+
+## Delete Virtual Key
+
+`DELETE /keys/:id`
+
+Permanently deletes a virtual key. Any requests using this key will immediately fail.
+
+### Path Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `id` | Virtual key ID |
+
+### Example Request
+
+```bash
+curl -X DELETE https://api.raven.dev/keys/key_abc123 \
+  -H "Authorization: Bearer rk_live_..."
+```
+
+### Example Response
+
+```json
+{
+  "success": true
+}
+```

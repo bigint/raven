@@ -1,0 +1,35 @@
+---
+title: "Delete Provider"
+description: "Delete a provider configuration."
+---
+
+## Delete Provider
+
+`DELETE /providers/:id`
+
+Permanently deletes a provider configuration and its stored API key.
+
+### Path Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `id` | Provider ID |
+
+### Example Request
+
+```bash
+curl -X DELETE https://api.raven.dev/providers/prov_abc123 \
+  -H "Authorization: Bearer rk_live_..."
+```
+
+### Example Response
+
+```json
+{
+  "success": true
+}
+```
+
+<Warning>
+  This action is irreversible. All requests that would have been routed to this provider will fail until another provider is configured.
+</Warning>

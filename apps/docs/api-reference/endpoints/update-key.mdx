@@ -1,0 +1,52 @@
+---
+title: "Update Key"
+description: "Update a virtual key's configuration."
+---
+
+## Update Virtual Key
+
+`PATCH /keys/:id`
+
+Updates a virtual key's configuration.
+
+### Path Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `id` | Virtual key ID |
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | string | No | New display name |
+| `rateLimitRpm` | integer | No | New RPM limit |
+| `rateLimitRpd` | integer | No | New RPD limit |
+| `expiresAt` | string | No | New expiration date |
+
+### Example Request
+
+```bash
+curl -X PATCH https://api.raven.dev/keys/key_abc123 \
+  -H "Authorization: Bearer rk_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rateLimitRpm": 200
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "id": "key_abc123",
+  "name": "Production App",
+  "prefix": "rk_live_abc1",
+  "environment": "live",
+  "rateLimitRpm": 200,
+  "rateLimitRpd": 10000,
+  "expiresAt": null,
+  "createdAt": "2025-01-15T10:00:00Z",
+  "updatedAt": "2025-01-20T14:30:00Z"
+}
+```

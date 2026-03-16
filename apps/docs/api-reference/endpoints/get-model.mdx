@@ -1,0 +1,39 @@
+---
+title: "Get Model"
+description: "Get details for a specific model."
+---
+
+## Get Model
+
+`GET /models/:id`
+
+Returns detailed information about a specific model.
+
+### Path Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `id` | Model ID |
+
+### Example Request
+
+```bash
+curl -X GET https://api.raven.dev/models/model_abc123 \
+  -H "Authorization: Bearer rk_live_..."
+```
+
+### Example Response
+
+```json
+{
+  "id": "model_abc123",
+  "modelId": "gpt-4o",
+  "provider": "openai",
+  "inputPricePerMillion": 2.50,
+  "outputPricePerMillion": 10.00,
+  "contextWindow": 128000,
+  "capabilities": ["chat", "vision", "function_calling"],
+  "createdAt": "2025-01-01T00:00:00Z",
+  "updatedAt": "2025-01-15T00:00:00Z"
+}
+```

@@ -1,0 +1,51 @@
+---
+title: "List Models"
+description: "List all available models."
+---
+
+## List Models
+
+`GET /models`
+
+Returns the model catalog with pricing and capability information.
+
+### Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `provider` | string | Filter by provider |
+| `capability` | string | Filter by capability |
+
+### Example Request
+
+```bash
+curl -X GET https://api.raven.dev/models \
+  -H "Authorization: Bearer rk_live_..."
+```
+
+### Example Response
+
+```json
+[
+  {
+    "id": "model_abc123",
+    "modelId": "gpt-4o",
+    "provider": "openai",
+    "inputPricePerMillion": 2.50,
+    "outputPricePerMillion": 10.00,
+    "contextWindow": 128000,
+    "capabilities": ["chat", "vision", "function_calling"],
+    "createdAt": "2025-01-01T00:00:00Z"
+  },
+  {
+    "id": "model_def456",
+    "modelId": "claude-sonnet-4-20250514",
+    "provider": "anthropic",
+    "inputPricePerMillion": 3.00,
+    "outputPricePerMillion": 15.00,
+    "contextWindow": 200000,
+    "capabilities": ["chat", "vision", "function_calling"],
+    "createdAt": "2025-01-01T00:00:00Z"
+  }
+]
+```

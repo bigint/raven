@@ -1,0 +1,44 @@
+---
+title: "List Providers"
+description: "List all configured LLM providers."
+---
+
+## List Providers
+
+`GET /providers`
+
+Returns all provider configurations for the authenticated organization.
+
+### Example Request
+
+```bash
+curl -X GET https://api.raven.dev/providers \
+  -H "Authorization: Bearer rk_live_..."
+```
+
+### Example Response
+
+```json
+[
+  {
+    "id": "prov_abc123",
+    "provider": "openai",
+    "name": "Production OpenAI",
+    "isEnabled": true,
+    "createdAt": "2025-01-15T10:00:00Z",
+    "updatedAt": "2025-01-15T10:00:00Z"
+  },
+  {
+    "id": "prov_def456",
+    "provider": "anthropic",
+    "name": "Anthropic",
+    "isEnabled": true,
+    "createdAt": "2025-01-16T12:00:00Z",
+    "updatedAt": "2025-01-16T12:00:00Z"
+  }
+]
+```
+
+<Note>
+  API keys are never returned in responses. Only the provider type, name, and status are included.
+</Note>

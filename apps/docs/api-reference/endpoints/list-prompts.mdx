@@ -1,0 +1,31 @@
+---
+title: "List Prompts"
+description: "List all prompt templates."
+---
+
+## List Prompts
+
+`GET /prompts`
+
+Returns all prompt templates for the organization.
+
+### Example Request
+
+```bash
+curl -X GET https://api.raven.dev/prompts \
+  -H "Authorization: Bearer rk_live_..."
+```
+
+### Example Response
+
+```json
+[
+  {
+    "id": "prompt_abc123",
+    "name": "summarizer",
+    "activeVersionId": "ver_xyz789",
+    "createdAt": "2025-01-15T10:00:00Z",
+    "updatedAt": "2025-01-18T14:00:00Z"
+  }
+]
+```

@@ -1,0 +1,45 @@
+---
+title: "Create Provider"
+description: "Add a new LLM provider configuration."
+---
+
+## Create Provider
+
+`POST /providers`
+
+Adds a new provider configuration to the organization.
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `provider` | string | Yes | Provider identifier (e.g., `openai`, `anthropic`) |
+| `apiKey` | string | Yes | Provider API key |
+| `name` | string | No | Display name |
+| `isEnabled` | boolean | No | Enable immediately (default: true) |
+
+### Example Request
+
+```bash
+curl -X POST https://api.raven.dev/providers \
+  -H "Authorization: Bearer rk_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "provider": "openai",
+    "apiKey": "sk-...",
+    "name": "Production OpenAI"
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "id": "prov_abc123",
+  "provider": "openai",
+  "name": "Production OpenAI",
+  "isEnabled": true,
+  "createdAt": "2025-01-15T10:00:00Z",
+  "updatedAt": "2025-01-15T10:00:00Z"
+}
+```
