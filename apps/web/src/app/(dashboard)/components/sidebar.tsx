@@ -6,6 +6,8 @@ import type { LucideIcon } from "lucide-react";
 import {
   Activity,
   BarChart3,
+  BookOpen,
+  Bot,
   Cpu,
   CreditCard,
   DollarSign,
@@ -17,6 +19,7 @@ import {
   Menu,
   MessageSquare,
   Network,
+  Plug,
   Receipt,
   Route,
   ScrollText,
@@ -70,6 +73,9 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/requests", icon: Activity, label: "Requests" },
   { href: "/budgets", icon: CreditCard, label: "Budgets" },
   { href: "/finops", icon: DollarSign, label: "FinOps" },
+  { href: "/agents", icon: Bot, label: "Agents" },
+  { href: "/mcp", icon: Plug, label: "MCP Servers" },
+  { href: "/catalog", icon: BookOpen, label: "Catalog" },
   {
     gate: (plan) => PLAN_FEATURES[plan].hasGuardrails,
     href: "/guardrails",
