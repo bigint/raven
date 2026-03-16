@@ -13,7 +13,11 @@ import { useOrgSettings } from "./hooks/use-org-settings";
 
 const TABS = [
   { label: "General", value: "general" },
-  { label: "Exports", value: "exports" }
+  { label: "Billing", value: "billing" },
+  { label: "Domains", value: "domains" },
+  { label: "Cache", value: "cache" },
+  { label: "Exports", value: "exports" },
+  { label: "Danger Zone", value: "danger" }
 ];
 
 const OrgSettingsPage = () => {
@@ -53,6 +57,14 @@ const OrgSettingsPage = () => {
     router.replace(`/${slug}/settings?tab=${value}`);
   };
 
+  // Filter tabs based on role
+  const visibleTabs = TABS.filter((t) => {
+    if (t.value === "domains" && !isAdmin) return false;
+    if (t.value === "cache" && !isAdmin) return false;
+    if (t.value === "danger" && !isOwner) return false;
+    return true;
+  });
+
   return (
     <div>
       <PageHeader
@@ -75,50 +87,50 @@ const OrgSettingsPage = () => {
         </div>
       ) : settings === null ? null : (
         <>
-          <PillTabs onChange={setTab} options={TABS} value={tab} />
+          <PillTabs onChange={setTab} options={visibleTabs} value={tab} />
 
           <div className="mt-6">
             {tab === "general" && (
-              <div className="space-y-6">
-                <OrgSettingsForm
-                  editName={editName}
-                  editSlug={editSlug}
-                  hasChanges={hasChanges}
-                  isAdmin={isAdmin}
-                  isSlugValid={isSlugValid}
-                  onNameChange={setEditName}
-                  onSave={handleSave}
-                  onSaveErrorClear={() => setSaveError(null)}
-                  onSlugChange={setEditSlug}
-                  saveError={saveError}
-                  saving={saving}
-                  settings={settings}
-                />
-
-                <PlanSubscription settings={settings} />
-
-                {isAdmin && <CustomDomains plan={settings.plan} />}
-
-                {isAdmin && <CacheManagement />}
-
-                {isOwner && (
-                  <DangerZone
-                    deleteConfirmText={deleteConfirmText}
-                    deleteError={deleteError}
-                    deleting={deleting}
-                    onCloseConfirm={() => setShowDeleteConfirm(false)}
-                    onConfirmTextChange={setDeleteConfirmText}
-                    onDelete={handleDelete}
-                    onDeleteErrorClear={() => setDeleteError(null)}
-                    onOpenConfirm={openDeleteConfirm}
-                    orgName={settings.name}
-                    showDeleteConfirm={showDeleteConfirm}
-                  />
-                )}
-              </div>
+              <OrgSettingsForm
+                editName={editName}
+                editSlug={editSlug}
+                hasChanges={hasChanges}
+                isAdmin={isAdmin}
+                isSlugValid={isSlugValid}
+                onNameChange={setEditName}
+                onSave={handleSave}
+                onSaveErrorClear={() => setSaveError(null)}
+                onSlugChange={setEditSlug}
+                saveError={saveError}
+                saving={saving}
+                settings={settings}
+              />
             )}
 
+            {tab === "billing" && <PlanSubscription settings={settings} />}
+
+            {tab === "domains" && isAdmin && (
+              <CustomDomains plan={settings.plan} />
+            )}
+
+            {tab === "cache" && isAdmin && <CacheManagement />}
+
             {tab === "exports" && <ExportsTab />}
+
+            {tab === "danger" && isOwner && (
+              <DangerZone
+                deleteConfirmText={deleteConfirmText}
+                deleteError={deleteError}
+                deleting={deleting}
+                onCloseConfirm={() => setShowDeleteConfirm(false)}
+                onConfirmTextChange={setDeleteConfirmText}
+                onDelete={handleDelete}
+                onDeleteErrorClear={() => setDeleteError(null)}
+                onOpenConfirm={openDeleteConfirm}
+                orgName={settings.name}
+                showDeleteConfirm={showDeleteConfirm}
+              />
+            )}
           </div>
         </>
       )}
