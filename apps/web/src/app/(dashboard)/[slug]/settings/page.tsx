@@ -1,15 +1,26 @@
 "use client";
 
-import { PageHeader } from "@raven/ui";
+import { PageHeader, PillTabs } from "@raven/ui";
 import { Settings } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { CacheManagement } from "./components/cache-management";
 import { CustomDomains } from "./components/custom-domains";
 import { DangerZone } from "./components/danger-zone";
+import { ExportsTab } from "./components/exports-tab";
 import { OrgSettingsForm } from "./components/org-settings-form";
 import { PlanSubscription } from "./components/plan-subscription";
 import { useOrgSettings } from "./hooks/use-org-settings";
 
+const TABS = [
+  { label: "General", value: "general" },
+  { label: "Exports", value: "exports" }
+];
+
 const OrgSettingsPage = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab") ?? "general";
+
   const {
     settings,
     isLoading,
@@ -37,6 +48,11 @@ const OrgSettingsPage = () => {
     handleDelete
   } = useOrgSettings();
 
+  const setTab = (value: string) => {
+    const slug = settings?.slug ?? "";
+    router.replace(`/${slug}/settings?tab=${value}`);
+  };
+
   return (
     <div>
       <PageHeader
@@ -58,43 +74,53 @@ const OrgSettingsPage = () => {
           </p>
         </div>
       ) : settings === null ? null : (
-        <div className="space-y-6">
-          <OrgSettingsForm
-            editName={editName}
-            editSlug={editSlug}
-            hasChanges={hasChanges}
-            isAdmin={isAdmin}
-            isSlugValid={isSlugValid}
-            onNameChange={setEditName}
-            onSave={handleSave}
-            onSaveErrorClear={() => setSaveError(null)}
-            onSlugChange={setEditSlug}
-            saveError={saveError}
-            saving={saving}
-            settings={settings}
-          />
+        <>
+          <PillTabs onChange={setTab} options={TABS} value={tab} />
 
-          <PlanSubscription settings={settings} />
+          <div className="mt-6">
+            {tab === "general" && (
+              <div className="space-y-6">
+                <OrgSettingsForm
+                  editName={editName}
+                  editSlug={editSlug}
+                  hasChanges={hasChanges}
+                  isAdmin={isAdmin}
+                  isSlugValid={isSlugValid}
+                  onNameChange={setEditName}
+                  onSave={handleSave}
+                  onSaveErrorClear={() => setSaveError(null)}
+                  onSlugChange={setEditSlug}
+                  saveError={saveError}
+                  saving={saving}
+                  settings={settings}
+                />
 
-          {isAdmin && <CustomDomains plan={settings.plan} />}
+                <PlanSubscription settings={settings} />
 
-          {isAdmin && <CacheManagement />}
+                {isAdmin && <CustomDomains plan={settings.plan} />}
 
-          {isOwner && (
-            <DangerZone
-              deleteConfirmText={deleteConfirmText}
-              deleteError={deleteError}
-              deleting={deleting}
-              onCloseConfirm={() => setShowDeleteConfirm(false)}
-              onConfirmTextChange={setDeleteConfirmText}
-              onDelete={handleDelete}
-              onDeleteErrorClear={() => setDeleteError(null)}
-              onOpenConfirm={openDeleteConfirm}
-              orgName={settings.name}
-              showDeleteConfirm={showDeleteConfirm}
-            />
-          )}
-        </div>
+                {isAdmin && <CacheManagement />}
+
+                {isOwner && (
+                  <DangerZone
+                    deleteConfirmText={deleteConfirmText}
+                    deleteError={deleteError}
+                    deleting={deleting}
+                    onCloseConfirm={() => setShowDeleteConfirm(false)}
+                    onConfirmTextChange={setDeleteConfirmText}
+                    onDelete={handleDelete}
+                    onDeleteErrorClear={() => setDeleteError(null)}
+                    onOpenConfirm={openDeleteConfirm}
+                    orgName={settings.name}
+                    showDeleteConfirm={showDeleteConfirm}
+                  />
+                )}
+              </div>
+            )}
+
+            {tab === "exports" && <ExportsTab />}
+          </div>
+        </>
       )}
     </div>
   );
