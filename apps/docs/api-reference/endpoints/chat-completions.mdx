@@ -1,0 +1,128 @@
+---
+title: "Chat Completions"
+description: "Create a chat completion through the Raven gateway."
+---
+
+## Create Chat Completion
+
+`POST /v1/chat/completions`
+
+Creates a chat completion using the specified model. This endpoint is fully compatible with the OpenAI Chat Completions API.
+
+### Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | Model ID (e.g., `gpt-4o`, `claude-sonnet-4-20250514`) |
+| `messages` | array | Yes | Array of message objects |
+| `stream` | boolean | No | Enable streaming (default: false) |
+| `temperature` | number | No | Sampling temperature (0-2) |
+| `top_p` | number | No | Nucleus sampling parameter |
+| `max_tokens` | integer | No | Maximum tokens to generate |
+| `stop` | string/array | No | Stop sequences |
+| `tools` | array | No | Function/tool definitions |
+| `tool_choice` | string/object | No | Tool selection strategy |
+| `response_format` | object | No | Response format (e.g., JSON mode) |
+
+### Message Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `role` | string | `system`, `user`, `assistant`, or `tool` |
+| `content` | string/array | Message content (text or multimodal) |
+| `name` | string | Optional name for the message author |
+| `tool_calls` | array | Tool calls (for assistant messages) |
+| `tool_call_id` | string | Tool call ID (for tool messages) |
+
+### Example Request
+
+```bash
+curl -X POST https://api.raven.dev/v1/chat/completions \
+  -H "Authorization: Bearer rk_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "What is the capital of France?"}
+    ],
+    "temperature": 0.7,
+    "max_tokens": 500
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1705312800,
+  "model": "gpt-4o",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "The capital of France is Paris."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 25,
+    "completion_tokens": 8,
+    "total_tokens": 33
+  }
+}
+```
+
+### Streaming
+
+Set `stream: true` to receive Server-Sent Events:
+
+```bash
+curl -X POST https://api.raven.dev/v1/chat/completions \
+  -H "Authorization: Bearer rk_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello"}],
+    "stream": true
+  }'
+```
+
+Each chunk follows the SSE format:
+
+```
+data: {"id":"chatcmpl-abc123","choices":[{"delta":{"content":"Hello"}}]}
+
+data: {"id":"chatcmpl-abc123","choices":[{"delta":{"content":"!"}}]}
+
+data: [DONE]
+```
+
+### Function Calling
+
+```json
+{
+  "model": "gpt-4o",
+  "messages": [{"role": "user", "content": "What's the weather in Paris?"}],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "get_weather",
+        "description": "Get current weather",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "city": {"type": "string"}
+          },
+          "required": ["city"]
+        }
+      }
+    }
+  ]
+}
+```
