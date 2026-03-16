@@ -8,6 +8,7 @@ import {
   BarChart3,
   Cpu,
   CreditCard,
+  FileCheck,
   FileText,
   Key,
   LayoutDashboard,
@@ -19,6 +20,7 @@ import {
   ScrollText,
   Settings,
   Shield,
+  ShieldCheck,
   TrendingUp,
   Users,
   Webhook,
@@ -69,6 +71,18 @@ const NAV_ITEMS: NavItem[] = [
     href: "/guardrails",
     icon: Shield,
     label: "Guardrails"
+  },
+  {
+    gate: (plan) => PLAN_FEATURES[plan].hasGuardrails,
+    href: "/policies",
+    icon: ShieldCheck,
+    label: "Policies"
+  },
+  {
+    gate: (plan) => PLAN_FEATURES[plan].hasGuardrails,
+    href: "/compliance",
+    icon: FileCheck,
+    label: "Compliance"
   },
   {
     gate: (plan) => PLAN_FEATURES[plan].hasTeams,
