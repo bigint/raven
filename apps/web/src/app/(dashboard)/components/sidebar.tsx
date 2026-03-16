@@ -277,7 +277,7 @@ export const Sidebar = ({
           <OrgSwitcher activeOrg={activeOrg} onSwitch={onSwitchOrg} orgs={orgs} />
         </div>
         <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">{navLinks}</nav>
-        <div className="shrink-0 border-t border-border">
+        <div className="shrink-0">
           <UserMenu user={user} />
         </div>
       </aside>
