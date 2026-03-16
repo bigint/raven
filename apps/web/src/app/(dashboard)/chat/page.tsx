@@ -1,13 +1,12 @@
 "use client";
 
-import { Button, PageHeader, Spinner } from "@raven/ui";
+import { Button } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { RotateCcw } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChatInput } from "./components/chat-input";
 import { ChatMessages } from "./components/chat-messages";
-import { ModelInput } from "./components/model-input";
 import { PlaygroundSettingsPanel } from "./components/playground-settings";
 import { catalogModelsQueryOptions, useChat } from "./hooks/use-chat";
 
@@ -29,9 +28,7 @@ const ChatPage = () => {
   const searchParams = useSearchParams();
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const { data: models = [], isLoading: modelsLoading } = useQuery(
-    catalogModelsQueryOptions()
-  );
+  const { data: models = [] } = useQuery(catalogModelsQueryOptions());
 
   // Auto-select first model, or use URL params
   useEffect(() => {
@@ -81,34 +78,27 @@ const ChatPage = () => {
 
   return (
     <div className="flex h-[calc(100dvh-var(--spacing)*8)] flex-col md:h-dvh md:-m-6 md:p-6">
-      <PageHeader
-        actions={
-          <div className="flex items-center gap-2">
-            {modelsLoading && <Spinner size="sm" />}
-            <ModelInput
-              disabled={modelsLoading}
-              onChange={(model, provider) =>
-                setSelectedModel({ model, provider })
-              }
-              options={modelOptions}
-              value={selectedModel?.model ?? ""}
-            />
-            {messages.length > 0 && (
-              <Button
-                disabled={isStreaming}
-                onClick={clearMessages}
-                size="sm"
-                variant="ghost"
-              >
-                <RotateCcw className="size-3.5" />
-                New Chat
-              </Button>
-            )}
-          </div>
-        }
-        description="Test your AI providers and models through the gateway."
-        title="Playground"
-      />
+      {/* Minimal header */}
+      <div className="flex items-center justify-between pb-4">
+        <div>
+          <h1 className="text-lg font-semibold">Playground</h1>
+          <p className="text-sm text-muted-foreground">
+            Test your AI providers and models through the gateway.
+          </p>
+        </div>
+        {messages.length > 0 && (
+          <Button
+            disabled={isStreaming}
+            onClick={clearMessages}
+            size="sm"
+            variant="ghost"
+          >
+            <RotateCcw className="size-3.5" />
+            New Chat
+          </Button>
+        )}
+      </div>
+
       <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border">
         <PlaygroundSettingsPanel
           onOpenChange={setSettingsOpen}
@@ -128,6 +118,10 @@ const ChatPage = () => {
           disabled={!selectedModel}
           isStreaming={isStreaming}
           model={selectedModel?.model}
+          modelOptions={modelOptions}
+          onModelChange={(model, provider) =>
+            setSelectedModel({ model, provider })
+          }
           onSend={sendMessage}
           onSettingsToggle={toggleSettings}
           onStop={stopStreaming}

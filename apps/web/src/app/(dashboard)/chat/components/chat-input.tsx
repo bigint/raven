@@ -1,7 +1,19 @@
 "use client";
 
-import { ArrowUp, Settings2, Square, Thermometer } from "lucide-react";
+import {
+  ArrowUp,
+  ChevronDown,
+  Settings2,
+  Square,
+  Thermometer
+} from "lucide-react";
 import { type KeyboardEvent, useCallback, useRef, useState } from "react";
+
+interface ModelOption {
+  label: string;
+  value: string;
+  provider: string;
+}
 
 interface ChatInputProps {
   disabled: boolean;
@@ -9,6 +21,8 @@ interface ChatInputProps {
   onSend: (content: string) => void;
   onStop: () => void;
   model?: string;
+  modelOptions: ModelOption[];
+  onModelChange: (model: string, provider: string) => void;
   temperature?: number;
   stream?: boolean;
   onSettingsToggle?: () => void;
@@ -20,12 +34,16 @@ export const ChatInput = ({
   onSend,
   onStop,
   model,
+  modelOptions,
+  onModelChange,
   temperature,
   stream,
   onSettingsToggle
 }: ChatInputProps) => {
   const [value, setValue] = useState("");
+  const [modelDropdownOpen, setModelDropdownOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const adjustHeight = useCallback(() => {
     const textarea = textareaRef.current;
@@ -62,9 +80,7 @@ export const ChatInput = ({
             adjustHeight();
           }}
           onKeyDown={handleKeyDown}
-          placeholder={
-            disabled ? "Loading models..." : "Start a new message..."
-          }
+          placeholder="Start a new message..."
           ref={textareaRef}
           rows={1}
           style={{ maxHeight: 200 }}
@@ -74,20 +90,65 @@ export const ChatInput = ({
         {/* Bottom bar */}
         <div className="flex items-center justify-between px-3 pb-2">
           <div className="flex items-center gap-1">
-            {model && (
-              <span className="rounded-md bg-muted px-2 py-1 text-[11px] font-medium text-muted-foreground">
-                {model}
-              </span>
-            )}
+            {/* Model selector */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                className="flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                onClick={() => setModelDropdownOpen((o) => !o)}
+                type="button"
+              >
+                {model ?? "Select model"}
+                <ChevronDown className="size-3" />
+              </button>
+
+              {modelDropdownOpen && (
+                <>
+                  {/* biome-ignore lint/a11y/useSemanticElements: backdrop overlay */}
+                  <button
+                    aria-label="Close dropdown"
+                    className="fixed inset-0 z-40 cursor-default"
+                    onClick={() => setModelDropdownOpen(false)}
+                    tabIndex={-1}
+                    type="button"
+                  />
+                  <div className="absolute bottom-full left-0 z-50 mb-1 max-h-60 w-56 overflow-y-auto rounded-lg border border-border bg-popover py-1 shadow-lg">
+                    {modelOptions.map((opt) => (
+                      <button
+                        className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors hover:bg-accent ${
+                          opt.value === model
+                            ? "text-foreground font-medium"
+                            : "text-muted-foreground"
+                        }`}
+                        key={opt.value}
+                        onClick={() => {
+                          onModelChange(opt.value, opt.provider);
+                          setModelDropdownOpen(false);
+                        }}
+                        type="button"
+                      >
+                        <span className="truncate">{opt.label}</span>
+                        <span className="ml-auto shrink-0 text-[10px] text-muted-foreground/60">
+                          {opt.provider}
+                        </span>
+                      </button>
+                    ))}
+                    {modelOptions.length === 0 && (
+                      <p className="px-3 py-2 text-xs text-muted-foreground">
+                        No models available. Add a provider first.
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+
+            <span className="mx-1 text-border">|</span>
 
             {temperature !== undefined && (
-              <>
-                <span className="mx-1 text-border">|</span>
-                <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                  <Thermometer className="size-3" />
-                  {temperature}
-                </span>
-              </>
+              <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                <Thermometer className="size-3" />
+                {temperature}
+              </span>
             )}
 
             {stream !== undefined && (
