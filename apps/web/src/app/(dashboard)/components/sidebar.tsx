@@ -71,7 +71,12 @@ const NAV_ITEMS: NavItem[] = [
     icon: Shield,
     label: "Guardrails"
   },
-  { href: "/ip-allowlists", icon: ShieldBan, label: "IP Allowlists" },
+  {
+    gate: (plan) => plan === "enterprise",
+    href: "/ip-allowlists",
+    icon: ShieldBan,
+    label: "IP Allowlists"
+  },
   {
     gate: (plan) => PLAN_FEATURES[plan].hasTeams,
     href: "/team",

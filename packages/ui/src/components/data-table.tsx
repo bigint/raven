@@ -53,8 +53,8 @@ const DataTable = <T,>({
   }
 
   return (
-    <div className="rounded-xl border border-border overflow-x-auto">
-      <table className="w-full min-w-[600px] text-sm">
+    <div className="rounded-xl border border-border overflow-hidden overflow-x-auto">
+      <table className="w-full min-w-[600px] border-collapse text-sm">
         <thead>
           <tr className="border-b border-border">
             {columns.map((col) => (
@@ -78,7 +78,7 @@ const DataTable = <T,>({
                   animate={{ opacity: 1, y: 0 }}
                   className={cn(
                     "transition-colors hover:bg-muted/30",
-                    idx !== data.length - 1 && "border-b border-border"
+                    "border-b border-border last:border-b-0"
                   )}
                   exit={{ opacity: 0 }}
                   initial={{ opacity: 0, y: -8 }}
