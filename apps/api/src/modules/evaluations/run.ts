@@ -30,7 +30,9 @@ export const runEvaluation =
   (db: Database) => async (c: AppContextWithJson<Body>) => {
     const orgId = c.get("orgId");
     const id = c.req.param("id") as string;
-    const { prompts, evaluators } = c.req.valid("json");
+    const body = c.req.valid("json");
+    const prompts = body.prompts ?? body.samples ?? [];
+    const evaluators = body.evaluators;
 
     const [evaluation] = await db
       .select()

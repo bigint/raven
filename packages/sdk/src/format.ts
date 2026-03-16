@@ -69,6 +69,7 @@ const parseUsage = (usage: Record<string, number> | undefined): Usage => ({
 export const parseBufferedResponse = (
   data: Record<string, unknown>
 ): TextResult => {
+  // OpenAI format: choices[0].message.content
   const choices = data.choices as
     | Array<{
         finish_reason?: string;
@@ -79,12 +80,32 @@ export const parseBufferedResponse = (
       }>
     | undefined;
 
-  const choice = choices?.[0];
+  if (choices?.[0]) {
+    const choice = choices[0];
+    return {
+      finishReason: choice.finish_reason ?? "stop",
+      text: choice.message?.content ?? "",
+      toolCalls: choice.message?.tool_calls ?? [],
+      usage: parseUsage(data.usage as Record<string, number> | undefined)
+    };
+  }
+
+  // Anthropic format: content[0].text
+  const content = data.content as
+    | Array<{ type: string; text?: string }>
+    | undefined;
+  const textBlock = content?.find((b) => b.type === "text");
+  const usage = data.usage as Record<string, number> | undefined;
 
   return {
-    finishReason: choice?.finish_reason ?? "stop",
-    text: choice?.message?.content ?? "",
-    toolCalls: choice?.message?.tool_calls ?? [],
-    usage: parseUsage(data.usage as Record<string, number> | undefined)
+    finishReason: (data.stop_reason as string) ?? "stop",
+    text: textBlock?.text ?? "",
+    toolCalls: [],
+    usage: {
+      completionTokens: usage?.output_tokens ?? 0,
+      promptTokens: usage?.input_tokens ?? 0,
+      totalTokens:
+        (usage?.input_tokens ?? 0) + (usage?.output_tokens ?? 0)
+    }
   };
 };
