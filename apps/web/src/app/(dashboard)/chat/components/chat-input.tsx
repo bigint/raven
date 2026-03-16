@@ -11,6 +11,8 @@ export interface PlaygroundSettings {
   showMetadata: boolean;
   enableTools: boolean;
   enableWebSearch: boolean;
+  enableReasoning: boolean;
+  reasoningBudget: number;
   chatMemory: number;
 }
 
@@ -337,6 +339,45 @@ export const ChatInput = ({
                         onCheckedChange={(v) => update("enableWebSearch", v)}
                       />
                     </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs">Reasoning</span>
+                      <Switch
+                        checked={settings.enableReasoning}
+                        onCheckedChange={(v) => update("enableReasoning", v)}
+                      />
+                    </div>
+
+                    {settings.enableReasoning && (
+                      <div className="space-y-1.5 rounded-md bg-muted px-3 py-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-muted-foreground">
+                            Token budget
+                          </span>
+                          <span className="text-[10px] font-mono text-muted-foreground">
+                            {settings.reasoningBudget.toLocaleString()}
+                          </span>
+                        </div>
+                        <input
+                          className="w-full accent-primary"
+                          max="32000"
+                          min="1024"
+                          onChange={(e) =>
+                            update(
+                              "reasoningBudget",
+                              Number.parseInt(e.target.value, 10)
+                            )
+                          }
+                          step="1024"
+                          type="range"
+                          value={settings.reasoningBudget}
+                        />
+                        <p className="text-[10px] text-muted-foreground">
+                          Max tokens for the model's thinking process. Works
+                          with Claude and other reasoning models.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </Dropdown>
               )}

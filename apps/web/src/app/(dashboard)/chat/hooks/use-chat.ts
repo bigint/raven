@@ -43,9 +43,11 @@ export const useChat = () => {
   } | null>(null);
   const [settings, setSettings] = useState<PlaygroundSettings>({
     chatMemory: 5,
+    enableReasoning: false,
     enableTools: false,
     enableWebSearch: false,
     maxTokens: 4096,
+    reasoningBudget: 8192,
     showMetadata: true,
     stream: true,
     temperature: 0.7
@@ -189,7 +191,14 @@ export const useChat = () => {
           messages: chatMessages,
           model: selectedModel.model,
           provider: selectedModel.provider,
-          temperature: settings.temperature,
+          ...(settings.enableReasoning
+            ? {
+                reasoning: {
+                  budgetTokens: settings.reasoningBudget,
+                  enabled: true
+                }
+              }
+            : { temperature: settings.temperature }),
           ...(demoTools ? { tools: demoTools } : {})
         };
 

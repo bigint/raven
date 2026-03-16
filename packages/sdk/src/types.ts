@@ -48,11 +48,17 @@ export interface Usage {
   totalTokens: number;
 }
 
+export interface ReasoningConfig {
+  enabled: boolean;
+  budgetTokens?: number;
+}
+
 export interface GenerateParams {
   maxTokens?: number;
   messages: Message[];
   model: string;
-  provider: string;
+  provider?: string;
+  reasoning?: ReasoningConfig;
   stop?: string[];
   system?: string;
   temperature?: number;

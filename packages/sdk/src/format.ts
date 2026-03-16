@@ -52,6 +52,14 @@ export const formatRequest = (
   if (params.stop) body.stop = params.stop;
   if (params.tools) body.tools = params.tools;
   if (params.toolChoice) body.tool_choice = params.toolChoice;
+  if (params.reasoning?.enabled) {
+    body.thinking = {
+      budget_tokens: params.reasoning.budgetTokens ?? 8192,
+      type: "enabled"
+    };
+    // Anthropic requires temperature=1 for extended thinking
+    body.temperature = 1;
+  }
 
   if (stream) {
     body.stream_options = { include_usage: true };
