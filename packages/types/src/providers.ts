@@ -4,8 +4,9 @@ interface ProviderDefinition {
 }
 
 export const PROVIDERS = [
-  { id: "openai", label: "OpenAI" },
-  { id: "anthropic", label: "Anthropic" }
+  { id: "anthropic", label: "Anthropic" },
+  { id: "mistralai", label: "Mistral AI" },
+  { id: "openai", label: "OpenAI" }
 ] as const satisfies readonly ProviderDefinition[];
 
 export type Provider = (typeof PROVIDERS)[number]["id"];
