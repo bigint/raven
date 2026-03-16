@@ -12,12 +12,14 @@ const sampleSchema = z.object({
   response: z.string().min(1)
 });
 
-export const runEvaluationSchema = z.object({
-  evaluators: z
-    .array(z.enum(["relevance", "coherence", "piiLeakage", "toxicity"]))
-    .optional(),
-  prompts: z.array(sampleSchema).min(1).max(100).optional(),
-  samples: z.array(sampleSchema).min(1).max(100).optional()
-}).refine((data) => data.prompts || data.samples, {
-  message: "Either 'prompts' or 'samples' must be provided"
-});
+export const runEvaluationSchema = z
+  .object({
+    evaluators: z
+      .array(z.enum(["relevance", "coherence", "piiLeakage", "toxicity"]))
+      .optional(),
+    prompts: z.array(sampleSchema).min(1).max(100).optional(),
+    samples: z.array(sampleSchema).min(1).max(100).optional()
+  })
+  .refine((data) => data.prompts || data.samples, {
+    message: "Either 'prompts' or 'samples' must be provided"
+  });

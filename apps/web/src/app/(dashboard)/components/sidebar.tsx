@@ -19,7 +19,6 @@ import {
   Key,
   LayoutDashboard,
   Menu,
-  MessageCircle,
   Network,
   Plug,
   Puzzle,
@@ -66,7 +65,6 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { href: "/overview", icon: LayoutDashboard, label: "Overview" },
   { href: "/chat", icon: SquareTerminal, label: "Playground" },
-  { href: "/conversations", icon: MessageCircle, label: "Conversations" },
   { href: "/analytics", icon: BarChart3, label: "Analytics" },
   { href: "/evaluations", icon: ClipboardCheck, label: "Evaluations" },
   { href: "/providers", icon: Network, label: "Providers" },
