@@ -65,7 +65,7 @@ const evaluatePiiDetection = (
   for (const content of contents) {
     for (const piiType of enabledTypes) {
       const pattern = PII_PATTERNS[piiType];
-      if (pattern && pattern.test(content)) {
+      if (pattern?.test(content)) {
         return piiType;
       }
     }

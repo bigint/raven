@@ -105,7 +105,7 @@ class MetricsCollector {
       lines.push(`${hist.name}_count{${labelStr}} ${hist.count}`);
     }
 
-    return lines.join("\n") + "\n";
+    return `${lines.join("\n")}\n`;
   }
 
   reset() {
