@@ -73,8 +73,12 @@ const Select = ({
         </BaseSelect.Icon>
       </BaseSelect.Trigger>
       <BaseSelect.Portal>
-        <BaseSelect.Positioner className="z-50" sideOffset={4}>
-          <BaseSelect.Popup className="max-h-60 overflow-y-auto rounded-md border border-border bg-popover py-1 shadow-md">
+        <BaseSelect.Positioner
+          className="z-[100]"
+          sideOffset={4}
+          style={{ width: "var(--anchor-width)" }}
+        >
+          <BaseSelect.Popup className="max-h-60 w-full overflow-y-auto rounded-md border border-border bg-popover py-1 shadow-lg">
             {options.map((option) => (
               <BaseSelect.Item
                 className="flex w-full cursor-default items-center gap-2 px-3 py-2 text-sm text-muted-foreground outline-none select-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[selected]:text-foreground"
