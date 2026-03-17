@@ -56,7 +56,7 @@ export const anthropicAdapter = (provider: string): ProviderAdapter => {
         role: m.role
       }));
 
-      // Strip trailing assistant prefill (empty or whitespace-only) — models that don't support prefill will reject it
+      // Anthropic requires conversation to end with a user message
       const lastMsg = cleanedMessages[cleanedMessages.length - 1];
       if (lastMsg?.role === "assistant") {
         const content = lastMsg.content;
@@ -65,7 +65,11 @@ export const anthropicAdapter = (provider: string): ProviderAdapter => {
           (typeof content === "string" && !content.trim()) ||
           (Array.isArray(content) && content.length === 0);
         if (isEmpty) {
+          // Empty prefill — just remove it
           cleanedMessages = cleanedMessages.slice(0, -1);
+        } else {
+          // Non-empty assistant message — append a continue prompt
+          cleanedMessages.push({ content: "Continue.", role: "user" });
         }
       }
 
