@@ -1,62 +1,23 @@
-import { getModelPricing } from "@/lib/pricing-cache";
-import { PROVIDERS } from "@/lib/providers";
-import { anthropicAdapter } from "./anthropic";
+import { createAnthropicAdapter } from "./anthropic";
+import { createMistralAdapter } from "./mistral";
+import { createOpenAIAdapter } from "./openai";
+import type { ProviderAdapter } from "./types";
 
-export interface ProviderAdapter {
-  name: string;
-  baseUrl: string;
-  chatEndpoint: string;
-  modelsEndpoint: string;
-  transformHeaders(
-    apiKey: string,
-    headers: Record<string, string>
-  ): Record<string, string>;
-  transformBody?(body: Record<string, unknown>): Record<string, unknown>;
-  normalizeRequest?(body: Record<string, unknown>): Record<string, unknown>;
-  normalizeStreamChunk?(line: string): string | null;
-  estimateCost(
-    model: string,
-    inputTokens: number,
-    outputTokens: number,
-    cacheReadTokens?: number,
-    cacheWriteTokens?: number
-  ): number;
-}
+export type { ProviderAdapter } from "./types";
 
-const DEFAULT_AUTH_HEADERS = (apiKey: string): Record<string, string> => ({
-  Authorization: `Bearer ${apiKey}`
-});
-
-const createOpenAICompatibleAdapter = (provider: string): ProviderAdapter => {
-  const config = PROVIDERS[provider];
-
-  return {
-    baseUrl: config?.baseUrl ?? "https://api.openai.com/v1",
-    chatEndpoint: config?.chatEndpoint ?? "/chat/completions",
-
-    estimateCost(model, inputTokens, outputTokens, cacheReadTokens = 0) {
-      const pricing = getModelPricing(model, provider);
-      const regularInput = Math.max(0, inputTokens - cacheReadTokens);
-      const regularInputCost = (regularInput / 1_000_000) * pricing.input;
-      const cachedInputCost =
-        (cacheReadTokens / 1_000_000) * pricing.input * 0.5;
-      const outputCost = (outputTokens / 1_000_000) * pricing.output;
-      return regularInputCost + cachedInputCost + outputCost;
-    },
-    modelsEndpoint: config?.modelsEndpoint ?? "/models",
-    name: provider,
-
-    transformHeaders(apiKey, headers) {
-      const authFn = config?.authHeaders ?? DEFAULT_AUTH_HEADERS;
-      return {
-        ...headers,
-        ...authFn(apiKey)
-      };
-    }
-  };
-};
-
+/**
+ * Creates a fresh adapter per call. Do NOT cache or memoize — some adapters
+ * (e.g. Anthropic) hold per-stream mutable state in normalizeStreamChunk.
+ */
 export const getProviderAdapter = (provider: string): ProviderAdapter => {
-  if (provider === "anthropic") return anthropicAdapter(provider);
-  return createOpenAICompatibleAdapter(provider);
+  switch (provider) {
+    case "anthropic":
+      return createAnthropicAdapter(provider);
+    case "mistralai":
+      return createMistralAdapter(provider);
+    case "openai":
+      return createOpenAIAdapter(provider);
+    default:
+      return createOpenAIAdapter(provider);
+  }
 };

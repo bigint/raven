@@ -323,12 +323,10 @@ export const proxyHandler = (
       finalBodyText = JSON.stringify(transformed);
     }
 
-    // 8d. Override upstream path to provider's chat endpoint when applicable
-    const resolvedUpstreamPath =
-      upstreamPath === "/chat/completions" &&
-      adapter.chatEndpoint !== "/chat/completions"
-        ? adapter.chatEndpoint
-        : upstreamPath;
+    // 8d. Map endpoint path to provider-specific path
+    const resolvedUpstreamPath = adapter.mapEndpoint
+      ? adapter.mapEndpoint(upstreamPath)
+      : upstreamPath;
 
     // 9. Forward request with retry logic
     const forwardInput = {
@@ -417,9 +415,17 @@ export const proxyHandler = (
     if (proxyResponse.kind === "buffered") {
       const responseStatus = proxyResponse.response.status;
       const responseOk = upstreamResult.response.ok;
-      const responseText = proxyResponse.text;
-      const responseBody = proxyResponse.body;
       const requestedModel = upstreamResult.requestedModel;
+
+      // 11c. Normalize provider-native response to OpenAI format
+      const responseBody =
+        adapter.normalizeResponse && responseOk
+          ? adapter.normalizeResponse(proxyResponse.body)
+          : proxyResponse.body;
+      const responseText =
+        responseBody === proxyResponse.body
+          ? proxyResponse.text
+          : JSON.stringify(responseBody);
 
       // Defer all post-processing — none of it affects the response
       void (() => {

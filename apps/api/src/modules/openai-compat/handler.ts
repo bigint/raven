@@ -193,7 +193,9 @@ export const chatCompletionsHandler = (
       finalBody = adapter.normalizeRequest(parsedBody);
     if (adapter.transformBody) finalBody = adapter.transformBody(finalBody);
     const finalBodyText = JSON.stringify(finalBody);
-    const resolvedPath = adapter.chatEndpoint;
+    const resolvedPath = adapter.mapEndpoint
+      ? adapter.mapEndpoint("/chat/completions")
+      : adapter.chatEndpoint;
 
     // 9. Forward with retry
     const forwardInput = {
@@ -277,8 +279,16 @@ export const chatCompletionsHandler = (
     if (proxyResponse.kind === "buffered") {
       const responseStatus = proxyResponse.response.status;
       const responseOk = upstreamResult.response.ok;
-      const responseText = proxyResponse.text;
-      const responseBody = proxyResponse.body;
+
+      // Normalize provider-native response to OpenAI format
+      const responseBody =
+        adapter.normalizeResponse && responseOk
+          ? adapter.normalizeResponse(proxyResponse.body)
+          : proxyResponse.body;
+      const responseText =
+        responseBody === proxyResponse.body
+          ? proxyResponse.text
+          : JSON.stringify(responseBody);
 
       // Defer all post-processing — none of it affects the response
       void (() => {
