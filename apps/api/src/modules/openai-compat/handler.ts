@@ -64,6 +64,7 @@ export const chatCompletionsHandler = (
 
     // 1. Auth
     const authHeader = c.req.header("Authorization") ?? "";
+    console.log("[openai-compat] Auth header present:", !!authHeader, "starts with Bearer:", authHeader.startsWith("Bearer "));
     const { virtualKey } = await authenticateKey(db, authHeader, redis);
 
     // 2. Parse body
@@ -76,12 +77,20 @@ export const chatCompletionsHandler = (
     }
 
     const modelSlug = parsedBody.model as string | undefined;
+    console.log("[openai-compat] Model requested:", modelSlug);
     if (!modelSlug) {
       throw new ValidationError("'model' field is required");
     }
 
     // 3. Resolve provider from model
-    const providerName = await resolveModelProvider(db, modelSlug);
+    let providerName: string;
+    try {
+      providerName = await resolveModelProvider(db, modelSlug);
+      console.log("[openai-compat] Resolved provider:", providerName);
+    } catch (err) {
+      console.error("[openai-compat] Model resolution failed:", modelSlug, err instanceof Error ? err.message : err);
+      throw err;
+    }
 
     // 4. Gate checks
     await Promise.all([
@@ -210,6 +219,12 @@ export const chatCompletionsHandler = (
     let upstreamResult = await withRetry(() => forwardRequest(forwardInput));
     let finalProviderConfigId = providerConfigId;
     let finalProviderName = providerName;
+
+    console.log("[openai-compat] Upstream response:", upstreamResult.response.status, upstreamResult.response.statusText);
+    if (!upstreamResult.response.ok) {
+      const errBody = await upstreamResult.response.clone().text().catch(() => "");
+      console.error("[openai-compat] Upstream error body:", errBody.slice(0, 500));
+    }
 
     // 10. Fallback
     if (!upstreamResult.response.ok) {
