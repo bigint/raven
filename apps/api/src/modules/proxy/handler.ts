@@ -405,6 +405,15 @@ export const proxyHandler = (
       topP: parsed.topP
     };
 
+    // DEBUG: log tool schemas to diagnose input_schema.type issue
+    if (aiSdkTools) {
+      for (const [name, t] of Object.entries(aiSdkTools)) {
+        const params = (t as Record<string, unknown>).parameters as Record<string, unknown> | undefined;
+        const schema = params?.jsonSchema as Record<string, unknown> | undefined;
+        console.log(`[DEBUG] Tool "${name}" schema:`, JSON.stringify(schema));
+      }
+    }
+
     // Helper: finalize logging after a successful response
     const finalizeLog = () => {
       logData.latencyMs = Date.now() - startTime;
