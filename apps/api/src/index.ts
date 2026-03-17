@@ -3,7 +3,6 @@ import { createAuth } from "@raven/auth";
 import { parseEnv } from "@raven/config";
 import { createDatabase } from "@raven/db";
 import { Hono } from "hono";
-import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { initEmailDispatcher } from "./lib/email-dispatcher";
 import { AppError } from "./lib/errors";
@@ -83,13 +82,6 @@ app.use("*", async (c, next) => {
 
 app.use("*", requestId());
 app.use("*", requestTiming());
-app.use(
-  "*",
-  cors({
-    credentials: true,
-    origin: [env.APP_URL]
-  })
-);
 
 // Security headers
 app.use("*", async (c, next) => {
