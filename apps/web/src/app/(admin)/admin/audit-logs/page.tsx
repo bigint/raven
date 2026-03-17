@@ -17,9 +17,7 @@ const columns: Column<AdminAuditLog>[] = [
   {
     header: "Resource",
     key: "resource",
-    render: (l) => (
-      <span className="text-foreground/70">{l.resourceType}</span>
-    )
+    render: (l) => <span className="text-foreground/70">{l.resourceType}</span>
   },
   {
     header: "Actor",

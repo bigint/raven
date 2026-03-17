@@ -45,7 +45,11 @@ const base64ToBytes = (b64: string): Uint8Array => {
 const toImagePart = (url: string): Msg => {
   const match = /^data:([^;]+);base64,(.+)$/.exec(url);
   if (match) {
-    return { image: base64ToBytes(match[2]!), mimeType: match[1]!, type: "image" };
+    return {
+      image: base64ToBytes(match[2]!),
+      mimeType: match[1]!,
+      type: "image"
+    };
   }
   return { image: url, type: "image" };
 };
@@ -78,7 +82,10 @@ const convertMessage = (msg: Msg): ModelMessage | null => {
 
   switch (role) {
     case "user":
-      return { content: convertContent(msg.content), role: "user" } as ModelMessage;
+      return {
+        content: convertContent(msg.content),
+        role: "user"
+      } as ModelMessage;
 
     case "assistant": {
       const parts: unknown[] = [];

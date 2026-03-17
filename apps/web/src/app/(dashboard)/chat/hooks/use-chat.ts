@@ -48,7 +48,10 @@ export const catalogModelsQueryOptions = () =>
 
 const parseSSEStream = async function* (
   reader: ReadableStreamDefaultReader<Uint8Array>
-): AsyncGenerator<{ text: string; usage?: { prompt_tokens: number; completion_tokens: number } }> {
+): AsyncGenerator<{
+  text: string;
+  usage?: { prompt_tokens: number; completion_tokens: number };
+}> {
   const decoder = new TextDecoder();
   let buffer = "";
   let usage: { prompt_tokens: number; completion_tokens: number } | undefined;
@@ -243,7 +246,9 @@ export const useChat = () => {
           messages: chatMessages,
           model: selectedModel.model,
           stream: settings.stream,
-          ...(settings.stream ? { stream_options: { include_usage: true } } : {}),
+          ...(settings.stream
+            ? { stream_options: { include_usage: true } }
+            : {}),
           ...(settings.enableReasoning
             ? {}
             : { temperature: settings.temperature }),
@@ -269,16 +274,24 @@ export const useChat = () => {
           const errMsg =
             (err as Record<string, unknown>)?.error &&
             typeof (err as Record<string, unknown>).error === "object"
-              ? ((err as Record<string, unknown>).error as Record<string, unknown>)?.message
+              ? (
+                  (err as Record<string, unknown>).error as Record<
+                    string,
+                    unknown
+                  >
+                )?.message
               : (err as Record<string, unknown>)?.message;
           throw new Error(
-            (errMsg as string) ?? `Request failed with status ${response.status}`
+            (errMsg as string) ??
+              `Request failed with status ${response.status}`
           );
         }
 
         if (settings.stream && response.body) {
           const reader = response.body.getReader();
-          let finalUsage: { prompt_tokens: number; completion_tokens: number } | undefined;
+          let finalUsage:
+            | { prompt_tokens: number; completion_tokens: number }
+            | undefined;
 
           for await (const chunk of parseSSEStream(reader)) {
             if (chunk.usage) {
@@ -311,10 +324,8 @@ export const useChat = () => {
           const choice = (result as Record<string, unknown>).choices as
             | Record<string, unknown>[]
             | undefined;
-          const text =
-            (choice?.[0]?.message as Record<string, unknown>)?.content as
-              | string
-              | undefined;
+          const text = (choice?.[0]?.message as Record<string, unknown>)
+            ?.content as string | undefined;
           const usage = (result as Record<string, unknown>).usage as
             | Record<string, unknown>
             | undefined;

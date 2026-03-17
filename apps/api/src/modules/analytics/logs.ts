@@ -41,10 +41,9 @@ export const getLogs =
         .select({
           cachedTokens: sum(requestLogs.cachedTokens).as("cached_tokens_sum"),
           endTime: max(requestLogs.createdAt).as("end_time"),
-          errorCount:
-            count(
-              sql`CASE WHEN ${requestLogs.statusCode} >= 400 THEN 1 END`
-            ).as("error_count"),
+          errorCount: count(
+            sql`CASE WHEN ${requestLogs.statusCode} >= 400 THEN 1 END`
+          ).as("error_count"),
           inputTokens: sum(requestLogs.inputTokens).as("input_tokens_sum"),
           keyName: virtualKeys.name,
           models:

@@ -85,8 +85,7 @@ export const evaluateRoutingRules = async (
 
   const needsTokenCount = parsedRules.some(
     (r) =>
-      r.condition === "token_count_below" ||
-      r.condition === "token_count_above"
+      r.condition === "token_count_below" || r.condition === "token_count_above"
   );
   const messagesText = extractMessagesText(body);
   const tokenCount = needsTokenCount ? estimateTokens(messagesText) : 0;
