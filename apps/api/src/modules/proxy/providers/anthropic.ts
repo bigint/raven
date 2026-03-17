@@ -57,10 +57,25 @@ export const anthropicAdapter = (provider: string): ProviderAdapter => {
       }));
 
       // Anthropic requires conversation to end with a user message.
-      // If the last message is assistant, strip it — it's either a prefill
-      // or the client echoing back the model's own response.
-      if (cleanedMessages[cleanedMessages.length - 1]?.role === "assistant") {
+      // Strip trailing assistant messages — these are either prefills or
+      // the client echoing back the model's own responses.
+      while (
+        cleanedMessages.length > 1 &&
+        cleanedMessages[cleanedMessages.length - 1]?.role === "assistant"
+      ) {
         cleanedMessages = cleanedMessages.slice(0, -1);
+      }
+
+      // If we stripped everything down to a single assistant message,
+      // or ended up empty, something is very wrong — just keep original
+      if (
+        cleanedMessages.length === 0 ||
+        (cleanedMessages.length === 1 &&
+          cleanedMessages[0]?.role === "assistant")
+      ) {
+        cleanedMessages = nonSystemMessages
+          .filter((m) => m.role === "user")
+          .map((m) => ({ content: m.content, role: m.role }));
       }
 
       const result: Record<string, unknown> = {
