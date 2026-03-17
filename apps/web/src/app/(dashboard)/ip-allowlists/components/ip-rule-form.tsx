@@ -1,7 +1,8 @@
 "use client";
 
 import { Button, Input, Modal } from "@raven/ui";
-import { type FormEvent, useState } from "react";
+import { LocateFixed } from "lucide-react";
+import { type FormEvent, useEffect, useState } from "react";
 import { TextMorph } from "torph/react";
 import type { IpRule } from "../hooks/use-ip-allowlists";
 import { useCreateIpRule, useUpdateIpRule } from "../hooks/use-ip-allowlists";
@@ -24,6 +25,15 @@ interface IpRuleFormProps {
 
 const IpRuleForm = ({ open, onClose, editingRule }: IpRuleFormProps) => {
   const isEdit = !!editingRule;
+  const [currentIp, setCurrentIp] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open || currentIp) return;
+    fetch("https://api.ipify.org?format=json")
+      .then((r) => r.json())
+      .then((data: { ip: string }) => setCurrentIp(data.ip))
+      .catch(() => {});
+  }, [open, currentIp]);
   const [form, setForm] = useState<FormState>(() =>
     editingRule
       ? {
@@ -85,13 +95,31 @@ const IpRuleForm = ({ open, onClose, editingRule }: IpRuleFormProps) => {
           </div>
         )}
 
-        <Input
-          id="ip-cidr"
-          label="CIDR"
-          onChange={(e) => setForm((f) => ({ ...f, cidr: e.target.value }))}
-          placeholder="192.168.1.0/24"
-          value={form.cidr}
-        />
+        <div>
+          <Input
+            id="ip-cidr"
+            label="CIDR"
+            onChange={(e) => setForm((f) => ({ ...f, cidr: e.target.value }))}
+            placeholder="192.168.1.0/24"
+            value={form.cidr}
+          />
+          {currentIp && !isEdit && (
+            <button
+              className="mt-1.5 flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+              onClick={() =>
+                setForm((f) => ({
+                  ...f,
+                  cidr: `${currentIp}/32`,
+                  description: f.description || "My IP"
+                }))
+              }
+              type="button"
+            >
+              <LocateFixed className="size-3" />
+              Use my IP ({currentIp})
+            </button>
+          )}
+        </div>
 
         <Input
           id="ip-description"
