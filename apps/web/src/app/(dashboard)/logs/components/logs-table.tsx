@@ -68,9 +68,9 @@ export const LogsTable = ({
           </tr>
         </thead>
         <tbody>
-          {data.map((session) => (
+          {data.map((session, index) => (
             <SessionRow
-              key={session.sessionId}
+              key={`${session.sessionId}-${index}`}
               onRequestClick={onRequestClick}
               session={session}
             />
