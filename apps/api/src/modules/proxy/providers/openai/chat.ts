@@ -115,6 +115,14 @@ export const normalizeRequest = (
     modified = true;
   }
 
+  // OpenAI rejects reasoning_effort + tools on /v1/chat/completions for
+  // gpt-5 and other reasoning models. Strip reasoning_effort when tools present.
+  if (result.reasoning_effort !== undefined && Array.isArray(result.tools)) {
+    const { reasoning_effort: _, ...rest } = result;
+    result = rest;
+    modified = true;
+  }
+
   // Newer OpenAI models require max_completion_tokens instead of max_tokens.
   // If both are absent or max_completion_tokens is already set, do nothing.
   if (
