@@ -1,15 +1,5 @@
-import type {
-  AssistantModelMessage,
-  ImagePart,
-  ModelMessage,
-  TextPart,
-  ToolCallPart,
-  ToolModelMessage,
-  ToolResultPart,
-  UserModelMessage
-} from "ai";
+import type { ModelMessage } from "ai";
 
-// ProviderOptions = Record<string, Record<string, JSONValue>>
 type ProviderOptions = Record<string, Record<string, unknown>>;
 
 export interface ParsedRequest {
@@ -30,201 +20,123 @@ export interface ParsedRequest {
   seed?: number;
   isStreaming: boolean;
   includeUsage: boolean;
-  /** True when the request uses n > 1 and cannot be served by AI SDK */
   requiresRawProxy: boolean;
 }
 
 // ---------------------------------------------------------------------------
-// JSON Schema cleaning
+// Messages — convert OpenAI format to AI SDK ModelMessage[]
+// Only the differences need conversion: tool_calls, tool results, image_url
 // ---------------------------------------------------------------------------
 
-/**
- * Ensure a tool parameter schema is valid for all providers.
- * - Strips $id/$schema (Mistral rejects these)
- * - Ensures top-level type: "object" (Anthropic requires it)
- */
+type Msg = Record<string, unknown>;
+
+const convertContent = (content: unknown): unknown => {
+  if (typeof content === "string") return content;
+  if (!Array.isArray(content)) return String(content ?? "");
+
+  return content.map((block: Msg) => {
+    // image_url → image
+    if (block.type === "image_url") {
+      const url = (block.image_url as Msg)?.url as string;
+      return { image: url, type: "image" };
+    }
+    // Anthropic native image → data URI
+    if (block.type === "image") {
+      const src = block.source as Msg | undefined;
+      if (src?.type === "base64") {
+        return {
+          image: `data:${src.media_type as string};base64,${src.data as string}`,
+          type: "image"
+        };
+      }
+      if (src?.type === "url") return { image: src.url, type: "image" };
+    }
+    return block;
+  });
+};
+
+const convertMessage = (msg: Msg): ModelMessage | null => {
+  const role = msg.role as string;
+
+  switch (role) {
+    case "user":
+      return { content: convertContent(msg.content), role: "user" } as ModelMessage;
+
+    case "assistant": {
+      const parts: unknown[] = [];
+
+      // Text content
+      if (typeof msg.content === "string" && msg.content) {
+        parts.push({ text: msg.content, type: "text" });
+      } else if (Array.isArray(msg.content)) {
+        for (const b of msg.content as Msg[]) {
+          if (b.type === "text" && b.text) parts.push(b);
+        }
+      }
+
+      // tool_calls → tool-call parts
+      if (Array.isArray(msg.tool_calls)) {
+        for (const tc of msg.tool_calls as Msg[]) {
+          const fn = tc.function as Msg;
+          parts.push({
+            input:
+              typeof fn.arguments === "string"
+                ? JSON.parse(fn.arguments as string)
+                : fn.arguments,
+            toolCallId: tc.id,
+            toolName: fn.name,
+            type: "tool-call"
+          });
+        }
+      }
+
+      return {
+        content:
+          parts.length === 1 && (parts[0] as Msg).type === "text"
+            ? (parts[0] as Msg).text
+            : parts,
+        role: "assistant"
+      } as ModelMessage;
+    }
+
+    case "tool":
+      return {
+        content: [
+          {
+            output: {
+              type: "text",
+              value:
+                typeof msg.content === "string"
+                  ? msg.content
+                  : JSON.stringify(msg.content)
+            },
+            toolCallId: msg.tool_call_id,
+            toolName: "",
+            type: "tool-result"
+          }
+        ],
+        role: "tool"
+      } as ModelMessage;
+
+    default:
+      return null;
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Tools
+// ---------------------------------------------------------------------------
+
 const ensureToolSchema = (schema: unknown): Record<string, unknown> => {
   if (!schema || typeof schema !== "object") {
     return { properties: {}, type: "object" };
   }
-
   const s = JSON.parse(JSON.stringify(schema)) as Record<string, unknown>;
   delete s.$id;
   delete s.$schema;
-
-  if (!s.type) {
-    s.type = "object";
-  }
-
+  if (!s.type) s.type = "object";
   return s;
 };
-
-// ---------------------------------------------------------------------------
-// Content part parsing
-// ---------------------------------------------------------------------------
-
-const parseUserContentParts = (content: unknown): (TextPart | ImagePart)[] => {
-  if (typeof content === "string") {
-    return [{ text: content, type: "text" }];
-  }
-
-  if (!Array.isArray(content)) {
-    return [{ text: String(content ?? ""), type: "text" }];
-  }
-
-  const parts: (TextPart | ImagePart)[] = [];
-
-  for (const block of content) {
-    const b = block as Record<string, unknown>;
-
-    if (b.type === "text") {
-      const part: TextPart = { text: b.text as string, type: "text" };
-      // Preserve client-specified cache control for Anthropic
-      if (b.cache_control) {
-        (part as unknown as Record<string, unknown>).providerOptions = {
-          anthropic: {
-            cacheControl: b.cache_control
-          }
-        };
-      }
-      parts.push(part);
-    } else if (b.type === "image_url") {
-      const imageUrl = b.image_url as Record<string, unknown> | undefined;
-      const url = imageUrl?.url as string | undefined;
-      if (url) {
-        parts.push({ image: url, type: "image" } as ImagePart);
-      }
-    } else if (b.type === "image") {
-      // Anthropic-native image format — convert to data URI
-      const source = b.source as Record<string, unknown> | undefined;
-      if (source?.type === "base64") {
-        parts.push({
-          image: `data:${source.media_type as string};base64,${source.data as string}`,
-          type: "image"
-        } as ImagePart);
-      } else if (source?.type === "url") {
-        parts.push({
-          image: source.url as string,
-          type: "image"
-        } as ImagePart);
-      }
-    }
-  }
-
-  return parts;
-};
-
-// ---------------------------------------------------------------------------
-// Message parsing
-// ---------------------------------------------------------------------------
-
-const parseMessages = (
-  rawMessages: unknown[]
-): { messages: ModelMessage[]; system?: string } => {
-  const messages: ModelMessage[] = [];
-  const systemParts: string[] = [];
-
-  for (const raw of rawMessages) {
-    const msg = raw as Record<string, unknown>;
-    const role = msg.role as string;
-
-    switch (role) {
-      case "system": {
-        if (typeof msg.content === "string") {
-          systemParts.push(msg.content);
-        } else if (Array.isArray(msg.content)) {
-          for (const block of msg.content) {
-            const b = block as Record<string, unknown>;
-            if (b.type === "text") systemParts.push(b.text as string);
-          }
-        }
-        break;
-      }
-
-      case "user": {
-        messages.push({
-          content: parseUserContentParts(msg.content),
-          role: "user"
-        } as UserModelMessage);
-        break;
-      }
-
-      case "assistant": {
-        const parts: (TextPart | ToolCallPart)[] = [];
-
-        if (typeof msg.content === "string" && msg.content) {
-          parts.push({ text: msg.content, type: "text" });
-        } else if (Array.isArray(msg.content)) {
-          for (const block of msg.content) {
-            const b = block as Record<string, unknown>;
-            if (b.type === "text" && b.text) {
-              parts.push({ text: b.text as string, type: "text" });
-            }
-          }
-        }
-
-        if (Array.isArray(msg.tool_calls)) {
-          for (const tc of msg.tool_calls) {
-            const call = tc as Record<string, unknown>;
-            const fn = call.function as Record<string, unknown>;
-            parts.push({
-              input:
-                typeof fn.arguments === "string"
-                  ? JSON.parse(fn.arguments)
-                  : fn.arguments,
-              toolCallId: call.id as string,
-              toolName: fn.name as string,
-              type: "tool-call"
-            } satisfies ToolCallPart);
-          }
-        }
-
-        messages.push({
-          content:
-            parts.length === 1 && parts[0]!.type === "text"
-              ? parts[0]!.text
-              : parts,
-          role: "assistant"
-        } as AssistantModelMessage);
-        break;
-      }
-
-      case "tool": {
-        messages.push({
-          content: [
-            {
-              output: {
-                type: "text",
-                value:
-                  typeof msg.content === "string"
-                    ? msg.content
-                    : JSON.stringify(msg.content)
-              },
-              toolCallId: msg.tool_call_id as string,
-              toolName: "",
-              type: "tool-result"
-            } satisfies ToolResultPart
-          ],
-          role: "tool"
-        } satisfies ToolModelMessage);
-        break;
-      }
-
-      default:
-        // Skip unknown roles
-        break;
-    }
-  }
-
-  return {
-    messages,
-    system: systemParts.length > 0 ? systemParts.join("\n\n") : undefined
-  };
-};
-
-// ---------------------------------------------------------------------------
-// Tool parsing
-// ---------------------------------------------------------------------------
 
 const parseTools = (
   rawTools: unknown[] | undefined
@@ -242,12 +154,10 @@ const parseTools = (
   > = {};
 
   for (const raw of rawTools) {
-    const t = raw as Record<string, unknown>;
+    const t = raw as Msg;
     if (t.type !== "function") continue;
-
-    const fn = t.function as Record<string, unknown>;
-    const name = fn.name as string;
-    tools[name] = {
+    const fn = t.function as Msg;
+    tools[fn.name as string] = {
       description: fn.description as string | undefined,
       parameters: ensureToolSchema(fn.parameters)
     };
@@ -262,15 +172,12 @@ const parseToolChoice = (
   if (toolChoice === "auto") return "auto";
   if (toolChoice === "none") return "none";
   if (toolChoice === "required") return "required";
-
   if (typeof toolChoice === "object" && toolChoice !== null) {
-    const tc = toolChoice as Record<string, unknown>;
+    const tc = toolChoice as Msg;
     if (tc.type === "function") {
-      const fn = tc.function as Record<string, unknown>;
-      return { toolName: fn.name as string };
+      return { toolName: (tc.function as Msg).name as string };
     }
   }
-
   return undefined;
 };
 
@@ -279,55 +186,57 @@ const parseToolChoice = (
 // ---------------------------------------------------------------------------
 
 const buildProviderOptions = (
-  body: Record<string, unknown>,
+  body: Msg,
   provider: string,
   hasTools: boolean
 ): ProviderOptions | undefined => {
   const opts: Record<string, Record<string, unknown>> = {};
 
-  // OpenAI reasoning effort — must be stripped when tools are present
   if (body.reasoning_effort && provider === "openai" && !hasTools) {
-    opts.openai = {
-      ...opts.openai,
-      reasoningEffort: body.reasoning_effort as string
-    };
+    opts.openai = { reasoningEffort: body.reasoning_effort as string };
   }
 
-  // Anthropic: auto-inject ephemeral cache control on system prompt.
-  // This is Raven's value-add — customers get prompt caching for free.
   if (provider === "anthropic") {
-    opts.anthropic = {
-      ...opts.anthropic,
-      cacheControl: { type: "ephemeral" }
-    };
+    opts.anthropic = { cacheControl: { type: "ephemeral" } };
   }
 
   return Object.keys(opts).length > 0 ? opts : undefined;
 };
 
 // ---------------------------------------------------------------------------
-// Main entry point
+// Main
 // ---------------------------------------------------------------------------
 
 export const parseIncomingRequest = (
-  body: Record<string, unknown>,
+  body: Msg,
   provider: string
 ): ParsedRequest => {
-  const rawMessages = (body.messages as unknown[]) ?? [];
-  const { messages, system } = parseMessages(rawMessages);
+  const rawMessages = (body.messages as Msg[]) ?? [];
+
+  const messages: ModelMessage[] = [];
+  const systemParts: string[] = [];
+
+  for (const msg of rawMessages) {
+    if (msg.role === "system") {
+      systemParts.push(
+        typeof msg.content === "string"
+          ? msg.content
+          : JSON.stringify(msg.content)
+      );
+    } else {
+      const converted = convertMessage(msg);
+      if (converted) messages.push(converted);
+    }
+  }
+
   const tools = parseTools(body.tools as unknown[] | undefined);
   const hasTools = tools !== undefined && Object.keys(tools).length > 0;
-  const toolChoice = parseToolChoice(body.tool_choice);
-  const providerOptions = buildProviderOptions(body, provider, hasTools);
 
-  const streamOpts = body.stream_options as Record<string, unknown> | undefined;
+  const streamOpts = body.stream_options as Msg | undefined;
 
   let stopSequences: string[] | undefined;
-  if (typeof body.stop === "string") {
-    stopSequences = [body.stop];
-  } else if (Array.isArray(body.stop)) {
-    stopSequences = body.stop as string[];
-  }
+  if (typeof body.stop === "string") stopSequences = [body.stop];
+  else if (Array.isArray(body.stop)) stopSequences = body.stop as string[];
 
   return {
     frequencyPenalty: body.frequency_penalty as number | undefined,
@@ -339,13 +248,13 @@ export const parseIncomingRequest = (
       undefined,
     messages,
     presencePenalty: body.presence_penalty as number | undefined,
-    providerOptions,
+    providerOptions: buildProviderOptions(body, provider, hasTools),
     requiresRawProxy: typeof body.n === "number" && body.n > 1,
     seed: body.seed as number | undefined,
     stopSequences,
-    system,
+    system: systemParts.length > 0 ? systemParts.join("\n\n") : undefined,
     temperature: body.temperature as number | undefined,
-    toolChoice,
+    toolChoice: parseToolChoice(body.tool_choice),
     tools,
     topP: body.top_p as number | undefined
   };
