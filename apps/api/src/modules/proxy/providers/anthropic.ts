@@ -56,21 +56,11 @@ export const anthropicAdapter = (provider: string): ProviderAdapter => {
         role: m.role
       }));
 
-      // Anthropic requires conversation to end with a user message
-      const lastMsg = cleanedMessages[cleanedMessages.length - 1];
-      if (lastMsg?.role === "assistant") {
-        const content = lastMsg.content;
-        const isEmpty =
-          !content ||
-          (typeof content === "string" && !content.trim()) ||
-          (Array.isArray(content) && content.length === 0);
-        if (isEmpty) {
-          // Empty prefill — just remove it
-          cleanedMessages = cleanedMessages.slice(0, -1);
-        } else {
-          // Non-empty assistant message — append a continue prompt
-          cleanedMessages.push({ content: "Continue.", role: "user" });
-        }
+      // Anthropic requires conversation to end with a user message.
+      // If the last message is assistant, strip it — it's either a prefill
+      // or the client echoing back the model's own response.
+      if (cleanedMessages[cleanedMessages.length - 1]?.role === "assistant") {
+        cleanedMessages = cleanedMessages.slice(0, -1);
       }
 
       const result: Record<string, unknown> = {
