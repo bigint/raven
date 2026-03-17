@@ -192,6 +192,30 @@ export const chatCompletionsHandler = (
     if (adapter.normalizeRequest)
       finalBody = adapter.normalizeRequest(parsedBody);
     if (adapter.transformBody) finalBody = adapter.transformBody(finalBody);
+    // 8b. If after normalization the conversation ends with assistant,
+    // return an empty stop response. The model already finished — the client
+    // is just echoing back the response (common in agent loops).
+    const normalizedMsgs = finalBody.messages as
+      | Array<{ role: string }>
+      | undefined;
+    const lastRole = normalizedMsgs?.[normalizedMsgs.length - 1]?.role;
+    if (lastRole === "assistant") {
+      return c.json(
+        {
+          choices: [
+            {
+              finish_reason: "stop",
+              index: 0,
+              message: { content: "", role: "assistant" }
+            }
+          ],
+          model: modelSlug,
+          usage: { completion_tokens: 0, prompt_tokens: 0, total_tokens: 0 }
+        },
+        200
+      );
+    }
+
     const finalBodyText = JSON.stringify(finalBody);
     const resolvedPath = adapter.chatEndpoint;
 
