@@ -108,13 +108,15 @@ export const flushLastUsed = async (
   }
 
   // Batch update DB
-  for (const { keyId, timestamp } of updates) {
-    await db
-      .update(virtualKeys)
-      .set({ lastUsedAt: timestamp })
-      .where(eq(virtualKeys.id, keyId))
-      .catch((err) => console.error("Failed to flush lastUsedAt:", err));
-  }
+  await Promise.all(
+    updates.map(({ keyId, timestamp }) =>
+      db
+        .update(virtualKeys)
+        .set({ lastUsedAt: timestamp })
+        .where(eq(virtualKeys.id, keyId))
+        .catch((err) => console.error("Failed to flush lastUsedAt:", err))
+    )
+  );
 };
 
 export interface BudgetContext {

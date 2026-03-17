@@ -3,6 +3,7 @@ import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
+import { cachedQuery } from "@/lib/cache-utils";
 import { decrypt } from "@/lib/crypto";
 import {
   ForbiddenError,
@@ -19,6 +20,20 @@ export interface ProviderResolution {
   upstreamPath: string;
 }
 
+export const parseProviderFromPath = (
+  reqPath: string
+): { providerName: string; configId: string | null; upstreamPath: string } => {
+  const pathSegments = reqPath.replace(/^\/v1\/proxy\/?/, "").split("/");
+  const providerSegment = pathSegments[0] ?? "";
+  const tildeIdx = providerSegment.indexOf("~");
+  return {
+    configId: tildeIdx === -1 ? null : providerSegment.slice(tildeIdx + 1),
+    providerName:
+      tildeIdx === -1 ? providerSegment : providerSegment.slice(0, tildeIdx),
+    upstreamPath: `/${pathSegments.slice(1).join("/")}`
+  };
+};
+
 export const resolveProvider = async (
   db: Database,
   env: Env,
@@ -27,46 +42,34 @@ export const resolveProvider = async (
   redis?: Redis,
   strategy?: RoutingStrategy
 ): Promise<ProviderResolution> => {
-  const pathSegments = reqPath.replace(/^\/v1\/proxy\/?/, "").split("/");
-  const providerSegment = pathSegments[0];
-
-  if (!providerSegment) {
-    throw new ValidationError("Provider not specified in path");
-  }
-
-  // Parse "openai~configId" or just "openai"
-  const tildeIdx = providerSegment.indexOf("~");
-  const providerName =
-    tildeIdx === -1 ? providerSegment : providerSegment.slice(0, tildeIdx);
-  const configId = tildeIdx === -1 ? null : providerSegment.slice(tildeIdx + 1);
+  const { providerName, configId, upstreamPath } =
+    parseProviderFromPath(reqPath);
 
   if (!providerName) {
     throw new ValidationError("Provider not specified in path");
   }
 
-  let providerConfig: typeof providerConfigs.$inferSelect | undefined;
+  let providerConfig: typeof providerConfigs.$inferSelect | null = null;
 
   if (configId) {
-    const [result] = await db
-      .select()
-      .from(providerConfigs)
-      .where(
-        and(
-          eq(providerConfigs.id, configId),
-          eq(providerConfigs.organizationId, organizationId),
-          eq(providerConfigs.provider, providerName)
+    const queryFn = async () => {
+      const [result] = await db
+        .select()
+        .from(providerConfigs)
+        .where(
+          and(
+            eq(providerConfigs.id, configId),
+            eq(providerConfigs.organizationId, organizationId),
+            eq(providerConfigs.provider, providerName)
+          )
         )
-      )
-      .limit(1);
-    providerConfig = result;
-
-    if (!providerConfig) {
-      throw new NotFoundError(
-        `No provider config found for '${providerName}' with ID '${configId}'`
-      );
-    }
+        .limit(1);
+      return result ?? null;
+    };
+    providerConfig = redis
+      ? await cachedQuery(redis, `pc:id:${configId}`, 60, queryFn)
+      : await queryFn();
   } else if (redis) {
-    // Use smart routing when Redis is available
     const resolvedId = await resolveWithStrategy(
       db,
       redis,
@@ -74,18 +77,20 @@ export const resolveProvider = async (
       providerName,
       strategy
     );
-    const [result] = await db
-      .select()
-      .from(providerConfigs)
-      .where(eq(providerConfigs.id, resolvedId))
-      .limit(1);
-    providerConfig = result;
-
-    if (!providerConfig) {
-      throw new NotFoundError(`No provider config found for '${providerName}'`);
-    }
+    providerConfig = await cachedQuery(
+      redis,
+      `pc:id:${resolvedId}`,
+      60,
+      async () => {
+        const [result] = await db
+          .select()
+          .from(providerConfigs)
+          .where(eq(providerConfigs.id, resolvedId))
+          .limit(1);
+        return result ?? null;
+      }
+    );
   } else {
-    // Fallback: pick a random enabled config
     const allConfigs = await db
       .select()
       .from(providerConfigs)
@@ -98,31 +103,32 @@ export const resolveProvider = async (
       )
       .limit(10);
 
-    if (allConfigs.length === 0) {
-      throw new NotFoundError(`No provider config found for '${providerName}'`);
-    }
-
-    providerConfig = allConfigs[Math.floor(Math.random() * allConfigs.length)];
+    providerConfig =
+      allConfigs[Math.floor(Math.random() * allConfigs.length)] ?? null;
   }
 
-  const resolvedConfig = providerConfig as NonNullable<typeof providerConfig>;
+  if (!providerConfig) {
+    throw new NotFoundError(
+      configId
+        ? `No provider config found for '${providerName}' with ID '${configId}'`
+        : `No provider config found for '${providerName}'`
+    );
+  }
 
-  if (!resolvedConfig.isEnabled) {
+  if (!providerConfig.isEnabled) {
     throw new ForbiddenError(`Provider '${providerName}' is disabled`);
   }
 
   let decryptedApiKey: string;
   try {
-    decryptedApiKey = decrypt(resolvedConfig.apiKey, env.ENCRYPTION_SECRET);
+    decryptedApiKey = decrypt(providerConfig.apiKey, env.ENCRYPTION_SECRET);
   } catch {
     throw new UnauthorizedError("Failed to decrypt provider credentials");
   }
 
-  const upstreamPath = `/${pathSegments.slice(1).join("/")}`;
-
   return {
     decryptedApiKey,
-    providerConfigId: resolvedConfig.id,
+    providerConfigId: providerConfig.id,
     providerName,
     upstreamPath
   };

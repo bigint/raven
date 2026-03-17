@@ -2,6 +2,7 @@ import type { Database } from "@raven/db";
 import { budgets } from "@raven/db";
 import { and, eq, inArray } from "drizzle-orm";
 import type { Redis } from "ioredis";
+import { cachedQuery, cacheKeys } from "@/lib/cache-utils";
 import { BudgetExceededError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 
@@ -24,15 +25,21 @@ export const checkBudgets = async (
     entityIds.push(teamId);
   }
 
-  const activeBudgets = await db
-    .select()
-    .from(budgets)
-    .where(
-      and(
-        eq(budgets.organizationId, orgId),
-        inArray(budgets.entityId, entityIds)
-      )
-    );
+  const activeBudgets = await cachedQuery(
+    redis,
+    cacheKeys.budgets(orgId, teamId, virtualKeyId),
+    15,
+    () =>
+      db
+        .select()
+        .from(budgets)
+        .where(
+          and(
+            eq(budgets.organizationId, orgId),
+            inArray(budgets.entityId, entityIds)
+          )
+        )
+  );
 
   if (activeBudgets.length === 0) {
     return;

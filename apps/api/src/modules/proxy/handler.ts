@@ -13,7 +13,7 @@ import { evaluateRoutingRules } from "./content-router";
 import { execute } from "./execute";
 import { evaluateGuardrails, type GuardrailMatch } from "./guardrails";
 import { checkPlanLimit } from "./plan-check";
-import { resolveProvider } from "./provider-resolver";
+import { parseProviderFromPath, resolveProvider } from "./provider-resolver";
 import { checkRateLimit } from "./rate-limiter";
 import { parseIncomingRequest } from "./request-parser";
 
@@ -29,8 +29,10 @@ export const proxyHandler = (
     const authHeader = c.req.header("Authorization") ?? "";
     const { virtualKey } = await authenticateKey(db, authHeader, redis);
 
-    // 2. Gate checks
-    await Promise.all([
+    // 2. Gate checks + body parse in parallel
+    const method = c.req.method;
+    const hasBody = method !== "GET" && method !== "HEAD";
+    const [, , , bodyText] = await Promise.all([
       checkRateLimit(
         redis,
         virtualKey.id,
@@ -44,14 +46,11 @@ export const proxyHandler = (
         virtualKey.organizationId,
         virtualKey.teamId,
         virtualKey.id
-      )
+      ),
+      hasBody ? c.req.text() : undefined
     ]);
 
     // 3. Parse body
-    const method = c.req.method;
-    const hasBody = method !== "GET" && method !== "HEAD";
-    const bodyText = hasBody ? await c.req.text() : undefined;
-
     let parsedBody: Record<string, unknown> = {};
     if (bodyText) {
       try {
@@ -103,55 +102,33 @@ export const proxyHandler = (
       parsedBody.model = routingResult.model;
     }
 
-    // 5. Validate model
+    // 5. Cache check + model validation + provider resolution in parallel
     const requestedModelSlug = parsedBody.model as string | undefined;
-    if (requestedModelSlug) {
-      const allowedModel = await cachedQuery(
-        redis,
-        `model:${requestedModelSlug}`,
-        300,
-        async () => {
-          const [row] = await db
-            .select({ id: models.id })
-            .from(models)
-            .where(eq(models.slug, requestedModelSlug))
-            .limit(1);
-          return row ?? null;
-        }
-      );
+    const { providerName: pathProvider } = parseProviderFromPath(c.req.path);
 
-      if (!allowedModel) {
-        return c.json(
-          {
-            error: {
-              code: "MODEL_NOT_SUPPORTED",
-              message: `Model "${requestedModelSlug}" is not supported in Raven. Please contact us at support@raven.ai.`
+    const [cacheResult, allowedModel, providerResolution] = await Promise.all([
+      checkCache(redis, virtualKey.organizationId, pathProvider, parsedBody),
+      requestedModelSlug
+        ? cachedQuery(
+            redis,
+            `model:${requestedModelSlug}`,
+            300,
+            async () => {
+              const [row] = await db
+                .select({ id: models.id })
+                .from(models)
+                .where(eq(models.slug, requestedModelSlug))
+                .limit(1);
+              return row ?? null;
             }
-          },
-          400
-        );
-      }
-    }
+          )
+        : null,
+      resolveProvider(db, env, virtualKey.organizationId, c.req.path, redis)
+    ]);
 
-    // 6. Resolve provider
     const { decryptedApiKey, providerConfigId, providerName, upstreamPath } =
-      await resolveProvider(
-        db,
-        env,
-        virtualKey.organizationId,
-        c.req.path,
-        redis
-      );
-
+      providerResolution;
     const requestedModel = (parsedBody.model as string) ?? "unknown";
-
-    // 7. Cache check
-    const cacheResult = await checkCache(
-      redis,
-      virtualKey.organizationId,
-      providerName,
-      parsedBody
-    );
 
     if (cacheResult.hit) {
       return serveCacheHit(db, cacheResult, {
@@ -172,7 +149,19 @@ export const proxyHandler = (
       });
     }
 
-    // 8. Parse + execute
+    if (requestedModelSlug && !allowedModel) {
+      return c.json(
+        {
+          error: {
+            code: "MODEL_NOT_SUPPORTED",
+            message: `Model "${requestedModelSlug}" is not supported in Raven. Please contact us at support@raven.ai.`
+          }
+        },
+        400
+      );
+    }
+
+    // 6. Parse + execute
     const parsed = parseIncomingRequest(parsedBody, providerName);
 
     if (parsed.requiresRawProxy) {
