@@ -1,32 +1,38 @@
 import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import { models } from "@raven/db";
+import { generateText, jsonSchema, streamText, type ToolSet, tool } from "ai";
 import { eq } from "drizzle-orm";
 import type { Context } from "hono";
 import type { Redis } from "ioredis";
 import { NotFoundError, ValidationError } from "@/lib/errors";
+import { PROVIDERS } from "@/lib/providers";
+import {
+  createProviderModel,
+  filterPassthroughHeaders
+} from "../proxy/ai-provider-factory";
 import { authenticateKey } from "../proxy/auth";
 import { checkBudgets } from "../proxy/budget-check";
 import { checkCache, storeCache } from "../proxy/cache";
 import { analyzeContent } from "../proxy/content-analyzer";
-import { withFallback } from "../proxy/fallback";
+import { estimateCost } from "../proxy/cost-estimator";
+import { getFallbackProviders } from "../proxy/fallback";
 import { evaluateGuardrails, type GuardrailMatch } from "../proxy/guardrails";
 import { updateMetrics } from "../proxy/latency-tracker";
 import { logAndPublish, updateLastUsed } from "../proxy/logger";
 import { checkPlanLimit } from "../proxy/plan-check";
 import { resolveProvider } from "../proxy/provider-resolver";
 import { checkRateLimit } from "../proxy/rate-limiter";
-import { buildResponse } from "../proxy/response";
+import { parseIncomingRequest } from "../proxy/request-parser";
 import { analyzeResponse } from "../proxy/response-analyzer";
-import { withRetry } from "../proxy/retry";
 import {
-  extractModel,
-  extractTokenUsage,
-  StreamTokenAccumulator
-} from "../proxy/token-usage";
-import { forwardRequest } from "../proxy/upstream";
+  formatBufferedResponse,
+  formatErrorResponse,
+  formatStreamingResponse
+} from "../proxy/response-formatter";
+import { extractCachedUsage } from "../proxy/usage-mapper";
 
-// Maps model slugs to provider names. Cached in memory for performance.
+// Model → provider cache with 5-minute TTL
 const modelProviderCache = new Map<string, string>();
 
 const resolveModelProvider = async (
@@ -49,9 +55,28 @@ const resolveModelProvider = async (
   }
 
   modelProviderCache.set(modelSlug, model.provider);
-  // Evict cache after 5 minutes
   setTimeout(() => modelProviderCache.delete(modelSlug), 300_000);
   return model.provider;
+};
+
+const buildAiSdkTools = (
+  tools:
+    | Record<
+        string,
+        { description?: string; parameters: Record<string, unknown> }
+      >
+    | undefined
+) => {
+  if (!tools) return undefined;
+  return Object.fromEntries(
+    Object.entries(tools).map(([name, def]) => [
+      name,
+      tool({
+        description: def.description,
+        parameters: jsonSchema(def.parameters)
+      })
+    ])
+  );
 };
 
 export const chatCompletionsHandler = (
@@ -75,10 +100,8 @@ export const chatCompletionsHandler = (
       throw new ValidationError("Invalid JSON body");
     }
 
-    const modelSlug = parsedBody.model as string | undefined;
-    if (!modelSlug) {
-      throw new ValidationError("'model' field is required");
-    }
+    const modelSlug = parsedBody.model as string;
+    if (!modelSlug) throw new ValidationError("'model' field is required");
 
     // 3. Resolve provider from model
     const providerName = await resolveModelProvider(db, modelSlug);
@@ -122,14 +145,13 @@ export const chatCompletionsHandler = (
 
     // 6. Resolve provider config
     const fakeProxyPath = `/v1/proxy/${providerName}/chat/completions`;
-    const { adapter, decryptedApiKey, providerConfigId } =
-      await resolveProvider(
-        db,
-        env,
-        virtualKey.organizationId,
-        fakeProxyPath,
-        redis
-      );
+    const { decryptedApiKey, providerConfigId } = await resolveProvider(
+      db,
+      env,
+      virtualKey.organizationId,
+      fakeProxyPath,
+      redis
+    );
 
     // 7. Cache check
     const cacheResult = await checkCache(
@@ -145,12 +167,12 @@ export const chatCompletionsHandler = (
         parsedBody,
         c.req.header("x-session-id")
       );
-      const { inputTokens, outputTokens, reasoningTokens, cachedTokens } =
-        extractTokenUsage(cacheResult.parsed);
+      const usage = extractCachedUsage(cacheResult.parsed);
+
       logAndPublish(
         db,
         {
-          cachedTokens,
+          cachedTokens: usage.cachedTokens,
           cacheHit: true,
           cost: 0,
           guardrailMatches:
@@ -158,16 +180,16 @@ export const chatCompletionsHandler = (
           hasImages: contentAnalysis.hasImages,
           hasToolUse: contentAnalysis.hasToolUse,
           imageCount: contentAnalysis.imageCount,
-          inputTokens,
+          inputTokens: usage.inputTokens,
           latencyMs,
           method: "POST",
           model: modelSlug,
           organizationId: virtualKey.organizationId,
-          outputTokens,
+          outputTokens: usage.outputTokens,
           path: "/v1/chat/completions",
           provider: providerName,
           providerConfigId,
-          reasoningTokens,
+          reasoningTokens: usage.reasoningTokens,
           requestBody: parsedBody,
           sessionId: contentAnalysis.sessionId,
           statusCode: 200,
@@ -178,6 +200,7 @@ export const chatCompletionsHandler = (
         { redis, teamId: virtualKey.teamId }
       );
       updateLastUsed(redis, virtualKey.id);
+
       const headers: Record<string, string> = {
         "content-type": "application/json"
       };
@@ -187,57 +210,30 @@ export const chatCompletionsHandler = (
       return new Response(cacheResult.body, { headers, status: 200 });
     }
 
-    // 8. Normalize request for provider
-    let finalBody = parsedBody;
-    if (adapter.normalizeRequest)
-      finalBody = adapter.normalizeRequest(parsedBody);
-    if (adapter.transformBody) finalBody = adapter.transformBody(finalBody);
-    const finalBodyText = JSON.stringify(finalBody);
-    const resolvedPath = adapter.mapEndpoint
-      ? adapter.mapEndpoint("/chat/completions")
-      : adapter.chatEndpoint;
+    // 8. Parse request into AI SDK format
+    const parsed = parseIncomingRequest(parsedBody, providerName);
 
-    // 9. Forward with retry
-    const forwardInput = {
-      adapter,
-      body: finalBodyText,
-      decryptedApiKey,
-      incomingHeaders: c.req.header(),
-      method: "POST",
-      rawUrl: c.req.url,
-      upstreamPath: resolvedPath
-    };
-
-    let upstreamResult = await withRetry(() => forwardRequest(forwardInput));
-    let finalProviderConfigId = providerConfigId;
-    let finalProviderName = providerName;
-
-    // 10. Fallback
-    if (!upstreamResult.response.ok) {
-      const fallbackResult = await withFallback(
-        db,
-        env,
-        virtualKey.organizationId,
-        providerConfigId,
-        (overrides) =>
-          withRetry(() => forwardRequest({ ...forwardInput, ...overrides }))
+    if (parsed.requiresRawProxy) {
+      return c.json(
+        {
+          error: {
+            code: "UNSUPPORTED_PARAMETER",
+            message:
+              'Parameter "n" > 1 is not currently supported. Please send separate requests.'
+          }
+        },
+        400
       );
-      if (fallbackResult) {
-        upstreamResult = fallbackResult.result;
-        finalProviderConfigId = fallbackResult.providerConfigId;
-        finalProviderName = fallbackResult.providerName;
-      }
     }
 
-    const latencyMs = Date.now() - startTime;
-    const proxyResponse = await buildResponse(
-      upstreamResult.response,
-      upstreamResult.isStreaming
-    );
+    // 9. Content analysis for logging
     const contentAnalysis = analyzeContent(
       parsedBody,
       c.req.header("x-session-id")
     );
+
+    let finalProviderConfigId = providerConfigId;
+    let finalProviderName = providerName;
 
     const logData = {
       cachedTokens: 0,
@@ -249,7 +245,7 @@ export const chatCompletionsHandler = (
       hasToolUse: contentAnalysis.hasToolUse,
       imageCount: contentAnalysis.imageCount,
       inputTokens: 0,
-      latencyMs,
+      latencyMs: 0,
       method: "POST",
       model: modelSlug,
       organizationId: virtualKey.organizationId,
@@ -260,168 +256,219 @@ export const chatCompletionsHandler = (
       reasoningTokens: 0,
       requestBody: parsedBody,
       sessionId: contentAnalysis.sessionId,
-      statusCode: upstreamResult.response.status,
+      statusCode: 200,
       toolCount: contentAnalysis.toolCount,
       toolNames: [...contentAnalysis.toolNames],
       virtualKeyId: virtualKey.id
     };
 
+    // 10. Build AI SDK model + params
+    const passthroughHeaders = filterPassthroughHeaders(c.req.header());
+    const providerBaseUrl = PROVIDERS[providerName]?.baseUrl;
+
+    const aiModel = createProviderModel(
+      {
+        apiKey: decryptedApiKey,
+        baseUrl: providerBaseUrl,
+        headers: passthroughHeaders,
+        provider: providerName
+      },
+      modelSlug
+    );
+
+    const aiSdkTools = buildAiSdkTools(parsed.tools);
+
+    const baseParams = {
+      frequencyPenalty: parsed.frequencyPenalty,
+      maxRetries: 2,
+      maxTokens: parsed.maxTokens,
+      messages: parsed.messages,
+      presencePenalty: parsed.presencePenalty,
+      providerOptions: parsed.providerOptions,
+      seed: parsed.seed,
+      stopSequences: parsed.stopSequences,
+      system: parsed.system,
+      temperature: parsed.temperature,
+      toolChoice: parsed.toolChoice as Parameters<
+        typeof streamText
+      >[0]["toolChoice"],
+      tools: aiSdkTools as ToolSet | undefined,
+      topP: parsed.topP
+    };
+
+    const guardHeaders: Record<string, string> = {};
     if (guardrailWarnings.length > 0) {
-      proxyResponse.headers["X-Guardrail-Warnings"] =
-        guardrailWarnings.join("; ");
+      guardHeaders["X-Guardrail-Warnings"] = guardrailWarnings.join("; ");
     }
 
-    // Add Raven-specific headers
-    proxyResponse.headers["X-Raven-Provider"] = finalProviderName;
-    proxyResponse.headers["X-Raven-Model"] = modelSlug;
-    proxyResponse.headers["X-Raven-Latency-Ms"] = String(latencyMs);
+    const ravenHeaders = {
+      "X-Raven-Latency-Ms": "",
+      "X-Raven-Model": modelSlug,
+      "X-Raven-Provider": finalProviderName
+    };
 
-    if (proxyResponse.kind === "buffered") {
-      const responseStatus = proxyResponse.response.status;
-      const responseOk = upstreamResult.response.ok;
+    const finalizeLog = () => {
+      logData.latencyMs = Date.now() - startTime;
+      logData.provider = finalProviderName;
+      logData.providerConfigId = finalProviderConfigId;
+      logAndPublish(db, logData, { redis, teamId: virtualKey.teamId });
+      updateLastUsed(redis, virtualKey.id);
+      void updateMetrics(
+        redis,
+        finalProviderConfigId,
+        logData.latencyMs,
+        logData.cost
+      );
+    };
 
-      // Normalize provider-native response to OpenAI format
-      const responseBody =
-        adapter.normalizeResponse && responseOk
-          ? adapter.normalizeResponse(proxyResponse.body)
-          : proxyResponse.body;
-      const responseText =
-        responseBody === proxyResponse.body
-          ? proxyResponse.text
-          : JSON.stringify(responseBody);
+    // 11. Execute via AI SDK
+    try {
+      if (parsed.isStreaming) {
+        return executeStreaming(baseParams, aiModel);
+      }
+      return await executeBuffered(baseParams, aiModel);
+    } catch (err) {
+      // Fallback
+      const fallbacks = await getFallbackProviders(
+        db,
+        env,
+        virtualKey.organizationId,
+        providerConfigId,
+        providerName
+      );
 
-      // Defer all post-processing — none of it affects the response
+      for (const fb of fallbacks) {
+        try {
+          const fbModel = createProviderModel(
+            {
+              apiKey: fb.decryptedApiKey,
+              baseUrl: providerBaseUrl,
+              headers: passthroughHeaders,
+              provider: fb.providerName
+            },
+            modelSlug
+          );
+
+          finalProviderConfigId = fb.providerConfigId;
+          finalProviderName = fb.providerName;
+          ravenHeaders["X-Raven-Provider"] = finalProviderName;
+
+          if (parsed.isStreaming) {
+            return executeStreaming(baseParams, fbModel);
+          }
+          return await executeBuffered(baseParams, fbModel);
+        } catch (fbErr) {
+          console.error(
+            `Fallback ${fb.providerName} (${fb.providerConfigId}) failed:`,
+            fbErr instanceof Error ? fbErr.message : fbErr
+          );
+        }
+      }
+
+      const { body, status } = formatErrorResponse(err);
+      logData.latencyMs = Date.now() - startTime;
+      logData.statusCode = status;
+      logAndPublish(db, logData, { redis, teamId: virtualKey.teamId });
+      return new Response(body, {
+        headers: { "content-type": "application/json", ...guardHeaders },
+        status
+      });
+    }
+
+    function executeStreaming(
+      params: typeof baseParams,
+      model: ReturnType<typeof createProviderModel>
+    ): Response {
+      const result = streamText({ ...params, model } as Parameters<
+        typeof streamText
+      >[0]);
+
+      const stream = formatStreamingResponse(
+        result.fullStream,
+        modelSlug,
+        parsed.includeUsage,
+        (usage) => {
+          logData.inputTokens = usage.inputTokens;
+          logData.outputTokens = usage.outputTokens;
+          logData.reasoningTokens = usage.reasoningTokens;
+          logData.cachedTokens = usage.cachedTokens;
+          logData.cost = estimateCost(finalProviderName, logData.model, usage);
+          finalizeLog();
+        }
+      );
+
+      ravenHeaders["X-Raven-Latency-Ms"] = String(Date.now() - startTime);
+
+      return new Response(stream, {
+        headers: {
+          "cache-control": "no-cache",
+          connection: "keep-alive",
+          "content-type": "text/event-stream",
+          ...guardHeaders,
+          ...ravenHeaders
+        },
+        status: 200
+      });
+    }
+
+    async function executeBuffered(
+      params: typeof baseParams,
+      model: ReturnType<typeof createProviderModel>
+    ): Promise<Response> {
+      const result = await generateText({ ...params, model } as Parameters<
+        typeof generateText
+      >[0]);
+
+      const formatted = formatBufferedResponse(
+        {
+          finishReason: result.finishReason,
+          reasoning: result.reasoning,
+          text: result.text,
+          toolCalls: result.toolCalls,
+          usage: result.usage
+        },
+        modelSlug
+      );
+
       void (() => {
-        const {
-          inputTokens,
-          outputTokens,
-          reasoningTokens,
-          cachedTokens,
-          cacheReadTokens,
-          cacheWriteTokens
-        } = extractTokenUsage(responseBody);
-        const model = extractModel(responseBody, modelSlug);
-        logData.cachedTokens = cachedTokens;
-        logData.inputTokens = inputTokens;
-        logData.outputTokens = outputTokens;
-        logData.reasoningTokens = reasoningTokens;
-        logData.model = model;
-        logData.cost = adapter.estimateCost(
-          model,
-          inputTokens,
-          outputTokens,
-          cacheReadTokens,
-          cacheWriteTokens
-        );
-
-        const respAnalysis = analyzeResponse(responseBody);
+        const respAnalysis = analyzeResponse(formatted.body);
         if (respAnalysis.hasToolCalls) {
           logData.hasToolUse = true;
           logData.toolCount += respAnalysis.toolCallCount;
           logData.toolNames.push(...respAnalysis.toolCallNames);
         }
 
-        if (responseOk) {
-          void storeCache(
-            redis,
-            virtualKey.organizationId,
-            finalProviderName,
-            parsedBody,
-            responseText
-          );
-        }
-
-        logAndPublish(db, logData, { redis, teamId: virtualKey.teamId });
-        updateLastUsed(redis, virtualKey.id);
-        void updateMetrics(
-          redis,
-          finalProviderConfigId,
-          latencyMs,
-          logData.cost
+        logData.inputTokens = formatted.usage.inputTokens;
+        logData.outputTokens = formatted.usage.outputTokens;
+        logData.reasoningTokens = formatted.usage.reasoningTokens;
+        logData.cachedTokens = formatted.usage.cachedTokens;
+        logData.cost = estimateCost(
+          finalProviderName,
+          logData.model,
+          formatted.usage
         );
+
+        void storeCache(
+          redis,
+          virtualKey.organizationId,
+          finalProviderName,
+          parsedBody,
+          formatted.text
+        );
+
+        finalizeLog();
       })();
 
-      return new Response(responseText, {
-        headers: proxyResponse.headers,
-        status: responseStatus
+      ravenHeaders["X-Raven-Latency-Ms"] = String(Date.now() - startTime);
+
+      return new Response(formatted.text, {
+        headers: {
+          "content-type": "application/json",
+          ...guardHeaders,
+          ...ravenHeaders
+        },
+        status: 200
       });
     }
-
-    // Streaming
-    const accumulator = new StreamTokenAccumulator();
-    let partialLine = "";
-
-    const transform = new TransformStream<Uint8Array, Uint8Array>({
-      flush() {
-        if (partialLine) accumulator.processChunk(partialLine);
-        const {
-          inputTokens,
-          outputTokens,
-          reasoningTokens,
-          cachedTokens,
-          cacheReadTokens,
-          cacheWriteTokens
-        } = accumulator.getUsage();
-        const model =
-          accumulator.getModel() === "unknown"
-            ? modelSlug
-            : accumulator.getModel();
-        logData.cachedTokens = cachedTokens;
-        logData.inputTokens = inputTokens;
-        logData.outputTokens = outputTokens;
-        logData.reasoningTokens = reasoningTokens;
-        logData.model = model;
-        logData.cost = adapter.estimateCost(
-          model,
-          inputTokens,
-          outputTokens,
-          cacheReadTokens,
-          cacheWriteTokens
-        );
-        logAndPublish(db, logData, { redis, teamId: virtualKey.teamId });
-        updateLastUsed(redis, virtualKey.id);
-        void updateMetrics(
-          redis,
-          finalProviderConfigId,
-          latencyMs,
-          logData.cost
-        );
-      },
-      transform(chunk, controller) {
-        const text = new TextDecoder().decode(chunk);
-        const combined = partialLine + text;
-        const lines = combined.split("\n");
-        partialLine = lines.pop() ?? "";
-
-        if (adapter.normalizeStreamChunk) {
-          const encoder = new TextEncoder();
-          for (const line of lines) {
-            const trimmed = line.trim();
-            if (trimmed) {
-              accumulator.processChunk(trimmed);
-              const normalized = adapter.normalizeStreamChunk(trimmed);
-              if (normalized) {
-                controller.enqueue(encoder.encode(`${normalized}\n\n`));
-              }
-            } else {
-              controller.enqueue(encoder.encode("\n"));
-            }
-          }
-        } else {
-          controller.enqueue(chunk);
-          for (const line of lines) {
-            const trimmed = line.trim();
-            if (trimmed) accumulator.processChunk(trimmed);
-          }
-        }
-      }
-    });
-
-    const streamBody = proxyResponse.response.body?.pipeThrough(transform);
-
-    return new Response(streamBody, {
-      headers: proxyResponse.headers,
-      status: proxyResponse.response.status
-    });
   };
 };

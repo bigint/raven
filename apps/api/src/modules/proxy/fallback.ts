@@ -3,78 +3,56 @@ import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { and, eq, ne } from "drizzle-orm";
 import { decrypt } from "@/lib/crypto";
-import { getProviderAdapter } from "./providers/registry";
-import type { ForwardRequestInput, ForwardRequestResult } from "./upstream";
 
-export interface FallbackResult {
-  result: ForwardRequestResult;
+export interface FallbackProvider {
+  decryptedApiKey: string;
   providerConfigId: string;
   providerName: string;
 }
 
-export const withFallback = async (
+/**
+ * Returns fallback provider configs for the same provider type.
+ *
+ * Cross-provider fallback (e.g. Anthropic → OpenAI) is not supported because
+ * the model ID would not resolve on a different provider. Only same-provider
+ * fallback (different API keys or endpoints) is returned.
+ */
+export const getFallbackProviders = async (
   db: Database,
   env: Env,
   orgId: string,
   primaryConfigId: string,
-  requestFn: (
-    input: Partial<ForwardRequestInput>
-  ) => Promise<ForwardRequestResult>
-): Promise<FallbackResult | null> => {
-  const fallbackConfigs = await db
+  primaryProviderName: string
+): Promise<FallbackProvider[]> => {
+  const configs = await db
     .select()
     .from(providerConfigs)
     .where(
       and(
         eq(providerConfigs.organizationId, orgId),
+        eq(providerConfigs.provider, primaryProviderName),
         eq(providerConfigs.isEnabled, true),
         ne(providerConfigs.id, primaryConfigId)
       )
     )
     .limit(10);
 
-  // Decrypt all keys in parallel upfront
-  const prepared = await Promise.all(
-    fallbackConfigs.map(async (config) => {
-      try {
-        const adapter = getProviderAdapter(config.provider);
-        const decryptedApiKey = decrypt(config.apiKey, env.ENCRYPTION_SECRET);
-        return { adapter, config, decryptedApiKey };
-      } catch {
-        console.error(
-          `Failed to decrypt fallback provider credentials: ${config.provider}`
-        );
-        return null;
-      }
-    })
-  );
+  const results: FallbackProvider[] = [];
 
-  for (const entry of prepared) {
-    if (!entry) continue;
-
+  for (const config of configs) {
     try {
-      const result = await requestFn({
-        adapter: entry.adapter,
-        decryptedApiKey: entry.decryptedApiKey
+      const decryptedApiKey = decrypt(config.apiKey, env.ENCRYPTION_SECRET);
+      results.push({
+        decryptedApiKey,
+        providerConfigId: config.id,
+        providerName: config.provider
       });
-
-      if (result.response.ok) {
-        console.info(
-          `Fallback succeeded with provider: ${entry.config.provider} (${entry.config.id})`
-        );
-        return {
-          providerConfigId: entry.config.id,
-          providerName: entry.config.provider,
-          result
-        };
-      }
-    } catch (err) {
+    } catch {
       console.error(
-        `Fallback provider ${entry.config.provider} failed:`,
-        err instanceof Error ? err.message : err
+        `Failed to decrypt fallback provider credentials: ${config.provider} (${config.id})`
       );
     }
   }
 
-  return null;
+  return results;
 };

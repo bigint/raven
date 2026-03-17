@@ -33,19 +33,6 @@ export const analyzeResponse = (body: unknown): ResponseAnalysis => {
     }
   }
 
-  // Anthropic: content blocks with type: "tool_use"
-  if (Array.isArray(b.content)) {
-    for (const block of b.content) {
-      const bl = block as Record<string, unknown>;
-      if (bl.type === "tool_use") {
-        result.toolCallCount++;
-        if (typeof bl.name === "string") {
-          result.toolCallNames.push(bl.name);
-        }
-      }
-    }
-  }
-
   result.hasToolCalls = result.toolCallCount > 0;
 
   return result;
