@@ -52,6 +52,11 @@ const cleanJsonSchema = (schema: unknown): Record<string, unknown> => {
   delete s.$id;
   delete s.$schema;
 
+  // Anthropic requires `type` on every schema object — ensure it's present
+  if (!s.type) {
+    s.type = "object";
+  }
+
   if (s.properties && typeof s.properties === "object") {
     const props = { ...(s.properties as Record<string, unknown>) };
     for (const key of Object.keys(props)) {
