@@ -94,6 +94,14 @@ const SignInPage = () => {
                 value={password}
               />
             </div>
+            <div className="flex items-center justify-end">
+              <Link
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                href="/sign-in/forgot-password"
+              >
+                Forgot password?
+              </Link>
+            </div>
             <button
               className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
               disabled={isLoading}

@@ -15,7 +15,7 @@ const columns: Column<AdminUser>[] = [
   {
     header: "Email",
     key: "email",
-    render: (u) => <span className="text-muted-foreground">{u.email}</span>
+    render: (u) => <span className="text-foreground/70">{u.email}</span>
   },
   {
     header: "Role",
@@ -33,7 +33,7 @@ const columns: Column<AdminUser>[] = [
     header: "Joined",
     key: "createdAt",
     render: (u) => (
-      <span className="text-muted-foreground">
+      <span className="text-foreground/70">
         {new Date(u.createdAt).toLocaleDateString()}
       </span>
     )

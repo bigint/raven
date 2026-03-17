@@ -41,6 +41,10 @@ export const getLogs =
         .select({
           cachedTokens: sum(requestLogs.cachedTokens).as("cached_tokens_sum"),
           endTime: max(requestLogs.createdAt).as("end_time"),
+          errorCount:
+            count(
+              sql`CASE WHEN ${requestLogs.statusCode} >= 400 THEN 1 END`
+            ).as("error_count"),
           inputTokens: sum(requestLogs.inputTokens).as("input_tokens_sum"),
           keyName: virtualKeys.name,
           models:
@@ -88,6 +92,7 @@ export const getLogs =
       data: rows.map((row) => ({
         cachedTokens: Number(row.cachedTokens ?? 0),
         endTime: row.endTime,
+        errorCount: Number(row.errorCount ?? 0),
         inputTokens: Number(row.inputTokens ?? 0),
         keyName: row.keyName ?? "Unknown",
         models: row.models ? row.models.split(",") : [],

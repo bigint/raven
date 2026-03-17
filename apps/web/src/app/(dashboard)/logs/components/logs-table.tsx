@@ -15,6 +15,7 @@ const TABLE_HEADERS = [
   { className: "w-10", label: "" },
   { className: "text-left", label: "Key" },
   { className: "text-left", label: "User Agent" },
+  { className: "text-center", label: "Status" },
   { className: "text-right", label: "Requests" },
   { className: "text-left", label: "Models" },
   { className: "text-right", label: "Input Tokens" },

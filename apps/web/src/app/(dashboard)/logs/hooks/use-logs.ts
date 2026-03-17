@@ -10,6 +10,7 @@ export interface LogSession {
   keyName: string;
   userAgent: string | null;
   requestCount: number;
+  errorCount: number;
   models: string[];
   inputTokens: number;
   outputTokens: number;

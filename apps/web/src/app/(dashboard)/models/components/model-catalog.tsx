@@ -88,8 +88,8 @@ const ModelCard = ({ model }: { model: ModelDefinition }) => {
           </div>
           <div>
             <h3 className="font-semibold">{model.name}</h3>
-            <p className="text-xs capitalize text-muted-foreground">
-              {model.provider}
+            <p className="text-xs text-muted-foreground">
+              {formatProviderName(model.provider)}
             </p>
           </div>
         </div>

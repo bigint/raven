@@ -9,11 +9,12 @@ import { UsageChart } from "./components/usage-chart";
 import { useOverview } from "./hooks/use-overview";
 
 const OverviewPage = () => {
-  const { stats, usage, recentRequests, keys, isLoading } = useOverview();
+  const { stats, usage, recentRequests, keys, providers, isLoading } =
+    useOverview();
 
   const activeKeys = keys.filter((k) => k.isActive).length;
   const totalRequests = stats?.totalRequests ?? 0;
-  const providerCount = new Set(usage.map((u) => u.provider)).size;
+  const providerCount = providers.length;
 
   return (
     <div>
@@ -24,7 +25,7 @@ const OverviewPage = () => {
         </p>
       </div>
 
-      <StatCards activeKeys={activeKeys} loading={isLoading} stats={stats} />
+      <StatCards loading={isLoading} stats={stats} />
 
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <UsageChart

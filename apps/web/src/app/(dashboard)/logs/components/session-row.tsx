@@ -53,6 +53,15 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
         <td className="px-5 py-4 text-sm text-muted-foreground">
           {session.userAgent ?? "\u2014"}
         </td>
+        <td className="px-5 py-4 text-center">
+          {session.errorCount > 0 ? (
+            <Badge variant="error">
+              {session.errorCount} error{session.errorCount > 1 ? "s" : ""}
+            </Badge>
+          ) : (
+            <Badge variant="success">OK</Badge>
+          )}
+        </td>
         <td className="px-5 py-4 text-right tabular-nums">
           <span className="inline-flex items-center gap-1.5">
             {session.requestCount.toLocaleString()}
@@ -95,7 +104,7 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
 
       {expanded && (
         <tr>
-          <td className="bg-muted/20 px-0 py-0" colSpan={11}>
+          <td className="bg-muted/20 px-0 py-0" colSpan={12}>
             <div className="px-8 py-4">
               {requests.length === 0 ? (
                 <p className="py-4 text-center text-sm text-muted-foreground">

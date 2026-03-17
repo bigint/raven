@@ -46,7 +46,7 @@ const columns: Column<AdminOrg>[] = [
     header: "Created",
     key: "createdAt",
     render: (o) => (
-      <span className="text-muted-foreground">
+      <span className="text-foreground/70">
         {new Date(o.createdAt).toLocaleDateString()}
       </span>
     )

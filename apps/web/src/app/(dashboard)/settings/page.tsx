@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useOrgStore } from "@/stores/org";
 import { OrgList } from "../profile/components/org-list";
 import { PendingInvitations } from "../profile/components/pending-invitations";
 import { ProfileForm } from "../profile/components/profile-form";
@@ -43,7 +44,8 @@ const SettingsPage = () => {
     }
   };
 
-  const activeOrgId = orgsQuery.data?.[0]?.id ?? null;
+  const storeOrg = useOrgStore((s) => s.activeOrg);
+  const activeOrgId = storeOrg?.id ?? null;
 
   return (
     <div>
