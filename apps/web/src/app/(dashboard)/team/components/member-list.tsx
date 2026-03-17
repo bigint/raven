@@ -1,7 +1,7 @@
 "use client";
 
 import type { Column } from "@raven/ui";
-import { Avatar, Badge, DataTable, EmptyState, Spinner } from "@raven/ui";
+import { Avatar, Badge, DataTable, EmptyState } from "@raven/ui";
 import { Trash2, Users } from "lucide-react";
 import type { Member } from "../hooks/use-team-data";
 
@@ -18,11 +18,7 @@ interface MemberListProps {
 }
 
 const MemberList = ({ isLoading, members, onDelete }: MemberListProps) => {
-  if (isLoading) {
-    return <Spinner />;
-  }
-
-  if (members.length === 0) {
+  if (!isLoading && members.length === 0) {
     return (
       <EmptyState icon={<Users className="size-8" />} title="No members yet" />
     );
@@ -87,6 +83,8 @@ const MemberList = ({ isLoading, members, onDelete }: MemberListProps) => {
       }
       data={members}
       keyExtractor={(member) => member.id}
+      loading={isLoading}
+      loadingMessage="Loading members..."
     />
   );
 };

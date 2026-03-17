@@ -218,7 +218,19 @@ const buildProviderOptions = (
   }
 
   if (provider === "anthropic") {
-    opts.anthropic = { cacheControl: { type: "ephemeral" } };
+    const anthropicOpts: Record<string, unknown> = {
+      cacheControl: { type: "ephemeral" }
+    };
+
+    const reasoning = body.reasoning as Msg | undefined;
+    if (reasoning?.budget_tokens) {
+      anthropicOpts.thinking = {
+        budgetTokens: reasoning.budget_tokens as number,
+        type: "enabled"
+      };
+    }
+
+    opts.anthropic = anthropicOpts;
   }
 
   return Object.keys(opts).length > 0 ? opts : undefined;

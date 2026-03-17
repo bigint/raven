@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { ExamplePrompts } from "./example-prompts";
 import { Markdown } from "./markdown";
 import type { ResponseMeta } from "./response-metadata";
@@ -18,6 +19,7 @@ interface ChatMessage {
   id: string;
   images?: ImageAttachment[];
   meta?: ResponseMeta;
+  reasoning?: string;
   role: "assistant" | "user";
 }
 
@@ -27,6 +29,44 @@ interface ChatMessagesProps {
   onExampleSelect: (message: string) => void;
   showMetadata: boolean;
 }
+
+const ReasoningBlock = ({
+  content,
+  isStreaming
+}: {
+  content: string;
+  isStreaming?: boolean;
+}) => {
+  const [expanded, setExpanded] = useState(isStreaming ?? false);
+
+  return (
+    <div className="mb-2 rounded-lg border border-border/50 bg-background/50">
+      <button
+        className="flex w-full items-center gap-1.5 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        onClick={() => setExpanded(!expanded)}
+        type="button"
+      >
+        {expanded ? (
+          <ChevronDown className="size-3" />
+        ) : (
+          <ChevronRight className="size-3" />
+        )}
+        Thinking
+        {isStreaming && !expanded && (
+          <span className="ml-1 inline-block h-3 w-1 animate-pulse rounded-sm bg-current" />
+        )}
+      </button>
+      {expanded && (
+        <div className="border-t border-border/50 px-3 py-2 text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">
+          {content}
+          {isStreaming && (
+            <span className="ml-0.5 inline-block h-3 w-1 animate-pulse rounded-sm bg-current align-text-bottom" />
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const ChatMessages = ({
   isStreaming,
@@ -83,7 +123,15 @@ export const ChatMessages = ({
                     {message.content}
                   </>
                 ) : (
-                  <Markdown content={message.content} />
+                  <>
+                    {message.reasoning && (
+                      <ReasoningBlock
+                        content={message.reasoning}
+                        isStreaming={isCurrentAssistant}
+                      />
+                    )}
+                    <Markdown content={message.content} />
+                  </>
                 )}
                 {isCurrentAssistant && (
                   <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-current align-text-bottom" />

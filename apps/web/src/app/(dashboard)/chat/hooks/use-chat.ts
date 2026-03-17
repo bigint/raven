@@ -14,6 +14,7 @@ interface DisplayMessage {
   id: string;
   images?: ImageAttachment[];
   meta?: ResponseMeta;
+  reasoning?: string;
   role: "assistant" | "user";
 }
 
@@ -49,6 +50,7 @@ export const catalogModelsQueryOptions = () =>
 const parseSSEStream = async function* (
   reader: ReadableStreamDefaultReader<Uint8Array>
 ): AsyncGenerator<{
+  reasoning?: string;
   text: string;
   usage?: { prompt_tokens: number; completion_tokens: number };
 }> {
@@ -82,8 +84,11 @@ const parseSSEStream = async function* (
         }
 
         const delta = parsed.choices?.[0]?.delta;
-        if (delta?.content) {
-          yield { text: delta.content };
+        if (delta?.content || delta?.reasoning_content) {
+          yield {
+            reasoning: delta.reasoning_content,
+            text: delta.content ?? ""
+          };
         }
       } catch {
         // skip malformed chunks
@@ -250,7 +255,12 @@ export const useChat = () => {
             ? { stream_options: { include_usage: true } }
             : {}),
           ...(settings.enableReasoning
-            ? {}
+            ? {
+                reasoning: {
+                  budget_tokens: settings.reasoningBudget
+                },
+                reasoning_effort: "medium"
+              }
             : { temperature: settings.temperature }),
           ...(demoTools ? { tools: demoTools } : {})
         };
@@ -297,13 +307,19 @@ export const useChat = () => {
             if (chunk.usage) {
               finalUsage = chunk.usage;
             }
-            if (chunk.text) {
+            if (chunk.text || chunk.reasoning) {
               setMessages((prev) => {
                 const idx = prev.length - 1;
                 const msg = prev[idx];
                 if (!msg || msg.id !== assistantMessage.id) return prev;
                 const updated = [...prev];
-                updated[idx] = { ...msg, content: msg.content + chunk.text };
+                updated[idx] = {
+                  ...msg,
+                  content: msg.content + (chunk.text ?? ""),
+                  ...(chunk.reasoning
+                    ? { reasoning: (msg.reasoning ?? "") + chunk.reasoning }
+                    : {})
+                };
                 return updated;
               });
             }
@@ -324,8 +340,9 @@ export const useChat = () => {
           const choice = (result as Record<string, unknown>).choices as
             | Record<string, unknown>[]
             | undefined;
-          const text = (choice?.[0]?.message as Record<string, unknown>)
-            ?.content as string | undefined;
+          const msg = choice?.[0]?.message as Record<string, unknown> | undefined;
+          const text = msg?.content as string | undefined;
+          const reasoningContent = msg?.reasoning_content as string | undefined;
           const usage = (result as Record<string, unknown>).usage as
             | Record<string, unknown>
             | undefined;
@@ -340,7 +357,12 @@ export const useChat = () => {
           setMessages((prev) =>
             prev.map((m) =>
               m.id === assistantMessage.id
-                ? { ...m, content: text ?? "", meta }
+                ? {
+                    ...m,
+                    content: text ?? "",
+                    meta,
+                    ...(reasoningContent ? { reasoning: reasoningContent } : {})
+                  }
                 : m
             )
           );

@@ -1,7 +1,6 @@
 "use client";
 
-import { PageHeader, PillTabs } from "@raven/ui";
-import { Settings } from "lucide-react";
+import { PageHeader, PillTabs, Spinner } from "@raven/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { DangerZone } from "./components/danger-zone";
 import { OrgSettingsForm } from "./components/org-settings-form";
@@ -72,7 +71,7 @@ const OrgSettingsPage = () => {
 
       {isLoading ? (
         <div className="rounded-xl border border-border p-12 text-center">
-          <Settings className="mx-auto size-6 animate-spin text-muted-foreground/50" />
+          <Spinner className="mx-auto" />
           <p className="mt-3 text-sm text-muted-foreground">
             Loading settings...
           </p>

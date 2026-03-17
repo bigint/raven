@@ -1,7 +1,7 @@
 "use client";
 
 import type { Column } from "@raven/ui";
-import { Badge, Button, DataTable, EmptyState, Spinner } from "@raven/ui";
+import { Badge, Button, DataTable, EmptyState } from "@raven/ui";
 import { Mail, Trash2 } from "lucide-react";
 import type { Invitation } from "../hooks/use-team-data";
 
@@ -30,11 +30,7 @@ const InvitationList = ({
   onDelete,
   onInvite
 }: InvitationListProps) => {
-  if (isLoading) {
-    return <Spinner />;
-  }
-
-  if (invitations.length === 0) {
+  if (!isLoading && invitations.length === 0) {
     return (
       <EmptyState
         action={
@@ -105,6 +101,8 @@ const InvitationList = ({
       }
       data={invitations}
       keyExtractor={(inv) => inv.id}
+      loading={isLoading}
+      loadingMessage="Loading invitations..."
     />
   );
 };

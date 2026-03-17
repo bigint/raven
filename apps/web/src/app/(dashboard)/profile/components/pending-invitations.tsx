@@ -41,7 +41,10 @@ const PendingInvitations = ({
         </div>
       )}
       {invitationsLoading ? (
-        <Spinner />
+        <div className="py-6 text-center">
+          <Spinner className="mx-auto" />
+          <p className="mt-3 text-sm text-muted-foreground">Loading invitations...</p>
+        </div>
       ) : invitations.length === 0 ? (
         <EmptyState
           bordered={false}

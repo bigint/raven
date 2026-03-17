@@ -1,5 +1,6 @@
 "use client";
 
+import { Spinner } from "@raven/ui";
 import { CreditCard } from "lucide-react";
 import { PlanSelector } from "./components/plan-selector";
 import { SubscriptionStatus } from "./components/subscription-status";
@@ -35,7 +36,7 @@ const BillingPage = () => {
 
       {isLoading ? (
         <div className="rounded-xl border border-border p-12 text-center">
-          <div className="mx-auto size-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+          <Spinner className="mx-auto" />
           <p className="mt-3 text-sm text-muted-foreground">
             Loading billing...
           </p>
