@@ -78,13 +78,7 @@ export const chatCompletionsHandler = (
         virtualKey.rateLimitRpd
       ),
       checkPlanLimit(db, redis, virtualKey.organizationId),
-      checkBudgets(
-        db,
-        redis,
-        virtualKey.organizationId,
-        virtualKey.teamId,
-        virtualKey.id
-      )
+      checkBudgets(db, redis, virtualKey.organizationId, virtualKey.id)
     ]);
 
     // 5. Guardrails
@@ -138,7 +132,6 @@ export const chatCompletionsHandler = (
         redis,
         sessionHeader: c.req.header("x-session-id") ?? null,
         startTime,
-        teamId: virtualKey.teamId,
         virtualKeyId: virtualKey.id
       });
     }
@@ -183,8 +176,7 @@ export const chatCompletionsHandler = (
       startTime,
       virtualKey: {
         id: virtualKey.id,
-        organizationId: virtualKey.organizationId,
-        teamId: virtualKey.teamId
+        organizationId: virtualKey.organizationId
       }
     });
   };

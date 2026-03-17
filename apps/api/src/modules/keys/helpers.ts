@@ -22,6 +22,5 @@ export const safeKey = (k: typeof virtualKeys.$inferSelect) => ({
   name: k.name,
   organizationId: k.organizationId,
   rateLimitRpd: k.rateLimitRpd,
-  rateLimitRpm: k.rateLimitRpm,
-  teamId: k.teamId
+  rateLimitRpm: k.rateLimitRpm
 });

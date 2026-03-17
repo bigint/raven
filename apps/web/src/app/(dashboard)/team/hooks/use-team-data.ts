@@ -24,13 +24,6 @@ export interface Invitation {
   expiresAt: string;
 }
 
-export interface Team {
-  id: string;
-  name: string;
-  memberCount: number;
-  createdAt: string;
-}
-
 export const membersQueryOptions = () =>
   queryOptions({
     queryFn: () => api.get<Member[]>("/v1/teams/members"),
@@ -43,12 +36,6 @@ export const invitationsQueryOptions = () =>
     queryKey: ["teams", "invitations"]
   });
 
-export const teamsQueryOptions = () =>
-  queryOptions({
-    queryFn: () => api.get<Team[]>("/v1/teams/teams"),
-    queryKey: ["teams", "teams"]
-  });
-
 export const useInviteMember = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -56,16 +43,6 @@ export const useInviteMember = () => {
       api.post("/v1/teams/invitations", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["teams", "invitations"] });
-    }
-  });
-};
-
-export const useCreateTeam = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (data: { name: string }) => api.post("/v1/teams/teams", data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["teams", "teams"] });
     }
   });
 };
@@ -86,16 +63,6 @@ export const useDeleteInvitation = () => {
     mutationFn: (id: string) => api.delete(`/v1/teams/invitations/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["teams", "invitations"] });
-    }
-  });
-};
-
-export const useDeleteTeam = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) => api.delete(`/v1/teams/teams/${id}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["teams", "teams"] });
     }
   });
 };

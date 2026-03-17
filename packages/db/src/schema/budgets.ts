@@ -11,7 +11,6 @@ import { organizations } from "./organizations";
 
 export const budgetEntityTypeEnum = pgEnum("budget_entity_type", [
   "organization",
-  "team",
   "key"
 ]);
 export const budgetPeriodEnum = pgEnum("budget_period", ["daily", "monthly"]);

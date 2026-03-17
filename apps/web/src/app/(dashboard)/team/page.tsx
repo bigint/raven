@@ -2,27 +2,22 @@
 
 import { Button, ConfirmDialog, PageHeader, Tabs } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
-import { Mail, Plus } from "lucide-react";
+import { Mail } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { InvitationList } from "./components/invitation-list";
 import { InviteForm } from "./components/invite-form";
 import { MemberList } from "./components/member-list";
-import { TeamForm } from "./components/team-form";
-import { TeamList } from "./components/team-list";
 import {
   invitationsQueryOptions,
   membersQueryOptions,
-  teamsQueryOptions,
-  useCreateTeam,
   useDeleteInvitation,
   useDeleteMember,
-  useDeleteTeam,
   useInviteMember
 } from "./hooks/use-team-data";
 
-type ActiveTab = "members" | "invitations" | "teams";
-const VALID_TABS: ActiveTab[] = ["members", "invitations", "teams"];
+type ActiveTab = "members" | "invitations";
+const VALID_TABS: ActiveTab[] = ["members", "invitations"];
 
 const DELETE_CONFIG = {
   invitation: {
@@ -36,12 +31,6 @@ const DELETE_CONFIG = {
       "Are you sure you want to remove this member? They will lose access immediately.",
     label: "Remove",
     title: "Remove Member"
-  },
-  team: {
-    description:
-      "Are you sure you want to delete this team? This action cannot be undone.",
-    label: "Delete",
-    title: "Delete Team"
   }
 };
 
@@ -59,35 +48,26 @@ const TeamPage = () => {
 
   const membersQuery = useQuery(membersQueryOptions());
   const invitationsQuery = useQuery(invitationsQueryOptions());
-  const teamsQuery = useQuery(teamsQueryOptions());
 
   const inviteMember = useInviteMember();
-  const createTeam = useCreateTeam();
   const deleteMember = useDeleteMember();
   const deleteInvitation = useDeleteInvitation();
-  const deleteTeamMut = useDeleteTeam();
 
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const [showTeamModal, setShowTeamModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{
-    type: "member" | "invitation" | "team";
+    type: "member" | "invitation";
     id: string;
   } | null>(null);
 
-  const isDeleting =
-    deleteMember.isPending ||
-    deleteInvitation.isPending ||
-    deleteTeamMut.isPending;
+  const isDeleting = deleteMember.isPending || deleteInvitation.isPending;
   const members = membersQuery.data ?? [];
   const invitations = invitationsQuery.data ?? [];
-  const teams = teamsQuery.data ?? [];
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
     const mutations = {
       invitation: deleteInvitation,
-      member: deleteMember,
-      team: deleteTeamMut
+      member: deleteMember
     };
     await mutations[deleteTarget.type].mutateAsync(deleteTarget.id);
     setDeleteTarget(null);
@@ -99,22 +79,14 @@ const TeamPage = () => {
     <div>
       <PageHeader
         actions={
-          <>
-            {activeTab === "invitations" && (
-              <Button onClick={() => setShowInviteModal(true)}>
-                <Mail className="size-4" />
-                Invite Member
-              </Button>
-            )}
-            {activeTab === "teams" && (
-              <Button onClick={() => setShowTeamModal(true)}>
-                <Plus className="size-4" />
-                New Team
-              </Button>
-            )}
-          </>
+          activeTab === "invitations" ? (
+            <Button onClick={() => setShowInviteModal(true)}>
+              <Mail className="size-4" />
+              Invite Member
+            </Button>
+          ) : null
         }
-        description="Manage members, invitations, and teams."
+        description="Manage members and invitations."
         title="Team"
       />
       {membersQuery.isError && (
@@ -130,8 +102,7 @@ const TeamPage = () => {
             count: invitations.length,
             label: "Invitations",
             value: "invitations"
-          },
-          { count: teams.length, label: "Teams", value: "teams" }
+          }
         ]}
         value={activeTab}
       />
@@ -150,23 +121,10 @@ const TeamPage = () => {
           onInvite={() => setShowInviteModal(true)}
         />
       )}
-      {activeTab === "teams" && (
-        <TeamList
-          isLoading={teamsQuery.isLoading}
-          onCreateTeam={() => setShowTeamModal(true)}
-          onDelete={(id) => setDeleteTarget({ id, type: "team" })}
-          teams={teams}
-        />
-      )}
       <InviteForm
         onClose={() => setShowInviteModal(false)}
         onSubmit={(data) => inviteMember.mutateAsync(data) as Promise<void>}
         open={showInviteModal}
-      />
-      <TeamForm
-        onClose={() => setShowTeamModal(false)}
-        onSubmit={(data) => createTeam.mutateAsync(data) as Promise<void>}
-        open={showTeamModal}
       />
       <ConfirmDialog
         confirmLabel={

@@ -17,17 +17,13 @@ export const checkBudgets = async (
   db: Database,
   redis: Redis,
   orgId: string,
-  teamId: string | null,
   virtualKeyId: string
 ): Promise<void> => {
   const entityIds = [orgId, virtualKeyId];
-  if (teamId) {
-    entityIds.push(teamId);
-  }
 
   const activeBudgets = await cachedQuery(
     redis,
-    cacheKeys.budgets(orgId, teamId, virtualKeyId),
+    cacheKeys.budgets(orgId, virtualKeyId),
     15,
     () =>
       db
@@ -85,7 +81,6 @@ export const incrementBudgetSpend = async (
   db: Database,
   redis: Redis,
   orgId: string,
-  teamId: string | null,
   virtualKeyId: string,
   cost: number
 ): Promise<void> => {
@@ -94,9 +89,6 @@ export const incrementBudgetSpend = async (
   }
 
   const entityIds = [orgId, virtualKeyId];
-  if (teamId) {
-    entityIds.push(teamId);
-  }
 
   const activeBudgets = await db
     .select({ id: budgets.id, period: budgets.period })

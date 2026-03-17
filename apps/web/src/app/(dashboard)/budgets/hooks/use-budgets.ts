@@ -18,7 +18,6 @@ export interface Budget {
 
 export const ENTITY_TYPE_OPTIONS = [
   { label: "Organization", value: "organization" },
-  { label: "Team", value: "team" },
   { label: "API Key", value: "key" }
 ];
 
@@ -29,8 +28,7 @@ export const PERIOD_OPTIONS = [
 
 export const ENTITY_TYPE_LABELS: Record<string, string> = {
   key: "API Key",
-  organization: "Organization",
-  team: "Team"
+  organization: "Organization"
 };
 
 export const budgetsQueryOptions = () =>

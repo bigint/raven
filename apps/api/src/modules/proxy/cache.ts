@@ -100,7 +100,6 @@ export const serveCacheHit = (
     redis: Redis;
     sessionHeader: string | null;
     startTime: number;
-    teamId: string | null;
     virtualKeyId: string;
   }
 ): Response => {
@@ -136,7 +135,7 @@ export const serveCacheHit = (
       toolNames: analysis.toolNames,
       virtualKeyId: opts.virtualKeyId
     },
-    { redis: opts.redis, teamId: opts.teamId }
+    { redis: opts.redis }
   );
   updateLastUsed(opts.redis, opts.virtualKeyId);
 

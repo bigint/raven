@@ -18,8 +18,7 @@ export const cachedQuery = async <T>(
 
 // Cache key builders
 export const cacheKeys = {
-  budgets: (orgId: string, teamId: string | null, keyId: string) =>
-    `budgets:${orgId}:${teamId ?? ""}:${keyId}`,
+  budgets: (orgId: string, keyId: string) => `budgets:${orgId}:${keyId}`,
   orgPlan: (orgId: string) => `plan:${orgId}`,
   providerConfigs: (orgId: string, provider: string) =>
     `pc:${orgId}:${provider}`,

@@ -40,13 +40,7 @@ export const proxyHandler = (
         virtualKey.rateLimitRpd
       ),
       checkPlanLimit(db, redis, virtualKey.organizationId),
-      checkBudgets(
-        db,
-        redis,
-        virtualKey.organizationId,
-        virtualKey.teamId,
-        virtualKey.id
-      ),
+      checkBudgets(db, redis, virtualKey.organizationId, virtualKey.id),
       hasBody ? c.req.text() : undefined
     ]);
 
@@ -109,19 +103,14 @@ export const proxyHandler = (
     const [cacheResult, allowedModel, providerResolution] = await Promise.all([
       checkCache(redis, virtualKey.organizationId, pathProvider, parsedBody),
       requestedModelSlug
-        ? cachedQuery(
-            redis,
-            `model:${requestedModelSlug}`,
-            300,
-            async () => {
-              const [row] = await db
-                .select({ id: models.id })
-                .from(models)
-                .where(eq(models.slug, requestedModelSlug))
-                .limit(1);
-              return row ?? null;
-            }
-          )
+        ? cachedQuery(redis, `model:${requestedModelSlug}`, 300, async () => {
+            const [row] = await db
+              .select({ id: models.id })
+              .from(models)
+              .where(eq(models.slug, requestedModelSlug))
+              .limit(1);
+            return row ?? null;
+          })
         : null,
       resolveProvider(db, env, virtualKey.organizationId, c.req.path, redis)
     ]);
@@ -144,7 +133,6 @@ export const proxyHandler = (
         redis,
         sessionHeader: c.req.header("x-session-id") ?? null,
         startTime,
-        teamId: virtualKey.teamId,
         virtualKeyId: virtualKey.id
       });
     }
@@ -197,8 +185,7 @@ export const proxyHandler = (
       startTime,
       virtualKey: {
         id: virtualKey.id,
-        organizationId: virtualKey.organizationId,
-        teamId: virtualKey.teamId
+        organizationId: virtualKey.organizationId
       }
     });
   };

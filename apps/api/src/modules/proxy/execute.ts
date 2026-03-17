@@ -38,7 +38,6 @@ export interface ExecuteInput {
   virtualKey: {
     id: string;
     organizationId: string;
-    teamId: string | null;
   };
   method: string;
   path: string;
@@ -185,7 +184,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     logData.latencyMs = Date.now() - startTime;
     logData.provider = finalProviderName;
     logData.providerConfigId = finalProviderConfigId;
-    logAndPublish(db, logData, { redis, teamId: virtualKey.teamId });
+    logAndPublish(db, logData, { redis });
     updateLastUsed(redis, virtualKey.id);
     void updateMetrics(
       redis,
@@ -270,7 +269,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     const { body, status } = formatErrorResponse(err);
     logData.latencyMs = Date.now() - startTime;
     logData.statusCode = status;
-    logAndPublish(db, logData, { redis, teamId: virtualKey.teamId });
+    logAndPublish(db, logData, { redis });
     return new Response(body, {
       headers: { "content-type": "application/json", ...responseHeaders },
       status

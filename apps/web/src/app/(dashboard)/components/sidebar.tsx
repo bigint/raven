@@ -75,12 +75,7 @@ const NAV_ITEMS: NavItem[] = [
     icon: Shield,
     label: "Guardrails"
   },
-  {
-    gate: (plan) => PLAN_FEATURES[plan].hasTeams,
-    href: "/team",
-    icon: Users,
-    label: "Team"
-  },
+  { href: "/team", icon: Users, label: "Team" },
   { href: "/billing", icon: Receipt, label: "Billing" },
   {
     gate: (plan) => PLAN_FEATURES[plan].hasWebhooks,

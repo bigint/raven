@@ -55,6 +55,5 @@ export {
   subscriptions
 } from "./subscriptions";
 export { syncedProviders } from "./synced-providers";
-export { teamMembers, teamRoleEnum, teams } from "./teams";
 export { platformRoleEnum, users } from "./users";
 export { webhooks } from "./webhooks";

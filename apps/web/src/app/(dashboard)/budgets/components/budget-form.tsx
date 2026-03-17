@@ -1,8 +1,10 @@
 "use client";
 
 import { Button, Input, Modal, Select } from "@raven/ui";
-import { type FormEvent, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { type FormEvent, useMemo, useState } from "react";
 import { TextMorph } from "torph/react";
+import { keysQueryOptions } from "../../keys/hooks/use-keys";
 import type { Budget } from "../hooks/use-budgets";
 import {
   ENTITY_TYPE_OPTIONS,
@@ -21,7 +23,7 @@ interface FormState {
 
 const DEFAULT_FORM: FormState = {
   alertThreshold: "80",
-  entityId: "",
+  entityId: "*",
   entityType: "organization",
   limitAmount: "100",
   period: "monthly"
@@ -50,6 +52,18 @@ const BudgetForm = ({ open, onClose, editingBudget }: BudgetFormProps) => {
   );
   const [formError, setFormError] = useState<string | null>(null);
 
+  const { data: keys } = useQuery(keysQueryOptions());
+
+  const entityOptions = useMemo(() => {
+    if (form.entityType === "key") {
+      return (keys ?? []).map((k) => ({
+        label: `${k.name} (${k.keyPrefix}...)`,
+        value: k.id
+      }));
+    }
+    return [];
+  }, [form.entityType, keys]);
+
   const createMutation = useCreateBudget();
   const updateMutation = useUpdateBudget();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
@@ -69,8 +83,8 @@ const BudgetForm = ({ open, onClose, editingBudget }: BudgetFormProps) => {
       setFormError("Limit amount must be a valid number");
       return;
     }
-    if (!form.entityId.trim()) {
-      setFormError("Entity ID is required");
+    if (form.entityType !== "organization" && !form.entityId.trim()) {
+      setFormError("Please select an API key");
       return;
     }
     const alertVal = Number(form.alertThreshold);
@@ -81,7 +95,7 @@ const BudgetForm = ({ open, onClose, editingBudget }: BudgetFormProps) => {
 
     const body = {
       alertThreshold: alertVal / 100,
-      entityId: form.entityId.trim(),
+      entityId: form.entityType === "organization" ? "*" : form.entityId.trim(),
       entityType: form.entityType,
       limitAmount: Number(form.limitAmount),
       period: form.period
@@ -118,19 +132,32 @@ const BudgetForm = ({ open, onClose, editingBudget }: BudgetFormProps) => {
           </label>
           <Select
             id="entity-type"
-            onChange={(v) => update("entityType", v)}
+            onChange={(v) => {
+              setForm((f) => ({
+                ...f,
+                entityId: v === "organization" ? "*" : "",
+                entityType: v
+              }));
+            }}
             options={ENTITY_TYPE_OPTIONS}
             value={form.entityType}
           />
         </div>
 
-        <Input
-          id="entity-id"
-          label="Entity ID"
-          onChange={(e) => update("entityId", e.target.value)}
-          placeholder="e.g. org_123 or *"
-          value={form.entityId}
-        />
+        {form.entityType === "key" && (
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium" htmlFor="entity-id">
+              API Key
+            </label>
+            <Select
+              id="entity-id"
+              onChange={(v) => update("entityId", v)}
+              options={entityOptions}
+              placeholder="Select an API key"
+              value={form.entityId}
+            />
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-4">
           <Input

@@ -3,21 +3,7 @@ import { Hono } from "hono";
 import { jsonValidator } from "@/lib/validation";
 import { inviteUser, listInvitations, revokeInvitation } from "./invitations";
 import { changeRole, listMembers, removeMember } from "./members";
-import {
-  addTeamMemberSchema,
-  changeRoleSchema,
-  createTeamSchema,
-  inviteSchema,
-  updateTeamSchema
-} from "./schema";
-import {
-  addTeamMember,
-  createTeam,
-  deleteTeam,
-  listTeams,
-  removeTeamMember,
-  updateTeam
-} from "./teams";
+import { changeRoleSchema, inviteSchema } from "./schema";
 
 export const createTeamsModule = (db: Database) => {
   const app = new Hono();
@@ -31,18 +17,6 @@ export const createTeamsModule = (db: Database) => {
   app.post("/invitations", jsonValidator(inviteSchema), inviteUser(db));
   app.get("/invitations", listInvitations(db));
   app.delete("/invitations/:id", revokeInvitation(db));
-
-  // Teams
-  app.get("/teams", listTeams(db));
-  app.post("/teams", jsonValidator(createTeamSchema), createTeam(db));
-  app.put("/teams/:id", jsonValidator(updateTeamSchema), updateTeam(db));
-  app.delete("/teams/:id", deleteTeam(db));
-  app.post(
-    "/teams/:id/members",
-    jsonValidator(addTeamMemberSchema),
-    addTeamMember(db)
-  );
-  app.delete("/teams/:id/members/:userId", removeTeamMember(db));
 
   return app;
 };

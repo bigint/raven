@@ -121,7 +121,6 @@ export const flushLastUsed = async (
 
 export interface BudgetContext {
   redis: Redis;
-  teamId: string | null;
 }
 
 export const logAndPublish = (
@@ -137,7 +136,6 @@ export const logAndPublish = (
         db,
         budgetCtx.redis,
         data.organizationId,
-        budgetCtx.teamId,
         data.virtualKeyId,
         data.cost
       );
