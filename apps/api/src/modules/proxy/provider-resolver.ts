@@ -10,11 +10,9 @@ import {
   UnauthorizedError,
   ValidationError
 } from "@/lib/errors";
-import { getProviderAdapter, type ProviderAdapter } from "./providers/registry";
 import { type RoutingStrategy, resolveWithStrategy } from "./router";
 
 export interface ProviderResolution {
-  adapter: ProviderAdapter;
   decryptedApiKey: string;
   providerConfigId: string;
   providerName: string;
@@ -113,8 +111,6 @@ export const resolveProvider = async (
     throw new ForbiddenError(`Provider '${providerName}' is disabled`);
   }
 
-  const adapter = getProviderAdapter(providerName);
-
   let decryptedApiKey: string;
   try {
     decryptedApiKey = decrypt(resolvedConfig.apiKey, env.ENCRYPTION_SECRET);
@@ -125,7 +121,6 @@ export const resolveProvider = async (
   const upstreamPath = `/${pathSegments.slice(1).join("/")}`;
 
   return {
-    adapter,
     decryptedApiKey,
     providerConfigId: resolvedConfig.id,
     providerName,

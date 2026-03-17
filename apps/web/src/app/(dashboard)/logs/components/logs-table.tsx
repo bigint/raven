@@ -15,6 +15,7 @@ const TABLE_HEADERS = [
   { className: "w-10", label: "" },
   { className: "text-left", label: "Key" },
   { className: "text-left", label: "User Agent" },
+  { className: "text-center", label: "Status" },
   { className: "text-right", label: "Requests" },
   { className: "text-left", label: "Models" },
   { className: "text-right", label: "Input Tokens" },
@@ -68,9 +69,9 @@ export const LogsTable = ({
           </tr>
         </thead>
         <tbody>
-          {data.map((session) => (
+          {data.map((session, index) => (
             <SessionRow
-              key={session.sessionId}
+              key={`${session.sessionId}-${index}`}
               onRequestClick={onRequestClick}
               session={session}
             />

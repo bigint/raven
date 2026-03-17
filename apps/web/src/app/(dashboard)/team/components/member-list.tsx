@@ -70,14 +70,16 @@ const MemberList = ({ isLoading, members, onDelete }: MemberListProps) => {
             key: "actions",
             render: (member) => (
               <div className="flex items-center justify-end gap-1">
-                <button
-                  className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                  onClick={() => onDelete(member.id)}
-                  title="Remove member"
-                  type="button"
-                >
-                  <Trash2 className="size-4" />
-                </button>
+                {member.role !== "owner" && (
+                  <button
+                    className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                    onClick={() => onDelete(member.id)}
+                    title="Remove member"
+                    type="button"
+                  >
+                    <Trash2 className="size-4" />
+                  </button>
+                )}
               </div>
             )
           }

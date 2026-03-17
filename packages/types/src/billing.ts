@@ -10,17 +10,14 @@ export interface PlanFeatures {
   readonly maxSeats: number;
   readonly maxRequestsPerMonth: number;
   readonly maxProviders: number;
-  readonly maxCustomDomains: number;
   readonly maxBudgets: number;
   readonly maxVirtualKeys: number;
   readonly analyticsRetentionDays: number;
   readonly hasTeams: boolean;
-  readonly hasCustomDomains: boolean;
   readonly hasAuditLogs: boolean;
   readonly hasGuardrails: boolean;
   readonly hasAdoption: boolean;
   readonly hasWebhooks: boolean;
-  readonly hasIpAllowlists: boolean;
 }
 
 export type BooleanFeatureKey = {
@@ -72,13 +69,10 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     analyticsRetentionDays: 365,
     hasAdoption: true,
     hasAuditLogs: true,
-    hasCustomDomains: true,
     hasGuardrails: true,
-    hasIpAllowlists: true,
     hasTeams: true,
     hasWebhooks: true,
     maxBudgets: Number.POSITIVE_INFINITY,
-    maxCustomDomains: Number.POSITIVE_INFINITY,
     maxProviders: Number.POSITIVE_INFINITY,
     maxRequestsPerMonth: Number.POSITIVE_INFINITY,
     maxSeats: Number.POSITIVE_INFINITY,
@@ -88,13 +82,10 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     analyticsRetentionDays: 7,
     hasAdoption: false,
     hasAuditLogs: false,
-    hasCustomDomains: false,
     hasGuardrails: false,
-    hasIpAllowlists: false,
     hasTeams: false,
     hasWebhooks: false,
     maxBudgets: 1,
-    maxCustomDomains: 0,
     maxProviders: 2,
     maxRequestsPerMonth: 10_000,
     maxSeats: 1,
@@ -104,13 +95,10 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     analyticsRetentionDays: 30,
     hasAdoption: true,
     hasAuditLogs: false,
-    hasCustomDomains: true,
     hasGuardrails: true,
-    hasIpAllowlists: false,
     hasTeams: false,
     hasWebhooks: true,
     maxBudgets: 10,
-    maxCustomDomains: 1,
     maxProviders: 10,
     maxRequestsPerMonth: 500_000,
     maxSeats: 1,
@@ -120,13 +108,10 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     analyticsRetentionDays: 90,
     hasAdoption: true,
     hasAuditLogs: false,
-    hasCustomDomains: true,
     hasGuardrails: true,
-    hasIpAllowlists: false,
     hasTeams: true,
     hasWebhooks: true,
     maxBudgets: Number.POSITIVE_INFINITY,
-    maxCustomDomains: 3,
     maxProviders: Number.POSITIVE_INFINITY,
     maxRequestsPerMonth: 2_000_000,
     maxSeats: 30,

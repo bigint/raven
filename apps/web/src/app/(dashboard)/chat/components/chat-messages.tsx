@@ -6,9 +6,17 @@ import { Markdown } from "./markdown";
 import type { ResponseMeta } from "./response-metadata";
 import { ResponseMetadata } from "./response-metadata";
 
+interface ImageAttachment {
+  id: string;
+  base64: string;
+  name: string;
+  preview: string;
+}
+
 interface ChatMessage {
   content: string;
   id: string;
+  images?: ImageAttachment[];
   meta?: ResponseMeta;
   role: "assistant" | "user";
 }
@@ -59,7 +67,21 @@ export const ChatMessages = ({
                 }`}
               >
                 {isUser ? (
-                  message.content
+                  <>
+                    {message.images && message.images.length > 0 && (
+                      <div className="mb-2 flex flex-wrap gap-2">
+                        {message.images.map((img) => (
+                          <img
+                            alt={img.name}
+                            className="max-h-48 max-w-full rounded-lg"
+                            key={img.id}
+                            src={img.preview}
+                          />
+                        ))}
+                      </div>
+                    )}
+                    {message.content}
+                  </>
                 ) : (
                   <Markdown content={message.content} />
                 )}

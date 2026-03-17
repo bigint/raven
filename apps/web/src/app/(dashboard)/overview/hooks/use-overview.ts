@@ -36,6 +36,12 @@ interface KeySummary {
   lastUsedAt: string | null;
 }
 
+interface ProviderConfig {
+  id: string;
+  provider: string;
+  isEnabled: boolean;
+}
+
 const THIRTY_DAYS_MS = 2_592_000_000;
 
 const overviewFrom = () => new Date(Date.now() - THIRTY_DAYS_MS).toISOString();
@@ -71,6 +77,12 @@ export const overviewKeysQueryOptions = () =>
     queryKey: ["overview", "keys"]
   });
 
+export const overviewProvidersQueryOptions = () =>
+  queryOptions({
+    queryFn: () => api.get<ProviderConfig[]>("/v1/providers"),
+    queryKey: ["overview", "providers"]
+  });
+
 const POLL_INTERVAL = 30_000;
 
 export const useOverview = () => {
@@ -87,16 +99,19 @@ export const useOverview = () => {
     refetchInterval: POLL_INTERVAL
   });
   const keysQuery = useQuery(overviewKeysQueryOptions());
+  const providersQuery = useQuery(overviewProvidersQueryOptions());
 
   const isLoading =
     statsQuery.isPending ||
     usageQuery.isPending ||
     requestsQuery.isPending ||
-    keysQuery.isPending;
+    keysQuery.isPending ||
+    providersQuery.isPending;
 
   return {
     isLoading,
     keys: keysQuery.data ?? [],
+    providers: providersQuery.data ?? [],
     recentRequests: requestsQuery.data ?? [],
     stats: statsQuery.data ?? null,
     usage: usageQuery.data ?? []

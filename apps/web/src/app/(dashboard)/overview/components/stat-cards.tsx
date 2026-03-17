@@ -7,7 +7,6 @@ import type { Stats } from "../hooks/use-overview";
 
 interface StatCardsProps {
   stats: Stats | null;
-  activeKeys: number;
   loading: boolean;
 }
 
@@ -20,10 +19,7 @@ interface StatCard {
   value: string;
 }
 
-const buildStatCards = (
-  stats: Stats | null,
-  activeKeys: number
-): StatCard[] => {
+const buildStatCards = (stats: Stats | null): StatCard[] => {
   const totalRequests = stats?.totalRequests ?? 0;
   const totalCost = Number(stats?.totalCost ?? 0);
   const avgLatency = Number(stats?.avgLatencyMs ?? 0);
@@ -59,14 +55,14 @@ const buildStatCards = (
       color: "text-purple-500",
       icon: Zap,
       label: "Cache Hit Rate",
-      sub: `${activeKeys} active keys`,
+      sub: "Across all requests",
       value: `${cacheHitRate.toFixed(1)}%`
     }
   ];
 };
 
-export const StatCards = ({ stats, activeKeys, loading }: StatCardsProps) => {
-  const statCards = buildStatCards(stats, activeKeys);
+export const StatCards = ({ stats, loading }: StatCardsProps) => {
+  const statCards = buildStatCards(stats);
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

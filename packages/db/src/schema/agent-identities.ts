@@ -45,8 +45,8 @@ export const agentIdentities = pgTable(
         allowedModels: [],
         allowedTools: [],
         maxConcurrentRequests: 10,
-        maxTokensPerRequest: 100000,
-        maxCostPerRequest: 1.0
+        maxCostPerRequest: 1.0,
+        maxTokensPerRequest: 100000
       }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()

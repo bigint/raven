@@ -23,7 +23,7 @@ const DEFAULT_FORM: FormState = {
   alertThreshold: "80",
   entityId: "",
   entityType: "organization",
-  limitAmount: "",
+  limitAmount: "100",
   period: "monthly"
 };
 

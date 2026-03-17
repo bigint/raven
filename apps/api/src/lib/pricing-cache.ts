@@ -9,6 +9,7 @@ const pricingCache = new Map<string, { input: number; output: number }>();
 
 const PROVIDER_DEFAULTS: Record<string, { input: number; output: number }> = {
   anthropic: { input: 3, output: 15 },
+  mistralai: { input: 0.3, output: 0.9 },
   openai: { input: 2.5, output: 10 }
 };
 

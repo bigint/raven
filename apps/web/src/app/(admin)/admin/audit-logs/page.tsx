@@ -18,7 +18,7 @@ const columns: Column<AdminAuditLog>[] = [
     header: "Resource",
     key: "resource",
     render: (l) => (
-      <span className="text-muted-foreground">{l.resourceType}</span>
+      <span className="text-foreground/70">{l.resourceType}</span>
     )
   },
   {
@@ -34,13 +34,13 @@ const columns: Column<AdminAuditLog>[] = [
   {
     header: "Organization",
     key: "orgName",
-    render: (l) => <span className="text-muted-foreground">{l.orgName}</span>
+    render: (l) => <span className="text-foreground/70">{l.orgName}</span>
   },
   {
     header: "Time",
     key: "createdAt",
     render: (l) => (
-      <span className="text-muted-foreground">
+      <span className="text-foreground/70">
         {new Date(l.createdAt).toLocaleString()}
       </span>
     )

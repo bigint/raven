@@ -1,16 +1,18 @@
 "use client";
 
-import type { Message } from "@raven/sdk";
-import { RavenClient } from "@raven/sdk";
 import { queryOptions, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import { API_URL, api } from "@/lib/api";
-import type { PlaygroundSettings } from "../components/chat-input";
+import type {
+  ImageAttachment,
+  PlaygroundSettings
+} from "../components/chat-input";
 import type { ResponseMeta } from "../components/response-metadata";
 
 interface DisplayMessage {
   content: string;
   id: string;
+  images?: ImageAttachment[];
   meta?: ResponseMeta;
   role: "assistant" | "user";
 }
@@ -27,11 +29,72 @@ interface PlaygroundKey {
   key: string;
 }
 
+type ContentPart =
+  | { type: "text"; text: string }
+  | { type: "image"; image: string };
+
+type Message = {
+  role: "user" | "assistant" | "system";
+  content: string | ContentPart[];
+};
+
 export const catalogModelsQueryOptions = () =>
   queryOptions({
     queryFn: () => api.get<CatalogModel[]>("/v1/available-models"),
     queryKey: ["available-models"]
   });
+
+// SSE helpers
+
+const parseSSEStream = async function* (
+  reader: ReadableStreamDefaultReader<Uint8Array>
+): AsyncGenerator<{ text: string; usage?: { prompt_tokens: number; completion_tokens: number } }> {
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let usage: { prompt_tokens: number; completion_tokens: number } | undefined;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || !trimmed.startsWith("data: ")) continue;
+      const payload = trimmed.slice(6);
+      if (payload === "[DONE]") continue;
+
+      try {
+        const parsed = JSON.parse(payload);
+
+        // Extract usage from finish chunk
+        if (parsed.usage) {
+          usage = {
+            completion_tokens: parsed.usage.completion_tokens ?? 0,
+            prompt_tokens: parsed.usage.prompt_tokens ?? 0
+          };
+        }
+
+        const delta = parsed.choices?.[0]?.delta;
+        if (delta?.content) {
+          yield { text: delta.content };
+        }
+      } catch {
+        // skip malformed chunks
+      }
+    }
+  }
+
+  // Yield final empty chunk with usage if available
+  if (usage) {
+    yield { text: "", usage };
+  }
+};
+
+// Hook
 
 export const useChat = () => {
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
@@ -54,7 +117,7 @@ export const useChat = () => {
   });
   const abortRef = useRef<AbortController | null>(null);
   const keyRef = useRef<PlaygroundKey | null>(null);
-  const clientRef = useRef<RavenClient | null>(null);
+  const sessionIdRef = useRef(crypto.randomUUID());
   const queryClient = useQueryClient();
 
   const ensureKey = async (): Promise<PlaygroundKey> => {
@@ -66,38 +129,22 @@ export const useChat = () => {
     });
     const pk = { id: result.id, key: result.key };
     keyRef.current = pk;
-    clientRef.current = new RavenClient({
-      apiKey: pk.key,
-      baseUrl: API_URL,
-      headers: { "x-session-id": crypto.randomUUID() }
-    });
     return pk;
   };
 
-  const extractHeaderMeta = (response: Response): ResponseMeta => {
-    const meta: ResponseMeta = {};
-    const provider = response.headers.get("x-raven-provider");
-    const model = response.headers.get("x-raven-model");
-    const latency = response.headers.get("x-raven-latency-ms");
-    const cost = response.headers.get("x-raven-cost");
-    const cacheHit = response.headers.get("x-raven-cache-hit");
-
-    if (provider) meta.provider = provider;
-    if (model) meta.model = model;
-    if (latency) meta.latencyMs = Number.parseInt(latency, 10);
-    if (cost) meta.cost = Number.parseFloat(cost);
-    if (cacheHit) meta.cacheHit = cacheHit === "true";
-
-    return meta;
-  };
-
   const sendMessage = useCallback(
-    async (content: string) => {
-      if (!content.trim() || !selectedModel || isStreaming) return;
+    async (content: string, images?: ImageAttachment[]) => {
+      if (
+        (!content.trim() && (!images || images.length === 0)) ||
+        !selectedModel ||
+        isStreaming
+      )
+        return;
 
       const userMessage: DisplayMessage = {
         content: content.trim(),
         id: crypto.randomUUID(),
+        images,
         role: "user"
       };
 
@@ -115,20 +162,25 @@ export const useChat = () => {
       const startTime = performance.now();
 
       try {
-        await ensureKey();
+        const pk = await ensureKey();
 
-        const client = clientRef.current;
-        if (!client) return;
+        // Build messages array
+        const allMessages: Message[] = [...messages, userMessage].map((m) => {
+          if (m.images && m.images.length > 0) {
+            const parts: ContentPart[] = [];
+            for (const img of m.images) {
+              parts.push({ image: img.base64, type: "image" });
+            }
+            if (m.content) {
+              parts.push({ text: m.content, type: "text" });
+            }
+            return { content: parts, role: m.role };
+          }
+          return { content: m.content, role: m.role };
+        });
 
-        const allMessages = [...messages, userMessage].map((m) => ({
-          content: m.content,
-          role: m.role
-        }));
-
-        // Apply chat memory limit — only send the last N messages
         const recentMessages = allMessages.slice(-settings.chatMemory);
 
-        // Build system prompt with optional web search instruction
         const fullSystemPrompt = [
           systemPrompt,
           settings.enableWebSearch
@@ -186,72 +238,98 @@ export const useChat = () => {
             ]
           : undefined;
 
-        const generateParams = {
-          maxTokens: settings.maxTokens,
+        const body = {
+          max_tokens: settings.maxTokens,
           messages: chatMessages,
           model: selectedModel.model,
-          provider: selectedModel.provider,
+          stream: settings.stream,
+          ...(settings.stream ? { stream_options: { include_usage: true } } : {}),
           ...(settings.enableReasoning
-            ? {
-                reasoning: {
-                  budgetTokens: settings.reasoningBudget,
-                  enabled: true
-                }
-              }
+            ? {}
             : { temperature: settings.temperature }),
           ...(demoTools ? { tools: demoTools } : {})
         };
 
-        if (settings.stream) {
-          const stream = await client.streamText(
-            generateParams,
-            abortController.signal
+        const response = await fetch(
+          `${API_URL}/v1/proxy/${selectedModel.provider}/chat/completions`,
+          {
+            body: JSON.stringify(body),
+            headers: {
+              Authorization: `Bearer ${pk.key}`,
+              "Content-Type": "application/json",
+              "x-session-id": sessionIdRef.current
+            },
+            method: "POST",
+            signal: abortController.signal
+          }
+        );
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          const errMsg =
+            (err as Record<string, unknown>)?.error &&
+            typeof (err as Record<string, unknown>).error === "object"
+              ? ((err as Record<string, unknown>).error as Record<string, unknown>)?.message
+              : (err as Record<string, unknown>)?.message;
+          throw new Error(
+            (errMsg as string) ?? `Request failed with status ${response.status}`
           );
+        }
 
-          const headerMeta = extractHeaderMeta(stream.response);
+        if (settings.stream && response.body) {
+          const reader = response.body.getReader();
+          let finalUsage: { prompt_tokens: number; completion_tokens: number } | undefined;
 
-          for await (const delta of stream) {
-            setMessages((prev) => {
-              const idx = prev.length - 1;
-              const msg = prev[idx];
-              if (!msg || msg.id !== assistantMessage.id) return prev;
-              const updated = [...prev];
-              updated[idx] = { ...msg, content: msg.content + delta };
-              return updated;
-            });
+          for await (const chunk of parseSSEStream(reader)) {
+            if (chunk.usage) {
+              finalUsage = chunk.usage;
+            }
+            if (chunk.text) {
+              setMessages((prev) => {
+                const idx = prev.length - 1;
+                const msg = prev[idx];
+                if (!msg || msg.id !== assistantMessage.id) return prev;
+                const updated = [...prev];
+                updated[idx] = { ...msg, content: msg.content + chunk.text };
+                return updated;
+              });
+            }
           }
 
-          const usage = await stream.usage;
           const elapsedMs = Math.round(performance.now() - startTime);
-
           const meta: ResponseMeta = {
-            ...headerMeta,
-            inputTokens: usage.promptTokens,
-            latencyMs: headerMeta.latencyMs ?? elapsedMs,
-            outputTokens: usage.completionTokens
+            inputTokens: finalUsage?.prompt_tokens,
+            latencyMs: elapsedMs,
+            outputTokens: finalUsage?.completion_tokens
           };
 
           setMessages((prev) =>
             prev.map((m) => (m.id === assistantMessage.id ? { ...m, meta } : m))
           );
         } else {
-          const result = await client.generateText(
-            generateParams,
-            abortController.signal
-          );
+          const result = await response.json();
+          const choice = (result as Record<string, unknown>).choices as
+            | Record<string, unknown>[]
+            | undefined;
+          const text =
+            (choice?.[0]?.message as Record<string, unknown>)?.content as
+              | string
+              | undefined;
+          const usage = (result as Record<string, unknown>).usage as
+            | Record<string, unknown>
+            | undefined;
 
           const elapsedMs = Math.round(performance.now() - startTime);
-
           const meta: ResponseMeta = {
-            inputTokens: result.usage.promptTokens,
+            inputTokens: (usage?.prompt_tokens as number) ?? 0,
             latencyMs: elapsedMs,
-            outputTokens: result.usage.completionTokens
+            outputTokens: (usage?.completion_tokens as number) ?? 0
           };
 
           setMessages((prev) =>
             prev.map((m) =>
               m.id === assistantMessage.id
-                ? { ...m, content: result.text, meta }
+                ? { ...m, content: text ?? "", meta }
                 : m
             )
           );
@@ -287,8 +365,8 @@ export const useChat = () => {
         queryClient.invalidateQueries({ queryKey: ["keys"] });
       });
       keyRef.current = null;
-      clientRef.current = null;
     }
+    sessionIdRef.current = crypto.randomUUID();
   }, [queryClient]);
 
   return {

@@ -22,11 +22,11 @@ export const getPlans = (_db: Database) => async (c: Context) => {
       },
       {
         included: true,
-        text: `${features.maxBudgets === Number.POSITIVE_INFINITY ? "Unlimited" : features.maxBudgets} budgets`
+        text: `${features.maxBudgets === Number.POSITIVE_INFINITY ? "Unlimited" : features.maxBudgets} ${features.maxBudgets === 1 ? "budget" : "budgets"}`
       },
       {
         included: true,
-        text: `${features.maxSeats === Number.POSITIVE_INFINITY ? "Unlimited" : features.maxSeats} seats`
+        text: `${features.maxSeats === Number.POSITIVE_INFINITY ? "Unlimited" : features.maxSeats} ${features.maxSeats === 1 ? "seat" : "seats"}`
       },
       {
         included: true,
@@ -34,8 +34,7 @@ export const getPlans = (_db: Database) => async (c: Context) => {
       },
       { included: features.hasTeams, text: "Team management" },
       { included: features.hasAuditLogs, text: "Audit logs" },
-      { included: features.hasGuardrails, text: "Guardrails" },
-      { included: features.hasCustomDomains, text: "Custom domains" }
+      { included: features.hasGuardrails, text: "Guardrails" }
     ];
 
     return {
