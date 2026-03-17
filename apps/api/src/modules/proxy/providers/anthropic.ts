@@ -2,6 +2,77 @@ import { getModelPricing } from "@/lib/pricing-cache";
 import { PROVIDERS } from "@/lib/providers";
 import type { ProviderAdapter } from "./registry";
 
+interface CleanMessage {
+  role: string;
+  content: unknown;
+}
+
+/**
+ * Convert OpenAI-format messages to Anthropic-format messages.
+ *
+ * Anthropic rules:
+ * 1. System messages go in a separate `system` field
+ * 2. Messages must strictly alternate: user, assistant, user, assistant
+ * 3. Consecutive same-role messages must be merged
+ * 4. First message must be user
+ * 5. Last message must be user (no assistant prefill on some models)
+ * 6. Only `role` and `content` fields — no extra fields like `cache_control`
+ */
+const normalizeMessages = (
+  rawMessages: Array<{ content: unknown; role: string }>
+): { messages: CleanMessage[]; systemText: string | undefined } => {
+  // 1. Extract system messages
+  const systemParts: string[] = [];
+  const nonSystem: CleanMessage[] = [];
+
+  for (const msg of rawMessages) {
+    if (msg.role === "system") {
+      systemParts.push(
+        typeof msg.content === "string" ? msg.content : String(msg.content)
+      );
+    } else {
+      // Only keep role + content, strip everything else
+      nonSystem.push({ content: msg.content, role: msg.role });
+    }
+  }
+
+  const systemText =
+    systemParts.length > 0 ? systemParts.join("\n\n") : undefined;
+
+  // 2. Merge consecutive same-role messages
+  const merged: CleanMessage[] = [];
+  for (const msg of nonSystem) {
+    const prev = merged[merged.length - 1];
+    if (prev && prev.role === msg.role) {
+      // Merge content
+      const prevText =
+        typeof prev.content === "string" ? prev.content : String(prev.content);
+      const curText =
+        typeof msg.content === "string" ? msg.content : String(msg.content);
+      prev.content = `${prevText}\n\n${curText}`;
+    } else {
+      merged.push({ ...msg });
+    }
+  }
+
+  // 3. Ensure first message is user — if it starts with assistant, prepend empty user
+  if (merged.length > 0 && merged[0]?.role !== "user") {
+    merged.unshift({ content: ".", role: "user" });
+  }
+
+  // 4. Ensure last message is user — strip trailing assistant
+  while (merged.length > 1 && merged[merged.length - 1]?.role === "assistant") {
+    merged.pop();
+  }
+
+  // 5. Safety: if empty, shouldn't happen but handle gracefully
+  if (merged.length === 0) {
+    merged.push({ content: "Hello", role: "user" });
+  }
+
+  return { messages: merged, systemText };
+};
+
 export const anthropicAdapter = (provider: string): ProviderAdapter => {
   const config = PROVIDERS[provider];
   if (!config) throw new Error(`Unknown provider: ${provider}`);
@@ -38,49 +109,11 @@ export const anthropicAdapter = (provider: string): ProviderAdapter => {
         | undefined;
       if (!messages) return body;
 
-      const systemMessages = messages.filter((m) => m.role === "system");
-      const nonSystemMessages = messages.filter((m) => m.role !== "system");
-
-      const systemText =
-        systemMessages.length > 0
-          ? systemMessages
-              .map((m) =>
-                typeof m.content === "string" ? m.content : String(m.content)
-              )
-              .join("\n\n")
-          : undefined;
-
-      // Clean messages — only pass fields Anthropic accepts
-      let cleanedMessages = nonSystemMessages.map((m) => ({
-        content: m.content,
-        role: m.role
-      }));
-
-      // Anthropic requires conversation to end with a user message.
-      // Strip trailing assistant messages — these are either prefills or
-      // the client echoing back the model's own responses.
-      while (
-        cleanedMessages.length > 1 &&
-        cleanedMessages[cleanedMessages.length - 1]?.role === "assistant"
-      ) {
-        cleanedMessages = cleanedMessages.slice(0, -1);
-      }
-
-      // If we stripped everything down to a single assistant message,
-      // or ended up empty, something is very wrong — just keep original
-      if (
-        cleanedMessages.length === 0 ||
-        (cleanedMessages.length === 1 &&
-          cleanedMessages[0]?.role === "assistant")
-      ) {
-        cleanedMessages = nonSystemMessages
-          .filter((m) => m.role === "user")
-          .map((m) => ({ content: m.content, role: m.role }));
-      }
+      const { messages: normalized, systemText } = normalizeMessages(messages);
 
       const result: Record<string, unknown> = {
         max_tokens: body.max_tokens ?? 4096,
-        messages: cleanedMessages,
+        messages: normalized,
         model: body.model,
         stream: body.stream
       };
@@ -91,6 +124,7 @@ export const anthropicAdapter = (provider: string): ProviderAdapter => {
       if (body.stop) result.stop_sequences = body.stop;
       if (body.thinking) result.thinking = body.thinking;
 
+      // Convert OpenAI tool format to Anthropic tool format
       if (Array.isArray(body.tools) && body.tools.length > 0) {
         result.tools = (
           body.tools as Array<{

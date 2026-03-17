@@ -64,7 +64,6 @@ export const chatCompletionsHandler = (
 
     // 1. Auth
     const authHeader = c.req.header("Authorization") ?? "";
-    console.log("[openai-compat] Auth header present:", !!authHeader, "starts with Bearer:", authHeader.startsWith("Bearer "));
     const { virtualKey } = await authenticateKey(db, authHeader, redis);
 
     // 2. Parse body
@@ -77,21 +76,12 @@ export const chatCompletionsHandler = (
     }
 
     const modelSlug = parsedBody.model as string | undefined;
-    const incomingMessages = parsedBody.messages as Array<{ role: string; content: unknown }> | undefined;
-    console.log("[openai-compat] Model requested:", modelSlug, "| Messages:", incomingMessages?.length, "| Last role:", incomingMessages?.[incomingMessages.length - 1]?.role);
     if (!modelSlug) {
       throw new ValidationError("'model' field is required");
     }
 
     // 3. Resolve provider from model
-    let providerName: string;
-    try {
-      providerName = await resolveModelProvider(db, modelSlug);
-      console.log("[openai-compat] Resolved provider:", providerName);
-    } catch (err) {
-      console.error("[openai-compat] Model resolution failed:", modelSlug, err instanceof Error ? err.message : err);
-      throw err;
-    }
+    const providerName = await resolveModelProvider(db, modelSlug);
 
     // 4. Gate checks
     await Promise.all([
@@ -203,14 +193,6 @@ export const chatCompletionsHandler = (
       finalBody = adapter.normalizeRequest(parsedBody);
     if (adapter.transformBody) finalBody = adapter.transformBody(finalBody);
     const finalBodyText = JSON.stringify(finalBody);
-
-    // Debug: log the last message role being sent
-    const finalMessages = finalBody.messages as Array<{ role: string; content: unknown }> | undefined;
-    if (finalMessages?.length) {
-      const lastMsg = finalMessages[finalMessages.length - 1];
-      console.log(`[openai-compat] Sending ${finalMessages.length} messages, last role: ${lastMsg?.role}, content preview: ${typeof lastMsg?.content === "string" ? lastMsg.content.slice(0, 80) : "non-string"}`);
-    }
-
     const resolvedPath = adapter.chatEndpoint;
 
     // 9. Forward with retry
@@ -227,12 +209,6 @@ export const chatCompletionsHandler = (
     let upstreamResult = await withRetry(() => forwardRequest(forwardInput));
     let finalProviderConfigId = providerConfigId;
     let finalProviderName = providerName;
-
-    console.log("[openai-compat] Upstream response:", upstreamResult.response.status, upstreamResult.response.statusText);
-    if (!upstreamResult.response.ok) {
-      const errBody = await upstreamResult.response.clone().text().catch(() => "");
-      console.error("[openai-compat] Upstream error body:", errBody.slice(0, 500));
-    }
 
     // 10. Fallback
     if (!upstreamResult.response.ok) {
