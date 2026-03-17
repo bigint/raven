@@ -81,8 +81,10 @@ const normalizeRequest = (
       continue;
     }
 
-    // Regular user/assistant — strip extra fields (cache_control, name, etc.)
-    cleaned.push({ content: msg.content ?? "", role });
+    // Regular user/assistant — keep content and cache_control, strip other extra fields
+    const entry: Record<string, unknown> = { content: msg.content ?? "", role };
+    if (msg.cache_control) entry.cache_control = msg.cache_control;
+    cleaned.push(entry as { role: string; content: unknown });
   }
 
   // 2. Merge consecutive same-role messages (Anthropic requires strict alternation)
@@ -111,9 +113,10 @@ const normalizeRequest = (
     merged.unshift({ content: ".", role: "user" });
   }
 
-  // 4. Strip trailing assistant messages
-  while (merged.length > 1 && merged[merged.length - 1]?.role === "assistant") {
-    merged.pop();
+  // 4. If last message is assistant, strip trailing whitespace (prefill support)
+  const lastMsg = merged[merged.length - 1];
+  if (lastMsg?.role === "assistant" && typeof lastMsg.content === "string") {
+    lastMsg.content = lastMsg.content.trimEnd();
   }
 
   if (merged.length === 0) {
@@ -164,7 +167,7 @@ const normalizeRequest = (
     } else if (tc === "required" || tc === "any") {
       result.tool_choice = { type: "any" };
     } else if (tc === "none") {
-      // Anthropic doesn't have "none" — just don't set it
+      result.tool_choice = { type: "none" };
     } else if (
       typeof tc === "object" &&
       tc !== null &&
