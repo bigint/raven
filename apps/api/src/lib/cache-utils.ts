@@ -16,15 +16,6 @@ export const cachedQuery = async <T>(
   return result;
 };
 
-export const invalidateCache = async (
-  redis: Redis,
-  ...keys: string[]
-): Promise<void> => {
-  if (keys.length > 0) {
-    await redis.del(...keys);
-  }
-};
-
 // Cache key builders
 export const cacheKeys = {
   orgPlan: (orgId: string) => `plan:${orgId}`,
