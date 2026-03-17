@@ -80,6 +80,57 @@ const mapFinishReason = (stopReason: string | undefined): string => {
 };
 
 // ---------------------------------------------------------------------------
+// Image conversion — OpenAI image_url -> Anthropic image
+// ---------------------------------------------------------------------------
+
+/**
+ * Convert OpenAI image_url content block to Anthropic image block.
+ * data:image/png;base64,xxx -> {type:"image", source:{type:"base64", media_type:"image/png", data:"xxx"}}
+ * https://example.com/img.png -> {type:"image", source:{type:"url", url:"https://..."}}
+ */
+const convertImageBlock = (
+  block: Record<string, unknown>
+): Record<string, unknown> => {
+  const imageUrl = block.image_url as Record<string, unknown> | undefined;
+  if (!imageUrl) return block;
+
+  const url = imageUrl.url as string;
+  if (!url) return block;
+
+  // data URI: extract media type and base64 data
+  const dataMatch = url.match(/^data:([^;]+);base64,(.+)$/s);
+  if (dataMatch) {
+    return {
+      source: {
+        data: dataMatch[2],
+        media_type: dataMatch[1],
+        type: "base64"
+      },
+      type: "image"
+    };
+  }
+
+  // HTTP URL: use url source type
+  return {
+    source: { type: "url", url },
+    type: "image"
+  };
+};
+
+/**
+ * Convert all image_url blocks in a content array to Anthropic image format.
+ * Non-image blocks are passed through unchanged.
+ */
+const convertContentImages = (content: unknown): unknown => {
+  if (!Array.isArray(content)) return content;
+
+  return (content as Array<Record<string, unknown>>).map((block) => {
+    if (block.type === "image_url") return convertImageBlock(block);
+    return block;
+  });
+};
+
+// ---------------------------------------------------------------------------
 // normalizeRequest — OpenAI -> Anthropic
 // ---------------------------------------------------------------------------
 
@@ -166,7 +217,8 @@ export const normalizeRequest = (
 
     // Regular user/assistant — strip cache_control from message level
     // (Anthropic only allows cache_control on content blocks, not messages)
-    cleaned.push({ content: msg.content ?? "", role });
+    // Convert OpenAI image_url blocks to Anthropic image format
+    cleaned.push({ content: convertContentImages(msg.content ?? ""), role });
   }
 
   // 2. Merge consecutive same-role messages (Anthropic requires strict alternation)
