@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   Boxes,
   Building2,
-  Globe,
   LayoutDashboard,
   ScrollText,
   Users
@@ -16,7 +15,6 @@ const NAV_ITEMS = [
   { href: "/admin", icon: LayoutDashboard, label: "Overview" },
   { href: "/admin/users", icon: Users, label: "Users" },
   { href: "/admin/organizations", icon: Building2, label: "Organizations" },
-  { href: "/admin/domains", icon: Globe, label: "Domains" },
   { href: "/admin/models", icon: Boxes, label: "Models" },
   { href: "/admin/audit-logs", icon: ScrollText, label: "Audit Logs" }
 ];

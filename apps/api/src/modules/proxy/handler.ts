@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import type { Context } from "hono";
 import type { Redis } from "ioredis";
 import { cachedQuery } from "@/lib/cache-utils";
-import { ForbiddenError, GuardrailError } from "@/lib/errors";
+import { GuardrailError } from "@/lib/errors";
 import { authenticateKey } from "./auth";
 import { checkBudgets } from "./budget-check";
 import { checkCache, serveCacheHit } from "./cache";
@@ -28,13 +28,6 @@ export const proxyHandler = (
     // 1. Auth
     const authHeader = c.req.header("Authorization") ?? "";
     const { virtualKey } = await authenticateKey(db, authHeader, redis);
-
-    const domainOrgId = c.get("domainOrgId") as string | undefined;
-    if (domainOrgId && virtualKey.organizationId !== domainOrgId) {
-      throw new ForbiddenError(
-        "Virtual key does not belong to this domain's organization"
-      );
-    }
 
     // 2. Gate checks
     await Promise.all([

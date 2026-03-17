@@ -13,7 +13,6 @@ export {
 } from "./catalog-items";
 export { complianceFrameworks } from "./compliance-frameworks";
 export { conversationMessages, conversations } from "./conversations";
-export { customDomains, domainStatusEnum } from "./custom-domains";
 export {
   evaluationResults,
   evaluationStatusEnum,

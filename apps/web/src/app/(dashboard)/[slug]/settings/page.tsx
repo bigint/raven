@@ -3,10 +3,7 @@
 import { PageHeader, PillTabs } from "@raven/ui";
 import { Settings } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CacheManagement } from "./components/cache-management";
-import { CustomDomains } from "./components/custom-domains";
 import { DangerZone } from "./components/danger-zone";
-import { ExportsTab } from "./components/exports-tab";
 import { OrgSettingsForm } from "./components/org-settings-form";
 import { PlanSubscription } from "./components/plan-subscription";
 import { useOrgSettings } from "./hooks/use-org-settings";
@@ -14,9 +11,6 @@ import { useOrgSettings } from "./hooks/use-org-settings";
 const TABS = [
   { label: "General", value: "general" },
   { label: "Billing", value: "billing" },
-  { label: "Domains", value: "domains" },
-  { label: "Cache", value: "cache" },
-  { label: "Exports", value: "exports" },
   { label: "Danger Zone", value: "danger" }
 ];
 
@@ -59,8 +53,6 @@ const OrgSettingsPage = () => {
 
   // Filter tabs based on role
   const visibleTabs = TABS.filter((t) => {
-    if (t.value === "domains" && !isAdmin) return false;
-    if (t.value === "cache" && !isAdmin) return false;
     if (t.value === "danger" && !isOwner) return false;
     return true;
   });
@@ -108,14 +100,6 @@ const OrgSettingsPage = () => {
             )}
 
             {tab === "billing" && <PlanSubscription settings={settings} />}
-
-            {tab === "domains" && isAdmin && (
-              <CustomDomains plan={settings.plan} />
-            )}
-
-            {tab === "cache" && isAdmin && <CacheManagement />}
-
-            {tab === "exports" && <ExportsTab />}
 
             {tab === "danger" && isOwner && (
               <DangerZone

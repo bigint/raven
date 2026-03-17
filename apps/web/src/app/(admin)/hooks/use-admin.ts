@@ -9,7 +9,6 @@ export interface AdminStats {
   planDistribution: Record<string, number>;
   totalRequests: number;
   totalCost: string;
-  totalDomains: number;
   totalInputTokens: number;
   totalOutputTokens: number;
   totalReasoningTokens: number;
@@ -32,16 +31,6 @@ export interface AdminOrg {
   createdAt: string;
   plan: string | null;
   memberCount: number;
-}
-
-export interface AdminDomain {
-  id: string;
-  domain: string;
-  status: string;
-  createdAt: string;
-  verifiedAt: string | null;
-  orgName: string;
-  orgSlug: string;
 }
 
 export interface AdminAuditLog {
@@ -72,12 +61,6 @@ export const adminOrgsQueryOptions = () =>
   queryOptions({
     queryFn: () => api.get<AdminOrg[]>("/v1/admin/organizations"),
     queryKey: ["admin", "organizations"]
-  });
-
-export const adminDomainsQueryOptions = () =>
-  queryOptions({
-    queryFn: () => api.get<AdminDomain[]>("/v1/admin/domains"),
-    queryKey: ["admin", "domains"]
   });
 
 export const adminAuditLogsQueryOptions = () =>
@@ -113,6 +96,5 @@ export const adminProvidersQueryOptions = () =>
 export const useAdminStats = () => useQuery(adminStatsQueryOptions());
 export const useAdminUsers = () => useQuery(adminUsersQueryOptions());
 export const useAdminOrgs = () => useQuery(adminOrgsQueryOptions());
-export const useAdminDomains = () => useQuery(adminDomainsQueryOptions());
 export const useAdminAuditLogs = () => useQuery(adminAuditLogsQueryOptions());
 export const useAdminProviders = () => useQuery(adminProvidersQueryOptions());

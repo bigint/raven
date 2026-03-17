@@ -1,18 +1,12 @@
 import type { Database } from "@raven/db";
-import {
-  customDomains,
-  organizations,
-  requestLogs,
-  subscriptions,
-  users
-} from "@raven/db";
+import { organizations, requestLogs, subscriptions, users } from "@raven/db";
 import { count, gte, sum } from "drizzle-orm";
 import type { Context } from "hono";
 
 export const getAdminStats = (db: Database) => async (c: Context) => {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
-  const [[userCount], [orgCount], planCounts, [requestStats], [domainCount]] =
+  const [[userCount], [orgCount], planCounts, [requestStats]] =
     await Promise.all([
       db.select({ value: count() }).from(users),
       db.select({ value: count() }).from(organizations),
@@ -33,8 +27,7 @@ export const getAdminStats = (db: Database) => async (c: Context) => {
           totalRequests: count()
         })
         .from(requestLogs)
-        .where(gte(requestLogs.createdAt, thirtyDaysAgo)),
-      db.select({ value: count() }).from(customDomains)
+        .where(gte(requestLogs.createdAt, thirtyDaysAgo))
     ]);
 
   const subscribedCount = planCounts.reduce((acc, p) => acc + p.value, 0);
@@ -52,7 +45,6 @@ export const getAdminStats = (db: Database) => async (c: Context) => {
       planDistribution,
       totalCachedTokens: Number(requestStats?.totalCachedTokens ?? 0),
       totalCost: requestStats?.totalCost ?? "0",
-      totalDomains: domainCount?.value ?? 0,
       totalInputTokens: Number(requestStats?.totalInputTokens ?? 0),
       totalOrgs: orgCount?.value ?? 0,
       totalOutputTokens: Number(requestStats?.totalOutputTokens ?? 0),

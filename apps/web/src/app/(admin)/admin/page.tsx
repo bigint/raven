@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "@raven/ui";
-import { Activity, Building2, DollarSign, Globe, Users } from "lucide-react";
+import { Activity, Building2, DollarSign, Users } from "lucide-react";
 import { TextMorph } from "torph/react";
 import { useAdminStats } from "../hooks/use-admin";
 
@@ -36,13 +36,6 @@ const AdminOverviewPage = () => {
       icon: DollarSign,
       label: "Cost (30d)",
       value: `$${Number(stats?.totalCost ?? 0).toFixed(2)}`
-    },
-    {
-      bg: "bg-orange-500/10",
-      color: "text-orange-500",
-      icon: Globe,
-      label: "Custom Domains",
-      value: stats?.totalDomains.toLocaleString() ?? "0"
     }
   ];
 
@@ -57,7 +50,7 @@ const AdminOverviewPage = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((card) => {
           const Icon = card.icon;
           return (
