@@ -123,7 +123,7 @@ const buildTools = (tools: ParsedRequest["tools"]): ToolSet | undefined => {
       name,
       tool({
         description: def.description,
-        parameters: jsonSchema({
+        inputSchema: jsonSchema({
           type: "object",
           ...def.parameters
         })
