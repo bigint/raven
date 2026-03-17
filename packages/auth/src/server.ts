@@ -6,6 +6,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { organization } from "better-auth/plugins";
 
 interface AuthOptions {
+  onResetPassword?: (user: { email: string }, url: string) => void;
   onUserCreated?: (user: { id: string; name: string; email: string }) => void;
 }
 
@@ -41,8 +42,23 @@ export const createAuth = (db: Database, env: Env, options?: AuthOptions) => {
       }
     },
     emailAndPassword: {
-      enabled: true
+      enabled: true,
+      sendResetPassword: options?.onResetPassword
+        ? async ({ url, user }) => {
+            options.onResetPassword?.(user, url);
+          }
+        : undefined
     },
+    ...(env.NODE_ENV === "production"
+      ? {
+          advanced: {
+            defaultCookieAttributes: {
+              sameSite: "none" as const,
+              secure: true
+            }
+          }
+        }
+      : {}),
     plugins: [organization()],
     secret: env.BETTER_AUTH_SECRET,
     session: {

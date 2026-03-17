@@ -2,6 +2,7 @@ import { render } from "@react-email/components";
 import { Resend } from "resend";
 import { BudgetAlertEmail } from "./templates/budget-alert";
 import { InvitationEmail } from "./templates/invitation";
+import { PasswordResetEmail } from "./templates/password-reset";
 import { WelcomeEmail } from "./templates/welcome";
 
 let resend: Resend | null = null;
@@ -52,6 +53,14 @@ export const sendInvitationEmail = async (
     subject: `${inviterName} invited you to ${orgName} on Raven`,
     to
   });
+};
+
+export const sendPasswordResetEmail = async (
+  to: string,
+  resetUrl: string
+): Promise<void> => {
+  const html = await render(PasswordResetEmail({ resetUrl }));
+  await sendEmail({ html, subject: "Reset your Raven password", to });
 };
 
 export const sendBudgetAlertEmail = async (

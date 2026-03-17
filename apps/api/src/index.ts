@@ -10,6 +10,7 @@ import { AppError } from "./lib/errors";
 import { initEventBus } from "./lib/events";
 import { refreshPricingCache } from "./lib/pricing-cache";
 import { getRedis } from "./lib/redis";
+import { sendPasswordResetEmail } from "./lib/send-password-reset-email";
 import { sendWelcomeEmail } from "./lib/send-welcome-email";
 import { initWebhookDispatcher } from "./lib/webhook-dispatcher";
 import { createAuthMiddleware } from "./middleware/auth";
@@ -59,6 +60,7 @@ void refreshPricingCache(db).catch((err) =>
 );
 
 const auth = createAuth(db, env, {
+  onResetPassword: (user, url) => void sendPasswordResetEmail(user, url),
   onUserCreated: (user) => void sendWelcomeEmail(user, env.APP_URL)
 });
 
