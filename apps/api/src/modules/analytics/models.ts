@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { requestLogs } from "@raven/db";
-import { and, avg, count, eq, max, sql, sum } from "drizzle-orm";
+import { and, avg, count, eq, isNull, max, sql, sum } from "drizzle-orm";
 import type { z } from "zod";
 import type { AppContextWithQuery } from "@/lib/types";
 
@@ -15,7 +15,11 @@ export const getModels =
     const { from, to } = c.req.valid("query");
 
     const dateConditions = parseDateRange(from, to);
-    const where = and(eq(requestLogs.organizationId, orgId), ...dateConditions);
+    const where = and(
+      eq(requestLogs.organizationId, orgId),
+      isNull(requestLogs.deletedAt),
+      ...dateConditions
+    );
 
     const rows = await db
       .select({

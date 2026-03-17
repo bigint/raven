@@ -1,6 +1,16 @@
 import type { Database } from "@raven/db";
 import { requestLogs } from "@raven/db";
-import { and, count, eq, isNotNull, max, min, sql, sum } from "drizzle-orm";
+import {
+  and,
+  count,
+  eq,
+  isNotNull,
+  isNull,
+  max,
+  min,
+  sql,
+  sum
+} from "drizzle-orm";
 import type { z } from "zod";
 import { buildPaginationMeta, getOffset } from "@/lib/pagination";
 import type { AppContext, AppContextWithQuery } from "@/lib/types";
@@ -23,6 +33,7 @@ export const getSessions =
     const where = and(
       eq(requestLogs.organizationId, orgId),
       isNotNull(requestLogs.sessionId),
+      isNull(requestLogs.deletedAt),
       ...dateConditions
     );
 
@@ -103,7 +114,8 @@ export const getSessionById = (db: Database) => async (c: AppContext) => {
     .where(
       and(
         eq(requestLogs.organizationId, orgId),
-        sql`${requestLogs.sessionId} = ${sessionId}`
+        sql`${requestLogs.sessionId} = ${sessionId}`,
+        isNull(requestLogs.deletedAt)
       )
     )
     .orderBy(sql`${requestLogs.createdAt} ASC`);

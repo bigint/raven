@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { auditLogs } from "@raven/db";
-import { and, desc, eq, gte, lte } from "drizzle-orm";
+import { and, desc, eq, gte, isNull, lte } from "drizzle-orm";
 import type { z } from "zod";
 import type { AppContextWithQuery } from "@/lib/types";
 import { checkFeatureGate } from "@/modules/proxy/plan-gate";
@@ -16,7 +16,10 @@ export const listAuditLogs =
 
     const query = c.req.valid("query");
 
-    const conditions = [eq(auditLogs.organizationId, orgId)];
+    const conditions = [
+      eq(auditLogs.organizationId, orgId),
+      isNull(auditLogs.deletedAt)
+    ];
 
     if (query.action) {
       conditions.push(eq(auditLogs.action, query.action));

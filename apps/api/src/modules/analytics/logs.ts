@@ -1,6 +1,16 @@
 import type { Database } from "@raven/db";
 import { requestLogs, virtualKeys } from "@raven/db";
-import { and, count, eq, isNotNull, max, min, sql, sum } from "drizzle-orm";
+import {
+  and,
+  count,
+  eq,
+  isNotNull,
+  isNull,
+  max,
+  min,
+  sql,
+  sum
+} from "drizzle-orm";
 import type { z } from "zod";
 import { buildPaginationMeta, getOffset } from "@/lib/pagination";
 import type { AppContextWithQuery } from "@/lib/types";
@@ -23,6 +33,7 @@ export const getLogs =
     const filterConditions = [
       eq(requestLogs.organizationId, orgId),
       isNotNull(requestLogs.sessionId),
+      isNull(requestLogs.deletedAt),
       ...dateConditions
     ];
 

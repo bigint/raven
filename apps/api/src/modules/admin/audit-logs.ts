@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { auditLogs, organizations, users } from "@raven/db";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, isNull } from "drizzle-orm";
 import type { Context } from "hono";
 
 export const getAdminAuditLogs = (db: Database) => async (c: Context) => {
@@ -19,6 +19,7 @@ export const getAdminAuditLogs = (db: Database) => async (c: Context) => {
     .from(auditLogs)
     .leftJoin(users, eq(users.id, auditLogs.actorId))
     .leftJoin(organizations, eq(organizations.id, auditLogs.organizationId))
+    .where(isNull(auditLogs.deletedAt))
     .orderBy(desc(auditLogs.createdAt))
     .limit(200);
 

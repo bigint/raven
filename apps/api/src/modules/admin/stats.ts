@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { organizations, requestLogs, subscriptions, users } from "@raven/db";
-import { count, gte, sum } from "drizzle-orm";
+import { and, count, gte, isNull, sum } from "drizzle-orm";
 import type { Context } from "hono";
 
 export const getAdminStats = (db: Database) => async (c: Context) => {
@@ -8,8 +8,11 @@ export const getAdminStats = (db: Database) => async (c: Context) => {
 
   const [[userCount], [orgCount], planCounts, [requestStats]] =
     await Promise.all([
-      db.select({ value: count() }).from(users),
-      db.select({ value: count() }).from(organizations),
+      db.select({ value: count() }).from(users).where(isNull(users.deletedAt)),
+      db
+        .select({ value: count() })
+        .from(organizations)
+        .where(isNull(organizations.deletedAt)),
       db
         .select({
           plan: subscriptions.plan,
@@ -27,7 +30,12 @@ export const getAdminStats = (db: Database) => async (c: Context) => {
           totalRequests: count()
         })
         .from(requestLogs)
-        .where(gte(requestLogs.createdAt, thirtyDaysAgo))
+        .where(
+          and(
+            gte(requestLogs.createdAt, thirtyDaysAgo),
+            isNull(requestLogs.deletedAt)
+          )
+        )
     ]);
 
   const subscribedCount = planCounts.reduce((acc, p) => acc + p.value, 0);

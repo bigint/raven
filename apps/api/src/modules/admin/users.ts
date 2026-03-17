@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { members, users } from "@raven/db";
-import { count, desc, eq } from "drizzle-orm";
+import { count, desc, eq, isNull } from "drizzle-orm";
 import type { Context } from "hono";
 
 export const getAdminUsers = (db: Database) => async (c: Context) => {
@@ -15,6 +15,7 @@ export const getAdminUsers = (db: Database) => async (c: Context) => {
     })
     .from(users)
     .leftJoin(members, eq(members.userId, users.id))
+    .where(isNull(users.deletedAt))
     .groupBy(users.id)
     .orderBy(desc(users.createdAt));
 

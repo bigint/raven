@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { requestLogs, virtualKeys } from "@raven/db";
-import { and, count, eq, sql, sum } from "drizzle-orm";
+import { and, count, eq, isNull, sql, sum } from "drizzle-orm";
 import type { z } from "zod";
 import type { AppContextWithQuery } from "@/lib/types";
 
@@ -17,7 +17,11 @@ export const getAdoptionChart =
     const { from, to } = c.req.valid("query");
 
     const dateConditions = parseDateRange(from, to);
-    const where = and(eq(requestLogs.organizationId, orgId), ...dateConditions);
+    const where = and(
+      eq(requestLogs.organizationId, orgId),
+      isNull(requestLogs.deletedAt),
+      ...dateConditions
+    );
 
     const rows = await db
       .select({
@@ -50,7 +54,11 @@ export const getAdoptionBreakdown =
     const { from, to, groupBy } = c.req.valid("query");
 
     const dateConditions = parseDateRange(from, to);
-    const where = and(eq(requestLogs.organizationId, orgId), ...dateConditions);
+    const where = and(
+      eq(requestLogs.organizationId, orgId),
+      isNull(requestLogs.deletedAt),
+      ...dateConditions
+    );
 
     if (groupBy === "model") {
       const rows = await db

@@ -15,7 +15,11 @@ export const getUsage =
     const { from, to } = c.req.valid("query");
 
     const dateConditions = parseDateRange(from, to);
-    const where = and(eq(requestLogs.organizationId, orgId), ...dateConditions);
+    const where = and(
+      eq(requestLogs.organizationId, orgId),
+      isNull(requestLogs.deletedAt),
+      ...dateConditions
+    );
 
     const rows = await db
       .select({

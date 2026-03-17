@@ -1,6 +1,16 @@
 import type { Database } from "@raven/db";
 import { requestLogs, virtualKeys } from "@raven/db";
-import { and, count, eq, gt, isNotNull, max, sql, sum } from "drizzle-orm";
+import {
+  and,
+  count,
+  eq,
+  gt,
+  isNotNull,
+  isNull,
+  max,
+  sql,
+  sum
+} from "drizzle-orm";
 import type { z } from "zod";
 import { buildPaginationMeta, getOffset } from "@/lib/pagination";
 import type { AppContextWithQuery } from "@/lib/types";
@@ -20,6 +30,7 @@ export const getToolStats =
     const where = and(
       eq(requestLogs.organizationId, orgId),
       gt(requestLogs.toolCount, 0),
+      isNull(requestLogs.deletedAt),
       ...dateConditions
     );
 
@@ -56,6 +67,7 @@ export const getToolSessions =
     const where = and(
       eq(requestLogs.organizationId, orgId),
       isNotNull(requestLogs.sessionId),
+      isNull(requestLogs.deletedAt),
       ...dateConditions
     );
 
