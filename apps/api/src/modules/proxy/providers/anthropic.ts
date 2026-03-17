@@ -2,99 +2,37 @@ import { getModelPricing } from "@/lib/pricing-cache";
 import { PROVIDERS } from "@/lib/providers";
 import type { ProviderAdapter } from "./registry";
 
-/* ------------------------------------------------------------------ */
-/*  OpenAI ↔ Anthropic message format conversion                      */
-/* ------------------------------------------------------------------ */
-
-interface AnthropicMessage {
-  role: "user" | "assistant";
-  content: unknown;
-}
-
 /**
- * Convert an OpenAI-format message array into Anthropic-format.
- *
- * Handles:
- * - system → extracted to separate field
- * - assistant with tool_calls → assistant with tool_use content blocks
- * - tool (tool results) → user with tool_result content blocks
- * - Consecutive same-role merging (Anthropic requires strict alternation)
- * - Trailing assistant stripping (some models don't support prefill)
- * - Extra field stripping (cache_control, name, etc.)
+ * Convert OpenAI-format request body to Anthropic-format.
+ * Handles: system extraction, message cleaning, tool format conversion,
+ * tool_choice conversion, and extra field stripping.
  */
-const convertMessages = (
-  rawMessages: Array<Record<string, unknown>>
-): { messages: AnthropicMessage[]; systemText: string | undefined } => {
-  const systemParts: string[] = [];
-  const converted: AnthropicMessage[] = [];
+const normalizeRequest = (
+  body: Record<string, unknown>
+): Record<string, unknown> => {
+  const messages = body.messages as Array<Record<string, unknown>> | undefined;
+  if (!messages) return body;
 
-  for (const msg of rawMessages) {
+  // 1. Extract system messages into separate field
+  const systemParts: string[] = [];
+  const cleaned: Array<{ role: string; content: unknown }> = [];
+
+  for (const msg of messages) {
     const role = msg.role as string;
 
-    // System → extract
     if (role === "system") {
       const content = msg.content;
       systemParts.push(typeof content === "string" ? content : String(content));
       continue;
     }
 
-    // Assistant with tool_calls → convert to Anthropic tool_use format
-    if (role === "assistant") {
-      const toolCalls = msg.tool_calls as
-        | Array<{
-            id: string;
-            function: { name: string; arguments: string };
-          }>
-        | undefined;
-
-      if (toolCalls && toolCalls.length > 0) {
-        // Build content blocks: text (if any) + tool_use blocks
-        const contentBlocks: Array<Record<string, unknown>> = [];
-
-        const textContent = msg.content;
-        if (
-          textContent &&
-          typeof textContent === "string" &&
-          textContent.trim()
-        ) {
-          contentBlocks.push({ text: textContent, type: "text" });
-        }
-
-        for (const tc of toolCalls) {
-          let input: unknown = {};
-          try {
-            input = JSON.parse(tc.function.arguments);
-          } catch {
-            input = { raw: tc.function.arguments };
-          }
-          contentBlocks.push({
-            id: tc.id,
-            input,
-            name: tc.function.name,
-            type: "tool_use"
-          });
-        }
-
-        converted.push({ content: contentBlocks, role: "assistant" });
-        continue;
-      }
-
-      // Regular assistant message
-      converted.push({
-        content: msg.content ?? "",
-        role: "assistant"
-      });
-      continue;
-    }
-
-    // Tool result → convert to Anthropic user message with tool_result content
+    // Convert OpenAI "tool" role to Anthropic "user" with tool_result
     if (role === "tool") {
       const toolCallId = msg.tool_call_id as string | undefined;
       const content = msg.content;
       const resultText =
         typeof content === "string" ? content : JSON.stringify(content);
-
-      converted.push({
+      cleaned.push({
         content: [
           {
             content: resultText,
@@ -107,79 +45,156 @@ const convertMessages = (
       continue;
     }
 
-    // Regular user message
-    if (role === "user") {
-      converted.push({
-        content: msg.content ?? "",
-        role: "user"
-      });
+    // Convert assistant with OpenAI tool_calls to Anthropic tool_use
+    if (role === "assistant" && msg.tool_calls) {
+      const toolCalls = msg.tool_calls as Array<{
+        id: string;
+        function: { name: string; arguments: string };
+      }>;
+      const contentBlocks: Array<Record<string, unknown>> = [];
+
+      const textContent = msg.content;
+      if (
+        textContent &&
+        typeof textContent === "string" &&
+        textContent.trim()
+      ) {
+        contentBlocks.push({ text: textContent, type: "text" });
+      }
+
+      for (const tc of toolCalls) {
+        let input: unknown = {};
+        try {
+          input = JSON.parse(tc.function.arguments);
+        } catch {
+          input = { raw: tc.function.arguments };
+        }
+        contentBlocks.push({
+          id: tc.id,
+          input,
+          name: tc.function.name,
+          type: "tool_use"
+        });
+      }
+
+      cleaned.push({ content: contentBlocks, role: "assistant" });
       continue;
     }
 
-    // Unknown role — treat as user
-    converted.push({
-      content: msg.content ?? "",
-      role: "user"
-    });
+    // Regular user/assistant — strip extra fields (cache_control, name, etc.)
+    cleaned.push({ content: msg.content ?? "", role });
   }
 
-  // Merge consecutive same-role messages
-  const merged: AnthropicMessage[] = [];
-  for (const msg of converted) {
+  // 2. Merge consecutive same-role messages (Anthropic requires strict alternation)
+  const merged: Array<{ role: string; content: unknown }> = [];
+  for (const msg of cleaned) {
     const prev = merged[merged.length - 1];
     if (prev && prev.role === msg.role) {
-      // Merge into array content blocks
       const prevBlocks = Array.isArray(prev.content)
         ? prev.content
-        : [{ text: String(prev.content), type: "text" }];
+        : typeof prev.content === "string"
+          ? [{ text: prev.content, type: "text" }]
+          : [prev.content];
       const curBlocks = Array.isArray(msg.content)
         ? msg.content
-        : [{ text: String(msg.content), type: "text" }];
+        : typeof msg.content === "string"
+          ? [{ text: msg.content, type: "text" }]
+          : [msg.content];
       prev.content = [...prevBlocks, ...curBlocks];
     } else {
       merged.push({ ...msg });
     }
   }
 
-  // Ensure first message is user
+  // 3. Ensure first message is user
   if (merged.length > 0 && merged[0]?.role !== "user") {
     merged.unshift({ content: ".", role: "user" });
   }
 
-  // Ensure conversation ends with user — Anthropic requires this.
-  // In agent flows, tool results (converted from role:"tool" to role:"user")
-  // naturally end with user. Trailing assistant messages are the client
-  // echoing back the model's response — safe to strip.
-  while (
-    merged.length > 1 &&
-    merged[merged.length - 1]?.role === "assistant"
-  ) {
+  // 4. Strip trailing assistant messages
+  while (merged.length > 1 && merged[merged.length - 1]?.role === "assistant") {
     merged.pop();
   }
 
-  // Safety
   if (merged.length === 0) {
     merged.push({ content: "Hello", role: "user" });
   }
 
+  // 5. Build result
+  const result: Record<string, unknown> = {
+    max_tokens: body.max_tokens ?? 4096,
+    messages: merged,
+    model: body.model,
+    stream: body.stream
+  };
+
+  // System
   const systemText =
     systemParts.length > 0 ? systemParts.join("\n\n") : undefined;
+  if (systemText) result.system = systemText;
 
-  return { messages: merged, systemText };
+  // Parameters
+  if (body.temperature !== undefined) result.temperature = body.temperature;
+  if (body.top_p !== undefined) result.top_p = body.top_p;
+  if (body.stop) result.stop_sequences = body.stop;
+  if (body.thinking) result.thinking = body.thinking;
+
+  // Convert OpenAI tools format to Anthropic
+  if (Array.isArray(body.tools) && body.tools.length > 0) {
+    result.tools = (
+      body.tools as Array<{
+        function?: {
+          description?: string;
+          name: string;
+          parameters: unknown;
+        };
+      }>
+    ).map((t) => ({
+      description: t.function?.description,
+      input_schema: t.function?.parameters,
+      name: t.function?.name
+    }));
+  }
+
+  // Convert tool_choice
+  if (body.tool_choice !== undefined) {
+    const tc = body.tool_choice;
+    if (tc === "auto") {
+      result.tool_choice = { type: "auto" };
+    } else if (tc === "required" || tc === "any") {
+      result.tool_choice = { type: "any" };
+    } else if (tc === "none") {
+      // Anthropic doesn't have "none" — just don't set it
+    } else if (
+      typeof tc === "object" &&
+      tc !== null &&
+      (tc as Record<string, unknown>).function
+    ) {
+      const fn = (tc as Record<string, unknown>).function as Record<
+        string,
+        unknown
+      >;
+      result.tool_choice = { name: fn.name, type: "tool" };
+    }
+  }
+
+  // Don't pass OpenAI-specific fields
+  // stream_options, n, logprobs, etc. are stripped by not copying them
+
+  return result;
 };
 
-/* ------------------------------------------------------------------ */
-/*  Anthropic → OpenAI streaming chunk conversion                     */
-/* ------------------------------------------------------------------ */
-
-// Track active tool calls during streaming
+/**
+ * Convert Anthropic streaming chunks to OpenAI format.
+ */
+// Track tool calls being accumulated during streaming
 let streamToolCalls: Array<{
   id: string;
   name: string;
   arguments: string;
 }> = [];
 
-const convertStreamChunk = (line: string): string | null => {
+const normalizeStreamChunk = (line: string): string | null => {
   const trimmed = line.trim();
   if (!trimmed.startsWith("data:")) return null;
   const data = trimmed.slice(5).trim();
@@ -188,7 +203,7 @@ const convertStreamChunk = (line: string): string | null => {
   try {
     const parsed = JSON.parse(data) as Record<string, unknown>;
 
-    // Text delta
+    // Text content
     if (parsed.type === "content_block_delta") {
       const delta = parsed.delta as Record<string, unknown> | undefined;
       if (delta?.type === "text_delta" && delta.text) {
@@ -196,7 +211,7 @@ const convertStreamChunk = (line: string): string | null => {
           choices: [{ delta: { content: delta.text }, index: 0 }]
         })}`;
       }
-      // Tool input delta
+      // Tool input accumulation
       if (
         delta?.type === "input_json_delta" &&
         delta.partial_json !== undefined
@@ -205,7 +220,7 @@ const convertStreamChunk = (line: string): string | null => {
         if (streamToolCalls[idx]) {
           streamToolCalls[idx].arguments += delta.partial_json as string;
         }
-        return null; // Accumulate, emit on content_block_stop
+        return null;
       }
     }
 
@@ -228,7 +243,7 @@ const convertStreamChunk = (line: string): string | null => {
       const idx = (parsed.index as number) ?? 0;
       const tc = streamToolCalls[idx];
       if (tc) {
-        const chunk = `data: ${JSON.stringify({
+        return `data: ${JSON.stringify({
           choices: [
             {
               delta: {
@@ -245,7 +260,6 @@ const convertStreamChunk = (line: string): string | null => {
             }
           ]
         })}`;
-        return chunk;
       }
       return null;
     }
@@ -255,7 +269,6 @@ const convertStreamChunk = (line: string): string | null => {
       const delta = parsed.delta as { stop_reason?: string } | undefined;
       const usage = parsed.usage as Record<string, number> | undefined;
       const stopReason = delta?.stop_reason;
-      // Map Anthropic stop reasons to OpenAI
       const finishReason =
         stopReason === "tool_use" ? "tool_calls" : (stopReason ?? "stop");
       return `data: ${JSON.stringify({
@@ -272,7 +285,7 @@ const convertStreamChunk = (line: string): string | null => {
 
     // Message start
     if (parsed.type === "message_start") {
-      streamToolCalls = []; // Reset for new message
+      streamToolCalls = [];
       const message = parsed.message as Record<string, unknown> | undefined;
       const usage = message?.usage as Record<string, number> | undefined;
       if (usage) {
@@ -289,7 +302,7 @@ const convertStreamChunk = (line: string): string | null => {
 
     // Message stop
     if (parsed.type === "message_stop") {
-      streamToolCalls = []; // Clean up
+      streamToolCalls = [];
       return "data: [DONE]";
     }
   } catch {
@@ -298,10 +311,6 @@ const convertStreamChunk = (line: string): string | null => {
 
   return null;
 };
-
-/* ------------------------------------------------------------------ */
-/*  Adapter                                                           */
-/* ------------------------------------------------------------------ */
 
 export const anthropicAdapter = (provider: string): ProviderAdapter => {
   const config = PROVIDERS[provider];
@@ -333,52 +342,13 @@ export const anthropicAdapter = (provider: string): ProviderAdapter => {
     modelsEndpoint: config.modelsEndpoint,
     name: provider,
 
-    normalizeRequest(body) {
-      const messages = body.messages as
-        | Array<Record<string, unknown>>
-        | undefined;
-      if (!messages) return body;
-
-      const { messages: normalized, systemText } = convertMessages(messages);
-
-      const result: Record<string, unknown> = {
-        max_tokens: body.max_tokens ?? 4096,
-        messages: normalized,
-        model: body.model,
-        stream: body.stream
-      };
-
-      if (systemText) result.system = systemText;
-      if (body.temperature !== undefined) result.temperature = body.temperature;
-      if (body.top_p !== undefined) result.top_p = body.top_p;
-      if (body.stop) result.stop_sequences = body.stop;
-      if (body.thinking) result.thinking = body.thinking;
-
-      // Convert OpenAI tool format to Anthropic tool format
-      if (Array.isArray(body.tools) && body.tools.length > 0) {
-        result.tools = (
-          body.tools as Array<{
-            function?: {
-              description?: string;
-              name: string;
-              parameters: unknown;
-            };
-          }>
-        ).map((t) => ({
-          description: t.function?.description,
-          input_schema: t.function?.parameters,
-          name: t.function?.name
-        }));
-      }
-
-      return result;
-    },
-
-    normalizeStreamChunk: convertStreamChunk,
+    normalizeRequest,
+    normalizeStreamChunk,
 
     transformBody(body) {
       const result = { ...body };
 
+      // Add cache_control to system blocks
       if (result.system !== undefined) {
         const blocks =
           typeof result.system === "string"
@@ -395,6 +365,7 @@ export const anthropicAdapter = (provider: string): ProviderAdapter => {
         result.system = blocks;
       }
 
+      // Add cache_control to last tool
       if (Array.isArray(result.tools) && result.tools.length > 0) {
         const tools = (result.tools as Array<Record<string, unknown>>).map(
           (t) => ({ ...t })
