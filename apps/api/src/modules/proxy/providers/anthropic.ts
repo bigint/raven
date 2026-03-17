@@ -50,9 +50,18 @@ export const anthropicAdapter = (provider: string): ProviderAdapter => {
               .join("\n\n")
           : undefined;
 
+      // Clean messages — only pass fields Anthropic accepts
+      const cleanedMessages = nonSystemMessages.map((m) => {
+        const clean: Record<string, unknown> = {
+          content: m.content,
+          role: m.role
+        };
+        return clean;
+      });
+
       const result: Record<string, unknown> = {
         max_tokens: body.max_tokens ?? 4096,
-        messages: nonSystemMessages,
+        messages: cleanedMessages,
         model: body.model,
         stream: body.stream
       };
@@ -61,6 +70,7 @@ export const anthropicAdapter = (provider: string): ProviderAdapter => {
       if (body.temperature !== undefined) result.temperature = body.temperature;
       if (body.top_p !== undefined) result.top_p = body.top_p;
       if (body.stop) result.stop_sequences = body.stop;
+      if (body.thinking) result.thinking = body.thinking;
 
       if (Array.isArray(body.tools) && body.tools.length > 0) {
         result.tools = (
