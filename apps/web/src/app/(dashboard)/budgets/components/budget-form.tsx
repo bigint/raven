@@ -22,7 +22,7 @@ interface FormState {
 const DEFAULT_FORM: FormState = {
   alertThreshold: "80",
   entityId: "",
-  entityType: "org",
+  entityType: "organization",
   limitAmount: "",
   period: "monthly"
 };
