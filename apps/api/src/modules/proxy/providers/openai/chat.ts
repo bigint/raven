@@ -115,6 +115,20 @@ export const normalizeRequest = (
     modified = true;
   }
 
+  // Newer OpenAI models require max_completion_tokens instead of max_tokens.
+  // If both are absent or max_completion_tokens is already set, do nothing.
+  if (
+    result.max_tokens !== undefined &&
+    result.max_completion_tokens === undefined
+  ) {
+    result = {
+      ...result,
+      max_completion_tokens: result.max_tokens
+    };
+    delete result.max_tokens;
+    modified = true;
+  }
+
   // Strip cache_control from messages
   const messages = result.messages as Message[] | undefined;
   if (Array.isArray(messages)) {
