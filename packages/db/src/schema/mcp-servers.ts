@@ -23,10 +23,7 @@ export const mcpServers = pgTable(
     accessControl: jsonb("access_control")
       .$type<{ allowedKeys: string[]; allowedTeams: string[] }>()
       .default({ allowedKeys: [], allowedTeams: [] }),
-    capabilities: jsonb("capabilities")
-      .notNull()
-      .$type<string[]>()
-      .default([]),
+    capabilities: jsonb("capabilities").notNull().$type<string[]>().default([]),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

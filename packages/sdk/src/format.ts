@@ -112,8 +112,7 @@ export const parseBufferedResponse = (
     usage: {
       completionTokens: usage?.output_tokens ?? 0,
       promptTokens: usage?.input_tokens ?? 0,
-      totalTokens:
-        (usage?.input_tokens ?? 0) + (usage?.output_tokens ?? 0)
+      totalTokens: (usage?.input_tokens ?? 0) + (usage?.output_tokens ?? 0)
     }
   };
 };

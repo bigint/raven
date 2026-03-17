@@ -1,11 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
-import {
-  boolean,
-  index,
-  pgTable,
-  text,
-  timestamp
-} from "drizzle-orm/pg-core";
+import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { organizations } from "./organizations";
 
 export const ipAllowlists = pgTable(
