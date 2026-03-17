@@ -1,7 +1,14 @@
 "use client";
 
 import { Switch, Textarea } from "@raven/ui";
-import { ArrowUp, ChevronDown, Square, Thermometer, X } from "lucide-react";
+import {
+  ArrowUp,
+  ChevronDown,
+  ImagePlus,
+  Square,
+  Thermometer,
+  X
+} from "lucide-react";
 import { type KeyboardEvent, useCallback, useRef, useState } from "react";
 
 export interface PlaygroundSettings {
@@ -22,12 +29,19 @@ interface ModelOption {
   provider: string;
 }
 
+export interface ImageAttachment {
+  id: string;
+  base64: string;
+  name: string;
+  preview: string;
+}
+
 type Popover = "model" | "temperature" | "memory" | "settings" | null;
 
 interface ChatInputProps {
   disabled: boolean;
   isStreaming: boolean;
-  onSend: (content: string) => void;
+  onSend: (content: string, images?: ImageAttachment[]) => void;
   onStop: () => void;
   model?: string;
   modelOptions: ModelOption[];
@@ -37,6 +51,17 @@ interface ChatInputProps {
   systemPrompt: string;
   onSystemPromptChange: (value: string) => void;
 }
+
+const MAX_IMAGE_SIZE = 20 * 1024 * 1024; // 20MB
+const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/gif", "image/webp"];
+
+const fileToBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 
 export const ChatInput = ({
   disabled,
@@ -52,8 +77,10 @@ export const ChatInput = ({
   onSystemPromptChange
 }: ChatInputProps) => {
   const [value, setValue] = useState("");
+  const [images, setImages] = useState<ImageAttachment[]>([]);
   const [openPopover, setOpenPopover] = useState<Popover>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const toggle = (p: Popover) =>
     setOpenPopover((cur) => (cur === p ? null : p));
@@ -66,13 +93,14 @@ export const ChatInput = ({
   }, []);
 
   const handleSend = useCallback(() => {
-    if (!value.trim() || disabled) return;
-    onSend(value);
+    if ((!value.trim() && images.length === 0) || disabled) return;
+    onSend(value, images.length > 0 ? images : undefined);
     setValue("");
+    setImages([]);
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
-  }, [value, disabled, onSend]);
+  }, [value, images, disabled, onSend]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -81,6 +109,61 @@ export const ChatInput = ({
     }
   };
 
+  const handleFileSelect = useCallback(async (files: FileList | null) => {
+    if (!files) return;
+
+    const newImages: ImageAttachment[] = [];
+    for (const file of Array.from(files)) {
+      if (!ACCEPTED_TYPES.includes(file.type)) continue;
+      if (file.size > MAX_IMAGE_SIZE) continue;
+
+      const base64 = await fileToBase64(file);
+      newImages.push({
+        base64,
+        id: crypto.randomUUID(),
+        name: file.name,
+        preview: URL.createObjectURL(file)
+      });
+    }
+
+    setImages((prev) => [...prev, ...newImages]);
+  }, []);
+
+  const removeImage = useCallback((id: string) => {
+    setImages((prev) => {
+      const img = prev.find((i) => i.id === id);
+      if (img) URL.revokeObjectURL(img.preview);
+      return prev.filter((i) => i.id !== id);
+    });
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      handleFileSelect(e.dataTransfer.files);
+    },
+    [handleFileSelect]
+  );
+
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent) => {
+      const items = e.clipboardData.items;
+      const imageFiles: File[] = [];
+      for (const item of Array.from(items)) {
+        if (item.type.startsWith("image/")) {
+          const file = item.getAsFile();
+          if (file) imageFiles.push(file);
+        }
+      }
+      if (imageFiles.length > 0) {
+        const dt = new DataTransfer();
+        for (const f of imageFiles) dt.items.add(f);
+        handleFileSelect(dt.files);
+      }
+    },
+    [handleFileSelect]
+  );
+
   const update = <K extends keyof PlaygroundSettings>(
     key: K,
     val: PlaygroundSettings[K]
@@ -88,7 +171,34 @@ export const ChatInput = ({
 
   return (
     <div className="px-4 py-3 md:px-6">
-      <div className="mx-auto max-w-3xl rounded-xl border border-border bg-muted/30 shadow-sm transition-colors focus-within:border-ring focus-within:bg-background">
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: drop zone for image uploads */}
+      <div
+        className="mx-auto max-w-3xl rounded-xl border border-border bg-muted/30 shadow-sm transition-colors focus-within:border-ring focus-within:bg-background"
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={handleDrop}
+      >
+        {/* Image previews */}
+        {images.length > 0 && (
+          <div className="flex flex-wrap gap-2 px-4 pt-3">
+            {images.map((img) => (
+              <div className="group relative" key={img.id}>
+                <img
+                  alt={img.name}
+                  className="size-16 rounded-lg border border-border object-cover"
+                  src={img.preview}
+                />
+                <button
+                  className="absolute -top-1.5 -right-1.5 rounded-full bg-background border border-border p-0.5 opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
+                  onClick={() => removeImage(img.id)}
+                  type="button"
+                >
+                  <X className="size-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
         <textarea
           className="w-full resize-none bg-transparent px-4 pt-3 pb-2 text-sm placeholder:text-muted-foreground focus:outline-none"
           disabled={isStreaming}
@@ -97,7 +207,12 @@ export const ChatInput = ({
             adjustHeight();
           }}
           onKeyDown={handleKeyDown}
-          placeholder="Start a new message..."
+          onPaste={handlePaste}
+          placeholder={
+            images.length > 0
+              ? "Add a message about the image(s)..."
+              : "Start a new message..."
+          }
           ref={textareaRef}
           rows={1}
           style={{ maxHeight: 200 }}
@@ -106,6 +221,26 @@ export const ChatInput = ({
 
         <div className="flex items-center justify-between px-3 pb-2">
           <div className="flex items-center gap-0.5">
+            {/* Image upload */}
+            <button
+              className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              onClick={() => fileInputRef.current?.click()}
+              title="Attach image"
+              type="button"
+            >
+              <ImagePlus className="size-3.5" />
+            </button>
+            <input
+              accept={ACCEPTED_TYPES.join(",")}
+              className="hidden"
+              multiple
+              onChange={(e) => handleFileSelect(e.target.files)}
+              ref={fileInputRef}
+              type="file"
+            />
+
+            <Sep />
+
             {/* Model selector */}
             <div className="relative">
               <button
@@ -395,7 +530,7 @@ export const ChatInput = ({
           ) : (
             <button
               className="rounded-lg bg-primary p-2 text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed"
-              disabled={!value.trim() || disabled}
+              disabled={(!value.trim() && images.length === 0) || disabled}
               onClick={handleSend}
               type="button"
             >

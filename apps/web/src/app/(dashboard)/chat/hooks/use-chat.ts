@@ -1,16 +1,20 @@
 "use client";
 
-import type { Message } from "@raven/sdk";
+import type { ContentPart, Message } from "@raven/sdk";
 import { RavenClient } from "@raven/sdk";
 import { queryOptions, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import { API_URL, api } from "@/lib/api";
-import type { PlaygroundSettings } from "../components/chat-input";
+import type {
+  ImageAttachment,
+  PlaygroundSettings
+} from "../components/chat-input";
 import type { ResponseMeta } from "../components/response-metadata";
 
 interface DisplayMessage {
   content: string;
   id: string;
+  images?: ImageAttachment[];
   meta?: ResponseMeta;
   role: "assistant" | "user";
 }
@@ -92,12 +96,18 @@ export const useChat = () => {
   };
 
   const sendMessage = useCallback(
-    async (content: string) => {
-      if (!content.trim() || !selectedModel || isStreaming) return;
+    async (content: string, images?: ImageAttachment[]) => {
+      if (
+        (!content.trim() && (!images || images.length === 0)) ||
+        !selectedModel ||
+        isStreaming
+      )
+        return;
 
       const userMessage: DisplayMessage = {
         content: content.trim(),
         id: crypto.randomUUID(),
+        images,
         role: "user"
       };
 
@@ -120,10 +130,19 @@ export const useChat = () => {
         const client = clientRef.current;
         if (!client) return;
 
-        const allMessages = [...messages, userMessage].map((m) => ({
-          content: m.content,
-          role: m.role
-        }));
+        const allMessages: Message[] = [...messages, userMessage].map((m) => {
+          if (m.images && m.images.length > 0) {
+            const parts: ContentPart[] = [];
+            for (const img of m.images) {
+              parts.push({ image: img.base64, type: "image" });
+            }
+            if (m.content) {
+              parts.push({ text: m.content, type: "text" });
+            }
+            return { content: parts, role: m.role };
+          }
+          return { content: m.content, role: m.role };
+        });
 
         // Apply chat memory limit — only send the last N messages
         const recentMessages = allMessages.slice(-settings.chatMemory);
