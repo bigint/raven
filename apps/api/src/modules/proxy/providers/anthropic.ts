@@ -51,13 +51,27 @@ export const anthropicAdapter = (provider: string): ProviderAdapter => {
           : undefined;
 
       // Clean messages — only pass fields Anthropic accepts
-      const cleanedMessages = nonSystemMessages.map((m) => {
-        const clean: Record<string, unknown> = {
-          content: m.content,
-          role: m.role
-        };
-        return clean;
-      });
+      let cleanedMessages = nonSystemMessages.map((m) => ({
+        content: m.content,
+        role: m.role
+      }));
+
+      // Strip trailing empty assistant messages (prefill not supported on all models)
+      while (
+        cleanedMessages.length > 0 &&
+        cleanedMessages[cleanedMessages.length - 1]?.role === "assistant"
+      ) {
+        const last = cleanedMessages[cleanedMessages.length - 1];
+        const content = last?.content;
+        if (
+          !content ||
+          (typeof content === "string" && !content.trim())
+        ) {
+          cleanedMessages = cleanedMessages.slice(0, -1);
+        } else {
+          break;
+        }
+      }
 
       const result: Record<string, unknown> = {
         max_tokens: body.max_tokens ?? 4096,
