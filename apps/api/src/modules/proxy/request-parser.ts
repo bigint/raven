@@ -39,34 +39,21 @@ export interface ParsedRequest {
 // ---------------------------------------------------------------------------
 
 /**
- * Strip $id and $schema from JSON Schema objects.
- * Mistral rejects these; they're non-standard in tool parameter schemas.
- * Applied for all providers since they serve no purpose in tool definitions.
+ * Ensure a tool parameter schema is valid for all providers.
+ * - Strips $id/$schema (Mistral rejects these)
+ * - Ensures top-level type: "object" (Anthropic requires it)
  */
-const cleanJsonSchema = (schema: unknown): Record<string, unknown> => {
+const ensureToolSchema = (schema: unknown): Record<string, unknown> => {
   if (!schema || typeof schema !== "object") {
-    return { properties: {}, type: "object" };
+    return { type: "object", properties: {} };
   }
 
-  const s = { ...(schema as Record<string, unknown>) };
+  const s = JSON.parse(JSON.stringify(schema)) as Record<string, unknown>;
   delete s.$id;
   delete s.$schema;
 
-  // Anthropic requires `type` on every schema object — ensure it's present
   if (!s.type) {
     s.type = "object";
-  }
-
-  if (s.properties && typeof s.properties === "object") {
-    const props = { ...(s.properties as Record<string, unknown>) };
-    for (const key of Object.keys(props)) {
-      props[key] = cleanJsonSchema(props[key]);
-    }
-    s.properties = props;
-  }
-
-  if (s.items) {
-    s.items = cleanJsonSchema(s.items);
   }
 
   return s;
@@ -262,7 +249,7 @@ const parseTools = (
     const name = fn.name as string;
     tools[name] = {
       description: fn.description as string | undefined,
-      parameters: cleanJsonSchema(fn.parameters)
+      parameters: ensureToolSchema(fn.parameters)
     };
   }
 
