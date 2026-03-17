@@ -1,6 +1,5 @@
 "use client";
 
-import { PROVIDER_LABELS } from "@raven/types";
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { ModelIcon } from "@/components/model-icon";
@@ -105,7 +104,7 @@ export const RequestDetail = ({ request, onClose }: RequestDetailProps) => (
               <Field label="Method" value={request.method} />
               <Field label="Path" value={request.path} />
               <Field label="Status Code" value={String(request.statusCode)} />
-              <Field label="Provider" value={PROVIDER_LABELS[request.provider] ?? request.provider} />
+              <Field label="Provider" value={request.provider} />
               <Field
                 label="Cache Hit"
                 value={request.cacheHit ? "Yes" : "No"}

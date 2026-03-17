@@ -53,7 +53,17 @@ const Select = ({
         )}
         id={id}
       >
-        <BaseSelect.Value placeholder={placeholder} />
+        <BaseSelect.Value placeholder={placeholder}>
+          {(val: string) => {
+            const match = options.find((o) => o.value === val);
+            return match ? (
+              <span className="flex items-center gap-2">
+                {match.icon}
+                {match.label}
+              </span>
+            ) : val;
+          }}
+        </BaseSelect.Value>
         <BaseSelect.Icon className="ml-2">
           <svg
             className="size-4 text-muted-foreground"

@@ -1,6 +1,5 @@
 "use client";
 
-import { PROVIDER_LABELS } from "@raven/types";
 import { Switch, Textarea } from "@raven/ui";
 import {
   ArrowUp,
@@ -268,7 +267,7 @@ export const ChatInput = ({
                       >
                         <span className="truncate">{opt.label}</span>
                         <span className="ml-auto shrink-0 text-[10px] text-muted-foreground/60">
-                          {PROVIDER_LABELS[opt.provider] ?? opt.provider}
+                          {opt.provider}
                         </span>
                       </button>
                     ))}
