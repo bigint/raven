@@ -107,7 +107,7 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
             onChange={(v) =>
               setForm((f) => ({ ...f, environment: v as "live" | "test" }))
             }
-            options={[...ENVIRONMENT_OPTIONS]}
+            options={ENVIRONMENT_OPTIONS}
             value={form.environment}
           />
         )}

@@ -35,7 +35,7 @@ export const WEBHOOK_EVENTS = [
   "team.deleted",
   "settings.updated",
   "subscription.updated"
-] as const;
+];
 
 export const EVENT_CATEGORIES: Record<string, string[]> = {
   Billing: ["subscription.updated"],

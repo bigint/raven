@@ -61,7 +61,7 @@ const InviteForm = ({ onClose, onSubmit, open }: InviteFormProps) => {
           id="invite-role"
           label="Role"
           onChange={setRole}
-          options={[...ROLE_OPTIONS]}
+          options={ROLE_OPTIONS}
           value={role}
         />
         <div className="flex justify-end gap-2 pt-1">
