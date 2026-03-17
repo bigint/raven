@@ -18,7 +18,6 @@ import {
   ScrollText,
   Settings,
   Shield,
-  ShieldBan,
   SquareTerminal,
   TrendingUp,
   Users,
@@ -75,12 +74,6 @@ const NAV_ITEMS: NavItem[] = [
     href: "/guardrails",
     icon: Shield,
     label: "Guardrails"
-  },
-  {
-    gate: (plan) => PLAN_FEATURES[plan].hasIpAllowlists,
-    href: "/ip-allowlists",
-    icon: ShieldBan,
-    label: "IP Allowlists"
   },
   {
     gate: (plan) => PLAN_FEATURES[plan].hasTeams,

@@ -18,7 +18,6 @@ export interface PlanFeatures {
   readonly hasGuardrails: boolean;
   readonly hasAdoption: boolean;
   readonly hasWebhooks: boolean;
-  readonly hasIpAllowlists: boolean;
 }
 
 export type BooleanFeatureKey = {
@@ -71,7 +70,6 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     hasAdoption: true,
     hasAuditLogs: true,
     hasGuardrails: true,
-    hasIpAllowlists: true,
     hasTeams: true,
     hasWebhooks: true,
     maxBudgets: Number.POSITIVE_INFINITY,
@@ -85,7 +83,6 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     hasAdoption: false,
     hasAuditLogs: false,
     hasGuardrails: false,
-    hasIpAllowlists: false,
     hasTeams: false,
     hasWebhooks: false,
     maxBudgets: 1,
@@ -99,7 +96,6 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     hasAdoption: true,
     hasAuditLogs: false,
     hasGuardrails: true,
-    hasIpAllowlists: false,
     hasTeams: false,
     hasWebhooks: true,
     maxBudgets: 10,
@@ -113,7 +109,6 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     hasAdoption: true,
     hasAuditLogs: false,
     hasGuardrails: true,
-    hasIpAllowlists: false,
     hasTeams: true,
     hasWebhooks: true,
     maxBudgets: Number.POSITIVE_INFINITY,
