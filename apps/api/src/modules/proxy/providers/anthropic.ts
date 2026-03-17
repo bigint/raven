@@ -146,18 +146,15 @@ const convertMessages = (
     merged.unshift({ content: ".", role: "user" });
   }
 
-  // Strip trailing empty assistant (prefill) — but keep non-empty ones
-  // for tool-calling flows where the conversation legitimately ends with assistant
-  const last = merged[merged.length - 1];
-  if (last?.role === "assistant") {
-    const content = last.content;
-    const isEmpty =
-      !content ||
-      (typeof content === "string" && !content.trim()) ||
-      (Array.isArray(content) && content.length === 0);
-    if (isEmpty) {
-      merged.pop();
-    }
+  // Ensure conversation ends with user — Anthropic requires this.
+  // In agent flows, tool results (converted from role:"tool" to role:"user")
+  // naturally end with user. Trailing assistant messages are the client
+  // echoing back the model's response — safe to strip.
+  while (
+    merged.length > 1 &&
+    merged[merged.length - 1]?.role === "assistant"
+  ) {
+    merged.pop();
   }
 
   // Safety
