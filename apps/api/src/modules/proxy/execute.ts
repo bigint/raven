@@ -22,9 +22,7 @@ import {
   formatStreamingResponse
 } from "./response-formatter";
 
-// ---------------------------------------------------------------------------
 // Types
-// ---------------------------------------------------------------------------
 
 export interface ExecuteInput {
   db: Database;
@@ -51,9 +49,7 @@ export interface ExecuteInput {
   extraResponseHeaders?: Record<string, string>;
 }
 
-// ---------------------------------------------------------------------------
 // Log sanitization
-// ---------------------------------------------------------------------------
 
 const sanitizeForLog = (
   body: Record<string, unknown>
@@ -110,9 +106,7 @@ const sanitizeForLog = (
   return clone;
 };
 
-// ---------------------------------------------------------------------------
 // Tool building
-// ---------------------------------------------------------------------------
 
 const buildTools = (tools: ParsedRequest["tools"]): ToolSet | undefined => {
   if (!tools) return undefined;
@@ -131,9 +125,7 @@ const buildTools = (tools: ParsedRequest["tools"]): ToolSet | undefined => {
   ) as ToolSet;
 };
 
-// ---------------------------------------------------------------------------
 // Execute
-// ---------------------------------------------------------------------------
 
 export const execute = async (input: ExecuteInput): Promise<Response> => {
   const {

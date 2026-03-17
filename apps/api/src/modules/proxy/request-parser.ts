@@ -23,10 +23,8 @@ export interface ParsedRequest {
   requiresRawProxy: boolean;
 }
 
-// ---------------------------------------------------------------------------
 // Messages — convert OpenAI format to AI SDK ModelMessage[]
 // Only the differences need conversion: tool_calls, tool results, image_url
-// ---------------------------------------------------------------------------
 
 type Msg = Record<string, unknown>;
 
@@ -143,9 +141,7 @@ const convertMessage = (msg: Msg): ModelMessage | null => {
   }
 };
 
-// ---------------------------------------------------------------------------
 // Tools
-// ---------------------------------------------------------------------------
 
 const ensureToolSchema = (schema: unknown): Record<string, unknown> => {
   if (!schema || typeof schema !== "object") {
@@ -201,9 +197,7 @@ const parseToolChoice = (
   return undefined;
 };
 
-// ---------------------------------------------------------------------------
 // Provider options
-// ---------------------------------------------------------------------------
 
 const buildProviderOptions = (
   body: Msg,
@@ -223,9 +217,7 @@ const buildProviderOptions = (
   return Object.keys(opts).length > 0 ? opts : undefined;
 };
 
-// ---------------------------------------------------------------------------
 // Main
-// ---------------------------------------------------------------------------
 
 export const parseIncomingRequest = (
   body: Msg,

@@ -44,9 +44,7 @@ export const catalogModelsQueryOptions = () =>
     queryKey: ["available-models"]
   });
 
-// ---------------------------------------------------------------------------
 // SSE helpers
-// ---------------------------------------------------------------------------
 
 const parseSSEStream = async function* (
   reader: ReadableStreamDefaultReader<Uint8Array>
@@ -96,9 +94,7 @@ const parseSSEStream = async function* (
   }
 };
 
-// ---------------------------------------------------------------------------
 // Hook
-// ---------------------------------------------------------------------------
 
 export const useChat = () => {
   const [messages, setMessages] = useState<DisplayMessage[]>([]);

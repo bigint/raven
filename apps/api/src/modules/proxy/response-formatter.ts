@@ -7,9 +7,7 @@ import type {
 import type { TokenUsage } from "./usage-mapper";
 import { mapUsage } from "./usage-mapper";
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
 
 const mapFinishReason = (reason: string | undefined | null): string => {
   switch (reason) {
@@ -46,9 +44,7 @@ const buildOpenAIUsage = (usage: TokenUsage): Record<string, unknown> => ({
     : {})
 });
 
-// ---------------------------------------------------------------------------
 // Buffered response
-// ---------------------------------------------------------------------------
 
 interface BufferedResult {
   text: string;
@@ -116,9 +112,7 @@ export const formatBufferedResponse = (
   };
 };
 
-// ---------------------------------------------------------------------------
 // Streaming response
-// ---------------------------------------------------------------------------
 
 /**
  * Converts AI SDK's fullStream into an OpenAI-compatible SSE ReadableStream.
@@ -305,9 +299,7 @@ export const formatStreamingResponse = (
   });
 };
 
-// ---------------------------------------------------------------------------
 // Error response
-// ---------------------------------------------------------------------------
 
 /**
  * Format an AI SDK error into an OpenAI-compatible error response.
