@@ -5,6 +5,7 @@ export const organizations = pgTable("organizations", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
+  deletedAt: timestamp("deleted_at", { withTimezone: true }),
   id: text("id").primaryKey().$defaultFn(createId),
   lemonSqueezyCustomerId: text("lemonsqueezy_customer_id"),
   name: text("name").notNull(),

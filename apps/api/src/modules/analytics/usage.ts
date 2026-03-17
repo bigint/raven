@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { providerConfigs, requestLogs } from "@raven/db";
-import { and, avg, count, eq, sum } from "drizzle-orm";
+import { and, avg, count, eq, isNull, sum } from "drizzle-orm";
 import type { z } from "zod";
 import type { AppContextWithQuery } from "@/lib/types";
 

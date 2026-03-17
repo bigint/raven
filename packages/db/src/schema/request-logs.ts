@@ -22,6 +22,7 @@ export const requestLogs = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
     hasImages: boolean("has_images").notNull().default(false),
     hasToolUse: boolean("has_tool_use").notNull().default(false),
     id: text("id").primaryKey().$defaultFn(createId),
@@ -32,7 +33,7 @@ export const requestLogs = pgTable(
     model: text("model").notNull(),
     organizationId: text("organization_id")
       .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
+      .references(() => organizations.id, { onDelete: "no action" }),
     outputTokens: integer("output_tokens").notNull().default(0),
     path: text("path").notNull(),
     provider: text("provider").notNull(),
@@ -47,9 +48,9 @@ export const requestLogs = pgTable(
     toolCount: integer("tool_count").notNull().default(0),
     toolNames: jsonb("tool_names").$type<string[]>().default([]),
     userAgent: text("user_agent"),
-    virtualKeyId: text("virtual_key_id")
-      .notNull()
-      .references(() => virtualKeys.id, { onDelete: "cascade" })
+    virtualKeyId: text("virtual_key_id").references(() => virtualKeys.id, {
+      onDelete: "set null"
+    })
   },
   (t) => [
     index("request_logs_org_created_idx").on(t.organizationId, t.createdAt),

@@ -13,11 +13,12 @@ export const auditLogs = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
     id: text("id").primaryKey().$defaultFn(createId),
     metadata: jsonb("metadata").$type<Record<string, unknown>>(),
     organizationId: text("organization_id")
       .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
+      .references(() => organizations.id, { onDelete: "no action" }),
     resourceId: text("resource_id").notNull(),
     resourceType: text("resource_type").notNull()
   },

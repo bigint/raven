@@ -8,6 +8,7 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
+  deletedAt: timestamp("deleted_at", { withTimezone: true }),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").notNull().default(false),
   id: text("id").primaryKey().$defaultFn(createId),
