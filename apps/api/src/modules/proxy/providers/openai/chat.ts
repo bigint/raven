@@ -1,7 +1,6 @@
 /**
- * OpenAI chat normalization — lightweight passthrough since OpenAI IS the
- * canonical format. Only strips Anthropic-specific fields that may leak
- * through from upstream callers.
+ * OpenAI chat normalization — strips non-standard parameters that OpenAI
+ * rejects and removes Anthropic-specific fields that may leak through.
  */
 
 interface MessageContent {
@@ -12,6 +11,44 @@ interface MessageContent {
 
 type Message = Record<string, unknown>;
 type Tool = Record<string, unknown>;
+
+/**
+ * Known OpenAI chat completion parameters. Anything not in this set
+ * is stripped to prevent "Unknown parameter" errors from the API.
+ */
+const OPENAI_PARAMS = new Set([
+  "audio",
+  "frequency_penalty",
+  "function_call",
+  "functions",
+  "logit_bias",
+  "logprobs",
+  "max_completion_tokens",
+  "max_tokens",
+  "messages",
+  "metadata",
+  "model",
+  "modalities",
+  "n",
+  "parallel_tool_calls",
+  "prediction",
+  "presence_penalty",
+  "reasoning_effort",
+  "response_format",
+  "seed",
+  "service_tier",
+  "stop",
+  "store",
+  "stream",
+  "stream_options",
+  "temperature",
+  "tool_choice",
+  "tools",
+  "top_logprobs",
+  "top_p",
+  "user",
+  "web_search_options"
+]);
 
 /** Remove `cache_control` from a single content block. */
 const stripCacheControl = (block: MessageContent): Record<string, unknown> => {
@@ -60,8 +97,8 @@ const cleanTool = (tool: Tool): Tool => {
 };
 
 /**
- * Normalize an OpenAI-format request by stripping Anthropic-specific fields.
- * Returns the body as-is when no Anthropic fields are present.
+ * Normalize an OpenAI-format request by stripping unknown parameters
+ * and Anthropic-specific fields. Returns the body as-is when clean.
  */
 export const normalizeRequest = (
   body: Record<string, unknown>
@@ -69,8 +106,17 @@ export const normalizeRequest = (
   let modified = false;
   let result = body;
 
+  // Strip unknown top-level parameters
+  const unknownKeys = Object.keys(body).filter((k) => !OPENAI_PARAMS.has(k));
+  if (unknownKeys.length > 0) {
+    result = Object.fromEntries(
+      Object.entries(body).filter(([k]) => OPENAI_PARAMS.has(k))
+    );
+    modified = true;
+  }
+
   // Strip cache_control from messages
-  const messages = body.messages as Message[] | undefined;
+  const messages = result.messages as Message[] | undefined;
   if (Array.isArray(messages)) {
     const hasCacheControl = messages.some(
       (msg) =>
@@ -88,7 +134,7 @@ export const normalizeRequest = (
   }
 
   // Strip cache_control from tools
-  const tools = body.tools as Tool[] | undefined;
+  const tools = result.tools as Tool[] | undefined;
   if (Array.isArray(tools)) {
     const hasCacheControl = tools.some((tool) => {
       if (tool.cache_control !== undefined) return true;
