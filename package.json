@@ -14,7 +14,7 @@
       "@biomejs/biome",
       "esbuild",
       "sharp"
-    ]
+    ],
   },
   "private": true,
   "scripts": {
