@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { organizations, subscriptions } from "@raven/db";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { NotFoundError } from "@/lib/errors";
 import { success } from "@/lib/response";
 import type { AppContext } from "@/lib/types";
@@ -17,7 +17,7 @@ export const getSettings = (db: Database) => async (c: AppContext) => {
       slug: organizations.slug
     })
     .from(organizations)
-    .where(eq(organizations.id, orgId))
+    .where(and(eq(organizations.id, orgId), isNull(organizations.deletedAt)))
     .limit(1);
 
   if (!org) {

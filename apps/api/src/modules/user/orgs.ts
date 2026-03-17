@@ -2,7 +2,7 @@ import { createId } from "@paralleldrive/cuid2";
 import type { Database } from "@raven/db";
 import { members, organizations, subscriptions } from "@raven/db";
 import type { Plan } from "@raven/types";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import type { z } from "zod";
 import { UnauthorizedError } from "@/lib/errors";
 import { created, success } from "@/lib/response";
@@ -26,7 +26,7 @@ export const listOrgs = (db: Database) => async (c: AuthContext) => {
     .from(members)
     .innerJoin(organizations, eq(members.organizationId, organizations.id))
     .leftJoin(subscriptions, eq(subscriptions.organizationId, organizations.id))
-    .where(eq(members.userId, user.id));
+    .where(and(eq(members.userId, user.id), isNull(organizations.deletedAt)));
 
   const result = userMembers.map((m) => ({
     ...m,
