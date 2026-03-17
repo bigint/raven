@@ -53,9 +53,7 @@ const Select = ({
         )}
         id={id}
       >
-        <BaseSelect.Value>
-          {value ? options.find((o) => o.value === value)?.label : placeholder}
-        </BaseSelect.Value>
+        <BaseSelect.Value placeholder={placeholder} />
         <BaseSelect.Icon className="ml-2">
           <svg
             className="size-4 text-muted-foreground"
@@ -73,36 +71,42 @@ const Select = ({
         </BaseSelect.Icon>
       </BaseSelect.Trigger>
       <BaseSelect.Portal>
-        <BaseSelect.Positioner className="z-[100]" sideOffset={4}>
+        <BaseSelect.Positioner
+          alignItemWithTrigger={false}
+          className="z-[100]"
+          sideOffset={4}
+        >
           <BaseSelect.Popup
             className="max-h-60 overflow-y-auto rounded-md border border-border bg-popover py-1 shadow-lg"
             style={{ width: "var(--anchor-width)" }}
           >
-            {options.map((option) => (
-              <BaseSelect.Item
-                className="flex w-full cursor-default items-center gap-2 px-3 py-2 text-sm text-muted-foreground outline-none select-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[selected]:text-foreground"
-                key={option.value}
-                value={option.value}
-              >
-                <BaseSelect.ItemIndicator className="shrink-0">
-                  <svg
-                    className="size-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M5 13l4 4L19 7"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </BaseSelect.ItemIndicator>
-                {option.icon}
-                <BaseSelect.ItemText>{option.label}</BaseSelect.ItemText>
-              </BaseSelect.Item>
-            ))}
+            <BaseSelect.List>
+              {options.map((option) => (
+                <BaseSelect.Item
+                  className="flex w-full cursor-default items-center gap-2 px-3 py-2 text-sm outline-none select-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                  key={option.value}
+                  value={option.value}
+                >
+                  <BaseSelect.ItemIndicator className="inline-flex size-4 shrink-0 items-center justify-center">
+                    <svg
+                      className="size-3.5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M5 13l4 4L19 7"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </BaseSelect.ItemIndicator>
+                  {option.icon}
+                  <BaseSelect.ItemText>{option.label}</BaseSelect.ItemText>
+                </BaseSelect.Item>
+              ))}
+            </BaseSelect.List>
           </BaseSelect.Popup>
         </BaseSelect.Positioner>
       </BaseSelect.Portal>
