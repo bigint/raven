@@ -2,76 +2,309 @@ import { getModelPricing } from "@/lib/pricing-cache";
 import { PROVIDERS } from "@/lib/providers";
 import type { ProviderAdapter } from "./registry";
 
-interface CleanMessage {
-  role: string;
+/* ------------------------------------------------------------------ */
+/*  OpenAI ↔ Anthropic message format conversion                      */
+/* ------------------------------------------------------------------ */
+
+interface AnthropicMessage {
+  role: "user" | "assistant";
   content: unknown;
 }
 
 /**
- * Convert OpenAI-format messages to Anthropic-format messages.
+ * Convert an OpenAI-format message array into Anthropic-format.
  *
- * Anthropic rules:
- * 1. System messages go in a separate `system` field
- * 2. Messages must strictly alternate: user, assistant, user, assistant
- * 3. Consecutive same-role messages must be merged
- * 4. First message must be user
- * 5. Last message must be user (no assistant prefill on some models)
- * 6. Only `role` and `content` fields — no extra fields like `cache_control`
+ * Handles:
+ * - system → extracted to separate field
+ * - assistant with tool_calls → assistant with tool_use content blocks
+ * - tool (tool results) → user with tool_result content blocks
+ * - Consecutive same-role merging (Anthropic requires strict alternation)
+ * - Trailing assistant stripping (some models don't support prefill)
+ * - Extra field stripping (cache_control, name, etc.)
  */
-const normalizeMessages = (
-  rawMessages: Array<{ content: unknown; role: string }>
-): { messages: CleanMessage[]; systemText: string | undefined } => {
-  // 1. Extract system messages
+const convertMessages = (
+  rawMessages: Array<Record<string, unknown>>
+): { messages: AnthropicMessage[]; systemText: string | undefined } => {
   const systemParts: string[] = [];
-  const nonSystem: CleanMessage[] = [];
+  const converted: AnthropicMessage[] = [];
 
   for (const msg of rawMessages) {
-    if (msg.role === "system") {
-      systemParts.push(
-        typeof msg.content === "string" ? msg.content : String(msg.content)
-      );
-    } else {
-      // Only keep role + content, strip everything else
-      nonSystem.push({ content: msg.content, role: msg.role });
+    const role = msg.role as string;
+
+    // System → extract
+    if (role === "system") {
+      const content = msg.content;
+      systemParts.push(typeof content === "string" ? content : String(content));
+      continue;
     }
+
+    // Assistant with tool_calls → convert to Anthropic tool_use format
+    if (role === "assistant") {
+      const toolCalls = msg.tool_calls as
+        | Array<{
+            id: string;
+            function: { name: string; arguments: string };
+          }>
+        | undefined;
+
+      if (toolCalls && toolCalls.length > 0) {
+        // Build content blocks: text (if any) + tool_use blocks
+        const contentBlocks: Array<Record<string, unknown>> = [];
+
+        const textContent = msg.content;
+        if (
+          textContent &&
+          typeof textContent === "string" &&
+          textContent.trim()
+        ) {
+          contentBlocks.push({ text: textContent, type: "text" });
+        }
+
+        for (const tc of toolCalls) {
+          let input: unknown = {};
+          try {
+            input = JSON.parse(tc.function.arguments);
+          } catch {
+            input = { raw: tc.function.arguments };
+          }
+          contentBlocks.push({
+            id: tc.id,
+            input,
+            name: tc.function.name,
+            type: "tool_use"
+          });
+        }
+
+        converted.push({ content: contentBlocks, role: "assistant" });
+        continue;
+      }
+
+      // Regular assistant message
+      converted.push({
+        content: msg.content ?? "",
+        role: "assistant"
+      });
+      continue;
+    }
+
+    // Tool result → convert to Anthropic user message with tool_result content
+    if (role === "tool") {
+      const toolCallId = msg.tool_call_id as string | undefined;
+      const content = msg.content;
+      const resultText =
+        typeof content === "string" ? content : JSON.stringify(content);
+
+      converted.push({
+        content: [
+          {
+            content: resultText,
+            tool_use_id: toolCallId ?? "unknown",
+            type: "tool_result"
+          }
+        ],
+        role: "user"
+      });
+      continue;
+    }
+
+    // Regular user message
+    if (role === "user") {
+      converted.push({
+        content: msg.content ?? "",
+        role: "user"
+      });
+      continue;
+    }
+
+    // Unknown role — treat as user
+    converted.push({
+      content: msg.content ?? "",
+      role: "user"
+    });
   }
 
-  const systemText =
-    systemParts.length > 0 ? systemParts.join("\n\n") : undefined;
-
-  // 2. Merge consecutive same-role messages
-  const merged: CleanMessage[] = [];
-  for (const msg of nonSystem) {
+  // Merge consecutive same-role messages
+  const merged: AnthropicMessage[] = [];
+  for (const msg of converted) {
     const prev = merged[merged.length - 1];
     if (prev && prev.role === msg.role) {
-      // Merge content
-      const prevText =
-        typeof prev.content === "string" ? prev.content : String(prev.content);
-      const curText =
-        typeof msg.content === "string" ? msg.content : String(msg.content);
-      prev.content = `${prevText}\n\n${curText}`;
+      // Merge into array content blocks
+      const prevBlocks = Array.isArray(prev.content)
+        ? prev.content
+        : [{ text: String(prev.content), type: "text" }];
+      const curBlocks = Array.isArray(msg.content)
+        ? msg.content
+        : [{ text: String(msg.content), type: "text" }];
+      prev.content = [...prevBlocks, ...curBlocks];
     } else {
       merged.push({ ...msg });
     }
   }
 
-  // 3. Ensure first message is user — if it starts with assistant, prepend empty user
+  // Ensure first message is user
   if (merged.length > 0 && merged[0]?.role !== "user") {
     merged.unshift({ content: ".", role: "user" });
   }
 
-  // 4. Ensure last message is user — strip trailing assistant
-  while (merged.length > 1 && merged[merged.length - 1]?.role === "assistant") {
-    merged.pop();
+  // Strip trailing empty assistant (prefill) — but keep non-empty ones
+  // for tool-calling flows where the conversation legitimately ends with assistant
+  const last = merged[merged.length - 1];
+  if (last?.role === "assistant") {
+    const content = last.content;
+    const isEmpty =
+      !content ||
+      (typeof content === "string" && !content.trim()) ||
+      (Array.isArray(content) && content.length === 0);
+    if (isEmpty) {
+      merged.pop();
+    }
   }
 
-  // 5. Safety: if empty, shouldn't happen but handle gracefully
+  // Safety
   if (merged.length === 0) {
     merged.push({ content: "Hello", role: "user" });
   }
 
+  const systemText =
+    systemParts.length > 0 ? systemParts.join("\n\n") : undefined;
+
   return { messages: merged, systemText };
 };
+
+/* ------------------------------------------------------------------ */
+/*  Anthropic → OpenAI streaming chunk conversion                     */
+/* ------------------------------------------------------------------ */
+
+// Track active tool calls during streaming
+let streamToolCalls: Array<{
+  id: string;
+  name: string;
+  arguments: string;
+}> = [];
+
+const convertStreamChunk = (line: string): string | null => {
+  const trimmed = line.trim();
+  if (!trimmed.startsWith("data:")) return null;
+  const data = trimmed.slice(5).trim();
+  if (data === "[DONE]") return line;
+
+  try {
+    const parsed = JSON.parse(data) as Record<string, unknown>;
+
+    // Text delta
+    if (parsed.type === "content_block_delta") {
+      const delta = parsed.delta as Record<string, unknown> | undefined;
+      if (delta?.type === "text_delta" && delta.text) {
+        return `data: ${JSON.stringify({
+          choices: [{ delta: { content: delta.text }, index: 0 }]
+        })}`;
+      }
+      // Tool input delta
+      if (
+        delta?.type === "input_json_delta" &&
+        delta.partial_json !== undefined
+      ) {
+        const idx = (parsed.index as number) ?? 0;
+        if (streamToolCalls[idx]) {
+          streamToolCalls[idx].arguments += delta.partial_json as string;
+        }
+        return null; // Accumulate, emit on content_block_stop
+      }
+    }
+
+    // Tool use block start
+    if (parsed.type === "content_block_start") {
+      const block = parsed.content_block as Record<string, unknown> | undefined;
+      if (block?.type === "tool_use") {
+        const idx = (parsed.index as number) ?? streamToolCalls.length;
+        streamToolCalls[idx] = {
+          arguments: "",
+          id: block.id as string,
+          name: block.name as string
+        };
+      }
+      return null;
+    }
+
+    // Content block stop — emit accumulated tool call
+    if (parsed.type === "content_block_stop") {
+      const idx = (parsed.index as number) ?? 0;
+      const tc = streamToolCalls[idx];
+      if (tc) {
+        const chunk = `data: ${JSON.stringify({
+          choices: [
+            {
+              delta: {
+                tool_calls: [
+                  {
+                    function: { arguments: tc.arguments, name: tc.name },
+                    id: tc.id,
+                    index: idx,
+                    type: "function"
+                  }
+                ]
+              },
+              index: 0
+            }
+          ]
+        })}`;
+        return chunk;
+      }
+      return null;
+    }
+
+    // Message delta (stop reason + usage)
+    if (parsed.type === "message_delta") {
+      const delta = parsed.delta as { stop_reason?: string } | undefined;
+      const usage = parsed.usage as Record<string, number> | undefined;
+      const stopReason = delta?.stop_reason;
+      // Map Anthropic stop reasons to OpenAI
+      const finishReason =
+        stopReason === "tool_use" ? "tool_calls" : (stopReason ?? "stop");
+      return `data: ${JSON.stringify({
+        choices: [{ delta: {}, finish_reason: finishReason, index: 0 }],
+        usage: usage
+          ? {
+              completion_tokens: usage.output_tokens ?? 0,
+              prompt_tokens: 0,
+              total_tokens: usage.output_tokens ?? 0
+            }
+          : undefined
+      })}`;
+    }
+
+    // Message start
+    if (parsed.type === "message_start") {
+      streamToolCalls = []; // Reset for new message
+      const message = parsed.message as Record<string, unknown> | undefined;
+      const usage = message?.usage as Record<string, number> | undefined;
+      if (usage) {
+        return `data: ${JSON.stringify({
+          choices: [{ delta: { content: "", role: "assistant" }, index: 0 }],
+          usage: {
+            completion_tokens: 0,
+            prompt_tokens: usage.input_tokens ?? 0,
+            total_tokens: usage.input_tokens ?? 0
+          }
+        })}`;
+      }
+    }
+
+    // Message stop
+    if (parsed.type === "message_stop") {
+      streamToolCalls = []; // Clean up
+      return "data: [DONE]";
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+};
+
+/* ------------------------------------------------------------------ */
+/*  Adapter                                                           */
+/* ------------------------------------------------------------------ */
 
 export const anthropicAdapter = (provider: string): ProviderAdapter => {
   const config = PROVIDERS[provider];
@@ -105,11 +338,11 @@ export const anthropicAdapter = (provider: string): ProviderAdapter => {
 
     normalizeRequest(body) {
       const messages = body.messages as
-        | Array<{ content: unknown; role: string }>
+        | Array<Record<string, unknown>>
         | undefined;
       if (!messages) return body;
 
-      const { messages: normalized, systemText } = normalizeMessages(messages);
+      const { messages: normalized, systemText } = convertMessages(messages);
 
       const result: Record<string, unknown> = {
         max_tokens: body.max_tokens ?? 4096,
@@ -144,73 +377,7 @@ export const anthropicAdapter = (provider: string): ProviderAdapter => {
       return result;
     },
 
-    normalizeStreamChunk(line) {
-      const trimmed = line.trim();
-      if (!trimmed.startsWith("data:")) return null;
-      const data = trimmed.slice(5).trim();
-      if (data === "[DONE]") return line;
-
-      try {
-        const parsed = JSON.parse(data) as Record<string, unknown>;
-
-        if (parsed.type === "content_block_delta") {
-          const delta = parsed.delta as
-            | { text?: string; type?: string }
-            | undefined;
-          if (delta?.type === "text_delta" && delta.text) {
-            return `data: ${JSON.stringify({
-              choices: [{ delta: { content: delta.text }, index: 0 }]
-            })}`;
-          }
-        }
-
-        if (parsed.type === "message_delta") {
-          const delta = parsed.delta as { stop_reason?: string } | undefined;
-          const usage = parsed.usage as Record<string, number> | undefined;
-          return `data: ${JSON.stringify({
-            choices: [
-              {
-                delta: {},
-                finish_reason: delta?.stop_reason ?? "stop",
-                index: 0
-              }
-            ],
-            usage: usage
-              ? {
-                  completion_tokens: usage.output_tokens ?? 0,
-                  prompt_tokens: 0,
-                  total_tokens: usage.output_tokens ?? 0
-                }
-              : undefined
-          })}`;
-        }
-
-        if (parsed.type === "message_start") {
-          const message = parsed.message as Record<string, unknown> | undefined;
-          const usage = message?.usage as Record<string, number> | undefined;
-          if (usage) {
-            return `data: ${JSON.stringify({
-              choices: [
-                { delta: { content: "", role: "assistant" }, index: 0 }
-              ],
-              usage: {
-                completion_tokens: 0,
-                prompt_tokens: usage.input_tokens ?? 0,
-                total_tokens: usage.input_tokens ?? 0
-              }
-            })}`;
-          }
-        }
-
-        if (parsed.type === "message_stop") {
-          return "data: [DONE]";
-        }
-      } catch {
-        return null;
-      }
-
-      return null;
-    },
+    normalizeStreamChunk: convertStreamChunk,
 
     transformBody(body) {
       const result = { ...body };
@@ -224,12 +391,10 @@ export const anthropicAdapter = (provider: string): ProviderAdapter => {
               }));
 
         const hasExisting = blocks.some((b) => b.cache_control !== undefined);
-
         if (!hasExisting && blocks.length > 0) {
           const last = blocks[blocks.length - 1];
           if (last) last.cache_control = { type: "ephemeral" };
         }
-
         result.system = blocks;
       }
 
@@ -239,12 +404,10 @@ export const anthropicAdapter = (provider: string): ProviderAdapter => {
         );
 
         const hasExisting = tools.some((t) => t.cache_control !== undefined);
-
         if (!hasExisting) {
           const last = tools[tools.length - 1];
           if (last) last.cache_control = { type: "ephemeral" };
         }
-
         result.tools = tools;
       }
 
