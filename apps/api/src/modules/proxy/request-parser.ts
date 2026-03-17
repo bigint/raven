@@ -45,7 +45,7 @@ export interface ParsedRequest {
  */
 const ensureToolSchema = (schema: unknown): Record<string, unknown> => {
   if (!schema || typeof schema !== "object") {
-    return { type: "object", properties: {} };
+    return { properties: {}, type: "object" };
   }
 
   const s = JSON.parse(JSON.stringify(schema)) as Record<string, unknown>;
