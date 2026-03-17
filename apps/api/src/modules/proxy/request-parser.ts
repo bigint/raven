@@ -30,26 +30,46 @@ export interface ParsedRequest {
 
 type Msg = Record<string, unknown>;
 
+/**
+ * Convert a base64 string to Uint8Array.
+ */
+const base64ToBytes = (b64: string): Uint8Array => {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+};
+
+/**
+ * Build an AI SDK image part. Data URIs are decoded to inline bytes
+ * because AI SDK v6 rejects data: schemes (tries to fetch them).
+ */
+const toImagePart = (url: string): Msg => {
+  const match = /^data:([^;]+);base64,(.+)$/.exec(url);
+  if (match) {
+    return { image: base64ToBytes(match[2]!), mimeType: match[1]!, type: "image" };
+  }
+  return { image: url, type: "image" };
+};
+
 const convertContent = (content: unknown): unknown => {
   if (typeof content === "string") return content;
   if (!Array.isArray(content)) return String(content ?? "");
 
   return content.map((block: Msg) => {
-    // image_url → image
     if (block.type === "image_url") {
-      const url = (block.image_url as Msg)?.url as string;
-      return { image: url, type: "image" };
+      return toImagePart((block.image_url as Msg)?.url as string);
     }
-    // Anthropic native image → data URI
     if (block.type === "image") {
       const src = block.source as Msg | undefined;
       if (src?.type === "base64") {
         return {
-          image: `data:${src.media_type as string};base64,${src.data as string}`,
+          image: base64ToBytes(src.data as string),
+          mimeType: src.media_type as string,
           type: "image"
         };
       }
-      if (src?.type === "url") return { image: src.url, type: "image" };
+      if (src?.type === "url") return toImagePart(src.url as string);
     }
     return block;
   });
