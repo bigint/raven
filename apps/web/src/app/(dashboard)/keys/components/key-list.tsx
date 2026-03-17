@@ -9,13 +9,14 @@ import type { VirtualKey } from "../hooks/use-keys";
 
 interface KeyListProps {
   keys: VirtualKey[];
+  loading?: boolean;
   onCreate: () => void;
   onDelete: (id: string) => void;
   onEdit: (key: VirtualKey) => void;
 }
 
-const KeyList = ({ keys, onCreate, onDelete, onEdit }: KeyListProps) => {
-  if (keys.length === 0) {
+const KeyList = ({ keys, loading, onCreate, onDelete, onEdit }: KeyListProps) => {
+  if (!loading && keys.length === 0) {
     return (
       <EmptyState
         action={
@@ -158,6 +159,8 @@ const KeyList = ({ keys, onCreate, onDelete, onEdit }: KeyListProps) => {
       }
       data={keys}
       keyExtractor={(key) => key.id}
+      loading={loading}
+      loadingMessage="Loading keys..."
     />
   );
 };

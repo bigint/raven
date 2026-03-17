@@ -1,5 +1,6 @@
 "use client";
 
+import { PROVIDER_LABELS } from "@raven/types";
 import { Badge } from "@raven/ui";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
@@ -45,7 +46,7 @@ const ResponseMetadata = ({ meta, show }: ResponseMetadataProps) => {
 
       {expanded && (
         <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-          {meta.provider && <Badge variant="neutral">{meta.provider}</Badge>}
+          {meta.provider && <Badge variant="neutral">{PROVIDER_LABELS[meta.provider] ?? meta.provider}</Badge>}
           {meta.model && <Badge variant="neutral">{meta.model}</Badge>}
           {meta.latencyMs !== undefined && (
             <Badge variant="neutral">{meta.latencyMs}ms</Badge>

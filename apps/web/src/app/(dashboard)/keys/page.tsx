@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Button,
-  ConfirmDialog,
-  PageHeader,
-  PillTabs,
-  Spinner
-} from "@raven/ui";
+import { Button, ConfirmDialog, PageHeader, PillTabs } from "@raven/ui";
 import { Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -86,16 +80,13 @@ const KeysPage = () => {
         />
       </div>
 
-      {keysQuery.isLoading ? (
-        <Spinner />
-      ) : (
-        <KeyList
-          keys={filteredKeys}
-          onCreate={openCreate}
-          onDelete={setDeleteId}
-          onEdit={openEdit}
-        />
-      )}
+      <KeyList
+        keys={filteredKeys}
+        loading={keysQuery.isLoading}
+        onCreate={openCreate}
+        onDelete={setDeleteId}
+        onEdit={openEdit}
+      />
 
       <KeyForm
         editingKey={editingKey}
