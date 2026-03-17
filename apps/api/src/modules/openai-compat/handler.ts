@@ -7,16 +7,13 @@ import type { Redis } from "ioredis";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { authenticateKey } from "../proxy/auth";
 import { checkBudgets } from "../proxy/budget-check";
-import { checkCache } from "../proxy/cache";
-import { analyzeContent } from "../proxy/content-analyzer";
+import { checkCache, serveCacheHit } from "../proxy/cache";
 import { execute } from "../proxy/execute";
 import { evaluateGuardrails, type GuardrailMatch } from "../proxy/guardrails";
-import { logAndPublish, updateLastUsed } from "../proxy/logger";
 import { checkPlanLimit } from "../proxy/plan-check";
 import { resolveProvider } from "../proxy/provider-resolver";
 import { checkRateLimit } from "../proxy/rate-limiter";
 import { parseIncomingRequest } from "../proxy/request-parser";
-import { extractCachedUsage } from "../proxy/usage-mapper";
 
 // Model → provider cache with 5-minute TTL
 const modelProviderCache = new Map<string, string>();
@@ -128,49 +125,22 @@ export const chatCompletionsHandler = (
     );
 
     if (cacheResult.hit) {
-      const latencyMs = Date.now() - startTime;
-      const analysis = analyzeContent(parsedBody, c.req.header("x-session-id"));
-      const usage = extractCachedUsage(cacheResult.parsed);
-
-      logAndPublish(
-        db,
-        {
-          cachedTokens: usage.cachedTokens,
-          cacheHit: true,
-          cost: 0,
-          guardrailMatches:
-            guardrailMatches.length > 0 ? guardrailMatches : undefined,
-          hasImages: analysis.hasImages,
-          hasToolUse: analysis.hasToolUse,
-          imageCount: analysis.imageCount,
-          inputTokens: usage.inputTokens,
-          latencyMs,
-          method: "POST",
-          model: modelSlug,
-          organizationId: virtualKey.organizationId,
-          outputTokens: usage.outputTokens,
-          path: "/v1/chat/completions",
-          provider: providerName,
-          providerConfigId,
-          reasoningTokens: usage.reasoningTokens,
-          requestBody: parsedBody,
-          sessionId: analysis.sessionId,
-          statusCode: 200,
-          toolCount: analysis.toolCount,
-          toolNames: analysis.toolNames,
-          virtualKeyId: virtualKey.id
-        },
-        { redis, teamId: virtualKey.teamId }
-      );
-      updateLastUsed(redis, virtualKey.id);
-
-      const headers: Record<string, string> = {
-        "content-type": "application/json"
-      };
-      if (guardrailWarnings.length > 0) {
-        headers["X-Guardrail-Warnings"] = guardrailWarnings.join("; ");
-      }
-      return new Response(cacheResult.body, { headers, status: 200 });
+      return serveCacheHit(db, cacheResult, {
+        guardrailMatches,
+        guardrailWarnings,
+        method: "POST",
+        model: modelSlug,
+        organizationId: virtualKey.organizationId,
+        parsedBody,
+        path: "/v1/chat/completions",
+        providerConfigId,
+        providerName,
+        redis,
+        sessionHeader: c.req.header("x-session-id") ?? null,
+        startTime,
+        teamId: virtualKey.teamId,
+        virtualKeyId: virtualKey.id
+      });
     }
 
     // 8. Parse + execute

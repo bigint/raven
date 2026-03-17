@@ -16,7 +16,6 @@ import type { GuardrailMatch } from "./guardrails";
 import { updateMetrics } from "./latency-tracker";
 import { logAndPublish, updateLastUsed } from "./logger";
 import type { ParsedRequest } from "./request-parser";
-import { analyzeResponse } from "./response-analyzer";
 import {
   formatBufferedResponse,
   formatErrorResponse,
@@ -337,11 +336,10 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     );
 
     void (() => {
-      const respAnalysis = analyzeResponse(formatted.body);
-      if (respAnalysis.hasToolCalls) {
+      if (result.toolCalls?.length) {
         logData.hasToolUse = true;
-        logData.toolCount += respAnalysis.toolCallCount;
-        logData.toolNames.push(...respAnalysis.toolCallNames);
+        logData.toolCount += result.toolCalls.length;
+        logData.toolNames.push(...result.toolCalls.map((tc) => tc.toolName));
       }
 
       logData.inputTokens = formatted.usage.inputTokens;

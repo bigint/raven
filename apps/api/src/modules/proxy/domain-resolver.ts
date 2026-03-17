@@ -3,12 +3,6 @@ import { customDomains } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
 
-export type ProxyEnv = {
-  Variables: {
-    domainOrgId: string;
-  };
-};
-
 const CACHE_TTL = 300; // 5 minutes
 const cacheKey = (host: string) => `domain:${host}`;
 

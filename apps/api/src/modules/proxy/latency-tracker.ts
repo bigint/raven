@@ -5,47 +5,8 @@ const ALPHA = 0.3;
 const TTL_SECONDS = 86400 * 30; // 30 days
 
 /**
- * Updates the exponential moving average latency for a provider config.
- * Formula: newAvg = alpha * latency + (1 - alpha) * oldAvg
- */
-export const updateLatency = async (
-  redis: Redis,
-  configId: string,
-  latencyMs: number
-): Promise<void> => {
-  const key = `latency:${configId}`;
-  const existing = await redis.get(key);
-
-  const newAvg =
-    existing === null
-      ? latencyMs
-      : ALPHA * latencyMs + (1 - ALPHA) * Number.parseFloat(existing);
-
-  await redis.set(key, newAvg.toFixed(2), "EX", TTL_SECONDS);
-};
-
-/**
- * Increments the cumulative cost for a provider config in the current month.
- */
-export const updateCost = async (
-  redis: Redis,
-  configId: string,
-  cost: number
-): Promise<void> => {
-  if (cost <= 0) return;
-
-  const now = new Date();
-  const monthKey = formatDate(now, "yyyy-MM");
-  const key = `cost:${configId}:${monthKey}`;
-
-  const pipeline = redis.pipeline();
-  pipeline.incrbyfloat(key, cost);
-  pipeline.expire(key, 86400 * 35);
-  await pipeline.exec();
-};
-
-/**
- * Combined metrics update — single call from handler instead of two separate void calls.
+ * Updates latency (exponential moving average) and cumulative cost
+ * for a provider config in a single Redis pipeline.
  */
 export const updateMetrics = async (
   redis: Redis,
@@ -65,8 +26,7 @@ export const updateMetrics = async (
   pipeline.set(latencyKey, newAvg.toFixed(2), "EX", TTL_SECONDS);
 
   if (cost > 0) {
-    const now = new Date();
-    const monthKey = formatDate(now, "yyyy-MM");
+    const monthKey = formatDate(new Date(), "yyyy-MM");
     const costKey = `cost:${configId}:${monthKey}`;
     pipeline.incrbyfloat(costKey, cost);
     pipeline.expire(costKey, 86400 * 35);

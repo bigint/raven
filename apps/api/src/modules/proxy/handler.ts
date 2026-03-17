@@ -8,17 +8,14 @@ import { cachedQuery } from "@/lib/cache-utils";
 import { ForbiddenError, GuardrailError } from "@/lib/errors";
 import { authenticateKey } from "./auth";
 import { checkBudgets } from "./budget-check";
-import { checkCache } from "./cache";
-import { analyzeContent } from "./content-analyzer";
+import { checkCache, serveCacheHit } from "./cache";
 import { evaluateRoutingRules } from "./content-router";
 import { execute } from "./execute";
 import { evaluateGuardrails, type GuardrailMatch } from "./guardrails";
-import { logAndPublish, updateLastUsed } from "./logger";
 import { checkPlanLimit } from "./plan-check";
 import { resolveProvider } from "./provider-resolver";
 import { checkRateLimit } from "./rate-limiter";
 import { parseIncomingRequest } from "./request-parser";
-import { extractCachedUsage, extractModel } from "./usage-mapper";
 
 export const proxyHandler = (
   db: Database,
@@ -164,49 +161,22 @@ export const proxyHandler = (
     );
 
     if (cacheResult.hit) {
-      const latencyMs = Date.now() - startTime;
-      const analysis = analyzeContent(parsedBody, c.req.header("x-session-id"));
-      const usage = extractCachedUsage(cacheResult.parsed);
-
-      logAndPublish(
-        db,
-        {
-          cachedTokens: usage.cachedTokens,
-          cacheHit: true,
-          cost: 0,
-          guardrailMatches:
-            guardrailMatches.length > 0 ? guardrailMatches : undefined,
-          hasImages: analysis.hasImages,
-          hasToolUse: analysis.hasToolUse,
-          imageCount: analysis.imageCount,
-          inputTokens: usage.inputTokens,
-          latencyMs,
-          method,
-          model: extractModel(cacheResult.parsed, requestedModel),
-          organizationId: virtualKey.organizationId,
-          outputTokens: usage.outputTokens,
-          path: upstreamPath,
-          provider: providerName,
-          providerConfigId,
-          reasoningTokens: usage.reasoningTokens,
-          requestBody: parsedBody,
-          sessionId: analysis.sessionId,
-          statusCode: 200,
-          toolCount: analysis.toolCount,
-          toolNames: analysis.toolNames,
-          virtualKeyId: virtualKey.id
-        },
-        { redis, teamId: virtualKey.teamId }
-      );
-      updateLastUsed(redis, virtualKey.id);
-
-      const headers: Record<string, string> = {
-        "content-type": "application/json"
-      };
-      if (guardrailWarnings.length > 0) {
-        headers["X-Guardrail-Warnings"] = guardrailWarnings.join("; ");
-      }
-      return new Response(cacheResult.body, { headers, status: 200 });
+      return serveCacheHit(db, cacheResult, {
+        guardrailMatches,
+        guardrailWarnings,
+        method,
+        model: requestedModel,
+        organizationId: virtualKey.organizationId,
+        parsedBody,
+        path: upstreamPath,
+        providerConfigId,
+        providerName,
+        redis,
+        sessionHeader: c.req.header("x-session-id") ?? null,
+        startTime,
+        teamId: virtualKey.teamId,
+        virtualKeyId: virtualKey.id
+      });
     }
 
     // 8. Parse + execute
