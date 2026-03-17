@@ -48,63 +48,6 @@ export interface ExecuteInput {
   extraResponseHeaders?: Record<string, string>;
 }
 
-// Log sanitization
-
-const sanitizeForLog = (
-  body: Record<string, unknown>
-): Record<string, unknown> => {
-  const messages = body.messages;
-  if (!Array.isArray(messages)) return body;
-
-  let hasBase64 = false;
-  for (const msg of messages) {
-    const m = msg as Record<string, unknown>;
-    if (!Array.isArray(m.content)) continue;
-    for (const block of m.content) {
-      const b = block as Record<string, unknown>;
-      if (
-        b.type === "image_url" &&
-        typeof (b.image_url as Record<string, unknown>)?.url === "string" &&
-        ((b.image_url as Record<string, unknown>).url as string).startsWith(
-          "data:"
-        )
-      ) {
-        hasBase64 = true;
-        break;
-      }
-      if (
-        b.type === "image" &&
-        (b.source as Record<string, unknown>)?.type === "base64"
-      ) {
-        hasBase64 = true;
-        break;
-      }
-    }
-    if (hasBase64) break;
-  }
-
-  if (!hasBase64) return body;
-
-  const clone = structuredClone(body);
-  for (const msg of clone.messages as Record<string, unknown>[]) {
-    if (!Array.isArray(msg.content)) continue;
-    for (const block of msg.content) {
-      const b = block as Record<string, unknown>;
-      if (b.type === "image_url") {
-        const img = b.image_url as Record<string, unknown> | undefined;
-        if (img && typeof img.url === "string" && img.url.startsWith("data:")) {
-          img.url = "[base64 image stripped]";
-        }
-      }
-      if (b.type === "image") {
-        const src = b.source as Record<string, unknown> | undefined;
-        if (src?.type === "base64") src.data = "[base64 image stripped]";
-      }
-    }
-  }
-  return clone;
-};
-
 // Tool building
 
 const buildTools = (tools: ParsedRequest["tools"]): ToolSet | undefined => {
@@ -172,7 +115,6 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     provider: finalProviderName,
     providerConfigId: finalProviderConfigId,
     reasoningTokens: 0,
-    requestBody: sanitizeForLog(parsedBody),
     sessionId: contentAnalysis.sessionId,
     statusCode: 200,
     toolCount: contentAnalysis.toolCount,

@@ -26,7 +26,6 @@ export interface LogData {
   hasToolUse: boolean;
   toolCount: number;
   toolNames: string[];
-  requestBody?: Record<string, unknown>;
   sessionId: string | null;
   guardrailMatches?: Array<{
     ruleName: string;
@@ -60,7 +59,6 @@ export const logProxyRequest = async (
         provider: data.provider,
         providerConfigId: data.providerConfigId,
         reasoningTokens: data.reasoningTokens,
-        requestBody: data.requestBody,
         sessionId: data.sessionId,
         statusCode: data.statusCode,
         toolCount: data.toolCount,

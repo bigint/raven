@@ -134,20 +134,6 @@ export const RequestDetail = ({ request, onClose }: RequestDetailProps) => (
             )}
           </div>
 
-          <div className="px-6 py-5">
-            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Request Body
-            </h3>
-            {request.requestBody ? (
-              <pre className="max-h-96 overflow-auto rounded-lg bg-muted p-4 text-xs leading-relaxed">
-                {JSON.stringify(request.requestBody, null, 2)}
-              </pre>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                No request body recorded.
-              </p>
-            )}
-          </div>
         </motion.div>
       </>
     )}

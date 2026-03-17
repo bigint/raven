@@ -109,7 +109,27 @@ export const getSessionById = (db: Database) => async (c: AppContext) => {
   const sessionId = c.req.param("sessionId") ?? "";
 
   const rows = await db
-    .select()
+    .select({
+      cachedTokens: requestLogs.cachedTokens,
+      cacheHit: requestLogs.cacheHit,
+      cost: requestLogs.cost,
+      createdAt: requestLogs.createdAt,
+      id: requestLogs.id,
+      inputTokens: requestLogs.inputTokens,
+      latencyMs: requestLogs.latencyMs,
+      method: requestLogs.method,
+      model: requestLogs.model,
+      outputTokens: requestLogs.outputTokens,
+      path: requestLogs.path,
+      provider: requestLogs.provider,
+      reasoningTokens: requestLogs.reasoningTokens,
+      sessionId: requestLogs.sessionId,
+      statusCode: requestLogs.statusCode,
+      toolCount: requestLogs.toolCount,
+      toolNames: requestLogs.toolNames,
+      userAgent: requestLogs.userAgent,
+      virtualKeyId: requestLogs.virtualKeyId
+    })
     .from(requestLogs)
     .where(
       and(

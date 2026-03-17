@@ -128,7 +128,6 @@ export const serveCacheHit = (
       provider: opts.providerName,
       providerConfigId: opts.providerConfigId,
       reasoningTokens: usage.reasoningTokens,
-      requestBody: opts.parsedBody,
       sessionId: analysis.sessionId,
       statusCode: 200,
       toolCount: analysis.toolCount,
