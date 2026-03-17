@@ -77,7 +77,8 @@ export const chatCompletionsHandler = (
     }
 
     const modelSlug = parsedBody.model as string | undefined;
-    console.log("[openai-compat] Model requested:", modelSlug);
+    const incomingMessages = parsedBody.messages as Array<{ role: string; content: unknown }> | undefined;
+    console.log("[openai-compat] Model requested:", modelSlug, "| Messages:", incomingMessages?.length, "| Last role:", incomingMessages?.[incomingMessages.length - 1]?.role);
     if (!modelSlug) {
       throw new ValidationError("'model' field is required");
     }
@@ -202,6 +203,13 @@ export const chatCompletionsHandler = (
       finalBody = adapter.normalizeRequest(parsedBody);
     if (adapter.transformBody) finalBody = adapter.transformBody(finalBody);
     const finalBodyText = JSON.stringify(finalBody);
+
+    // Debug: log the last message role being sent
+    const finalMessages = finalBody.messages as Array<{ role: string; content: unknown }> | undefined;
+    if (finalMessages?.length) {
+      const lastMsg = finalMessages[finalMessages.length - 1];
+      console.log(`[openai-compat] Sending ${finalMessages.length} messages, last role: ${lastMsg?.role}, content preview: ${typeof lastMsg?.content === "string" ? lastMsg.content.slice(0, 80) : "non-string"}`);
+    }
 
     const resolvedPath = adapter.chatEndpoint;
 
