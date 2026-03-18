@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { requestLogs } from "@raven/db";
-import { and, eq, isNull, not } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import type { AppContext } from "@/lib/types";
 
 export const toggleStar = (db: Database) => async (c: AppContext) => {
