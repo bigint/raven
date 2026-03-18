@@ -71,7 +71,8 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
 
     try {
       setSubmitting(true);
-      await onSubmit(mode!, form, editingKey?.id);
+      if (!mode) return;
+      await onSubmit(mode, form, editingKey?.id);
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");

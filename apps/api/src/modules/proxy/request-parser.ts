@@ -44,10 +44,10 @@ const base64ToBytes = (b64: string): Uint8Array => {
  */
 const toImagePart = (url: string): Msg => {
   const match = /^data:([^;]+);base64,(.+)$/.exec(url);
-  if (match) {
+  if (match?.[1] && match[2]) {
     return {
-      image: base64ToBytes(match[2]!),
-      mimeType: match[1]!,
+      image: base64ToBytes(match[2]),
+      mimeType: match[1],
       type: "image"
     };
   }
