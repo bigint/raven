@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import type { ReactNode } from "react";
 import { cn } from "../cn";
@@ -9,6 +10,7 @@ import { Spinner } from "./spinner";
 interface Column<T> {
   key: string;
   header: string;
+  sortable?: boolean;
   className?: string;
   headerClassName?: string;
   render: (item: T, index: number) => ReactNode;
@@ -26,6 +28,9 @@ interface DataTableProps<T> {
   animateRows?: boolean;
   hiddenColumns?: string[];
   onToggleColumn?: (key: string) => void;
+  sortKey?: string;
+  sortDirection?: "asc" | "desc";
+  onSort?: (key: string) => void;
 }
 
 const DataTable = <T,>({
@@ -39,7 +44,10 @@ const DataTable = <T,>({
   emptyAction,
   animateRows = false,
   hiddenColumns,
-  onToggleColumn
+  onToggleColumn,
+  sortKey,
+  sortDirection,
+  onSort
 }: DataTableProps<T>) => {
   const visibleColumns = hiddenColumns
     ? columns.filter((col) => !hiddenColumns.includes(col.key))

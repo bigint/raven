@@ -4,6 +4,7 @@ import type { Plan } from "@raven/types";
 import { PLAN_FEATURES } from "@raven/types";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { subscriptionQueryOptions } from "@/app/(dashboard)/billing/hooks/use-billing";
 import { api } from "@/lib/api";
 
@@ -47,9 +48,9 @@ interface CacheStats {
   totalRequests: number;
 }
 
-type DateRange = "7d" | "30d" | "90d";
+type DateRange = "7d" | "30d" | "90d" | "custom";
 
-const RANGE_DAYS: Record<DateRange, number> = {
+const RANGE_DAYS: Record<string, number> = {
   "7d": 7,
   "30d": 30,
   "90d": 90
@@ -58,19 +59,22 @@ const RANGE_DAYS: Record<DateRange, number> = {
 const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
   { label: "Last 7 days", value: "7d" },
   { label: "Last 30 days", value: "30d" },
-  { label: "Last 90 days", value: "90d" }
+  { label: "Last 90 days", value: "90d" },
+  { label: "Custom", value: "custom" }
 ];
 
-const VALID_RANGES: DateRange[] = ["7d", "30d", "90d"];
+const VALID_RANGES: DateRange[] = ["7d", "30d", "90d", "custom"];
 
-const RANGE_MS: Record<DateRange, number> = {
+const RANGE_MS: Record<string, number> = {
   "7d": 604_800_000,
   "30d": 2_592_000_000,
   "90d": 7_776_000_000
 };
 
-const rangeToFrom = (range: DateRange): string =>
-  new Date(Date.now() - RANGE_MS[range]).toISOString();
+const rangeToFrom = (range: string): string => {
+  const ms = RANGE_MS[range] ?? 2_592_000_000;
+  return new Date(Date.now() - ms).toISOString();
+};
 
 const keyFilter = (keyId?: string): string =>
   keyId ? `&virtualKeyId=${keyId}` : "";
