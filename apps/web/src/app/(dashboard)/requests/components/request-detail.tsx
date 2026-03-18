@@ -1,9 +1,11 @@
 "use client";
 
-import { X } from "lucide-react";
+import { cn } from "@raven/ui";
+import { Star, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { ModelIcon } from "@/components/model-icon";
 import type { SessionRequest } from "../hooks/use-logs";
+import { useToggleStar } from "../hooks/use-logs";
 
 interface RequestDetailProps {
   request: SessionRequest | null;

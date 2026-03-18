@@ -142,6 +142,7 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
                       <th className="px-3 py-2 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
                         Cost
                       </th>
+                      <th className="w-8 px-3 py-2" />
                     </tr>
                   </thead>
                   <tbody>
@@ -183,6 +184,24 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
                         </td>
                         <td className="px-3 py-2.5 text-right tabular-nums">
                           ${Number(req.cost).toFixed(6)}
+                        </td>
+                        <td className="px-3 py-2.5 text-center">
+                          <button
+                            className="rounded p-0.5 text-muted-foreground transition-colors hover:text-yellow-500"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleStar.mutate(req.id);
+                            }}
+                            type="button"
+                          >
+                            <Star
+                              className={cn(
+                                "size-3.5",
+                                req.isStarred &&
+                                  "fill-yellow-500 text-yellow-500"
+                              )}
+                            />
+                          </button>
                         </td>
                       </tr>
                     ))}
