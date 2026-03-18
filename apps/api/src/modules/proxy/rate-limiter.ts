@@ -24,6 +24,8 @@ const getLimiter = (
   return limiter;
 };
 
+const SECONDS_PER_DAY = 86_400;
+
 export const checkRateLimit = async (
   redis: Redis,
   keyId: string,
@@ -32,31 +34,32 @@ export const checkRateLimit = async (
 ): Promise<void> => {
   if (rpm === null && rpd === null) return;
 
-  const checks: Promise<void>[] = [];
-
-  if (rpm !== null) {
-    const limiter = getLimiter(redis, "rl:rpm", rpm, 60);
-    checks.push(
-      limiter.consume(keyId).then(
-        () => {},
-        () => {
-          throw new RateLimitError("Rate limit exceeded (requests per minute)");
-        }
-      )
-    );
-  }
-
-  if (rpd !== null) {
-    const limiter = getLimiter(redis, "rl:rpd", rpd, 86400);
-    checks.push(
-      limiter.consume(keyId).then(
-        () => {},
-        () => {
-          throw new RateLimitError("Rate limit exceeded (requests per day)");
-        }
-      )
-    );
-  }
+  const checks = [
+    ...(rpm !== null
+      ? [
+          getLimiter(redis, "rl:rpm", rpm, 60)
+            .consume(keyId)
+            .then(
+              () => {},
+              () => {
+                throw new RateLimitError("Rate limit exceeded (requests per minute)");
+              }
+            )
+        ]
+      : []),
+    ...(rpd !== null
+      ? [
+          getLimiter(redis, "rl:rpd", rpd, SECONDS_PER_DAY)
+            .consume(keyId)
+            .then(
+              () => {},
+              () => {
+                throw new RateLimitError("Rate limit exceeded (requests per day)");
+              }
+            )
+        ]
+      : [])
+  ];
 
   await Promise.all(checks);
 };

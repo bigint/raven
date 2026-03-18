@@ -5,9 +5,12 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { organization } from "better-auth/plugins";
 
+const SESSION_EXPIRY_SECONDS = 30 * 24 * 60 * 60; // 30 days
+const SESSION_UPDATE_AGE_SECONDS = 24 * 60 * 60; // 1 day
+
 interface AuthOptions {
-  onResetPassword?: (user: { email: string }, url: string) => void;
-  onUserCreated?: (user: { id: string; name: string; email: string }) => void;
+  readonly onResetPassword?: (user: { email: string }, url: string) => void;
+  readonly onUserCreated?: (user: { id: string; name: string; email: string }) => void;
 }
 
 export const createAuth = (db: Database, env: Env, options?: AuthOptions) => {
@@ -61,8 +64,8 @@ export const createAuth = (db: Database, env: Env, options?: AuthOptions) => {
     plugins: [organization()],
     secret: env.BETTER_AUTH_SECRET,
     session: {
-      expiresIn: 30 * 24 * 60 * 60,
-      updateAge: 24 * 60 * 60
+      expiresIn: SESSION_EXPIRY_SECONDS,
+      updateAge: SESSION_UPDATE_AGE_SECONDS
     },
     socialProviders: {
       ...(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET

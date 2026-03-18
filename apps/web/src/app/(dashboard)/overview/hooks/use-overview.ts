@@ -4,42 +4,42 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
 interface Stats {
-  totalRequests: number;
-  totalCost: string;
-  avgLatencyMs: string;
-  cacheHitRate: string;
+  readonly totalRequests: number;
+  readonly totalCost: string;
+  readonly avgLatencyMs: string;
+  readonly cacheHitRate: string;
 }
 
 interface UsageRow {
-  provider: string;
-  providerConfigName: string | null;
-  model: string;
-  totalRequests: number;
-  totalCost: string;
-  avgLatencyMs: string;
+  readonly provider: string;
+  readonly providerConfigName: string | null;
+  readonly model: string;
+  readonly totalRequests: number;
+  readonly totalCost: string;
+  readonly avgLatencyMs: string;
 }
 
 interface RecentRequest {
-  id: string;
-  provider: string;
-  model: string;
-  statusCode: number;
-  latencyMs: number;
-  cost: string;
-  createdAt: string;
+  readonly id: string;
+  readonly provider: string;
+  readonly model: string;
+  readonly statusCode: number;
+  readonly latencyMs: number;
+  readonly cost: string;
+  readonly createdAt: string;
 }
 
 interface KeySummary {
-  id: string;
-  name: string;
-  isActive: boolean;
-  lastUsedAt: string | null;
+  readonly id: string;
+  readonly name: string;
+  readonly isActive: boolean;
+  readonly lastUsedAt: string | null;
 }
 
 interface ProviderConfig {
-  id: string;
-  provider: string;
-  isEnabled: boolean;
+  readonly id: string;
+  readonly provider: string;
+  readonly isEnabled: boolean;
 }
 
 const THIRTY_DAYS_MS = 2_592_000_000;

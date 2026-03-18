@@ -3,11 +3,11 @@
 import { Button } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { RotateCcw } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { ChatInput } from "./components/chat-input";
 import { ChatMessages } from "./components/chat-messages";
 import { catalogModelsQueryOptions, useChat } from "./hooks/use-chat";
+import { useInitialModelSelection } from "./hooks/use-initial-model-selection";
 
 const ChatPage = () => {
   const {
@@ -24,41 +24,15 @@ const ChatPage = () => {
     systemPrompt
   } = useChat();
 
-  const searchParams = useSearchParams();
   const { data: models = [] } = useQuery(catalogModelsQueryOptions());
 
-  useEffect(() => {
-    if (!models.length || selectedModel) return;
-
-    const urlSystem = searchParams.get("system");
-    const urlModel = searchParams.get("model");
-
-    if (urlSystem && !systemPrompt) {
-      setSystemPrompt(urlSystem);
-    }
-
-    if (urlModel) {
-      const match = models.find(
-        (m) => m.slug === urlModel || m.name === urlModel
-      );
-      if (match) {
-        setSelectedModel({ model: match.slug, provider: match.provider });
-        return;
-      }
-    }
-
-    const first = models[0];
-    if (first) {
-      setSelectedModel({ model: first.slug, provider: first.provider });
-    }
-  }, [
-    searchParams,
+  useInitialModelSelection({
     models,
-    systemPrompt,
     selectedModel,
+    setSelectedModel,
     setSystemPrompt,
-    setSelectedModel
-  ]);
+    systemPrompt
+  });
 
   const modelOptions = useMemo(
     () =>

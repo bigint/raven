@@ -22,30 +22,32 @@ import {
   formatStreamingResponse
 } from "./response-formatter";
 
+const MAX_PROVIDER_RETRIES = 2;
+
 // Types
 
 export interface ExecuteInput {
-  db: Database;
-  redis: Redis;
-  env: Env;
-  startTime: number;
-  parsedBody: Record<string, unknown>;
-  parsed: ParsedRequest;
-  requestedModel: string;
-  providerName: string;
-  providerConfigId: string;
-  decryptedApiKey: string;
-  virtualKey: {
-    id: string;
-    organizationId: string;
+  readonly db: Database;
+  readonly redis: Redis;
+  readonly env: Env;
+  readonly startTime: number;
+  readonly parsedBody: Record<string, unknown>;
+  readonly parsed: ParsedRequest;
+  readonly requestedModel: string;
+  readonly providerName: string;
+  readonly providerConfigId: string;
+  readonly decryptedApiKey: string;
+  readonly virtualKey: {
+    readonly id: string;
+    readonly organizationId: string;
   };
-  method: string;
-  path: string;
-  sessionId: string | null;
-  guardrailWarnings: string[];
-  guardrailMatches: GuardrailMatch[];
-  incomingHeaders: Record<string, string>;
-  extraResponseHeaders?: Record<string, string>;
+  readonly method: string;
+  readonly path: string;
+  readonly sessionId: string | null;
+  readonly guardrailWarnings: readonly string[];
+  readonly guardrailMatches: readonly GuardrailMatch[];
+  readonly incomingHeaders: Readonly<Record<string, string>>;
+  readonly extraResponseHeaders?: Readonly<Record<string, string>>;
 }
 
 // Tool building
@@ -93,28 +95,20 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
 
   const contentAnalysis = analyzeContent(parsedBody, sessionId);
 
-  let finalProviderConfigId = providerConfigId;
-  let finalProviderName = providerName;
+  // Track active provider via a mutable ref — updated on fallback
+  const activeProvider = { configId: providerConfigId, name: providerName };
 
-  const logData = {
-    cachedTokens: 0,
+  const baseLogData = {
     cacheHit: false,
-    cost: 0,
     guardrailMatches:
       guardrailMatches.length > 0 ? guardrailMatches : undefined,
     hasImages: contentAnalysis.hasImages,
     hasToolUse: contentAnalysis.hasToolUse,
     imageCount: contentAnalysis.imageCount,
-    inputTokens: 0,
-    latencyMs: 0,
     method,
     model: requestedModel,
     organizationId: virtualKey.organizationId,
-    outputTokens: 0,
     path,
-    provider: finalProviderName,
-    providerConfigId: finalProviderConfigId,
-    reasoningTokens: 0,
     sessionId: contentAnalysis.sessionId,
     statusCode: 200,
     toolCount: contentAnalysis.toolCount,
@@ -122,18 +116,36 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     virtualKeyId: virtualKey.id
   };
 
-  const finalizeLog = () => {
-    logData.latencyMs = Date.now() - startTime;
-    logData.provider = finalProviderName;
-    logData.providerConfigId = finalProviderConfigId;
-    logAndPublish(db, logData, { redis });
+  const finalizeLog = (usage: {
+    cachedTokens: number;
+    cost: number;
+    inputTokens: number;
+    outputTokens: number;
+    reasoningTokens: number;
+    hasToolUse?: boolean;
+    toolCount?: number;
+    toolNames?: readonly string[];
+  }) => {
+    const latencyMs = Date.now() - startTime;
+    const logEntry = {
+      ...baseLogData,
+      cachedTokens: usage.cachedTokens,
+      cost: usage.cost,
+      hasToolUse: usage.hasToolUse ?? baseLogData.hasToolUse,
+      inputTokens: usage.inputTokens,
+      latencyMs,
+      outputTokens: usage.outputTokens,
+      provider: activeProvider.name,
+      providerConfigId: activeProvider.configId,
+      reasoningTokens: usage.reasoningTokens,
+      toolCount: usage.toolCount ?? baseLogData.toolCount,
+      toolNames: usage.toolNames
+        ? [...baseLogData.toolNames, ...usage.toolNames]
+        : baseLogData.toolNames
+    };
+    logAndPublish(db, logEntry, { redis });
     updateLastUsed(redis, virtualKey.id);
-    void updateMetrics(
-      redis,
-      finalProviderConfigId,
-      logData.latencyMs,
-      logData.cost
-    );
+    void updateMetrics(redis, activeProvider.configId, latencyMs, usage.cost);
   };
 
   // Build headers
@@ -148,13 +160,13 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
   const passthroughHeaders = filterPassthroughHeaders(incomingHeaders);
   const providerBaseUrl = PROVIDERS[providerName]?.baseUrl;
 
-  const makeModel = (apiKey: string, provider: string) =>
+  const makeModel = (apiKey: string, providerSlug: string) =>
     createProviderModel(
       {
         apiKey,
         baseUrl: providerBaseUrl,
         headers: passthroughHeaders,
-        provider
+        provider: providerSlug
       },
       requestedModel
     );
@@ -164,7 +176,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
 
   const baseParams = {
     frequencyPenalty: parsed.frequencyPenalty,
-    maxRetries: 2,
+    maxRetries: MAX_PROVIDER_RETRIES,
     maxTokens: parsed.maxTokens,
     messages: parsed.messages,
     presencePenalty: parsed.presencePenalty,
@@ -197,8 +209,8 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
 
     for (const fb of fallbacks) {
       try {
-        finalProviderConfigId = fb.providerConfigId;
-        finalProviderName = fb.providerName;
+        activeProvider.configId = fb.providerConfigId;
+        activeProvider.name = fb.providerName;
         return await tryExecute(makeModel(fb.decryptedApiKey, fb.providerName));
       } catch (fbErr) {
         console.error(
@@ -209,9 +221,19 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     }
 
     const { body, status } = formatErrorResponse(err);
-    logData.latencyMs = Date.now() - startTime;
-    logData.statusCode = status;
-    logAndPublish(db, logData, { redis });
+    const errorLog = {
+      ...baseLogData,
+      cachedTokens: 0,
+      cost: 0,
+      inputTokens: 0,
+      latencyMs: Date.now() - startTime,
+      outputTokens: 0,
+      provider: activeProvider.name,
+      providerConfigId: activeProvider.configId,
+      reasoningTokens: 0,
+      statusCode: status
+    };
+    logAndPublish(db, errorLog, { redis });
     return new Response(body, {
       headers: { "content-type": "application/json", ...responseHeaders },
       status
@@ -230,12 +252,13 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
       requestedModel,
       parsed.includeUsage,
       (usage) => {
-        logData.inputTokens = usage.inputTokens;
-        logData.outputTokens = usage.outputTokens;
-        logData.reasoningTokens = usage.reasoningTokens;
-        logData.cachedTokens = usage.cachedTokens;
-        logData.cost = estimateCost(finalProviderName, logData.model, usage);
-        finalizeLog();
+        finalizeLog({
+          cachedTokens: usage.cachedTokens,
+          cost: estimateCost(activeProvider.name, requestedModel, usage),
+          inputTokens: usage.inputTokens,
+          outputTokens: usage.outputTokens,
+          reasoningTokens: usage.reasoningTokens
+        });
       }
     );
 
@@ -269,31 +292,30 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     );
 
     void (() => {
-      if (result.toolCalls?.length) {
-        logData.hasToolUse = true;
-        logData.toolCount += result.toolCalls.length;
-        logData.toolNames.push(...result.toolCalls.map((tc) => tc.toolName));
-      }
+      const toolCallNames = result.toolCalls?.length
+        ? result.toolCalls.map((tc) => tc.toolName)
+        : undefined;
 
-      logData.inputTokens = formatted.usage.inputTokens;
-      logData.outputTokens = formatted.usage.outputTokens;
-      logData.reasoningTokens = formatted.usage.reasoningTokens;
-      logData.cachedTokens = formatted.usage.cachedTokens;
-      logData.cost = estimateCost(
-        finalProviderName,
-        logData.model,
-        formatted.usage
-      );
+      finalizeLog({
+        cachedTokens: formatted.usage.cachedTokens,
+        cost: estimateCost(activeProvider.name, requestedModel, formatted.usage),
+        hasToolUse: result.toolCalls?.length ? true : undefined,
+        inputTokens: formatted.usage.inputTokens,
+        outputTokens: formatted.usage.outputTokens,
+        reasoningTokens: formatted.usage.reasoningTokens,
+        toolCount: result.toolCalls?.length
+          ? baseLogData.toolCount + result.toolCalls.length
+          : undefined,
+        toolNames: toolCallNames
+      });
 
       void storeCache(
         redis,
         virtualKey.organizationId,
-        finalProviderName,
+        activeProvider.name,
         parsedBody,
         formatted.text
       );
-
-      finalizeLog();
     })();
 
     return new Response(formatted.text, {

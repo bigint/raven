@@ -62,9 +62,6 @@ export const proxyHandler = (
       Object.keys(parsedBody).length > 0 && messages.length > 0;
     const hasModel = typeof parsedBody.model === "string";
 
-    let guardrailWarnings: string[] = [];
-    let guardrailMatches: GuardrailMatch[] = [];
-
     const [guardrailResult, routingResult] = await Promise.all([
       hasMessages
         ? evaluateGuardrails(
@@ -87,13 +84,12 @@ export const proxyHandler = (
         : null
     ]);
 
-    if (guardrailResult) {
-      guardrailWarnings = guardrailResult.warnings;
-      guardrailMatches = guardrailResult.matches;
-    }
+    const guardrailWarnings = guardrailResult?.warnings ?? [];
+    const guardrailMatches = guardrailResult?.matches ?? [];
 
+    // Apply routing result immutably — create new object instead of mutating
     if (routingResult?.ruleApplied) {
-      parsedBody.model = routingResult.model;
+      parsedBody = { ...parsedBody, model: routingResult.model };
     }
 
     // 5. Cache check + model validation + provider resolution in parallel
