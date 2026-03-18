@@ -1,4 +1,6 @@
 export class AppError extends Error {
+  readonly title: string;
+
   constructor(
     message: string,
     readonly statusCode: number,
@@ -7,7 +9,28 @@ export class AppError extends Error {
   ) {
     super(message);
     this.name = "AppError";
+    this.title = message;
   }
+
+  toProblemDetails(instance?: string): ProblemDetails {
+    return {
+      type: "about:blank",
+      title: this.title,
+      status: this.statusCode,
+      detail: this.message,
+      instance,
+      ...(this.details ? this.details : {})
+    };
+  }
+}
+
+export interface ProblemDetails {
+  type: string;
+  title: string;
+  status: number;
+  detail: string;
+  instance?: string;
+  [key: string]: unknown;
 }
 
 export class NotFoundError extends AppError {
@@ -76,5 +99,14 @@ export class PlanLimitError extends AppError {
     details?: Record<string, unknown>
   ) {
     super(message, 429, "PLAN_LIMIT_EXCEEDED", details);
+  }
+}
+
+export class PreconditionFailedError extends AppError {
+  constructor(
+    message = "Precondition failed",
+    details?: Record<string, unknown>
+  ) {
+    super(message, 412, "PRECONDITION_FAILED", details);
   }
 }

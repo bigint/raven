@@ -76,9 +76,13 @@ app.use("*", async (c, next) => {
   if (contentLength && Number.parseInt(contentLength, 10) > 10 * 1024 * 1024) {
     return c.json(
       {
-        error: { code: "PAYLOAD_TOO_LARGE", message: "Request body too large" }
+        type: "about:blank",
+        title: "Request body too large",
+        status: 413,
+        detail: "Request body too large",
+        instance: c.req.path
       },
-      413
+      { status: 413, headers: { "Content-Type": "application/problem+json" } }
     );
   }
   return next();
@@ -104,24 +108,27 @@ app.use("*", async (c, next) => {
   c.header("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
 });
 
-// Global error handler
+// Global error handler (RFC 9457 Problem Details)
 app.onError((err, c) => {
+  const instance = c.req.path;
+
   if (err instanceof AppError) {
     return c.json(
-      {
-        error: {
-          code: err.code,
-          message: err.message,
-          ...(err.details ? { details: err.details } : {})
-        }
-      },
-      err.statusCode as 400 | 401 | 403 | 404 | 409 | 429 | 500
+      err.toProblemDetails(instance),
+      { status: err.statusCode as 400 | 401 | 403 | 404 | 409 | 429 | 500, headers: { "Content-Type": "application/problem+json" } }
     );
   }
+
   console.error("Unhandled error:", err);
   return c.json(
-    { error: { code: "INTERNAL_ERROR", message: "Internal server error" } },
-    500
+    {
+      type: "about:blank",
+      title: "Internal server error",
+      status: 500,
+      detail: "Internal server error",
+      instance
+    },
+    { status: 500, headers: { "Content-Type": "application/problem+json" } }
   );
 });
 
@@ -176,7 +183,16 @@ v1.route("/routing-rules", createRoutingRulesModule(db));
 app.route("/v1", v1);
 
 app.notFound((c) =>
-  c.json({ error: { code: "NOT_FOUND", message: "Route not found" } }, 404)
+  c.json(
+    {
+      type: "about:blank",
+      title: "Route not found",
+      status: 404,
+      detail: "Route not found",
+      instance: c.req.path
+    },
+    { status: 404, headers: { "Content-Type": "application/problem+json" } }
+  )
 );
 
 serve({ fetch: app.fetch, port: env.API_PORT }, (info) => {

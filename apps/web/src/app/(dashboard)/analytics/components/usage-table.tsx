@@ -8,7 +8,7 @@ import type { BreakdownRow } from "../hooks/use-adoption";
 interface UsageTableProps {
   data: BreakdownRow[];
   loading: boolean;
-  groupBy?: "key" | "model";
+  groupBy?: "key" | "model" | "userAgent";
 }
 
 export const UsageTable = ({ data, loading, groupBy }: UsageTableProps) => {
