@@ -64,6 +64,10 @@ export const createAuth = (db: Database, env: Env, options?: AuthOptions) => {
     plugins: [organization()],
     secret: env.BETTER_AUTH_SECRET,
     session: {
+      cookieCache: {
+        enabled: true,
+        maxAge: 5 * 60
+      },
       expiresIn: SESSION_EXPIRY_SECONDS,
       updateAge: SESSION_UPDATE_AGE_SECONDS
     },

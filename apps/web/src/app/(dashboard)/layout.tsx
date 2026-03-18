@@ -9,13 +9,32 @@ import { useOrgs } from "./hooks/use-orgs";
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
-  const { data: session, isPending: isSessionPending } = useSession();
+  const { data: session, error, isPending: isSessionPending } = useSession();
   const { orgs, activeOrg, isPending: isOrgsPending, switchOrg } = useOrgs();
 
   if (isSessionPending || (session && isOrgsPending)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="size-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (error && !session) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <p className="mb-4 text-sm text-muted-foreground">
+            Unable to verify your session
+          </p>
+          <button
+            className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground"
+            onClick={() => window.location.reload()}
+            type="button"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
