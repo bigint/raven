@@ -24,6 +24,7 @@ export const getRequests =
       eq(requestLogs.organizationId, orgId),
       isNull(requestLogs.deletedAt),
       ...dateConditions,
+      ...(query.endUser ? [eq(requestLogs.endUser, query.endUser)] : []),
       ...(query.provider ? [eq(requestLogs.provider, query.provider)] : []),
       ...(query.model ? [eq(requestLogs.model, query.model)] : []),
       ...(query.statusCode

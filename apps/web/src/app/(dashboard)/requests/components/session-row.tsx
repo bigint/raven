@@ -2,12 +2,12 @@
 
 import { Badge, cn } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight, MessageSquare, Wrench } from "lucide-react";
+import { ChevronRight, MessageSquare, Star, Wrench } from "lucide-react";
 import { useState } from "react";
 import { ModelIcon } from "@/components/model-icon";
 import { formatTimeAgo } from "@/lib/format";
 import type { LogSession } from "../hooks/use-logs";
-import { sessionDetailQueryOptions } from "../hooks/use-logs";
+import { sessionDetailQueryOptions, useToggleStar } from "../hooks/use-logs";
 
 interface SessionRowProps {
   session: LogSession;
@@ -28,6 +28,7 @@ const getStatusBadge = (statusCode: number) => {
 
 export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
   const [expanded, setExpanded] = useState(false);
+  const toggleStar = useToggleStar();
 
   const { data: detail } = useQuery({
     ...sessionDetailQueryOptions(session.sessionId ?? ""),

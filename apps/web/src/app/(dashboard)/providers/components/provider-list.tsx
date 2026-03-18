@@ -3,6 +3,7 @@
 import { PROVIDER_LABELS } from "@raven/types";
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
+import { useQuery } from "@tanstack/react-query";
 import {
   Check,
   Loader2,
@@ -17,7 +18,6 @@ import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { TextMorph } from "torph/react";
 import { ProviderIcon } from "@/components/model-icon";
-import { useQuery } from "@tanstack/react-query";
 import type { Provider } from "../hooks/use-providers";
 import {
   providerModelsQueryOptions,

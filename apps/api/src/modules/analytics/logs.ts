@@ -35,6 +35,7 @@ export const getLogs =
       isNotNull(requestLogs.sessionId),
       isNull(requestLogs.deletedAt),
       ...dateConditions,
+      ...(query.endUser ? [eq(requestLogs.endUser, query.endUser)] : []),
       ...(query.virtualKeyId
         ? [eq(requestLogs.virtualKeyId, query.virtualKeyId)]
         : []),
