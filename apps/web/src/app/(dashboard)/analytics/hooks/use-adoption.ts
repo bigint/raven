@@ -79,10 +79,7 @@ const fillChartGaps = (
 const keyFilter = (keyId?: string): string =>
   keyId ? `&virtualKeyId=${keyId}` : "";
 
-export const adoptionChartQueryOptions = (
-  range: DateRange,
-  keyId?: string
-) =>
+export const adoptionChartQueryOptions = (range: DateRange, keyId?: string) =>
   queryOptions({
     queryFn: async () => {
       const data = await api.get<ChartDataPoint[]>(

@@ -75,10 +75,7 @@ const rangeToFrom = (range: DateRange): string =>
 const keyFilter = (keyId?: string): string =>
   keyId ? `&virtualKeyId=${keyId}` : "";
 
-export const analyticsStatsQueryOptions = (
-  range: DateRange,
-  keyId?: string
-) =>
+export const analyticsStatsQueryOptions = (range: DateRange, keyId?: string) =>
   queryOptions({
     queryFn: () =>
       api.get<Stats>(
@@ -87,10 +84,7 @@ export const analyticsStatsQueryOptions = (
     queryKey: ["analytics", "stats", range, keyId]
   });
 
-export const analyticsUsageQueryOptions = (
-  range: DateRange,
-  keyId?: string
-) =>
+export const analyticsUsageQueryOptions = (range: DateRange, keyId?: string) =>
   queryOptions({
     queryFn: () =>
       api.get<UsageRow[]>(
@@ -99,10 +93,7 @@ export const analyticsUsageQueryOptions = (
     queryKey: ["analytics", "usage", range, keyId]
   });
 
-export const analyticsCacheQueryOptions = (
-  range: DateRange,
-  keyId?: string
-) =>
+export const analyticsCacheQueryOptions = (range: DateRange, keyId?: string) =>
   queryOptions({
     queryFn: () =>
       api.get<CacheStats>(
