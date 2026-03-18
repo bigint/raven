@@ -104,12 +104,12 @@ export const chatCompletionsHandler = (
     const fakeProxyPath = `/v1/proxy/${providerName}/chat/completions`;
     const { decryptedApiKey, providerConfigId, providerConfigName } =
       await resolveProvider(
-      db,
-      env,
-      virtualKey.organizationId,
-      fakeProxyPath,
-      redis
-    );
+        db,
+        env,
+        virtualKey.organizationId,
+        fakeProxyPath,
+        redis
+      );
 
     // 7. Cache check
     const cacheResult = await checkCache(

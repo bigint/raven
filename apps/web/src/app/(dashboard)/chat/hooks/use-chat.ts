@@ -188,19 +188,21 @@ export const useChat = () => {
         const pk = await ensureKey();
 
         // Build messages array
-        const allMessages: Message[] = [...currentMessages, userMessage].map((m) => {
-          if (m.images && m.images.length > 0) {
-            const parts: ContentPart[] = [];
-            for (const img of m.images) {
-              parts.push({ image: img.base64, type: "image" });
+        const allMessages: Message[] = [...currentMessages, userMessage].map(
+          (m) => {
+            if (m.images && m.images.length > 0) {
+              const parts: ContentPart[] = [];
+              for (const img of m.images) {
+                parts.push({ image: img.base64, type: "image" });
+              }
+              if (m.content) {
+                parts.push({ text: m.content, type: "text" });
+              }
+              return { content: parts, role: m.role };
             }
-            if (m.content) {
-              parts.push({ text: m.content, type: "text" });
-            }
-            return { content: parts, role: m.role };
+            return { content: m.content, role: m.role };
           }
-          return { content: m.content, role: m.role };
-        });
+        );
 
         const recentMessages = allMessages.slice(-currentSettings.chatMemory);
 

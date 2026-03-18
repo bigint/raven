@@ -35,7 +35,9 @@ export const getLogs =
       isNotNull(requestLogs.sessionId),
       isNull(requestLogs.deletedAt),
       ...dateConditions,
-      ...(query.virtualKeyId ? [eq(requestLogs.virtualKeyId, query.virtualKeyId)] : []),
+      ...(query.virtualKeyId
+        ? [eq(requestLogs.virtualKeyId, query.virtualKeyId)]
+        : []),
       ...(query.model ? [eq(requestLogs.model, query.model)] : [])
     );
 

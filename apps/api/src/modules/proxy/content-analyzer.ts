@@ -64,15 +64,21 @@ export const analyzeContent = (
   const b = body as Record<string, unknown>;
 
   // Count images in messages
-  const imageCount = Array.isArray(b.messages)
-    ? countImages(b.messages)
-    : 0;
+  const imageCount = Array.isArray(b.messages) ? countImages(b.messages) : 0;
 
   // Detect tool use: OpenAI uses "tools" or "functions", Anthropic uses "tools"
   const toolInfo = Array.isArray(b.tools)
-    ? { hasToolUse: true, toolCount: b.tools.length, toolNames: extractToolNames(b.tools) }
+    ? {
+        hasToolUse: true,
+        toolCount: b.tools.length,
+        toolNames: extractToolNames(b.tools)
+      }
     : Array.isArray(b.functions)
-      ? { hasToolUse: true, toolCount: b.functions.length, toolNames: extractFunctionNames(b.functions) }
+      ? {
+          hasToolUse: true,
+          toolCount: b.functions.length,
+          toolNames: extractFunctionNames(b.functions)
+        }
       : { hasToolUse: false, toolCount: 0, toolNames: [] as readonly string[] };
 
   // Extract session ID from header or body metadata

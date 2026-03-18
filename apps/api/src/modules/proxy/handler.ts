@@ -11,7 +11,7 @@ import { checkBudgets } from "./budget-check";
 import { checkCache, serveCacheHit } from "./cache";
 import { evaluateRoutingRules } from "./content-router";
 import { execute } from "./execute";
-import { evaluateGuardrails, type GuardrailMatch } from "./guardrails";
+import { evaluateGuardrails } from "./guardrails";
 import { checkPlanLimit } from "./plan-check";
 import { parseProviderFromPath, resolveProvider } from "./provider-resolver";
 import { checkRateLimit } from "./rate-limiter";

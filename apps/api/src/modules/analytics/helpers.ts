@@ -6,7 +6,10 @@ import { gte, lte } from "drizzle-orm";
 import { ValidationError } from "@/lib/errors";
 import { getOrgPlan } from "@/modules/proxy/plan-gate";
 
-export const parseDateRange = (from?: string, to?: string): ReturnType<typeof gte>[] => {
+export const parseDateRange = (
+  from?: string,
+  to?: string
+): ReturnType<typeof gte>[] => {
   const fromCondition = (() => {
     if (!from) return [];
     const fromDate = new Date(from);

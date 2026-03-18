@@ -9,11 +9,11 @@ export interface Budget {
   id: string;
   entityType: string;
   entityId: string;
+  entityName: string | null;
   limitAmount: number;
   period: string;
   alertThreshold: number;
   createdAt: string;
-  updatedAt: string;
 }
 
 export const ENTITY_TYPE_OPTIONS = [

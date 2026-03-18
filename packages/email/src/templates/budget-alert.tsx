@@ -23,7 +23,8 @@ export const BudgetAlertEmail = ({
   limit,
   threshold
 }: BudgetAlertEmailProps) => {
-  const usagePercent = limit > 0 ? Math.min(Math.round((currentUsage / limit) * 100), 100) : 100;
+  const usagePercent =
+    limit > 0 ? Math.min(Math.round((currentUsage / limit) * 100), 100) : 100;
   const thresholdPercent = Math.round(threshold * 100);
 
   return (

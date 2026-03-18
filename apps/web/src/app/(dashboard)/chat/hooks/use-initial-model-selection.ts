@@ -6,8 +6,14 @@ import type { CatalogModel } from "./use-chat";
 
 interface UseInitialModelSelectionParams {
   readonly models: readonly CatalogModel[];
-  readonly selectedModel: { readonly model: string; readonly provider: string } | null;
-  readonly setSelectedModel: (value: { model: string; provider: string }) => void;
+  readonly selectedModel: {
+    readonly model: string;
+    readonly provider: string;
+  } | null;
+  readonly setSelectedModel: (value: {
+    model: string;
+    provider: string;
+  }) => void;
   readonly setSystemPrompt: (value: string) => void;
   readonly systemPrompt: string;
 }

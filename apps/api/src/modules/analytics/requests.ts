@@ -26,8 +26,12 @@ export const getRequests =
       ...dateConditions,
       ...(query.provider ? [eq(requestLogs.provider, query.provider)] : []),
       ...(query.model ? [eq(requestLogs.model, query.model)] : []),
-      ...(query.statusCode ? [eq(requestLogs.statusCode, query.statusCode)] : []),
-      ...(query.virtualKeyId ? [eq(requestLogs.virtualKeyId, query.virtualKeyId)] : [])
+      ...(query.statusCode
+        ? [eq(requestLogs.statusCode, query.statusCode)]
+        : []),
+      ...(query.virtualKeyId
+        ? [eq(requestLogs.virtualKeyId, query.virtualKeyId)]
+        : [])
     );
 
     const [rows, countResult] = await Promise.all([

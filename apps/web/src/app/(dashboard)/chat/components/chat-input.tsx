@@ -9,7 +9,13 @@ import {
   Thermometer,
   X
 } from "lucide-react";
-import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
+import {
+  type KeyboardEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from "react";
 
 export interface PlaygroundSettings {
   readonly temperature: number;

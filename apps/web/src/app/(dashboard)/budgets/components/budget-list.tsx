@@ -25,10 +25,9 @@ const columns: Column<Budget>[] = [
     )
   },
   {
-    className: "font-mono text-muted-foreground",
-    header: "Entity ID",
-    key: "entityId",
-    render: (budget) => budget.entityId
+    header: "Name",
+    key: "entityName",
+    render: (budget) => budget.entityName ?? budget.entityId
   },
   {
     className: "font-medium",

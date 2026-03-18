@@ -10,7 +10,11 @@ const SESSION_UPDATE_AGE_SECONDS = 24 * 60 * 60; // 1 day
 
 interface AuthOptions {
   readonly onResetPassword?: (user: { email: string }, url: string) => void;
-  readonly onUserCreated?: (user: { id: string; name: string; email: string }) => void;
+  readonly onUserCreated?: (user: {
+    id: string;
+    name: string;
+    email: string;
+  }) => void;
 }
 
 export const createAuth = (db: Database, env: Env, options?: AuthOptions) => {

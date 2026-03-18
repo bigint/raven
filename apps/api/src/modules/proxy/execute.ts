@@ -307,7 +307,11 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
 
       finalizeLog({
         cachedTokens: formatted.usage.cachedTokens,
-        cost: estimateCost(activeProvider.name, requestedModel, formatted.usage),
+        cost: estimateCost(
+          activeProvider.name,
+          requestedModel,
+          formatted.usage
+        ),
         hasToolUse: result.toolCalls?.length ? true : undefined,
         inputTokens: formatted.usage.inputTokens,
         outputTokens: formatted.usage.outputTokens,
