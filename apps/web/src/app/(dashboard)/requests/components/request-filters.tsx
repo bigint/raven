@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, PillTabs, Select } from "@raven/ui";
+import { Button, cn, PillTabs, Select } from "@raven/ui";
 import { Radio } from "lucide-react";
 import {
   DATE_RANGE_OPTIONS,
@@ -66,7 +66,7 @@ const RequestFilters = ({
       onClick={onToggleLive}
       variant={isLive ? "primary" : "secondary"}
     >
-      <Radio className={`size-4 ${isLive ? "animate-pulse" : ""}`} />
+      <Radio className={cn("size-4", isLive && "animate-pulse")} />
       {isLive ? "Exit Live" : "Go Live"}
     </Button>
 

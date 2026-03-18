@@ -1,6 +1,6 @@
 "use client";
 
-import { Spinner } from "@raven/ui";
+import { cn, Spinner } from "@raven/ui";
 import { ScrollText } from "lucide-react";
 import type { LogSession } from "../hooks/use-logs";
 import { SessionRow } from "./session-row";
@@ -60,7 +60,10 @@ export const LogsTable = ({
           <tr className="border-b border-border">
             {TABLE_HEADERS.map((h, i) => (
               <th
-                className={`px-5 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground ${h.className}`}
+                className={cn(
+                  "px-5 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground",
+                  h.className
+                )}
                 key={h.label || `expand-${i}`}
               >
                 {h.label}
