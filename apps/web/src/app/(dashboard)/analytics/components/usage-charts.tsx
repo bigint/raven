@@ -79,7 +79,7 @@ export const UsageCharts = ({
             Track usage, costs, and performance across providers.
           </p>
         </div>
-        <div className="flex flex-col gap-2 sm:items-end">
+        <div className="flex flex-wrap items-center gap-3">
           <PillTabs
             onChange={onDateRangeChange}
             options={dateRangeOptions}
