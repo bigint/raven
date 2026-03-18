@@ -19,7 +19,10 @@ const Field = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
-export const RequestDetail = ({ request, onClose }: RequestDetailProps) => (
+export const RequestDetail = ({ request, onClose }: RequestDetailProps) => {
+  const toggleStar = useToggleStar();
+
+  return (
   <AnimatePresence>
     {request && (
       <>
@@ -39,7 +42,22 @@ export const RequestDetail = ({ request, onClose }: RequestDetailProps) => (
         >
           <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background px-6 py-4">
             <div>
-              <h2 className="text-base font-semibold">Request Details</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-semibold">Request Details</h2>
+                <button
+                  className="rounded p-0.5 text-muted-foreground transition-colors hover:text-yellow-500"
+                  onClick={() => toggleStar.mutate(request.id)}
+                  type="button"
+                >
+                  <Star
+                    className={cn(
+                      "size-4",
+                      request.isStarred &&
+                        "fill-yellow-500 text-yellow-500"
+                    )}
+                  />
+                </button>
+              </div>
               <p className="text-xs text-muted-foreground">ID: {request.id}</p>
             </div>
             <button
@@ -156,4 +174,5 @@ export const RequestDetail = ({ request, onClose }: RequestDetailProps) => (
       </>
     )}
   </AnimatePresence>
-);
+  );
+};
