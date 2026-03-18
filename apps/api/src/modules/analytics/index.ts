@@ -27,7 +27,11 @@ export const createAnalyticsModule = (db: Database) => {
 
   // Clamp analytics date range to plan retention limit
   app.use("*", async (c, next) => {
-    if (c.req.path.endsWith("/requests/live")) return next();
+    if (
+      c.req.path.endsWith("/requests/live") ||
+      c.req.path.endsWith("/star")
+    )
+      return next();
     const orgId = c.get("orgId");
     const from = c.req.query("from");
     const clamped = await clampAnalyticsRetention(db, orgId, from);
