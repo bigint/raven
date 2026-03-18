@@ -10,6 +10,8 @@ import { Badge, Select } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import {
   Brain,
+  Check,
+  Copy,
   DollarSign,
   Eye,
   MessageSquare,
@@ -71,6 +73,33 @@ const formatProviderName = (slug: string): string => {
   return names[slug] ?? slug.charAt(0).toUpperCase() + slug.slice(1);
 };
 
+const CopyableSlug = ({ value }: { value: string }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  return (
+    <button
+      className="group/copy mt-0.5 flex items-center gap-1 font-mono text-[11px] text-muted-foreground hover:text-foreground"
+      onClick={handleCopy}
+      title="Copy model ID"
+      type="button"
+    >
+      {value}
+      {copied ? (
+        <Check className="size-3 text-green-600" />
+      ) : (
+        <Copy className="size-3 opacity-0 group-hover/copy:opacity-100" />
+      )}
+    </button>
+  );
+};
+
 const ModelCard = ({ model }: { model: ModelDefinition }) => {
   const categoryMeta = MODEL_CATEGORIES[model.category];
 
@@ -91,6 +120,7 @@ const ModelCard = ({ model }: { model: ModelDefinition }) => {
             <p className="text-xs text-muted-foreground">
               {formatProviderName(model.provider)}
             </p>
+            <CopyableSlug value={model.slug} />
           </div>
         </div>
         <Badge

@@ -2,10 +2,37 @@
 
 import { PROVIDER_LABELS } from "@raven/types";
 import { Spinner } from "@raven/ui";
-import { Cpu } from "lucide-react";
+import { Check, Copy, Cpu } from "lucide-react";
+import { useState } from "react";
 import { ModelIcon } from "@/components/model-icon";
 import { formatTimeAgo } from "@/lib/format";
 import type { ModelRow } from "../hooks/use-models";
+
+const CopyableId = ({ value }: { value: string }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  return (
+    <button
+      className="group/copy mt-0.5 flex items-center gap-1 font-mono text-xs text-muted-foreground hover:text-foreground"
+      onClick={handleCopy}
+      title="Copy model ID"
+      type="button"
+    >
+      {value}
+      {copied ? (
+        <Check className="size-3 text-green-600" />
+      ) : (
+        <Copy className="size-3 opacity-0 group-hover/copy:opacity-100" />
+      )}
+    </button>
+  );
+};
 
 interface ModelsTableProps {
   data: ModelRow[];
@@ -78,9 +105,10 @@ export const ModelsTable = ({ data, loading }: ModelsTableProps) => {
                   <ModelIcon model={row.model} provider={row.provider} />
                   {row.model}
                 </div>
-                <div className="mt-0.5 text-xs text-muted-foreground">
+                <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
                   {PROVIDER_LABELS[row.provider] ?? row.provider}
                 </div>
+                <CopyableId value={row.model} />
               </td>
               <td className="px-5 py-4 text-right tabular-nums">
                 {row.requests.toLocaleString()}

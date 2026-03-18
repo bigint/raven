@@ -7,6 +7,7 @@ export type ModelCategory =
 
 export interface ModelDefinition {
   readonly id: string;
+  readonly slug: string;
   readonly name: string;
   readonly provider: string;
   readonly category: ModelCategory;
