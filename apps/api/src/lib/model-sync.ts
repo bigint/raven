@@ -112,7 +112,7 @@ export const deriveCategory = (
 
 export const deriveCapabilities = (
   model: ModelsDevModel
-): readonly string[] => {
+): string[] => {
   const inputMods = model.modalities?.input ?? [];
   const hasVision = inputMods.includes("image") || inputMods.includes("video");
 
