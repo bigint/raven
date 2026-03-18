@@ -32,14 +32,14 @@ const PillTabs = <T extends string = string>({
     <LayoutGroup id={id}>
       <div
         className={cn(
-          "flex items-center gap-1 overflow-x-auto rounded-lg border border-border p-1 w-fit",
+          "flex h-9 items-center gap-1 overflow-x-auto rounded-md border border-border px-1 w-fit",
           className
         )}
       >
         {options.map((opt) => (
           <button
             className={cn(
-              "relative shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+              "relative shrink-0 rounded-md px-3 py-1 text-sm font-medium transition-colors",
               opt.disabled && "cursor-not-allowed opacity-50"
             )}
             disabled={opt.disabled}
