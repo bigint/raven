@@ -340,7 +340,9 @@ export const useChat = () => {
           const choice = (result as Record<string, unknown>).choices as
             | Record<string, unknown>[]
             | undefined;
-          const msg = choice?.[0]?.message as Record<string, unknown> | undefined;
+          const msg = choice?.[0]?.message as
+            | Record<string, unknown>
+            | undefined;
           const text = msg?.content as string | undefined;
           const reasoningContent = msg?.reasoning_content as string | undefined;
           const usage = (result as Record<string, unknown>).usage as

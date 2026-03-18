@@ -41,7 +41,10 @@ export const getRequestsLive = (db: Database) => async (c: AppContext) => {
         eq(requestLogs.providerConfigId, providerConfigs.id)
       )
       .where(
-        and(eq(requestLogs.organizationId, orgId), isNull(requestLogs.deletedAt))
+        and(
+          eq(requestLogs.organizationId, orgId),
+          isNull(requestLogs.deletedAt)
+        )
       )
       .orderBy(desc(requestLogs.createdAt))
       .limit(50);

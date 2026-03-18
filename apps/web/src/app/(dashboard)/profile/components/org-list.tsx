@@ -72,7 +72,9 @@ const OrgList = ({
       {orgsLoading ? (
         <div className="py-6 text-center">
           <Spinner className="mx-auto" />
-          <p className="mt-3 text-sm text-muted-foreground">Loading organizations...</p>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Loading organizations...
+          </p>
         </div>
       ) : orgs.length === 0 ? (
         <EmptyState

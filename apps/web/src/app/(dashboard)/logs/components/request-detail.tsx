@@ -133,7 +133,6 @@ export const RequestDetail = ({ request, onClose }: RequestDetailProps) => (
               </p>
             )}
           </div>
-
         </motion.div>
       </>
     )}

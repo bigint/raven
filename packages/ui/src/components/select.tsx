@@ -61,7 +61,9 @@ const Select = ({
                 {match.icon}
                 {match.label}
               </span>
-            ) : val;
+            ) : (
+              val
+            );
           }}
         </BaseSelect.Value>
         <BaseSelect.Icon className="ml-2">

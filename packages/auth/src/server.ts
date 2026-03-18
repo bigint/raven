@@ -12,6 +12,15 @@ interface AuthOptions {
 
 export const createAuth = (db: Database, env: Env, options?: AuthOptions) => {
   return betterAuth({
+    advanced: {
+      defaultCookieAttributes: {
+        httpOnly: true,
+        path: "/",
+        ...(env.NODE_ENV === "production"
+          ? { sameSite: "none" as const, secure: true }
+          : { sameSite: "lax" as const, secure: false })
+      }
+    },
     baseURL: env.BETTER_AUTH_URL,
     database: drizzleAdapter(db, {
       provider: "pg",
@@ -49,16 +58,6 @@ export const createAuth = (db: Database, env: Env, options?: AuthOptions) => {
           }
         : undefined
     },
-    ...(env.NODE_ENV === "production"
-      ? {
-          advanced: {
-            defaultCookieAttributes: {
-              sameSite: "none" as const,
-              secure: true
-            }
-          }
-        }
-      : {}),
     plugins: [organization()],
     secret: env.BETTER_AUTH_SECRET,
     session: {

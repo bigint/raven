@@ -15,7 +15,13 @@ interface KeyListProps {
   onEdit: (key: VirtualKey) => void;
 }
 
-const KeyList = ({ keys, loading, onCreate, onDelete, onEdit }: KeyListProps) => {
+const KeyList = ({
+  keys,
+  loading,
+  onCreate,
+  onDelete,
+  onEdit
+}: KeyListProps) => {
   if (!loading && keys.length === 0) {
     return (
       <EmptyState

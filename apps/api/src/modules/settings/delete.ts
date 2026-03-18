@@ -40,9 +40,7 @@ export const deleteSettings = (db: Database) => async (c: AppContext) => {
         .delete(providerConfigs)
         .where(eq(providerConfigs.organizationId, orgId)),
       tx.delete(budgets).where(eq(budgets.organizationId, orgId)),
-      tx
-        .delete(guardrailRules)
-        .where(eq(guardrailRules.organizationId, orgId)),
+      tx.delete(guardrailRules).where(eq(guardrailRules.organizationId, orgId)),
       tx.delete(prompts).where(eq(prompts.organizationId, orgId)),
       tx.delete(routingRules).where(eq(routingRules.organizationId, orgId)),
       tx.delete(webhooks).where(eq(webhooks.organizationId, orgId)),
