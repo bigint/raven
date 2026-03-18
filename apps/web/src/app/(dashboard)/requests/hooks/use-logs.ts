@@ -1,6 +1,11 @@
 "use client";
 
-import { queryOptions, useInfiniteQuery } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient
+} from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { api } from "@/lib/api";
@@ -42,6 +47,7 @@ export interface SessionRequest {
   toolNames: string[] | null;
   sessionId: string | null;
   userAgent: string | null;
+  isStarred: boolean;
   virtualKeyId: string;
 }
 
@@ -86,6 +92,20 @@ export const sessionDetailQueryOptions = (sessionId: string) =>
       api.get<SessionRequest[]>(`/v1/analytics/sessions/${sessionId}`),
     queryKey: ["session", sessionId]
   });
+
+export const useToggleStar = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) =>
+      api.patch<{ isStarred: boolean }>(
+        `/v1/analytics/requests/${id}/star`
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["session"] });
+    }
+  });
+};
 
 export const useLogs = () => {
   const searchParams = useSearchParams();
