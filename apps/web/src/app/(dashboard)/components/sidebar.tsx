@@ -15,14 +15,11 @@ import {
   Network,
   Receipt,
   Route,
-  ScrollText,
   Settings,
   Shield,
   SquareTerminal,
-  TrendingUp,
   Users,
   Webhook,
-  Wrench,
   X
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -60,14 +57,6 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/models", icon: Cpu, label: "Models" },
   { href: "/routing", icon: Route, label: "Routing" },
   { href: "/requests", icon: Activity, label: "Requests" },
-  { href: "/logs", icon: ScrollText, label: "Logs" },
-  { href: "/tools", icon: Wrench, label: "Tool Use" },
-  {
-    gate: (plan) => PLAN_FEATURES[plan].hasAdoption,
-    href: "/adoption",
-    icon: TrendingUp,
-    label: "Adoption"
-  },
   { href: "/budgets", icon: CreditCard, label: "Budgets" },
   {
     gate: (plan) => PLAN_FEATURES[plan].hasGuardrails,

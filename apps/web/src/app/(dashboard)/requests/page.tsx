@@ -1,13 +1,20 @@
 "use client";
 
-import { Button, PageHeader, Spinner } from "@raven/ui";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { Radio } from "lucide-react";
+import { PageHeader, PillTabs, Spinner, Tabs } from "@raven/ui";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
+import { LogsTable } from "./components/logs-table";
+import { RequestDetail } from "./components/request-detail";
 import { RequestFilters } from "./components/request-filters";
 import { RequestTable } from "./components/request-table";
+import {
+  type SessionRequest,
+  sessionDetailQueryOptions,
+  useLogs
+} from "./hooks/use-logs";
 import {
   buildRequestsUrl,
   type DateRange,
@@ -15,7 +22,9 @@ import {
   useLiveRequests
 } from "./hooks/use-requests";
 
-const RequestsPage = () => {
+type View = "requests" | "sessions";
+
+const RequestsView = () => {
   const [provider, setProvider] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [dateRange, setDateRange] = useState<DateRange>("24h");
@@ -59,42 +68,19 @@ const RequestsPage = () => {
     !isLive && query.hasNextPage && !query.isFetchingNextPage
   );
 
-  const toggleLive = () => {
-    setIsLive((prev) => !prev);
-  };
-
   return (
-    <div>
-      <PageHeader
-        actions={
-          <Button
-            className={
-              isLive
-                ? "bg-green-500/10 text-green-600 border border-green-500/30 hover:opacity-100"
-                : ""
-            }
-            onClick={toggleLive}
-            variant={isLive ? "primary" : "secondary"}
-          >
-            <Radio className={`size-4 ${isLive ? "animate-pulse" : ""}`} />
-            {isLive ? "Live" : "Go Live"}
-          </Button>
-        }
-        description="View and inspect API request logs."
-        title="Requests"
+    <>
+      <RequestFilters
+        dateRange={dateRange}
+        isLive={isLive}
+        onDateRangeChange={setDateRange}
+        onProviderChange={setProvider}
+        onStatusChange={setStatusFilter}
+        onToggleLive={() => setIsLive((prev) => !prev)}
+        provider={provider}
+        statusFilter={statusFilter}
+        total={total}
       />
-
-      {!isLive && (
-        <RequestFilters
-          dateRange={dateRange}
-          onDateRangeChange={setDateRange}
-          onProviderChange={setProvider}
-          onStatusChange={setStatusFilter}
-          provider={provider}
-          statusFilter={statusFilter}
-          total={total}
-        />
-      )}
 
       {isLive && (
         <div className="mb-4 flex items-center gap-2">
@@ -133,6 +119,114 @@ const RequestsPage = () => {
           {query.isFetchingNextPage && <Spinner className="size-5" />}
         </div>
       )}
+    </>
+  );
+};
+
+const SessionsView = () => {
+  const {
+    data,
+    dateRange,
+    dateRangeOptions,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    setDateRange
+  } = useLogs();
+
+  const [selectedRequest, setSelectedRequest] = useState<SessionRequest | null>(
+    null
+  );
+  const [activeSessionId, setActiveSessionId] = useState<string>("");
+
+  const { data: sessionDetail } = useQuery({
+    ...sessionDetailQueryOptions(activeSessionId),
+    enabled: !!activeSessionId
+  });
+
+  const sentinelRef = useInfiniteScroll(
+    () => fetchNextPage(),
+    hasNextPage && !isFetchingNextPage
+  );
+
+  const handleRequestClick = (requestId: string, sessionId: string) => {
+    setActiveSessionId(sessionId);
+    const requests = sessionDetail ?? [];
+    const req = requests.find((r) => r.id === requestId);
+    if (req) {
+      setSelectedRequest(req);
+    }
+  };
+
+  return (
+    <>
+      {error && (
+        <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {error}
+        </div>
+      )}
+
+      <PillTabs
+        className="mb-6"
+        onChange={setDateRange}
+        options={dateRangeOptions}
+        value={dateRange}
+      />
+
+      <LogsTable
+        data={data}
+        loading={isLoading}
+        onRequestClick={handleRequestClick}
+      />
+
+      {hasNextPage && (
+        <div className="flex justify-center py-6" ref={sentinelRef}>
+          {isFetchingNextPage && <Spinner className="size-5" />}
+        </div>
+      )}
+
+      <RequestDetail
+        onClose={() => setSelectedRequest(null)}
+        request={selectedRequest}
+      />
+    </>
+  );
+};
+
+const RequestsPage = () => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const view = (searchParams.get("view") as View) ?? "requests";
+  const setView = (v: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("view", v);
+    router.replace(`?${params.toString()}`);
+  };
+
+  return (
+    <div>
+      <PageHeader
+        description={
+          view === "requests"
+            ? "View and inspect individual API requests."
+            : "View sessions grouped by conversation."
+        }
+        title="Requests"
+      />
+
+      <Tabs
+        onChange={setView}
+        tabs={[
+          { label: "Requests", value: "requests" },
+          { label: "Sessions", value: "sessions" }
+        ]}
+        value={view}
+      />
+
+      {view === "requests" ? <RequestsView /> : <SessionsView />}
     </div>
   );
 };

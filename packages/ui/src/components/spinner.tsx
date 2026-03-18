@@ -12,7 +12,6 @@ const sizeMap = {
 };
 
 const Spinner = ({ className, size = "md" }: SpinnerProps) => (
-  // biome-ignore lint/a11y/useSemanticElements: spinner uses role="status" for a11y
   <div
     aria-label="Loading"
     className={cn(

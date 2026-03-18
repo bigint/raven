@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge } from "@raven/ui";
+import { Badge, cn } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, MessageSquare, Wrench } from "lucide-react";
 import { useState } from "react";
@@ -44,7 +44,10 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
       >
         <td className="px-5 py-4">
           <ChevronRight
-            className={`size-4 text-muted-foreground transition-transform ${expanded ? "rotate-90" : ""}`}
+            className={cn(
+              "size-4 text-muted-foreground transition-transform",
+              expanded && "rotate-90"
+            )}
           />
         </td>
         <td className="px-5 py-4 font-medium text-primary">

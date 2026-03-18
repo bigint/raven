@@ -6,8 +6,8 @@ import {
   useQuery
 } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { SessionRequest } from "@/app/(dashboard)/logs/hooks/use-logs";
-import { sessionDetailQueryOptions } from "@/app/(dashboard)/logs/hooks/use-logs";
+import type { SessionRequest } from "@/app/(dashboard)/requests/hooks/use-logs";
+import { sessionDetailQueryOptions } from "@/app/(dashboard)/requests/hooks/use-logs";
 import { api } from "@/lib/api";
 
 export interface ToolDailyStats {
