@@ -1,12 +1,12 @@
 import { createId } from "@paralleldrive/cuid2";
 
 export interface ContentAnalysis {
-  hasImages: boolean;
-  imageCount: number;
-  hasToolUse: boolean;
-  toolCount: number;
-  toolNames: string[];
-  sessionId: string | null;
+  readonly hasImages: boolean;
+  readonly imageCount: number;
+  readonly hasToolUse: boolean;
+  readonly toolCount: number;
+  readonly toolNames: readonly string[];
+  readonly sessionId: string | null;
 }
 
 const countImages = (messages: unknown[]): number => {
@@ -29,11 +29,28 @@ const countImages = (messages: unknown[]): number => {
   return count;
 };
 
+const extractToolNames = (tools: unknown[]): readonly string[] =>
+  tools.flatMap((tool) => {
+    const t = tool as Record<string, unknown>;
+    // OpenAI: tools[].function.name
+    const fn = t.function as Record<string, unknown> | undefined;
+    if (fn && typeof fn.name === "string") return [fn.name];
+    // Anthropic: tools[].name
+    if (typeof t.name === "string") return [t.name];
+    return [];
+  });
+
+const extractFunctionNames = (functions: unknown[]): readonly string[] =>
+  functions.flatMap((fn) => {
+    const f = fn as Record<string, unknown>;
+    return typeof f.name === "string" ? [f.name] : [];
+  });
+
 export const analyzeContent = (
   body: unknown,
   sessionHeader?: string | null
 ): ContentAnalysis => {
-  const result: ContentAnalysis = {
+  const empty: ContentAnalysis = {
     hasImages: false,
     hasToolUse: false,
     imageCount: 0,
@@ -42,53 +59,36 @@ export const analyzeContent = (
     toolNames: []
   };
 
-  if (!body || typeof body !== "object") return result;
+  if (!body || typeof body !== "object") return empty;
 
   const b = body as Record<string, unknown>;
 
   // Count images in messages
-  if (Array.isArray(b.messages)) {
-    result.imageCount = countImages(b.messages);
-    result.hasImages = result.imageCount > 0;
-  }
+  const imageCount = Array.isArray(b.messages)
+    ? countImages(b.messages)
+    : 0;
 
   // Detect tool use: OpenAI uses "tools" or "functions", Anthropic uses "tools"
-  if (Array.isArray(b.tools)) {
-    result.hasToolUse = true;
-    result.toolCount = b.tools.length;
-    for (const tool of b.tools) {
-      const t = tool as Record<string, unknown>;
-      // OpenAI: tools[].function.name
-      const fn = t.function as Record<string, unknown> | undefined;
-      if (fn && typeof fn.name === "string") {
-        result.toolNames.push(fn.name);
-        // Anthropic: tools[].name
-      } else if (typeof t.name === "string") {
-        result.toolNames.push(t.name);
-      }
-    }
-  } else if (Array.isArray(b.functions)) {
-    result.hasToolUse = true;
-    result.toolCount = b.functions.length;
-    for (const fn of b.functions) {
-      const f = fn as Record<string, unknown>;
-      if (typeof f.name === "string") {
-        result.toolNames.push(f.name);
-      }
-    }
-  }
+  const toolInfo = Array.isArray(b.tools)
+    ? { hasToolUse: true, toolCount: b.tools.length, toolNames: extractToolNames(b.tools) }
+    : Array.isArray(b.functions)
+      ? { hasToolUse: true, toolCount: b.functions.length, toolNames: extractFunctionNames(b.functions) }
+      : { hasToolUse: false, toolCount: 0, toolNames: [] as readonly string[] };
 
   // Extract session ID from header or body metadata
-  if (sessionHeader) {
-    result.sessionId = sessionHeader;
-  } else {
+  const sessionId = (() => {
+    if (sessionHeader) return sessionHeader;
     const metadata = b.metadata as Record<string, unknown> | undefined;
     if (metadata && typeof metadata.session_id === "string") {
-      result.sessionId = metadata.session_id;
-    } else {
-      result.sessionId = createId();
+      return metadata.session_id;
     }
-  }
+    return createId();
+  })();
 
-  return result;
+  return {
+    hasImages: imageCount > 0,
+    ...toolInfo,
+    imageCount,
+    sessionId
+  };
 };

@@ -30,22 +30,14 @@ export const getLogs =
 
     const dateConditions = parseDateRange(query.from, query.to);
 
-    const filterConditions = [
+    const where = and(
       eq(requestLogs.organizationId, orgId),
       isNotNull(requestLogs.sessionId),
       isNull(requestLogs.deletedAt),
-      ...dateConditions
-    ];
-
-    if (query.virtualKeyId) {
-      filterConditions.push(eq(requestLogs.virtualKeyId, query.virtualKeyId));
-    }
-
-    if (query.model) {
-      filterConditions.push(eq(requestLogs.model, query.model));
-    }
-
-    const where = and(...filterConditions);
+      ...dateConditions,
+      ...(query.virtualKeyId ? [eq(requestLogs.virtualKeyId, query.virtualKeyId)] : []),
+      ...(query.model ? [eq(requestLogs.model, query.model)] : [])
+    );
 
     const [rows, countResult] = await Promise.all([
       db

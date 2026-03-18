@@ -5,51 +5,51 @@ export const SUPPORTED_PROVIDERS = [
 ];
 
 interface ModelsDevModel {
-  id: string;
-  name: string;
-  family?: string;
-  attachment?: boolean;
-  reasoning?: boolean;
-  tool_call?: boolean;
-  temperature?: boolean;
-  structured_output?: boolean;
-  knowledge?: string;
-  release_date?: string;
-  modalities?: {
-    input?: string[];
-    output?: string[];
+  readonly id: string;
+  readonly name: string;
+  readonly family?: string;
+  readonly attachment?: boolean;
+  readonly reasoning?: boolean;
+  readonly tool_call?: boolean;
+  readonly temperature?: boolean;
+  readonly structured_output?: boolean;
+  readonly knowledge?: string;
+  readonly release_date?: string;
+  readonly modalities?: {
+    readonly input?: readonly string[];
+    readonly output?: readonly string[];
   };
-  open_weights?: boolean;
-  cost?: {
-    input?: number;
-    output?: number;
-    cache_read?: number;
-    cache_write?: number;
+  readonly open_weights?: boolean;
+  readonly cost?: {
+    readonly input?: number;
+    readonly output?: number;
+    readonly cache_read?: number;
+    readonly cache_write?: number;
   };
-  limit?: {
-    context?: number;
-    output?: number;
-    input?: number;
+  readonly limit?: {
+    readonly context?: number;
+    readonly output?: number;
+    readonly input?: number;
   };
 }
 
 interface ModelsDevProvider {
-  id: string;
-  name: string;
-  models: Record<string, ModelsDevModel>;
+  readonly id: string;
+  readonly name: string;
+  readonly models: Readonly<Record<string, ModelsDevModel>>;
 }
 
 type ModelsDevResponse = Record<string, ModelsDevProvider>;
 
 export interface SearchResult {
-  id: string;
-  name: string;
-  capabilities: string[];
-  category: string;
-  contextWindow: number;
-  maxOutput: number;
-  inputPrice: number;
-  outputPrice: number;
+  readonly id: string;
+  readonly name: string;
+  readonly capabilities: readonly string[];
+  readonly category: string;
+  readonly contextWindow: number;
+  readonly maxOutput: number;
+  readonly inputPrice: number;
+  readonly outputPrice: number;
 }
 
 const MODELS_DEV_API = "https://models.dev/api.json";
@@ -110,18 +110,17 @@ export const deriveCategory = (
   return "balanced";
 };
 
-export const deriveCapabilities = (model: ModelsDevModel): string[] => {
-  const caps: string[] = ["chat"];
-
+export const deriveCapabilities = (model: ModelsDevModel): readonly string[] => {
   const inputMods = model.modalities?.input ?? [];
-  if (inputMods.includes("image") || inputMods.includes("video")) {
-    caps.push("vision");
-  }
-  if (model.tool_call) caps.push("function_calling");
-  if (model.reasoning) caps.push("reasoning");
-  caps.push("streaming");
+  const hasVision = inputMods.includes("image") || inputMods.includes("video");
 
-  return caps;
+  return [
+    "chat",
+    ...(hasVision ? ["vision"] : []),
+    ...(model.tool_call ? ["function_calling"] : []),
+    ...(model.reasoning ? ["reasoning"] : []),
+    "streaming"
+  ];
 };
 
 export const searchModels = async (

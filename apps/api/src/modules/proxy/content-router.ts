@@ -11,8 +11,8 @@ const rulesCache = new Map<
 const RULES_CACHE_TTL = 30_000; // 30 seconds
 
 interface Message {
-  content?: string;
-  role?: string;
+  readonly content?: string;
+  readonly role?: string;
 }
 
 const encoder = encodingForModel("gpt-4o");

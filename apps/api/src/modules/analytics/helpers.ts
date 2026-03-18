@@ -6,26 +6,26 @@ import { gte, lte } from "drizzle-orm";
 import { ValidationError } from "@/lib/errors";
 import { getOrgPlan } from "@/modules/proxy/plan-gate";
 
-export const parseDateRange = (from?: string, to?: string) => {
-  const conditions: ReturnType<typeof gte>[] = [];
-
-  if (from) {
+export const parseDateRange = (from?: string, to?: string): ReturnType<typeof gte>[] => {
+  const fromCondition = (() => {
+    if (!from) return [];
     const fromDate = new Date(from);
     if (Number.isNaN(fromDate.getTime())) {
       throw new ValidationError("Invalid `from` date");
     }
-    conditions.push(gte(requestLogs.createdAt, fromDate));
-  }
+    return [gte(requestLogs.createdAt, fromDate)];
+  })();
 
-  if (to) {
+  const toCondition = (() => {
+    if (!to) return [];
     const toDate = new Date(to);
     if (Number.isNaN(toDate.getTime())) {
       throw new ValidationError("Invalid `to` date");
     }
-    conditions.push(lte(requestLogs.createdAt, toDate));
-  }
+    return [lte(requestLogs.createdAt, toDate)];
+  })();
 
-  return conditions;
+  return [...fromCondition, ...toCondition];
 };
 
 export const clampAnalyticsRetention = async (

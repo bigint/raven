@@ -20,29 +20,15 @@ export const getRequests =
 
     const dateConditions = parseDateRange(query.from, query.to);
 
-    const filterConditions = [
+    const where = and(
       eq(requestLogs.organizationId, orgId),
       isNull(requestLogs.deletedAt),
-      ...dateConditions
-    ];
-
-    if (query.provider) {
-      filterConditions.push(eq(requestLogs.provider, query.provider));
-    }
-
-    if (query.model) {
-      filterConditions.push(eq(requestLogs.model, query.model));
-    }
-
-    if (query.statusCode) {
-      filterConditions.push(eq(requestLogs.statusCode, query.statusCode));
-    }
-
-    if (query.virtualKeyId) {
-      filterConditions.push(eq(requestLogs.virtualKeyId, query.virtualKeyId));
-    }
-
-    const where = and(...filterConditions);
+      ...dateConditions,
+      ...(query.provider ? [eq(requestLogs.provider, query.provider)] : []),
+      ...(query.model ? [eq(requestLogs.model, query.model)] : []),
+      ...(query.statusCode ? [eq(requestLogs.statusCode, query.statusCode)] : []),
+      ...(query.virtualKeyId ? [eq(requestLogs.virtualKeyId, query.virtualKeyId)] : [])
+    );
 
     const [rows, countResult] = await Promise.all([
       db

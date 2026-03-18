@@ -9,47 +9,47 @@ import {
   Thermometer,
   X
 } from "lucide-react";
-import { type KeyboardEvent, useCallback, useRef, useState } from "react";
+import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 
 export interface PlaygroundSettings {
-  temperature: number;
-  maxTokens: number;
-  stream: boolean;
-  showMetadata: boolean;
-  enableTools: boolean;
-  enableWebSearch: boolean;
-  enableReasoning: boolean;
-  reasoningBudget: number;
-  chatMemory: number;
+  readonly temperature: number;
+  readonly maxTokens: number;
+  readonly stream: boolean;
+  readonly showMetadata: boolean;
+  readonly enableTools: boolean;
+  readonly enableWebSearch: boolean;
+  readonly enableReasoning: boolean;
+  readonly reasoningBudget: number;
+  readonly chatMemory: number;
 }
 
 interface ModelOption {
-  label: string;
-  value: string;
-  provider: string;
+  readonly label: string;
+  readonly value: string;
+  readonly provider: string;
 }
 
 export interface ImageAttachment {
-  id: string;
-  base64: string;
-  name: string;
-  preview: string;
+  readonly id: string;
+  readonly base64: string;
+  readonly name: string;
+  readonly preview: string;
 }
 
 type Popover = "model" | "temperature" | "memory" | "settings" | null;
 
 interface ChatInputProps {
-  disabled: boolean;
-  isStreaming: boolean;
-  onSend: (content: string, images?: ImageAttachment[]) => void;
-  onStop: () => void;
-  model?: string;
-  modelOptions: ModelOption[];
-  onModelChange: (model: string, provider: string) => void;
-  settings: PlaygroundSettings;
-  onSettingsChange: (settings: PlaygroundSettings) => void;
-  systemPrompt: string;
-  onSystemPromptChange: (value: string) => void;
+  readonly disabled: boolean;
+  readonly isStreaming: boolean;
+  readonly onSend: (content: string, images?: ImageAttachment[]) => void;
+  readonly onStop: () => void;
+  readonly model?: string;
+  readonly modelOptions: readonly ModelOption[];
+  readonly onModelChange: (model: string, provider: string) => void;
+  readonly settings: PlaygroundSettings;
+  readonly onSettingsChange: (settings: PlaygroundSettings) => void;
+  readonly systemPrompt: string;
+  readonly onSystemPromptChange: (value: string) => void;
 }
 
 const MAX_IMAGE_SIZE = 20 * 1024 * 1024; // 20MB
@@ -81,6 +81,17 @@ export const ChatInput = ({
   const [openPopover, setOpenPopover] = useState<Popover>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Revoke any remaining object URLs on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      for (const img of images) {
+        URL.revokeObjectURL(img.preview);
+      }
+    };
+    // Only run cleanup on unmount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const toggle = (p: Popover) =>
     setOpenPopover((cur) => (cur === p ? null : p));

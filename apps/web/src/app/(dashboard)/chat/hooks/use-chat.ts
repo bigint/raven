@@ -10,24 +10,24 @@ import type {
 import type { ResponseMeta } from "../components/response-metadata";
 
 interface DisplayMessage {
-  content: string;
-  id: string;
-  images?: ImageAttachment[];
-  meta?: ResponseMeta;
-  reasoning?: string;
-  role: "assistant" | "user";
+  readonly content: string;
+  readonly id: string;
+  readonly images?: readonly ImageAttachment[];
+  readonly meta?: ResponseMeta;
+  readonly reasoning?: string;
+  readonly role: "assistant" | "user";
 }
 
 export interface CatalogModel {
-  id: string;
-  slug: string;
-  name: string;
-  provider: string;
+  readonly id: string;
+  readonly slug: string;
+  readonly name: string;
+  readonly provider: string;
 }
 
 interface PlaygroundKey {
-  id: string;
-  key: string;
+  readonly id: string;
+  readonly key: string;
 }
 
 type ContentPart =
@@ -44,6 +44,8 @@ export const catalogModelsQueryOptions = () =>
     queryFn: () => api.get<CatalogModel[]>("/v1/available-models"),
     queryKey: ["available-models"]
   });
+
+const PLAYGROUND_KEY_TTL_MS = 3_600_000; // 1 hour
 
 // SSE helpers
 
@@ -128,11 +130,19 @@ export const useChat = () => {
   const sessionIdRef = useRef(crypto.randomUUID());
   const queryClient = useQueryClient();
 
+  // Keep refs for values used inside sendMessage to avoid stale closures
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+  const systemPromptRef = useRef(systemPrompt);
+  systemPromptRef.current = systemPrompt;
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
+
   const ensureKey = async (): Promise<PlaygroundKey> => {
     if (keyRef.current) return keyRef.current;
     const result = await api.post<PlaygroundKey>("/v1/keys", {
       environment: "test",
-      expiresAt: new Date(Date.now() + 3_600_000).toISOString(),
+      expiresAt: new Date(Date.now() + PLAYGROUND_KEY_TTL_MS).toISOString(),
       name: `Playground ${new Date().toLocaleTimeString()}`
     });
     const pk = { id: result.id, key: result.key };
@@ -148,6 +158,11 @@ export const useChat = () => {
         isStreaming
       )
         return;
+
+      // Read current values from refs to avoid stale closures
+      const currentMessages = messagesRef.current;
+      const currentSystemPrompt = systemPromptRef.current;
+      const currentSettings = settingsRef.current;
 
       const userMessage: DisplayMessage = {
         content: content.trim(),
@@ -173,7 +188,7 @@ export const useChat = () => {
         const pk = await ensureKey();
 
         // Build messages array
-        const allMessages: Message[] = [...messages, userMessage].map((m) => {
+        const allMessages: Message[] = [...currentMessages, userMessage].map((m) => {
           if (m.images && m.images.length > 0) {
             const parts: ContentPart[] = [];
             for (const img of m.images) {
@@ -187,11 +202,11 @@ export const useChat = () => {
           return { content: m.content, role: m.role };
         });
 
-        const recentMessages = allMessages.slice(-settings.chatMemory);
+        const recentMessages = allMessages.slice(-currentSettings.chatMemory);
 
         const fullSystemPrompt = [
-          systemPrompt,
-          settings.enableWebSearch
+          currentSystemPrompt,
+          currentSettings.enableWebSearch
             ? "You have access to the web. When the user asks about current events, recent information, or anything that requires up-to-date knowledge, search the web and cite your sources with URLs."
             : ""
         ]
@@ -205,7 +220,7 @@ export const useChat = () => {
           ...recentMessages
         ];
 
-        const demoTools = settings.enableTools
+        const demoTools = currentSettings.enableTools
           ? [
               {
                 function: {
@@ -247,21 +262,21 @@ export const useChat = () => {
           : undefined;
 
         const body = {
-          max_tokens: settings.maxTokens,
+          max_tokens: currentSettings.maxTokens,
           messages: chatMessages,
           model: selectedModel.model,
-          stream: settings.stream,
-          ...(settings.stream
+          stream: currentSettings.stream,
+          ...(currentSettings.stream
             ? { stream_options: { include_usage: true } }
             : {}),
-          ...(settings.enableReasoning
+          ...(currentSettings.enableReasoning
             ? {
                 reasoning: {
-                  budget_tokens: settings.reasoningBudget
+                  budget_tokens: currentSettings.reasoningBudget
                 },
                 reasoning_effort: "medium"
               }
-            : { temperature: settings.temperature }),
+            : { temperature: currentSettings.temperature }),
           ...(demoTools ? { tools: demoTools } : {})
         };
 
@@ -297,7 +312,7 @@ export const useChat = () => {
           );
         }
 
-        if (settings.stream && response.body) {
+        if (currentSettings.stream && response.body) {
           const reader = response.body.getReader();
           let finalUsage:
             | { prompt_tokens: number; completion_tokens: number }
@@ -383,8 +398,7 @@ export const useChat = () => {
         abortRef.current = null;
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedModel, messages, isStreaming, settings]
+    [selectedModel, isStreaming]
   );
 
   const stopStreaming = useCallback(() => {
