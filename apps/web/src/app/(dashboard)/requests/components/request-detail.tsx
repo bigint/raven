@@ -93,6 +93,23 @@ export const RequestDetail = ({ request, onClose }: RequestDetailProps) => (
                 label="Cost"
                 value={`$${Number(request.cost).toFixed(6)}`}
               />
+              <Field
+                label="Tokens/Second"
+                value={
+                  request.latencyMs > 0
+                    ? (request.outputTokens / (request.latencyMs / 1000)).toFixed(1)
+                    : "\u2014"
+                }
+              />
+              <Field
+                label="Total Tokens"
+                value={(
+                  request.inputTokens +
+                  request.outputTokens +
+                  request.cachedTokens +
+                  request.reasoningTokens
+                ).toLocaleString()}
+              />
             </div>
           </div>
 

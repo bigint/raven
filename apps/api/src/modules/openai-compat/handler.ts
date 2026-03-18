@@ -134,6 +134,7 @@ export const chatCompletionsHandler = (
         redis,
         sessionHeader: c.req.header("x-session-id") ?? null,
         startTime,
+        userAgent: c.req.header("user-agent") ?? null,
         virtualKeyId: virtualKey.id
       });
     }
@@ -177,6 +178,7 @@ export const chatCompletionsHandler = (
       requestedModel: modelSlug,
       sessionId: c.req.header("x-session-id") ?? null,
       startTime,
+      userAgent: c.req.header("user-agent") ?? null,
       virtualKey: {
         id: virtualKey.id,
         organizationId: virtualKey.organizationId

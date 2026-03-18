@@ -23,6 +23,7 @@ const TABLE_HEADERS = [
   { className: "text-right", label: "Cached" },
   { className: "text-right", label: "Reasoning" },
   { className: "text-right", label: "Tool Uses" },
+  { className: "text-right", label: "Cost" },
   { className: "text-right", label: "Last Activity" }
 ];
 

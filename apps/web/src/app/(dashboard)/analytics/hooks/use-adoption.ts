@@ -76,30 +76,37 @@ const fillChartGaps = (
   return result;
 };
 
-export const adoptionChartQueryOptions = (range: DateRange) =>
+const keyFilter = (keyId?: string): string =>
+  keyId ? `&virtualKeyId=${keyId}` : "";
+
+export const adoptionChartQueryOptions = (
+  range: DateRange,
+  keyId?: string
+) =>
   queryOptions({
     queryFn: async () => {
       const data = await api.get<ChartDataPoint[]>(
-        `/v1/analytics/adoption/chart?from=${rangeToFrom(range)}`
+        `/v1/analytics/adoption/chart?from=${rangeToFrom(range)}${keyFilter(keyId)}`
       );
       return fillChartGaps(data, range);
     },
-    queryKey: ["adoption", "chart", range]
+    queryKey: ["adoption", "chart", range, keyId]
   });
 
 export const adoptionBreakdownQueryOptions = (
   range: DateRange,
-  groupBy: GroupBy
+  groupBy: GroupBy,
+  keyId?: string
 ) =>
   queryOptions({
     queryFn: () =>
       api.get<BreakdownRow[]>(
-        `/v1/analytics/adoption/breakdown?from=${rangeToFrom(range)}&groupBy=${groupBy}`
+        `/v1/analytics/adoption/breakdown?from=${rangeToFrom(range)}&groupBy=${groupBy}${keyFilter(keyId)}`
       ),
-    queryKey: ["adoption", "breakdown", range, groupBy]
+    queryKey: ["adoption", "breakdown", range, groupBy, keyId]
   });
 
-export const useAdoption = () => {
+export const useAdoption = (keyId?: string) => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -123,9 +130,9 @@ export const useAdoption = () => {
     router.replace(`?${params.toString()}`);
   };
 
-  const chartQuery = useQuery(adoptionChartQueryOptions(dateRange));
+  const chartQuery = useQuery(adoptionChartQueryOptions(dateRange, keyId));
   const breakdownQuery = useQuery(
-    adoptionBreakdownQueryOptions(dateRange, groupBy)
+    adoptionBreakdownQueryOptions(dateRange, groupBy, keyId)
   );
 
   return {

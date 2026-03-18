@@ -23,5 +23,7 @@ export const cacheKeys = {
   providerConfigs: (orgId: string, provider: string) =>
     `pc:${orgId}:${provider}`,
   providerModels: (configId: string) => `provider-models:${configId}`,
+  modelAlias: (orgId: string, alias: string) =>
+    `model-alias:${orgId}:${alias}`,
   virtualKey: (keyHash: string) => `vk:${keyHash}`
 };

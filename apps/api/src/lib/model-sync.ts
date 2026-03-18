@@ -1,5 +1,6 @@
 export const SUPPORTED_PROVIDERS = [
   { name: "Anthropic", slug: "anthropic" },
+  { name: "Google", slug: "google" },
   { name: "Mistral AI", slug: "mistralai" },
   { name: "OpenAI", slug: "openai" }
 ];
@@ -57,6 +58,7 @@ const CACHE_TTL_MS = 10 * 60 * 1000;
 
 export const PROVIDER_SLUG_MAP: Record<string, string> = {
   anthropic: "anthropic",
+  google: "google",
   mistral: "mistralai",
   openai: "openai"
 };

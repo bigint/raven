@@ -72,30 +72,48 @@ const RANGE_MS: Record<DateRange, number> = {
 const rangeToFrom = (range: DateRange): string =>
   new Date(Date.now() - RANGE_MS[range]).toISOString();
 
-export const analyticsStatsQueryOptions = (range: DateRange) =>
+const keyFilter = (keyId?: string): string =>
+  keyId ? `&virtualKeyId=${keyId}` : "";
+
+export const analyticsStatsQueryOptions = (
+  range: DateRange,
+  keyId?: string
+) =>
   queryOptions({
     queryFn: () =>
-      api.get<Stats>(`/v1/analytics/stats?from=${rangeToFrom(range)}`),
-    queryKey: ["analytics", "stats", range]
+      api.get<Stats>(
+        `/v1/analytics/stats?from=${rangeToFrom(range)}${keyFilter(keyId)}`
+      ),
+    queryKey: ["analytics", "stats", range, keyId]
   });
 
-export const analyticsUsageQueryOptions = (range: DateRange) =>
+export const analyticsUsageQueryOptions = (
+  range: DateRange,
+  keyId?: string
+) =>
   queryOptions({
     queryFn: () =>
-      api.get<UsageRow[]>(`/v1/analytics/usage?from=${rangeToFrom(range)}`),
-    queryKey: ["analytics", "usage", range]
+      api.get<UsageRow[]>(
+        `/v1/analytics/usage?from=${rangeToFrom(range)}${keyFilter(keyId)}`
+      ),
+    queryKey: ["analytics", "usage", range, keyId]
   });
 
-export const analyticsCacheQueryOptions = (range: DateRange) =>
+export const analyticsCacheQueryOptions = (
+  range: DateRange,
+  keyId?: string
+) =>
   queryOptions({
     queryFn: () =>
-      api.get<CacheStats>(`/v1/analytics/cache?from=${rangeToFrom(range)}`),
-    queryKey: ["analytics", "cache", range]
+      api.get<CacheStats>(
+        `/v1/analytics/cache?from=${rangeToFrom(range)}${keyFilter(keyId)}`
+      ),
+    queryKey: ["analytics", "cache", range, keyId]
   });
 
 const POLL_INTERVAL = 30_000;
 
-export const useAnalytics = () => {
+export const useAnalytics = (keyId?: string) => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -132,15 +150,15 @@ export const useAnalytics = () => {
   });
 
   const statsQuery = useQuery({
-    ...analyticsStatsQueryOptions(dateRange),
+    ...analyticsStatsQueryOptions(dateRange, keyId),
     refetchInterval: POLL_INTERVAL
   });
   const usageQuery = useQuery({
-    ...analyticsUsageQueryOptions(dateRange),
+    ...analyticsUsageQueryOptions(dateRange, keyId),
     refetchInterval: POLL_INTERVAL
   });
   const cacheQuery = useQuery({
-    ...analyticsCacheQueryOptions(dateRange),
+    ...analyticsCacheQueryOptions(dateRange, keyId),
     refetchInterval: POLL_INTERVAL
   });
 

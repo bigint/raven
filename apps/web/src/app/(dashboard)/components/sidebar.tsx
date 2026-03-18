@@ -13,6 +13,7 @@ import {
   LayoutDashboard,
   Menu,
   Network,
+  Plug,
   Receipt,
   Route,
   Settings,
@@ -71,7 +72,8 @@ const NAV_ITEMS: NavItem[] = [
     href: "/webhooks",
     icon: Webhook,
     label: "Webhooks"
-  }
+  },
+  { href: "/integrations", icon: Plug, label: "Integrations" }
 ];
 
 interface SidebarProps {

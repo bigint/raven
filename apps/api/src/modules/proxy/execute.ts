@@ -45,6 +45,7 @@ export interface ExecuteInput {
   readonly method: string;
   readonly path: string;
   readonly sessionId: string | null;
+  readonly userAgent: string | null;
   readonly guardrailWarnings: readonly string[];
   readonly guardrailMatches: readonly GuardrailMatch[];
   readonly incomingHeaders: Readonly<Record<string, string>>;
@@ -89,6 +90,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     method,
     path,
     sessionId,
+    userAgent,
     guardrailWarnings,
     guardrailMatches,
     incomingHeaders,
@@ -119,6 +121,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     statusCode: 200,
     toolCount: contentAnalysis.toolCount,
     toolNames: [...contentAnalysis.toolNames],
+    userAgent,
     virtualKeyId: virtualKey.id
   };
 

@@ -1,7 +1,7 @@
 import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
-import { models } from "@raven/db";
-import { eq } from "drizzle-orm";
+import { modelAliases, models } from "@raven/db";
+import { and, eq, isNull } from "drizzle-orm";
 import type { Context } from "hono";
 import type { Redis } from "ioredis";
 import { cachedQuery } from "@/lib/cache-utils";
@@ -51,6 +51,29 @@ export const proxyHandler = (
         parsedBody = JSON.parse(bodyText);
       } catch {
         // Non-JSON body
+      }
+    }
+
+    // 3.5 Resolve model alias
+    if (typeof parsedBody.model === "string") {
+      const aliasKey = `model-alias:${virtualKey.organizationId}:${parsedBody.model}`;
+      const resolved = await cachedQuery(redis, aliasKey, 300, async () => {
+        const [row] = await db
+          .select({ targetModel: modelAliases.targetModel })
+          .from(modelAliases)
+          .where(
+            and(
+              eq(modelAliases.alias, parsedBody.model as string),
+              eq(modelAliases.organizationId, virtualKey.organizationId),
+              isNull(modelAliases.deletedAt)
+            )
+          )
+          .limit(1);
+        return row ?? null;
+      });
+
+      if (resolved) {
+        parsedBody = { ...parsedBody, model: resolved.targetModel };
       }
     }
 
@@ -135,6 +158,7 @@ export const proxyHandler = (
         redis,
         sessionHeader: c.req.header("x-session-id") ?? null,
         startTime,
+        userAgent: c.req.header("user-agent") ?? null,
         virtualKeyId: virtualKey.id
       });
     }
@@ -186,6 +210,7 @@ export const proxyHandler = (
       requestedModel,
       sessionId: c.req.header("x-session-id") ?? null,
       startTime,
+      userAgent: c.req.header("user-agent") ?? null,
       virtualKey: {
         id: virtualKey.id,
         organizationId: virtualKey.organizationId

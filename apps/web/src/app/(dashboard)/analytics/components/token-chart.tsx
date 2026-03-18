@@ -15,11 +15,17 @@ import type { ChartDataPoint } from "../hooks/use-adoption";
 
 interface TokenChartProps {
   data: ChartDataPoint[];
+  title?: string;
 }
 
-export const TokenChart = ({ data }: TokenChartProps) => {
+export const TokenChart = ({ data, title }: TokenChartProps) => {
   return (
     <div className="mb-8 rounded-xl border border-border p-5">
+      {title && (
+        <h3 className="mb-3 text-sm font-medium text-muted-foreground">
+          {title}
+        </h3>
+      )}
       <ResponsiveContainer height={300} width="100%">
         <BarChart data={data}>
           <CartesianGrid

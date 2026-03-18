@@ -2,11 +2,15 @@
 
 import type { Plan } from "@raven/types";
 import { PLAN_FEATURES } from "@raven/types";
-import { PageHeader, PillTabs, Spinner, Tabs } from "@raven/ui";
+import { Button, PageHeader, PillTabs, Spinner, Tabs } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
+import { Download, X } from "lucide-react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { subscriptionQueryOptions } from "@/app/(dashboard)/billing/hooks/use-billing";
+import { keysQueryOptions } from "@/app/(dashboard)/keys/hooks/use-keys";
+import { exportToCsv } from "@/lib/csv-export";
 import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
 import { CacheStats } from "./components/cache-stats";
 import { ModelsTable } from "./components/models-table";
@@ -27,6 +31,20 @@ type AnalyticsTab = "overview" | "models" | "tools" | "adoption";
 
 type MetricKey = "inputTokens" | "outputTokens" | "cachedTokens" | "requests";
 
+type ChartMetric = "tokens" | "cost" | "requests";
+
+const CHART_METRIC_OPTIONS: { value: ChartMetric; label: string }[] = [
+  { label: "Tokens", value: "tokens" },
+  { label: "Cost", value: "cost" },
+  { label: "Requests", value: "requests" }
+];
+
+const CHART_METRIC_TITLES: Record<ChartMetric, string> = {
+  cost: "Cost Over Time",
+  requests: "Requests Over Time",
+  tokens: "Tokens Over Time"
+};
+
 const METRIC_OPTIONS: { value: MetricKey; label: string }[] = [
   { label: "Input Tokens", value: "inputTokens" },
   { label: "Output Tokens", value: "outputTokens" },
@@ -34,7 +52,7 @@ const METRIC_OPTIONS: { value: MetricKey; label: string }[] = [
   { label: "Requests", value: "requests" }
 ];
 
-const OverviewTab = () => {
+const OverviewTab = ({ keyId }: { keyId?: string }) => {
   const {
     cache,
     stats,
@@ -44,7 +62,7 @@ const OverviewTab = () => {
     dateRange,
     dateRangeOptions,
     setDateRange
-  } = useAnalytics();
+  } = useAnalytics(keyId);
 
   return (
     <>
@@ -67,9 +85,39 @@ const OverviewTab = () => {
   );
 };
 
-const ModelsTab = () => {
+const ModelsTab = ({ keyId }: { keyId?: string }) => {
   const { data, dateRange, dateRangeOptions, error, isLoading, setDateRange } =
-    useModels();
+    useModels(keyId);
+
+  const handleExportCsv = () => {
+    exportToCsv(
+      `models-${dateRange}.csv`,
+      [
+        "Model",
+        "Provider",
+        "Requests",
+        "Input Tokens",
+        "Output Tokens",
+        "Cached Tokens",
+        "Reasoning Tokens",
+        "Cost",
+        "Avg Latency (ms)",
+        "Last Used"
+      ],
+      data.map((row) => [
+        row.model,
+        row.provider,
+        row.requests,
+        row.inputTokens,
+        row.outputTokens,
+        row.cachedTokens,
+        row.reasoningTokens,
+        Number(row.totalCost).toFixed(4),
+        Math.round(row.avgLatencyMs),
+        row.lastUsed ?? ""
+      ])
+    );
+  };
 
   return (
     <>
@@ -78,18 +126,29 @@ const ModelsTab = () => {
           {error}
         </div>
       )}
-      <PillTabs
-        className="mb-6"
-        onChange={setDateRange}
-        options={dateRangeOptions}
-        value={dateRange}
-      />
+      <div className="mb-6 flex items-center gap-3">
+        <PillTabs
+          onChange={setDateRange}
+          options={dateRangeOptions}
+          value={dateRange}
+        />
+        <button
+          className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border px-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
+          disabled={isLoading || data.length === 0}
+          onClick={handleExportCsv}
+          title="Export as CSV"
+          type="button"
+        >
+          <Download className="size-4" />
+          <span>Export</span>
+        </button>
+      </div>
       <ModelsTable data={data} loading={isLoading} />
     </>
   );
 };
 
-const ToolsTab = () => {
+const ToolsTab = ({ keyId }: { keyId?: string }) => {
   const {
     chartData,
     dateRange,
@@ -101,7 +160,7 @@ const ToolsTab = () => {
     isLoading,
     sessions,
     setDateRange
-  } = useTools();
+  } = useTools(keyId);
 
   const sentinelRef = useInfiniteScroll(
     () => fetchNextPage(),
@@ -132,7 +191,7 @@ const ToolsTab = () => {
   );
 };
 
-const AdoptionTab = () => {
+const AdoptionTab = ({ keyId }: { keyId?: string }) => {
   const {
     breakdownData,
     chartData,
@@ -144,10 +203,11 @@ const AdoptionTab = () => {
     isLoading,
     setDateRange,
     setGroupBy
-  } = useAdoption();
+  } = useAdoption(keyId);
 
   const [viewTab, setViewTab] = useState<"table" | "bars">("table");
   const [metric, setMetric] = useState<MetricKey>("inputTokens");
+  const [chartMetric, setChartMetric] = useState<ChartMetric>("tokens");
 
   return (
     <>
@@ -162,7 +222,15 @@ const AdoptionTab = () => {
         options={dateRangeOptions}
         value={dateRange}
       />
-      <TokenChart data={chartData} />
+      <div className="mb-4 flex items-center gap-2">
+        <span className="text-sm text-muted-foreground">View:</span>
+        <PillTabs
+          onChange={setChartMetric}
+          options={CHART_METRIC_OPTIONS}
+          value={chartMetric}
+        />
+      </div>
+      <TokenChart data={chartData} title={CHART_METRIC_TITLES[chartMetric]} />
       <Tabs
         onChange={(v) => setViewTab(v as "table" | "bars")}
         tabs={[
@@ -217,6 +285,26 @@ const TAB_DESCRIPTIONS: Record<AnalyticsTab, string> = {
   tools: "Tool call activity and session breakdowns."
 };
 
+const KeyFilterBanner = ({ keyId }: { keyId: string }) => {
+  const { data: keys } = useQuery(keysQueryOptions());
+  const keyName = keys?.find((k) => k.id === keyId)?.name ?? keyId;
+
+  return (
+    <div className="mb-4 flex items-center justify-between rounded-md border border-border bg-muted/50 px-4 py-3">
+      <span className="text-sm text-muted-foreground">
+        Filtered by key:{" "}
+        <span className="font-medium text-foreground">{keyName}</span>
+      </span>
+      <Link href="/analytics">
+        <Button size="sm" variant="ghost">
+          <X className="size-4" />
+          Clear filter
+        </Button>
+      </Link>
+    </div>
+  );
+};
+
 const AnalyticsPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -224,6 +312,8 @@ const AnalyticsPage = () => {
   const { data: subscription } = useQuery(subscriptionQueryOptions());
   const plan = (subscription?.planId as Plan) ?? "free";
   const hasAdoption = PLAN_FEATURES[plan].hasAdoption;
+
+  const keyId = searchParams.get("keyId") ?? undefined;
 
   const tab = (searchParams.get("tab") as AnalyticsTab) ?? "overview";
   const setTab = (value: string) => {
@@ -248,12 +338,14 @@ const AnalyticsPage = () => {
     <div>
       <PageHeader description={TAB_DESCRIPTIONS[tab]} title="Analytics" />
 
+      {keyId && <KeyFilterBanner keyId={keyId} />}
+
       <Tabs onChange={setTab} tabs={tabs} value={tab} />
 
-      {tab === "overview" && <OverviewTab />}
-      {tab === "models" && <ModelsTab />}
-      {tab === "tools" && <ToolsTab />}
-      {tab === "adoption" && hasAdoption && <AdoptionTab />}
+      {tab === "overview" && <OverviewTab keyId={keyId} />}
+      {tab === "models" && <ModelsTab keyId={keyId} />}
+      {tab === "tools" && <ToolsTab keyId={keyId} />}
+      {tab === "adoption" && hasAdoption && <AdoptionTab keyId={keyId} />}
     </div>
   );
 };

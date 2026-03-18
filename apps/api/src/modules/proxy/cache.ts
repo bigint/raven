@@ -101,6 +101,7 @@ export const serveCacheHit = (
     redis: Redis;
     sessionHeader: string | null;
     startTime: number;
+    userAgent: string | null;
     virtualKeyId: string;
   }
 ): Response => {
@@ -134,6 +135,7 @@ export const serveCacheHit = (
       statusCode: 200,
       toolCount: analysis.toolCount,
       toolNames: analysis.toolNames,
+      userAgent: opts.userAgent,
       virtualKeyId: opts.virtualKeyId
     },
     { redis: opts.redis }

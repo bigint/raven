@@ -28,6 +28,7 @@ export interface LogData {
   toolCount: number;
   toolNames: readonly string[];
   sessionId: string | null;
+  userAgent: string | null;
   guardrailMatches?: readonly {
     ruleName: string;
     ruleType: string;
@@ -64,6 +65,7 @@ export const logProxyRequest = async (
         statusCode: data.statusCode,
         toolCount: data.toolCount,
         toolNames: data.toolNames.length > 0 ? [...data.toolNames] : undefined,
+        userAgent: data.userAgent,
         virtualKeyId: data.virtualKeyId
       })
       .returning();

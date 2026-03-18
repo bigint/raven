@@ -3,7 +3,7 @@
 import { PageHeader, PillTabs, Spinner, Tabs } from "@raven/ui";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
 import { LogsTable } from "./components/logs-table";
@@ -125,6 +125,8 @@ const RequestsView = () => {
 
 const SessionsView = () => {
   const {
+    customFrom,
+    customTo,
     data,
     dateRange,
     dateRangeOptions,
@@ -133,13 +135,17 @@ const SessionsView = () => {
     hasNextPage,
     isFetchingNextPage,
     isLoading,
-    setDateRange
+    pageSize,
+    setCustomRange,
+    setDateRange,
+    setPageSize
   } = useLogs();
 
   const [selectedRequest, setSelectedRequest] = useState<SessionRequest | null>(
     null
   );
   const [activeSessionId, setActiveSessionId] = useState<string>("");
+  const [modelFilter, setModelFilter] = useState<string>("");
 
   const { data: sessionDetail } = useQuery({
     ...sessionDetailQueryOptions(activeSessionId),
@@ -149,6 +155,24 @@ const SessionsView = () => {
   const sentinelRef = useInfiniteScroll(
     () => fetchNextPage(),
     hasNextPage && !isFetchingNextPage
+  );
+
+  const uniqueModels = useMemo(() => {
+    const models = new Set<string>();
+    for (const session of data) {
+      for (const model of session.models) {
+        models.add(model);
+      }
+    }
+    return Array.from(models).sort();
+  }, [data]);
+
+  const filteredData = useMemo(
+    () =>
+      modelFilter
+        ? data.filter((session) => session.models.includes(modelFilter))
+        : data,
+    [data, modelFilter]
   );
 
   const handleRequestClick = (requestId: string, sessionId: string) => {
@@ -168,18 +192,71 @@ const SessionsView = () => {
         </div>
       )}
 
-      <PillTabs
-        className="mb-6"
-        onChange={setDateRange}
-        options={dateRangeOptions}
-        value={dateRange}
-      />
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <PillTabs
+          onChange={setDateRange}
+          options={dateRangeOptions}
+          value={dateRange}
+        />
+
+        {dateRange === "custom" && (
+          <div className="flex items-center gap-2">
+            <input
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+              onChange={(e) => setCustomRange(e.target.value, customTo)}
+              type="date"
+              value={customFrom}
+            />
+            <span className="text-sm text-muted-foreground">to</span>
+            <input
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+              min={customFrom}
+              onChange={(e) => setCustomRange(customFrom, e.target.value)}
+              type="date"
+              value={customTo}
+            />
+          </div>
+        )}
+
+        <select
+          className="h-9 rounded-md border border-input bg-background px-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+          onChange={(e) => setModelFilter(e.target.value)}
+          value={modelFilter}
+        >
+          <option value="">All Models</option>
+          {uniqueModels.map((model) => (
+            <option key={model} value={model}>
+              {model}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <LogsTable
-        data={data}
+        data={filteredData}
         loading={isLoading}
         onRequestClick={handleRequestClick}
       />
+
+      <div className="mt-4 flex items-center gap-2">
+        <label
+          className="text-sm text-muted-foreground"
+          htmlFor="page-size-select"
+        >
+          Rows per page
+        </label>
+        <select
+          className="rounded-md border border-border bg-background px-2 py-1 text-sm"
+          id="page-size-select"
+          onChange={(e) => setPageSize(Number(e.target.value))}
+          value={pageSize}
+        >
+          <option value={10}>10</option>
+          <option value={25}>25</option>
+          <option value={50}>50</option>
+          <option value={100}>100</option>
+        </select>
+      </div>
 
       {hasNextPage && (
         <div className="flex justify-center py-6" ref={sentinelRef}>

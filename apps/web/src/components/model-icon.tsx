@@ -4,6 +4,7 @@ const LOGO_BASE = "https://models.dev/logos";
 
 const PROVIDER_LOGO_MAP: Record<string, string> = {
   anthropic: "anthropic",
+  google: "google",
   mistralai: "mistral",
   openai: "openai",
   "x-ai": "xai"
@@ -11,6 +12,7 @@ const PROVIDER_LOGO_MAP: Record<string, string> = {
 
 const MODEL_PROVIDER_RULES: [RegExp, string][] = [
   [/claude/i, "anthropic"],
+  [/gemini|gemma/i, "google"],
   [/gpt|o1|o3|o4|codex/i, "openai"],
   [/grok/i, "xai"],
   [/mistral|mixtral|codestral|pixtral|devstral/i, "mistral"]

@@ -100,6 +100,9 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
             <Wrench className="size-3.5 text-muted-foreground" />
           </span>
         </td>
+        <td className="px-5 py-4 text-right tabular-nums">
+          ${Number(session.totalCost).toFixed(4)}
+        </td>
         <td className="px-5 py-4 text-right text-sm text-muted-foreground whitespace-nowrap">
           {formatTimeAgo(session.endTime)}
         </td>
@@ -107,7 +110,7 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
 
       {expanded && (
         <tr>
-          <td className="bg-muted/20 px-0 py-0" colSpan={12}>
+          <td className="bg-muted/20 px-0 py-0" colSpan={13}>
             <div className="px-8 py-4">
               {requests.length === 0 ? (
                 <p className="py-4 text-center text-sm text-muted-foreground">

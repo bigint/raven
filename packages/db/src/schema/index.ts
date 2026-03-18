@@ -8,6 +8,7 @@ export {
 } from "./guardrail-rules";
 export { invitations } from "./invitations";
 export { keyEnvironmentEnum, virtualKeys } from "./keys";
+export { modelAliases } from "./model-aliases";
 export { members } from "./members";
 export { models } from "./models";
 export { organizations } from "./organizations";

@@ -29,6 +29,7 @@ import {
 import { createBudgetsModule } from "./modules/budgets/index";
 import { createGuardrailsModule } from "./modules/guardrails/index";
 import { createKeysModule } from "./modules/keys/index";
+import { createModelAliasesModule } from "./modules/model-aliases/index";
 import { listAvailableModels } from "./modules/models/available";
 import { createModelsModule } from "./modules/models/index";
 import { createOpenAICompatModule } from "./modules/openai-compat/index";
@@ -161,6 +162,7 @@ v1.use("*", createTenantMiddleware(db));
 v1.get("/available-models", listAvailableModels(db));
 v1.route("/providers", createProvidersModule(db, env, redis));
 v1.route("/keys", createKeysModule(db));
+v1.route("/model-aliases", createModelAliasesModule(db));
 v1.route("/prompts", createPromptsModule(db));
 v1.route("/budgets", createBudgetsModule(db));
 v1.route("/guardrails", createGuardrailsModule(db));
