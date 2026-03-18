@@ -12,7 +12,6 @@ import {
   Brain,
   Check,
   Copy,
-  DollarSign,
   Eye,
   MessageSquare,
   Search,
@@ -21,7 +20,7 @@ import {
   Zap
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ModelIcon } from "@/components/model-icon";
+import { ModelIcon, ProviderIcon } from "@/components/model-icon";
 import { api } from "@/lib/api";
 import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
 
@@ -186,8 +185,7 @@ const ModelCard = ({ model }: { model: ModelDefinition }) => {
         })}
       </div>
 
-      <div className="mt-3 flex items-center gap-1 text-xs text-muted-foreground">
-        <DollarSign className="size-3" />
+      <div className="mt-3 text-xs text-muted-foreground">
         <span className="tabular-nums">
           {formatPrice(model.inputPrice)} input /{" "}
           {formatPrice(model.outputPrice)} output per 1M tokens
@@ -212,7 +210,11 @@ export const ModelCatalog = () => {
     const slugs = [...new Set(models.map((m) => m.provider))].sort();
     return [
       { label: "All Providers", value: "all" },
-      ...slugs.map((s) => ({ label: formatProviderName(s), value: s }))
+      ...slugs.map((s) => ({
+        icon: <ProviderIcon provider={s} size={16} />,
+        label: formatProviderName(s),
+        value: s
+      }))
     ];
   }, [models]);
 
