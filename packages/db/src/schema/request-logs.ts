@@ -16,8 +16,8 @@ import { providerConfigs } from "./providers";
 export const requestLogs = pgTable(
   "request_logs",
   {
-    cachedTokens: integer("cached_tokens").notNull().default(0),
     cacheHit: boolean("cache_hit").notNull().default(false),
+    cachedTokens: integer("cached_tokens").notNull().default(0),
     cost: numeric("cost", { precision: 12, scale: 6 }).notNull().default("0"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -27,9 +27,9 @@ export const requestLogs = pgTable(
     hasImages: boolean("has_images").notNull().default(false),
     hasToolUse: boolean("has_tool_use").notNull().default(false),
     id: text("id").primaryKey().$defaultFn(createId),
-    isStarred: boolean("is_starred").notNull().default(false),
     imageCount: integer("image_count").notNull().default(0),
     inputTokens: integer("input_tokens").notNull().default(0),
+    isStarred: boolean("is_starred").notNull().default(false),
     latencyMs: integer("latency_ms").notNull().default(0),
     method: text("method").notNull(),
     model: text("model").notNull(),

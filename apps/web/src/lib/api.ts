@@ -46,7 +46,7 @@ const client = ky.create({
 });
 
 const request = async <T>(
-  method: "get" | "post" | "put" | "delete",
+  method: "get" | "post" | "put" | "patch" | "delete",
   path: string,
   body?: unknown
 ): Promise<T> => {
@@ -59,6 +59,7 @@ const request = async <T>(
 export const api = {
   delete: <T>(path: string) => request<T>("delete", path),
   get: <T>(path: string) => request<T>("get", path),
+  patch: <T>(path: string, body?: unknown) => request<T>("patch", path, body),
   post: <T>(path: string, body?: unknown) => request<T>("post", path, body),
   put: <T>(path: string, body?: unknown) => request<T>("put", path, body)
 };

@@ -30,10 +30,23 @@ export interface Provider {
   updatedAt: string;
 }
 
+interface ProviderModel {
+  id: string;
+  name: string;
+  provider: string;
+}
+
 export const providersQueryOptions = () =>
   queryOptions({
     queryFn: () => api.get<Provider[]>("/v1/providers"),
     queryKey: ["providers"]
+  });
+
+export const providerModelsQueryOptions = (providerId: string) =>
+  queryOptions({
+    queryFn: () =>
+      api.get<ProviderModel[]>(`/v1/providers/${providerId}/models`),
+    queryKey: ["providers", providerId, "models"]
   });
 
 interface CreateProviderInput {

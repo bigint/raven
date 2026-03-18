@@ -17,6 +17,7 @@ import {
   sessionsQuerySchema
 } from "./schema";
 import { getSessionById, getSessions } from "./sessions";
+import { toggleStar } from "./star";
 import { getStats } from "./stats";
 import { getToolSessions, getToolStats } from "./tools";
 import { getUsage } from "./usage";
@@ -43,6 +44,7 @@ export const createAnalyticsModule = (db: Database) => {
   app.get("/cache", queryValidator(dateRangeQuerySchema), getCache(db));
   app.get("/requests/live", getRequestsLive(db));
   app.get("/requests", queryValidator(requestsQuerySchema), getRequests(db));
+  app.patch("/requests/:id/star", toggleStar(db));
   app.get("/sessions", queryValidator(sessionsQuerySchema), getSessions(db));
   app.get("/sessions/:sessionId", getSessionById(db));
   app.get("/logs", queryValidator(logsQuerySchema), getLogs(db));

@@ -130,6 +130,7 @@ export const chatCompletionsHandler = (
 
     if (cacheResult.hit) {
       return serveCacheHit(db, cacheResult, {
+        endUser,
         guardrailMatches,
         guardrailWarnings,
         method: "POST",
@@ -167,6 +168,7 @@ export const chatCompletionsHandler = (
     return execute({
       db,
       decryptedApiKey,
+      endUser,
       env,
       extraResponseHeaders: {
         "X-Raven-Latency-Ms": String(Date.now() - startTime),
