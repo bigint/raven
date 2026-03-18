@@ -21,6 +21,7 @@ const OrgSettingsPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab") ?? "general";
+  const [exporting, setExporting] = useState(false);
 
   const {
     settings,
@@ -54,6 +55,32 @@ const OrgSettingsPage = () => {
     router.replace(`/${slug}/settings?tab=${value}`);
   };
 
+  const handleExportConfig = async () => {
+    try {
+      setExporting(true);
+      const data = await api.get<Record<string, unknown>>(
+        "/v1/settings/export"
+      );
+      const date = new Date().toISOString().split("T")[0];
+      const filename = `raven-config-${settings?.slug ?? "org"}-${date}.json`;
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json"
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to export configuration"
+      );
+    } finally {
+      setExporting(false);
+    }
+  };
+
   // Filter tabs based on role
   const visibleTabs = TABS.filter((t) => {
     if (t.value === "danger" && !isOwner) return false;
@@ -63,6 +90,18 @@ const OrgSettingsPage = () => {
   return (
     <div>
       <PageHeader
+        actions={
+          settings && (
+            <Button
+              disabled={exporting}
+              onClick={handleExportConfig}
+              variant="secondary"
+            >
+              <Download className="size-4" />
+              {exporting ? "Exporting..." : "Export Configuration"}
+            </Button>
+          )
+        }
         description="Manage your organization's configuration."
         title="Organization Settings"
       />

@@ -12,6 +12,9 @@ interface UsageChartsProps {
   dateRange: DateRange;
   dateRangeOptions: PillTabOption<DateRange>[];
   onDateRangeChange: (range: DateRange) => void;
+  customFrom?: string;
+  customTo?: string;
+  onCustomRangeChange?: (from: string, to: string) => void;
 }
 
 interface StatCard {
@@ -60,7 +63,10 @@ export const UsageCharts = ({
   loading,
   dateRange,
   dateRangeOptions,
-  onDateRangeChange
+  onDateRangeChange,
+  customFrom = "",
+  customTo = "",
+  onCustomRangeChange
 }: UsageChartsProps) => {
   const statCards = buildStatCards(stats);
 
@@ -73,11 +79,35 @@ export const UsageCharts = ({
             Track usage, costs, and performance across providers.
           </p>
         </div>
-        <PillTabs
-          onChange={onDateRangeChange}
-          options={dateRangeOptions}
-          value={dateRange}
-        />
+        <div className="flex flex-col gap-2 sm:items-end">
+          <PillTabs
+            onChange={onDateRangeChange}
+            options={dateRangeOptions}
+            value={dateRange}
+          />
+          {dateRange === "custom" && onCustomRangeChange && (
+            <div className="flex items-center gap-2">
+              <input
+                className="h-9 rounded-md border border-input bg-background px-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+                onChange={(e) =>
+                  onCustomRangeChange(e.target.value, customTo)
+                }
+                type="date"
+                value={customFrom}
+              />
+              <span className="text-sm text-muted-foreground">to</span>
+              <input
+                className="h-9 rounded-md border border-input bg-background px-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+                min={customFrom}
+                onChange={(e) =>
+                  onCustomRangeChange(customFrom, e.target.value)
+                }
+                type="date"
+                value={customTo}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

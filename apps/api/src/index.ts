@@ -115,7 +115,7 @@ app.onError((err, c) => {
   if (err instanceof AppError) {
     return c.json(
       err.toProblemDetails(instance),
-      { status: err.statusCode as 400 | 401 | 403 | 404 | 409 | 429 | 500, headers: { "Content-Type": "application/problem+json" } }
+      { status: err.statusCode as 400 | 401 | 403 | 404 | 409 | 412 | 429 | 500, headers: { "Content-Type": "application/problem+json" } }
     );
   }
 

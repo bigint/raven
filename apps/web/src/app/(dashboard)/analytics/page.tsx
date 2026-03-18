@@ -55,12 +55,15 @@ const METRIC_OPTIONS: { value: MetricKey; label: string }[] = [
 const OverviewTab = ({ keyId }: { keyId?: string }) => {
   const {
     cache,
+    customFrom,
+    customTo,
     stats,
     usage,
     isLoading,
     error,
     dateRange,
     dateRangeOptions,
+    setCustomRange,
     setDateRange
   } = useAnalytics(keyId);
 
@@ -72,9 +75,12 @@ const OverviewTab = ({ keyId }: { keyId?: string }) => {
         </div>
       )}
       <UsageCharts
+        customFrom={customFrom}
+        customTo={customTo}
         dateRange={dateRange}
         dateRangeOptions={dateRangeOptions}
         loading={isLoading}
+        onCustomRangeChange={setCustomRange}
         onDateRangeChange={setDateRange}
         stats={stats}
       />
