@@ -3,10 +3,22 @@
 import { PROVIDER_LABELS } from "@raven/types";
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
-import { Check, Pencil, Plug, Plus, Trash2, X } from "lucide-react";
+import {
+  Check,
+  Loader2,
+  Pencil,
+  Plug,
+  Plus,
+  Trash2,
+  Zap,
+  X
+} from "lucide-react";
+import { useCallback, useState } from "react";
+import { toast } from "sonner";
 import { TextMorph } from "torph/react";
 import { ProviderIcon } from "@/components/model-icon";
 import type { Provider } from "../hooks/use-providers";
+import { useTestProvider } from "../hooks/use-providers";
 
 interface ProviderListProps {
   providers: Provider[];
@@ -57,6 +69,30 @@ const ProviderList = ({
   onDelete,
   onToggleEnabled
 }: ProviderListProps) => {
+  const testMutation = useTestProvider();
+  const [testingId, setTestingId] = useState<string | null>(null);
+
+  const handleTest = useCallback(
+    async (id: string) => {
+      setTestingId(id);
+      try {
+        const result = await testMutation.mutateAsync(id);
+        if (result.success) {
+          toast.success("Connected");
+        } else {
+          toast.error(result.message);
+        }
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : "Connection test failed"
+        );
+      } finally {
+        setTestingId(null);
+      }
+    },
+    [testMutation]
+  );
+
   const allColumns: Column<Provider>[] = [
     ...columns,
     {
@@ -89,27 +125,44 @@ const ProviderList = ({
       header: "Actions",
       headerClassName: "text-right",
       key: "actions",
-      render: (provider) => (
-        <div className="flex items-center justify-end gap-1">
-          <Button
-            onClick={() => onEdit(provider)}
-            size="sm"
-            title="Edit provider"
-            variant="ghost"
-          >
-            <Pencil className="size-4" />
-          </Button>
-          <Button
-            className="hover:bg-destructive/10 hover:text-destructive"
-            onClick={() => onDelete(provider.id)}
-            size="sm"
-            title="Delete provider"
-            variant="ghost"
-          >
-            <Trash2 className="size-4" />
-          </Button>
-        </div>
-      )
+      render: (provider) => {
+        const isTesting = testingId === provider.id;
+
+        return (
+          <div className="flex items-center justify-end gap-1">
+            <Button
+              disabled={isTesting}
+              onClick={() => handleTest(provider.id)}
+              size="sm"
+              title="Test connection"
+              variant="ghost"
+            >
+              {isTesting ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Zap className="size-4" />
+              )}
+            </Button>
+            <Button
+              onClick={() => onEdit(provider)}
+              size="sm"
+              title="Edit provider"
+              variant="ghost"
+            >
+              <Pencil className="size-4" />
+            </Button>
+            <Button
+              className="hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => onDelete(provider.id)}
+              size="sm"
+              title="Delete provider"
+              variant="ghost"
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          </div>
+        );
+      }
     }
   ];
 

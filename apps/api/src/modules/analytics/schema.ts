@@ -34,6 +34,6 @@ export const logsQuerySchema = z.object({
 
 export const adoptionQuerySchema = z.object({
   from: z.string().optional(),
-  groupBy: z.enum(["key", "model"]).default("key"),
+  groupBy: z.enum(["key", "model", "userAgent"]).default("key"),
   to: z.string().optional()
 });

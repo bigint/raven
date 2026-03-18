@@ -29,6 +29,7 @@ const MAX_PROVIDER_RETRIES = 2;
 export interface ExecuteInput {
   readonly db: Database;
   readonly redis: Redis;
+  readonly endUser: string | null;
   readonly env: Env;
   readonly startTime: number;
   readonly parsedBody: Record<string, unknown>;
@@ -77,6 +78,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
   const {
     db,
     redis,
+    endUser,
     env,
     startTime,
     parsedBody,
@@ -108,6 +110,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
 
   const baseLogData = {
     cacheHit: false,
+    endUser,
     guardrailMatches:
       guardrailMatches.length > 0 ? guardrailMatches : undefined,
     hasImages: contentAnalysis.hasImages,

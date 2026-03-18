@@ -84,3 +84,14 @@ export const useDeleteProvider = () => {
     }
   });
 };
+
+interface TestProviderResult {
+  success: boolean;
+  message: string;
+}
+
+export const useTestProvider = () =>
+  useMutation({
+    mutationFn: (id: string) =>
+      api.post<TestProviderResult>(`/v1/providers/${id}/test`)
+  });

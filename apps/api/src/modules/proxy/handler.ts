@@ -54,7 +54,16 @@ export const proxyHandler = (
       }
     }
 
-    // 3.5 Resolve model alias
+    // 3.5 Extract end-user identity
+    const endUser =
+      (c.req.header("x-user-id") as string | undefined) ??
+      (typeof parsedBody.user === "string" ? parsedBody.user : null) ??
+      (typeof (parsedBody.metadata as Record<string, unknown> | undefined)
+        ?.user_id === "string"
+        ? ((parsedBody.metadata as Record<string, unknown>).user_id as string)
+        : null);
+
+    // 3.6 Resolve model alias
     if (typeof parsedBody.model === "string") {
       const aliasKey = `model-alias:${virtualKey.organizationId}:${parsedBody.model}`;
       const resolved = await cachedQuery(redis, aliasKey, 300, async () => {
@@ -145,6 +154,7 @@ export const proxyHandler = (
 
     if (cacheResult.hit) {
       return serveCacheHit(db, cacheResult, {
+        endUser,
         guardrailMatches,
         guardrailWarnings,
         method,
@@ -194,6 +204,7 @@ export const proxyHandler = (
     return execute({
       db,
       decryptedApiKey,
+      endUser,
       env,
       extraResponseHeaders: undefined,
       guardrailMatches,

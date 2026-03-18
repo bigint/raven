@@ -22,7 +22,7 @@ export interface BreakdownRow {
 }
 
 export type DateRange = "7d" | "30d" | "90d";
-export type GroupBy = "key" | "model";
+export type GroupBy = "key" | "model" | "userAgent";
 
 const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
   { label: "Last 7 days", value: "7d" },
@@ -32,7 +32,8 @@ const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
 
 const GROUP_BY_OPTIONS: { value: GroupBy; label: string }[] = [
   { label: "Keys", value: "key" },
-  { label: "Models", value: "model" }
+  { label: "Models", value: "model" },
+  { label: "User Agents", value: "userAgent" }
 ];
 
 const VALID_RANGES: DateRange[] = ["7d", "30d", "90d"];
@@ -113,7 +114,11 @@ export const useAdoption = (keyId?: string) => {
 
   const groupByParam = searchParams.get("groupBy") as GroupBy | null;
   const groupBy =
-    groupByParam === "key" || groupByParam === "model" ? groupByParam : "key";
+    groupByParam === "key" ||
+    groupByParam === "model" ||
+    groupByParam === "userAgent"
+      ? groupByParam
+      : "key";
 
   const setDateRange = (range: DateRange) => {
     const params = new URLSearchParams(searchParams.toString());

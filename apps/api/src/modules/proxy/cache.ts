@@ -88,6 +88,7 @@ export const serveCacheHit = (
   db: Database,
   cacheResult: CacheCheckResult,
   opts: {
+    endUser: string | null;
     guardrailMatches: GuardrailMatch[];
     guardrailWarnings: string[];
     method: string;

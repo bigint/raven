@@ -22,6 +22,7 @@ export interface LogData {
   latencyMs: number;
   cachedTokens: number;
   cacheHit: boolean;
+  endUser: string | null;
   hasImages: boolean;
   imageCount: number;
   hasToolUse: boolean;
@@ -48,6 +49,7 @@ export const logProxyRequest = async (
         cachedTokens: data.cachedTokens,
         cacheHit: data.cacheHit,
         cost: data.cost.toFixed(6),
+        endUser: data.endUser,
         hasImages: data.hasImages,
         hasToolUse: data.hasToolUse,
         imageCount: data.imageCount,

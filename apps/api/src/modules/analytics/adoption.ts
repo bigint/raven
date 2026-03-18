@@ -60,6 +60,33 @@ export const getAdoptionBreakdown =
       ...dateConditions
     );
 
+    if (groupBy === "userAgent") {
+      const rows = await db
+        .select({
+          cachedTokens: sum(requestLogs.cachedTokens),
+          inputTokens: sum(requestLogs.inputTokens),
+          label: requestLogs.userAgent,
+          outputTokens: sum(requestLogs.outputTokens),
+          reasoningTokens: sum(requestLogs.reasoningTokens),
+          requests: count()
+        })
+        .from(requestLogs)
+        .where(where)
+        .groupBy(requestLogs.userAgent)
+        .orderBy(sql`${sum(requestLogs.inputTokens)} DESC`);
+
+      return c.json({
+        data: rows.map((row) => ({
+          cachedTokens: Number(row.cachedTokens ?? 0),
+          inputTokens: Number(row.inputTokens ?? 0),
+          label: row.label ?? "Unknown",
+          outputTokens: Number(row.outputTokens ?? 0),
+          reasoningTokens: Number(row.reasoningTokens ?? 0),
+          requests: Number(row.requests)
+        }))
+      });
+    }
+
     if (groupBy === "model") {
       const rows = await db
         .select({
