@@ -76,13 +76,13 @@ app.use("*", async (c, next) => {
   if (contentLength && Number.parseInt(contentLength, 10) > 10 * 1024 * 1024) {
     return c.json(
       {
-        type: "about:blank",
-        title: "Request body too large",
-        status: 413,
         detail: "Request body too large",
-        instance: c.req.path
+        instance: c.req.path,
+        status: 413,
+        title: "Request body too large",
+        type: "about:blank"
       },
-      { status: 413, headers: { "Content-Type": "application/problem+json" } }
+      { headers: { "Content-Type": "application/problem+json" }, status: 413 }
     );
   }
   return next();
@@ -113,22 +113,22 @@ app.onError((err, c) => {
   const instance = c.req.path;
 
   if (err instanceof AppError) {
-    return c.json(
-      err.toProblemDetails(instance),
-      { status: err.statusCode as 400 | 401 | 403 | 404 | 409 | 412 | 429 | 500, headers: { "Content-Type": "application/problem+json" } }
-    );
+    return c.json(err.toProblemDetails(instance), {
+      headers: { "Content-Type": "application/problem+json" },
+      status: err.statusCode as 400 | 401 | 403 | 404 | 409 | 412 | 429 | 500
+    });
   }
 
   console.error("Unhandled error:", err);
   return c.json(
     {
-      type: "about:blank",
-      title: "Internal server error",
-      status: 500,
       detail: "Internal server error",
-      instance
+      instance,
+      status: 500,
+      title: "Internal server error",
+      type: "about:blank"
     },
-    { status: 500, headers: { "Content-Type": "application/problem+json" } }
+    { headers: { "Content-Type": "application/problem+json" }, status: 500 }
   );
 });
 
@@ -185,13 +185,13 @@ app.route("/v1", v1);
 app.notFound((c) =>
   c.json(
     {
-      type: "about:blank",
-      title: "Route not found",
-      status: 404,
       detail: "Route not found",
-      instance: c.req.path
+      instance: c.req.path,
+      status: 404,
+      title: "Route not found",
+      type: "about:blank"
     },
-    { status: 404, headers: { "Content-Type": "application/problem+json" } }
+    { headers: { "Content-Type": "application/problem+json" }, status: 404 }
   )
 );
 

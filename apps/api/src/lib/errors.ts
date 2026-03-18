@@ -14,11 +14,11 @@ export class AppError extends Error {
 
   toProblemDetails(instance?: string): ProblemDetails {
     return {
-      type: "about:blank",
-      title: this.title,
-      status: this.statusCode,
       detail: this.message,
       instance,
+      status: this.statusCode,
+      title: this.title,
+      type: "about:blank",
       ...(this.details ? this.details : {})
     };
   }

@@ -28,12 +28,7 @@ export const toggleStar = (db: Database) => async (c: AppContext) => {
   await db
     .update(requestLogs)
     .set({ isStarred: newValue })
-    .where(
-      and(
-        eq(requestLogs.id, id),
-        eq(requestLogs.organizationId, orgId)
-      )
-    );
+    .where(and(eq(requestLogs.id, id), eq(requestLogs.organizationId, orgId)));
 
   return c.json({ data: { isStarred: newValue } });
 };

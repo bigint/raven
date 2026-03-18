@@ -182,8 +182,7 @@ export const useAnalytics = (keyId?: string) => {
     };
   });
 
-  const isCustomReady =
-    dateRange !== "custom" || (!!customFrom && !!customTo);
+  const isCustomReady = dateRange !== "custom" || (!!customFrom && !!customTo);
 
   const statsQuery = useQuery({
     ...analyticsStatsQueryOptions(dateRange, keyId, customFrom, customTo),

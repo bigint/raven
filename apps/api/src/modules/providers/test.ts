@@ -36,7 +36,10 @@ export const testProvider =
 
     try {
       await validateApiKey(provider.provider, decryptedKey);
-      return c.json({ message: "Provider connectivity verified", success: true });
+      return c.json({
+        message: "Provider connectivity verified",
+        success: true
+      });
     } catch {
       return c.json(
         { message: "Provider connectivity check failed", success: false },

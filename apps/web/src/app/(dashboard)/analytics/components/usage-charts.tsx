@@ -89,9 +89,7 @@ export const UsageCharts = ({
             <div className="flex items-center gap-2">
               <input
                 className="h-9 rounded-md border border-input bg-background px-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
-                onChange={(e) =>
-                  onCustomRangeChange(e.target.value, customTo)
-                }
+                onChange={(e) => onCustomRangeChange(e.target.value, customTo)}
                 type="date"
                 value={customFrom}
               />

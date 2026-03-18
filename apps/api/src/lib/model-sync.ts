@@ -112,9 +112,7 @@ export const deriveCategory = (
   return "balanced";
 };
 
-export const deriveCapabilities = (
-  model: ModelsDevModel
-): string[] => {
+export const deriveCapabilities = (model: ModelsDevModel): string[] => {
   const inputMods = model.modalities?.input ?? [];
   const hasVision = inputMods.includes("image") || inputMods.includes("video");
 

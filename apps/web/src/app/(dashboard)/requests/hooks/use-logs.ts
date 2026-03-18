@@ -98,9 +98,7 @@ export const useToggleStar = () => {
 
   return useMutation({
     mutationFn: (id: string) =>
-      api.patch<{ isStarred: boolean }>(
-        `/v1/analytics/requests/${id}/star`
-      ),
+      api.patch<{ isStarred: boolean }>(`/v1/analytics/requests/${id}/star`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["session"] });
     }

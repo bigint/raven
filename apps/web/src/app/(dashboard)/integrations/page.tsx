@@ -21,18 +21,18 @@ const SNIPPETS: Record<AgentTab, string> = {
     "ANTHROPIC_BASE_URL": "https://your-raven-instance.com/v1/proxy/anthropic"
   }
 }`,
-  cursor: `Base URL: https://your-raven-instance.com/v1/proxy/openai
-API Key: rk_live_your_key_here`,
-  windsurf: `Base URL: https://your-raven-instance.com/v1/proxy/openai
-API Key: rk_live_your_key_here`,
   codex: `export OPENAI_BASE_URL="https://your-raven-instance.com/v1/proxy/openai"
 export OPENAI_API_KEY="rk_live_your_key_here"`,
+  cursor: `Base URL: https://your-raven-instance.com/v1/proxy/openai
+API Key: rk_live_your_key_here`,
   shell: `export OPENAI_BASE_URL="https://your-raven-instance.com/v1/proxy/openai"
 export OPENAI_API_KEY="rk_live_your_key_here"
 
 # Or for Anthropic
 export ANTHROPIC_BASE_URL="https://your-raven-instance.com/v1/proxy/anthropic"
-export ANTHROPIC_API_KEY="rk_live_your_key_here"`
+export ANTHROPIC_API_KEY="rk_live_your_key_here"`,
+  windsurf: `Base URL: https://your-raven-instance.com/v1/proxy/openai
+API Key: rk_live_your_key_here`
 };
 
 const CodeBlock = ({ content }: { content: string }) => {

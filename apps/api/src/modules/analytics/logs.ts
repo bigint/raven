@@ -62,9 +62,9 @@ export const getLogs =
           ),
           requestCount: count().as("request_count"),
           sessionId: requestLogs.sessionId,
-          totalCost: sum(requestLogs.cost).as("total_cost"),
           startTime: min(requestLogs.createdAt).as("start_time"),
           toolUses: sum(requestLogs.toolCount).as("tool_uses"),
+          totalCost: sum(requestLogs.cost).as("total_cost"),
           userAgent:
             sql<string>`(array_agg(${requestLogs.userAgent} ORDER BY ${requestLogs.createdAt} DESC))[1]`.as(
               "user_agent"
@@ -106,9 +106,9 @@ export const getLogs =
         reasoningTokens: Number(row.reasoningTokens ?? 0),
         requestCount: Number(row.requestCount),
         sessionId: row.sessionId,
-        totalCost: row.totalCost ?? "0",
         startTime: row.startTime,
         toolUses: Number(row.toolUses ?? 0),
+        totalCost: row.totalCost ?? "0",
         userAgent: row.userAgent ?? null,
         virtualKeyId: row.virtualKeyId
       })),

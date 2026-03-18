@@ -16,8 +16,8 @@ import { providerConfigs } from "./providers";
 export const requestLogs = pgTable(
   "request_logs",
   {
-    cacheHit: boolean("cache_hit").notNull().default(false),
     cachedTokens: integer("cached_tokens").notNull().default(0),
+    cacheHit: boolean("cache_hit").notNull().default(false),
     cost: numeric("cost", { precision: 12, scale: 6 }).notNull().default("0"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()

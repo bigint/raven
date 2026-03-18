@@ -1,8 +1,8 @@
 import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { and, eq } from "drizzle-orm";
-import { generateETag } from "@/lib/etag";
 import { NotFoundError } from "@/lib/errors";
+import { generateETag } from "@/lib/etag";
 import { success } from "@/lib/response";
 import type { AppContext } from "@/lib/types";
 import { maskApiKey } from "./helpers";
