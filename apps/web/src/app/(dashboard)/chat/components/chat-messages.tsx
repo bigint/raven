@@ -8,19 +8,19 @@ import type { ResponseMeta } from "./response-metadata";
 import { ResponseMetadata } from "./response-metadata";
 
 interface ImageAttachment {
-  id: string;
-  base64: string;
-  name: string;
-  preview: string;
+  readonly id: string;
+  readonly base64: string;
+  readonly name: string;
+  readonly preview: string;
 }
 
 interface ChatMessage {
-  content: string;
-  id: string;
-  images?: ImageAttachment[];
-  meta?: ResponseMeta;
-  reasoning?: string;
-  role: "assistant" | "user";
+  readonly content: string;
+  readonly id: string;
+  readonly images?: readonly ImageAttachment[];
+  readonly meta?: ResponseMeta;
+  readonly reasoning?: string;
+  readonly role: "assistant" | "user";
 }
 
 interface ChatMessagesProps {
