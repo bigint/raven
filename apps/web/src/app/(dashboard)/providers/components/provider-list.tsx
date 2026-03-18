@@ -10,8 +10,8 @@ import {
   Plug,
   Plus,
   Trash2,
-  Zap,
-  X
+  X,
+  Zap
 } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";

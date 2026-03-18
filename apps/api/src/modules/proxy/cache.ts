@@ -116,6 +116,7 @@ export const serveCacheHit = (
       cachedTokens: usage.cachedTokens,
       cacheHit: true,
       cost: 0,
+      endUser: opts.endUser,
       guardrailMatches:
         opts.guardrailMatches.length > 0 ? opts.guardrailMatches : undefined,
       hasImages: analysis.hasImages,

@@ -66,6 +66,15 @@ export const chatCompletionsHandler = (
     const modelSlug = parsedBody.model as string;
     if (!modelSlug) throw new ValidationError("'model' field is required");
 
+    // Extract end-user identity
+    const endUser =
+      (c.req.header("x-user-id") as string | undefined) ??
+      (typeof parsedBody.user === "string" ? parsedBody.user : null) ??
+      (typeof (parsedBody.metadata as Record<string, unknown> | undefined)
+        ?.user_id === "string"
+        ? ((parsedBody.metadata as Record<string, unknown>).user_id as string)
+        : null);
+
     // 3. Resolve provider from model
     const providerName = await resolveModelProvider(db, modelSlug);
 
