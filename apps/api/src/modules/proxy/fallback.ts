@@ -7,6 +7,7 @@ import { decrypt } from "@/lib/crypto";
 export interface FallbackProvider {
   decryptedApiKey: string;
   providerConfigId: string;
+  providerConfigName: string | null;
   providerName: string;
 }
 
@@ -45,6 +46,7 @@ export const getFallbackProviders = async (
       results.push({
         decryptedApiKey,
         providerConfigId: config.id,
+        providerConfigName: config.name,
         providerName: config.provider
       });
     } catch {

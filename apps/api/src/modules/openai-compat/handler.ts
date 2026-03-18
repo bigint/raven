@@ -102,7 +102,8 @@ export const chatCompletionsHandler = (
 
     // 6. Resolve provider config
     const fakeProxyPath = `/v1/proxy/${providerName}/chat/completions`;
-    const { decryptedApiKey, providerConfigId } = await resolveProvider(
+    const { decryptedApiKey, providerConfigId, providerConfigName } =
+      await resolveProvider(
       db,
       env,
       virtualKey.organizationId,
@@ -128,6 +129,7 @@ export const chatCompletionsHandler = (
         parsedBody,
         path: "/v1/chat/completions",
         providerConfigId,
+        providerConfigName,
         providerName,
         redis,
         sessionHeader: c.req.header("x-session-id") ?? null,
@@ -169,6 +171,7 @@ export const chatCompletionsHandler = (
       parsedBody,
       path: "/v1/chat/completions",
       providerConfigId,
+      providerConfigName,
       providerName,
       redis,
       requestedModel: modelSlug,

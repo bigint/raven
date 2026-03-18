@@ -16,6 +16,7 @@ import { type RoutingStrategy, resolveWithStrategy } from "./router";
 export interface ProviderResolution {
   decryptedApiKey: string;
   providerConfigId: string;
+  providerConfigName: string | null;
   providerName: string;
   upstreamPath: string;
 }
@@ -129,6 +130,7 @@ export const resolveProvider = async (
   return {
     decryptedApiKey,
     providerConfigId: providerConfig.id,
+    providerConfigName: providerConfig.name,
     providerName,
     upstreamPath
   };

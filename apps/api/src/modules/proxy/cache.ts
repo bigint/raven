@@ -96,6 +96,7 @@ export const serveCacheHit = (
     parsedBody: Record<string, unknown>;
     path: string;
     providerConfigId: string;
+    providerConfigName: string | null;
     providerName: string;
     redis: Redis;
     sessionHeader: string | null;
@@ -127,6 +128,7 @@ export const serveCacheHit = (
       path: opts.path,
       provider: opts.providerName,
       providerConfigId: opts.providerConfigId,
+      providerConfigName: opts.providerConfigName,
       reasoningTokens: usage.reasoningTokens,
       sessionId: analysis.sessionId,
       statusCode: 200,

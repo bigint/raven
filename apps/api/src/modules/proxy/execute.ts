@@ -36,6 +36,7 @@ export interface ExecuteInput {
   readonly requestedModel: string;
   readonly providerName: string;
   readonly providerConfigId: string;
+  readonly providerConfigName: string | null;
   readonly decryptedApiKey: string;
   readonly virtualKey: {
     readonly id: string;
@@ -82,6 +83,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     requestedModel,
     providerName,
     providerConfigId,
+    providerConfigName,
     decryptedApiKey,
     virtualKey,
     method,
@@ -96,7 +98,11 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
   const contentAnalysis = analyzeContent(parsedBody, sessionId);
 
   // Track active provider via a mutable ref — updated on fallback
-  const activeProvider = { configId: providerConfigId, name: providerName };
+  const activeProvider = {
+    configId: providerConfigId,
+    configName: providerConfigName,
+    name: providerName
+  };
 
   const baseLogData = {
     cacheHit: false,
@@ -137,6 +143,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
       outputTokens: usage.outputTokens,
       provider: activeProvider.name,
       providerConfigId: activeProvider.configId,
+      providerConfigName: activeProvider.configName,
       reasoningTokens: usage.reasoningTokens,
       toolCount: usage.toolCount ?? baseLogData.toolCount,
       toolNames: usage.toolNames
@@ -210,6 +217,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     for (const fb of fallbacks) {
       try {
         activeProvider.configId = fb.providerConfigId;
+        activeProvider.configName = fb.providerConfigName ?? null;
         activeProvider.name = fb.providerName;
         return await tryExecute(makeModel(fb.decryptedApiKey, fb.providerName));
       } catch (fbErr) {
@@ -230,6 +238,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
       outputTokens: 0,
       provider: activeProvider.name,
       providerConfigId: activeProvider.configId,
+      providerConfigName: activeProvider.configName,
       reasoningTokens: 0,
       statusCode: status
     };

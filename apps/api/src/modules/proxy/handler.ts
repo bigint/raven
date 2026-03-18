@@ -111,8 +111,13 @@ export const proxyHandler = (
       resolveProvider(db, env, virtualKey.organizationId, c.req.path, redis)
     ]);
 
-    const { decryptedApiKey, providerConfigId, providerName, upstreamPath } =
-      providerResolution;
+    const {
+      decryptedApiKey,
+      providerConfigId,
+      providerConfigName,
+      providerName,
+      upstreamPath
+    } = providerResolution;
     const requestedModel = (parsedBody.model as string) ?? "unknown";
 
     if (cacheResult.hit) {
@@ -125,6 +130,7 @@ export const proxyHandler = (
         parsedBody,
         path: upstreamPath,
         providerConfigId,
+        providerConfigName,
         providerName,
         redis,
         sessionHeader: c.req.header("x-session-id") ?? null,
@@ -174,6 +180,7 @@ export const proxyHandler = (
       parsedBody,
       path: upstreamPath,
       providerConfigId,
+      providerConfigName,
       providerName,
       redis,
       requestedModel,

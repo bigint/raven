@@ -10,6 +10,7 @@ export interface LogData {
   virtualKeyId: string;
   provider: string;
   providerConfigId: string;
+  providerConfigName: string | null;
   model: string;
   method: string;
   path: string;
@@ -127,7 +128,11 @@ export const logAndPublish = (
   budgetCtx?: BudgetContext
 ): void => {
   void logProxyRequest(db, data).then((row) => {
-    if (row) void publishEvent(data.organizationId, "request.created", row);
+    if (row)
+      void publishEvent(data.organizationId, "request.created", {
+        ...row,
+        providerConfigName: data.providerConfigName
+      });
 
     if (budgetCtx && data.cost > 0) {
       void incrementBudgetSpend(
