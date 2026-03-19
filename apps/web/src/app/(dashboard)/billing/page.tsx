@@ -2,6 +2,7 @@
 
 import { PageHeader, Spinner } from "@raven/ui";
 import { CreditCard } from "lucide-react";
+import { match, P } from "ts-pattern";
 import { PlanSelector } from "./components/plan-selector";
 import { SubscriptionStatus } from "./components/subscription-status";
 import { useBilling } from "./hooks/use-billing";
@@ -26,48 +27,51 @@ const BillingPage = () => {
 
       <div className="space-y-8">
         {/* Subscription section */}
-        {subscription.error && (
-          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-            {subscription.error.message}
-          </div>
-        )}
-        {subscription.isPending ? (
-          <div className="rounded-xl border border-border p-12 text-center">
-            <Spinner className="mx-auto" />
-            <p className="mt-3 text-sm text-muted-foreground">
-              Loading subscription...
-            </p>
-          </div>
-        ) : (
-          subscription.data && (
-            <SubscriptionStatus subscription={subscription.data} />
-          )
-        )}
+        {match(subscription)
+          .with({ isError: true }, ({ error }) => (
+            <div className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              {error.message}
+            </div>
+          ))
+          .with({ isPending: true }, () => (
+            <div className="rounded-xl border border-border p-12 text-center">
+              <Spinner className="mx-auto" />
+              <p className="mt-3 text-sm text-muted-foreground">
+                Loading subscription...
+              </p>
+            </div>
+          ))
+          .with({ data: P.nonNullable }, ({ data }) => (
+            <SubscriptionStatus subscription={data} />
+          ))
+          .otherwise(() => null)}
 
         {/* Plans section */}
-        {plans.error && (
-          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-            {plans.error.message}
-          </div>
-        )}
-        {plans.isPending ? (
-          <div className="rounded-xl border border-border p-12 text-center">
-            <Spinner className="mx-auto" />
-            <p className="mt-3 text-sm text-muted-foreground">
-              Loading plans...
-            </p>
-          </div>
-        ) : (
-          <PlanSelector
-            billingInterval={billingInterval}
-            getPlanButtonLabel={getPlanButtonLabel}
-            onIntervalChange={setBillingInterval}
-            onPlanAction={handlePlanAction}
-            plans={plans.data ?? []}
-            subscription={subscription.data ?? null}
-            upgrading={upgrading}
-          />
-        )}
+        {match(plans)
+          .with({ isError: true }, ({ error }) => (
+            <div className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              {error.message}
+            </div>
+          ))
+          .with({ isPending: true }, () => (
+            <div className="rounded-xl border border-border p-12 text-center">
+              <Spinner className="mx-auto" />
+              <p className="mt-3 text-sm text-muted-foreground">
+                Loading plans...
+              </p>
+            </div>
+          ))
+          .otherwise(() => (
+            <PlanSelector
+              billingInterval={billingInterval}
+              getPlanButtonLabel={getPlanButtonLabel}
+              onIntervalChange={setBillingInterval}
+              onPlanAction={handlePlanAction}
+              plans={plans.data ?? []}
+              subscription={subscription.data ?? null}
+              upgrading={upgrading}
+            />
+          ))}
 
         {!subscription.isPending &&
           !plans.isPending &&

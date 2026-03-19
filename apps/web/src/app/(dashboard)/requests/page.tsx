@@ -4,6 +4,7 @@ import { Input, PageHeader, PillTabs, Select, Spinner, Tabs } from "@raven/ui";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
+import { match } from "ts-pattern";
 import { api } from "@/lib/api";
 import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
 import { LogsTable } from "./components/logs-table";
@@ -274,11 +275,10 @@ const RequestsPage = () => {
   return (
     <div>
       <PageHeader
-        description={
-          view === "requests"
-            ? "View and inspect individual API requests."
-            : "View sessions grouped by conversation."
-        }
+        description={match(view)
+          .with("requests", () => "View and inspect individual API requests.")
+          .with("sessions", () => "View sessions grouped by conversation.")
+          .exhaustive()}
         title="Requests"
       />
 
@@ -291,7 +291,10 @@ const RequestsPage = () => {
         value={view}
       />
 
-      {view === "requests" ? <RequestsView /> : <SessionsView />}
+      {match(view)
+        .with("requests", () => <RequestsView />)
+        .with("sessions", () => <SessionsView />)
+        .exhaustive()}
     </div>
   );
 };

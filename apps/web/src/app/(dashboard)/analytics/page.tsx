@@ -8,6 +8,7 @@ import { Download, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
+import { match } from "ts-pattern";
 import { subscriptionQueryOptions } from "@/app/(dashboard)/billing/hooks/use-billing";
 import { keysQueryOptions } from "@/app/(dashboard)/keys/hooks/use-keys";
 import { exportToCsv } from "@/lib/csv-export";
@@ -350,10 +351,14 @@ const AnalyticsPage = () => {
 
       <Tabs onChange={setTab} tabs={tabs} value={tab} />
 
-      {tab === "overview" && <OverviewTab keyId={keyId} />}
-      {tab === "models" && <ModelsTab keyId={keyId} />}
-      {tab === "tools" && <ToolsTab keyId={keyId} />}
-      {tab === "adoption" && hasAdoption && <AdoptionTab keyId={keyId} />}
+      {match(tab)
+        .with("overview", () => <OverviewTab keyId={keyId} />)
+        .with("models", () => <ModelsTab keyId={keyId} />)
+        .with("tools", () => <ToolsTab keyId={keyId} />)
+        .with("adoption", () =>
+          hasAdoption ? <AdoptionTab keyId={keyId} /> : null
+        )
+        .otherwise(() => null)}
     </div>
   );
 };

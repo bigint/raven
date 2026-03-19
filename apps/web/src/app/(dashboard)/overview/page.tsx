@@ -3,6 +3,7 @@
 import { PageHeader, Spinner } from "@raven/ui";
 import { Key, Network, TrendingUp } from "lucide-react";
 import Link from "next/link";
+import { match } from "ts-pattern";
 import { TextMorph } from "torph/react";
 import { RecentRequests } from "./components/recent-requests";
 import { StatCards } from "./components/stat-cards";
@@ -33,27 +34,31 @@ const OverviewPage = () => {
       <StatCards loading={stats.isPending} stats={stats.data ?? null} />
 
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {usage.error ? (
-          <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-            {usage.error.message}
-          </div>
-        ) : (
-          <UsageChart
-            loading={usage.isPending}
-            totalRequests={totalRequests}
-            usage={usage.data ?? []}
-          />
-        )}
-        {requests.error ? (
-          <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-            {requests.error.message}
-          </div>
-        ) : (
-          <RecentRequests
-            loading={requests.isPending}
-            requests={requests.data ?? []}
-          />
-        )}
+        {match(usage)
+          .with({ isError: true }, ({ error }) => (
+            <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              {error.message}
+            </div>
+          ))
+          .otherwise(() => (
+            <UsageChart
+              loading={usage.isPending}
+              totalRequests={totalRequests}
+              usage={usage.data ?? []}
+            />
+          ))}
+        {match(requests)
+          .with({ isError: true }, ({ error }) => (
+            <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              {error.message}
+            </div>
+          ))
+          .otherwise(() => (
+            <RecentRequests
+              loading={requests.isPending}
+              requests={requests.data ?? []}
+            />
+          ))}
       </div>
 
       {/* Quick Actions */}
@@ -68,22 +73,24 @@ const OverviewPage = () => {
               <Network className="size-4 text-orange-500" />
             </div>
             <div>
-              {providers.isPending ? (
-                <Spinner className="size-4" />
-              ) : (
-                <>
-                  <TextMorph className="text-sm font-medium">
-                    {providerCount > 0
-                      ? `${providerCount} Providers`
-                      : "Add Provider"}
-                  </TextMorph>
-                  <p className="text-xs text-muted-foreground">
-                    {providerCount > 0
-                      ? "Manage configurations"
-                      : "Connect your first AI provider"}
-                  </p>
-                </>
-              )}
+              {match(providers)
+                .with({ isPending: true }, () => (
+                  <Spinner className="size-4" />
+                ))
+                .otherwise(() => (
+                  <>
+                    <TextMorph className="text-sm font-medium">
+                      {providerCount > 0
+                        ? `${providerCount} Providers`
+                        : "Add Provider"}
+                    </TextMorph>
+                    <p className="text-xs text-muted-foreground">
+                      {providerCount > 0
+                        ? "Manage configurations"
+                        : "Connect your first AI provider"}
+                    </p>
+                  </>
+                ))}
             </div>
           </Link>
           <Link
@@ -94,22 +101,24 @@ const OverviewPage = () => {
               <Key className="size-4 text-purple-500" />
             </div>
             <div>
-              {keys.isPending ? (
-                <Spinner className="size-4" />
-              ) : (
-                <>
-                  <TextMorph className="text-sm font-medium">
-                    {activeKeys > 0
-                      ? `${activeKeys} Active Keys`
-                      : "Create Key"}
-                  </TextMorph>
-                  <p className="text-xs text-muted-foreground">
-                    {activeKeys > 0
-                      ? "Manage virtual keys"
-                      : "Create a virtual API key"}
-                  </p>
-                </>
-              )}
+              {match(keys)
+                .with({ isPending: true }, () => (
+                  <Spinner className="size-4" />
+                ))
+                .otherwise(() => (
+                  <>
+                    <TextMorph className="text-sm font-medium">
+                      {activeKeys > 0
+                        ? `${activeKeys} Active Keys`
+                        : "Create Key"}
+                    </TextMorph>
+                    <p className="text-xs text-muted-foreground">
+                      {activeKeys > 0
+                        ? "Manage virtual keys"
+                        : "Create a virtual API key"}
+                    </p>
+                  </>
+                ))}
             </div>
           </Link>
           <Link

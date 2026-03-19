@@ -2,6 +2,7 @@
 
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { memo, useEffect, useRef, useState } from "react";
+import { match } from "ts-pattern";
 import { ExamplePrompts } from "./example-prompts";
 import { Markdown } from "./markdown";
 import type { ResponseMeta } from "./response-metadata";
