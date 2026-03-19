@@ -3,6 +3,7 @@ import {
   useMutation,
   useQueryClient
 } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export interface ModelAlias {
@@ -30,6 +31,9 @@ export const useCreateModelAlias = () => {
   return useMutation({
     mutationFn: (input: CreateModelAliasInput) =>
       api.post<ModelAlias>("/v1/model-aliases", input),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["model-aliases"] });
     }
@@ -41,6 +45,9 @@ export const useDeleteModelAlias = () => {
 
   return useMutation({
     mutationFn: (id: string) => api.delete(`/v1/model-aliases/${id}`),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["model-aliases"] });
     }

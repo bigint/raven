@@ -3,6 +3,7 @@ import {
   useMutation,
   useQueryClient
 } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export interface Webhook {
@@ -78,6 +79,9 @@ export const useCreateWebhook = () => {
   return useMutation({
     mutationFn: (input: WebhookCreateInput) =>
       api.post<Webhook>("/v1/webhooks", input),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["webhooks"] });
     }
@@ -90,6 +94,9 @@ export const useUpdateWebhook = () => {
   return useMutation({
     mutationFn: ({ id, ...body }: WebhookUpdateInput) =>
       api.put<Webhook>(`/v1/webhooks/${id}`, body),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["webhooks"] });
     }
@@ -101,6 +108,9 @@ export const useDeleteWebhook = () => {
 
   return useMutation({
     mutationFn: (id: string) => api.delete(`/v1/webhooks/${id}`),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["webhooks"] });
     }
@@ -115,5 +125,8 @@ interface TestWebhookResult {
 export const useTestWebhook = () =>
   useMutation({
     mutationFn: (url: string) =>
-      api.post<TestWebhookResult>("/v1/webhooks/test", { url })
+      api.post<TestWebhookResult>("/v1/webhooks/test", { url }),
+    onError: (err) => {
+      toast.error(err.message);
+    }
   });

@@ -99,6 +99,9 @@ export const useCreateVersion = () => {
   return useMutation({
     mutationFn: ({ promptId, ...body }: CreateVersionInput) =>
       api.post<PromptVersion>(`/v1/prompts/${promptId}/versions`, body),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["prompts", { id: variables.promptId }]
@@ -119,6 +122,9 @@ export const useActivateVersion = () => {
       promptId: string;
       versionId: string;
     }) => api.put(`/v1/prompts/${promptId}/versions/${versionId}/activate`),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["prompts", { id: variables.promptId }]

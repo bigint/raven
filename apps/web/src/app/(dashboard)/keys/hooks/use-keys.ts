@@ -5,6 +5,7 @@ import {
   useMutation,
   useQueryClient
 } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export interface VirtualKey {
@@ -51,6 +52,9 @@ export const useCreateKey = () => {
   return useMutation({
     mutationFn: (data: CreateKeyInput) =>
       api.post<CreateKeyResponse>("/v1/keys", data),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["keys"] });
     }
@@ -62,6 +66,9 @@ export const useUpdateKey = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateKeyInput }) =>
       api.put<VirtualKey>(`/v1/keys/${id}`, data),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["keys"] });
     }
@@ -72,6 +79,9 @@ export const useDeleteKey = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.delete(`/v1/keys/${id}`),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["keys"] });
     }

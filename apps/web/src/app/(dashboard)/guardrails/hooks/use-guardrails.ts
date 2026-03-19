@@ -3,6 +3,7 @@ import {
   useMutation,
   useQueryClient
 } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export interface Guardrail {
@@ -64,6 +65,9 @@ export const useCreateGuardrail = () => {
   return useMutation({
     mutationFn: (input: GuardrailInput) =>
       api.post<Guardrail>("/v1/guardrails", input),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["guardrails"] });
     }
@@ -76,6 +80,9 @@ export const useUpdateGuardrail = () => {
   return useMutation({
     mutationFn: ({ id, ...body }: GuardrailInput & { id: string }) =>
       api.put<Guardrail>(`/v1/guardrails/${id}`, body),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["guardrails"] });
     }
@@ -87,6 +94,9 @@ export const useDeleteGuardrail = () => {
 
   return useMutation({
     mutationFn: (id: string) => api.delete(`/v1/guardrails/${id}`),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["guardrails"] });
     }

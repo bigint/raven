@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import type { ExtendedDateRange } from "@/app/(dashboard)/analytics/lib/date-utils";
 import {
   EXTENDED_DATE_RANGE_OPTIONS,
@@ -85,6 +86,9 @@ export const useToggleStar = () => {
   return useMutation({
     mutationFn: (id: string) =>
       api.patch<{ isStarred: boolean }>(`/v1/analytics/requests/${id}/star`),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["session"] });
     }

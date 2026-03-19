@@ -3,6 +3,7 @@ import {
   useMutation,
   useQueryClient
 } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export interface RoutingRule {
@@ -54,6 +55,9 @@ export const useCreateRoutingRule = () => {
   return useMutation({
     mutationFn: (input: RoutingRuleInput) =>
       api.post<RoutingRule>("/v1/routing-rules", input),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["routing-rules"] });
     }
@@ -66,6 +70,9 @@ export const useUpdateRoutingRule = () => {
   return useMutation({
     mutationFn: ({ id, ...body }: RoutingRuleInput & { id: string }) =>
       api.put<RoutingRule>(`/v1/routing-rules/${id}`, body),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["routing-rules"] });
     }
@@ -77,6 +84,9 @@ export const useDeleteRoutingRule = () => {
 
   return useMutation({
     mutationFn: (id: string) => api.delete(`/v1/routing-rules/${id}`),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["routing-rules"] });
     }

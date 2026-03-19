@@ -4,6 +4,7 @@ import {
   useQuery,
   useQueryClient
 } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export interface AvailableProvider {
@@ -69,6 +70,9 @@ export const useCreateProvider = () => {
   return useMutation({
     mutationFn: (input: CreateProviderInput) =>
       api.post<Provider>("/v1/providers", input),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["providers"] });
     }
@@ -81,6 +85,9 @@ export const useUpdateProvider = () => {
   return useMutation({
     mutationFn: ({ id, ...body }: UpdateProviderInput) =>
       api.put<Provider>(`/v1/providers/${id}`, body),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["providers"] });
     }
@@ -92,6 +99,9 @@ export const useDeleteProvider = () => {
 
   return useMutation({
     mutationFn: (id: string) => api.delete(`/v1/providers/${id}`),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["providers"] });
     }
@@ -106,5 +116,8 @@ interface TestProviderResult {
 export const useTestProvider = () =>
   useMutation({
     mutationFn: (id: string) =>
-      api.post<TestProviderResult>(`/v1/providers/${id}/test`)
+      api.post<TestProviderResult>(`/v1/providers/${id}/test`),
+    onError: (err) => {
+      toast.error(err.message);
+    }
   });
