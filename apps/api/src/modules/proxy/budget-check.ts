@@ -74,14 +74,18 @@ export const checkBudgets = async (
     }
 
     if (threshold > 0 && spent >= threshold * limit) {
-      void publishEvent(orgId, "budget.alert", {
-        budgetId: budget.id,
-        entityId: budget.entityId,
-        entityType: budget.entityType,
-        limitAmount: limit,
-        spent,
-        threshold
-      });
+      const debounceKey = `budget:alert:${budget.id}`;
+      const isNew = await redis.set(debounceKey, "1", "EX", 3600, "NX");
+      if (isNew) {
+        void publishEvent(orgId, "budget.alert", {
+          budgetId: budget.id,
+          entityId: budget.entityId,
+          entityType: budget.entityType,
+          limitAmount: limit,
+          spent,
+          threshold
+        });
+      }
     }
   }
 };

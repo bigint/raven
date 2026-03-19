@@ -2,7 +2,9 @@ import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { and, eq } from "drizzle-orm";
+import type { Redis } from "ioredis";
 import type { z } from "zod";
+import { cacheKeys } from "@/lib/cache-utils";
 import { encrypt } from "@/lib/crypto";
 import { NotFoundError, PreconditionFailedError } from "@/lib/errors";
 import { checkIfMatch, generateETag } from "@/lib/etag";
@@ -16,7 +18,8 @@ import type { updateProviderSchema } from "./schema";
 type Body = z.infer<typeof updateProviderSchema>;
 
 export const updateProvider =
-  (db: Database, env: Env) => async (c: AppContextWithJson<Body>) => {
+  (db: Database, env: Env, redis: Redis) =>
+  async (c: AppContextWithJson<Body>) => {
     const orgId = c.get("orgId");
     const user = c.get("user");
     const id = c.req.param("id") as string;
@@ -76,6 +79,11 @@ export const updateProvider =
       .returning();
 
     const record = updated as NonNullable<typeof updated>;
+
+    // Invalidate provider configs and models cache
+    void redis.del(cacheKeys.providerConfigs(orgId, record.provider));
+    void redis.del(cacheKeys.providerModels(id));
+
     const masked = maskApiKey(record.apiKey);
     void publishEvent(orgId, "provider.updated", {
       ...record,

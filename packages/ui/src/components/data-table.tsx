@@ -31,6 +31,7 @@ interface DataTableProps<T> {
   sortKey?: string;
   sortDirection?: "asc" | "desc";
   onSort?: (key: string) => void;
+  maxDisplayRows?: number;
 }
 
 const DataTable = <T,>({
@@ -47,11 +48,15 @@ const DataTable = <T,>({
   onToggleColumn,
   sortKey,
   sortDirection,
-  onSort
+  onSort,
+  maxDisplayRows
 }: DataTableProps<T>) => {
   const visibleColumns = hiddenColumns
     ? columns.filter((col) => !hiddenColumns.includes(col.key))
     : columns;
+
+  const displayData = maxDisplayRows ? data.slice(0, maxDisplayRows) : data;
+  const isLargeDataset = animateRows && data.length > 50;
 
   if (loading) {
     return (

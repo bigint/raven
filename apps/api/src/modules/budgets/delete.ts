@@ -12,19 +12,14 @@ export const deleteBudget = (db: Database) => async (c: AppContext) => {
   const user = c.get("user");
   const id = c.req.param("id") as string;
 
-  const [existing] = await db
-    .select({ id: budgets.id })
-    .from(budgets)
+  const [deleted] = await db
+    .delete(budgets)
     .where(and(eq(budgets.id, id), eq(budgets.organizationId, orgId)))
-    .limit(1);
+    .returning({ id: budgets.id });
 
-  if (!existing) {
+  if (!deleted) {
     throw new NotFoundError("Budget not found");
   }
-
-  await db
-    .delete(budgets)
-    .where(and(eq(budgets.id, id), eq(budgets.organizationId, orgId)));
 
   void publishEvent(orgId, "budget.deleted", { id });
   void logAudit(db, {

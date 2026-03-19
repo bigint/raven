@@ -3,6 +3,7 @@
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
 import { Pencil, Plus, Shield, Trash2 } from "lucide-react";
+import { useMemo } from "react";
 import { TextMorph } from "torph/react";
 import type { Guardrail } from "../hooks/use-guardrails";
 import { ACTION_LABELS, TYPE_LABELS } from "../hooks/use-guardrails";
@@ -70,36 +71,39 @@ const GuardrailList = ({
   onEdit,
   onDelete
 }: GuardrailListProps) => {
-  const allColumns: Column<Guardrail>[] = [
-    ...columns,
-    {
-      className: "text-right",
-      header: "Actions",
-      headerClassName: "text-right",
-      key: "actions",
-      render: (guardrail) => (
-        <div className="flex items-center justify-end gap-1">
-          <Button
-            onClick={() => onEdit(guardrail)}
-            size="sm"
-            title="Edit guardrail"
-            variant="ghost"
-          >
-            <Pencil className="size-4" />
-          </Button>
-          <Button
-            className="hover:bg-destructive/10 hover:text-destructive"
-            onClick={() => onDelete(guardrail.id)}
-            size="sm"
-            title="Delete guardrail"
-            variant="ghost"
-          >
-            <Trash2 className="size-4" />
-          </Button>
-        </div>
-      )
-    }
-  ];
+  const allColumns: Column<Guardrail>[] = useMemo(
+    () => [
+      ...columns,
+      {
+        className: "text-right",
+        header: "Actions",
+        headerClassName: "text-right",
+        key: "actions",
+        render: (guardrail) => (
+          <div className="flex items-center justify-end gap-1">
+            <Button
+              onClick={() => onEdit(guardrail)}
+              size="sm"
+              title="Edit guardrail"
+              variant="ghost"
+            >
+              <Pencil className="size-4" />
+            </Button>
+            <Button
+              className="hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => onDelete(guardrail.id)}
+              size="sm"
+              title="Delete guardrail"
+              variant="ghost"
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          </div>
+        )
+      }
+    ],
+    [onEdit, onDelete]
+  );
 
   return (
     <DataTable

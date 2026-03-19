@@ -3,6 +3,7 @@ import { createAuth } from "@raven/auth";
 import { parseEnv } from "@raven/config";
 import { createDatabase } from "@raven/db";
 import { Hono } from "hono";
+import { compress } from "hono/compress";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { initEmailDispatcher } from "./lib/email-dispatcher";
@@ -100,6 +101,8 @@ app.use(
     origin: [env.APP_URL]
   })
 );
+
+app.use("*", compress());
 
 // Security headers
 app.use("*", async (c, next) => {

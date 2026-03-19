@@ -115,6 +115,9 @@ export const useChat = () => {
   const abortRef = useRef<AbortController | null>(null);
   const keyRef = useRef<PlaygroundKey | null>(null);
   const sessionIdRef = useRef(crypto.randomUUID());
+  const streamBufferRef = useRef("");
+  const streamReasoningBufferRef = useRef("");
+  const rafRef = useRef<number | null>(null);
   const queryClient = useQueryClient();
 
   // Keep refs for values used inside sendMessage to avoid stale closures
@@ -175,6 +178,14 @@ export const useChat = () => {
       };
 
       setMessages((prev) => [...prev, userMessage, assistantMessage]);
+      // Strip base64 data from stored messages to prevent memory growth
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.images?.length
+            ? { ...m, images: m.images.map((img) => ({ ...img, base64: "" })) }
+            : m
+        )
+      );
       setIsStreaming(true);
 
       const abortController = new AbortController();
@@ -322,21 +333,71 @@ export const useChat = () => {
               finalUsage = chunk.usage;
             }
             if (chunk.text || chunk.reasoning) {
-              setMessages((prev) => {
-                const idx = prev.length - 1;
-                const msg = prev[idx];
-                if (!msg || msg.id !== assistantMessage.id) return prev;
-                const updated = [...prev];
-                updated[idx] = {
-                  ...msg,
-                  content: msg.content + (chunk.text ?? ""),
-                  ...(chunk.reasoning
-                    ? { reasoning: (msg.reasoning ?? "") + chunk.reasoning }
-                    : {})
-                };
-                return updated;
-              });
+              streamBufferRef.current += chunk.text ?? "";
+              if (chunk.reasoning) {
+                streamReasoningBufferRef.current += chunk.reasoning;
+              }
+              if (!rafRef.current) {
+                rafRef.current = requestAnimationFrame(() => {
+                  const bufferedText = streamBufferRef.current;
+                  const bufferedReasoning =
+                    streamReasoningBufferRef.current;
+                  streamBufferRef.current = "";
+                  streamReasoningBufferRef.current = "";
+                  rafRef.current = null;
+                  setMessages((prev) => {
+                    const idx = prev.length - 1;
+                    const msg = prev[idx];
+                    if (!msg || msg.id !== assistantMessage.id) return prev;
+                    const updated = [...prev];
+                    updated[idx] = {
+                      ...msg,
+                      content: msg.content + bufferedText,
+                      ...(bufferedReasoning
+                        ? {
+                            reasoning:
+                              (msg.reasoning ?? "") + bufferedReasoning
+                          }
+                        : {})
+                    };
+                    return updated;
+                  });
+                });
+              }
             }
+          }
+
+          // Flush any remaining buffered content after stream ends
+          if (rafRef.current) {
+            cancelAnimationFrame(rafRef.current);
+            rafRef.current = null;
+          }
+          if (
+            streamBufferRef.current ||
+            streamReasoningBufferRef.current
+          ) {
+            const remainingText = streamBufferRef.current;
+            const remainingReasoning =
+              streamReasoningBufferRef.current;
+            streamBufferRef.current = "";
+            streamReasoningBufferRef.current = "";
+            setMessages((prev) => {
+              const idx = prev.length - 1;
+              const msg = prev[idx];
+              if (!msg || msg.id !== assistantMessage.id) return prev;
+              const updated = [...prev];
+              updated[idx] = {
+                ...msg,
+                content: msg.content + remainingText,
+                ...(remainingReasoning
+                  ? {
+                      reasoning:
+                        (msg.reasoning ?? "") + remainingReasoning
+                    }
+                  : {})
+              };
+              return updated;
+            });
           }
 
           const elapsedMs = Math.round(performance.now() - startTime);

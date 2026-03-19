@@ -3,6 +3,7 @@
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
 import { GitBranch, Pencil, Plus, Trash2 } from "lucide-react";
+import { useMemo } from "react";
 import { TextMorph } from "torph/react";
 import type { RoutingRule } from "../hooks/use-routing-rules";
 import { CONDITION_LABELS } from "../hooks/use-routing-rules";

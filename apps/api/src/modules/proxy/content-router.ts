@@ -9,6 +9,7 @@ const rulesCache = new Map<
   { rules: (typeof routingRules.$inferSelect)[]; expiresAt: number }
 >();
 const RULES_CACHE_TTL = 30_000; // 30 seconds
+const RULES_CACHE_MAX = 500;
 
 interface Message {
   readonly content?: string;
@@ -60,6 +61,10 @@ export const evaluateRoutingRules = async (
         )
       )
       .orderBy(asc(routingRules.priority));
+    if (rulesCache.size >= RULES_CACHE_MAX) {
+      const firstKey = rulesCache.keys().next().value;
+      if (firstKey) rulesCache.delete(firstKey);
+    }
     rulesCache.set(cacheKey, {
       expiresAt: Date.now() + RULES_CACHE_TTL,
       rules

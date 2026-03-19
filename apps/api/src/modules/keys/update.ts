@@ -20,16 +20,6 @@ export const updateKey =
     const { name, rateLimitRpm, rateLimitRpd, isActive, expiresAt } =
       c.req.valid("json");
 
-    const [existing] = await db
-      .select({ id: virtualKeys.id })
-      .from(virtualKeys)
-      .where(and(eq(virtualKeys.id, id), eq(virtualKeys.organizationId, orgId)))
-      .limit(1);
-
-    if (!existing) {
-      throw new NotFoundError("Virtual key not found");
-    }
-
     const updates: Partial<typeof virtualKeys.$inferInsert> = {};
 
     if (name !== undefined) {
@@ -57,6 +47,10 @@ export const updateKey =
       .set(updates)
       .where(and(eq(virtualKeys.id, id), eq(virtualKeys.organizationId, orgId)))
       .returning();
+
+    if (!updated) {
+      throw new NotFoundError("Virtual key not found");
+    }
 
     const safeKeyData = safeKey(updated as NonNullable<typeof updated>);
     void publishEvent(orgId, "key.updated", safeKeyData);

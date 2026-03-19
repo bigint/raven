@@ -90,43 +90,40 @@ export const chatCompletionsHandler = (
       checkBudgets(db, redis, virtualKey.organizationId, virtualKey.id)
     ]);
 
-    // 5. Guardrails
+    // 5–7. Guardrails, provider resolution, and cache check run in parallel
     const messages = Array.isArray(parsedBody.messages)
       ? parsedBody.messages
       : [];
-    let guardrailWarnings: string[] = [];
-    let guardrailMatches: GuardrailMatch[] = [];
 
-    if (messages.length > 0) {
-      const result = await evaluateGuardrails(
-        db,
-        virtualKey.organizationId,
-        messages
-      ).catch(() => null);
-      if (result) {
-        guardrailWarnings = result.warnings;
-        guardrailMatches = result.matches;
-      }
-    }
-
-    // 6. Resolve provider config
     const fakeProxyPath = `/v1/proxy/${providerName}/chat/completions`;
-    const { decryptedApiKey, providerConfigId, providerConfigName } =
-      await resolveProvider(
+
+    const [guardrailResult, providerResult, cacheResult] = await Promise.all([
+      messages.length > 0
+        ? evaluateGuardrails(
+            db,
+            virtualKey.organizationId,
+            messages
+          ).catch(() => null)
+        : Promise.resolve(null),
+      resolveProvider(
         db,
         env,
         virtualKey.organizationId,
         fakeProxyPath,
         redis
-      );
+      ),
+      checkCache(
+        redis,
+        virtualKey.organizationId,
+        providerName,
+        parsedBody
+      )
+    ]);
 
-    // 7. Cache check
-    const cacheResult = await checkCache(
-      redis,
-      virtualKey.organizationId,
-      providerName,
-      parsedBody
-    );
+    const guardrailWarnings = guardrailResult?.warnings ?? [];
+    const guardrailMatches = guardrailResult?.matches ?? [];
+    const { decryptedApiKey, providerConfigId, providerConfigName } =
+      providerResult;
 
     if (cacheResult.hit) {
       return serveCacheHit(db, cacheResult, {

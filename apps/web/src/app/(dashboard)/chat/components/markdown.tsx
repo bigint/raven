@@ -10,7 +10,7 @@
 
 import { Check, Clipboard } from "lucide-react";
 import { Highlight, themes } from "prism-react-renderer";
-import { type ReactNode, useCallback, useState } from "react";
+import { type ReactNode, memo, useCallback, useState } from "react";
 
 // ---------------------------------------------------------------------------
 // Safe URL check — only http(s) and mailto links are allowed
@@ -227,7 +227,7 @@ const CodeBlock = ({
 // Main Markdown component
 // ---------------------------------------------------------------------------
 
-const Markdown = ({ content }: { readonly content: string }) => {
+const Markdown = memo(function Markdown({ content }: { readonly content: string }) {
   const lines = content.split("\n");
   const elements: ReactNode[] = [];
   let i = 0;
@@ -443,6 +443,6 @@ const Markdown = ({ content }: { readonly content: string }) => {
   }
 
   return <div>{elements}</div>;
-};
+});
 
 export { Markdown };

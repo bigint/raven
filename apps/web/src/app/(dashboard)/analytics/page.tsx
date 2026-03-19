@@ -5,9 +5,10 @@ import { PLAN_FEATURES } from "@raven/types";
 import { Button, PageHeader, PillTabs, Select, Spinner, Tabs } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Download, X } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { match } from "ts-pattern";
 import { subscriptionQueryOptions } from "@/app/(dashboard)/billing/hooks/use-billing";
 import { keysQueryOptions } from "@/app/(dashboard)/keys/hooks/use-keys";
@@ -16,9 +17,7 @@ import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
 import { CacheStats } from "./components/cache-stats";
 import { ModelsTable } from "./components/models-table";
 import { TokenBreakdown } from "./components/token-breakdown";
-import { TokenChart } from "./components/token-chart";
 import { TokenStats } from "./components/token-stats";
-import { ToolChart } from "./components/tool-chart";
 import { ToolSessionsTable } from "./components/tool-sessions-table";
 import { UsageBars } from "./components/usage-bars";
 import { UsageCharts } from "./components/usage-charts";
@@ -27,6 +26,24 @@ import { type GroupBy, useAdoption } from "./hooks/use-adoption";
 import { useAnalytics } from "./hooks/use-analytics";
 import { useModels } from "./hooks/use-models";
 import { useTools } from "./hooks/use-tools";
+
+const TokenChart = dynamic(
+  () =>
+    import("./components/token-chart").then((m) => ({ default: m.TokenChart })),
+  {
+    ssr: false,
+    loading: () => <div className="h-64 animate-pulse rounded-lg bg-muted" />
+  }
+);
+
+const ToolChart = dynamic(
+  () =>
+    import("./components/tool-chart").then((m) => ({ default: m.ToolChart })),
+  {
+    ssr: false,
+    loading: () => <div className="h-64 animate-pulse rounded-lg bg-muted" />
+  }
+);
 
 type AnalyticsTab = "overview" | "models" | "tools" | "adoption";
 
@@ -351,14 +368,20 @@ const AnalyticsPage = () => {
 
       <Tabs onChange={setTab} tabs={tabs} value={tab} />
 
-      {match(tab)
-        .with("overview", () => <OverviewTab keyId={keyId} />)
-        .with("models", () => <ModelsTab keyId={keyId} />)
-        .with("tools", () => <ToolsTab keyId={keyId} />)
-        .with("adoption", () =>
-          hasAdoption ? <AdoptionTab keyId={keyId} /> : null
-        )
-        .otherwise(() => null)}
+      <Suspense
+        fallback={
+          <div className="h-96 animate-pulse rounded-lg bg-muted" />
+        }
+      >
+        {match(tab)
+          .with("overview", () => <OverviewTab keyId={keyId} />)
+          .with("models", () => <ModelsTab keyId={keyId} />)
+          .with("tools", () => <ToolsTab keyId={keyId} />)
+          .with("adoption", () =>
+            hasAdoption ? <AdoptionTab keyId={keyId} /> : null
+          )
+          .otherwise(() => null)}
+      </Suspense>
     </div>
   );
 };

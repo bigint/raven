@@ -12,23 +12,16 @@ export const deleteGuardrail = (db: Database) => async (c: AppContext) => {
   const user = c.get("user");
   const id = c.req.param("id") as string;
 
-  const [existing] = await db
-    .select({ id: guardrailRules.id })
-    .from(guardrailRules)
-    .where(
-      and(eq(guardrailRules.id, id), eq(guardrailRules.organizationId, orgId))
-    )
-    .limit(1);
-
-  if (!existing) {
-    throw new NotFoundError("Guardrail rule not found");
-  }
-
-  await db
+  const [deleted] = await db
     .delete(guardrailRules)
     .where(
       and(eq(guardrailRules.id, id), eq(guardrailRules.organizationId, orgId))
-    );
+    )
+    .returning({ id: guardrailRules.id });
+
+  if (!deleted) {
+    throw new NotFoundError("Guardrail rule not found");
+  }
 
   void publishEvent(orgId, "guardrail.deleted", { id });
   void logAudit(db, {

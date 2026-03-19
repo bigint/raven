@@ -1,16 +1,21 @@
 import type { Database } from "@raven/db";
 import { providerConfigs, requestLogs } from "@raven/db";
 import { and, avg, count, eq, isNull, sum } from "drizzle-orm";
+import type { Redis } from "ioredis";
 import type { z } from "zod";
+import { cachedQuery } from "@/lib/cache-utils";
 import type { AppContextWithQuery } from "@/lib/types";
 
 import { parseDateRange } from "./helpers";
 import type { dateRangeQuerySchema } from "./schema";
 
+const USAGE_TTL = 30;
+
 type Query = z.infer<typeof dateRangeQuerySchema>;
 
 export const getUsage =
-  (db: Database) => async (c: AppContextWithQuery<Query>) => {
+  (db: Database, redis?: Redis) =>
+  async (c: AppContextWithQuery<Query>) => {
     const orgId = c.get("orgId");
     const { from, to } = c.req.valid("query");
 
@@ -21,27 +26,36 @@ export const getUsage =
       ...dateConditions
     );
 
-    const rows = await db
-      .select({
-        avgLatencyMs: avg(requestLogs.latencyMs),
-        model: requestLogs.model,
-        provider: requestLogs.provider,
-        providerConfigName: providerConfigs.name,
-        totalCachedTokens: sum(requestLogs.cachedTokens),
-        totalCost: sum(requestLogs.cost),
-        totalInputTokens: sum(requestLogs.inputTokens),
-        totalOutputTokens: sum(requestLogs.outputTokens),
-        totalReasoningTokens: sum(requestLogs.reasoningTokens),
-        totalRequests: count()
-      })
-      .from(requestLogs)
-      .leftJoin(
-        providerConfigs,
-        eq(requestLogs.providerConfigId, providerConfigs.id)
-      )
-      .where(where)
-      .groupBy(requestLogs.provider, requestLogs.model, providerConfigs.name)
-      .orderBy(requestLogs.provider, requestLogs.model);
+    const queryFn = async () => {
+      const rows = await db
+        .select({
+          avgLatencyMs: avg(requestLogs.latencyMs),
+          model: requestLogs.model,
+          provider: requestLogs.provider,
+          providerConfigName: providerConfigs.name,
+          totalCachedTokens: sum(requestLogs.cachedTokens),
+          totalCost: sum(requestLogs.cost),
+          totalInputTokens: sum(requestLogs.inputTokens),
+          totalOutputTokens: sum(requestLogs.outputTokens),
+          totalReasoningTokens: sum(requestLogs.reasoningTokens),
+          totalRequests: count()
+        })
+        .from(requestLogs)
+        .leftJoin(
+          providerConfigs,
+          eq(requestLogs.providerConfigId, providerConfigs.id)
+        )
+        .where(where)
+        .groupBy(requestLogs.provider, requestLogs.model, providerConfigs.name)
+        .orderBy(requestLogs.provider, requestLogs.model);
 
-    return c.json({ data: rows });
+      return rows;
+    };
+
+    const cacheKey = `analytics:usage:${orgId}:${from ?? ""}:${to ?? ""}`;
+    const data = redis
+      ? await cachedQuery(redis, cacheKey, USAGE_TTL, queryFn)
+      : await queryFn();
+
+    return c.json({ data });
   };

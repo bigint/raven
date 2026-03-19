@@ -19,9 +19,17 @@ export const createProvidersModule = (db: Database, env: Env, redis: Redis) => {
   app.get("/", listProviders(db));
   app.get("/:id/models", listProviderModels(db, env, redis));
   app.post("/:id/test", testProvider(db, env));
-  app.post("/", jsonValidator(createProviderSchema), createProvider(db, env));
-  app.put("/:id", jsonValidator(updateProviderSchema), updateProvider(db, env));
-  app.delete("/:id", deleteProvider(db));
+  app.post(
+    "/",
+    jsonValidator(createProviderSchema),
+    createProvider(db, env, redis)
+  );
+  app.put(
+    "/:id",
+    jsonValidator(updateProviderSchema),
+    updateProvider(db, env, redis)
+  );
+  app.delete("/:id", deleteProvider(db, redis));
 
   return app;
 };

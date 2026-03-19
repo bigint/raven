@@ -4,6 +4,7 @@ import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
 import { Eye, MessageSquare, Pencil, Play, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import type { Prompt } from "../hooks/use-prompts";
 
 interface PromptListProps {

@@ -12,21 +12,16 @@ export const deleteRoutingRule = (db: Database) => async (c: AppContext) => {
   const user = c.get("user");
   const id = c.req.param("id") as string;
 
-  const [existing] = await db
-    .select({ id: routingRules.id })
-    .from(routingRules)
-    .where(and(eq(routingRules.id, id), eq(routingRules.organizationId, orgId)))
-    .limit(1);
-
-  if (!existing) {
-    throw new NotFoundError("Routing rule not found");
-  }
-
-  await db
+  const [deleted] = await db
     .delete(routingRules)
     .where(
       and(eq(routingRules.id, id), eq(routingRules.organizationId, orgId))
-    );
+    )
+    .returning({ id: routingRules.id });
+
+  if (!deleted) {
+    throw new NotFoundError("Routing rule not found");
+  }
 
   void publishEvent(orgId, "routing-rule.deleted", { id });
   void logAudit(db, {

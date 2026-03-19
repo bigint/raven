@@ -73,6 +73,35 @@ const fileToBase64 = (file: File): Promise<string> =>
     reader.readAsDataURL(file);
   });
 
+const compressImage = (
+  file: File,
+  maxDim = 2048,
+  quality = 0.8
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        const ratio = Math.min(maxDim / width, maxDim / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return reject(new Error("Canvas not supported"));
+      ctx.drawImage(img, 0, 0, width, height);
+      const objectUrl = img.src;
+      resolve(canvas.toDataURL("image/jpeg", quality));
+      URL.revokeObjectURL(objectUrl);
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+};
+
 export const ChatInput = ({
   disabled,
   isStreaming,
@@ -118,6 +147,7 @@ export const ChatInput = ({
     if ((!value.trim() && images.length === 0) || disabled) return;
     onSend(value, images.length > 0 ? images : undefined);
     setValue("");
+    images.forEach((img) => URL.revokeObjectURL(img.preview));
     setImages([]);
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -139,7 +169,9 @@ export const ChatInput = ({
       if (!ACCEPTED_TYPES.includes(file.type)) continue;
       if (file.size > MAX_IMAGE_SIZE) continue;
 
-      const base64 = await fileToBase64(file);
+      const base64 = file.type.startsWith("image/")
+        ? await compressImage(file)
+        : await fileToBase64(file);
       newImages.push({
         base64,
         id: crypto.randomUUID(),

@@ -4,6 +4,7 @@ import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable, EmptyState } from "@raven/ui";
 import { BarChart3, Check, Key, Pencil, Plus, Trash2, X } from "lucide-react";
 import Link from "next/link";
+import { useMemo } from "react";
 import { TextMorph } from "torph/react";
 import { formatDate } from "@/lib/format";
 import type { VirtualKey } from "../hooks/use-keys";

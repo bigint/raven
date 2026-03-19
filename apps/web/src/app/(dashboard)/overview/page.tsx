@@ -3,6 +3,7 @@
 import { PageHeader, Spinner } from "@raven/ui";
 import { Key, Network, TrendingUp } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 import { TextMorph } from "torph/react";
 import { match } from "ts-pattern";
 import { RecentRequests } from "./components/recent-requests";
@@ -34,31 +35,43 @@ const OverviewPage = () => {
       <StatCards loading={stats.isPending} stats={stats.data ?? null} />
 
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {match(usage)
-          .with({ isError: true }, ({ error }) => (
-            <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-              {error.message}
-            </div>
-          ))
-          .otherwise(() => (
-            <UsageChart
-              loading={usage.isPending}
-              totalRequests={totalRequests}
-              usage={usage.data ?? []}
-            />
-          ))}
-        {match(requests)
-          .with({ isError: true }, ({ error }) => (
-            <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-              {error.message}
-            </div>
-          ))
-          .otherwise(() => (
-            <RecentRequests
-              loading={requests.isPending}
-              requests={requests.data ?? []}
-            />
-          ))}
+        <Suspense
+          fallback={
+            <div className="h-64 animate-pulse rounded-lg bg-muted" />
+          }
+        >
+          {match(usage)
+            .with({ isError: true }, ({ error }) => (
+              <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {error.message}
+              </div>
+            ))
+            .otherwise(() => (
+              <UsageChart
+                loading={usage.isPending}
+                totalRequests={totalRequests}
+                usage={usage.data ?? []}
+              />
+            ))}
+        </Suspense>
+        <Suspense
+          fallback={
+            <div className="h-64 animate-pulse rounded-lg bg-muted" />
+          }
+        >
+          {match(requests)
+            .with({ isError: true }, ({ error }) => (
+              <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {error.message}
+              </div>
+            ))
+            .otherwise(() => (
+              <RecentRequests
+                loading={requests.isPending}
+                requests={requests.data ?? []}
+              />
+            ))}
+        </Suspense>
       </div>
 
       {/* Quick Actions */}
