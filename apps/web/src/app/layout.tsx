@@ -9,7 +9,29 @@ const outfit = Outfit({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   description: "Unified AI gateway for teams",
-  title: "Raven - AI Gateway"
+  metadataBase: new URL("https://ravenai.dev"),
+  openGraph: {
+    description:
+      "Route, monitor, and manage AI API calls across OpenAI, Anthropic, Google, and more.",
+    siteName: "Raven",
+    title: "Raven - AI Gateway",
+    type: "website",
+    url: "https://ravenai.dev"
+  },
+  robots: {
+    follow: true,
+    index: true
+  },
+  title: {
+    default: "Raven - AI Gateway",
+    template: "%s | Raven"
+  },
+  twitter: {
+    card: "summary_large_image",
+    description:
+      "Route, monitor, and manage AI API calls across OpenAI, Anthropic, Google, and more.",
+    title: "Raven - AI Gateway"
+  }
 };
 
 const RootLayout = ({ children }: { children: ReactNode }) => {

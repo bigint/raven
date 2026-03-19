@@ -33,7 +33,22 @@ const OrgList = ({
   orgs,
   orgsError,
   orgsLoading
-}: OrgListProps) => (
+}: OrgListProps) => {
+  const router = useRouter();
+
+  const handleSwitchOrg = (org: Org) => {
+    useOrgStore.getState().setActiveOrg({
+      id: org.id,
+      name: org.name,
+      plan: org.plan,
+      role: org.role,
+      slug: org.slug
+    });
+    router.push("/overview");
+    router.refresh();
+  };
+
+  return (
   <div className="rounded-xl border border-border">
     <div className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
       <div className="flex items-center gap-3">
@@ -134,6 +149,7 @@ const OrgList = ({
       )}
     </div>
   </div>
-);
+  );
+};
 
 export { getRoleBadge, OrgList };
