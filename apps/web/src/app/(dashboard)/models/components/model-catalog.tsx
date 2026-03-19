@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ModelIcon, ProviderIcon } from "@/components/model-icon";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { api } from "@/lib/api";
 import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
 
@@ -73,13 +74,11 @@ const formatProviderName = (slug: string): string => {
 };
 
 const CopyableSlug = ({ value }: { value: string }) => {
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard(1500);
 
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigator.clipboard.writeText(value);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    copy(value);
   };
 
   return (

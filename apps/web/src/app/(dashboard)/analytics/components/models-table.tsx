@@ -3,18 +3,16 @@
 import { PROVIDER_LABELS } from "@raven/types";
 import { Spinner } from "@raven/ui";
 import { Check, Copy, Cpu } from "lucide-react";
-import { useState } from "react";
 import { ModelIcon } from "@/components/model-icon";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { formatTimeAgo } from "@/lib/format";
 import type { ModelRow } from "../hooks/use-models";
 
 const CopyableId = ({ value }: { value: string }) => {
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard(1500);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(value);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    copy(value);
   };
 
   return (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { API_URL, api } from "@/lib/api";
 import type {
   ImageAttachment,
@@ -124,6 +124,16 @@ export const useChat = () => {
   systemPromptRef.current = systemPrompt;
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
+
+  useEffect(() => {
+    return () => {
+      const key = keyRef.current;
+      if (key) {
+        api.delete(`/v1/keys/${key.id}`).catch(() => {});
+        keyRef.current = null;
+      }
+    };
+  }, []);
 
   const ensureKey = async (): Promise<PlaygroundKey> => {
     if (keyRef.current) return keyRef.current;
