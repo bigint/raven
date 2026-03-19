@@ -46,8 +46,8 @@ const TeamPageContent = () => {
     router.replace(`?${params.toString()}`);
   };
 
-  const membersQuery = useQuery(membersQueryOptions());
-  const invitationsQuery = useQuery(invitationsQueryOptions());
+  const membersQuery = useQuery({ ...membersQueryOptions(), enabled: activeTab === "members" });
+  const invitationsQuery = useQuery({ ...invitationsQueryOptions(), enabled: activeTab === "invitations" });
 
   const inviteMember = useInviteMember();
   const deleteMember = useDeleteMember();

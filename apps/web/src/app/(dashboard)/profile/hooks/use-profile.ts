@@ -24,13 +24,18 @@ export const profileInvitationsQueryOptions = () =>
     queryKey: ["user", "invitations"]
   });
 
-export const useUpdateProfile = () =>
-  useMutation({
+export const useUpdateProfile = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
     mutationFn: (data: { name: string }) => api.put("/v1/user/profile", data),
     onError: (err) => {
       toast.error(err.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["session"] });
     }
   });
+};
 
 export const useAcceptInvitation = () => {
   const queryClient = useQueryClient();
