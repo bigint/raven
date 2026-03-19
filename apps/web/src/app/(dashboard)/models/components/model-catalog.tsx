@@ -6,7 +6,7 @@ import {
   type ModelCategory,
   type ModelDefinition
 } from "@raven/types";
-import { Badge, Select } from "@raven/ui";
+import { Badge, Button, EmptyState, Select } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import {
   Brain,
@@ -14,11 +14,13 @@ import {
   Copy,
   Eye,
   MessageSquare,
+  Network,
   Search,
   Sparkles,
   Wrench,
   Zap
 } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ModelIcon, ProviderIcon } from "@/components/model-icon";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
@@ -257,6 +259,24 @@ export const ModelCatalog = () => {
           />
         ))}
       </div>
+    );
+  }
+
+  if (models.length === 0) {
+    return (
+      <EmptyState
+        action={
+          <Link href="/providers">
+            <Button>
+              <Network className="size-4" />
+              Add Provider
+            </Button>
+          </Link>
+        }
+        description="Connect an AI provider to browse available models."
+        icon={<Network className="size-8" />}
+        title="Connect a provider first"
+      />
     );
   }
 
