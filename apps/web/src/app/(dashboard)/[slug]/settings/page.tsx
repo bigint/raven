@@ -1,5 +1,6 @@
 "use client";
 
+import type { Tab } from "@raven/ui";
 import { Button, PageHeader, Spinner, Tabs } from "@raven/ui";
 import { Download } from "lucide-react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
@@ -12,7 +13,7 @@ import { OrgSettingsForm } from "./components/org-settings-form";
 import { PlanSubscription } from "./components/plan-subscription";
 import { useOrgSettings } from "./hooks/use-org-settings";
 
-const TABS = [
+const TABS: Tab[] = [
   { label: "General", value: "general" },
   { label: "Billing", value: "billing" },
   { label: "Danger Zone", value: "danger" }
