@@ -17,6 +17,7 @@ import {
   Receipt,
   Replace,
   Route,
+  ScrollText,
   Settings,
   Shield,
   SquareTerminal,
@@ -73,6 +74,12 @@ const NAV_ITEMS: NavItem[] = [
     label: "Guardrails"
   },
   { href: "/team", icon: Users, label: "Team" },
+  {
+    gate: (plan) => PLAN_FEATURES[plan].hasAuditLogs,
+    href: "/audit-logs",
+    icon: ScrollText,
+    label: "Audit Logs"
+  },
   { href: "/billing", icon: Receipt, label: "Billing" },
   {
     gate: (plan) => PLAN_FEATURES[plan].hasWebhooks,

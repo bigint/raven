@@ -6,6 +6,7 @@ const AUTH_ROUTES = ["/sign-in", "/sign-up"];
 
 const PROTECTED_PREFIXES = [
   "/analytics",
+  "/audit-logs",
   "/billing",
   "/budgets",
   "/chat",

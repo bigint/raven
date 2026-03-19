@@ -107,7 +107,7 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
   team: {
     analyticsRetentionDays: 90,
     hasAdoption: true,
-    hasAuditLogs: false,
+    hasAuditLogs: true,
     hasGuardrails: true,
     hasModelAliases: true,
     hasWebhooks: true,
