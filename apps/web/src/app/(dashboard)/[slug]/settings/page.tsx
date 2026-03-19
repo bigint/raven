@@ -2,10 +2,11 @@
 
 import { Button, PageHeader, PillTabs, Spinner } from "@raven/ui";
 import { Download } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { useOrgStore } from "@/stores/org";
 import { DangerZone } from "./components/danger-zone";
 import { OrgSettingsForm } from "./components/org-settings-form";
 import { PlanSubscription } from "./components/plan-subscription";
@@ -19,7 +20,15 @@ const TABS = [
 
 const OrgSettingsPage = () => {
   const router = useRouter();
+  const params = useParams<{ slug: string }>();
+  const activeOrg = useOrgStore((s) => s.activeOrg);
   const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (activeOrg && params.slug !== activeOrg.slug) {
+      router.replace(`/${activeOrg.slug}/settings`);
+    }
+  }, [activeOrg, params.slug, router]);
   const tab = searchParams.get("tab") ?? "general";
   const [exporting, setExporting] = useState(false);
 
