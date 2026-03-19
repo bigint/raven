@@ -90,7 +90,7 @@ export const sessionDetailQueryOptions = (sessionId: string) =>
     enabled: !!sessionId,
     queryFn: () =>
       api.get<SessionRequest[]>(`/v1/analytics/sessions/${sessionId}`),
-    queryKey: ["session", sessionId]
+    queryKey: ["session", { sessionId }]
   });
 
 export const useToggleStar = () => {
@@ -148,7 +148,7 @@ export const useLogs = () => {
     initialPageParam: 1,
     queryFn: ({ pageParam }) =>
       api.get<LogsResponse>(buildQueryUrl(pageParam as number)),
-    queryKey: ["logs", dateRange, pageSize, customFrom, customTo]
+    queryKey: ["logs", { customFrom, customTo, pageSize, range: dateRange }]
   });
 
   return {
