@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import type { CatalogModel } from "./use-chat";
+import type { CatalogModel } from "@/lib/use-models";
 
 interface UseInitialModelSelectionParams {
   readonly models: readonly CatalogModel[];

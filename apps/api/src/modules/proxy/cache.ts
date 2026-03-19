@@ -88,6 +88,7 @@ export const serveCacheHit = (
   db: Database,
   cacheResult: CacheCheckResult,
   opts: {
+    endUser: string | null;
     guardrailMatches: GuardrailMatch[];
     guardrailWarnings: string[];
     method: string;
@@ -101,6 +102,7 @@ export const serveCacheHit = (
     redis: Redis;
     sessionHeader: string | null;
     startTime: number;
+    userAgent: string | null;
     virtualKeyId: string;
   }
 ): Response => {
@@ -114,6 +116,7 @@ export const serveCacheHit = (
       cachedTokens: usage.cachedTokens,
       cacheHit: true,
       cost: 0,
+      endUser: opts.endUser,
       guardrailMatches:
         opts.guardrailMatches.length > 0 ? opts.guardrailMatches : undefined,
       hasImages: analysis.hasImages,
@@ -134,6 +137,7 @@ export const serveCacheHit = (
       statusCode: 200,
       toolCount: analysis.toolCount,
       toolNames: analysis.toolNames,
+      userAgent: opts.userAgent,
       virtualKeyId: opts.virtualKeyId
     },
     { redis: opts.redis }

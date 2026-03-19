@@ -116,6 +116,7 @@ export const getSessionById = (db: Database) => async (c: AppContext) => {
       createdAt: requestLogs.createdAt,
       id: requestLogs.id,
       inputTokens: requestLogs.inputTokens,
+      isStarred: requestLogs.isStarred,
       latencyMs: requestLogs.latencyMs,
       method: requestLogs.method,
       model: requestLogs.model,

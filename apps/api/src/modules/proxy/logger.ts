@@ -22,12 +22,14 @@ export interface LogData {
   latencyMs: number;
   cachedTokens: number;
   cacheHit: boolean;
+  endUser: string | null;
   hasImages: boolean;
   imageCount: number;
   hasToolUse: boolean;
   toolCount: number;
   toolNames: readonly string[];
   sessionId: string | null;
+  userAgent: string | null;
   guardrailMatches?: readonly {
     ruleName: string;
     ruleType: string;
@@ -47,6 +49,7 @@ export const logProxyRequest = async (
         cachedTokens: data.cachedTokens,
         cacheHit: data.cacheHit,
         cost: data.cost.toFixed(6),
+        endUser: data.endUser,
         hasImages: data.hasImages,
         hasToolUse: data.hasToolUse,
         imageCount: data.imageCount,
@@ -64,6 +67,7 @@ export const logProxyRequest = async (
         statusCode: data.statusCode,
         toolCount: data.toolCount,
         toolNames: data.toolNames.length > 0 ? [...data.toolNames] : undefined,
+        userAgent: data.userAgent,
         virtualKeyId: data.virtualKeyId
       })
       .returning();

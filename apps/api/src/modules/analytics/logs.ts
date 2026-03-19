@@ -35,6 +35,7 @@ export const getLogs =
       isNotNull(requestLogs.sessionId),
       isNull(requestLogs.deletedAt),
       ...dateConditions,
+      ...(query.endUser ? [eq(requestLogs.endUser, query.endUser)] : []),
       ...(query.virtualKeyId
         ? [eq(requestLogs.virtualKeyId, query.virtualKeyId)]
         : []),
@@ -63,6 +64,7 @@ export const getLogs =
           sessionId: requestLogs.sessionId,
           startTime: min(requestLogs.createdAt).as("start_time"),
           toolUses: sum(requestLogs.toolCount).as("tool_uses"),
+          totalCost: sum(requestLogs.cost).as("total_cost"),
           userAgent:
             sql<string>`(array_agg(${requestLogs.userAgent} ORDER BY ${requestLogs.createdAt} DESC))[1]`.as(
               "user_agent"
@@ -106,6 +108,7 @@ export const getLogs =
         sessionId: row.sessionId,
         startTime: row.startTime,
         toolUses: Number(row.toolUses ?? 0),
+        totalCost: row.totalCost ?? "0",
         userAgent: row.userAgent ?? null,
         virtualKeyId: row.virtualKeyId
       })),

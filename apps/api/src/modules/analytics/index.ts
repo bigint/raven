@@ -17,6 +17,7 @@ import {
   sessionsQuerySchema
 } from "./schema";
 import { getSessionById, getSessions } from "./sessions";
+import { toggleStar } from "./star";
 import { getStats } from "./stats";
 import { getToolSessions, getToolStats } from "./tools";
 import { getUsage } from "./usage";
@@ -26,7 +27,8 @@ export const createAnalyticsModule = (db: Database) => {
 
   // Clamp analytics date range to plan retention limit
   app.use("*", async (c, next) => {
-    if (c.req.path.endsWith("/requests/live")) return next();
+    if (c.req.path.endsWith("/requests/live") || c.req.path.endsWith("/star"))
+      return next();
     const orgId = c.get("orgId");
     const from = c.req.query("from");
     const clamped = await clampAnalyticsRetention(db, orgId, from);
@@ -43,6 +45,7 @@ export const createAnalyticsModule = (db: Database) => {
   app.get("/cache", queryValidator(dateRangeQuerySchema), getCache(db));
   app.get("/requests/live", getRequestsLive(db));
   app.get("/requests", queryValidator(requestsQuerySchema), getRequests(db));
+  app.patch("/requests/:id/star", toggleStar(db));
   app.get("/sessions", queryValidator(sessionsQuerySchema), getSessions(db));
   app.get("/sessions/:sessionId", getSessionById(db));
   app.get("/logs", queryValidator(logsQuerySchema), getLogs(db));

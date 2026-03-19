@@ -1,9 +1,10 @@
 "use client";
 
-import { Badge, Button, Input, Modal, Textarea } from "@raven/ui";
+import { Badge, Button, Modal, Select, Textarea } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { type FormEvent, useState } from "react";
+import { useModelOptions } from "@/lib/use-models";
 import type { Prompt } from "../hooks/use-prompts";
 import {
   promptQueryOptions,
@@ -19,6 +20,7 @@ interface PromptDetailProps {
 
 const PromptDetail = ({ prompt, open, onClose }: PromptDetailProps) => {
   const { data: detail } = useQuery(promptQueryOptions(prompt.id));
+  const modelOptions = useModelOptions();
   const activateMutation = useActivateVersion();
   const createVersionMutation = useCreateVersion();
 
@@ -104,11 +106,13 @@ const PromptDetail = ({ prompt, open, onClose }: PromptDetailProps) => {
               rows={6}
               value={newContent}
             />
-            <Input
+            <Select
               id="new-version-model"
               label="Model (optional)"
-              onChange={(e) => setNewModel(e.target.value)}
-              placeholder="e.g. gpt-4o"
+              onChange={setNewModel}
+              options={modelOptions}
+              placeholder="Select a model..."
+              searchable
               value={newModel}
             />
             <div className="flex justify-end gap-2">

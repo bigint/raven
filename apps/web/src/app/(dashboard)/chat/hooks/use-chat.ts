@@ -1,6 +1,6 @@
 "use client";
 
-import { queryOptions, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import { API_URL, api } from "@/lib/api";
 import type {
@@ -18,13 +18,6 @@ interface DisplayMessage {
   readonly role: "assistant" | "user";
 }
 
-export interface CatalogModel {
-  readonly id: string;
-  readonly slug: string;
-  readonly name: string;
-  readonly provider: string;
-}
-
 interface PlaygroundKey {
   readonly id: string;
   readonly key: string;
@@ -38,12 +31,6 @@ type Message = {
   role: "user" | "assistant" | "system";
   content: string | ContentPart[];
 };
-
-export const catalogModelsQueryOptions = () =>
-  queryOptions({
-    queryFn: () => api.get<CatalogModel[]>("/v1/available-models"),
-    queryKey: ["available-models"]
-  });
 
 const PLAYGROUND_KEY_TTL_MS = 3_600_000; // 1 hour
 

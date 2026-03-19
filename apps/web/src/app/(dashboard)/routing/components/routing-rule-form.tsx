@@ -3,6 +3,7 @@
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
 import { type FormEvent, useState } from "react";
 import { TextMorph } from "torph/react";
+import { useModelOptions } from "@/lib/use-models";
 import type { RoutingRule } from "../hooks/use-routing-rules";
 import {
   CONDITION_OPTIONS,
@@ -57,6 +58,7 @@ const RoutingRuleForm = ({
   );
   const [formError, setFormError] = useState<string | null>(null);
 
+  const modelOptions = useModelOptions();
   const createMutation = useCreateRoutingRule();
   const updateMutation = useUpdateRoutingRule();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
@@ -146,18 +148,22 @@ const RoutingRuleForm = ({
         />
 
         <div className="grid grid-cols-2 gap-4">
-          <Input
+          <Select
             id="source-model"
             label="Source Model"
-            onChange={(e) => update("sourceModel", e.target.value)}
-            placeholder="gpt-4o"
+            onChange={(v) => update("sourceModel", v)}
+            options={modelOptions}
+            placeholder="Select model..."
+            searchable
             value={form.sourceModel}
           />
-          <Input
+          <Select
             id="target-model"
             label="Target Model"
-            onChange={(e) => update("targetModel", e.target.value)}
-            placeholder="gpt-4o-mini"
+            onChange={(v) => update("targetModel", v)}
+            options={modelOptions}
+            placeholder="Select model..."
+            searchable
             value={form.targetModel}
           />
         </div>

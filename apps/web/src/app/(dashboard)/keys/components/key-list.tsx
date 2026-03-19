@@ -2,7 +2,8 @@
 
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable, EmptyState } from "@raven/ui";
-import { Check, Key, Pencil, Plus, Trash2, X } from "lucide-react";
+import { BarChart3, Check, Key, Pencil, Plus, Trash2, X } from "lucide-react";
+import Link from "next/link";
 import { TextMorph } from "torph/react";
 import { formatDate } from "@/lib/format";
 import type { VirtualKey } from "../hooks/use-keys";
@@ -139,6 +140,16 @@ const KeyList = ({
             key: "actions",
             render: (key) => (
               <div className="flex items-center justify-end gap-1">
+                <Link href={`/analytics?keyId=${key.id}`}>
+                  <Button
+                    size="sm"
+                    title="View analytics"
+                    type="button"
+                    variant="ghost"
+                  >
+                    <BarChart3 className="size-4" />
+                  </Button>
+                </Link>
                 <Button
                   onClick={() => onEdit(key)}
                   size="sm"

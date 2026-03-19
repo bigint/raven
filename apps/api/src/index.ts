@@ -29,6 +29,7 @@ import {
 import { createBudgetsModule } from "./modules/budgets/index";
 import { createGuardrailsModule } from "./modules/guardrails/index";
 import { createKeysModule } from "./modules/keys/index";
+import { createModelAliasesModule } from "./modules/model-aliases/index";
 import { listAvailableModels } from "./modules/models/available";
 import { createModelsModule } from "./modules/models/index";
 import { createOpenAICompatModule } from "./modules/openai-compat/index";
@@ -75,9 +76,13 @@ app.use("*", async (c, next) => {
   if (contentLength && Number.parseInt(contentLength, 10) > 10 * 1024 * 1024) {
     return c.json(
       {
-        error: { code: "PAYLOAD_TOO_LARGE", message: "Request body too large" }
+        detail: "Request body too large",
+        instance: c.req.path,
+        status: 413,
+        title: "Request body too large",
+        type: "about:blank"
       },
-      413
+      { headers: { "Content-Type": "application/problem+json" }, status: 413 }
     );
   }
   return next();
@@ -103,24 +108,27 @@ app.use("*", async (c, next) => {
   c.header("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
 });
 
-// Global error handler
+// Global error handler (RFC 9457 Problem Details)
 app.onError((err, c) => {
+  const instance = c.req.path;
+
   if (err instanceof AppError) {
-    return c.json(
-      {
-        error: {
-          code: err.code,
-          message: err.message,
-          ...(err.details ? { details: err.details } : {})
-        }
-      },
-      err.statusCode as 400 | 401 | 403 | 404 | 409 | 429 | 500
-    );
+    return c.json(err.toProblemDetails(instance), {
+      headers: { "Content-Type": "application/problem+json" },
+      status: err.statusCode as 400 | 401 | 403 | 404 | 409 | 412 | 429 | 500
+    });
   }
+
   console.error("Unhandled error:", err);
   return c.json(
-    { error: { code: "INTERNAL_ERROR", message: "Internal server error" } },
-    500
+    {
+      detail: "Internal server error",
+      instance,
+      status: 500,
+      title: "Internal server error",
+      type: "about:blank"
+    },
+    { headers: { "Content-Type": "application/problem+json" }, status: 500 }
   );
 });
 
@@ -161,6 +169,7 @@ v1.use("*", createTenantMiddleware(db));
 v1.get("/available-models", listAvailableModels(db));
 v1.route("/providers", createProvidersModule(db, env, redis));
 v1.route("/keys", createKeysModule(db));
+v1.route("/model-aliases", createModelAliasesModule(db));
 v1.route("/prompts", createPromptsModule(db));
 v1.route("/budgets", createBudgetsModule(db));
 v1.route("/guardrails", createGuardrailsModule(db));
@@ -174,7 +183,16 @@ v1.route("/routing-rules", createRoutingRulesModule(db));
 app.route("/v1", v1);
 
 app.notFound((c) =>
-  c.json({ error: { code: "NOT_FOUND", message: "Route not found" } }, 404)
+  c.json(
+    {
+      detail: "Route not found",
+      instance: c.req.path,
+      status: 404,
+      title: "Route not found",
+      type: "about:blank"
+    },
+    { headers: { "Content-Type": "application/problem+json" }, status: 404 }
+  )
 );
 
 serve({ fetch: app.fetch, port: env.API_PORT }, (info) => {

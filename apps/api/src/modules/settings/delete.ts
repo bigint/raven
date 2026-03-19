@@ -5,6 +5,7 @@ import {
   guardrailRules,
   invitations,
   members,
+  modelAliases,
   organizations,
   prompts,
   providerConfigs,
@@ -35,6 +36,7 @@ export const deleteSettings = (db: Database) => async (c: AppContext) => {
   await db.transaction(async (tx) => {
     // Hard delete: keys, providers, budgets, guardrails, prompts, routing, webhooks, invitations, members, subscriptions
     await Promise.all([
+      tx.delete(modelAliases).where(eq(modelAliases.organizationId, orgId)),
       tx.delete(virtualKeys).where(eq(virtualKeys.organizationId, orgId)),
       tx
         .delete(providerConfigs)

@@ -1,8 +1,9 @@
 "use client";
 
-import { Button, Input, Modal, Textarea } from "@raven/ui";
+import { Button, Input, Modal, Select, Textarea } from "@raven/ui";
 import { type FormEvent, useState } from "react";
 import { TextMorph } from "torph/react";
+import { useModelOptions } from "@/lib/use-models";
 import type { Prompt } from "../hooks/use-prompts";
 import { useCreatePrompt, useUpdatePrompt } from "../hooks/use-prompts";
 
@@ -37,6 +38,7 @@ const PromptForm = ({ open, onClose, editingPrompt }: PromptFormProps) => {
   );
   const [formError, setFormError] = useState<string | null>(null);
 
+  const modelOptions = useModelOptions();
   const createMutation = useCreatePrompt();
   const updateMutation = useUpdatePrompt();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
@@ -116,11 +118,13 @@ const PromptForm = ({ open, onClose, editingPrompt }: PromptFormProps) => {
               value={form.content}
             />
 
-            <Input
+            <Select
               id="prompt-model"
               label="Model (optional)"
-              onChange={(e) => update("model", e.target.value)}
-              placeholder="e.g. gpt-4o"
+              onChange={(v) => update("model", v)}
+              options={modelOptions}
+              placeholder="Select a model..."
+              searchable
               value={form.model}
             />
           </>

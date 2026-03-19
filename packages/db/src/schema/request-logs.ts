@@ -23,11 +23,13 @@ export const requestLogs = pgTable(
       .notNull()
       .defaultNow(),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
+    endUser: text("end_user"),
     hasImages: boolean("has_images").notNull().default(false),
     hasToolUse: boolean("has_tool_use").notNull().default(false),
     id: text("id").primaryKey().$defaultFn(createId),
     imageCount: integer("image_count").notNull().default(0),
     inputTokens: integer("input_tokens").notNull().default(0),
+    isStarred: boolean("is_starred").notNull().default(false),
     latencyMs: integer("latency_ms").notNull().default(0),
     method: text("method").notNull(),
     model: text("model").notNull(),

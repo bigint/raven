@@ -29,6 +29,7 @@ const MAX_PROVIDER_RETRIES = 2;
 export interface ExecuteInput {
   readonly db: Database;
   readonly redis: Redis;
+  readonly endUser: string | null;
   readonly env: Env;
   readonly startTime: number;
   readonly parsedBody: Record<string, unknown>;
@@ -45,6 +46,7 @@ export interface ExecuteInput {
   readonly method: string;
   readonly path: string;
   readonly sessionId: string | null;
+  readonly userAgent: string | null;
   readonly guardrailWarnings: readonly string[];
   readonly guardrailMatches: readonly GuardrailMatch[];
   readonly incomingHeaders: Readonly<Record<string, string>>;
@@ -76,6 +78,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
   const {
     db,
     redis,
+    endUser,
     env,
     startTime,
     parsedBody,
@@ -89,6 +92,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     method,
     path,
     sessionId,
+    userAgent,
     guardrailWarnings,
     guardrailMatches,
     incomingHeaders,
@@ -106,6 +110,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
 
   const baseLogData = {
     cacheHit: false,
+    endUser,
     guardrailMatches:
       guardrailMatches.length > 0 ? guardrailMatches : undefined,
     hasImages: contentAnalysis.hasImages,
@@ -119,6 +124,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     statusCode: 200,
     toolCount: contentAnalysis.toolCount,
     toolNames: [...contentAnalysis.toolNames],
+    userAgent,
     virtualKeyId: virtualKey.id
   };
 

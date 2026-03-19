@@ -2,12 +2,12 @@
 
 import { Badge, cn } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight, MessageSquare, Wrench } from "lucide-react";
+import { ChevronRight, MessageSquare, Star, Wrench } from "lucide-react";
 import { useState } from "react";
 import { ModelIcon } from "@/components/model-icon";
 import { formatTimeAgo } from "@/lib/format";
 import type { LogSession } from "../hooks/use-logs";
-import { sessionDetailQueryOptions } from "../hooks/use-logs";
+import { sessionDetailQueryOptions, useToggleStar } from "../hooks/use-logs";
 
 interface SessionRowProps {
   session: LogSession;
@@ -28,6 +28,7 @@ const getStatusBadge = (statusCode: number) => {
 
 export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
   const [expanded, setExpanded] = useState(false);
+  const toggleStar = useToggleStar();
 
   const { data: detail } = useQuery({
     ...sessionDetailQueryOptions(session.sessionId ?? ""),
@@ -100,6 +101,9 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
             <Wrench className="size-3.5 text-muted-foreground" />
           </span>
         </td>
+        <td className="px-5 py-4 text-right tabular-nums">
+          ${Number(session.totalCost).toFixed(4)}
+        </td>
         <td className="px-5 py-4 text-right text-sm text-muted-foreground whitespace-nowrap">
           {formatTimeAgo(session.endTime)}
         </td>
@@ -107,7 +111,7 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
 
       {expanded && (
         <tr>
-          <td className="bg-muted/20 px-0 py-0" colSpan={12}>
+          <td className="bg-muted/20 px-0 py-0" colSpan={13}>
             <div className="px-8 py-4">
               {requests.length === 0 ? (
                 <p className="py-4 text-center text-sm text-muted-foreground">
@@ -138,6 +142,7 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
                       <th className="px-3 py-2 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
                         Cost
                       </th>
+                      <th className="w-8 px-3 py-2" />
                     </tr>
                   </thead>
                   <tbody>
@@ -179,6 +184,24 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
                         </td>
                         <td className="px-3 py-2.5 text-right tabular-nums">
                           ${Number(req.cost).toFixed(6)}
+                        </td>
+                        <td className="px-3 py-2.5 text-center">
+                          <button
+                            className="rounded p-0.5 text-muted-foreground transition-colors hover:text-yellow-500"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleStar.mutate(req.id);
+                            }}
+                            type="button"
+                          >
+                            <Star
+                              className={cn(
+                                "size-3.5",
+                                req.isStarred &&
+                                  "fill-yellow-500 text-yellow-500"
+                              )}
+                            />
+                          </button>
                         </td>
                       </tr>
                     ))}

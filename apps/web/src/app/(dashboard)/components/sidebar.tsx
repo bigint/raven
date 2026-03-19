@@ -13,7 +13,9 @@ import {
   LayoutDashboard,
   Menu,
   Network,
+  Plug,
   Receipt,
+  Replace,
   Route,
   Settings,
   Shield,
@@ -55,6 +57,12 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/keys", icon: Key, label: "Keys" },
   { href: "/prompts", icon: FileText, label: "Prompts" },
   { href: "/models", icon: Cpu, label: "Models" },
+  {
+    gate: (plan) => PLAN_FEATURES[plan].hasModelAliases,
+    href: "/model-aliases",
+    icon: Replace,
+    label: "Model Aliases"
+  },
   { href: "/routing", icon: Route, label: "Routing" },
   { href: "/requests", icon: Activity, label: "Requests" },
   { href: "/budgets", icon: CreditCard, label: "Budgets" },
@@ -71,7 +79,8 @@ const NAV_ITEMS: NavItem[] = [
     href: "/webhooks",
     icon: Webhook,
     label: "Webhooks"
-  }
+  },
+  { href: "/integrations", icon: Plug, label: "Integrations" }
 ];
 
 interface SidebarProps {

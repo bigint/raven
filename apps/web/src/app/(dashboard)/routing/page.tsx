@@ -1,9 +1,11 @@
 "use client";
 
-import { Button, ConfirmDialog, PageHeader } from "@raven/ui";
+import { Button, ConfirmDialog, EmptyState, PageHeader } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Network, Plus } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
+import { useSetupStatus } from "@/lib/use-setup-status";
 import { RoutingRuleForm } from "./components/routing-rule-form";
 import { RoutingRuleList } from "./components/routing-rule-list";
 import {
@@ -13,6 +15,7 @@ import {
 } from "./hooks/use-routing-rules";
 
 const RoutingPage = () => {
+  const { hasProviders } = useSetupStatus();
   const {
     data: rules = [],
     isLoading,
@@ -50,13 +53,29 @@ const RoutingPage = () => {
         </div>
       )}
 
-      <RoutingRuleList
-        loading={isLoading}
-        onAdd={() => setFormOpen(true)}
-        onDelete={(id) => setDeleteId(id)}
-        onEdit={(r) => setEditingRule(r)}
-        rules={rules}
-      />
+      {!hasProviders && !isLoading && rules.length === 0 ? (
+        <EmptyState
+          action={
+            <Link href="/providers">
+              <Button>
+                <Network className="size-4" />
+                Add Provider
+              </Button>
+            </Link>
+          }
+          description="Connect an AI provider to set up model routing."
+          icon={<Network className="size-8" />}
+          title="Connect a provider first"
+        />
+      ) : (
+        <RoutingRuleList
+          loading={isLoading}
+          onAdd={() => setFormOpen(true)}
+          onDelete={(id) => setDeleteId(id)}
+          onEdit={(r) => setEditingRule(r)}
+          rules={rules}
+        />
+      )}
 
       <RoutingRuleForm
         editingRule={editingRule}

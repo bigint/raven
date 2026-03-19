@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const requestsQuerySchema = z.object({
+  endUser: z.string().optional(),
   from: z.string().optional(),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   model: z.string().optional(),
@@ -24,6 +25,7 @@ export const sessionsQuerySchema = z.object({
 });
 
 export const logsQuerySchema = z.object({
+  endUser: z.string().optional(),
   from: z.string().optional(),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   model: z.string().optional(),
@@ -34,6 +36,6 @@ export const logsQuerySchema = z.object({
 
 export const adoptionQuerySchema = z.object({
   from: z.string().optional(),
-  groupBy: z.enum(["key", "model"]).default("key"),
+  groupBy: z.enum(["key", "model", "userAgent"]).default("key"),
   to: z.string().optional()
 });

@@ -2,6 +2,7 @@ import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import { NotFoundError } from "@/lib/errors";
+import { generateETag } from "@/lib/etag";
 import { success } from "@/lib/response";
 import type { AppContext } from "@/lib/types";
 import { maskApiKey } from "./helpers";
@@ -22,5 +23,8 @@ export const getProvider = (db: Database) => async (c: AppContext) => {
     throw new NotFoundError("Provider not found");
   }
 
-  return success(c, { ...provider, apiKey: maskApiKey(provider.apiKey) });
+  const data = { ...provider, apiKey: maskApiKey(provider.apiKey) };
+  c.header("ETag", generateETag(data));
+
+  return success(c, data);
 };

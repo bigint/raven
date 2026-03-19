@@ -82,20 +82,23 @@ const fillToolGaps = (
   return result;
 };
 
-export const toolStatsQueryOptions = (range: DateRange) =>
+const keyFilter = (keyId?: string): string =>
+  keyId ? `&virtualKeyId=${keyId}` : "";
+
+export const toolStatsQueryOptions = (range: DateRange, keyId?: string) =>
   queryOptions({
     queryFn: async () => {
       const data = await api.get<ToolDailyStats[]>(
-        `/v1/analytics/tools/stats?from=${rangeToFrom(range)}`
+        `/v1/analytics/tools/stats?from=${rangeToFrom(range)}${keyFilter(keyId)}`
       );
       return fillToolGaps(data, range);
     },
-    queryKey: ["tools", "stats", range]
+    queryKey: ["tools", "stats", range, keyId]
   });
 
 export { type SessionRequest, sessionDetailQueryOptions };
 
-export const useTools = () => {
+export const useTools = (keyId?: string) => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -109,7 +112,7 @@ export const useTools = () => {
     router.replace(`?${params.toString()}`);
   };
 
-  const statsQuery = useQuery(toolStatsQueryOptions(dateRange));
+  const statsQuery = useQuery(toolStatsQueryOptions(dateRange, keyId));
 
   const sessionsQuery = useInfiniteQuery({
     getNextPageParam: (lastPage: ToolSessionsResponse) => {
@@ -119,9 +122,9 @@ export const useTools = () => {
     initialPageParam: 1,
     queryFn: ({ pageParam }) =>
       api.get<ToolSessionsResponse>(
-        `/v1/analytics/tools/sessions?from=${rangeToFrom(dateRange)}&page=${pageParam}&limit=${PAGE_SIZE}`
+        `/v1/analytics/tools/sessions?from=${rangeToFrom(dateRange)}&page=${pageParam}&limit=${PAGE_SIZE}${keyFilter(keyId)}`
       ),
-    queryKey: ["tools", "sessions", dateRange]
+    queryKey: ["tools", "sessions", dateRange, keyId]
   });
 
   return {

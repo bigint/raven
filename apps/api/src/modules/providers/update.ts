@@ -4,7 +4,8 @@ import { providerConfigs } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import type { z } from "zod";
 import { encrypt } from "@/lib/crypto";
-import { NotFoundError } from "@/lib/errors";
+import { NotFoundError, PreconditionFailedError } from "@/lib/errors";
+import { checkIfMatch, generateETag } from "@/lib/etag";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
 import type { AppContextWithJson } from "@/lib/types";
@@ -34,6 +35,16 @@ export const updateProvider =
 
     if (!existing) {
       throw new NotFoundError("Provider not found");
+    }
+
+    const currentData = { ...existing, apiKey: maskApiKey(existing.apiKey) };
+    const currentETag = generateETag(currentData);
+    const ifMatch = c.req.header("If-Match");
+
+    if (!checkIfMatch(ifMatch, currentETag)) {
+      throw new PreconditionFailedError(
+        "Resource has been modified by another request"
+      );
     }
 
     const updates: Partial<typeof providerConfigs.$inferInsert> = {

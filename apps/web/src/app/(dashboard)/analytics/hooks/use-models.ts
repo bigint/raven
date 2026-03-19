@@ -36,14 +36,19 @@ const RANGE_MS: Record<DateRange, number> = {
 const rangeToFrom = (range: DateRange): string =>
   new Date(Date.now() - RANGE_MS[range]).toISOString();
 
-export const modelsQueryOptions = (range: DateRange) =>
+const keyFilter = (keyId?: string): string =>
+  keyId ? `&virtualKeyId=${keyId}` : "";
+
+export const modelsQueryOptions = (range: DateRange, keyId?: string) =>
   queryOptions({
     queryFn: () =>
-      api.get<ModelRow[]>(`/v1/analytics/models?from=${rangeToFrom(range)}`),
-    queryKey: ["models", range]
+      api.get<ModelRow[]>(
+        `/v1/analytics/models?from=${rangeToFrom(range)}${keyFilter(keyId)}`
+      ),
+    queryKey: ["models", range, keyId]
   });
 
-export const useModels = () => {
+export const useModels = (keyId?: string) => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -57,7 +62,7 @@ export const useModels = () => {
     router.replace(`?${params.toString()}`);
   };
 
-  const query = useQuery(modelsQueryOptions(dateRange));
+  const query = useQuery(modelsQueryOptions(dateRange, keyId));
 
   return {
     data: query.data ?? [],

@@ -1,12 +1,14 @@
 "use client";
 
-import { Button } from "@raven/ui";
+import { Button, EmptyState } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
-import { RotateCcw } from "lucide-react";
+import { Network, RotateCcw } from "lucide-react";
+import Link from "next/link";
 import { useMemo } from "react";
+import { catalogModelsQueryOptions } from "@/lib/use-models";
 import { ChatInput } from "./components/chat-input";
 import { ChatMessages } from "./components/chat-messages";
-import { catalogModelsQueryOptions, useChat } from "./hooks/use-chat";
+import { useChat } from "./hooks/use-chat";
 import { useInitialModelSelection } from "./hooks/use-initial-model-selection";
 
 const ChatPage = () => {
@@ -24,7 +26,9 @@ const ChatPage = () => {
     systemPrompt
   } = useChat();
 
-  const { data: models = [] } = useQuery(catalogModelsQueryOptions());
+  const { data: models = [], isLoading: modelsLoading } = useQuery(
+    catalogModelsQueryOptions()
+  );
 
   useInitialModelSelection({
     models,
@@ -66,29 +70,48 @@ const ChatPage = () => {
         )}
       </div>
 
-      <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border">
-        <ChatMessages
-          isStreaming={isStreaming}
-          messages={messages}
-          onExampleSelect={sendMessage}
-          showMetadata={settings.showMetadata}
-        />
-        <ChatInput
-          disabled={!selectedModel}
-          isStreaming={isStreaming}
-          model={selectedModel?.model}
-          modelOptions={modelOptions}
-          onModelChange={(model, provider) =>
-            setSelectedModel({ model, provider })
-          }
-          onSend={sendMessage}
-          onSettingsChange={setSettings}
-          onStop={stopStreaming}
-          onSystemPromptChange={setSystemPrompt}
-          settings={settings}
-          systemPrompt={systemPrompt}
-        />
-      </div>
+      {!modelsLoading && models.length === 0 ? (
+        <div className="flex flex-1 items-center justify-center rounded-xl border border-border">
+          <EmptyState
+            action={
+              <Link href="/providers">
+                <Button>
+                  <Network className="size-4" />
+                  Add Provider
+                </Button>
+              </Link>
+            }
+            bordered={false}
+            description="Connect an AI provider to start using the playground."
+            icon={<Network className="size-8" />}
+            title="Connect a provider first"
+          />
+        </div>
+      ) : (
+        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border">
+          <ChatMessages
+            isStreaming={isStreaming}
+            messages={messages}
+            onExampleSelect={sendMessage}
+            showMetadata={settings.showMetadata}
+          />
+          <ChatInput
+            disabled={!selectedModel}
+            isStreaming={isStreaming}
+            model={selectedModel?.model}
+            modelOptions={modelOptions}
+            onModelChange={(model, provider) =>
+              setSelectedModel({ model, provider })
+            }
+            onSend={sendMessage}
+            onSettingsChange={setSettings}
+            onStop={stopStreaming}
+            onSystemPromptChange={setSystemPrompt}
+            settings={settings}
+            systemPrompt={systemPrompt}
+          />
+        </div>
+      )}
     </div>
   );
 };

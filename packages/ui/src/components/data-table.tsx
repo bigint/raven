@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import type { ReactNode } from "react";
 import { cn } from "../cn";
@@ -9,6 +10,7 @@ import { Spinner } from "./spinner";
 interface Column<T> {
   key: string;
   header: string;
+  sortable?: boolean;
   className?: string;
   headerClassName?: string;
   render: (item: T, index: number) => ReactNode;
@@ -24,6 +26,11 @@ interface DataTableProps<T> {
   emptyTitle?: string;
   emptyAction?: ReactNode;
   animateRows?: boolean;
+  hiddenColumns?: string[];
+  onToggleColumn?: (key: string) => void;
+  sortKey?: string;
+  sortDirection?: "asc" | "desc";
+  onSort?: (key: string) => void;
 }
 
 const DataTable = <T,>({
@@ -35,8 +42,17 @@ const DataTable = <T,>({
   emptyIcon,
   emptyTitle = "No data",
   emptyAction,
-  animateRows = false
+  animateRows = false,
+  hiddenColumns,
+  onToggleColumn,
+  sortKey,
+  sortDirection,
+  onSort
 }: DataTableProps<T>) => {
+  const visibleColumns = hiddenColumns
+    ? columns.filter((col) => !hiddenColumns.includes(col.key))
+    : columns;
+
   if (loading) {
     return (
       <div className="rounded-xl border border-border p-12 text-center">
@@ -53,39 +69,112 @@ const DataTable = <T,>({
   }
 
   return (
-    <div className="rounded-xl border border-border overflow-hidden overflow-x-auto">
-      <table className="w-full min-w-[600px] border-collapse text-sm">
-        <thead>
-          <tr className="border-b border-border">
-            {columns.map((col) => (
-              <th
-                className={cn(
-                  "px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-5 sm:py-3",
-                  col.headerClassName
-                )}
-                key={col.key}
-              >
-                {col.header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {animateRows ? (
-            <AnimatePresence initial={false}>
-              {data.map((item, idx) => (
-                <motion.tr
-                  animate={{ opacity: 1, y: 0 }}
+    <div>
+      {onToggleColumn && (
+        <div className="mb-2 flex justify-end">
+          <details className="relative">
+            <summary className="cursor-pointer rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted/50">
+              Columns
+            </summary>
+            <div className="absolute right-0 z-10 mt-1 min-w-[160px] rounded-md border border-border bg-background p-2 shadow-md">
+              {columns.map((col) => (
+                <label
+                  className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-muted/50"
+                  key={col.key}
+                >
+                  <input
+                    checked={!hiddenColumns?.includes(col.key)}
+                    onChange={() => onToggleColumn(col.key)}
+                    type="checkbox"
+                  />
+                  {col.header}
+                </label>
+              ))}
+            </div>
+          </details>
+        </div>
+      )}
+      <div className="rounded-xl border border-border overflow-hidden overflow-x-auto">
+        <table className="w-full min-w-[600px] border-collapse text-sm">
+          <thead>
+            <tr className="border-b border-border">
+              {visibleColumns.map((col) => {
+                const isSortable = col.sortable && onSort;
+                const isActiveSort = sortKey === col.key;
+
+                const SortIcon = isActiveSort
+                  ? sortDirection === "asc"
+                    ? ArrowUp
+                    : ArrowDown
+                  : ArrowUpDown;
+
+                return (
+                  <th
+                    className={cn(
+                      "px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-5 sm:py-3",
+                      isSortable && "cursor-pointer select-none",
+                      col.headerClassName
+                    )}
+                    key={col.key}
+                    onClick={isSortable ? () => onSort(col.key) : undefined}
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      {col.header}
+                      {isSortable && (
+                        <SortIcon
+                          className={cn(
+                            "size-3.5",
+                            isActiveSort
+                              ? "text-foreground"
+                              : "text-muted-foreground/50"
+                          )}
+                        />
+                      )}
+                    </span>
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {animateRows ? (
+              <AnimatePresence initial={false}>
+                {data.map((item, idx) => (
+                  <motion.tr
+                    animate={{ opacity: 1, y: 0 }}
+                    className={cn(
+                      "transition-colors hover:bg-muted/30",
+                      "border-b border-border last:border-b-0"
+                    )}
+                    exit={{ opacity: 0 }}
+                    initial={{ opacity: 0, y: -8 }}
+                    key={keyExtractor(item)}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                  >
+                    {visibleColumns.map((col) => (
+                      <td
+                        className={cn(
+                          "px-3 py-3 sm:px-5 sm:py-4",
+                          col.className
+                        )}
+                        key={col.key}
+                      >
+                        {col.render(item, idx)}
+                      </td>
+                    ))}
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
+            ) : (
+              data.map((item, idx) => (
+                <tr
                   className={cn(
                     "transition-colors hover:bg-muted/30",
-                    "border-b border-border last:border-b-0"
+                    idx !== data.length - 1 && "border-b border-border"
                   )}
-                  exit={{ opacity: 0 }}
-                  initial={{ opacity: 0, y: -8 }}
                   key={keyExtractor(item)}
-                  transition={{ duration: 0.2, ease: "easeOut" }}
                 >
-                  {columns.map((col) => (
+                  {visibleColumns.map((col) => (
                     <td
                       className={cn("px-3 py-3 sm:px-5 sm:py-4", col.className)}
                       key={col.key}
@@ -93,31 +182,12 @@ const DataTable = <T,>({
                       {col.render(item, idx)}
                     </td>
                   ))}
-                </motion.tr>
-              ))}
-            </AnimatePresence>
-          ) : (
-            data.map((item, idx) => (
-              <tr
-                className={cn(
-                  "transition-colors hover:bg-muted/30",
-                  idx !== data.length - 1 && "border-b border-border"
-                )}
-                key={keyExtractor(item)}
-              >
-                {columns.map((col) => (
-                  <td
-                    className={cn("px-3 py-3 sm:px-5 sm:py-4", col.className)}
-                    key={col.key}
-                  >
-                    {col.render(item, idx)}
-                  </td>
-                ))}
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

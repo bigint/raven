@@ -22,7 +22,7 @@ export interface BreakdownRow {
 }
 
 export type DateRange = "7d" | "30d" | "90d";
-export type GroupBy = "key" | "model";
+export type GroupBy = "key" | "model" | "userAgent";
 
 const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
   { label: "Last 7 days", value: "7d" },
@@ -32,7 +32,8 @@ const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
 
 const GROUP_BY_OPTIONS: { value: GroupBy; label: string }[] = [
   { label: "Keys", value: "key" },
-  { label: "Models", value: "model" }
+  { label: "Models", value: "model" },
+  { label: "User Agents", value: "userAgent" }
 ];
 
 const VALID_RANGES: DateRange[] = ["7d", "30d", "90d"];
@@ -76,30 +77,34 @@ const fillChartGaps = (
   return result;
 };
 
-export const adoptionChartQueryOptions = (range: DateRange) =>
+const keyFilter = (keyId?: string): string =>
+  keyId ? `&virtualKeyId=${keyId}` : "";
+
+export const adoptionChartQueryOptions = (range: DateRange, keyId?: string) =>
   queryOptions({
     queryFn: async () => {
       const data = await api.get<ChartDataPoint[]>(
-        `/v1/analytics/adoption/chart?from=${rangeToFrom(range)}`
+        `/v1/analytics/adoption/chart?from=${rangeToFrom(range)}${keyFilter(keyId)}`
       );
       return fillChartGaps(data, range);
     },
-    queryKey: ["adoption", "chart", range]
+    queryKey: ["adoption", "chart", range, keyId]
   });
 
 export const adoptionBreakdownQueryOptions = (
   range: DateRange,
-  groupBy: GroupBy
+  groupBy: GroupBy,
+  keyId?: string
 ) =>
   queryOptions({
     queryFn: () =>
       api.get<BreakdownRow[]>(
-        `/v1/analytics/adoption/breakdown?from=${rangeToFrom(range)}&groupBy=${groupBy}`
+        `/v1/analytics/adoption/breakdown?from=${rangeToFrom(range)}&groupBy=${groupBy}${keyFilter(keyId)}`
       ),
-    queryKey: ["adoption", "breakdown", range, groupBy]
+    queryKey: ["adoption", "breakdown", range, groupBy, keyId]
   });
 
-export const useAdoption = () => {
+export const useAdoption = (keyId?: string) => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -109,7 +114,11 @@ export const useAdoption = () => {
 
   const groupByParam = searchParams.get("groupBy") as GroupBy | null;
   const groupBy =
-    groupByParam === "key" || groupByParam === "model" ? groupByParam : "key";
+    groupByParam === "key" ||
+    groupByParam === "model" ||
+    groupByParam === "userAgent"
+      ? groupByParam
+      : "key";
 
   const setDateRange = (range: DateRange) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -123,9 +132,9 @@ export const useAdoption = () => {
     router.replace(`?${params.toString()}`);
   };
 
-  const chartQuery = useQuery(adoptionChartQueryOptions(dateRange));
+  const chartQuery = useQuery(adoptionChartQueryOptions(dateRange, keyId));
   const breakdownQuery = useQuery(
-    adoptionBreakdownQueryOptions(dateRange, groupBy)
+    adoptionBreakdownQueryOptions(dateRange, groupBy, keyId)
   );
 
   return {

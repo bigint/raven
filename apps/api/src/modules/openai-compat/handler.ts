@@ -66,6 +66,15 @@ export const chatCompletionsHandler = (
     const modelSlug = parsedBody.model as string;
     if (!modelSlug) throw new ValidationError("'model' field is required");
 
+    // Extract end-user identity
+    const endUser =
+      (c.req.header("x-user-id") as string | undefined) ??
+      (typeof parsedBody.user === "string" ? parsedBody.user : null) ??
+      (typeof (parsedBody.metadata as Record<string, unknown> | undefined)
+        ?.user_id === "string"
+        ? ((parsedBody.metadata as Record<string, unknown>).user_id as string)
+        : null);
+
     // 3. Resolve provider from model
     const providerName = await resolveModelProvider(db, modelSlug);
 
@@ -121,6 +130,7 @@ export const chatCompletionsHandler = (
 
     if (cacheResult.hit) {
       return serveCacheHit(db, cacheResult, {
+        endUser,
         guardrailMatches,
         guardrailWarnings,
         method: "POST",
@@ -134,6 +144,7 @@ export const chatCompletionsHandler = (
         redis,
         sessionHeader: c.req.header("x-session-id") ?? null,
         startTime,
+        userAgent: c.req.header("user-agent") ?? null,
         virtualKeyId: virtualKey.id
       });
     }
@@ -157,6 +168,7 @@ export const chatCompletionsHandler = (
     return execute({
       db,
       decryptedApiKey,
+      endUser,
       env,
       extraResponseHeaders: {
         "X-Raven-Latency-Ms": String(Date.now() - startTime),
@@ -177,6 +189,7 @@ export const chatCompletionsHandler = (
       requestedModel: modelSlug,
       sessionId: c.req.header("x-session-id") ?? null,
       startTime,
+      userAgent: c.req.header("user-agent") ?? null,
       virtualKey: {
         id: virtualKey.id,
         organizationId: virtualKey.organizationId
