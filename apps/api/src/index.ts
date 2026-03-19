@@ -20,7 +20,6 @@ import { requestTiming } from "./middleware/request-timing";
 import { createTenantMiddleware } from "./middleware/tenant";
 import { createAdminModule } from "./modules/admin/index";
 import { createAnalyticsModule } from "./modules/analytics/index";
-import { createAuditLogsModule } from "./modules/audit-logs/index";
 import { createAuthModule } from "./modules/auth/index";
 import {
   createBillingModule,
@@ -181,7 +180,6 @@ v1.route("/analytics", createAnalyticsModule(db));
 v1.route("/teams", createTeamsModule(db));
 v1.route("/settings", createSettingsModule(db));
 v1.route("/billing", createBillingModule(db));
-v1.route("/audit-logs", createAuditLogsModule(db));
 v1.route("/webhooks", createWebhooksModule(db));
 v1.route("/routing-rules", createRoutingRulesModule(db));
 app.route("/v1", v1);
