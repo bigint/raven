@@ -88,33 +88,36 @@ const MessageBubble = memo(
               : "bg-muted text-foreground"
           }`}
         >
-          {isUser ? (
-            <>
-              {message.images && message.images.length > 0 && (
-                <div className="mb-2 flex flex-wrap gap-2">
-                  {message.images.map((img) => (
-                    <img
-                      alt={img.name}
-                      className="max-h-48 max-w-full rounded-lg"
-                      key={img.id}
-                      src={img.preview}
-                    />
-                  ))}
-                </div>
-              )}
-              {message.content}
-            </>
-          ) : (
-            <>
-              {message.reasoning && (
-                <ReasoningBlock
-                  content={message.reasoning}
-                  isStreaming={isCurrentAssistant}
-                />
-              )}
-              <Markdown content={message.content} />
-            </>
-          )}
+          {match(message.role)
+            .with("user", () => (
+              <>
+                {message.images && message.images.length > 0 && (
+                  <div className="mb-2 flex flex-wrap gap-2">
+                    {message.images.map((img) => (
+                      <img
+                        alt={img.name}
+                        className="max-h-48 max-w-full rounded-lg"
+                        key={img.id}
+                        src={img.preview}
+                      />
+                    ))}
+                  </div>
+                )}
+                {message.content}
+              </>
+            ))
+            .with("assistant", () => (
+              <>
+                {message.reasoning && (
+                  <ReasoningBlock
+                    content={message.reasoning}
+                    isStreaming={isCurrentAssistant}
+                  />
+                )}
+                <Markdown content={message.content} />
+              </>
+            ))
+            .exhaustive()}
           {isCurrentAssistant && (
             <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-current align-text-bottom" />
           )}

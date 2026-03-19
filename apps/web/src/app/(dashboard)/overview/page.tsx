@@ -3,8 +3,8 @@
 import { PageHeader, Spinner } from "@raven/ui";
 import { Key, Network, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import { match } from "ts-pattern";
 import { TextMorph } from "torph/react";
+import { match } from "ts-pattern";
 import { RecentRequests } from "./components/recent-requests";
 import { StatCards } from "./components/stat-cards";
 import { UsageChart } from "./components/usage-chart";
@@ -74,9 +74,7 @@ const OverviewPage = () => {
             </div>
             <div>
               {match(providers)
-                .with({ isPending: true }, () => (
-                  <Spinner className="size-4" />
-                ))
+                .with({ isPending: true }, () => <Spinner className="size-4" />)
                 .otherwise(() => (
                   <>
                     <TextMorph className="text-sm font-medium">
@@ -102,9 +100,7 @@ const OverviewPage = () => {
             </div>
             <div>
               {match(keys)
-                .with({ isPending: true }, () => (
-                  <Spinner className="size-4" />
-                ))
+                .with({ isPending: true }, () => <Spinner className="size-4" />)
                 .otherwise(() => (
                   <>
                     <TextMorph className="text-sm font-medium">

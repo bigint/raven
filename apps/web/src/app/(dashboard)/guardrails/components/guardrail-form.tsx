@@ -3,8 +3,8 @@
 import { Button, Input, Modal, Select, Switch, Textarea } from "@raven/ui";
 import { type FormEvent, useState } from "react";
 import { toast } from "sonner";
-import { match } from "ts-pattern";
 import { TextMorph } from "torph/react";
+import { match } from "ts-pattern";
 import type { Guardrail } from "../hooks/use-guardrails";
 import {
   ACTION_OPTIONS,
@@ -249,10 +249,7 @@ const GuardrailForm = ({
             <fieldset className="space-y-2">
               <legend className="text-sm font-medium">PII Types</legend>
               {PII_TYPES.map((pii) => (
-                <label
-                  className="flex items-center gap-2 text-sm"
-                  key={pii.id}
-                >
+                <label className="flex items-center gap-2 text-sm" key={pii.id}>
                   <input
                     checked={form.piiTypes.includes(pii.id)}
                     className="size-4 rounded border-input accent-primary"
@@ -296,9 +293,9 @@ const GuardrailForm = ({
           </Button>
           <Button disabled={isSubmitting} type="submit">
             <TextMorph>
-              {match({ isSubmitting, isEdit })
-                .with({ isSubmitting: true, isEdit: true }, () => "Saving...")
-                .with({ isSubmitting: true, isEdit: false }, () => "Adding...")
+              {match({ isEdit, isSubmitting })
+                .with({ isEdit: true, isSubmitting: true }, () => "Saving...")
+                .with({ isEdit: false, isSubmitting: true }, () => "Adding...")
                 .with({ isEdit: true }, () => "Save Changes")
                 .otherwise(() => "Add Guardrail")}
             </TextMorph>
