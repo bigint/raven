@@ -8,6 +8,12 @@ import {
 } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import type { ExtendedDateRange } from "@/app/(dashboard)/analytics/lib/date-utils";
+import {
+  EXTENDED_DATE_RANGE_OPTIONS,
+  EXTENDED_VALID_RANGES,
+  extendedRangeToFrom
+} from "@/app/(dashboard)/analytics/lib/date-utils";
 import { api } from "@/lib/api";
 
 export interface LogSession {
@@ -61,27 +67,7 @@ interface LogsResponse {
   };
 }
 
-export type DateRange = "7d" | "30d" | "90d" | "custom";
-
-const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
-  { label: "Last 7 days", value: "7d" },
-  { label: "Last 30 days", value: "30d" },
-  { label: "Last 90 days", value: "90d" },
-  { label: "Custom", value: "custom" }
-];
-
-const RANGE_MS: Record<string, number> = {
-  "7d": 604_800_000,
-  "30d": 2_592_000_000,
-  "90d": 7_776_000_000
-};
-
-const VALID_RANGES: DateRange[] = ["7d", "30d", "90d", "custom"];
-
-const rangeToFrom = (range: string): string => {
-  const ms = RANGE_MS[range] ?? 2_592_000_000;
-  return new Date(Date.now() - ms).toISOString();
-};
+export type DateRange = ExtendedDateRange;
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -114,7 +100,9 @@ export const useLogs = () => {
 
   const rangeParam = searchParams.get("range") as DateRange | null;
   const dateRange =
-    rangeParam && VALID_RANGES.includes(rangeParam) ? rangeParam : "30d";
+    rangeParam && EXTENDED_VALID_RANGES.includes(rangeParam)
+      ? rangeParam
+      : "30d";
 
   const setDateRange = (range: DateRange) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -135,7 +123,9 @@ export const useLogs = () => {
     }
 
     const fromDate =
-      dateRange === "custom" ? rangeToFrom("30d") : rangeToFrom(dateRange);
+      dateRange === "custom"
+        ? extendedRangeToFrom("30d")
+        : extendedRangeToFrom(dateRange);
     return `/v1/analytics/logs?from=${fromDate}&page=${pageParam}&limit=${pageSize}`;
   };
 
@@ -156,7 +146,7 @@ export const useLogs = () => {
     customTo,
     data: query.data?.pages.flatMap((p) => p.data) ?? [],
     dateRange,
-    dateRangeOptions: DATE_RANGE_OPTIONS,
+    dateRangeOptions: EXTENDED_DATE_RANGE_OPTIONS,
     error: query.error?.message ?? null,
     fetchNextPage: query.fetchNextPage,
     hasNextPage: query.hasNextPage,
