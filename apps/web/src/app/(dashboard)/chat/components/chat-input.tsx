@@ -1,7 +1,14 @@
 "use client";
 
-import { Select, Switch, Textarea } from "@raven/ui";
-import { ArrowUp, ImagePlus, Square, Thermometer, X } from "lucide-react";
+import { Switch, Textarea } from "@raven/ui";
+import {
+  ArrowUp,
+  ChevronDown,
+  ImagePlus,
+  Square,
+  Thermometer,
+  X
+} from "lucide-react";
 import {
   type KeyboardEvent,
   useCallback,
@@ -23,7 +30,6 @@ export interface PlaygroundSettings {
 }
 
 interface ModelOption {
-  readonly icon?: React.ReactNode;
   readonly label: string;
   readonly value: string;
   readonly provider: string;
@@ -259,18 +265,43 @@ export const ChatInput = ({
             )}
 
             {/* Model selector */}
-            <div className="w-52">
-              <Select
-                className="border-none bg-transparent text-xs shadow-none"
-                onChange={(val) => {
-                  const opt = modelOptions.find((o) => o.value === val);
-                  if (opt) onModelChange(opt.value, opt.provider);
-                }}
-                options={modelOptions}
-                placeholder="Select model"
-                searchable
-                value={model ?? ""}
-              />
+            <div className="relative">
+              <button
+                className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                onClick={() => toggle("model")}
+                type="button"
+              >
+                {model ?? "Select model"}
+                <ChevronDown className="size-3" />
+              </button>
+
+              {openPopover === "model" && (
+                <Dropdown onClose={() => setOpenPopover(null)}>
+                  <div className="max-h-60 w-56 overflow-y-auto py-1">
+                    {modelOptions.map((opt) => (
+                      <button
+                        className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors hover:bg-accent ${opt.value === model ? "text-foreground font-medium" : "text-muted-foreground"}`}
+                        key={opt.value}
+                        onClick={() => {
+                          onModelChange(opt.value, opt.provider);
+                          setOpenPopover(null);
+                        }}
+                        type="button"
+                      >
+                        <span className="truncate">{opt.label}</span>
+                        <span className="ml-auto shrink-0 text-[10px] text-muted-foreground/60">
+                          {opt.provider}
+                        </span>
+                      </button>
+                    ))}
+                    {modelOptions.length === 0 && (
+                      <p className="px-3 py-2 text-xs text-muted-foreground">
+                        No models. Add a provider first.
+                      </p>
+                    )}
+                  </div>
+                </Dropdown>
+              )}
             </div>
 
             {!settings.enableReasoning && (

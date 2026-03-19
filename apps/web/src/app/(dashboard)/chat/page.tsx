@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Network, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
-import { ProviderIcon } from "@/components/model-icon";
 import { catalogModelsQueryOptions } from "@/lib/use-models";
 import { ChatInput } from "./components/chat-input";
 import { ChatMessages } from "./components/chat-messages";
@@ -56,7 +55,6 @@ const ChatPage = () => {
   const modelOptions = useMemo(
     () =>
       chatModels.map((m) => ({
-        icon: <ProviderIcon provider={m.provider} size={14} />,
         label: m.name,
         provider: m.provider,
         value: m.slug
