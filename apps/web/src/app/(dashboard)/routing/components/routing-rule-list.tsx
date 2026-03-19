@@ -74,36 +74,39 @@ const RoutingRuleList = ({
   onEdit,
   onDelete
 }: RoutingRuleListProps) => {
-  const allColumns: Column<RoutingRule>[] = [
-    ...columns,
-    {
-      className: "text-right",
-      header: "Actions",
-      headerClassName: "text-right",
-      key: "actions",
-      render: (rule) => (
-        <div className="flex items-center justify-end gap-1">
-          <Button
-            onClick={() => onEdit(rule)}
-            size="sm"
-            title="Edit routing rule"
-            variant="ghost"
-          >
-            <Pencil className="size-4" />
-          </Button>
-          <Button
-            className="hover:bg-destructive/10 hover:text-destructive"
-            onClick={() => onDelete(rule.id)}
-            size="sm"
-            title="Delete routing rule"
-            variant="ghost"
-          >
-            <Trash2 className="size-4" />
-          </Button>
-        </div>
-      )
-    }
-  ];
+  const allColumns: Column<RoutingRule>[] = useMemo(
+    () => [
+      ...columns,
+      {
+        className: "text-right",
+        header: "Actions",
+        headerClassName: "text-right",
+        key: "actions",
+        render: (rule) => (
+          <div className="flex items-center justify-end gap-1">
+            <Button
+              onClick={() => onEdit(rule)}
+              size="sm"
+              title="Edit routing rule"
+              variant="ghost"
+            >
+              <Pencil className="size-4" />
+            </Button>
+            <Button
+              className="hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => onDelete(rule.id)}
+              size="sm"
+              title="Delete routing rule"
+              variant="ghost"
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          </div>
+        )
+      }
+    ],
+    [onEdit, onDelete]
+  );
 
   return (
     <DataTable

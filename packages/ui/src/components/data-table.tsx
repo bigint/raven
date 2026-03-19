@@ -150,15 +150,16 @@ const DataTable = <T,>({
           <tbody>
             {animateRows ? (
               <AnimatePresence initial={false}>
-                {data.map((item, idx) => (
+                {displayData.map((item, idx) => (
                   <motion.tr
                     animate={{ opacity: 1, y: 0 }}
                     className={cn(
                       "transition-colors hover:bg-muted/30",
                       "border-b border-border last:border-b-0"
                     )}
-                    exit={{ opacity: 0 }}
-                    initial={{ opacity: 0, y: -8 }}
+                    {...(isLargeDataset
+                      ? {}
+                      : { exit: { opacity: 0 }, initial: { opacity: 0, y: -8 } })}
                     key={keyExtractor(item)}
                     transition={{ duration: 0.2, ease: "easeOut" }}
                   >
@@ -177,11 +178,11 @@ const DataTable = <T,>({
                 ))}
               </AnimatePresence>
             ) : (
-              data.map((item, idx) => (
+              displayData.map((item, idx) => (
                 <tr
                   className={cn(
                     "transition-colors hover:bg-muted/30",
-                    idx !== data.length - 1 && "border-b border-border"
+                    idx !== displayData.length - 1 && "border-b border-border"
                   )}
                   key={keyExtractor(item)}
                 >
