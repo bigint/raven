@@ -41,21 +41,9 @@ export const createAnalyticsModule = (db: Database, redis?: Redis) => {
     return next();
   });
 
-  app.get(
-    "/stats",
-    queryValidator(dateRangeQuerySchema),
-    getStats(db, redis)
-  );
-  app.get(
-    "/usage",
-    queryValidator(dateRangeQuerySchema),
-    getUsage(db, redis)
-  );
-  app.get(
-    "/cache",
-    queryValidator(dateRangeQuerySchema),
-    getCache(db, redis)
-  );
+  app.get("/stats", queryValidator(dateRangeQuerySchema), getStats(db, redis));
+  app.get("/usage", queryValidator(dateRangeQuerySchema), getUsage(db, redis));
+  app.get("/cache", queryValidator(dateRangeQuerySchema), getCache(db, redis));
   app.get("/requests/live", getRequestsLive(db));
   app.get("/requests", queryValidator(requestsQuerySchema), getRequests(db));
   app.patch("/requests/:id/star", toggleStar(db));

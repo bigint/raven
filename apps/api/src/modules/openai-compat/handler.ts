@@ -9,7 +9,7 @@ import { authenticateKey } from "../proxy/auth";
 import { checkBudgets } from "../proxy/budget-check";
 import { checkCache, serveCacheHit } from "../proxy/cache";
 import { execute } from "../proxy/execute";
-import { evaluateGuardrails, type GuardrailMatch } from "../proxy/guardrails";
+import { evaluateGuardrails } from "../proxy/guardrails";
 import { checkPlanLimit } from "../proxy/plan-check";
 import { resolveProvider } from "../proxy/provider-resolver";
 import { checkRateLimit } from "../proxy/rate-limiter";

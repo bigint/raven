@@ -14,8 +14,7 @@ const CACHE_TTL = 30;
 type Query = z.infer<typeof dateRangeQuerySchema>;
 
 export const getCache =
-  (db: Database, redis?: Redis) =>
-  async (c: AppContextWithQuery<Query>) => {
+  (db: Database, redis?: Redis) => async (c: AppContextWithQuery<Query>) => {
     const orgId = c.get("orgId");
     const { from, to } = c.req.valid("query");
 
@@ -48,9 +47,7 @@ export const getCache =
         .select({
           date: sql<string>`DATE(${requestLogs.createdAt})`.as("date"),
           hits: count(sql`CASE WHEN ${requestLogs.cacheHit} THEN 1 END`),
-          misses: count(
-            sql`CASE WHEN NOT ${requestLogs.cacheHit} THEN 1 END`
-          ),
+          misses: count(sql`CASE WHEN NOT ${requestLogs.cacheHit} THEN 1 END`),
           total: count()
         })
         .from(requestLogs)

@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import type { Database } from "@raven/db";
 import { webhooks } from "@raven/db";
-import { and, arrayOverlaps, eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
 import pRetry from "p-retry";
 

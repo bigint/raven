@@ -14,8 +14,7 @@ const USAGE_TTL = 30;
 type Query = z.infer<typeof dateRangeQuerySchema>;
 
 export const getUsage =
-  (db: Database, redis?: Redis) =>
-  async (c: AppContextWithQuery<Query>) => {
+  (db: Database, redis?: Redis) => async (c: AppContextWithQuery<Query>) => {
     const orgId = c.get("orgId");
     const { from, to } = c.req.valid("query");
 

@@ -14,8 +14,7 @@ const STATS_TTL = 30;
 type Query = z.infer<typeof dateRangeQuerySchema>;
 
 export const getStats =
-  (db: Database, redis?: Redis) =>
-  async (c: AppContextWithQuery<Query>) => {
+  (db: Database, redis?: Redis) => async (c: AppContextWithQuery<Query>) => {
     const orgId = c.get("orgId");
     const { from, to } = c.req.valid("query");
 
@@ -55,9 +54,7 @@ export const getStats =
           ? Number(row.avgLatencyMs).toFixed(2)
           : "0.00",
         cacheHitRate:
-          totalRequests > 0
-            ? (cacheHits / totalRequests).toFixed(4)
-            : "0.0000",
+          totalRequests > 0 ? (cacheHits / totalRequests).toFixed(4) : "0.0000",
         totalCachedTokens,
         totalCost: row?.totalCost ?? "0",
         totalInputTokens,
