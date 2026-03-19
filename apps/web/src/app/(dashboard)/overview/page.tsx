@@ -1,5 +1,6 @@
 "use client";
 
+import { PageHeader } from "@raven/ui";
 import { Key, Network, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { TextMorph } from "torph/react";
@@ -18,12 +19,10 @@ const OverviewPage = () => {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-xl font-bold sm:text-2xl">Overview</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Here&apos;s what&apos;s happening across your organization.
-        </p>
-      </div>
+      <PageHeader
+        description="Here's what's happening across your organization."
+        title="Overview"
+      />
 
       <StatCards loading={isLoading} stats={stats} />
 

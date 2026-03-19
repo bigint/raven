@@ -46,8 +46,12 @@ const ResetPasswordForm = () => {
     try {
       await resetPassword({ newPassword: password, token });
       router.push("/sign-in");
-    } catch {
-      setError("Failed to reset password. The link may have expired.");
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to reset password. The link may have expired."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -61,7 +65,10 @@ const ResetPasswordForm = () => {
       </p>
 
       {error && (
-        <div className="mt-4 rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
+        <div
+          className="mt-4 rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive"
+          role="alert"
+        >
           {error}
         </div>
       )}
@@ -72,7 +79,7 @@ const ResetPasswordForm = () => {
             New password
           </label>
           <input
-            className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring"
+            className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
             id="password"
             minLength={8}
             onChange={(e) => setPassword(e.target.value)}
@@ -90,7 +97,7 @@ const ResetPasswordForm = () => {
             Confirm password
           </label>
           <input
-            className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring"
+            className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
             id="confirmPassword"
             minLength={8}
             onChange={(e) => setConfirmPassword(e.target.value)}
@@ -101,7 +108,7 @@ const ResetPasswordForm = () => {
           />
         </div>
         <button
-          className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           disabled={isLoading}
           type="submit"
         >

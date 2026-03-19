@@ -1,6 +1,6 @@
 "use client";
 
-import { Spinner } from "@raven/ui";
+import { PageHeader, Spinner } from "@raven/ui";
 import { CreditCard } from "lucide-react";
 import { PlanSelector } from "./components/plan-selector";
 import { SubscriptionStatus } from "./components/subscription-status";
@@ -21,12 +21,10 @@ const BillingPage = () => {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-xl font-bold sm:text-2xl">Billing</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Manage your subscription and billing details.
-        </p>
-      </div>
+      <PageHeader
+        description="Manage your subscription and billing details."
+        title="Billing"
+      />
 
       {error && (
         <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
