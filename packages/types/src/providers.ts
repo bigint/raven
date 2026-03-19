@@ -5,15 +5,16 @@ interface ProviderDefinition {
 
 export const PROVIDERS = [
   { id: "anthropic", label: "Anthropic" },
+  { id: "google", label: "Google" },
   { id: "mistralai", label: "Mistral AI" },
   { id: "openai", label: "OpenAI" }
 ] as const satisfies readonly ProviderDefinition[];
 
 export type Provider = (typeof PROVIDERS)[number]["id"];
 
-export const PROVIDER_LABELS: Record<string, string> = Object.fromEntries(
+export const PROVIDER_LABELS = Object.fromEntries(
   PROVIDERS.map((p) => [p.id, p.label])
-);
+) as Record<Provider, string>;
 
 export const PROVIDER_OPTIONS: { label: string; value: Provider }[] =
   PROVIDERS.map((p) => ({ label: p.label, value: p.id }));
