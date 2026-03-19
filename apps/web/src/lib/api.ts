@@ -25,10 +25,13 @@ const client = ky.create({
           .json()
           .catch(() => ({}) as Record<string, unknown>);
         const parsed = body as Record<string, unknown>;
+        const detail =
+          typeof parsed?.detail === "string" ? parsed.detail : undefined;
         const nested = parsed?.error as Record<string, unknown> | undefined;
         error.message =
-          (nested?.message as string) ??
-          (parsed?.message as string) ??
+          detail ??
+          (typeof nested?.message === "string" ? nested.message : undefined) ??
+          (typeof parsed?.message === "string" ? parsed.message : undefined) ??
           "Request failed";
         return error;
       }
