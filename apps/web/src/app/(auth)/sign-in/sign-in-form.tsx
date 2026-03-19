@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { signIn } from "@/lib/auth-client";
 
-const SignInPage = () => {
+export const SignInForm = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -131,4 +131,3 @@ const SignInPage = () => {
   );
 };
 
-export default SignInPage;
