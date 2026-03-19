@@ -2,6 +2,7 @@
 
 import { Button, Input, Modal, Select, Switch, Textarea } from "@raven/ui";
 import { type FormEvent, useState } from "react";
+import { toast } from "sonner";
 import { TextMorph } from "torph/react";
 import type { Guardrail } from "../hooks/use-guardrails";
 import {
@@ -160,6 +161,7 @@ const GuardrailForm = ({
       } else {
         await createMutation.mutateAsync(body);
       }
+      toast.success(isEdit ? "Guardrail updated" : "Guardrail created");
       handleClose();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Something went wrong");
@@ -174,7 +176,10 @@ const GuardrailForm = ({
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
         {formError && (
-          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <div
+            className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            role="alert"
+          >
             {formError}
           </div>
         )}

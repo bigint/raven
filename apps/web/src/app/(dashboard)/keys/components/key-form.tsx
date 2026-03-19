@@ -3,6 +3,7 @@
 import { ENVIRONMENT_OPTIONS } from "@raven/types";
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
 import { type FormEvent, useState } from "react";
+import { toast } from "sonner";
 import { TextMorph } from "torph/react";
 import type { VirtualKey } from "../hooks/use-keys";
 
@@ -73,6 +74,7 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
       setSubmitting(true);
       if (!mode) return;
       await onSubmit(mode, form, editingKey?.id);
+      toast.success(mode === "edit" ? "Key updated" : "Key created");
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -89,7 +91,10 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
         {error && (
-          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <div
+            className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            role="alert"
+          >
             {error}
           </div>
         )}

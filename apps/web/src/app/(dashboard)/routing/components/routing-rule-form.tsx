@@ -2,6 +2,7 @@
 
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
 import { type FormEvent, useState } from "react";
+import { toast } from "sonner";
 import { TextMorph } from "torph/react";
 import { useModelOptions } from "@/lib/use-models";
 import type { RoutingRule } from "../hooks/use-routing-rules";
@@ -114,6 +115,7 @@ const RoutingRuleForm = ({
       } else {
         await createMutation.mutateAsync(body);
       }
+      toast.success(isEdit ? "Routing rule updated" : "Routing rule created");
       handleClose();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Something went wrong");
@@ -134,7 +136,10 @@ const RoutingRuleForm = ({
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
         {formError && (
-          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <div
+            className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            role="alert"
+          >
             {formError}
           </div>
         )}

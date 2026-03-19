@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Network, Plus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
 import { useSetupStatus } from "@/lib/use-setup-status";
 import { ModelAliasForm } from "./components/model-alias-form";
 import { ModelAliasList } from "./components/model-alias-list";
@@ -28,8 +29,13 @@ const ModelAliasesPage = () => {
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    await deleteMutation.mutateAsync(deleteId);
-    setDeleteId(null);
+    try {
+      await deleteMutation.mutateAsync(deleteId);
+      setDeleteId(null);
+      toast.success("Model alias deleted");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete");
+    }
   };
 
   return (
@@ -46,7 +52,10 @@ const ModelAliasesPage = () => {
       />
 
       {error && (
-        <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <div
+          className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+          role="alert"
+        >
           {error.message}
         </div>
       )}
