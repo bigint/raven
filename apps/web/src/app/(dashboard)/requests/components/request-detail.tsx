@@ -3,6 +3,7 @@
 import { cn } from "@raven/ui";
 import { Star, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useRef } from "react";
 import { ModelIcon } from "@/components/model-icon";
 import type { SessionRequest } from "../hooks/use-logs";
 import { useToggleStar } from "../hooks/use-logs";
@@ -21,6 +22,13 @@ const Field = ({ label, value }: { label: string; value: string }) => (
 
 export const RequestDetail = ({ request, onClose }: RequestDetailProps) => {
   const toggleStar = useToggleStar();
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (request) {
+      panelRef.current?.focus();
+    }
+  }, [request]);
 
   return (
     <AnimatePresence>
@@ -35,9 +43,16 @@ export const RequestDetail = ({ request, onClose }: RequestDetailProps) => {
           />
           <motion.div
             animate={{ x: 0 }}
+            aria-label="Request details"
             className="fixed inset-y-0 right-0 z-50 w-full max-w-xl overflow-y-auto border-l border-border bg-background shadow-xl"
             exit={{ x: "100%" }}
             initial={{ x: "100%" }}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") onClose();
+            }}
+            ref={panelRef}
+            role="dialog"
+            tabIndex={-1}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background px-6 py-4">

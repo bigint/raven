@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input } from "@raven/ui";
+import { Button, Input, Modal } from "@raven/ui";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import { TextMorph } from "torph/react";
 
@@ -65,80 +65,62 @@ export const DangerZone = ({
       </div>
     </div>
 
-    {showDeleteConfirm && (
-      // biome-ignore lint/a11y/noStaticElementInteractions: modal backdrop dismiss
-      <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-        onClick={onCloseConfirm}
-        onKeyDown={(e) => {
-          if (e.key === "Escape") onCloseConfirm();
-        }}
-      >
-        <div
-          className="w-full max-w-sm rounded-xl border border-border bg-background shadow-xl"
-          onClick={(e) => e.stopPropagation()}
-          onKeyDown={(e) => e.stopPropagation()}
-          role="dialog"
-        >
-          <div className="px-4 py-4 sm:px-6 sm:py-5">
-            <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-destructive/10">
-              <Trash2 className="size-5 text-destructive" />
-            </div>
-            <h2 className="text-base font-semibold">Delete Organization</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              This will permanently delete{" "}
-              <span className="font-medium text-foreground">{orgName}</span> and
-              all associated data including providers, keys, budgets, and
-              request logs.
-            </p>
-            <p className="mt-3 text-sm text-muted-foreground">
-              Type{" "}
-              <span className="font-mono font-medium text-foreground">
-                {orgName}
-              </span>{" "}
-              to confirm.
-            </p>
-            <Input
-              className="mt-2"
-              onChange={(e) => {
-                onConfirmTextChange(e.target.value);
-                onDeleteErrorClear();
-              }}
-              placeholder={orgName}
-              type="text"
-              value={deleteConfirmText}
-            />
-            {deleteError && (
-              <div className="mt-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {deleteError}
-              </div>
-            )}
-          </div>
-          <div className="flex justify-end gap-2 border-t border-border px-4 py-4 sm:px-6">
-            <Button
-              disabled={deleting}
-              onClick={onCloseConfirm}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") onCloseConfirm();
-              }}
-              type="button"
-              variant="secondary"
-            >
-              Cancel
-            </Button>
-            <Button
-              disabled={deleting || deleteConfirmText !== orgName}
-              onClick={onDelete}
-              type="button"
-              variant="destructive"
-            >
-              <TextMorph>
-                {deleting ? "Deleting..." : "Delete Organization"}
-              </TextMorph>
-            </Button>
-          </div>
-        </div>
+    <Modal
+      footer={
+        <>
+          <Button
+            disabled={deleting}
+            onClick={onCloseConfirm}
+            type="button"
+            variant="secondary"
+          >
+            Cancel
+          </Button>
+          <Button
+            disabled={deleting || deleteConfirmText !== orgName}
+            onClick={onDelete}
+            type="button"
+            variant="destructive"
+          >
+            <TextMorph>
+              {deleting ? "Deleting..." : "Delete Organization"}
+            </TextMorph>
+          </Button>
+        </>
+      }
+      onClose={onCloseConfirm}
+      open={showDeleteConfirm}
+      size="sm"
+      title="Delete Organization"
+    >
+      <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-destructive/10">
+        <Trash2 className="size-5 text-destructive" />
       </div>
-    )}
+      <p className="text-sm text-muted-foreground">
+        This will permanently delete{" "}
+        <span className="font-medium text-foreground">{orgName}</span> and all
+        associated data including providers, keys, budgets, and request logs.
+      </p>
+      <p className="mt-3 text-sm text-muted-foreground">
+        Type{" "}
+        <span className="font-mono font-medium text-foreground">{orgName}</span>{" "}
+        to confirm.
+      </p>
+      <Input
+        className="mt-2"
+        onChange={(e) => {
+          onConfirmTextChange(e.target.value);
+          onDeleteErrorClear();
+        }}
+        placeholder={orgName}
+        type="text"
+        value={deleteConfirmText}
+      />
+      {deleteError && (
+        <div className="mt-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          {deleteError}
+        </div>
+      )}
+    </Modal>
   </>
 );
