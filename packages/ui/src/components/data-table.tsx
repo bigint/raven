@@ -112,15 +112,17 @@ const DataTable = <T,>({
                   <th
                     className={cn(
                       "px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-5 sm:py-3",
-                      isSortable && "cursor-pointer select-none",
                       col.headerClassName
                     )}
                     key={col.key}
-                    onClick={isSortable ? () => onSort(col.key) : undefined}
                   >
-                    <span className="inline-flex items-center gap-1">
-                      {col.header}
-                      {isSortable && (
+                    {isSortable ? (
+                      <button
+                        className="inline-flex items-center gap-1 cursor-pointer select-none"
+                        onClick={() => onSort(col.key)}
+                        type="button"
+                      >
+                        {col.header}
                         <SortIcon
                           className={cn(
                             "size-3.5",
@@ -129,8 +131,12 @@ const DataTable = <T,>({
                               : "text-muted-foreground/50"
                           )}
                         />
-                      )}
-                    </span>
+                      </button>
+                    ) : (
+                      <span className="inline-flex items-center gap-1">
+                        {col.header}
+                      </span>
+                    )}
                   </th>
                 );
               })}

@@ -34,10 +34,11 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
   VariantProps<typeof buttonVariants>;
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, ...props }, ref) => (
+  ({ className, variant, size, type = "button", ...props }, ref) => (
     <button
       className={cn(buttonVariants({ className, size, variant }))}
       ref={ref}
+      type={type}
       {...props}
     />
   )

@@ -66,7 +66,10 @@ const Modal = ({
               <Dialog.Title className="text-base font-semibold">
                 {title}
               </Dialog.Title>
-              <Dialog.Close className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground">
+              <Dialog.Close
+                aria-label="Close"
+                className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              >
                 <svg
                   className="size-4"
                   fill="none"
