@@ -4,7 +4,7 @@ import { Check, ChevronDown, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { useClickOutside } from "@/hooks/use-click-outside";
-import type { Org } from "../hooks/use-orgs";
+import type { Org } from "@/stores/org";
 
 interface OrgSwitcherProps {
   activeOrg: Org | null;

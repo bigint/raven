@@ -28,7 +28,7 @@ import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { Org } from "../hooks/use-orgs";
+import type { Org } from "@/stores/org";
 import { OrgSwitcher } from "./org-switcher";
 import { UserMenu } from "./user-menu";
 
