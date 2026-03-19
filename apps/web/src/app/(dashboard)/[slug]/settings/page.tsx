@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, PageHeader, PillTabs, Spinner } from "@raven/ui";
+import { Button, PageHeader, Spinner, Tabs } from "@raven/ui";
 import { Download } from "lucide-react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -130,9 +130,9 @@ const OrgSettingsPage = () => {
         </div>
       ) : settings === null ? null : (
         <>
-          <PillTabs onChange={setTab} options={visibleTabs} value={tab} />
+          <Tabs onChange={setTab} tabs={visibleTabs} value={tab} />
 
-          <div className="mt-6">
+          <div>
             {tab === "general" && (
               <OrgSettingsForm
                 editName={editName}
