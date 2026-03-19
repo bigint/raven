@@ -1,9 +1,11 @@
 "use client";
 
-import { Button, ConfirmDialog, PageHeader } from "@raven/ui";
+import { Button, ConfirmDialog, EmptyState, PageHeader } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Network, Plus } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
+import { useSetupStatus } from "@/lib/use-setup-status";
 import { ModelAliasForm } from "./components/model-alias-form";
 import { ModelAliasList } from "./components/model-alias-list";
 import {
@@ -12,6 +14,7 @@ import {
 } from "./hooks/use-model-aliases";
 
 const ModelAliasesPage = () => {
+  const { hasProviders } = useSetupStatus();
   const {
     data: aliases = [],
     isLoading,
@@ -48,12 +51,28 @@ const ModelAliasesPage = () => {
         </div>
       )}
 
-      <ModelAliasList
-        aliases={aliases}
-        loading={isLoading}
-        onAdd={() => setFormOpen(true)}
-        onDelete={(id) => setDeleteId(id)}
-      />
+      {!hasProviders && !isLoading && aliases.length === 0 ? (
+        <EmptyState
+          action={
+            <Link href="/providers">
+              <Button>
+                <Network className="size-4" />
+                Add Provider
+              </Button>
+            </Link>
+          }
+          description="Connect an AI provider to start creating model aliases."
+          icon={<Network className="size-8" />}
+          title="Connect a provider first"
+        />
+      ) : (
+        <ModelAliasList
+          aliases={aliases}
+          loading={isLoading}
+          onAdd={() => setFormOpen(true)}
+          onDelete={(id) => setDeleteId(id)}
+        />
+      )}
 
       <ModelAliasForm
         key={formOpen ? "open" : "closed"}
