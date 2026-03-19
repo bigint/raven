@@ -3,8 +3,8 @@
 import type { Column } from "@raven/ui";
 import { DataTable, PageHeader } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
+import { ScrollText } from "lucide-react";
 import { api } from "@/lib/api";
-import { formatTimeAgo } from "@/lib/format";
 
 interface AuditLog {
   readonly id: string;
@@ -17,47 +17,35 @@ interface AuditLog {
   readonly actorEmail: string | null;
 }
 
-const formatAction = (action: string): string =>
-  action.replace(/\./g, " ").replace(/^./, (c) => c.toUpperCase());
-
 const columns: Column<AuditLog>[] = [
   {
     header: "Action",
     key: "action",
-    render: (log) => (
-      <span className="text-sm font-medium">{formatAction(log.action)}</span>
+    render: (l) => (
+      <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{l.action}</code>
     )
   },
   {
     header: "Resource",
-    key: "resourceType",
-    render: (log) => (
-      <div>
-        <span className="text-sm capitalize">{log.resourceType}</span>
-        <p className="truncate font-mono text-xs text-muted-foreground">
-          {log.resourceId}
-        </p>
-      </div>
-    )
+    key: "resource",
+    render: (l) => <span className="text-foreground/70">{l.resourceType}</span>
   },
   {
     header: "Actor",
-    key: "actorName",
-    render: (log) => (
+    key: "actor",
+    render: (l) => (
       <div>
-        <span className="text-sm">{log.actorName ?? "System"}</span>
-        {log.actorEmail && (
-          <p className="text-xs text-muted-foreground">{log.actorEmail}</p>
-        )}
+        <p className="text-sm font-medium">{l.actorName ?? "System"}</p>
+        <p className="text-xs text-muted-foreground">{l.actorEmail}</p>
       </div>
     )
   },
   {
     header: "Time",
     key: "createdAt",
-    render: (log) => (
-      <span className="text-xs text-muted-foreground">
-        {formatTimeAgo(log.createdAt)}
+    render: (l) => (
+      <span className="text-foreground/70">
+        {new Date(l.createdAt).toLocaleString()}
       </span>
     )
   }
@@ -91,10 +79,10 @@ const AuditLogsPage = () => {
       <DataTable
         columns={columns}
         data={logs}
+        emptyIcon={<ScrollText className="size-8 text-muted-foreground" />}
         emptyTitle="No audit logs yet"
         keyExtractor={(l) => l.id}
         loading={isPending}
-        loadingMessage="Loading audit logs..."
       />
     </div>
   );
