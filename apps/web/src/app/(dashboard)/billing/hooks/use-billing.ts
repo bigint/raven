@@ -61,14 +61,10 @@ export const useBilling = () => {
     router.replace(`?${params.toString()}`);
   };
 
-  const subscriptionQuery = useQuery(subscriptionQueryOptions());
-  const plansQuery = useQuery(plansQueryOptions());
+  const subscription = useQuery(subscriptionQueryOptions());
+  const plans = useQuery(plansQueryOptions());
 
   const [upgrading, setUpgrading] = useState<string | null>(null);
-
-  const isLoading = subscriptionQuery.isPending || plansQuery.isPending;
-  const error =
-    subscriptionQuery.error?.message ?? plansQuery.error?.message ?? null;
 
   const handlePlanAction = async (planId: string) => {
     try {
@@ -81,11 +77,11 @@ export const useBilling = () => {
   };
 
   const getPlanButtonLabel = (plan: Plan): string => {
-    const subscription = subscriptionQuery.data;
-    const plans = plansQuery.data ?? [];
-    if (!subscription) return "Get started";
-    if (subscription.planId === plan.id) return "Current plan";
-    const currentPlan = plans.find((p) => p.id === subscription.planId);
+    const sub = subscription.data;
+    const allPlans = plans.data ?? [];
+    if (!sub) return "Get started";
+    if (sub.planId === plan.id) return "Current plan";
+    const currentPlan = allPlans.find((p) => p.id === sub.planId);
     if (!currentPlan) return "Switch plan";
     const currentPrice =
       billingInterval === "monthly"
@@ -98,13 +94,11 @@ export const useBilling = () => {
 
   return {
     billingInterval,
-    error,
     getPlanButtonLabel,
     handlePlanAction,
-    isLoading,
-    plans: plansQuery.data ?? [],
+    plans,
     setBillingInterval,
-    subscription: subscriptionQuery.data ?? null,
+    subscription,
     upgrading
   };
 };

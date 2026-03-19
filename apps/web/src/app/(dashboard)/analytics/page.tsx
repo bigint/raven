@@ -59,8 +59,6 @@ const OverviewTab = ({ keyId }: { keyId?: string }) => {
     customTo,
     stats,
     usage,
-    isLoading,
-    error,
     dateRange,
     dateRangeOptions,
     setCustomRange,
@@ -69,9 +67,9 @@ const OverviewTab = ({ keyId }: { keyId?: string }) => {
 
   return (
     <>
-      {error && (
+      {stats.error && (
         <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {error}
+          {stats.error.message}
         </div>
       )}
       <UsageCharts
@@ -79,14 +77,24 @@ const OverviewTab = ({ keyId }: { keyId?: string }) => {
         customTo={customTo}
         dateRange={dateRange}
         dateRangeOptions={dateRangeOptions}
-        loading={isLoading}
+        loading={stats.isPending}
         onCustomRangeChange={setCustomRange}
         onDateRangeChange={setDateRange}
-        stats={stats}
+        stats={stats.data ?? null}
       />
-      <TokenStats loading={isLoading} stats={stats} />
-      <CacheStats cache={cache} loading={isLoading} />
-      <TokenBreakdown loading={isLoading} usage={usage} />
+      {usage.error && (
+        <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {usage.error.message}
+        </div>
+      )}
+      <TokenStats loading={stats.isPending} stats={stats.data ?? null} />
+      {cache.error && (
+        <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {cache.error.message}
+        </div>
+      )}
+      <CacheStats cache={cache.data ?? null} loading={cache.isPending} />
+      <TokenBreakdown loading={usage.isPending} usage={usage.data ?? []} />
     </>
   );
 };

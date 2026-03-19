@@ -1,6 +1,6 @@
 "use client";
 
-import { PageHeader } from "@raven/ui";
+import { PageHeader, Spinner } from "@raven/ui";
 import { Key, Network, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { TextMorph } from "torph/react";
@@ -10,12 +10,13 @@ import { UsageChart } from "./components/usage-chart";
 import { useOverview } from "./hooks/use-overview";
 
 const OverviewPage = () => {
-  const { stats, usage, recentRequests, keys, providers, isLoading } =
-    useOverview();
+  const { stats, usage, requests, keys, providers } = useOverview();
 
-  const activeKeys = keys.filter((k) => k.isActive).length;
-  const totalRequests = stats?.totalRequests ?? 0;
-  const providerCount = providers.length;
+  const keysData = keys.data ?? [];
+  const providersData = providers.data ?? [];
+  const activeKeys = keysData.filter((k) => k.isActive).length;
+  const totalRequests = stats.data?.totalRequests ?? 0;
+  const providerCount = providersData.length;
 
   return (
     <div>
@@ -24,15 +25,35 @@ const OverviewPage = () => {
         title="Overview"
       />
 
-      <StatCards loading={isLoading} stats={stats} />
+      {stats.error && (
+        <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {stats.error.message}
+        </div>
+      )}
+      <StatCards loading={stats.isPending} stats={stats.data ?? null} />
 
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <UsageChart
-          loading={isLoading}
-          totalRequests={totalRequests}
-          usage={usage}
-        />
-        <RecentRequests loading={isLoading} requests={recentRequests} />
+        {usage.error ? (
+          <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {usage.error.message}
+          </div>
+        ) : (
+          <UsageChart
+            loading={usage.isPending}
+            totalRequests={totalRequests}
+            usage={usage.data ?? []}
+          />
+        )}
+        {requests.error ? (
+          <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {requests.error.message}
+          </div>
+        ) : (
+          <RecentRequests
+            loading={requests.isPending}
+            requests={requests.data ?? []}
+          />
+        )}
       </div>
 
       {/* Quick Actions */}
@@ -47,16 +68,22 @@ const OverviewPage = () => {
               <Network className="size-4 text-orange-500" />
             </div>
             <div>
-              <TextMorph className="text-sm font-medium">
-                {providerCount > 0
-                  ? `${providerCount} Providers`
-                  : "Add Provider"}
-              </TextMorph>
-              <p className="text-xs text-muted-foreground">
-                {providerCount > 0
-                  ? "Manage configurations"
-                  : "Connect your first AI provider"}
-              </p>
+              {providers.isPending ? (
+                <Spinner className="size-4" />
+              ) : (
+                <>
+                  <TextMorph className="text-sm font-medium">
+                    {providerCount > 0
+                      ? `${providerCount} Providers`
+                      : "Add Provider"}
+                  </TextMorph>
+                  <p className="text-xs text-muted-foreground">
+                    {providerCount > 0
+                      ? "Manage configurations"
+                      : "Connect your first AI provider"}
+                  </p>
+                </>
+              )}
             </div>
           </Link>
           <Link
@@ -67,14 +94,22 @@ const OverviewPage = () => {
               <Key className="size-4 text-purple-500" />
             </div>
             <div>
-              <TextMorph className="text-sm font-medium">
-                {activeKeys > 0 ? `${activeKeys} Active Keys` : "Create Key"}
-              </TextMorph>
-              <p className="text-xs text-muted-foreground">
-                {activeKeys > 0
-                  ? "Manage virtual keys"
-                  : "Create a virtual API key"}
-              </p>
+              {keys.isPending ? (
+                <Spinner className="size-4" />
+              ) : (
+                <>
+                  <TextMorph className="text-sm font-medium">
+                    {activeKeys > 0
+                      ? `${activeKeys} Active Keys`
+                      : "Create Key"}
+                  </TextMorph>
+                  <p className="text-xs text-muted-foreground">
+                    {activeKeys > 0
+                      ? "Manage virtual keys"
+                      : "Create a virtual API key"}
+                  </p>
+                </>
+              )}
             </div>
           </Link>
           <Link

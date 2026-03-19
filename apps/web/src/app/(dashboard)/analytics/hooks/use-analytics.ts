@@ -163,42 +163,32 @@ export const useAnalytics = (keyId?: string) => {
 
   const isCustomReady = dateRange !== "custom" || (!!customFrom && !!customTo);
 
-  const statsQuery = useQuery({
+  const stats = useQuery({
     ...analyticsStatsQueryOptions(dateRange, keyId, customFrom, customTo),
     enabled: isCustomReady,
     refetchInterval: POLL_INTERVAL
   });
-  const usageQuery = useQuery({
+  const usage = useQuery({
     ...analyticsUsageQueryOptions(dateRange, keyId, customFrom, customTo),
     enabled: isCustomReady,
     refetchInterval: POLL_INTERVAL
   });
-  const cacheQuery = useQuery({
+  const cache = useQuery({
     ...analyticsCacheQueryOptions(dateRange, keyId, customFrom, customTo),
     enabled: isCustomReady,
     refetchInterval: POLL_INTERVAL
   });
 
-  const isLoading =
-    statsQuery.isPending || usageQuery.isPending || cacheQuery.isPending;
-  const error =
-    statsQuery.error?.message ??
-    usageQuery.error?.message ??
-    cacheQuery.error?.message ??
-    null;
-
   return {
-    cache: cacheQuery.data ?? null,
+    cache,
     customFrom,
     customTo,
     dateRange,
     dateRangeOptions,
-    error,
-    isLoading,
     setCustomRange,
     setDateRange,
-    stats: statsQuery.data ?? null,
-    usage: usageQuery.data ?? []
+    stats,
+    usage
   };
 };
 

@@ -10,8 +10,6 @@ const BillingPage = () => {
   const {
     subscription,
     plans,
-    isLoading,
-    error,
     billingInterval,
     setBillingInterval,
     upgrading,
@@ -26,34 +24,55 @@ const BillingPage = () => {
         title="Billing"
       />
 
-      {error && (
-        <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {error}
-        </div>
-      )}
+      <div className="space-y-8">
+        {/* Subscription section */}
+        {subscription.error && (
+          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {subscription.error.message}
+          </div>
+        )}
+        {subscription.isPending ? (
+          <div className="rounded-xl border border-border p-12 text-center">
+            <Spinner className="mx-auto" />
+            <p className="mt-3 text-sm text-muted-foreground">
+              Loading subscription...
+            </p>
+          </div>
+        ) : (
+          subscription.data && (
+            <SubscriptionStatus subscription={subscription.data} />
+          )
+        )}
 
-      {isLoading ? (
-        <div className="rounded-xl border border-border p-12 text-center">
-          <Spinner className="mx-auto" />
-          <p className="mt-3 text-sm text-muted-foreground">
-            Loading billing...
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-8">
-          {subscription && <SubscriptionStatus subscription={subscription} />}
-
+        {/* Plans section */}
+        {plans.error && (
+          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {plans.error.message}
+          </div>
+        )}
+        {plans.isPending ? (
+          <div className="rounded-xl border border-border p-12 text-center">
+            <Spinner className="mx-auto" />
+            <p className="mt-3 text-sm text-muted-foreground">
+              Loading plans...
+            </p>
+          </div>
+        ) : (
           <PlanSelector
             billingInterval={billingInterval}
             getPlanButtonLabel={getPlanButtonLabel}
             onIntervalChange={setBillingInterval}
             onPlanAction={handlePlanAction}
-            plans={plans}
-            subscription={subscription}
+            plans={plans.data ?? []}
+            subscription={subscription.data ?? null}
             upgrading={upgrading}
           />
+        )}
 
-          {!subscription && plans.length === 0 && (
+        {!subscription.isPending &&
+          !plans.isPending &&
+          !subscription.data &&
+          (plans.data ?? []).length === 0 && (
             <div className="rounded-xl border border-border p-12 text-center">
               <CreditCard className="mx-auto size-8 text-muted-foreground/50" />
               <p className="mt-3 text-muted-foreground">
@@ -61,8 +80,7 @@ const BillingPage = () => {
               </p>
             </div>
           )}
-        </div>
-      )}
+      </div>
     </div>
   );
 };
