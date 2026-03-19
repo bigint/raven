@@ -25,8 +25,14 @@ export const OrgSwitcher = ({
   return (
     <div className="relative border-b border-border" ref={ref}>
       <button
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        aria-label="Switch organization"
         className="flex w-full items-center gap-2 px-5 py-4 transition-colors hover:bg-accent"
         onClick={() => setOpen(!open)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") setOpen(false);
+        }}
         type="button"
       >
         <div className="size-7 rounded-lg bg-primary flex items-center justify-center">
@@ -43,9 +49,13 @@ export const OrgSwitcher = ({
       </button>
 
       {open && (
-        <div className="absolute left-2 right-2 z-50 mt-1 rounded-md border border-border bg-popover py-1 shadow-md ring-1 ring-black/5">
+        <div
+          className="absolute left-2 right-2 z-50 mt-1 rounded-md border border-border bg-popover py-1 shadow-md ring-1 ring-black/5"
+          role="listbox"
+        >
           {orgs.map((org) => (
             <button
+              aria-selected={org.id === activeOrg?.id}
               className={`flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground ${
                 org.id === activeOrg?.id
                   ? "text-foreground"
@@ -56,6 +66,7 @@ export const OrgSwitcher = ({
                 onSwitch(org);
                 setOpen(false);
               }}
+              role="option"
               type="button"
             >
               <Check

@@ -189,9 +189,11 @@ export const Sidebar = ({
             />
             <motion.div
               animate={{ y: 0 }}
+              aria-label="Navigation menu"
               className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] flex-col rounded-t-2xl border-t border-border bg-background shadow-xl"
               exit={{ y: "100%" }}
               initial={{ y: "100%" }}
+              role="dialog"
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             >
               {/* Drawer handle */}
