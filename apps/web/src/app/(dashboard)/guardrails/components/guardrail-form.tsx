@@ -40,7 +40,7 @@ const DEFAULT_FORM: FormState = {
   piiTypes: PII_TYPES.map((t) => t.id),
   priority: "0",
   topics: "",
-  type: "block_topics"
+  type: "pii_detection"
 };
 
 const buildConfig = (form: FormState): Record<string, unknown> => {

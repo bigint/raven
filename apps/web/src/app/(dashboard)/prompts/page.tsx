@@ -1,9 +1,11 @@
 "use client";
 
-import { Button, ConfirmDialog, PageHeader } from "@raven/ui";
+import { Button, ConfirmDialog, EmptyState, PageHeader } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Network, Plus } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
+import { useSetupStatus } from "@/lib/use-setup-status";
 import { PromptDetail } from "./components/prompt-detail";
 import { PromptForm } from "./components/prompt-form";
 import { PromptList } from "./components/prompt-list";
@@ -14,6 +16,7 @@ import {
 } from "./hooks/use-prompts";
 
 const PromptsPage = () => {
+  const { hasProviders } = useSetupStatus();
   const {
     data: prompts = [],
     isLoading,
@@ -52,14 +55,30 @@ const PromptsPage = () => {
         </div>
       )}
 
-      <PromptList
-        loading={isLoading}
-        onAdd={() => setFormOpen(true)}
-        onDelete={(id) => setDeleteId(id)}
-        onEdit={(p) => setEditingPrompt(p)}
-        onView={(p) => setViewingPrompt(p)}
-        prompts={prompts}
-      />
+      {!hasProviders && !isLoading && prompts.length === 0 ? (
+        <EmptyState
+          action={
+            <Link href="/providers">
+              <Button>
+                <Network className="size-4" />
+                Add Provider
+              </Button>
+            </Link>
+          }
+          description="Connect an AI provider to start creating prompt templates."
+          icon={<Network className="size-8" />}
+          title="Connect a provider first"
+        />
+      ) : (
+        <PromptList
+          loading={isLoading}
+          onAdd={() => setFormOpen(true)}
+          onDelete={(id) => setDeleteId(id)}
+          onEdit={(p) => setEditingPrompt(p)}
+          onView={(p) => setViewingPrompt(p)}
+          prompts={prompts}
+        />
+      )}
 
       <PromptForm
         editingPrompt={editingPrompt}
