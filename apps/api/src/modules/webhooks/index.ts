@@ -12,7 +12,7 @@ import {
 import { testWebhook } from "./test";
 import { updateWebhook } from "./update";
 
-export const createWebhooksModule = (db: Database) => {
+export const createWebhooksModule = (db: Database, _redis?: unknown) => {
   const app = new Hono();
 
   app.get("/", listWebhooks(db));

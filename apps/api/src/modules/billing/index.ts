@@ -6,7 +6,7 @@ import { getPlans } from "./plans";
 import { getSubscription } from "./subscription";
 import { handleWebhook } from "./webhook";
 
-export const createBillingModule = (db: Database) => {
+export const createBillingModule = (db: Database, _redis?: unknown) => {
   const app = new Hono();
   app.get("/subscription", getSubscription(db));
   app.get("/plans", getPlans(db));

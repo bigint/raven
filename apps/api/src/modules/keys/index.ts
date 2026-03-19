@@ -7,7 +7,7 @@ import { listKeys } from "./list";
 import { createKeySchema, updateKeySchema } from "./schema";
 import { updateKey } from "./update";
 
-export const createKeysModule = (db: Database) => {
+export const createKeysModule = (db: Database, _redis?: unknown) => {
   const app = new Hono();
 
   app.get("/", listKeys(db));

@@ -6,7 +6,7 @@ import { deleteModelAlias } from "./delete";
 import { listModelAliases } from "./list";
 import { createModelAliasSchema } from "./schema";
 
-export const createModelAliasesModule = (db: Database) => {
+export const createModelAliasesModule = (db: Database, _redis?: unknown) => {
   const app = new Hono();
 
   app.get("/", listModelAliases(db));

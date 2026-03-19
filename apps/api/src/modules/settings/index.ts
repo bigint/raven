@@ -7,7 +7,7 @@ import { getSettings } from "./get";
 import { updateOrgSchema } from "./schema";
 import { updateSettings } from "./update";
 
-export const createSettingsModule = (db: Database) => {
+export const createSettingsModule = (db: Database, _redis?: unknown) => {
   const app = new Hono();
   app.get("/", getSettings(db));
   app.get("/export", exportSettings(db));

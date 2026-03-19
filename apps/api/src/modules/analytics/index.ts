@@ -22,7 +22,7 @@ import { getStats } from "./stats";
 import { getToolSessions, getToolStats } from "./tools";
 import { getUsage } from "./usage";
 
-export const createAnalyticsModule = (db: Database) => {
+export const createAnalyticsModule = (db: Database, _redis?: unknown) => {
   const app = new Hono<AppEnv>();
 
   // Clamp analytics date range to plan retention limit
