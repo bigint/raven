@@ -79,12 +79,10 @@ const TeamPageContent = () => {
     <div>
       <PageHeader
         actions={
-          activeTab === "invitations" ? (
-            <Button onClick={() => setShowInviteModal(true)}>
-              <Mail className="size-4" />
-              Invite Member
-            </Button>
-          ) : null
+          <Button onClick={() => setShowInviteModal(true)}>
+            <Mail className="size-4" />
+            Invite Member
+          </Button>
         }
         description="Manage members and invitations."
         title="Team"
