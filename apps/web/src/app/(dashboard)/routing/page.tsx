@@ -44,10 +44,12 @@ const RoutingPage = () => {
     <div>
       <PageHeader
         actions={
-          <Button onClick={() => setFormOpen(true)}>
-            <Plus className="size-4" />
-            Add Rule
-          </Button>
+          hasProviders ? (
+            <Button onClick={() => setFormOpen(true)}>
+              <Plus className="size-4" />
+              Add Rule
+            </Button>
+          ) : undefined
         }
         description="Route requests to different models based on conditions."
         title="Routing Rules"

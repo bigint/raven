@@ -42,10 +42,12 @@ const ModelAliasesPage = () => {
     <div>
       <PageHeader
         actions={
-          <Button onClick={() => setFormOpen(true)}>
-            <Plus className="size-4" />
-            Create Alias
-          </Button>
+          hasProviders ? (
+            <Button onClick={() => setFormOpen(true)}>
+              <Plus className="size-4" />
+              Create Alias
+            </Button>
+          ) : undefined
         }
         description="Create custom model names that map to actual models."
         title="Model Aliases"

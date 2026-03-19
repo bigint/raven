@@ -46,10 +46,12 @@ const PromptsPage = () => {
     <div>
       <PageHeader
         actions={
-          <Button onClick={() => setFormOpen(true)}>
-            <Plus className="size-4" />
-            Create Prompt
-          </Button>
+          hasProviders ? (
+            <Button onClick={() => setFormOpen(true)}>
+              <Plus className="size-4" />
+              Create Prompt
+            </Button>
+          ) : undefined
         }
         description="Manage reusable prompt templates for your organization."
         title="Prompts"

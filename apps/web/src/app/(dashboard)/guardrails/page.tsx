@@ -1,10 +1,12 @@
 "use client";
 
-import { Button, ConfirmDialog, PageHeader } from "@raven/ui";
+import { Button, ConfirmDialog, EmptyState, PageHeader } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Network, Plus } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useSetupStatus } from "@/lib/use-setup-status";
 import { GuardrailForm } from "./components/guardrail-form";
 import { GuardrailList } from "./components/guardrail-list";
 import {
@@ -14,6 +16,7 @@ import {
 } from "./hooks/use-guardrails";
 
 const GuardrailsPage = () => {
+  const { hasProviders } = useSetupStatus();
   const {
     data: guardrails = [],
     isLoading,
@@ -43,10 +46,12 @@ const GuardrailsPage = () => {
     <div>
       <PageHeader
         actions={
-          <Button onClick={() => setFormOpen(true)}>
-            <Plus className="size-4" />
-            Add Guardrail
-          </Button>
+          hasProviders ? (
+            <Button onClick={() => setFormOpen(true)}>
+              <Plus className="size-4" />
+              Add Guardrail
+            </Button>
+          ) : undefined
         }
         description="Configure rules to filter and moderate AI requests and responses."
         title="Guardrails"
@@ -61,13 +66,29 @@ const GuardrailsPage = () => {
         </div>
       )}
 
-      <GuardrailList
-        guardrails={guardrails}
-        loading={isLoading}
-        onAdd={() => setFormOpen(true)}
-        onDelete={(id) => setDeleteId(id)}
-        onEdit={(g) => setEditingGuardrail(g)}
-      />
+      {!hasProviders && !isLoading && guardrails.length === 0 ? (
+        <EmptyState
+          action={
+            <Link href="/providers">
+              <Button>
+                <Network className="size-4" />
+                Add Provider
+              </Button>
+            </Link>
+          }
+          description="Connect an AI provider to configure guardrails."
+          icon={<Network className="size-8" />}
+          title="Connect a provider first"
+        />
+      ) : (
+        <GuardrailList
+          guardrails={guardrails}
+          loading={isLoading}
+          onAdd={() => setFormOpen(true)}
+          onDelete={(id) => setDeleteId(id)}
+          onEdit={(g) => setEditingGuardrail(g)}
+        />
+      )}
 
       <GuardrailForm
         editingGuardrail={editingGuardrail}
