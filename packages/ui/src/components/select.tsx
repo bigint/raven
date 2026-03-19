@@ -61,10 +61,6 @@ function filterOptions(
   return options.filter((o) => o.label.toLowerCase().includes(term));
 }
 
-/* ------------------------------------------------------------------ */
-/*  Searchable — base-ui Popover                                      */
-/* ------------------------------------------------------------------ */
-
 const SearchableSelect = ({
   value,
   onChange,
@@ -216,10 +212,6 @@ const SearchableSelect = ({
   );
 };
 
-/* ------------------------------------------------------------------ */
-/*  Standard — base-ui Select                                         */
-/* ------------------------------------------------------------------ */
-
 const StandardSelect = ({
   value,
   onChange,
@@ -298,10 +290,6 @@ const StandardSelect = ({
     {error && <p className="text-xs text-destructive">{error}</p>}
   </div>
 );
-
-/* ------------------------------------------------------------------ */
-/*  Export                                                             */
-/* ------------------------------------------------------------------ */
 
 const Select = ({ searchable = false, ...props }: SelectProps) =>
   searchable ? <SearchableSelect {...props} /> : <StandardSelect {...props} />;
