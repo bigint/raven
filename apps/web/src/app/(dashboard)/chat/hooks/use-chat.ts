@@ -328,6 +328,28 @@ export const useChat = () => {
             | { prompt_tokens: number; completion_tokens: number }
             | undefined;
 
+          const flushBufferToMessages = () => {
+            const text = streamBufferRef.current;
+            const reasoning = streamReasoningBufferRef.current;
+            streamBufferRef.current = "";
+            streamReasoningBufferRef.current = "";
+            if (!text && !reasoning) return;
+            setMessages((prev) => {
+              const idx = prev.length - 1;
+              const msg = prev[idx];
+              if (!msg || msg.id !== assistantMessage.id) return prev;
+              const updated = [...prev];
+              updated[idx] = {
+                ...msg,
+                content: msg.content + text,
+                ...(reasoning
+                  ? { reasoning: (msg.reasoning ?? "") + reasoning }
+                  : {})
+              };
+              return updated;
+            });
+          };
+
           for await (const chunk of parseSSEStream(reader)) {
             if (chunk.usage) {
               finalUsage = chunk.usage;
@@ -339,29 +361,8 @@ export const useChat = () => {
               }
               if (!rafRef.current) {
                 rafRef.current = requestAnimationFrame(() => {
-                  const bufferedText = streamBufferRef.current;
-                  const bufferedReasoning =
-                    streamReasoningBufferRef.current;
-                  streamBufferRef.current = "";
-                  streamReasoningBufferRef.current = "";
                   rafRef.current = null;
-                  setMessages((prev) => {
-                    const idx = prev.length - 1;
-                    const msg = prev[idx];
-                    if (!msg || msg.id !== assistantMessage.id) return prev;
-                    const updated = [...prev];
-                    updated[idx] = {
-                      ...msg,
-                      content: msg.content + bufferedText,
-                      ...(bufferedReasoning
-                        ? {
-                            reasoning:
-                              (msg.reasoning ?? "") + bufferedReasoning
-                          }
-                        : {})
-                    };
-                    return updated;
-                  });
+                  flushBufferToMessages();
                 });
               }
             }
@@ -372,33 +373,7 @@ export const useChat = () => {
             cancelAnimationFrame(rafRef.current);
             rafRef.current = null;
           }
-          if (
-            streamBufferRef.current ||
-            streamReasoningBufferRef.current
-          ) {
-            const remainingText = streamBufferRef.current;
-            const remainingReasoning =
-              streamReasoningBufferRef.current;
-            streamBufferRef.current = "";
-            streamReasoningBufferRef.current = "";
-            setMessages((prev) => {
-              const idx = prev.length - 1;
-              const msg = prev[idx];
-              if (!msg || msg.id !== assistantMessage.id) return prev;
-              const updated = [...prev];
-              updated[idx] = {
-                ...msg,
-                content: msg.content + remainingText,
-                ...(remainingReasoning
-                  ? {
-                      reasoning:
-                        (msg.reasoning ?? "") + remainingReasoning
-                    }
-                  : {})
-              };
-              return updated;
-            });
-          }
+          flushBufferToMessages();
 
           const elapsedMs = Math.round(performance.now() - startTime);
           const meta: ResponseMeta = {

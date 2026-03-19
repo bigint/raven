@@ -42,12 +42,8 @@ export interface LogData {
 const FLUSH_INTERVAL = 2000;
 const MAX_BUFFER = 100;
 
-interface BufferedEntry {
-  db: Database;
-  values: typeof requestLogs.$inferInsert;
-}
-
-const logBuffer: BufferedEntry[] = [];
+let bufferDb: Database | null = null;
+const logBuffer: (typeof requestLogs.$inferInsert)[] = [];
 let flushTimer: ReturnType<typeof setInterval> | null = null;
 
 const startFlushTimer = (): void => {
@@ -58,29 +54,14 @@ const startFlushTimer = (): void => {
 };
 
 export const flushLogBuffer = async (): Promise<void> => {
-  if (logBuffer.length === 0) return;
+  if (logBuffer.length === 0 || !bufferDb) return;
 
   const batch = logBuffer.splice(0, logBuffer.length);
 
-  // Group entries by db instance in case multiple are used
-  const byDb = new Map<Database, (typeof requestLogs.$inferInsert)[]>();
-  for (const entry of batch) {
-    const existing = byDb.get(entry.db);
-    if (existing) {
-      existing.push(entry.values);
-    } else {
-      byDb.set(entry.db, [entry.values]);
-    }
-  }
-
-  const inserts = [...byDb.entries()].map(([db, values]) =>
-    db
-      .insert(requestLogs)
-      .values(values)
-      .catch((err) => console.error("Failed to flush log buffer:", err))
-  );
-
-  await Promise.all(inserts);
+  await bufferDb
+    .insert(requestLogs)
+    .values(batch)
+    .catch((err) => console.error("Failed to flush log buffer:", err));
 };
 
 export const logProxyRequest = async (
@@ -114,7 +95,8 @@ export const logProxyRequest = async (
       virtualKeyId: data.virtualKeyId
     };
 
-    logBuffer.push({ db, values });
+    bufferDb = db;
+    logBuffer.push(values);
     startFlushTimer();
 
     // Flush immediately when buffer reaches threshold
