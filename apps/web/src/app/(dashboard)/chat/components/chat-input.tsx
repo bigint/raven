@@ -19,30 +19,20 @@ import {
   useState
 } from "react";
 import { ProviderIcon } from "@/components/model-icon";
+import {
+  ACCEPTED_IMAGE_TYPES,
+  MAX_IMAGE_SIZE,
+  compressImage,
+  fileToBase64
+} from "../lib/image-utils";
+import type { ImageAttachment, PlaygroundSettings } from "../lib/types";
 
-export interface PlaygroundSettings {
-  readonly temperature: number;
-  readonly maxTokens: number;
-  readonly stream: boolean;
-  readonly showMetadata: boolean;
-  readonly enableTools: boolean;
-  readonly enableWebSearch: boolean;
-  readonly enableReasoning: boolean;
-  readonly reasoningBudget: number;
-  readonly chatMemory: number;
-}
+export type { ImageAttachment, PlaygroundSettings };
 
 interface ModelOption {
   readonly label: string;
   readonly value: string;
   readonly provider: string;
-}
-
-export interface ImageAttachment {
-  readonly id: string;
-  readonly base64: string;
-  readonly name: string;
-  readonly preview: string;
 }
 
 type Popover = "model" | "temperature" | "memory" | "settings" | null;
@@ -61,46 +51,6 @@ interface ChatInputProps {
   readonly systemPrompt: string;
   readonly onSystemPromptChange: (value: string) => void;
 }
-
-const MAX_IMAGE_SIZE = 20 * 1024 * 1024; // 20MB
-const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/gif", "image/webp"];
-
-const fileToBase64 = (file: File): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-
-const compressImage = (
-  file: File,
-  maxDim = 2048,
-  quality = 0.8
-): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      let { width, height } = img;
-      if (width > maxDim || height > maxDim) {
-        const ratio = Math.min(maxDim / width, maxDim / height);
-        width = Math.round(width * ratio);
-        height = Math.round(height * ratio);
-      }
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return reject(new Error("Canvas not supported"));
-      ctx.drawImage(img, 0, 0, width, height);
-      const objectUrl = img.src;
-      resolve(canvas.toDataURL("image/jpeg", quality));
-      URL.revokeObjectURL(objectUrl);
-    };
-    img.onerror = reject;
-    img.src = URL.createObjectURL(file);
-  });
-};
 
 export const ChatInput = ({
   disabled,
@@ -166,7 +116,7 @@ export const ChatInput = ({
 
     const newImages: ImageAttachment[] = [];
     for (const file of Array.from(files)) {
-      if (!ACCEPTED_TYPES.includes(file.type)) continue;
+      if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) continue;
       if (file.size > MAX_IMAGE_SIZE) continue;
 
       const base64 = file.type.startsWith("image/")
@@ -288,7 +238,7 @@ export const ChatInput = ({
                   <ImagePlus className="size-3.5" />
                 </button>
                 <input
-                  accept={ACCEPTED_TYPES.join(",")}
+                  accept={ACCEPTED_IMAGE_TYPES.join(",")}
                   className="hidden"
                   multiple
                   onChange={(e) => handleFileSelect(e.target.files)}
