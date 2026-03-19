@@ -4,9 +4,10 @@ import { Button } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { RotateCcw } from "lucide-react";
 import { useMemo } from "react";
+import { catalogModelsQueryOptions } from "@/lib/use-models";
 import { ChatInput } from "./components/chat-input";
 import { ChatMessages } from "./components/chat-messages";
-import { catalogModelsQueryOptions, useChat } from "./hooks/use-chat";
+import { useChat } from "./hooks/use-chat";
 import { useInitialModelSelection } from "./hooks/use-initial-model-selection";
 
 const ChatPage = () => {

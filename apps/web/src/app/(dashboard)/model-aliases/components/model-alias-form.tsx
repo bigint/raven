@@ -1,8 +1,9 @@
 "use client";
 
-import { Button, Input, Modal } from "@raven/ui";
+import { Button, Input, Modal, Select } from "@raven/ui";
 import { type FormEvent, useState } from "react";
 import { TextMorph } from "torph/react";
+import { useModelOptions } from "@/lib/use-models";
 import { useCreateModelAlias } from "../hooks/use-model-aliases";
 
 interface ModelAliasFormProps {
@@ -24,6 +25,7 @@ const ModelAliasForm = ({ open, onClose }: ModelAliasFormProps) => {
   const [form, setForm] = useState<FormState>(DEFAULT_FORM);
   const [formError, setFormError] = useState<string | null>(null);
 
+  const modelOptions = useModelOptions();
   const createMutation = useCreateModelAlias();
   const isSubmitting = createMutation.isPending;
 
@@ -77,11 +79,13 @@ const ModelAliasForm = ({ open, onClose }: ModelAliasFormProps) => {
           value={form.alias}
         />
 
-        <Input
+        <Select
           id="target-model"
           label="Target Model"
-          onChange={(e) => update("targetModel", e.target.value)}
-          placeholder="e.g. gpt-4o-mini"
+          onChange={(v) => update("targetModel", v)}
+          options={modelOptions}
+          placeholder="Select a model..."
+          searchable
           value={form.targetModel}
         />
 
