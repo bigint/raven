@@ -1,6 +1,6 @@
 "use client";
 
-import { PageHeader, PillTabs, Spinner, Tabs } from "@raven/ui";
+import { Input, PageHeader, PillTabs, Select, Spinner, Tabs } from "@raven/ui";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -201,15 +201,13 @@ const SessionsView = () => {
 
         {dateRange === "custom" && (
           <div className="flex items-center gap-2">
-            <input
-              className="h-9 rounded-md border border-input bg-background px-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+            <Input
               onChange={(e) => setCustomRange(e.target.value, customTo)}
               type="date"
               value={customFrom}
             />
             <span className="text-sm text-muted-foreground">to</span>
-            <input
-              className="h-9 rounded-md border border-input bg-background px-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+            <Input
               min={customFrom}
               onChange={(e) => setCustomRange(customFrom, e.target.value)}
               type="date"
@@ -218,18 +216,14 @@ const SessionsView = () => {
           </div>
         )}
 
-        <select
-          className="h-9 rounded-md border border-input bg-background px-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
-          onChange={(e) => setModelFilter(e.target.value)}
+        <Select
+          onChange={setModelFilter}
+          options={[
+            { label: "All Models", value: "" },
+            ...uniqueModels.map((model) => ({ label: model, value: model }))
+          ]}
           value={modelFilter}
-        >
-          <option value="">All Models</option>
-          {uniqueModels.map((model) => (
-            <option key={model} value={model}>
-              {model}
-            </option>
-          ))}
-        </select>
+        />
       </div>
 
       <LogsTable
@@ -239,23 +233,17 @@ const SessionsView = () => {
       />
 
       <div className="mt-4 flex items-center gap-2">
-        <label
-          className="text-sm text-muted-foreground"
-          htmlFor="page-size-select"
-        >
-          Rows per page
-        </label>
-        <select
-          className="rounded-md border border-border bg-background px-2 py-1 text-sm"
-          id="page-size-select"
-          onChange={(e) => setPageSize(Number(e.target.value))}
-          value={pageSize}
-        >
-          <option value={10}>10</option>
-          <option value={25}>25</option>
-          <option value={50}>50</option>
-          <option value={100}>100</option>
-        </select>
+        <Select
+          label="Rows per page"
+          onChange={(val) => setPageSize(Number(val))}
+          options={[
+            { label: "10", value: "10" },
+            { label: "25", value: "25" },
+            { label: "50", value: "50" },
+            { label: "100", value: "100" }
+          ]}
+          value={String(pageSize)}
+        />
       </div>
 
       {hasNextPage && (

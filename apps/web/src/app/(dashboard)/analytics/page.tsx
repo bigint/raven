@@ -2,7 +2,7 @@
 
 import type { Plan } from "@raven/types";
 import { PLAN_FEATURES } from "@raven/types";
-import { Button, PageHeader, PillTabs, Spinner, Tabs } from "@raven/ui";
+import { Button, PageHeader, PillTabs, Select, Spinner, Tabs } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Download, X } from "lucide-react";
 import Link from "next/link";
@@ -257,17 +257,11 @@ const AdoptionTab = ({ keyId }: { keyId?: string }) => {
         {viewTab === "bars" && (
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Metric:</span>
-            <select
-              className="rounded-md border border-border bg-background px-3 py-1.5 text-sm"
-              onChange={(e) => setMetric(e.target.value as MetricKey)}
+            <Select
+              onChange={(val) => setMetric(val as MetricKey)}
+              options={METRIC_OPTIONS}
               value={metric}
-            >
-              {METRIC_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+            />
           </div>
         )}
       </div>
