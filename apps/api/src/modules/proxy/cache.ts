@@ -3,7 +3,8 @@ import type { Database } from "@raven/db";
 import type { Redis } from "ioredis";
 import { analyzeContent } from "./content-analyzer";
 import type { GuardrailMatch } from "./guardrails";
-import { logAndPublish, updateLastUsed } from "./logger";
+import { updateLastUsed } from "./last-used";
+import { logAndPublish } from "./logger";
 import { extractCachedUsage, extractModel } from "./usage-mapper";
 
 const DEFAULT_TTL_SECONDS = 3600;
