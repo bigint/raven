@@ -5,6 +5,7 @@ import {
   ArrowUp,
   ChevronDown,
   ImagePlus,
+  Search,
   Square,
   Thermometer,
   X
@@ -13,9 +14,11 @@ import {
   type KeyboardEvent,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState
 } from "react";
+import { ProviderIcon } from "@/components/model-icon";
 
 export interface PlaygroundSettings {
   readonly temperature: number;
@@ -265,44 +268,14 @@ export const ChatInput = ({
             )}
 
             {/* Model selector */}
-            <div className="relative">
-              <button
-                className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                onClick={() => toggle("model")}
-                type="button"
-              >
-                {model ?? "Select model"}
-                <ChevronDown className="size-3" />
-              </button>
-
-              {openPopover === "model" && (
-                <Dropdown onClose={() => setOpenPopover(null)}>
-                  <div className="max-h-60 w-56 overflow-y-auto py-1">
-                    {modelOptions.map((opt) => (
-                      <button
-                        className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors hover:bg-accent ${opt.value === model ? "text-foreground font-medium" : "text-muted-foreground"}`}
-                        key={opt.value}
-                        onClick={() => {
-                          onModelChange(opt.value, opt.provider);
-                          setOpenPopover(null);
-                        }}
-                        type="button"
-                      >
-                        <span className="truncate">{opt.label}</span>
-                        <span className="ml-auto shrink-0 text-[10px] text-muted-foreground/60">
-                          {opt.provider}
-                        </span>
-                      </button>
-                    ))}
-                    {modelOptions.length === 0 && (
-                      <p className="px-3 py-2 text-xs text-muted-foreground">
-                        No models. Add a provider first.
-                      </p>
-                    )}
-                  </div>
-                </Dropdown>
-              )}
-            </div>
+            <ModelSelector
+              model={model}
+              modelOptions={modelOptions}
+              onClose={() => setOpenPopover(null)}
+              onModelChange={onModelChange}
+              onToggle={() => toggle("model")}
+              open={openPopover === "model"}
+            />
 
             {!settings.enableReasoning && (
               <>
@@ -576,6 +549,96 @@ export const ChatInput = ({
 };
 
 // Shared components
+
+const ModelSelector = ({
+  model,
+  modelOptions,
+  onModelChange,
+  onToggle,
+  open,
+  onClose
+}: {
+  readonly model?: string;
+  readonly modelOptions: readonly ModelOption[];
+  readonly onModelChange: (model: string, provider: string) => void;
+  readonly onToggle: () => void;
+  readonly open: boolean;
+  readonly onClose: () => void;
+}) => {
+  const [search, setSearch] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return modelOptions;
+    const q = search.toLowerCase();
+    return modelOptions.filter(
+      (o) =>
+        o.label.toLowerCase().includes(q) ||
+        o.value.toLowerCase().includes(q) ||
+        o.provider.toLowerCase().includes(q)
+    );
+  }, [modelOptions, search]);
+
+  useEffect(() => {
+    if (open) {
+      setSearch("");
+      setTimeout(() => searchRef.current?.focus(), 0);
+    }
+  }, [open]);
+
+  return (
+    <div className="relative">
+      <button
+        className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+        onClick={onToggle}
+        type="button"
+      >
+        {model ?? "Select model"}
+        <ChevronDown className="size-3" />
+      </button>
+
+      {open && (
+        <Dropdown onClose={onClose}>
+          <div className="w-64">
+            <div className="border-b border-border px-2 py-1.5">
+              <div className="relative">
+                <Search className="absolute left-2 top-1/2 size-3 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  className="w-full bg-transparent py-1 pl-7 pr-2 text-xs outline-none placeholder:text-muted-foreground"
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search models..."
+                  ref={searchRef}
+                  value={search}
+                />
+              </div>
+            </div>
+            <div className="max-h-60 overflow-y-auto py-1">
+              {filtered.map((opt) => (
+                <button
+                  className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors hover:bg-accent ${opt.value === model ? "font-medium text-foreground" : "text-muted-foreground"}`}
+                  key={opt.value}
+                  onClick={() => {
+                    onModelChange(opt.value, opt.provider);
+                    onClose();
+                  }}
+                  type="button"
+                >
+                  <ProviderIcon provider={opt.provider} size={14} />
+                  <span className="truncate">{opt.label}</span>
+                </button>
+              ))}
+              {filtered.length === 0 && (
+                <p className="px-3 py-2 text-xs text-muted-foreground">
+                  No models found.
+                </p>
+              )}
+            </div>
+          </div>
+        </Dropdown>
+      )}
+    </div>
+  );
+};
 
 const Sep = () => <span className="mx-0.5 text-border">|</span>;
 
