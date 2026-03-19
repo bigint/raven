@@ -27,6 +27,7 @@ import {
   createBillingWebhookModule
 } from "./modules/billing/index";
 import { createBudgetsModule } from "./modules/budgets/index";
+import { createCronModule } from "./modules/cron/index";
 import { createGuardrailsModule } from "./modules/guardrails/index";
 import { createKeysModule } from "./modules/keys/index";
 import { createModelAliasesModule } from "./modules/model-aliases/index";
@@ -146,6 +147,9 @@ app.all("/v1/proxy/*", proxyHandler(db, redis, env));
 // Billing webhooks (no auth)
 app.route("/webhooks/billing", createBillingWebhookModule(db, env));
 
+// Cron endpoints (secret header auth)
+app.route("/v1/cron", createCronModule(db, env));
+
 // Public models catalog (no auth required)
 app.route("/v1/models", createModelsModule(db));
 
@@ -177,9 +181,9 @@ v1.route("/analytics", createAnalyticsModule(db));
 v1.route("/teams", createTeamsModule(db));
 v1.route("/settings", createSettingsModule(db));
 v1.route("/billing", createBillingModule(db));
-v1.route("/audit-logs", createAuditLogsModule(db));
 v1.route("/webhooks", createWebhooksModule(db));
 v1.route("/routing-rules", createRoutingRulesModule(db));
+v1.route("/audit-logs", createAuditLogsModule(db));
 app.route("/v1", v1);
 
 app.notFound((c) =>

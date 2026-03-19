@@ -7,11 +7,11 @@ import type { Budget } from "../hooks/use-budgets";
 import { ENTITY_TYPE_LABELS } from "../hooks/use-budgets";
 
 interface BudgetListProps {
-  budgets: Budget[];
-  loading: boolean;
-  onAdd: () => void;
-  onEdit: (budget: Budget) => void;
-  onDelete: (id: string) => void;
+  readonly budgets: Budget[];
+  readonly loading: boolean;
+  readonly onAdd: () => void;
+  readonly onEdit: (budget: Budget) => void;
+  readonly onDelete: (id: string) => void;
 }
 
 const columns: Column<Budget>[] = [

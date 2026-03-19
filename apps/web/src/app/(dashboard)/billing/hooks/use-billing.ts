@@ -6,27 +6,27 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 
 interface Subscription {
-  planId: string;
-  planName: string;
-  status: string;
-  currentPeriodStart: string;
-  currentPeriodEnd: string;
-  cancelAtPeriodEnd: boolean;
+  readonly planId: string;
+  readonly planName: string;
+  readonly status: string;
+  readonly currentPeriodStart: string;
+  readonly currentPeriodEnd: string;
+  readonly cancelAtPeriodEnd: boolean;
 }
 
 interface PlanFeature {
-  text: string;
-  included: boolean;
+  readonly text: string;
+  readonly included: boolean;
 }
 
 interface Plan {
-  id: string;
-  name: string;
-  description: string;
-  priceMonthly: number;
-  priceYearly: number;
-  features: PlanFeature[];
-  isPopular?: boolean;
+  readonly id: string;
+  readonly name: string;
+  readonly description: string;
+  readonly priceMonthly: number;
+  readonly priceYearly: number;
+  readonly features: PlanFeature[];
+  readonly isPopular?: boolean;
 }
 
 type BillingInterval = "monthly" | "yearly";
@@ -61,14 +61,10 @@ export const useBilling = () => {
     router.replace(`?${params.toString()}`);
   };
 
-  const subscriptionQuery = useQuery(subscriptionQueryOptions());
-  const plansQuery = useQuery(plansQueryOptions());
+  const subscription = useQuery(subscriptionQueryOptions());
+  const plans = useQuery(plansQueryOptions());
 
   const [upgrading, setUpgrading] = useState<string | null>(null);
-
-  const isLoading = subscriptionQuery.isPending || plansQuery.isPending;
-  const error =
-    subscriptionQuery.error?.message ?? plansQuery.error?.message ?? null;
 
   const handlePlanAction = async (planId: string) => {
     try {
@@ -81,11 +77,11 @@ export const useBilling = () => {
   };
 
   const getPlanButtonLabel = (plan: Plan): string => {
-    const subscription = subscriptionQuery.data;
-    const plans = plansQuery.data ?? [];
-    if (!subscription) return "Get started";
-    if (subscription.planId === plan.id) return "Current plan";
-    const currentPlan = plans.find((p) => p.id === subscription.planId);
+    const sub = subscription.data;
+    const allPlans = plans.data ?? [];
+    if (!sub) return "Get started";
+    if (sub.planId === plan.id) return "Current plan";
+    const currentPlan = allPlans.find((p) => p.id === sub.planId);
     if (!currentPlan) return "Switch plan";
     const currentPrice =
       billingInterval === "monthly"
@@ -98,13 +94,11 @@ export const useBilling = () => {
 
   return {
     billingInterval,
-    error,
     getPlanButtonLabel,
     handlePlanAction,
-    isLoading,
-    plans: plansQuery.data ?? [],
+    plans,
     setBillingInterval,
-    subscription: subscriptionQuery.data ?? null,
+    subscription,
     upgrading
   };
 };

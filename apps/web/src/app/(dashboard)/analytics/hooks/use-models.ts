@@ -3,41 +3,28 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
+import type { DateRange } from "../lib/date-utils";
+import {
+  DATE_RANGE_OPTIONS,
+  keyFilter,
+  rangeToFrom,
+  VALID_RANGES
+} from "../lib/date-utils";
+
+export type { DateRange };
 
 export interface ModelRow {
-  model: string;
-  provider: string;
-  requests: number;
-  totalCost: string;
-  inputTokens: number;
-  outputTokens: number;
-  cachedTokens: number;
-  reasoningTokens: number;
-  avgLatencyMs: number;
-  lastUsed: string | null;
+  readonly model: string;
+  readonly provider: string;
+  readonly requests: number;
+  readonly totalCost: string;
+  readonly inputTokens: number;
+  readonly outputTokens: number;
+  readonly cachedTokens: number;
+  readonly reasoningTokens: number;
+  readonly avgLatencyMs: number;
+  readonly lastUsed: string | null;
 }
-
-export type DateRange = "7d" | "30d" | "90d";
-
-const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
-  { label: "Last 7 days", value: "7d" },
-  { label: "Last 30 days", value: "30d" },
-  { label: "Last 90 days", value: "90d" }
-];
-
-const VALID_RANGES: DateRange[] = ["7d", "30d", "90d"];
-
-const RANGE_MS: Record<DateRange, number> = {
-  "7d": 604_800_000,
-  "30d": 2_592_000_000,
-  "90d": 7_776_000_000
-};
-
-const rangeToFrom = (range: DateRange): string =>
-  new Date(Date.now() - RANGE_MS[range]).toISOString();
-
-const keyFilter = (keyId?: string): string =>
-  keyId ? `&virtualKeyId=${keyId}` : "";
 
 export const modelsQueryOptions = (range: DateRange, keyId?: string) =>
   queryOptions({
@@ -45,7 +32,7 @@ export const modelsQueryOptions = (range: DateRange, keyId?: string) =>
       api.get<ModelRow[]>(
         `/v1/analytics/models?from=${rangeToFrom(range)}${keyFilter(keyId)}`
       ),
-    queryKey: ["models", range, keyId]
+    queryKey: ["models", { keyId, range }]
   });
 
 export const useModels = (keyId?: string) => {

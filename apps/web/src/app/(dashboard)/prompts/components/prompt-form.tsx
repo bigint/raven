@@ -2,6 +2,7 @@
 
 import { Button, Input, Modal, Select, Textarea } from "@raven/ui";
 import { type FormEvent, useState } from "react";
+import { toast } from "sonner";
 import { TextMorph } from "torph/react";
 import { useModelOptions } from "@/lib/use-models";
 import type { Prompt } from "../hooks/use-prompts";
@@ -20,9 +21,9 @@ const DEFAULT_FORM: FormState = {
 };
 
 interface PromptFormProps {
-  open: boolean;
-  onClose: () => void;
-  editingPrompt?: Prompt | null;
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly editingPrompt?: Prompt | null;
 }
 
 const PromptForm = ({ open, onClose, editingPrompt }: PromptFormProps) => {
@@ -78,6 +79,7 @@ const PromptForm = ({ open, onClose, editingPrompt }: PromptFormProps) => {
           name: form.name.trim()
         });
       }
+      toast.success(isEdit ? "Prompt updated" : "Prompt created");
       handleClose();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Something went wrong");
@@ -92,7 +94,10 @@ const PromptForm = ({ open, onClose, editingPrompt }: PromptFormProps) => {
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
         {formError && (
-          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <div
+            className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            role="alert"
+          >
             {formError}
           </div>
         )}

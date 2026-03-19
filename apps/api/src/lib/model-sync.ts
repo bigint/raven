@@ -42,17 +42,6 @@ interface ModelsDevProvider {
 
 type ModelsDevResponse = Record<string, ModelsDevProvider>;
 
-export interface SearchResult {
-  readonly id: string;
-  readonly name: string;
-  readonly capabilities: readonly string[];
-  readonly category: string;
-  readonly contextWindow: number;
-  readonly maxOutput: number;
-  readonly inputPrice: number;
-  readonly outputPrice: number;
-}
-
 const MODELS_DEV_API = "https://models.dev/api.json";
 const CACHE_TTL_MS = 10 * 60 * 1000;
 
@@ -62,10 +51,6 @@ export const PROVIDER_SLUG_MAP: Record<string, string> = {
   mistral: "mistralai",
   openai: "openai"
 };
-
-const REVERSE_SLUG_MAP: Record<string, string> = Object.fromEntries(
-  Object.entries(PROVIDER_SLUG_MAP).map(([dev, ours]) => [ours, dev])
-);
 
 let cachedData: ModelsDevResponse | null = null;
 let cacheTimestamp = 0;
@@ -123,49 +108,4 @@ export const deriveCapabilities = (model: ModelsDevModel): string[] => {
     ...(model.reasoning ? ["reasoning"] : []),
     "streaming"
   ];
-};
-
-export const searchModels = async (
-  provider: string,
-  query: string
-): Promise<SearchResult[]> => {
-  const data = await fetchModelsDevCached();
-  const devSlug = REVERSE_SLUG_MAP[provider];
-  if (!devSlug) return [];
-
-  const providerData = data[devSlug];
-  if (!providerData?.models) return [];
-
-  const q = query.toLowerCase();
-
-  return Object.values(providerData.models)
-    .filter(
-      (m) => m.id.toLowerCase().includes(q) || m.name.toLowerCase().includes(q)
-    )
-    .map((m) => {
-      const inputPrice = m.cost?.input ?? 0;
-      return {
-        capabilities: deriveCapabilities(m),
-        category: deriveCategory(m, inputPrice),
-        contextWindow: m.limit?.context ?? 0,
-        id: m.id,
-        inputPrice,
-        maxOutput: m.limit?.output ?? 0,
-        name: m.name,
-        outputPrice: m.cost?.output ?? 0
-      };
-    })
-    .sort((a, b) => a.id.localeCompare(b.id));
-};
-
-export const getModelsDevModel = async (
-  provider: string,
-  modelId: string
-): Promise<ModelsDevModel | null> => {
-  const data = await fetchModelsDevCached();
-  const devSlug = REVERSE_SLUG_MAP[provider];
-  if (!devSlug) return null;
-
-  const providerData = data[devSlug];
-  return providerData?.models?.[modelId] ?? null;
 };

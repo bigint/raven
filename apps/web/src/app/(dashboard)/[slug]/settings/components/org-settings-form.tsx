@@ -6,18 +6,18 @@ import { TextMorph } from "torph/react";
 import type { OrgSettings } from "../hooks/use-org-settings";
 
 interface OrgSettingsFormProps {
-  settings: OrgSettings;
-  editName: string;
-  editSlug: string;
-  isAdmin: boolean;
-  isSlugValid: boolean;
-  hasChanges: boolean;
-  saving: boolean;
-  saveError: string | null;
-  onNameChange: (value: string) => void;
-  onSlugChange: (value: string) => void;
-  onSaveErrorClear: () => void;
-  onSave: () => void;
+  readonly settings: OrgSettings;
+  readonly editName: string;
+  readonly editSlug: string;
+  readonly isAdmin: boolean;
+  readonly isSlugValid: boolean;
+  readonly hasChanges: boolean;
+  readonly saving: boolean;
+  readonly saveError: string | null;
+  readonly onNameChange: (value: string) => void;
+  readonly onSlugChange: (value: string) => void;
+  readonly onSaveErrorClear: () => void;
+  readonly onSave: () => void;
 }
 
 export const OrgSettingsForm = ({

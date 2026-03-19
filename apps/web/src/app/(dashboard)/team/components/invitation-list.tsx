@@ -18,10 +18,10 @@ const STATUS_BADGE_VARIANT: Record<string, "warning" | "success" | "neutral"> =
   };
 
 interface InvitationListProps {
-  invitations: Invitation[];
-  isLoading: boolean;
-  onDelete: (id: string) => void;
-  onInvite: () => void;
+  readonly invitations: Invitation[];
+  readonly isLoading: boolean;
+  readonly onDelete: (id: string) => void;
+  readonly onInvite: () => void;
 }
 
 const InvitationList = ({

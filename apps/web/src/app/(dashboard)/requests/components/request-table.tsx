@@ -9,11 +9,11 @@ import type { RequestLog } from "../hooks/use-requests";
 import { PROVIDER_LABELS } from "../hooks/use-requests";
 
 interface RequestTableProps {
-  requests: RequestLog[];
-  loading: boolean;
-  loadingMessage?: string;
-  emptyMessage?: string;
-  animateRows?: boolean;
+  readonly requests: RequestLog[];
+  readonly loading: boolean;
+  readonly loadingMessage?: string;
+  readonly emptyMessage?: string;
+  readonly animateRows?: boolean;
 }
 
 const getStatusBadge = (statusCode: number) => {

@@ -1,17 +1,19 @@
 "use client";
 
-import { Button, PageHeader, PillTabs, Spinner } from "@raven/ui";
+import type { Tab } from "@raven/ui";
+import { Button, PageHeader, Spinner, Tabs } from "@raven/ui";
 import { Download } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { useOrgStore } from "@/stores/org";
 import { DangerZone } from "./components/danger-zone";
 import { OrgSettingsForm } from "./components/org-settings-form";
 import { PlanSubscription } from "./components/plan-subscription";
 import { useOrgSettings } from "./hooks/use-org-settings";
 
-const TABS = [
+const TABS: Tab[] = [
   { label: "General", value: "general" },
   { label: "Billing", value: "billing" },
   { label: "Danger Zone", value: "danger" }
@@ -19,7 +21,15 @@ const TABS = [
 
 const OrgSettingsPage = () => {
   const router = useRouter();
+  const params = useParams<{ slug: string }>();
+  const activeOrg = useOrgStore((s) => s.activeOrg);
   const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (activeOrg && params.slug !== activeOrg.slug) {
+      router.replace(`/${activeOrg.slug}/settings`);
+    }
+  }, [activeOrg, params.slug, router]);
   const tab = searchParams.get("tab") ?? "general";
   const [exporting, setExporting] = useState(false);
 
@@ -121,9 +131,9 @@ const OrgSettingsPage = () => {
         </div>
       ) : settings === null ? null : (
         <>
-          <PillTabs onChange={setTab} options={visibleTabs} value={tab} />
+          <Tabs onChange={setTab} tabs={visibleTabs} value={tab} />
 
-          <div className="mt-6">
+          <div>
             {tab === "general" && (
               <OrgSettingsForm
                 editName={editName}

@@ -3,16 +3,17 @@ import {
   useMutation,
   useQueryClient
 } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export interface Webhook {
-  id: string;
-  url: string;
-  events: string[];
-  secret: string;
-  isEnabled: boolean;
-  createdAt: string;
-  updatedAt: string;
+  readonly id: string;
+  readonly url: string;
+  readonly events: string[];
+  readonly secret: string;
+  readonly isEnabled: boolean;
+  readonly createdAt: string;
+  readonly updatedAt: string;
 }
 
 export const WEBHOOK_EVENTS = [
@@ -60,16 +61,16 @@ export const webhooksQueryOptions = () =>
   });
 
 interface WebhookCreateInput {
-  url: string;
-  events: string[];
-  isEnabled?: boolean;
+  readonly url: string;
+  readonly events: string[];
+  readonly isEnabled?: boolean;
 }
 
 interface WebhookUpdateInput {
-  id: string;
-  url?: string;
-  events?: string[];
-  isEnabled?: boolean;
+  readonly id: string;
+  readonly url?: string;
+  readonly events?: string[];
+  readonly isEnabled?: boolean;
 }
 
 export const useCreateWebhook = () => {
@@ -78,6 +79,9 @@ export const useCreateWebhook = () => {
   return useMutation({
     mutationFn: (input: WebhookCreateInput) =>
       api.post<Webhook>("/v1/webhooks", input),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["webhooks"] });
     }
@@ -90,6 +94,9 @@ export const useUpdateWebhook = () => {
   return useMutation({
     mutationFn: ({ id, ...body }: WebhookUpdateInput) =>
       api.put<Webhook>(`/v1/webhooks/${id}`, body),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["webhooks"] });
     }
@@ -101,6 +108,9 @@ export const useDeleteWebhook = () => {
 
   return useMutation({
     mutationFn: (id: string) => api.delete(`/v1/webhooks/${id}`),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["webhooks"] });
     }
@@ -108,12 +118,15 @@ export const useDeleteWebhook = () => {
 };
 
 interface TestWebhookResult {
-  ok: boolean;
-  status: number;
+  readonly ok: boolean;
+  readonly status: number;
 }
 
 export const useTestWebhook = () =>
   useMutation({
     mutationFn: (url: string) =>
-      api.post<TestWebhookResult>("/v1/webhooks/test", { url })
+      api.post<TestWebhookResult>("/v1/webhooks/test", { url }),
+    onError: (err) => {
+      toast.error(err.message);
+    }
   });

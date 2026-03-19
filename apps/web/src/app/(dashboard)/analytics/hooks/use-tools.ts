@@ -9,81 +9,45 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { SessionRequest } from "@/app/(dashboard)/requests/hooks/use-logs";
 import { sessionDetailQueryOptions } from "@/app/(dashboard)/requests/hooks/use-logs";
 import { api } from "@/lib/api";
+import type { DateRange } from "../lib/date-utils";
+import {
+  DATE_RANGE_OPTIONS,
+  fillTimeSeriesGaps,
+  keyFilter,
+  rangeToFrom,
+  VALID_RANGES
+} from "../lib/date-utils";
 
 export interface ToolDailyStats {
-  date: string;
-  totalRequests: number;
-  totalToolUses: number;
+  readonly date: string;
+  readonly totalRequests: number;
+  readonly totalToolUses: number;
 }
 
 export interface ToolSession {
-  sessionId: string;
-  virtualKeyId: string;
-  keyName: string;
-  userAgent: string | null;
-  requestCount: number;
-  models: string[];
-  toolUses: number;
-  endTime: string;
+  readonly sessionId: string;
+  readonly virtualKeyId: string;
+  readonly keyName: string;
+  readonly userAgent: string | null;
+  readonly requestCount: number;
+  readonly models: string[];
+  readonly toolUses: number;
+  readonly endTime: string;
 }
 
 interface ToolSessionsResponse {
-  data: ToolSession[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
+  readonly data: ToolSession[];
+  readonly pagination: {
+    readonly page: number;
+    readonly limit: number;
+    readonly total: number;
+    readonly totalPages: number;
   };
 }
 
-export type DateRange = "7d" | "30d" | "90d";
-
-const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
-  { label: "Last 7 days", value: "7d" },
-  { label: "Last 30 days", value: "30d" },
-  { label: "Last 90 days", value: "90d" }
-];
-
-const VALID_RANGES: DateRange[] = ["7d", "30d", "90d"];
-
-const RANGE_MS: Record<DateRange, number> = {
-  "7d": 604_800_000,
-  "30d": 2_592_000_000,
-  "90d": 7_776_000_000
-};
-
-const rangeToFrom = (range: DateRange): string =>
-  new Date(Date.now() - RANGE_MS[range]).toISOString();
+export type { DateRange };
 
 const PAGE_SIZE = 20;
-
-const fillToolGaps = (
-  data: ToolDailyStats[],
-  range: DateRange
-): ToolDailyStats[] => {
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  const from = new Date(Date.now() - RANGE_MS[range]);
-  from.setHours(0, 0, 0, 0);
-
-  const dataMap = new Map(data.map((d) => [d.date, d]));
-  const result: ToolDailyStats[] = [];
-  const current = new Date(from);
-
-  while (current <= now) {
-    const key = current.toISOString().slice(0, 10);
-    result.push(
-      dataMap.get(key) ?? { date: key, totalRequests: 0, totalToolUses: 0 }
-    );
-    current.setDate(current.getDate() + 1);
-  }
-
-  return result;
-};
-
-const keyFilter = (keyId?: string): string =>
-  keyId ? `&virtualKeyId=${keyId}` : "";
 
 export const toolStatsQueryOptions = (range: DateRange, keyId?: string) =>
   queryOptions({
@@ -91,9 +55,13 @@ export const toolStatsQueryOptions = (range: DateRange, keyId?: string) =>
       const data = await api.get<ToolDailyStats[]>(
         `/v1/analytics/tools/stats?from=${rangeToFrom(range)}${keyFilter(keyId)}`
       );
-      return fillToolGaps(data, range);
+      return fillTimeSeriesGaps(data, range, (date) => ({
+        date,
+        totalRequests: 0,
+        totalToolUses: 0
+      }));
     },
-    queryKey: ["tools", "stats", range, keyId]
+    queryKey: ["tools", "stats", { keyId, range }]
   });
 
 export { type SessionRequest, sessionDetailQueryOptions };
@@ -124,7 +92,7 @@ export const useTools = (keyId?: string) => {
       api.get<ToolSessionsResponse>(
         `/v1/analytics/tools/sessions?from=${rangeToFrom(dateRange)}&page=${pageParam}&limit=${PAGE_SIZE}${keyFilter(keyId)}`
       ),
-    queryKey: ["tools", "sessions", dateRange, keyId]
+    queryKey: ["tools", "sessions", { keyId, range: dateRange }]
   });
 
   return {

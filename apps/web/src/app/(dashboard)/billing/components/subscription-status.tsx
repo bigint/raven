@@ -13,7 +13,7 @@ const STATUS_BADGE: Record<string, string> = {
 };
 
 interface SubscriptionStatusProps {
-  subscription: Subscription;
+  readonly subscription: Subscription;
 }
 
 export const SubscriptionStatus = ({

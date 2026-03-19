@@ -6,10 +6,10 @@ import { Plus, Replace, Trash2 } from "lucide-react";
 import type { ModelAlias } from "../hooks/use-model-aliases";
 
 interface ModelAliasListProps {
-  aliases: ModelAlias[];
-  loading: boolean;
-  onAdd: () => void;
-  onDelete: (id: string) => void;
+  readonly aliases: ModelAlias[];
+  readonly loading: boolean;
+  readonly onAdd: () => void;
+  readonly onDelete: (id: string) => void;
 }
 
 const columns: Column<ModelAlias>[] = [

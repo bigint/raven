@@ -9,14 +9,14 @@ import { formatTimeAgo } from "@/lib/format";
 import type { RecentRequest } from "../hooks/use-overview";
 
 const getStatusColor = (statusCode: number): string => {
-  if (statusCode >= 200 && statusCode < 300) return "bg-green-500";
+  if (statusCode >= 200 && statusCode < 300) return "bg-success";
   if (statusCode >= 400) return "bg-destructive";
-  return "bg-yellow-500";
+  return "bg-warning";
 };
 
 interface RecentRequestsProps {
-  requests: RecentRequest[];
-  loading: boolean;
+  readonly requests: RecentRequest[];
+  readonly loading: boolean;
 }
 
 const LoadingSkeleton = () => (

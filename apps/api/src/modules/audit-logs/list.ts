@@ -1,53 +1,36 @@
 import type { Database } from "@raven/db";
-import { auditLogs } from "@raven/db";
-import { and, desc, eq, gte, isNull, lte } from "drizzle-orm";
-import type { z } from "zod";
-import type { AppContextWithQuery } from "@/lib/types";
-import { checkFeatureGate } from "@/modules/proxy/plan-gate";
-import type { listQuerySchema } from "./schema";
+import { auditLogs, users } from "@raven/db";
+import { and, desc, eq, isNull } from "drizzle-orm";
+import { Hono } from "hono";
+import type { AppContext } from "@/lib/types";
 
-type Query = z.infer<typeof listQuerySchema>;
+export const createAuditLogsModule = (db: Database) => {
+  const app = new Hono();
 
-export const listAuditLogs =
-  (db: Database) => async (c: AppContextWithQuery<Query>) => {
+  app.get("/", async (c: AppContext) => {
     const orgId = c.get("orgId");
 
-    await checkFeatureGate(db, orgId, "hasAuditLogs");
-
-    const query = c.req.valid("query");
-
-    const conditions = [
-      eq(auditLogs.organizationId, orgId),
-      isNull(auditLogs.deletedAt)
-    ];
-
-    if (query.action) {
-      conditions.push(eq(auditLogs.action, query.action));
-    }
-
-    if (query.resourceType) {
-      conditions.push(eq(auditLogs.resourceType, query.resourceType));
-    }
-
-    if (query.actorId) {
-      conditions.push(eq(auditLogs.actorId, query.actorId));
-    }
-
-    if (query.from) {
-      conditions.push(gte(auditLogs.createdAt, query.from));
-    }
-
-    if (query.to) {
-      conditions.push(lte(auditLogs.createdAt, query.to));
-    }
-
     const rows = await db
-      .select()
+      .select({
+        action: auditLogs.action,
+        actorEmail: users.email,
+        actorName: users.name,
+        createdAt: auditLogs.createdAt,
+        id: auditLogs.id,
+        metadata: auditLogs.metadata,
+        resourceId: auditLogs.resourceId,
+        resourceType: auditLogs.resourceType
+      })
       .from(auditLogs)
-      .where(and(...conditions))
+      .leftJoin(users, eq(users.id, auditLogs.actorId))
+      .where(
+        and(eq(auditLogs.organizationId, orgId), isNull(auditLogs.deletedAt))
+      )
       .orderBy(desc(auditLogs.createdAt))
-      .limit(query.limit)
-      .offset(query.offset);
+      .limit(200);
 
-    return c.json(rows);
-  };
+    return c.json({ data: rows });
+  });
+
+  return app;
+};

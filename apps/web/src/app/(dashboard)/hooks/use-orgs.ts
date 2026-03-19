@@ -1,17 +1,10 @@
 "use client";
 
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
 import { api } from "@/lib/api";
-import { useOrgStore } from "@/stores/org";
-
-interface Org {
-  id: string;
-  name: string;
-  slug: string;
-  role: string;
-  plan: string;
-}
+import { type Org, useOrgStore } from "@/stores/org";
 
 export const orgsQueryOptions = () =>
   queryOptions({
@@ -22,6 +15,8 @@ export const orgsQueryOptions = () =>
 export const useOrgs = () => {
   const { data: orgs = [], isPending, isError } = useQuery(orgsQueryOptions());
   const { activeOrg, setActiveOrg } = useOrgStore();
+  const queryClient = useQueryClient();
+  const router = useRouter();
 
   // Restore saved org or fall back to first
   useEffect(() => {
@@ -36,12 +31,11 @@ export const useOrgs = () => {
   const switchOrg = useCallback(
     (org: Org) => {
       setActiveOrg(org);
-      window.location.reload();
+      queryClient.invalidateQueries();
+      router.push("/overview");
     },
-    [setActiveOrg]
+    [setActiveOrg, queryClient, router]
   );
 
   return { activeOrg, isError, isPending, orgs, switchOrg };
 };
-
-export type { Org };

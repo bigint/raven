@@ -6,17 +6,17 @@ import { TextMorph } from "torph/react";
 import type { Stats } from "../hooks/use-overview";
 
 interface StatCardsProps {
-  stats: Stats | null;
-  loading: boolean;
+  readonly stats: Stats | null;
+  readonly loading: boolean;
 }
 
 interface StatCard {
-  bg: string;
-  color: string;
-  icon: LucideIcon;
-  label: string;
-  sub: string;
-  value: string;
+  readonly bg: string;
+  readonly color: string;
+  readonly icon: LucideIcon;
+  readonly label: string;
+  readonly sub: string;
+  readonly value: string;
 }
 
 const buildStatCards = (stats: Stats | null): StatCard[] => {
@@ -35,16 +35,16 @@ const buildStatCards = (stats: Stats | null): StatCard[] => {
       value: totalRequests.toLocaleString()
     },
     {
-      bg: "bg-green-500/10",
-      color: "text-green-500",
+      bg: "bg-success/10",
+      color: "text-success",
       icon: DollarSign,
       label: "Total Cost",
       sub: "Last 30 days",
       value: `$${totalCost.toFixed(2)}`
     },
     {
-      bg: "bg-yellow-500/10",
-      color: "text-yellow-500",
+      bg: "bg-warning/10",
+      color: "text-warning",
       icon: Clock,
       label: "Avg Latency",
       sub: "Across all requests",

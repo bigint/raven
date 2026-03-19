@@ -31,10 +31,7 @@ export const budgets = pgTable(
     organizationId: text("organization_id")
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
-    period: budgetPeriodEnum("period").notNull().default("monthly"),
-    periodStart: timestamp("period_start", { withTimezone: true })
-      .notNull()
-      .defaultNow()
+    period: budgetPeriodEnum("period").notNull().default("monthly")
   },
   (t) => [index("budgets_org_entity_idx").on(t.organizationId, t.entityId)]
 );

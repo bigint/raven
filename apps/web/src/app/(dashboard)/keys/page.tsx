@@ -72,13 +72,15 @@ const KeysPage = () => {
         </div>
       )}
 
-      <div className="mb-4">
-        <PillTabs
-          onChange={setEnvironment}
-          options={TAB_OPTIONS}
-          value={environment}
-        />
-      </div>
+      {keys.length > 0 && (
+        <div className="mb-4">
+          <PillTabs
+            onChange={setEnvironment}
+            options={TAB_OPTIONS}
+            value={environment}
+          />
+        </div>
+      )}
 
       <KeyList
         keys={filteredKeys}

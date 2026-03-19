@@ -7,77 +7,56 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { subscriptionQueryOptions } from "@/app/(dashboard)/billing/hooks/use-billing";
 import { api } from "@/lib/api";
+import type { ExtendedDateRange } from "../lib/date-utils";
+import {
+  EXTENDED_DATE_RANGE_OPTIONS,
+  EXTENDED_VALID_RANGES,
+  extendedRangeToFrom,
+  keyFilter,
+  RANGE_DAYS
+} from "../lib/date-utils";
 
 interface Stats {
-  totalRequests: number;
-  totalCost: string;
-  avgLatencyMs: string;
-  cacheHitRate: string;
-  totalTokens: number;
-  totalInputTokens: number;
-  totalOutputTokens: number;
-  totalCachedTokens: number;
-  totalReasoningTokens: number;
+  readonly totalRequests: number;
+  readonly totalCost: string;
+  readonly avgLatencyMs: string;
+  readonly cacheHitRate: string;
+  readonly totalTokens: number;
+  readonly totalInputTokens: number;
+  readonly totalOutputTokens: number;
+  readonly totalCachedTokens: number;
+  readonly totalReasoningTokens: number;
 }
 
 interface UsageRow {
-  provider: string;
-  providerConfigName: string | null;
-  model: string;
-  totalRequests: number;
-  totalCost: string;
-  totalInputTokens: string;
-  totalOutputTokens: string;
-  totalCachedTokens: string;
-  totalReasoningTokens: string;
-  avgLatencyMs: string;
+  readonly provider: string;
+  readonly providerConfigName: string | null;
+  readonly model: string;
+  readonly totalRequests: number;
+  readonly totalCost: string;
+  readonly totalInputTokens: string;
+  readonly totalOutputTokens: string;
+  readonly totalCachedTokens: string;
+  readonly totalReasoningTokens: string;
+  readonly avgLatencyMs: string;
 }
 
 interface CacheDailyRow {
-  date: string;
-  hits: number;
-  misses: number;
-  total: number;
+  readonly date: string;
+  readonly hits: number;
+  readonly misses: number;
+  readonly total: number;
 }
 
 interface CacheStats {
-  cacheHits: number;
-  cacheMisses: number;
-  daily: CacheDailyRow[];
-  hitRate: string;
-  totalRequests: number;
+  readonly cacheHits: number;
+  readonly cacheMisses: number;
+  readonly daily: CacheDailyRow[];
+  readonly hitRate: string;
+  readonly totalRequests: number;
 }
 
-type DateRange = "7d" | "30d" | "90d" | "custom";
-
-const RANGE_DAYS: Record<string, number> = {
-  "7d": 7,
-  "30d": 30,
-  "90d": 90
-};
-
-const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
-  { label: "Last 7 days", value: "7d" },
-  { label: "Last 30 days", value: "30d" },
-  { label: "Last 90 days", value: "90d" },
-  { label: "Custom", value: "custom" }
-];
-
-const VALID_RANGES: DateRange[] = ["7d", "30d", "90d", "custom"];
-
-const RANGE_MS: Record<string, number> = {
-  "7d": 604_800_000,
-  "30d": 2_592_000_000,
-  "90d": 7_776_000_000
-};
-
-const rangeToFrom = (range: string): string => {
-  const ms = RANGE_MS[range] ?? 2_592_000_000;
-  return new Date(Date.now() - ms).toISOString();
-};
-
-const keyFilter = (keyId?: string): string =>
-  keyId ? `&virtualKeyId=${keyId}` : "";
+type DateRange = ExtendedDateRange;
 
 const buildDateParams = (
   range: DateRange,
@@ -89,7 +68,7 @@ const buildDateParams = (
     const to = new Date(`${customTo}T23:59:59`).toISOString();
     return `from=${from}&to=${to}`;
   }
-  return `from=${rangeToFrom(range)}`;
+  return `from=${extendedRangeToFrom(range)}`;
 };
 
 export const analyticsStatsQueryOptions = (
@@ -103,7 +82,7 @@ export const analyticsStatsQueryOptions = (
       api.get<Stats>(
         `/v1/analytics/stats?${buildDateParams(range, customFrom, customTo)}${keyFilter(keyId)}`
       ),
-    queryKey: ["analytics", "stats", range, keyId, customFrom, customTo]
+    queryKey: ["analytics", "stats", { customFrom, customTo, keyId, range }]
   });
 
 export const analyticsUsageQueryOptions = (
@@ -117,7 +96,7 @@ export const analyticsUsageQueryOptions = (
       api.get<UsageRow[]>(
         `/v1/analytics/usage?${buildDateParams(range, customFrom, customTo)}${keyFilter(keyId)}`
       ),
-    queryKey: ["analytics", "usage", range, keyId, customFrom, customTo]
+    queryKey: ["analytics", "usage", { customFrom, customTo, keyId, range }]
   });
 
 export const analyticsCacheQueryOptions = (
@@ -131,7 +110,7 @@ export const analyticsCacheQueryOptions = (
       api.get<CacheStats>(
         `/v1/analytics/cache?${buildDateParams(range, customFrom, customTo)}${keyFilter(keyId)}`
       ),
-    queryKey: ["analytics", "cache", range, keyId, customFrom, customTo]
+    queryKey: ["analytics", "cache", { customFrom, customTo, keyId, range }]
   });
 
 const POLL_INTERVAL = 30_000;
@@ -148,12 +127,12 @@ export const useAnalytics = (keyId?: string) => {
 
   const rangeParam = searchParams.get("range") as DateRange | null;
   const maxAllowedRange =
-    VALID_RANGES.filter(
+    EXTENDED_VALID_RANGES.filter(
       (r) => r === "custom" || (RANGE_DAYS[r] ?? 0) <= retentionDays
     ).pop() ?? "7d";
   const dateRange =
     rangeParam &&
-    VALID_RANGES.includes(rangeParam) &&
+    EXTENDED_VALID_RANGES.includes(rangeParam) &&
     (rangeParam === "custom" || (RANGE_DAYS[rangeParam] ?? 0) <= retentionDays)
       ? rangeParam
       : maxAllowedRange;
@@ -169,7 +148,7 @@ export const useAnalytics = (keyId?: string) => {
     setCustomTo(to);
   };
 
-  const dateRangeOptions = DATE_RANGE_OPTIONS.map((opt) => {
+  const dateRangeOptions = EXTENDED_DATE_RANGE_OPTIONS.map((opt) => {
     if (opt.value === "custom") return opt;
     const days = RANGE_DAYS[opt.value] ?? 0;
     const allowed = days <= retentionDays;
@@ -184,42 +163,32 @@ export const useAnalytics = (keyId?: string) => {
 
   const isCustomReady = dateRange !== "custom" || (!!customFrom && !!customTo);
 
-  const statsQuery = useQuery({
+  const stats = useQuery({
     ...analyticsStatsQueryOptions(dateRange, keyId, customFrom, customTo),
     enabled: isCustomReady,
     refetchInterval: POLL_INTERVAL
   });
-  const usageQuery = useQuery({
+  const usage = useQuery({
     ...analyticsUsageQueryOptions(dateRange, keyId, customFrom, customTo),
     enabled: isCustomReady,
     refetchInterval: POLL_INTERVAL
   });
-  const cacheQuery = useQuery({
+  const cache = useQuery({
     ...analyticsCacheQueryOptions(dateRange, keyId, customFrom, customTo),
     enabled: isCustomReady,
     refetchInterval: POLL_INTERVAL
   });
 
-  const isLoading =
-    statsQuery.isPending || usageQuery.isPending || cacheQuery.isPending;
-  const error =
-    statsQuery.error?.message ??
-    usageQuery.error?.message ??
-    cacheQuery.error?.message ??
-    null;
-
   return {
-    cache: cacheQuery.data ?? null,
+    cache,
     customFrom,
     customTo,
     dateRange,
     dateRangeOptions,
-    error,
-    isLoading,
     setCustomRange,
     setDateRange,
-    stats: statsQuery.data ?? null,
-    usage: usageQuery.data ?? []
+    stats,
+    usage
   };
 };
 

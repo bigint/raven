@@ -6,9 +6,9 @@ import type { LogSession } from "../hooks/use-logs";
 import { SessionRow } from "./session-row";
 
 interface LogsTableProps {
-  data: LogSession[];
-  loading: boolean;
-  onRequestClick: (requestId: string, sessionId: string) => void;
+  readonly data: LogSession[];
+  readonly loading: boolean;
+  readonly onRequestClick: (requestId: string, sessionId: string) => void;
 }
 
 const TABLE_HEADERS = [

@@ -5,6 +5,7 @@ interface ProviderDefinition {
 
 export const PROVIDERS = [
   { id: "anthropic", label: "Anthropic" },
+  { id: "google", label: "Google" },
   { id: "mistralai", label: "Mistral AI" },
   { id: "openai", label: "OpenAI" }
 ] as const satisfies readonly ProviderDefinition[];

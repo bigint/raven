@@ -3,32 +3,34 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
+import type { DateRange } from "../lib/date-utils";
+import {
+  DATE_RANGE_OPTIONS,
+  fillTimeSeriesGaps,
+  keyFilter,
+  rangeToFrom,
+  VALID_RANGES
+} from "../lib/date-utils";
 
 export interface ChartDataPoint {
-  date: string;
-  cached: number;
-  input: number;
-  output: number;
-  reasoning: number;
+  readonly date: string;
+  readonly cached: number;
+  readonly input: number;
+  readonly output: number;
+  readonly reasoning: number;
 }
 
 export interface BreakdownRow {
-  label: string;
-  cachedTokens: number;
-  inputTokens: number;
-  outputTokens: number;
-  reasoningTokens: number;
-  requests: number;
+  readonly label: string;
+  readonly cachedTokens: number;
+  readonly inputTokens: number;
+  readonly outputTokens: number;
+  readonly reasoningTokens: number;
+  readonly requests: number;
 }
 
-export type DateRange = "7d" | "30d" | "90d";
+export type { DateRange };
 export type GroupBy = "key" | "model" | "userAgent";
-
-const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
-  { label: "Last 7 days", value: "7d" },
-  { label: "Last 30 days", value: "30d" },
-  { label: "Last 90 days", value: "90d" }
-];
 
 const GROUP_BY_OPTIONS: { value: GroupBy; label: string }[] = [
   { label: "Keys", value: "key" },
@@ -36,59 +38,21 @@ const GROUP_BY_OPTIONS: { value: GroupBy; label: string }[] = [
   { label: "User Agents", value: "userAgent" }
 ];
 
-const VALID_RANGES: DateRange[] = ["7d", "30d", "90d"];
-
-const RANGE_MS: Record<DateRange, number> = {
-  "7d": 604_800_000,
-  "30d": 2_592_000_000,
-  "90d": 7_776_000_000
-};
-
-const rangeToFrom = (range: DateRange): string =>
-  new Date(Date.now() - RANGE_MS[range]).toISOString();
-
-const fillChartGaps = (
-  data: ChartDataPoint[],
-  range: DateRange
-): ChartDataPoint[] => {
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  const from = new Date(Date.now() - RANGE_MS[range]);
-  from.setHours(0, 0, 0, 0);
-
-  const dataMap = new Map(data.map((d) => [d.date, d]));
-  const result: ChartDataPoint[] = [];
-  const current = new Date(from);
-
-  while (current <= now) {
-    const key = current.toISOString().slice(0, 10);
-    result.push(
-      dataMap.get(key) ?? {
-        cached: 0,
-        date: key,
-        input: 0,
-        output: 0,
-        reasoning: 0
-      }
-    );
-    current.setDate(current.getDate() + 1);
-  }
-
-  return result;
-};
-
-const keyFilter = (keyId?: string): string =>
-  keyId ? `&virtualKeyId=${keyId}` : "";
-
 export const adoptionChartQueryOptions = (range: DateRange, keyId?: string) =>
   queryOptions({
     queryFn: async () => {
       const data = await api.get<ChartDataPoint[]>(
         `/v1/analytics/adoption/chart?from=${rangeToFrom(range)}${keyFilter(keyId)}`
       );
-      return fillChartGaps(data, range);
+      return fillTimeSeriesGaps(data, range, (date) => ({
+        cached: 0,
+        date,
+        input: 0,
+        output: 0,
+        reasoning: 0
+      }));
     },
-    queryKey: ["adoption", "chart", range, keyId]
+    queryKey: ["adoption", "chart", { keyId, range }]
   });
 
 export const adoptionBreakdownQueryOptions = (
@@ -101,7 +65,7 @@ export const adoptionBreakdownQueryOptions = (
       api.get<BreakdownRow[]>(
         `/v1/analytics/adoption/breakdown?from=${rangeToFrom(range)}&groupBy=${groupBy}${keyFilter(keyId)}`
       ),
-    queryKey: ["adoption", "breakdown", range, groupBy, keyId]
+    queryKey: ["adoption", "breakdown", { groupBy, keyId, range }]
   });
 
 export const useAdoption = (keyId?: string) => {

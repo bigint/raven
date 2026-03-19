@@ -5,28 +5,18 @@ import {
   useMutation,
   useQueryClient
 } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { orgsQueryOptions } from "@/app/(dashboard)/hooks/use-orgs";
 import { api } from "@/lib/api";
 
-export interface Organization {
-  id: string;
-  name: string;
-  slug: string;
-  role: string;
-  plan: string;
-}
+export { orgsQueryOptions };
 
 export interface ProfileInvitation {
-  id: string;
-  orgName: string;
-  role: string;
-  expiresAt: string;
+  readonly id: string;
+  readonly orgName: string;
+  readonly role: string;
+  readonly expiresAt: string;
 }
-
-export const orgsQueryOptions = () =>
-  queryOptions({
-    queryFn: () => api.get<Organization[]>("/v1/user/orgs"),
-    queryKey: ["user", "orgs"]
-  });
 
 export const profileInvitationsQueryOptions = () =>
   queryOptions({
@@ -36,7 +26,10 @@ export const profileInvitationsQueryOptions = () =>
 
 export const useUpdateProfile = () =>
   useMutation({
-    mutationFn: (data: { name: string }) => api.put("/v1/user/profile", data)
+    mutationFn: (data: { name: string }) => api.put("/v1/user/profile", data),
+    onError: (err) => {
+      toast.error(err.message);
+    }
   });
 
 export const useAcceptInvitation = () => {
@@ -44,6 +37,9 @@ export const useAcceptInvitation = () => {
   return useMutation({
     mutationFn: (invitationId: string) =>
       api.post(`/v1/user/invitations/${invitationId}/accept`),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user"] });
     }
@@ -55,6 +51,9 @@ export const useDeclineInvitation = () => {
   return useMutation({
     mutationFn: (invitationId: string) =>
       api.post(`/v1/user/invitations/${invitationId}/decline`),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user", "invitations"] });
     }

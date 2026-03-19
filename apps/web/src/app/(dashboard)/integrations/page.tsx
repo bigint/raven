@@ -2,7 +2,8 @@
 
 import { PageHeader, Tabs } from "@raven/ui";
 import { Check, Copy } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 
 type AgentTab = "claude-code" | "cursor" | "windsurf" | "codex" | "shell";
 
@@ -36,24 +37,18 @@ API Key: rk_live_your_key_here`
 };
 
 const CodeBlock = ({ content }: { content: string }) => {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = useCallback(async () => {
-    await navigator.clipboard.writeText(content);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }, [content]);
+  const { copied, copy } = useCopyToClipboard();
 
   return (
     <div className="relative rounded-lg border border-border bg-muted/50">
       <button
         className="absolute right-3 top-3 rounded-md border border-border bg-background p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-        onClick={handleCopy}
+        onClick={() => copy(content)}
         title="Copy to clipboard"
         type="button"
       >
         {copied ? (
-          <Check className="size-4 text-green-500" />
+          <Check className="size-4 text-success" />
         ) : (
           <Copy className="size-4" />
         )}

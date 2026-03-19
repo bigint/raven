@@ -8,11 +8,11 @@ import type { Guardrail } from "../hooks/use-guardrails";
 import { ACTION_LABELS, TYPE_LABELS } from "../hooks/use-guardrails";
 
 interface GuardrailListProps {
-  guardrails: Guardrail[];
-  loading: boolean;
-  onAdd: () => void;
-  onEdit: (guardrail: Guardrail) => void;
-  onDelete: (id: string) => void;
+  readonly guardrails: Guardrail[];
+  readonly loading: boolean;
+  readonly onAdd: () => void;
+  readonly onEdit: (guardrail: Guardrail) => void;
+  readonly onDelete: (id: string) => void;
 }
 
 const ACTION_VARIANTS: Record<string, "error" | "warning" | "neutral"> = {

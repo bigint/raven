@@ -21,9 +21,13 @@ const Tabs = ({ tabs, value, onChange }: TabsProps) => {
 
   return (
     <LayoutGroup id={id}>
-      <div className="mb-6 flex gap-1 overflow-x-auto border-b border-border">
+      <div
+        className="mb-6 flex gap-1 overflow-x-auto border-b border-border"
+        role="tablist"
+      >
         {tabs.map((tab) => (
           <button
+            aria-selected={value === tab.value}
             className={cn(
               "relative flex shrink-0 items-center gap-2 whitespace-nowrap px-4 py-2 text-sm font-medium transition-colors",
               value === tab.value
@@ -32,6 +36,8 @@ const Tabs = ({ tabs, value, onChange }: TabsProps) => {
             )}
             key={tab.value}
             onClick={() => onChange(tab.value)}
+            role="tab"
+            tabIndex={value === tab.value ? 0 : -1}
             type="button"
           >
             {tab.label}

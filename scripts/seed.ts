@@ -99,10 +99,8 @@ async function seed() {
       await db.insert(subscriptions).values({
         id: createId(),
         organizationId: orgId,
-        lemonSqueezySubscriptionId: `seed_${orgDef.slug}_${createId()}`,
         plan: orgDef.plan,
         status: 'active',
-        seats: orgDef.plan === 'enterprise' ? 100 : orgDef.plan === 'team' ? 25 : 5,
         currentPeriodStart: now,
         currentPeriodEnd: periodEnd,
       })

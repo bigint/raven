@@ -3,7 +3,6 @@
 import { PROVIDER_LABELS } from "@raven/types";
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
-import { useQuery } from "@tanstack/react-query";
 import {
   Check,
   Loader2,
@@ -19,18 +18,15 @@ import { toast } from "sonner";
 import { TextMorph } from "torph/react";
 import { ProviderIcon } from "@/components/model-icon";
 import type { Provider } from "../hooks/use-providers";
-import {
-  providerModelsQueryOptions,
-  useTestProvider
-} from "../hooks/use-providers";
+import { useTestProvider } from "../hooks/use-providers";
 
 interface ProviderListProps {
-  providers: Provider[];
-  loading: boolean;
-  onAdd: () => void;
-  onEdit: (provider: Provider) => void;
-  onDelete: (id: string) => void;
-  onToggleEnabled: (provider: Provider) => void;
+  readonly providers: Provider[];
+  readonly loading: boolean;
+  readonly onAdd: () => void;
+  readonly onEdit: (provider: Provider) => void;
+  readonly onDelete: (id: string) => void;
+  readonly onToggleEnabled: (provider: Provider) => void;
 }
 
 const columns: Column<Provider>[] = [
@@ -64,28 +60,6 @@ const columns: Column<Provider>[] = [
     }
   }
 ];
-
-const ModelCount = ({ providerId }: { providerId: string }) => {
-  const { data: models, isLoading } = useQuery(
-    providerModelsQueryOptions(providerId)
-  );
-
-  if (isLoading) {
-    return (
-      <span className="text-xs text-muted-foreground">
-        <Loader2 className="inline size-3 animate-spin" />
-      </span>
-    );
-  }
-
-  const count = models?.length ?? 0;
-
-  return (
-    <span className="text-xs text-muted-foreground">
-      {count} {count === 1 ? "model" : "models"}
-    </span>
-  );
-};
 
 const ProviderList = ({
   providers,
@@ -121,11 +95,6 @@ const ProviderList = ({
 
   const allColumns: Column<Provider>[] = [
     ...columns,
-    {
-      header: "Models",
-      key: "models",
-      render: (provider) => <ModelCount providerId={provider.id} />
-    },
     {
       header: "Status",
       key: "status",

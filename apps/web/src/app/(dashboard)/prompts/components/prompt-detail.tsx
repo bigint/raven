@@ -13,9 +13,9 @@ import {
 } from "../hooks/use-prompts";
 
 interface PromptDetailProps {
-  prompt: Prompt;
-  open: boolean;
-  onClose: () => void;
+  readonly prompt: Prompt;
+  readonly open: boolean;
+  readonly onClose: () => void;
 }
 
 const PromptDetail = ({ prompt, open, onClose }: PromptDetailProps) => {

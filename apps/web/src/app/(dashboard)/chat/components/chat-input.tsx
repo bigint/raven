@@ -5,6 +5,7 @@ import {
   ArrowUp,
   ChevronDown,
   ImagePlus,
+  Search,
   Square,
   Thermometer,
   X
@@ -13,9 +14,11 @@ import {
   type KeyboardEvent,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState
 } from "react";
+import { ProviderIcon } from "@/components/model-icon";
 
 export interface PlaygroundSettings {
   readonly temperature: number;
@@ -54,6 +57,7 @@ interface ChatInputProps {
   readonly onModelChange: (model: string, provider: string) => void;
   readonly settings: PlaygroundSettings;
   readonly onSettingsChange: (settings: PlaygroundSettings) => void;
+  readonly supportsVision?: boolean;
   readonly systemPrompt: string;
   readonly onSystemPromptChange: (value: string) => void;
 }
@@ -79,6 +83,7 @@ export const ChatInput = ({
   onModelChange,
   settings,
   onSettingsChange,
+  supportsVision = false,
   systemPrompt,
   onSystemPromptChange
 }: ChatInputProps) => {
@@ -191,8 +196,8 @@ export const ChatInput = ({
       {/* biome-ignore lint/a11y/noStaticElementInteractions: drop zone for image uploads */}
       <div
         className="mx-auto max-w-3xl rounded-xl border border-border bg-muted/30 shadow-sm transition-colors focus-within:border-ring focus-within:bg-background"
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={handleDrop}
+        onDragOver={supportsVision ? (e) => e.preventDefault() : undefined}
+        onDrop={supportsVision ? handleDrop : undefined}
       >
         {/* Image previews */}
         {images.length > 0 && (
@@ -217,6 +222,7 @@ export const ChatInput = ({
         )}
 
         <textarea
+          aria-label="Message input"
           className="w-full resize-none bg-transparent px-4 pt-3 pb-2 text-sm placeholder:text-muted-foreground focus:outline-none"
           disabled={isStreaming}
           onChange={(e) => {
@@ -238,109 +244,91 @@ export const ChatInput = ({
 
         <div className="flex items-center justify-between px-3 pb-2">
           <div className="flex items-center gap-0.5">
-            {/* Image upload */}
-            <button
-              className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-              onClick={() => fileInputRef.current?.click()}
-              title="Attach image"
-              type="button"
-            >
-              <ImagePlus className="size-3.5" />
-            </button>
-            <input
-              accept={ACCEPTED_TYPES.join(",")}
-              className="hidden"
-              multiple
-              onChange={(e) => handleFileSelect(e.target.files)}
-              ref={fileInputRef}
-              type="file"
-            />
-
-            <Sep />
+            {/* Image upload - only shown when model supports vision */}
+            {supportsVision && (
+              <>
+                <button
+                  className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Attach image"
+                  type="button"
+                >
+                  <ImagePlus className="size-3.5" />
+                </button>
+                <input
+                  accept={ACCEPTED_TYPES.join(",")}
+                  className="hidden"
+                  multiple
+                  onChange={(e) => handleFileSelect(e.target.files)}
+                  ref={fileInputRef}
+                  type="file"
+                />
+                <Sep />
+              </>
+            )}
 
             {/* Model selector */}
-            <div className="relative">
-              <button
-                className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                onClick={() => toggle("model")}
-                type="button"
-              >
-                {model ?? "Select model"}
-                <ChevronDown className="size-3" />
-              </button>
+            <ModelSelector
+              model={model}
+              modelOptions={modelOptions}
+              onClose={() => setOpenPopover(null)}
+              onModelChange={onModelChange}
+              onToggle={() => toggle("model")}
+              open={openPopover === "model"}
+            />
 
-              {openPopover === "model" && (
-                <Dropdown onClose={() => setOpenPopover(null)}>
-                  <div className="max-h-60 w-56 overflow-y-auto py-1">
-                    {modelOptions.map((opt) => (
-                      <button
-                        className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors hover:bg-accent ${opt.value === model ? "text-foreground font-medium" : "text-muted-foreground"}`}
-                        key={opt.value}
-                        onClick={() => {
-                          onModelChange(opt.value, opt.provider);
-                          setOpenPopover(null);
-                        }}
-                        type="button"
-                      >
-                        <span className="truncate">{opt.label}</span>
-                        <span className="ml-auto shrink-0 text-[10px] text-muted-foreground/60">
-                          {opt.provider}
-                        </span>
-                      </button>
-                    ))}
-                    {modelOptions.length === 0 && (
-                      <p className="px-3 py-2 text-xs text-muted-foreground">
-                        No models. Add a provider first.
-                      </p>
-                    )}
-                  </div>
-                </Dropdown>
-              )}
-            </div>
+            {!settings.enableReasoning && (
+              <>
+                <Sep />
 
-            <Sep />
+                {/* Temperature */}
+                <div className="relative">
+                  <button
+                    className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                    onClick={() => toggle("temperature")}
+                    type="button"
+                  >
+                    <Thermometer className="size-3" />
+                    {settings.temperature}
+                  </button>
 
-            {/* Temperature */}
-            <div className="relative">
-              <button
-                className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                onClick={() => toggle("temperature")}
-                type="button"
-              >
-                <Thermometer className="size-3" />
-                {settings.temperature}
-              </button>
+                  {openPopover === "temperature" && (
+                    <Dropdown onClose={() => setOpenPopover(null)}>
+                      <div className="w-52 p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-medium">
+                            Temperature
+                          </span>
+                          <span className="text-xs text-muted-foreground font-mono">
+                            {settings.temperature}
+                          </span>
+                        </div>
+                        <input
+                          className="w-full accent-primary"
+                          max="2"
+                          min="0"
+                          onChange={(e) =>
+                            update(
+                              "temperature",
+                              Number.parseFloat(e.target.value)
+                            )
+                          }
+                          step="0.1"
+                          type="range"
+                          value={settings.temperature}
+                        />
+                        <div className="flex justify-between text-[10px] text-muted-foreground">
+                          <span>Precise</span>
+                          <span>Creative</span>
+                        </div>
+                      </div>
+                    </Dropdown>
+                  )}
+                </div>
 
-              {openPopover === "temperature" && (
-                <Dropdown onClose={() => setOpenPopover(null)}>
-                  <div className="w-52 p-3 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium">Temperature</span>
-                      <span className="text-xs text-muted-foreground font-mono">
-                        {settings.temperature}
-                      </span>
-                    </div>
-                    <input
-                      className="w-full accent-primary"
-                      max="2"
-                      min="0"
-                      onChange={(e) =>
-                        update("temperature", Number.parseFloat(e.target.value))
-                      }
-                      step="0.1"
-                      type="range"
-                      value={settings.temperature}
-                    />
-                    <div className="flex justify-between text-[10px] text-muted-foreground">
-                      <span>Precise</span>
-                      <span>Creative</span>
-                    </div>
-                  </div>
-                </Dropdown>
-              )}
-            </div>
-
-            <Sep />
+                <Sep />
+              </>
+            )}
 
             {/* Stream toggle */}
             <button
@@ -561,6 +549,96 @@ export const ChatInput = ({
 };
 
 // Shared components
+
+const ModelSelector = ({
+  model,
+  modelOptions,
+  onModelChange,
+  onToggle,
+  open,
+  onClose
+}: {
+  readonly model?: string;
+  readonly modelOptions: readonly ModelOption[];
+  readonly onModelChange: (model: string, provider: string) => void;
+  readonly onToggle: () => void;
+  readonly open: boolean;
+  readonly onClose: () => void;
+}) => {
+  const [search, setSearch] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return modelOptions;
+    const q = search.toLowerCase();
+    return modelOptions.filter(
+      (o) =>
+        o.label.toLowerCase().includes(q) ||
+        o.value.toLowerCase().includes(q) ||
+        o.provider.toLowerCase().includes(q)
+    );
+  }, [modelOptions, search]);
+
+  useEffect(() => {
+    if (open) {
+      setSearch("");
+      setTimeout(() => searchRef.current?.focus(), 0);
+    }
+  }, [open]);
+
+  return (
+    <div className="relative">
+      <button
+        className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+        onClick={onToggle}
+        type="button"
+      >
+        {model ?? "Select model"}
+        <ChevronDown className="size-3" />
+      </button>
+
+      {open && (
+        <Dropdown onClose={onClose}>
+          <div className="w-64">
+            <div className="border-b border-border px-2 py-1.5">
+              <div className="relative">
+                <Search className="absolute left-2 top-1/2 size-3 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  className="w-full bg-transparent py-1 pl-7 pr-2 text-xs outline-none placeholder:text-muted-foreground"
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search models..."
+                  ref={searchRef}
+                  value={search}
+                />
+              </div>
+            </div>
+            <div className="max-h-60 overflow-y-auto py-1">
+              {filtered.map((opt) => (
+                <button
+                  className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors hover:bg-accent ${opt.value === model ? "font-medium text-foreground" : "text-muted-foreground"}`}
+                  key={opt.value}
+                  onClick={() => {
+                    onModelChange(opt.value, opt.provider);
+                    onClose();
+                  }}
+                  type="button"
+                >
+                  <ProviderIcon provider={opt.provider} size={14} />
+                  <span className="truncate">{opt.label}</span>
+                </button>
+              ))}
+              {filtered.length === 0 && (
+                <p className="px-3 py-2 text-xs text-muted-foreground">
+                  No models found.
+                </p>
+              )}
+            </div>
+          </div>
+        </Dropdown>
+      )}
+    </div>
+  );
+};
 
 const Sep = () => <span className="mx-0.5 text-border">|</span>;
 

@@ -86,36 +86,22 @@ export const overviewProvidersQueryOptions = () =>
 const POLL_INTERVAL = 30_000;
 
 export const useOverview = () => {
-  const statsQuery = useQuery({
+  const stats = useQuery({
     ...overviewStatsQueryOptions(),
     refetchInterval: POLL_INTERVAL
   });
-  const usageQuery = useQuery({
+  const usage = useQuery({
     ...overviewUsageQueryOptions(),
     refetchInterval: POLL_INTERVAL
   });
-  const requestsQuery = useQuery({
+  const requests = useQuery({
     ...overviewRequestsQueryOptions(),
     refetchInterval: POLL_INTERVAL
   });
-  const keysQuery = useQuery(overviewKeysQueryOptions());
-  const providersQuery = useQuery(overviewProvidersQueryOptions());
+  const keys = useQuery(overviewKeysQueryOptions());
+  const providers = useQuery(overviewProvidersQueryOptions());
 
-  const isLoading =
-    statsQuery.isPending ||
-    usageQuery.isPending ||
-    requestsQuery.isPending ||
-    keysQuery.isPending ||
-    providersQuery.isPending;
-
-  return {
-    isLoading,
-    keys: keysQuery.data ?? [],
-    providers: providersQuery.data ?? [],
-    recentRequests: requestsQuery.data ?? [],
-    stats: statsQuery.data ?? null,
-    usage: usageQuery.data ?? []
-  };
+  return { keys, providers, requests, stats, usage };
 };
 
 export type { KeySummary, RecentRequest, Stats, UsageRow };

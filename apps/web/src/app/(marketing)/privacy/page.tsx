@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  description:
+    "Learn how Raven collects, uses, and protects your information when you use our AI gateway platform.",
+  title: "Privacy Policy - Raven"
+};
 
 const PrivacyPage = () => {
   return (

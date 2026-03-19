@@ -10,8 +10,8 @@ import type { LogSession } from "../hooks/use-logs";
 import { sessionDetailQueryOptions, useToggleStar } from "../hooks/use-logs";
 
 interface SessionRowProps {
-  session: LogSession;
-  onRequestClick: (requestId: string, sessionId: string) => void;
+  readonly session: LogSession;
+  readonly onRequestClick: (requestId: string, sessionId: string) => void;
 }
 
 const getStatusBadge = (statusCode: number) => {

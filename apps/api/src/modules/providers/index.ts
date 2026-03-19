@@ -6,7 +6,6 @@ import { jsonValidator } from "@/lib/validation";
 import { listAvailableProviders } from "./available";
 import { createProvider } from "./create";
 import { deleteProvider } from "./delete";
-import { getProvider } from "./get";
 import { listProviders } from "./list";
 import { listProviderModels } from "./models";
 import { createProviderSchema, updateProviderSchema } from "./schema";
@@ -20,7 +19,6 @@ export const createProvidersModule = (db: Database, env: Env, redis: Redis) => {
   app.get("/", listProviders(db));
   app.get("/:id/models", listProviderModels(db, env, redis));
   app.post("/:id/test", testProvider(db, env));
-  app.get("/:id", getProvider(db));
   app.post("/", jsonValidator(createProviderSchema), createProvider(db, env));
   app.put("/:id", jsonValidator(updateProviderSchema), updateProvider(db, env));
   app.delete("/:id", deleteProvider(db));

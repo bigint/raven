@@ -2,23 +2,21 @@
 
 import { Button, Modal } from "@raven/ui";
 import { AlertTriangle, Check, Copy } from "lucide-react";
-import { useState } from "react";
 import { toast } from "sonner";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 
 interface KeyRevealProps {
-  keyValue: string | null;
-  onClose: () => void;
+  readonly keyValue: string | null;
+  readonly onClose: () => void;
 }
 
 const KeyReveal = ({ keyValue, onClose }: KeyRevealProps) => {
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
 
   const handleCopy = async () => {
     if (!keyValue) return;
-    await navigator.clipboard.writeText(keyValue);
-    setCopied(true);
+    await copy(keyValue);
     toast.success("Key copied to clipboard");
-    setTimeout(() => setCopied(false), 2000);
   };
 
   return (

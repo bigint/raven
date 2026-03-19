@@ -17,6 +17,7 @@ import {
   Receipt,
   Replace,
   Route,
+  ScrollText,
   Settings,
   Shield,
   SquareTerminal,
@@ -28,7 +29,7 @@ import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { Org } from "../hooks/use-orgs";
+import type { Org } from "@/stores/org";
 import { OrgSwitcher } from "./org-switcher";
 import { UserMenu } from "./user-menu";
 
@@ -43,10 +44,10 @@ const useLockBodyScroll = (isLocked: boolean) => {
 };
 
 interface NavItem {
-  href: string;
-  label: string;
-  icon: LucideIcon;
-  gate?: (plan: Plan) => boolean;
+  readonly href: string;
+  readonly label: string;
+  readonly icon: LucideIcon;
+  readonly gate?: (plan: Plan) => boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -73,6 +74,12 @@ const NAV_ITEMS: NavItem[] = [
     label: "Guardrails"
   },
   { href: "/team", icon: Users, label: "Team" },
+  {
+    gate: (plan) => PLAN_FEATURES[plan].hasAuditLogs,
+    href: "/audit-logs",
+    icon: ScrollText,
+    label: "Audit Logs"
+  },
   { href: "/billing", icon: Receipt, label: "Billing" },
   {
     gate: (plan) => PLAN_FEATURES[plan].hasWebhooks,
@@ -84,10 +91,13 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 interface SidebarProps {
-  activeOrg: Org | null;
-  orgs: Org[];
-  user: { name?: string | null; email?: string | null };
-  onSwitchOrg: (org: Org) => void;
+  readonly activeOrg: Org | null;
+  readonly orgs: Org[];
+  readonly user: {
+    readonly name?: string | null;
+    readonly email?: string | null;
+  };
+  readonly onSwitchOrg: (org: Org) => void;
 }
 
 export const Sidebar = ({
@@ -189,9 +199,11 @@ export const Sidebar = ({
             />
             <motion.div
               animate={{ y: 0 }}
+              aria-label="Navigation menu"
               className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] flex-col rounded-t-2xl border-t border-border bg-background shadow-xl"
               exit={{ y: "100%" }}
               initial={{ y: "100%" }}
+              role="dialog"
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             >
               {/* Drawer handle */}

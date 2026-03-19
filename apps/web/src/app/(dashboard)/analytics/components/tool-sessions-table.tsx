@@ -13,8 +13,8 @@ import {
 } from "../hooks/use-tools";
 
 interface ToolSessionsTableProps {
-  sessions: ToolSession[];
-  loading: boolean;
+  readonly sessions: ToolSession[];
+  readonly loading: boolean;
 }
 
 const ToolSessionRow = ({ session }: { session: ToolSession }) => {

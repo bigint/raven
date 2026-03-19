@@ -1,6 +1,6 @@
 import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
-import { modelAliases, models } from "@raven/db";
+import { modelAliases } from "@raven/db";
 import { and, eq, isNull } from "drizzle-orm";
 import type { Context } from "hono";
 import type { Redis } from "ioredis";
@@ -124,22 +124,11 @@ export const proxyHandler = (
       parsedBody = { ...parsedBody, model: routingResult.model };
     }
 
-    // 5. Cache check + model validation + provider resolution in parallel
-    const requestedModelSlug = parsedBody.model as string | undefined;
+    // 5. Cache check + provider resolution in parallel
     const { providerName: pathProvider } = parseProviderFromPath(c.req.path);
 
-    const [cacheResult, allowedModel, providerResolution] = await Promise.all([
+    const [cacheResult, providerResolution] = await Promise.all([
       checkCache(redis, virtualKey.organizationId, pathProvider, parsedBody),
-      requestedModelSlug
-        ? cachedQuery(redis, `model:${requestedModelSlug}`, 300, async () => {
-            const [row] = await db
-              .select({ id: models.id })
-              .from(models)
-              .where(eq(models.slug, requestedModelSlug))
-              .limit(1);
-            return row ?? null;
-          })
-        : null,
       resolveProvider(db, env, virtualKey.organizationId, c.req.path, redis)
     ]);
 
@@ -171,18 +160,6 @@ export const proxyHandler = (
         userAgent: c.req.header("user-agent") ?? null,
         virtualKeyId: virtualKey.id
       });
-    }
-
-    if (requestedModelSlug && !allowedModel) {
-      return c.json(
-        {
-          error: {
-            code: "MODEL_NOT_SUPPORTED",
-            message: `Model "${requestedModelSlug}" is not supported in Raven. Please contact us at support@raven.ai.`
-          }
-        },
-        400
-      );
     }
 
     // 6. Parse + execute

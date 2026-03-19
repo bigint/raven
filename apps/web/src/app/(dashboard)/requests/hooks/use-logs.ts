@@ -8,80 +8,67 @@ import {
 } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
+import type { ExtendedDateRange } from "@/app/(dashboard)/analytics/lib/date-utils";
+import {
+  EXTENDED_DATE_RANGE_OPTIONS,
+  EXTENDED_VALID_RANGES,
+  extendedRangeToFrom
+} from "@/app/(dashboard)/analytics/lib/date-utils";
 import { api } from "@/lib/api";
 
 export interface LogSession {
-  sessionId: string;
-  virtualKeyId: string;
-  keyName: string;
-  userAgent: string | null;
-  requestCount: number;
-  errorCount: number;
-  models: string[];
-  inputTokens: number;
-  outputTokens: number;
-  cachedTokens: number;
-  reasoningTokens: number;
-  toolUses: number;
-  totalCost: number;
-  startTime: string;
-  endTime: string;
+  readonly sessionId: string;
+  readonly virtualKeyId: string;
+  readonly keyName: string;
+  readonly userAgent: string | null;
+  readonly requestCount: number;
+  readonly errorCount: number;
+  readonly models: string[];
+  readonly inputTokens: number;
+  readonly outputTokens: number;
+  readonly cachedTokens: number;
+  readonly reasoningTokens: number;
+  readonly toolUses: number;
+  readonly totalCost: number;
+  readonly startTime: string;
+  readonly endTime: string;
 }
 
 export interface SessionRequest {
-  id: string;
-  createdAt: string;
-  provider: string;
-  model: string;
-  statusCode: number;
-  latencyMs: number;
-  cost: string;
-  inputTokens: number;
-  outputTokens: number;
-  cachedTokens: number;
-  reasoningTokens: number;
-  cacheHit: boolean;
-  method: string;
-  path: string;
-  toolCount: number;
-  toolNames: string[] | null;
-  sessionId: string | null;
-  userAgent: string | null;
-  isStarred: boolean;
-  virtualKeyId: string;
+  readonly id: string;
+  readonly createdAt: string;
+  readonly provider: string;
+  readonly model: string;
+  readonly statusCode: number;
+  readonly latencyMs: number;
+  readonly cost: string;
+  readonly inputTokens: number;
+  readonly outputTokens: number;
+  readonly cachedTokens: number;
+  readonly reasoningTokens: number;
+  readonly cacheHit: boolean;
+  readonly method: string;
+  readonly path: string;
+  readonly toolCount: number;
+  readonly toolNames: string[] | null;
+  readonly sessionId: string | null;
+  readonly userAgent: string | null;
+  readonly isStarred: boolean;
+  readonly virtualKeyId: string;
 }
 
 interface LogsResponse {
-  data: LogSession[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
+  readonly data: LogSession[];
+  readonly pagination: {
+    readonly page: number;
+    readonly limit: number;
+    readonly total: number;
+    readonly totalPages: number;
   };
 }
 
-export type DateRange = "7d" | "30d" | "90d" | "custom";
-
-const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
-  { label: "Last 7 days", value: "7d" },
-  { label: "Last 30 days", value: "30d" },
-  { label: "Last 90 days", value: "90d" },
-  { label: "Custom", value: "custom" }
-];
-
-const RANGE_MS: Record<string, number> = {
-  "7d": 604_800_000,
-  "30d": 2_592_000_000,
-  "90d": 7_776_000_000
-};
-
-const VALID_RANGES: DateRange[] = ["7d", "30d", "90d", "custom"];
-
-const rangeToFrom = (range: string): string => {
-  const ms = RANGE_MS[range] ?? 2_592_000_000;
-  return new Date(Date.now() - ms).toISOString();
-};
+export type DateRange = ExtendedDateRange;
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -90,7 +77,7 @@ export const sessionDetailQueryOptions = (sessionId: string) =>
     enabled: !!sessionId,
     queryFn: () =>
       api.get<SessionRequest[]>(`/v1/analytics/sessions/${sessionId}`),
-    queryKey: ["session", sessionId]
+    queryKey: ["session", { sessionId }]
   });
 
 export const useToggleStar = () => {
@@ -99,6 +86,9 @@ export const useToggleStar = () => {
   return useMutation({
     mutationFn: (id: string) =>
       api.patch<{ isStarred: boolean }>(`/v1/analytics/requests/${id}/star`),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["session"] });
     }
@@ -114,7 +104,9 @@ export const useLogs = () => {
 
   const rangeParam = searchParams.get("range") as DateRange | null;
   const dateRange =
-    rangeParam && VALID_RANGES.includes(rangeParam) ? rangeParam : "30d";
+    rangeParam && EXTENDED_VALID_RANGES.includes(rangeParam)
+      ? rangeParam
+      : "30d";
 
   const setDateRange = (range: DateRange) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -135,7 +127,9 @@ export const useLogs = () => {
     }
 
     const fromDate =
-      dateRange === "custom" ? rangeToFrom("30d") : rangeToFrom(dateRange);
+      dateRange === "custom"
+        ? extendedRangeToFrom("30d")
+        : extendedRangeToFrom(dateRange);
     return `/v1/analytics/logs?from=${fromDate}&page=${pageParam}&limit=${pageSize}`;
   };
 
@@ -148,7 +142,7 @@ export const useLogs = () => {
     initialPageParam: 1,
     queryFn: ({ pageParam }) =>
       api.get<LogsResponse>(buildQueryUrl(pageParam as number)),
-    queryKey: ["logs", dateRange, pageSize, customFrom, customTo]
+    queryKey: ["logs", { customFrom, customTo, pageSize, range: dateRange }]
   });
 
   return {
@@ -156,7 +150,7 @@ export const useLogs = () => {
     customTo,
     data: query.data?.pages.flatMap((p) => p.data) ?? [],
     dateRange,
-    dateRangeOptions: DATE_RANGE_OPTIONS,
+    dateRangeOptions: EXTENDED_DATE_RANGE_OPTIONS,
     error: query.error?.message ?? null,
     fetchNextPage: query.fetchNextPage,
     hasNextPage: query.hasNextPage,

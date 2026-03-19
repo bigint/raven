@@ -3,17 +3,18 @@ import {
   useMutation,
   useQueryClient
 } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export interface Budget {
-  id: string;
-  entityType: string;
-  entityId: string;
-  entityName: string | null;
-  limitAmount: number;
-  period: string;
-  alertThreshold: number;
-  createdAt: string;
+  readonly id: string;
+  readonly entityType: string;
+  readonly entityId: string;
+  readonly entityName: string | null;
+  readonly limitAmount: number;
+  readonly period: string;
+  readonly alertThreshold: number;
+  readonly createdAt: string;
 }
 
 export const ENTITY_TYPE_OPTIONS = [
@@ -38,11 +39,11 @@ export const budgetsQueryOptions = () =>
   });
 
 interface BudgetInput {
-  entityType: string;
-  entityId: string;
-  limitAmount: number;
-  period: string;
-  alertThreshold: number;
+  readonly entityType: string;
+  readonly entityId: string;
+  readonly limitAmount: number;
+  readonly period: string;
+  readonly alertThreshold: number;
 }
 
 export const useCreateBudget = () => {
@@ -50,6 +51,9 @@ export const useCreateBudget = () => {
 
   return useMutation({
     mutationFn: (input: BudgetInput) => api.post<Budget>("/v1/budgets", input),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["budgets"] });
     }
@@ -62,6 +66,9 @@ export const useUpdateBudget = () => {
   return useMutation({
     mutationFn: ({ id, ...body }: BudgetInput & { id: string }) =>
       api.put<Budget>(`/v1/budgets/${id}`, body),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["budgets"] });
     }
@@ -73,6 +80,9 @@ export const useDeleteBudget = () => {
 
   return useMutation({
     mutationFn: (id: string) => api.delete(`/v1/budgets/${id}`),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["budgets"] });
     }

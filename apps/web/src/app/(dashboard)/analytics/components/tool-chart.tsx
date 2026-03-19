@@ -13,7 +13,7 @@ import { formatShortDate } from "@/lib/format";
 import type { ToolDailyStats } from "../hooks/use-tools";
 
 interface ToolChartProps {
-  data: ToolDailyStats[];
+  readonly data: ToolDailyStats[];
 }
 
 export const ToolChart = ({ data }: ToolChartProps) => {

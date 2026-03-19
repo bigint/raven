@@ -2,6 +2,7 @@
 
 import { Button, Input, Modal, Switch } from "@raven/ui";
 import { type FormEvent, useState } from "react";
+import { toast } from "sonner";
 import { TextMorph } from "torph/react";
 import type { Webhook } from "../hooks/use-webhooks";
 import {
@@ -24,9 +25,9 @@ const DEFAULT_FORM: FormState = {
 };
 
 interface WebhookFormProps {
-  open: boolean;
-  onClose: () => void;
-  editingWebhook?: Webhook | null;
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly editingWebhook?: Webhook | null;
 }
 
 const WebhookForm = ({ open, onClose, editingWebhook }: WebhookFormProps) => {
@@ -142,6 +143,7 @@ const WebhookForm = ({ open, onClose, editingWebhook }: WebhookFormProps) => {
           url: form.url.trim()
         });
       }
+      toast.success(isEdit ? "Webhook updated" : "Webhook created");
       handleClose();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Something went wrong");
@@ -156,7 +158,10 @@ const WebhookForm = ({ open, onClose, editingWebhook }: WebhookFormProps) => {
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
         {formError && (
-          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <div
+            className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            role="alert"
+          >
             {formError}
           </div>
         )}

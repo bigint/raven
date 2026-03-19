@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Network, Plus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
 import { useSetupStatus } from "@/lib/use-setup-status";
 import { PromptDetail } from "./components/prompt-detail";
 import { PromptForm } from "./components/prompt-form";
@@ -32,25 +33,35 @@ const PromptsPage = () => {
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    await deleteMutation.mutateAsync(deleteId);
-    setDeleteId(null);
+    try {
+      await deleteMutation.mutateAsync(deleteId);
+      setDeleteId(null);
+      toast.success("Prompt deleted");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete");
+    }
   };
 
   return (
     <div>
       <PageHeader
         actions={
-          <Button onClick={() => setFormOpen(true)}>
-            <Plus className="size-4" />
-            Create Prompt
-          </Button>
+          hasProviders ? (
+            <Button onClick={() => setFormOpen(true)}>
+              <Plus className="size-4" />
+              Create Prompt
+            </Button>
+          ) : undefined
         }
         description="Manage reusable prompt templates for your organization."
         title="Prompts"
       />
 
       {error && (
-        <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <div
+          className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+          role="alert"
+        >
           {error.message}
         </div>
       )}

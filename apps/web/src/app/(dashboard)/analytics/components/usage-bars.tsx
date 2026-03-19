@@ -4,8 +4,8 @@ import { formatCompactNumber } from "@/lib/format";
 import type { BreakdownRow } from "../hooks/use-adoption";
 
 interface UsageBarsProps {
-  data: BreakdownRow[];
-  metric: "inputTokens" | "outputTokens" | "cachedTokens" | "requests";
+  readonly data: BreakdownRow[];
+  readonly metric: "inputTokens" | "outputTokens" | "cachedTokens" | "requests";
 }
 
 export const UsageBars = ({ data, metric }: UsageBarsProps) => {

@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  description:
+    "Terms of Service for the Raven AI gateway platform. Read about acceptable use, billing, and your rights.",
+  title: "Terms of Service - Raven"
+};
 
 const TermsPage = () => {
   return (

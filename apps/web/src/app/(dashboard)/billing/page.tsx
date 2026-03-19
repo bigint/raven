@@ -1,7 +1,8 @@
 "use client";
 
-import { Spinner } from "@raven/ui";
+import { PageHeader, Spinner } from "@raven/ui";
 import { CreditCard } from "lucide-react";
+import { match, P } from "ts-pattern";
 import { PlanSelector } from "./components/plan-selector";
 import { SubscriptionStatus } from "./components/subscription-status";
 import { useBilling } from "./hooks/use-billing";
@@ -10,8 +11,6 @@ const BillingPage = () => {
   const {
     subscription,
     plans,
-    isLoading,
-    error,
     billingInterval,
     setBillingInterval,
     upgrading,
@@ -21,41 +20,63 @@ const BillingPage = () => {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-xl font-bold sm:text-2xl">Billing</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Manage your subscription and billing details.
-        </p>
-      </div>
+      <PageHeader
+        description="Manage your subscription and billing details."
+        title="Billing"
+      />
 
-      {error && (
-        <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {error}
-        </div>
-      )}
+      <div className="space-y-8">
+        {/* Subscription section */}
+        {match(subscription)
+          .with({ isError: true }, ({ error }) => (
+            <div className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              {error.message}
+            </div>
+          ))
+          .with({ isPending: true }, () => (
+            <div className="rounded-xl border border-border p-12 text-center">
+              <Spinner className="mx-auto" />
+              <p className="mt-3 text-sm text-muted-foreground">
+                Loading subscription...
+              </p>
+            </div>
+          ))
+          .with({ data: P.nonNullable }, ({ data }) => (
+            <SubscriptionStatus subscription={data} />
+          ))
+          .otherwise(() => null)}
 
-      {isLoading ? (
-        <div className="rounded-xl border border-border p-12 text-center">
-          <Spinner className="mx-auto" />
-          <p className="mt-3 text-sm text-muted-foreground">
-            Loading billing...
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-8">
-          {subscription && <SubscriptionStatus subscription={subscription} />}
+        {/* Plans section */}
+        {match(plans)
+          .with({ isError: true }, ({ error }) => (
+            <div className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              {error.message}
+            </div>
+          ))
+          .with({ isPending: true }, () => (
+            <div className="rounded-xl border border-border p-12 text-center">
+              <Spinner className="mx-auto" />
+              <p className="mt-3 text-sm text-muted-foreground">
+                Loading plans...
+              </p>
+            </div>
+          ))
+          .otherwise(() => (
+            <PlanSelector
+              billingInterval={billingInterval}
+              getPlanButtonLabel={getPlanButtonLabel}
+              onIntervalChange={setBillingInterval}
+              onPlanAction={handlePlanAction}
+              plans={plans.data ?? []}
+              subscription={subscription.data ?? null}
+              upgrading={upgrading}
+            />
+          ))}
 
-          <PlanSelector
-            billingInterval={billingInterval}
-            getPlanButtonLabel={getPlanButtonLabel}
-            onIntervalChange={setBillingInterval}
-            onPlanAction={handlePlanAction}
-            plans={plans}
-            subscription={subscription}
-            upgrading={upgrading}
-          />
-
-          {!subscription && plans.length === 0 && (
+        {!subscription.isPending &&
+          !plans.isPending &&
+          !subscription.data &&
+          (plans.data ?? []).length === 0 && (
             <div className="rounded-xl border border-border p-12 text-center">
               <CreditCard className="mx-auto size-8 text-muted-foreground/50" />
               <p className="mt-3 text-muted-foreground">
@@ -63,8 +84,7 @@ const BillingPage = () => {
               </p>
             </div>
           )}
-        </div>
-      )}
+      </div>
     </div>
   );
 };

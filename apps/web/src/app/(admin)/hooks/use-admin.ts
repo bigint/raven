@@ -75,18 +75,6 @@ export interface AdminProvider {
   modelCount: number;
 }
 
-export interface AvailableModel {
-  id: string;
-  name: string;
-  isAdded: boolean;
-  capabilities: string[];
-  category: string;
-  contextWindow: number;
-  maxOutput: number;
-  inputPrice: number;
-  outputPrice: number;
-}
-
 export const adminProvidersQueryOptions = () =>
   queryOptions({
     queryFn: () => api.get<AdminProvider[]>("/v1/admin/providers"),

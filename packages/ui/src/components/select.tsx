@@ -30,6 +30,7 @@ const TRIGGER_CLASS =
 
 const ChevronIcon = () => (
   <svg
+    aria-hidden="true"
     className="size-4 shrink-0 text-muted-foreground"
     fill="none"
     stroke="currentColor"
@@ -42,6 +43,7 @@ const ChevronIcon = () => (
 
 const CheckIcon = () => (
   <svg
+    aria-hidden="true"
     className="size-3.5"
     fill="none"
     stroke="currentColor"

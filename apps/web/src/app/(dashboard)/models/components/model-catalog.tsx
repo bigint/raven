@@ -3,10 +3,9 @@
 import {
   CAPABILITY_LABELS,
   MODEL_CATEGORIES,
-  type ModelCategory,
-  type ModelDefinition
+  type ModelCategory
 } from "@raven/types";
-import { Badge, Select } from "@raven/ui";
+import { Badge, Button, EmptyState, Select } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import {
   Brain,
@@ -14,15 +13,18 @@ import {
   Copy,
   Eye,
   MessageSquare,
+  Network,
   Search,
   Sparkles,
   Wrench,
   Zap
 } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ModelIcon, ProviderIcon } from "@/components/model-icon";
-import { api } from "@/lib/api";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
+import { allModelsQueryOptions, type CatalogModel } from "@/lib/use-models";
 
 const CAPABILITY_ICONS: Record<string, typeof MessageSquare> = {
   chat: MessageSquare,
@@ -33,7 +35,7 @@ const CAPABILITY_ICONS: Record<string, typeof MessageSquare> = {
   vision: Eye
 };
 
-const CATEGORY_COLORS: Record<ModelCategory, string> = {
+const CATEGORY_COLORS: Record<string, string> = {
   balanced: "info",
   embedding: "neutral",
   fast: "success",
@@ -73,13 +75,11 @@ const formatProviderName = (slug: string): string => {
 };
 
 const CopyableSlug = ({ value }: { value: string }) => {
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard(1500);
 
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigator.clipboard.writeText(value);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    copy(value);
   };
 
   return (
@@ -99,8 +99,9 @@ const CopyableSlug = ({ value }: { value: string }) => {
   );
 };
 
-const ModelCard = ({ model }: { model: ModelDefinition }) => {
-  const categoryMeta = MODEL_CATEGORIES[model.category];
+const ModelCard = ({ model }: { model: CatalogModel }) => {
+  const categoryMeta =
+    MODEL_CATEGORIES[model.category as ModelCategory] ?? null;
 
   return (
     <div className="group rounded-xl border border-border p-5 transition-colors hover:border-foreground/20">
@@ -201,10 +202,7 @@ export const ModelCatalog = () => {
   const [provider, setProvider] = useState("all");
   const [visibleCount, setVisibleCount] = useState(24);
 
-  const { data: models = [], isPending } = useQuery({
-    queryFn: () => api.get<ModelDefinition[]>("/v1/available-models"),
-    queryKey: ["available-models"]
-  });
+  const { data: models = [], isPending } = useQuery(allModelsQueryOptions());
 
   const providerOptions = useMemo(() => {
     const slugs = [...new Set(models.map((m) => m.provider))].sort();
@@ -258,6 +256,24 @@ export const ModelCatalog = () => {
           />
         ))}
       </div>
+    );
+  }
+
+  if (models.length === 0) {
+    return (
+      <EmptyState
+        action={
+          <Link href="/providers">
+            <Button>
+              <Network className="size-4" />
+              Add Provider
+            </Button>
+          </Link>
+        }
+        description="Connect an AI provider to browse available models."
+        icon={<Network className="size-8" />}
+        title="Connect a provider first"
+      />
     );
   }
 

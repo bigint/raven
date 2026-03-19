@@ -9,11 +9,11 @@ import { formatDate } from "@/lib/format";
 import type { VirtualKey } from "../hooks/use-keys";
 
 interface KeyListProps {
-  keys: VirtualKey[];
-  loading?: boolean;
-  onCreate: () => void;
-  onDelete: (id: string) => void;
-  onEdit: (key: VirtualKey) => void;
+  readonly keys: VirtualKey[];
+  readonly loading?: boolean;
+  readonly onCreate: () => void;
+  readonly onDelete: (id: string) => void;
+  readonly onEdit: (key: VirtualKey) => void;
 }
 
 const KeyList = ({

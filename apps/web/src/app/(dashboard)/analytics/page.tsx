@@ -2,12 +2,13 @@
 
 import type { Plan } from "@raven/types";
 import { PLAN_FEATURES } from "@raven/types";
-import { Button, PageHeader, PillTabs, Spinner, Tabs } from "@raven/ui";
+import { Button, PageHeader, PillTabs, Select, Spinner, Tabs } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Download, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
+import { match } from "ts-pattern";
 import { subscriptionQueryOptions } from "@/app/(dashboard)/billing/hooks/use-billing";
 import { keysQueryOptions } from "@/app/(dashboard)/keys/hooks/use-keys";
 import { exportToCsv } from "@/lib/csv-export";
@@ -59,8 +60,6 @@ const OverviewTab = ({ keyId }: { keyId?: string }) => {
     customTo,
     stats,
     usage,
-    isLoading,
-    error,
     dateRange,
     dateRangeOptions,
     setCustomRange,
@@ -69,9 +68,9 @@ const OverviewTab = ({ keyId }: { keyId?: string }) => {
 
   return (
     <>
-      {error && (
+      {stats.error && (
         <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {error}
+          {stats.error.message}
         </div>
       )}
       <UsageCharts
@@ -79,14 +78,24 @@ const OverviewTab = ({ keyId }: { keyId?: string }) => {
         customTo={customTo}
         dateRange={dateRange}
         dateRangeOptions={dateRangeOptions}
-        loading={isLoading}
+        loading={stats.isPending}
         onCustomRangeChange={setCustomRange}
         onDateRangeChange={setDateRange}
-        stats={stats}
+        stats={stats.data ?? null}
       />
-      <TokenStats loading={isLoading} stats={stats} />
-      <CacheStats cache={cache} loading={isLoading} />
-      <TokenBreakdown loading={isLoading} usage={usage} />
+      {usage.error && (
+        <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {usage.error.message}
+        </div>
+      )}
+      <TokenStats loading={stats.isPending} stats={stats.data ?? null} />
+      {cache.error && (
+        <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {cache.error.message}
+        </div>
+      )}
+      <CacheStats cache={cache.data ?? null} loading={cache.isPending} />
+      <TokenBreakdown loading={usage.isPending} usage={usage.data ?? []} />
     </>
   );
 };
@@ -257,17 +266,11 @@ const AdoptionTab = ({ keyId }: { keyId?: string }) => {
         {viewTab === "bars" && (
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Metric:</span>
-            <select
-              className="rounded-md border border-border bg-background px-3 py-1.5 text-sm"
-              onChange={(e) => setMetric(e.target.value as MetricKey)}
+            <Select
+              onChange={(val) => setMetric(val as MetricKey)}
+              options={METRIC_OPTIONS}
               value={metric}
-            >
-              {METRIC_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+            />
           </div>
         )}
       </div>
@@ -348,10 +351,14 @@ const AnalyticsPage = () => {
 
       <Tabs onChange={setTab} tabs={tabs} value={tab} />
 
-      {tab === "overview" && <OverviewTab keyId={keyId} />}
-      {tab === "models" && <ModelsTab keyId={keyId} />}
-      {tab === "tools" && <ToolsTab keyId={keyId} />}
-      {tab === "adoption" && hasAdoption && <AdoptionTab keyId={keyId} />}
+      {match(tab)
+        .with("overview", () => <OverviewTab keyId={keyId} />)
+        .with("models", () => <ModelsTab keyId={keyId} />)
+        .with("tools", () => <ToolsTab keyId={keyId} />)
+        .with("adoption", () =>
+          hasAdoption ? <AdoptionTab keyId={keyId} /> : null
+        )
+        .otherwise(() => null)}
     </div>
   );
 };

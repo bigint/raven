@@ -3,18 +3,19 @@ import {
   useMutation,
   useQueryClient
 } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export interface Guardrail {
-  id: string;
-  name: string;
-  type: string;
-  config: Record<string, unknown>;
-  action: string;
-  isEnabled: boolean;
-  priority: number;
-  createdAt: string;
-  updatedAt: string;
+  readonly id: string;
+  readonly name: string;
+  readonly type: string;
+  readonly config: Record<string, unknown>;
+  readonly action: string;
+  readonly isEnabled: boolean;
+  readonly priority: number;
+  readonly createdAt: string;
+  readonly updatedAt: string;
 }
 
 export const TYPE_OPTIONS = [
@@ -50,12 +51,12 @@ export const guardrailsQueryOptions = () =>
   });
 
 interface GuardrailInput {
-  name: string;
-  type: string;
-  config: Record<string, unknown>;
-  action: string;
-  isEnabled: boolean;
-  priority: number;
+  readonly name: string;
+  readonly type: string;
+  readonly config: Record<string, unknown>;
+  readonly action: string;
+  readonly isEnabled: boolean;
+  readonly priority: number;
 }
 
 export const useCreateGuardrail = () => {
@@ -64,6 +65,9 @@ export const useCreateGuardrail = () => {
   return useMutation({
     mutationFn: (input: GuardrailInput) =>
       api.post<Guardrail>("/v1/guardrails", input),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["guardrails"] });
     }
@@ -76,6 +80,9 @@ export const useUpdateGuardrail = () => {
   return useMutation({
     mutationFn: ({ id, ...body }: GuardrailInput & { id: string }) =>
       api.put<Guardrail>(`/v1/guardrails/${id}`, body),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["guardrails"] });
     }
@@ -87,6 +94,9 @@ export const useDeleteGuardrail = () => {
 
   return useMutation({
     mutationFn: (id: string) => api.delete(`/v1/guardrails/${id}`),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["guardrails"] });
     }

@@ -2,7 +2,9 @@
 
 import { Button, Input, Modal, Select, Switch, Textarea } from "@raven/ui";
 import { type FormEvent, useState } from "react";
+import { toast } from "sonner";
 import { TextMorph } from "torph/react";
+import { match } from "ts-pattern";
 import type { Guardrail } from "../hooks/use-guardrails";
 import {
   ACTION_OPTIONS,
@@ -94,9 +96,9 @@ const extractFormFromGuardrail = (g: Guardrail): FormState => ({
 });
 
 interface GuardrailFormProps {
-  open: boolean;
-  onClose: () => void;
-  editingGuardrail?: Guardrail | null;
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly editingGuardrail?: Guardrail | null;
 }
 
 const GuardrailForm = ({
@@ -160,6 +162,7 @@ const GuardrailForm = ({
       } else {
         await createMutation.mutateAsync(body);
       }
+      toast.success(isEdit ? "Guardrail updated" : "Guardrail created");
       handleClose();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Something went wrong");
@@ -174,7 +177,10 @@ const GuardrailForm = ({
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
         {formError && (
-          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <div
+            className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            role="alert"
+          >
             {formError}
           </div>
         )}
@@ -228,59 +234,58 @@ const GuardrailForm = ({
           onCheckedChange={(checked) => update("isEnabled", checked)}
         />
 
-        {form.type === "block_topics" && (
-          <Textarea
-            id="guardrail-topics"
-            label="Topics (one per line)"
-            onChange={(e) => update("topics", e.target.value)}
-            placeholder={"violence\nhate speech\nself-harm"}
-            rows={4}
-            value={form.topics}
-          />
-        )}
-
-        {form.type === "pii_detection" && (
-          <fieldset className="space-y-2">
-            <legend className="text-sm font-medium">PII Types</legend>
-            {PII_TYPES.map((pii) => (
-              <label className="flex items-center gap-2 text-sm" key={pii.id}>
-                <input
-                  checked={form.piiTypes.includes(pii.id)}
-                  className="size-4 rounded border-input accent-primary"
-                  onChange={(e) => {
-                    const next = e.target.checked
-                      ? [...form.piiTypes, pii.id]
-                      : form.piiTypes.filter((t) => t !== pii.id);
-                    setForm((f) => ({ ...f, piiTypes: next }));
-                  }}
-                  type="checkbox"
-                />
-                {pii.label}
-              </label>
-            ))}
-          </fieldset>
-        )}
-
-        {form.type === "content_filter" && (
-          <Textarea
-            id="guardrail-categories"
-            label="Categories (one per line)"
-            onChange={(e) => update("categories", e.target.value)}
-            placeholder={"profanity\nsexual content\nviolence"}
-            rows={4}
-            value={form.categories}
-          />
-        )}
-
-        {form.type === "custom_regex" && (
-          <Input
-            id="guardrail-pattern"
-            label="Regex Pattern"
-            onChange={(e) => update("pattern", e.target.value)}
-            placeholder="e.g. \\b\\d{3}-\\d{2}-\\d{4}\\b"
-            value={form.pattern}
-          />
-        )}
+        {match(form.type)
+          .with("block_topics", () => (
+            <Textarea
+              id="guardrail-topics"
+              label="Topics (one per line)"
+              onChange={(e) => update("topics", e.target.value)}
+              placeholder={"violence\nhate speech\nself-harm"}
+              rows={4}
+              value={form.topics}
+            />
+          ))
+          .with("pii_detection", () => (
+            <fieldset className="space-y-2">
+              <legend className="text-sm font-medium">PII Types</legend>
+              {PII_TYPES.map((pii) => (
+                <label className="flex items-center gap-2 text-sm" key={pii.id}>
+                  <input
+                    checked={form.piiTypes.includes(pii.id)}
+                    className="size-4 rounded border-input accent-primary"
+                    onChange={(e) => {
+                      const next = e.target.checked
+                        ? [...form.piiTypes, pii.id]
+                        : form.piiTypes.filter((t) => t !== pii.id);
+                      setForm((f) => ({ ...f, piiTypes: next }));
+                    }}
+                    type="checkbox"
+                  />
+                  {pii.label}
+                </label>
+              ))}
+            </fieldset>
+          ))
+          .with("content_filter", () => (
+            <Textarea
+              id="guardrail-categories"
+              label="Categories (one per line)"
+              onChange={(e) => update("categories", e.target.value)}
+              placeholder={"profanity\nsexual content\nviolence"}
+              rows={4}
+              value={form.categories}
+            />
+          ))
+          .with("custom_regex", () => (
+            <Input
+              id="guardrail-pattern"
+              label="Regex Pattern"
+              onChange={(e) => update("pattern", e.target.value)}
+              placeholder="e.g. \\b\\d{3}-\\d{2}-\\d{4}\\b"
+              value={form.pattern}
+            />
+          ))
+          .otherwise(() => null)}
 
         <div className="flex justify-end gap-2 pt-1">
           <Button onClick={handleClose} type="button" variant="secondary">
@@ -288,13 +293,11 @@ const GuardrailForm = ({
           </Button>
           <Button disabled={isSubmitting} type="submit">
             <TextMorph>
-              {isSubmitting
-                ? isEdit
-                  ? "Saving..."
-                  : "Adding..."
-                : isEdit
-                  ? "Save Changes"
-                  : "Add Guardrail"}
+              {match({ isEdit, isSubmitting })
+                .with({ isEdit: true, isSubmitting: true }, () => "Saving...")
+                .with({ isEdit: false, isSubmitting: true }, () => "Adding...")
+                .with({ isEdit: true }, () => "Save Changes")
+                .otherwise(() => "Add Guardrail")}
             </TextMorph>
           </Button>
         </div>

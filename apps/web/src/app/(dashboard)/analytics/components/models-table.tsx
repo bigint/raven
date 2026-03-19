@@ -3,18 +3,16 @@
 import { PROVIDER_LABELS } from "@raven/types";
 import { Spinner } from "@raven/ui";
 import { Check, Copy, Cpu } from "lucide-react";
-import { useState } from "react";
 import { ModelIcon } from "@/components/model-icon";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { formatTimeAgo } from "@/lib/format";
 import type { ModelRow } from "../hooks/use-models";
 
 const CopyableId = ({ value }: { value: string }) => {
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard(1500);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(value);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    copy(value);
   };
 
   return (
@@ -26,7 +24,7 @@ const CopyableId = ({ value }: { value: string }) => {
     >
       {value}
       {copied ? (
-        <Check className="size-3 text-green-600" />
+        <Check className="size-3 text-success" />
       ) : (
         <Copy className="size-3 opacity-0 group-hover/copy:opacity-100" />
       )}
@@ -35,8 +33,8 @@ const CopyableId = ({ value }: { value: string }) => {
 };
 
 interface ModelsTableProps {
-  data: ModelRow[];
-  loading: boolean;
+  readonly data: ModelRow[];
+  readonly loading: boolean;
 }
 
 export const ModelsTable = ({ data, loading }: ModelsTableProps) => {

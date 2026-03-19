@@ -20,8 +20,10 @@ const SignInPage = () => {
     try {
       await signIn.email({ email, password });
       router.push("/overview");
-    } catch {
-      setError("Invalid email or password");
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Invalid email or password"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -60,7 +62,10 @@ const SignInPage = () => {
           </p>
 
           {error && (
-            <div className="mt-4 rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
+            <div
+              className="mt-4 rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive"
+              role="alert"
+            >
               {error}
             </div>
           )}
@@ -71,7 +76,7 @@ const SignInPage = () => {
                 Email
               </label>
               <input
-                className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring"
+                className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
                 id="email"
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
@@ -85,7 +90,7 @@ const SignInPage = () => {
                 Password
               </label>
               <input
-                className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring"
+                className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
                 id="password"
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
@@ -103,7 +108,7 @@ const SignInPage = () => {
               </Link>
             </div>
             <button
-              className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
+              className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               disabled={isLoading}
               type="submit"
             >

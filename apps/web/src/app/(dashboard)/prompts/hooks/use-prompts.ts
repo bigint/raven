@@ -3,24 +3,25 @@ import {
   useMutation,
   useQueryClient
 } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export interface PromptVersion {
-  id: string;
-  version: number;
-  content: string;
-  model: string | null;
-  isActive: boolean;
-  createdAt: string;
+  readonly id: string;
+  readonly version: number;
+  readonly content: string;
+  readonly model: string | null;
+  readonly isActive: boolean;
+  readonly createdAt: string;
 }
 
 export interface Prompt {
-  id: string;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-  activeVersion?: PromptVersion;
-  versions?: PromptVersion[];
+  readonly id: string;
+  readonly name: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly activeVersion?: PromptVersion;
+  readonly versions?: PromptVersion[];
 }
 
 export const promptsQueryOptions = () =>
@@ -33,13 +34,13 @@ export const promptQueryOptions = (id: string) =>
   queryOptions({
     enabled: !!id,
     queryFn: () => api.get<Prompt>(`/v1/prompts/${id}`),
-    queryKey: ["prompts", id]
+    queryKey: ["prompts", { id }]
   });
 
 interface CreatePromptInput {
-  name: string;
-  content: string;
-  model?: string;
+  readonly name: string;
+  readonly content: string;
+  readonly model?: string;
 }
 
 export const useCreatePrompt = () => {
@@ -48,6 +49,9 @@ export const useCreatePrompt = () => {
   return useMutation({
     mutationFn: (input: CreatePromptInput) =>
       api.post<Prompt>("/v1/prompts", input),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["prompts"] });
     }
@@ -60,6 +64,9 @@ export const useUpdatePrompt = () => {
   return useMutation({
     mutationFn: ({ id, name }: { id: string; name: string }) =>
       api.put<Prompt>(`/v1/prompts/${id}`, { name }),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["prompts"] });
     }
@@ -71,6 +78,9 @@ export const useDeletePrompt = () => {
 
   return useMutation({
     mutationFn: (id: string) => api.delete(`/v1/prompts/${id}`),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["prompts"] });
     }
@@ -78,9 +88,9 @@ export const useDeletePrompt = () => {
 };
 
 interface CreateVersionInput {
-  promptId: string;
-  content: string;
-  model?: string;
+  readonly promptId: string;
+  readonly content: string;
+  readonly model?: string;
 }
 
 export const useCreateVersion = () => {
@@ -89,9 +99,12 @@ export const useCreateVersion = () => {
   return useMutation({
     mutationFn: ({ promptId, ...body }: CreateVersionInput) =>
       api.post<PromptVersion>(`/v1/prompts/${promptId}/versions`, body),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["prompts", variables.promptId]
+        queryKey: ["prompts", { id: variables.promptId }]
       });
       queryClient.invalidateQueries({ queryKey: ["prompts"] });
     }
@@ -109,9 +122,12 @@ export const useActivateVersion = () => {
       promptId: string;
       versionId: string;
     }) => api.put(`/v1/prompts/${promptId}/versions/${versionId}/activate`),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["prompts", variables.promptId]
+        queryKey: ["prompts", { id: variables.promptId }]
       });
       queryClient.invalidateQueries({ queryKey: ["prompts"] });
     }

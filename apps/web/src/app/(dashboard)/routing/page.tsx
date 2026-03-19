@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Network, Plus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
 import { useSetupStatus } from "@/lib/use-setup-status";
 import { RoutingRuleForm } from "./components/routing-rule-form";
 import { RoutingRuleList } from "./components/routing-rule-list";
@@ -30,25 +31,35 @@ const RoutingPage = () => {
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    await deleteMutation.mutateAsync(deleteId);
-    setDeleteId(null);
+    try {
+      await deleteMutation.mutateAsync(deleteId);
+      setDeleteId(null);
+      toast.success("Routing rule deleted");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete");
+    }
   };
 
   return (
     <div>
       <PageHeader
         actions={
-          <Button onClick={() => setFormOpen(true)}>
-            <Plus className="size-4" />
-            Add Rule
-          </Button>
+          hasProviders ? (
+            <Button onClick={() => setFormOpen(true)}>
+              <Plus className="size-4" />
+              Add Rule
+            </Button>
+          ) : undefined
         }
         description="Route requests to different models based on conditions."
         title="Routing Rules"
       />
 
       {error && (
-        <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <div
+          className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+          role="alert"
+        >
           {error.message}
         </div>
       )}

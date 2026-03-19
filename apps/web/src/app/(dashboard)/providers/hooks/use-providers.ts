@@ -4,11 +4,12 @@ import {
   useQuery,
   useQueryClient
 } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export interface AvailableProvider {
-  slug: string;
-  name: string;
+  readonly slug: string;
+  readonly name: string;
 }
 
 export const availableProvidersQueryOptions = () =>
@@ -21,19 +22,19 @@ export const useAvailableProviders = () =>
   useQuery(availableProvidersQueryOptions());
 
 export interface Provider {
-  id: string;
-  provider: string;
-  name: string | null;
-  apiKey: string;
-  isEnabled: boolean;
-  createdAt: string;
-  updatedAt: string;
+  readonly id: string;
+  readonly provider: string;
+  readonly name: string | null;
+  readonly apiKey: string;
+  readonly isEnabled: boolean;
+  readonly createdAt: string;
+  readonly updatedAt: string;
 }
 
 interface ProviderModel {
-  id: string;
-  name: string;
-  provider: string;
+  readonly id: string;
+  readonly name: string;
+  readonly provider: string;
 }
 
 export const providersQueryOptions = () =>
@@ -50,17 +51,17 @@ export const providerModelsQueryOptions = (providerId: string) =>
   });
 
 interface CreateProviderInput {
-  provider: string;
-  name?: string;
-  apiKey: string;
-  isEnabled: boolean;
+  readonly provider: string;
+  readonly name?: string;
+  readonly apiKey: string;
+  readonly isEnabled: boolean;
 }
 
 interface UpdateProviderInput {
-  id: string;
-  name?: string;
-  apiKey?: string;
-  isEnabled?: boolean;
+  readonly id: string;
+  readonly name?: string;
+  readonly apiKey?: string;
+  readonly isEnabled?: boolean;
 }
 
 export const useCreateProvider = () => {
@@ -69,6 +70,9 @@ export const useCreateProvider = () => {
   return useMutation({
     mutationFn: (input: CreateProviderInput) =>
       api.post<Provider>("/v1/providers", input),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["providers"] });
     }
@@ -81,6 +85,9 @@ export const useUpdateProvider = () => {
   return useMutation({
     mutationFn: ({ id, ...body }: UpdateProviderInput) =>
       api.put<Provider>(`/v1/providers/${id}`, body),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["providers"] });
     }
@@ -92,6 +99,9 @@ export const useDeleteProvider = () => {
 
   return useMutation({
     mutationFn: (id: string) => api.delete(`/v1/providers/${id}`),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["providers"] });
     }
@@ -99,12 +109,15 @@ export const useDeleteProvider = () => {
 };
 
 interface TestProviderResult {
-  success: boolean;
-  message: string;
+  readonly success: boolean;
+  readonly message: string;
 }
 
 export const useTestProvider = () =>
   useMutation({
     mutationFn: (id: string) =>
-      api.post<TestProviderResult>(`/v1/providers/${id}/test`)
+      api.post<TestProviderResult>(`/v1/providers/${id}/test`),
+    onError: (err) => {
+      toast.error(err.message);
+    }
   });

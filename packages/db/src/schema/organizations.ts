@@ -7,7 +7,6 @@ export const organizations = pgTable("organizations", {
     .defaultNow(),
   deletedAt: timestamp("deleted_at", { withTimezone: true }),
   id: text("id").primaryKey().$defaultFn(createId),
-  lemonSqueezyCustomerId: text("lemonsqueezy_customer_id"),
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
   updatedAt: timestamp("updated_at", { withTimezone: true })

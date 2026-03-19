@@ -13,7 +13,7 @@ const STATUS_BADGE: Record<string, string> = {
 };
 
 interface PlanSubscriptionProps {
-  settings: OrgSettings;
+  readonly settings: OrgSettings;
 }
 
 export const PlanSubscription = ({ settings }: PlanSubscriptionProps) => {

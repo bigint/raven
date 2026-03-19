@@ -1,10 +1,10 @@
 "use client";
 
-import { Button, ConfirmDialog, PageHeader, Tabs } from "@raven/ui";
+import { Button, ConfirmDialog, PageHeader, Spinner, Tabs } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Mail } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { InvitationList } from "./components/invitation-list";
 import { InviteForm } from "./components/invite-form";
 import { MemberList } from "./components/member-list";
@@ -34,7 +34,7 @@ const DELETE_CONFIG = {
   }
 };
 
-const TeamPage = () => {
+const TeamPageContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const tabParam = searchParams.get("tab") as ActiveTab | null;
@@ -79,12 +79,10 @@ const TeamPage = () => {
     <div>
       <PageHeader
         actions={
-          activeTab === "invitations" ? (
-            <Button onClick={() => setShowInviteModal(true)}>
-              <Mail className="size-4" />
-              Invite Member
-            </Button>
-          ) : null
+          <Button onClick={() => setShowInviteModal(true)}>
+            <Mail className="size-4" />
+            Invite Member
+          </Button>
         }
         description="Manage members and invitations."
         title="Team"
@@ -140,5 +138,11 @@ const TeamPage = () => {
     </div>
   );
 };
+
+const TeamPage = () => (
+  <Suspense fallback={<Spinner />}>
+    <TeamPageContent />
+  </Suspense>
+);
 
 export default TeamPage;

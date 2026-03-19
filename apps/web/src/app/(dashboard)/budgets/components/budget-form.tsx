@@ -3,6 +3,7 @@
 import { Button, Input, Modal, Select } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { type FormEvent, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { TextMorph } from "torph/react";
 import { keysQueryOptions } from "../../keys/hooks/use-keys";
 import type { Budget } from "../hooks/use-budgets";
@@ -30,9 +31,9 @@ const DEFAULT_FORM: FormState = {
 };
 
 interface BudgetFormProps {
-  open: boolean;
-  onClose: () => void;
-  editingBudget?: Budget | null;
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly editingBudget?: Budget | null;
 }
 
 const BudgetForm = ({ open, onClose, editingBudget }: BudgetFormProps) => {
@@ -107,6 +108,7 @@ const BudgetForm = ({ open, onClose, editingBudget }: BudgetFormProps) => {
       } else {
         await createMutation.mutateAsync(body);
       }
+      toast.success(isEdit ? "Budget updated" : "Budget created");
       handleClose();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Something went wrong");
@@ -121,7 +123,10 @@ const BudgetForm = ({ open, onClose, editingBudget }: BudgetFormProps) => {
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
         {formError && (
-          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <div
+            className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            role="alert"
+          >
             {formError}
           </div>
         )}

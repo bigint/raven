@@ -7,13 +7,13 @@ import { useRouter } from "next/navigation";
 import type { Prompt } from "../hooks/use-prompts";
 
 interface PromptListProps {
-  prompts: Prompt[];
-  loading: boolean;
-  onAdd: () => void;
-  onEdit: (prompt: Prompt) => void;
-  onView: (prompt: Prompt) => void;
-  onDelete: (id: string) => void;
-  onTest?: (prompt: Prompt) => void;
+  readonly prompts: Prompt[];
+  readonly loading: boolean;
+  readonly onAdd: () => void;
+  readonly onEdit: (prompt: Prompt) => void;
+  readonly onView: (prompt: Prompt) => void;
+  readonly onDelete: (id: string) => void;
+  readonly onTest?: (prompt: Prompt) => void;
 }
 
 const columns: Column<Prompt>[] = [

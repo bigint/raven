@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  description:
+    "Get up and running with Raven in under 5 minutes. Connect providers, create virtual keys, and start routing AI requests.",
+  title: "Getting Started - Raven"
+};
 
 const steps = [
   {

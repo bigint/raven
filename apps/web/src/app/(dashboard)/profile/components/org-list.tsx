@@ -3,8 +3,7 @@
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable, EmptyState, Spinner } from "@raven/ui";
 import { Building2, Check, Crown, Shield, User } from "lucide-react";
-import { useOrgStore } from "@/stores/org";
-import type { Organization } from "../hooks/use-profile";
+import { type Org, useOrgStore } from "@/stores/org";
 
 const ROLE_BADGES: Record<
   string,
@@ -20,14 +19,14 @@ const getRoleBadge = (role: string) =>
   ROLE_BADGES[role] ?? { className: "neutral" as const, icon: User };
 
 interface OrgListProps {
-  activeOrgId: string | null;
-  onCreateOrg: () => void;
-  orgs: Organization[];
-  orgsError: string | null;
-  orgsLoading: boolean;
+  readonly activeOrgId: string | null;
+  readonly onCreateOrg: () => void;
+  readonly orgs: Org[];
+  readonly orgsError: string | null;
+  readonly orgsLoading: boolean;
 }
 
-const handleSwitchOrg = (org: Organization) => {
+const handleSwitchOrg = (org: Org) => {
   useOrgStore.getState().setActiveOrg({
     id: org.id,
     name: org.name,
@@ -137,7 +136,7 @@ const OrgList = ({
                   </div>
                 )
               }
-            ] satisfies Column<Organization>[]
+            ] satisfies Column<Org>[]
           }
           data={orgs}
           keyExtractor={(org) => org.id}
