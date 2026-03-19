@@ -146,11 +146,7 @@ export const initWebhookDispatcher = (db: Database, redis: Redis): void => {
 
     void (async () => {
       try {
-        const matchingWebhooks = await getWebhookConfigs(
-          db,
-          orgId,
-          event.type
-        );
+        const matchingWebhooks = await getWebhookConfigs(db, orgId, event.type);
 
         for (const webhook of matchingWebhooks) {
           const body = JSON.stringify({

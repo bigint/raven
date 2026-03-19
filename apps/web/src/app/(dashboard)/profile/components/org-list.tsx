@@ -3,6 +3,7 @@
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable, EmptyState, Spinner } from "@raven/ui";
 import { Building2, Check, Crown, Shield, User } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { type Org, useOrgStore } from "@/stores/org";
 
 const ROLE_BADGES: Record<
@@ -25,17 +26,6 @@ interface OrgListProps {
   readonly orgsError: string | null;
   readonly orgsLoading: boolean;
 }
-
-const handleSwitchOrg = (org: Org) => {
-  useOrgStore.getState().setActiveOrg({
-    id: org.id,
-    name: org.name,
-    plan: org.plan,
-    role: org.role,
-    slug: org.slug
-  });
-  window.location.reload();
-};
 
 const OrgList = ({
   activeOrgId,

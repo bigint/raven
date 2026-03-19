@@ -14,8 +14,7 @@ import type { createModelAliasSchema } from "./schema";
 type Body = z.infer<typeof createModelAliasSchema>;
 
 export const createModelAlias =
-  (db: Database, redis: Redis) =>
-  async (c: AppContextWithJson<Body>) => {
+  (db: Database, redis: Redis) => async (c: AppContextWithJson<Body>) => {
     const orgId = c.get("orgId");
     const user = c.get("user");
     await checkFeatureGate(db, orgId, "hasModelAliases");
