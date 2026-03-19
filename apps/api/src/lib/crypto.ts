@@ -15,13 +15,23 @@ const PBKDF2_ITERATIONS = 100_000;
 // the input is already a high-entropy secret, not a user password.
 const SALT = Buffer.from("raven-encryption-key-derivation-v1");
 
+const keyCache = new Map<string, Buffer>();
 const deriveKey = (secret: string): Buffer => {
-  return pbkdf2Sync(secret, SALT, PBKDF2_ITERATIONS, KEY_LENGTH, "sha512");
+  const cached = keyCache.get(secret);
+  if (cached) return cached;
+  const key = pbkdf2Sync(secret, SALT, PBKDF2_ITERATIONS, KEY_LENGTH, "sha512");
+  keyCache.set(secret, key);
+  return key;
 };
 
 // Legacy key derivation for backward compatibility with existing encrypted data
+const legacyKeyCache = new Map<string, Buffer>();
 const deriveLegacyKey = (secret: string): Buffer => {
-  return createHash("sha256").update(secret).digest();
+  const cached = legacyKeyCache.get(secret);
+  if (cached) return cached;
+  const key = createHash("sha256").update(secret).digest();
+  legacyKeyCache.set(secret, key);
+  return key;
 };
 
 export const encrypt = (plaintext: string, secret: string): string => {

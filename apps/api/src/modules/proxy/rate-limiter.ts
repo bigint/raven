@@ -34,36 +34,26 @@ export const checkRateLimit = async (
 ): Promise<void> => {
   if (rpm === null && rpd === null) return;
 
-  const checks = [
-    ...(rpm === null
-      ? []
-      : [
-          getLimiter(redis, "rl:rpm", rpm, 60)
-            .consume(keyId)
-            .then(
-              () => {},
-              () => {
-                throw new RateLimitError(
-                  "Rate limit exceeded (requests per minute)"
-                );
-              }
-            )
-        ]),
-    ...(rpd === null
-      ? []
-      : [
-          getLimiter(redis, "rl:rpd", rpd, SECONDS_PER_DAY)
-            .consume(keyId)
-            .then(
-              () => {},
-              () => {
-                throw new RateLimitError(
-                  "Rate limit exceeded (requests per day)"
-                );
-              }
-            )
-        ])
-  ];
+  // Check RPM first
+  if (rpm !== null) {
+    try {
+      await getLimiter(redis, "rl:rpm", rpm, 60).consume(keyId);
+    } catch {
+      throw new RateLimitError("Rate limit exceeded (requests per minute)");
+    }
+  }
 
-  await Promise.all(checks);
+  // Check RPD second; if it fails, reward the RPM token back
+  if (rpd !== null) {
+    try {
+      await getLimiter(redis, "rl:rpd", rpd, SECONDS_PER_DAY).consume(keyId);
+    } catch {
+      if (rpm !== null) {
+        await getLimiter(redis, "rl:rpm", rpm, 60)
+          .reward(keyId)
+          .catch(() => {});
+      }
+      throw new RateLimitError("Rate limit exceeded (requests per day)");
+    }
+  }
 };

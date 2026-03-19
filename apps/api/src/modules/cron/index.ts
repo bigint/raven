@@ -1,9 +1,10 @@
 import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
+import type { Redis } from "ioredis";
 import { syncModels } from "./sync-models";
 
-export const createCronModule = (db: Database, env: Env) => {
+export const createCronModule = (db: Database, env: Env, redis: Redis) => {
   const app = new Hono();
 
   app.use("*", async (c, next) => {
@@ -22,7 +23,7 @@ export const createCronModule = (db: Database, env: Env) => {
     return next();
   });
 
-  app.post("/sync-models", syncModels(db));
+  app.post("/sync-models", syncModels(db, redis));
 
   return app;
 };

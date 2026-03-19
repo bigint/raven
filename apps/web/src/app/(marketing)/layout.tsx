@@ -114,7 +114,7 @@ const MarketingLayout = ({ children }: { children: ReactNode }) => {
             </div>
           </div>
           <div className="mt-10 border-t border-border pt-6 text-center text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} Raven. All rights reserved.
+            &copy; {2026} Raven. All rights reserved.
           </div>
         </div>
       </footer>

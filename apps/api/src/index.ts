@@ -37,7 +37,7 @@ import { createOpenAICompatModule } from "./modules/openai-compat/index";
 import { createPromptsModule } from "./modules/prompts/index";
 import { createProvidersModule } from "./modules/providers/index";
 import { proxyHandler } from "./modules/proxy/handler";
-import { flushLastUsed } from "./modules/proxy/logger";
+import { flushLastUsed, flushLogBuffer } from "./modules/proxy/logger";
 import { createRoutingRulesModule } from "./modules/routing-rules/index";
 import { createSettingsModule } from "./modules/settings/index";
 import { createTeamsModule } from "./modules/teams/index";
@@ -52,7 +52,7 @@ initWebhookDispatcher(db, redis);
 initEmailDispatcher(db, redis, env.APP_URL);
 
 // Flush buffered lastUsedAt timestamps every 60 seconds
-setInterval(() => {
+const flushInterval = setInterval(() => {
   void flushLastUsed(db, redis);
 }, 60_000);
 
@@ -68,8 +68,10 @@ const auth = createAuth(db, env, {
 
 const app = new Hono();
 
-// Global middleware
-app.use("*", logger());
+// Global middleware — disable request logger in production to reduce noise
+if (env.NODE_ENV !== "production") {
+  app.use("*", logger());
+}
 
 // Request body size limit (10MB)
 app.use("*", async (c, next) => {
@@ -145,10 +147,10 @@ app.route("/v1", createOpenAICompatModule(db, redis, env));
 app.all("/v1/proxy/*", proxyHandler(db, redis, env));
 
 // Billing webhooks (no auth)
-app.route("/webhooks/billing", createBillingWebhookModule(db, env));
+app.route("/webhooks/billing", createBillingWebhookModule(db, env, redis));
 
 // Cron endpoints (secret header auth)
-app.route("/v1/cron", createCronModule(db, env));
+app.route("/v1/cron", createCronModule(db, env, redis));
 
 // Public models catalog (no auth required)
 app.route("/v1/models", createModelsModule(db));
@@ -169,21 +171,21 @@ app.route("/v1/admin", adminRoutes);
 // Protected API routes (session auth + tenant)
 const v1 = new Hono();
 v1.use("*", createAuthMiddleware(auth));
-v1.use("*", createTenantMiddleware(db));
+v1.use("*", createTenantMiddleware(db, redis));
 v1.get("/available-models", listAvailableModels(db));
 v1.route("/providers", createProvidersModule(db, env, redis));
-v1.route("/keys", createKeysModule(db));
-v1.route("/model-aliases", createModelAliasesModule(db));
+v1.route("/keys", createKeysModule(db, redis));
+v1.route("/model-aliases", createModelAliasesModule(db, redis));
 v1.route("/prompts", createPromptsModule(db));
-v1.route("/budgets", createBudgetsModule(db));
-v1.route("/guardrails", createGuardrailsModule(db));
-v1.route("/analytics", createAnalyticsModule(db));
-v1.route("/teams", createTeamsModule(db));
-v1.route("/settings", createSettingsModule(db));
-v1.route("/billing", createBillingModule(db));
-v1.route("/webhooks", createWebhooksModule(db));
+v1.route("/budgets", createBudgetsModule(db, redis));
+v1.route("/guardrails", createGuardrailsModule(db, redis));
+v1.route("/analytics", createAnalyticsModule(db, redis));
+v1.route("/teams", createTeamsModule(db, redis));
+v1.route("/settings", createSettingsModule(db, redis));
+v1.route("/billing", createBillingModule(db, redis));
+v1.route("/webhooks", createWebhooksModule(db, redis));
 v1.route("/routing-rules", createRoutingRulesModule(db));
-v1.route("/audit-logs", createAuditLogsModule(db));
+v1.route("/audit-logs", createAuditLogsModule(db, redis));
 app.route("/v1", v1);
 
 app.notFound((c) =>
@@ -199,9 +201,26 @@ app.notFound((c) =>
   )
 );
 
-serve({ fetch: app.fetch, port: env.API_PORT }, (info) => {
+const server = serve({ fetch: app.fetch, port: env.API_PORT }, (info) => {
   console.log(`Raven API running on http://localhost:${info.port}`);
 });
+
+const shutdown = async (): Promise<void> => {
+  console.log("Shutting down gracefully...");
+  server.close();
+  clearInterval(flushInterval);
+  await flushLogBuffer().catch((err) =>
+    console.error("Failed to flush log buffer on shutdown:", err)
+  );
+  await flushLastUsed(db, redis).catch((err) =>
+    console.error("Failed to flush lastUsed on shutdown:", err)
+  );
+  await redis.quit();
+  process.exit(0);
+};
+
+process.on("SIGTERM", () => void shutdown());
+process.on("SIGINT", () => void shutdown());
 
 export { auth };
 export default app;

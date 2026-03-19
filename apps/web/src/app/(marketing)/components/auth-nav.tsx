@@ -1,109 +1,34 @@
-"use client";
-
-import { Menu, X } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
-import { useState } from "react";
-import { useSession } from "@/lib/auth-client";
 
 export const AuthNav = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { data: session, isPending } = useSession();
-
-  const isLoggedIn = !isPending && !!session;
-
   return (
-    <>
-      <div className="flex items-center gap-2">
-        {isLoggedIn ? (
-          <Link
-            className="hidden rounded-lg bg-foreground px-4 py-1.5 text-sm font-medium text-background transition-opacity hover:opacity-90 sm:inline-flex"
-            href="/overview"
-          >
-            Dashboard
-          </Link>
-        ) : (
-          <>
-            <Link
-              className="hidden rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
-              href="/sign-in"
-            >
-              Sign in
-            </Link>
-            <Link
-              className="hidden rounded-lg bg-foreground px-4 py-1.5 text-sm font-medium text-background transition-opacity hover:opacity-90 sm:inline-flex"
-              href="/sign-up"
-            >
-              Get Started
-            </Link>
-          </>
-        )}
-        <button
-          className="inline-flex items-center justify-center rounded-lg p-1.5 text-muted-foreground transition-colors hover:text-foreground sm:hidden"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          type="button"
+    <div className="flex items-center gap-2">
+      <Link
+        className="hidden rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+        href="/sign-in"
+      >
+        Sign in
+      </Link>
+      <Link
+        className="hidden rounded-lg bg-foreground px-4 py-1.5 text-sm font-medium text-background transition-opacity hover:opacity-90 sm:inline-flex"
+        href="/sign-up"
+      >
+        Get Started
+      </Link>
+      <div className="flex items-center gap-2 sm:hidden">
+        <Link
+          className="rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          href="/sign-in"
         >
-          {mobileMenuOpen ? (
-            <X className="size-5" />
-          ) : (
-            <Menu className="size-5" />
-          )}
-        </button>
+          Sign in
+        </Link>
+        <Link
+          className="rounded-lg bg-foreground px-4 py-1.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
+          href="/sign-up"
+        >
+          Get Started
+        </Link>
       </div>
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            animate={{ height: "auto", opacity: 1 }}
-            className="overflow-hidden border-t border-border sm:hidden"
-            exit={{ height: 0, opacity: 0 }}
-            initial={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <nav className="flex flex-col gap-2 px-4 py-4">
-              <Link
-                className="rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                href="/pricing"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Pricing
-              </Link>
-              <Link
-                className="rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                href="/docs"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Docs
-              </Link>
-              {isLoggedIn ? (
-                <Link
-                  className="rounded-xl bg-foreground px-4 py-2 text-center text-sm font-medium text-background transition-opacity hover:opacity-90"
-                  href="/overview"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Dashboard
-                </Link>
-              ) : (
-                <>
-                  <Link
-                    className="rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:text-foreground"
-                    href="/sign-in"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Sign in
-                  </Link>
-                  <Link
-                    className="rounded-xl bg-foreground px-4 py-2 text-center text-sm font-medium text-background transition-opacity hover:opacity-90"
-                    href="/sign-up"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Get Started
-                  </Link>
-                </>
-              )}
-            </nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+    </div>
   );
 };

@@ -6,7 +6,15 @@ import type { Redis } from "ioredis";
 import { cachedQuery, cacheKeys } from "@/lib/cache-utils";
 import { UnauthorizedError } from "@/lib/errors";
 
-export type VirtualKey = typeof virtualKeys.$inferSelect;
+export type VirtualKey = Pick<
+  typeof virtualKeys.$inferSelect,
+  | "expiresAt"
+  | "id"
+  | "isActive"
+  | "organizationId"
+  | "rateLimitRpd"
+  | "rateLimitRpm"
+>;
 
 export interface AuthResult {
   virtualKey: VirtualKey;
@@ -30,7 +38,14 @@ export const authenticateKey = async (
 
   const queryFn = async () => {
     const [vKey] = await db
-      .select()
+      .select({
+        expiresAt: virtualKeys.expiresAt,
+        id: virtualKeys.id,
+        isActive: virtualKeys.isActive,
+        organizationId: virtualKeys.organizationId,
+        rateLimitRpd: virtualKeys.rateLimitRpd,
+        rateLimitRpm: virtualKeys.rateLimitRpm
+      })
       .from(virtualKeys)
       .where(eq(virtualKeys.keyHash, keyHash))
       .limit(1);

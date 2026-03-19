@@ -59,7 +59,8 @@ const AuditLogsPage = () => {
     error
   } = useQuery({
     queryFn: () => api.get<AuditLog[]>("/v1/audit-logs"),
-    queryKey: ["audit-logs"]
+    queryKey: ["audit-logs"],
+    staleTime: 30_000
   });
 
   return (

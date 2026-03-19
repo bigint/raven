@@ -22,3 +22,6 @@ export const webhooks = pgTable(
   },
   (t) => [index("webhooks_org_enabled_idx").on(t.organizationId, t.isEnabled)]
 );
+
+// GIN index for array column - must be created via SQL migration:
+// CREATE INDEX webhooks_events_gin_idx ON webhooks USING gin(events);
