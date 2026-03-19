@@ -17,7 +17,6 @@ export const models = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
-    description: text("description").notNull().default(""),
     id: text("id").primaryKey(), // e.g. "openai/gpt-5"
     inputPrice: numeric("input_price", { precision: 10, scale: 4 })
       .notNull()

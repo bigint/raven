@@ -72,8 +72,7 @@ export const exportSettings = (db: Database) => async (c: AppContext) => {
           entityId: budgets.entityId,
           entityType: budgets.entityType,
           limitAmount: budgets.limitAmount,
-          period: budgets.period,
-          periodStart: budgets.periodStart
+          period: budgets.period
         })
         .from(budgets)
         .where(eq(budgets.organizationId, orgId)),
