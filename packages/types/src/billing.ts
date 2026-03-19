@@ -16,6 +16,7 @@ export interface PlanFeatures {
   readonly hasAuditLogs: boolean;
   readonly hasGuardrails: boolean;
   readonly hasAdoption: boolean;
+  readonly hasModelAliases: boolean;
   readonly hasWebhooks: boolean;
 }
 
@@ -69,7 +70,7 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     hasAdoption: true,
     hasAuditLogs: true,
     hasGuardrails: true,
-
+    hasModelAliases: true,
     hasWebhooks: true,
     maxBudgets: Number.POSITIVE_INFINITY,
     maxProviders: Number.POSITIVE_INFINITY,
@@ -82,7 +83,7 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     hasAdoption: false,
     hasAuditLogs: false,
     hasGuardrails: false,
-
+    hasModelAliases: false,
     hasWebhooks: false,
     maxBudgets: 1,
     maxProviders: 2,
@@ -95,7 +96,7 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     hasAdoption: true,
     hasAuditLogs: false,
     hasGuardrails: true,
-
+    hasModelAliases: true,
     hasWebhooks: true,
     maxBudgets: 10,
     maxProviders: 10,
@@ -108,7 +109,7 @@ export const PLAN_FEATURES: Record<Plan, PlanFeatures> = {
     hasAdoption: true,
     hasAuditLogs: false,
     hasGuardrails: true,
-
+    hasModelAliases: true,
     hasWebhooks: true,
     maxBudgets: Number.POSITIVE_INFINITY,
     maxProviders: Number.POSITIVE_INFINITY,
