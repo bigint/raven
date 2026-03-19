@@ -133,14 +133,20 @@ export const HomePageContent = () => {
 
                 {/* Body */}
                 <div className="overflow-x-auto p-5 text-left font-mono text-xs leading-relaxed sm:p-6 sm:text-sm">
-                  <div className="animate-fade-in" style={{ animationDelay: "0.5s" }}>
+                  <div
+                    className="animate-fade-in"
+                    style={{ animationDelay: "0.5s" }}
+                  >
                     <p className="text-neutral-500">
                       <span className="text-neutral-600"># </span>Just change
                       your base URL
                     </p>
                   </div>
 
-                  <div className="animate-fade-in" style={{ animationDelay: "0.8s" }}>
+                  <div
+                    className="animate-fade-in"
+                    style={{ animationDelay: "0.8s" }}
+                  >
                     <p className="mt-3">
                       <span className="text-blue-400">curl </span>
                       <span className="text-neutral-200">
@@ -149,7 +155,10 @@ export const HomePageContent = () => {
                     </p>
                   </div>
 
-                  <div className="animate-fade-in" style={{ animationDelay: "1.0s" }}>
+                  <div
+                    className="animate-fade-in"
+                    style={{ animationDelay: "1.0s" }}
+                  >
                     <p className="pl-4 text-neutral-200">
                       -H{" "}
                       <span className="text-emerald-400">
@@ -159,7 +168,10 @@ export const HomePageContent = () => {
                     </p>
                   </div>
 
-                  <div className="animate-fade-in" style={{ animationDelay: "1.2s" }}>
+                  <div
+                    className="animate-fade-in"
+                    style={{ animationDelay: "1.2s" }}
+                  >
                     <p className="pl-4 text-neutral-200">
                       -H{" "}
                       <span className="text-emerald-400">
@@ -169,7 +181,10 @@ export const HomePageContent = () => {
                     </p>
                   </div>
 
-                  <div className="animate-fade-in" style={{ animationDelay: "1.4s" }}>
+                  <div
+                    className="animate-fade-in"
+                    style={{ animationDelay: "1.4s" }}
+                  >
                     <p className="pl-4 text-neutral-200">
                       -d{" "}
                       <span className="text-amber-400">
@@ -180,10 +195,15 @@ export const HomePageContent = () => {
                   </div>
 
                   {/* Response */}
-                  <div className="animate-fade-in" style={{ animationDelay: "2.0s" }}>
+                  <div
+                    className="animate-fade-in"
+                    style={{ animationDelay: "2.0s" }}
+                  >
                     <div className="mt-4 border-t border-white/6 pt-4">
                       <p>
-                        <span className="text-emerald-400">&#10003; 200 OK</span>
+                        <span className="text-emerald-400">
+                          &#10003; 200 OK
+                        </span>
                         <span className="text-neutral-600">
                           {" "}
                           &middot; 847ms &middot; gpt-4o
@@ -237,7 +257,10 @@ export const HomePageContent = () => {
                 Everything you need to manage AI
               </h2>
             </div>
-            <div className="animate-fade-in" style={{ animationDelay: "0.05s" }}>
+            <div
+              className="animate-fade-in"
+              style={{ animationDelay: "0.05s" }}
+            >
               <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
                 One platform to connect, control, and monitor all your AI
                 provider integrations.
@@ -281,7 +304,10 @@ export const HomePageContent = () => {
                 Up and running in minutes
               </h2>
             </div>
-            <div className="animate-fade-in" style={{ animationDelay: "0.05s" }}>
+            <div
+              className="animate-fade-in"
+              style={{ animationDelay: "0.05s" }}
+            >
               <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
                 Three steps to centralize your AI infrastructure.
               </p>

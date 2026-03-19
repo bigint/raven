@@ -61,9 +61,7 @@ export const BillingToggle = ({ plans }: BillingToggleProps) => {
           return (
             <div
               className={`relative rounded-xl border p-6 flex flex-col ${
-                details.isPopular
-                  ? "border-primary shadow-lg"
-                  : "border-border"
+                details.isPopular ? "border-primary shadow-lg" : "border-border"
               }`}
               key={plan.plan}
             >
@@ -97,10 +95,7 @@ export const BillingToggle = ({ plans }: BillingToggleProps) => {
 
               <ul className="space-y-3 mb-8 flex-1">
                 {plan.features.map((feature) => (
-                  <li
-                    className="flex items-start gap-2 text-sm"
-                    key={feature}
-                  >
+                  <li className="flex items-start gap-2 text-sm" key={feature}>
                     <Check className="size-4 text-success shrink-0 mt-0.5" />
                     <span>{feature}</span>
                   </li>
