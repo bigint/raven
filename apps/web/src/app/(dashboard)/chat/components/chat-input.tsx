@@ -217,6 +217,7 @@ export const ChatInput = ({
         )}
 
         <textarea
+          aria-label="Message input"
           className="w-full resize-none bg-transparent px-4 pt-3 pb-2 text-sm placeholder:text-muted-foreground focus:outline-none"
           disabled={isStreaming}
           onChange={(e) => {
@@ -298,49 +299,58 @@ export const ChatInput = ({
               )}
             </div>
 
-            <Sep />
+            {!settings.enableReasoning && (
+              <>
+                <Sep />
 
-            {/* Temperature */}
-            <div className="relative">
-              <button
-                className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                onClick={() => toggle("temperature")}
-                type="button"
-              >
-                <Thermometer className="size-3" />
-                {settings.temperature}
-              </button>
+                {/* Temperature */}
+                <div className="relative">
+                  <button
+                    className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                    onClick={() => toggle("temperature")}
+                    type="button"
+                  >
+                    <Thermometer className="size-3" />
+                    {settings.temperature}
+                  </button>
 
-              {openPopover === "temperature" && (
-                <Dropdown onClose={() => setOpenPopover(null)}>
-                  <div className="w-52 p-3 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium">Temperature</span>
-                      <span className="text-xs text-muted-foreground font-mono">
-                        {settings.temperature}
-                      </span>
-                    </div>
-                    <input
-                      className="w-full accent-primary"
-                      max="2"
-                      min="0"
-                      onChange={(e) =>
-                        update("temperature", Number.parseFloat(e.target.value))
-                      }
-                      step="0.1"
-                      type="range"
-                      value={settings.temperature}
-                    />
-                    <div className="flex justify-between text-[10px] text-muted-foreground">
-                      <span>Precise</span>
-                      <span>Creative</span>
-                    </div>
-                  </div>
-                </Dropdown>
-              )}
-            </div>
+                  {openPopover === "temperature" && (
+                    <Dropdown onClose={() => setOpenPopover(null)}>
+                      <div className="w-52 p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-medium">
+                            Temperature
+                          </span>
+                          <span className="text-xs text-muted-foreground font-mono">
+                            {settings.temperature}
+                          </span>
+                        </div>
+                        <input
+                          className="w-full accent-primary"
+                          max="2"
+                          min="0"
+                          onChange={(e) =>
+                            update(
+                              "temperature",
+                              Number.parseFloat(e.target.value)
+                            )
+                          }
+                          step="0.1"
+                          type="range"
+                          value={settings.temperature}
+                        />
+                        <div className="flex justify-between text-[10px] text-muted-foreground">
+                          <span>Precise</span>
+                          <span>Creative</span>
+                        </div>
+                      </div>
+                    </Dropdown>
+                  )}
+                </div>
 
-            <Sep />
+                <Sep />
+              </>
+            )}
 
             {/* Stream toggle */}
             <button
