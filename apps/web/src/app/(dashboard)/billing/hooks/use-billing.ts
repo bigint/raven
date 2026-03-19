@@ -6,27 +6,27 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 
 interface Subscription {
-  planId: string;
-  planName: string;
-  status: string;
-  currentPeriodStart: string;
-  currentPeriodEnd: string;
-  cancelAtPeriodEnd: boolean;
+  readonly planId: string;
+  readonly planName: string;
+  readonly status: string;
+  readonly currentPeriodStart: string;
+  readonly currentPeriodEnd: string;
+  readonly cancelAtPeriodEnd: boolean;
 }
 
 interface PlanFeature {
-  text: string;
-  included: boolean;
+  readonly text: string;
+  readonly included: boolean;
 }
 
 interface Plan {
-  id: string;
-  name: string;
-  description: string;
-  priceMonthly: number;
-  priceYearly: number;
-  features: PlanFeature[];
-  isPopular?: boolean;
+  readonly id: string;
+  readonly name: string;
+  readonly description: string;
+  readonly priceMonthly: number;
+  readonly priceYearly: number;
+  readonly features: PlanFeature[];
+  readonly isPopular?: boolean;
 }
 
 type BillingInterval = "monthly" | "yearly";

@@ -7,11 +7,11 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 interface OrgSettings {
-  name: string;
-  slug: string;
-  plan: string;
-  subscriptionStatus: string;
-  userRole: string;
+  readonly name: string;
+  readonly slug: string;
+  readonly plan: string;
+  readonly subscriptionStatus: string;
+  readonly userRole: string;
 }
 
 const SLUG_PATTERN = /^[a-z][a-z0-9-]{1,48}[a-z0-9]$/;

@@ -7,13 +7,13 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export interface Webhook {
-  id: string;
-  url: string;
-  events: string[];
-  secret: string;
-  isEnabled: boolean;
-  createdAt: string;
-  updatedAt: string;
+  readonly id: string;
+  readonly url: string;
+  readonly events: string[];
+  readonly secret: string;
+  readonly isEnabled: boolean;
+  readonly createdAt: string;
+  readonly updatedAt: string;
 }
 
 export const WEBHOOK_EVENTS = [
@@ -61,16 +61,16 @@ export const webhooksQueryOptions = () =>
   });
 
 interface WebhookCreateInput {
-  url: string;
-  events: string[];
-  isEnabled?: boolean;
+  readonly url: string;
+  readonly events: string[];
+  readonly isEnabled?: boolean;
 }
 
 interface WebhookUpdateInput {
-  id: string;
-  url?: string;
-  events?: string[];
-  isEnabled?: boolean;
+  readonly id: string;
+  readonly url?: string;
+  readonly events?: string[];
+  readonly isEnabled?: boolean;
 }
 
 export const useCreateWebhook = () => {
@@ -118,8 +118,8 @@ export const useDeleteWebhook = () => {
 };
 
 interface TestWebhookResult {
-  ok: boolean;
-  status: number;
+  readonly ok: boolean;
+  readonly status: number;
 }
 
 export const useTestWebhook = () =>

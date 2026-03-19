@@ -33,8 +33,8 @@ const CopyableId = ({ value }: { value: string }) => {
 };
 
 interface ModelsTableProps {
-  data: ModelRow[];
-  loading: boolean;
+  readonly data: ModelRow[];
+  readonly loading: boolean;
 }
 
 export const ModelsTable = ({ data, loading }: ModelsTableProps) => {

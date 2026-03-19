@@ -13,20 +13,20 @@ import {
 } from "../lib/date-utils";
 
 export interface ChartDataPoint {
-  date: string;
-  cached: number;
-  input: number;
-  output: number;
-  reasoning: number;
+  readonly date: string;
+  readonly cached: number;
+  readonly input: number;
+  readonly output: number;
+  readonly reasoning: number;
 }
 
 export interface BreakdownRow {
-  label: string;
-  cachedTokens: number;
-  inputTokens: number;
-  outputTokens: number;
-  reasoningTokens: number;
-  requests: number;
+  readonly label: string;
+  readonly cachedTokens: number;
+  readonly inputTokens: number;
+  readonly outputTokens: number;
+  readonly reasoningTokens: number;
+  readonly requests: number;
 }
 
 export type { DateRange };

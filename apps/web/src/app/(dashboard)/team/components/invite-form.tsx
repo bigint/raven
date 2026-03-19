@@ -6,9 +6,9 @@ import { type FormEvent, useState } from "react";
 import { TextMorph } from "torph/react";
 
 interface InviteFormProps {
-  onClose: () => void;
-  onSubmit: (data: { email: string; role: string }) => Promise<void>;
-  open: boolean;
+  readonly onClose: () => void;
+  readonly onSubmit: (data: { email: string; role: string }) => Promise<void>;
+  readonly open: boolean;
 }
 
 const InviteForm = ({ onClose, onSubmit, open }: InviteFormProps) => {

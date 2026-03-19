@@ -18,53 +18,53 @@ import {
 import { api } from "@/lib/api";
 
 export interface LogSession {
-  sessionId: string;
-  virtualKeyId: string;
-  keyName: string;
-  userAgent: string | null;
-  requestCount: number;
-  errorCount: number;
-  models: string[];
-  inputTokens: number;
-  outputTokens: number;
-  cachedTokens: number;
-  reasoningTokens: number;
-  toolUses: number;
-  totalCost: number;
-  startTime: string;
-  endTime: string;
+  readonly sessionId: string;
+  readonly virtualKeyId: string;
+  readonly keyName: string;
+  readonly userAgent: string | null;
+  readonly requestCount: number;
+  readonly errorCount: number;
+  readonly models: string[];
+  readonly inputTokens: number;
+  readonly outputTokens: number;
+  readonly cachedTokens: number;
+  readonly reasoningTokens: number;
+  readonly toolUses: number;
+  readonly totalCost: number;
+  readonly startTime: string;
+  readonly endTime: string;
 }
 
 export interface SessionRequest {
-  id: string;
-  createdAt: string;
-  provider: string;
-  model: string;
-  statusCode: number;
-  latencyMs: number;
-  cost: string;
-  inputTokens: number;
-  outputTokens: number;
-  cachedTokens: number;
-  reasoningTokens: number;
-  cacheHit: boolean;
-  method: string;
-  path: string;
-  toolCount: number;
-  toolNames: string[] | null;
-  sessionId: string | null;
-  userAgent: string | null;
-  isStarred: boolean;
-  virtualKeyId: string;
+  readonly id: string;
+  readonly createdAt: string;
+  readonly provider: string;
+  readonly model: string;
+  readonly statusCode: number;
+  readonly latencyMs: number;
+  readonly cost: string;
+  readonly inputTokens: number;
+  readonly outputTokens: number;
+  readonly cachedTokens: number;
+  readonly reasoningTokens: number;
+  readonly cacheHit: boolean;
+  readonly method: string;
+  readonly path: string;
+  readonly toolCount: number;
+  readonly toolNames: string[] | null;
+  readonly sessionId: string | null;
+  readonly userAgent: string | null;
+  readonly isStarred: boolean;
+  readonly virtualKeyId: string;
 }
 
 interface LogsResponse {
-  data: LogSession[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
+  readonly data: LogSession[];
+  readonly pagination: {
+    readonly page: number;
+    readonly limit: number;
+    readonly total: number;
+    readonly totalPages: number;
   };
 }
 

@@ -7,9 +7,9 @@ import { useClickOutside } from "@/hooks/use-click-outside";
 import type { Org } from "@/stores/org";
 
 interface OrgSwitcherProps {
-  activeOrg: Org | null;
-  orgs: Org[];
-  onSwitch: (org: Org) => void;
+  readonly activeOrg: Org | null;
+  readonly orgs: Org[];
+  readonly onSwitch: (org: Org) => void;
 }
 
 export const OrgSwitcher = ({

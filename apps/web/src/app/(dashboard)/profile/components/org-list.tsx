@@ -19,11 +19,11 @@ const getRoleBadge = (role: string) =>
   ROLE_BADGES[role] ?? { className: "neutral" as const, icon: User };
 
 interface OrgListProps {
-  activeOrgId: string | null;
-  onCreateOrg: () => void;
-  orgs: Org[];
-  orgsError: string | null;
-  orgsLoading: boolean;
+  readonly activeOrgId: string | null;
+  readonly onCreateOrg: () => void;
+  readonly orgs: Org[];
+  readonly orgsError: string | null;
+  readonly orgsLoading: boolean;
 }
 
 const handleSwitchOrg = (org: Org) => {

@@ -6,8 +6,8 @@ import { toast } from "sonner";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 
 interface KeyRevealProps {
-  keyValue: string | null;
-  onClose: () => void;
+  readonly keyValue: string | null;
+  readonly onClose: () => void;
 }
 
 const KeyReveal = ({ keyValue, onClose }: KeyRevealProps) => {

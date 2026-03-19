@@ -8,11 +8,11 @@ import type { RoutingRule } from "../hooks/use-routing-rules";
 import { CONDITION_LABELS } from "../hooks/use-routing-rules";
 
 interface RoutingRuleListProps {
-  rules: RoutingRule[];
-  loading: boolean;
-  onAdd: () => void;
-  onEdit: (rule: RoutingRule) => void;
-  onDelete: (id: string) => void;
+  readonly rules: RoutingRule[];
+  readonly loading: boolean;
+  readonly onAdd: () => void;
+  readonly onEdit: (rule: RoutingRule) => void;
+  readonly onDelete: (id: string) => void;
 }
 
 const columns: Column<RoutingRule>[] = [

@@ -26,10 +26,10 @@ const DEFAULT_FORM: FormState = {
 };
 
 interface KeyFormProps {
-  editingKey: VirtualKey | null;
-  mode: "create" | "edit" | null;
-  onClose: () => void;
-  onSubmit: (
+  readonly editingKey: VirtualKey | null;
+  readonly mode: "create" | "edit" | null;
+  readonly onClose: () => void;
+  readonly onSubmit: (
     mode: "create" | "edit",
     form: FormState,
     keyId?: string

@@ -7,15 +7,15 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export interface Guardrail {
-  id: string;
-  name: string;
-  type: string;
-  config: Record<string, unknown>;
-  action: string;
-  isEnabled: boolean;
-  priority: number;
-  createdAt: string;
-  updatedAt: string;
+  readonly id: string;
+  readonly name: string;
+  readonly type: string;
+  readonly config: Record<string, unknown>;
+  readonly action: string;
+  readonly isEnabled: boolean;
+  readonly priority: number;
+  readonly createdAt: string;
+  readonly updatedAt: string;
 }
 
 export const TYPE_OPTIONS = [
@@ -51,12 +51,12 @@ export const guardrailsQueryOptions = () =>
   });
 
 interface GuardrailInput {
-  name: string;
-  type: string;
-  config: Record<string, unknown>;
-  action: string;
-  isEnabled: boolean;
-  priority: number;
+  readonly name: string;
+  readonly type: string;
+  readonly config: Record<string, unknown>;
+  readonly action: string;
+  readonly isEnabled: boolean;
+  readonly priority: number;
 }
 
 export const useCreateGuardrail = () => {

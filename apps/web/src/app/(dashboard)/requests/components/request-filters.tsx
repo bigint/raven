@@ -10,15 +10,15 @@ import {
 } from "../hooks/use-requests";
 
 interface RequestFiltersProps {
-  provider: string;
-  onProviderChange: (value: string) => void;
-  statusFilter: string;
-  onStatusChange: (value: string) => void;
-  dateRange: DateRange;
-  onDateRangeChange: (value: DateRange) => void;
-  total: number;
-  isLive: boolean;
-  onToggleLive: () => void;
+  readonly provider: string;
+  readonly onProviderChange: (value: string) => void;
+  readonly statusFilter: string;
+  readonly onStatusChange: (value: string) => void;
+  readonly dateRange: DateRange;
+  readonly onDateRangeChange: (value: DateRange) => void;
+  readonly total: number;
+  readonly isLive: boolean;
+  readonly onToggleLive: () => void;
 }
 
 const RequestFilters = ({

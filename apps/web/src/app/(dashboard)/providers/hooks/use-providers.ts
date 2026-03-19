@@ -8,8 +8,8 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export interface AvailableProvider {
-  slug: string;
-  name: string;
+  readonly slug: string;
+  readonly name: string;
 }
 
 export const availableProvidersQueryOptions = () =>
@@ -22,19 +22,19 @@ export const useAvailableProviders = () =>
   useQuery(availableProvidersQueryOptions());
 
 export interface Provider {
-  id: string;
-  provider: string;
-  name: string | null;
-  apiKey: string;
-  isEnabled: boolean;
-  createdAt: string;
-  updatedAt: string;
+  readonly id: string;
+  readonly provider: string;
+  readonly name: string | null;
+  readonly apiKey: string;
+  readonly isEnabled: boolean;
+  readonly createdAt: string;
+  readonly updatedAt: string;
 }
 
 interface ProviderModel {
-  id: string;
-  name: string;
-  provider: string;
+  readonly id: string;
+  readonly name: string;
+  readonly provider: string;
 }
 
 export const providersQueryOptions = () =>
@@ -51,17 +51,17 @@ export const providerModelsQueryOptions = (providerId: string) =>
   });
 
 interface CreateProviderInput {
-  provider: string;
-  name?: string;
-  apiKey: string;
-  isEnabled: boolean;
+  readonly provider: string;
+  readonly name?: string;
+  readonly apiKey: string;
+  readonly isEnabled: boolean;
 }
 
 interface UpdateProviderInput {
-  id: string;
-  name?: string;
-  apiKey?: string;
-  isEnabled?: boolean;
+  readonly id: string;
+  readonly name?: string;
+  readonly apiKey?: string;
+  readonly isEnabled?: boolean;
 }
 
 export const useCreateProvider = () => {
@@ -109,8 +109,8 @@ export const useDeleteProvider = () => {
 };
 
 interface TestProviderResult {
-  success: boolean;
-  message: string;
+  readonly success: boolean;
+  readonly message: string;
 }
 
 export const useTestProvider = () =>

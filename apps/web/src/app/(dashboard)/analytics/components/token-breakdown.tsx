@@ -7,8 +7,8 @@ import { ModelIcon } from "@/components/model-icon";
 import type { UsageRow } from "../hooks/use-analytics";
 
 interface TokenBreakdownProps {
-  usage: UsageRow[];
-  loading: boolean;
+  readonly usage: UsageRow[];
+  readonly loading: boolean;
 }
 
 const LoadingState = () => (

@@ -25,9 +25,9 @@ const DEFAULT_FORM: FormState = {
 };
 
 interface WebhookFormProps {
-  open: boolean;
-  onClose: () => void;
-  editingWebhook?: Webhook | null;
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly editingWebhook?: Webhook | null;
 }
 
 const WebhookForm = ({ open, onClose, editingWebhook }: WebhookFormProps) => {

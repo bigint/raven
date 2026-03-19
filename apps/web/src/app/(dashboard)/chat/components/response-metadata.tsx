@@ -5,22 +5,22 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 interface ResponseMeta {
-  provider?: string;
-  model?: string;
-  latencyMs?: number;
-  inputTokens?: number;
-  outputTokens?: number;
-  cost?: number;
-  cacheHit?: boolean;
-  guardrailWarnings?: string[];
-  routingStrategy?: string;
-  taskType?: string;
-  toolCalls?: number;
+  readonly provider?: string;
+  readonly model?: string;
+  readonly latencyMs?: number;
+  readonly inputTokens?: number;
+  readonly outputTokens?: number;
+  readonly cost?: number;
+  readonly cacheHit?: boolean;
+  readonly guardrailWarnings?: string[];
+  readonly routingStrategy?: string;
+  readonly taskType?: string;
+  readonly toolCalls?: number;
 }
 
 interface ResponseMetadataProps {
-  meta: ResponseMeta;
-  show: boolean;
+  readonly meta: ResponseMeta;
+  readonly show: boolean;
 }
 
 const ResponseMetadata = ({ meta, show }: ResponseMetadataProps) => {

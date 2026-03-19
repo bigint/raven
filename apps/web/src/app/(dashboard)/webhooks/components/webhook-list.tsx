@@ -7,11 +7,11 @@ import { TextMorph } from "torph/react";
 import type { Webhook } from "../hooks/use-webhooks";
 
 interface WebhookListProps {
-  webhooks: Webhook[];
-  loading: boolean;
-  onAdd: () => void;
-  onEdit: (webhook: Webhook) => void;
-  onDelete: (id: string) => void;
+  readonly webhooks: Webhook[];
+  readonly loading: boolean;
+  readonly onAdd: () => void;
+  readonly onEdit: (webhook: Webhook) => void;
+  readonly onDelete: (id: string) => void;
 }
 
 const columns: Column<Webhook>[] = [

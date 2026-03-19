@@ -12,10 +12,10 @@ import { api } from "@/lib/api";
 export { orgsQueryOptions };
 
 export interface ProfileInvitation {
-  id: string;
-  orgName: string;
-  role: string;
-  expiresAt: string;
+  readonly id: string;
+  readonly orgName: string;
+  readonly role: string;
+  readonly expiresAt: string;
 }
 
 export const profileInvitationsQueryOptions = () =>

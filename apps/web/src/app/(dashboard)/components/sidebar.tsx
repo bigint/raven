@@ -43,10 +43,10 @@ const useLockBodyScroll = (isLocked: boolean) => {
 };
 
 interface NavItem {
-  href: string;
-  label: string;
-  icon: LucideIcon;
-  gate?: (plan: Plan) => boolean;
+  readonly href: string;
+  readonly label: string;
+  readonly icon: LucideIcon;
+  readonly gate?: (plan: Plan) => boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -84,10 +84,13 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 interface SidebarProps {
-  activeOrg: Org | null;
-  orgs: Org[];
-  user: { name?: string | null; email?: string | null };
-  onSwitchOrg: (org: Org) => void;
+  readonly activeOrg: Org | null;
+  readonly orgs: Org[];
+  readonly user: {
+    readonly name?: string | null;
+    readonly email?: string | null;
+  };
+  readonly onSwitchOrg: (org: Org) => void;
 }
 
 export const Sidebar = ({

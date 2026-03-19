@@ -12,9 +12,9 @@ const ROLE_BADGE_VARIANT: Record<string, "primary" | "neutral"> = {
 };
 
 interface MemberListProps {
-  isLoading: boolean;
-  members: Member[];
-  onDelete: (id: string) => void;
+  readonly isLoading: boolean;
+  readonly members: Member[];
+  readonly onDelete: (id: string) => void;
 }
 
 const MemberList = ({ isLoading, members, onDelete }: MemberListProps) => {

@@ -21,9 +21,9 @@ interface FormState {
 }
 
 interface ProviderFormProps {
-  open: boolean;
-  onClose: () => void;
-  editingProvider?: Provider | null;
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly editingProvider?: Provider | null;
 }
 
 const ProviderForm = ({

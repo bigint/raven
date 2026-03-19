@@ -12,9 +12,9 @@ export const PROVIDERS = [
 
 export type Provider = (typeof PROVIDERS)[number]["id"];
 
-export const PROVIDER_LABELS = Object.fromEntries(
+export const PROVIDER_LABELS: Record<string, string> = Object.fromEntries(
   PROVIDERS.map((p) => [p.id, p.label])
-) as Record<Provider, string>;
+);
 
 export const PROVIDER_OPTIONS: { label: string; value: Provider }[] =
   PROVIDERS.map((p) => ({ label: p.label, value: p.id }));

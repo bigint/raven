@@ -8,8 +8,8 @@ import { useModelOptions } from "@/lib/use-models";
 import { useCreateModelAlias } from "../hooks/use-model-aliases";
 
 interface ModelAliasFormProps {
-  open: boolean;
-  onClose: () => void;
+  readonly open: boolean;
+  readonly onClose: () => void;
 }
 
 interface FormState {

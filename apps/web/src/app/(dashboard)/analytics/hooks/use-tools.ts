@@ -19,29 +19,29 @@ import {
 } from "../lib/date-utils";
 
 export interface ToolDailyStats {
-  date: string;
-  totalRequests: number;
-  totalToolUses: number;
+  readonly date: string;
+  readonly totalRequests: number;
+  readonly totalToolUses: number;
 }
 
 export interface ToolSession {
-  sessionId: string;
-  virtualKeyId: string;
-  keyName: string;
-  userAgent: string | null;
-  requestCount: number;
-  models: string[];
-  toolUses: number;
-  endTime: string;
+  readonly sessionId: string;
+  readonly virtualKeyId: string;
+  readonly keyName: string;
+  readonly userAgent: string | null;
+  readonly requestCount: number;
+  readonly models: string[];
+  readonly toolUses: number;
+  readonly endTime: string;
 }
 
 interface ToolSessionsResponse {
-  data: ToolSession[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
+  readonly data: ToolSession[];
+  readonly pagination: {
+    readonly page: number;
+    readonly limit: number;
+    readonly total: number;
+    readonly totalPages: number;
   };
 }
 

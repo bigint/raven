@@ -4,13 +4,13 @@ import { TextMorph } from "torph/react";
 import type { Stats } from "../hooks/use-analytics";
 
 interface TokenStatsProps {
-  stats: Stats | null;
-  loading: boolean;
+  readonly stats: Stats | null;
+  readonly loading: boolean;
 }
 
 interface TokenCard {
-  label: string;
-  value: string;
+  readonly label: string;
+  readonly value: string;
 }
 
 const buildTokenCards = (stats: Stats | null): TokenCard[] => [

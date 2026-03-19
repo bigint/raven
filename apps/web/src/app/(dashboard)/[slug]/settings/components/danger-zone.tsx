@@ -5,16 +5,16 @@ import { AlertTriangle, Trash2 } from "lucide-react";
 import { TextMorph } from "torph/react";
 
 interface DangerZoneProps {
-  orgName: string;
-  showDeleteConfirm: boolean;
-  deleteConfirmText: string;
-  deleting: boolean;
-  deleteError: string | null;
-  onOpenConfirm: () => void;
-  onCloseConfirm: () => void;
-  onConfirmTextChange: (value: string) => void;
-  onDeleteErrorClear: () => void;
-  onDelete: () => void;
+  readonly orgName: string;
+  readonly showDeleteConfirm: boolean;
+  readonly deleteConfirmText: string;
+  readonly deleting: boolean;
+  readonly deleteError: string | null;
+  readonly onOpenConfirm: () => void;
+  readonly onCloseConfirm: () => void;
+  readonly onConfirmTextChange: (value: string) => void;
+  readonly onDeleteErrorClear: () => void;
+  readonly onDelete: () => void;
 }
 
 export const DangerZone = ({

@@ -6,17 +6,17 @@ import { TextMorph } from "torph/react";
 import type { Stats } from "../hooks/use-overview";
 
 interface StatCardsProps {
-  stats: Stats | null;
-  loading: boolean;
+  readonly stats: Stats | null;
+  readonly loading: boolean;
 }
 
 interface StatCard {
-  bg: string;
-  color: string;
-  icon: LucideIcon;
-  label: string;
-  sub: string;
-  value: string;
+  readonly bg: string;
+  readonly color: string;
+  readonly icon: LucideIcon;
+  readonly label: string;
+  readonly sub: string;
+  readonly value: string;
 }
 
 const buildStatCards = (stats: Stats | null): StatCard[] => {

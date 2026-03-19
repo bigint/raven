@@ -33,9 +33,9 @@ const DEFAULT_FORM: FormState = {
 };
 
 interface RoutingRuleFormProps {
-  open: boolean;
-  onClose: () => void;
-  editingRule?: RoutingRule | null;
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly editingRule?: RoutingRule | null;
 }
 
 const RoutingRuleForm = ({

@@ -4,24 +4,24 @@ import { API_URL } from "@/lib/api";
 import { useOrgStore } from "@/stores/org";
 
 export interface RequestLog {
-  id: string;
-  createdAt: string;
-  provider: string;
-  providerConfigName: string | null;
-  model: string;
-  statusCode: number;
-  latencyMs: number;
-  cost: string;
-  cacheHit: boolean;
+  readonly id: string;
+  readonly createdAt: string;
+  readonly provider: string;
+  readonly providerConfigName: string | null;
+  readonly model: string;
+  readonly statusCode: number;
+  readonly latencyMs: number;
+  readonly cost: string;
+  readonly cacheHit: boolean;
 }
 
 export interface RequestsResponse {
-  data: RequestLog[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
+  readonly data: RequestLog[];
+  readonly pagination: {
+    readonly page: number;
+    readonly limit: number;
+    readonly total: number;
+    readonly totalPages: number;
   };
 }
 
@@ -53,10 +53,10 @@ const RANGE_MS: Record<DateRange, number> = {
 };
 
 interface RequestsQueryParams {
-  page: number;
-  provider: string;
-  status: string;
-  range: DateRange;
+  readonly page: number;
+  readonly provider: string;
+  readonly status: string;
+  readonly range: DateRange;
 }
 
 export const buildRequestsUrl = (params: RequestsQueryParams): string => {

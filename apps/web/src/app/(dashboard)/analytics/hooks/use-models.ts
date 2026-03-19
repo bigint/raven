@@ -14,16 +14,16 @@ import {
 export type { DateRange };
 
 export interface ModelRow {
-  model: string;
-  provider: string;
-  requests: number;
-  totalCost: string;
-  inputTokens: number;
-  outputTokens: number;
-  cachedTokens: number;
-  reasoningTokens: number;
-  avgLatencyMs: number;
-  lastUsed: string | null;
+  readonly model: string;
+  readonly provider: string;
+  readonly requests: number;
+  readonly totalCost: string;
+  readonly inputTokens: number;
+  readonly outputTokens: number;
+  readonly cachedTokens: number;
+  readonly reasoningTokens: number;
+  readonly avgLatencyMs: number;
+  readonly lastUsed: string | null;
 }
 
 export const modelsQueryOptions = (range: DateRange, keyId?: string) =>

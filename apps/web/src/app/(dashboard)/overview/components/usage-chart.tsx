@@ -6,9 +6,9 @@ import Link from "next/link";
 import type { UsageRow } from "../hooks/use-overview";
 
 interface UsageChartProps {
-  usage: UsageRow[];
-  totalRequests: number;
-  loading: boolean;
+  readonly usage: UsageRow[];
+  readonly totalRequests: number;
+  readonly loading: boolean;
 }
 
 const LoadingSkeleton = () => (

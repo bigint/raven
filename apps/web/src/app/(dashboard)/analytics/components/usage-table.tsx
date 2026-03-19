@@ -6,9 +6,9 @@ import { ModelIcon } from "@/components/model-icon";
 import type { BreakdownRow } from "../hooks/use-adoption";
 
 interface UsageTableProps {
-  data: BreakdownRow[];
-  loading: boolean;
-  groupBy?: "key" | "model" | "userAgent";
+  readonly data: BreakdownRow[];
+  readonly loading: boolean;
+  readonly groupBy?: "key" | "model" | "userAgent";
 }
 
 export const UsageTable = ({ data, loading, groupBy }: UsageTableProps) => {

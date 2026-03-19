@@ -5,8 +5,8 @@ import { TextMorph } from "torph/react";
 import type { CacheStats as CacheStatsData } from "../hooks/use-analytics";
 
 interface CacheStatsProps {
-  cache: CacheStatsData | null;
-  loading: boolean;
+  readonly cache: CacheStatsData | null;
+  readonly loading: boolean;
 }
 
 export const CacheStats = ({ cache, loading }: CacheStatsProps) => {

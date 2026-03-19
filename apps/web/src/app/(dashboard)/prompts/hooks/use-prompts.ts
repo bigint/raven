@@ -7,21 +7,21 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export interface PromptVersion {
-  id: string;
-  version: number;
-  content: string;
-  model: string | null;
-  isActive: boolean;
-  createdAt: string;
+  readonly id: string;
+  readonly version: number;
+  readonly content: string;
+  readonly model: string | null;
+  readonly isActive: boolean;
+  readonly createdAt: string;
 }
 
 export interface Prompt {
-  id: string;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-  activeVersion?: PromptVersion;
-  versions?: PromptVersion[];
+  readonly id: string;
+  readonly name: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly activeVersion?: PromptVersion;
+  readonly versions?: PromptVersion[];
 }
 
 export const promptsQueryOptions = () =>
@@ -38,9 +38,9 @@ export const promptQueryOptions = (id: string) =>
   });
 
 interface CreatePromptInput {
-  name: string;
-  content: string;
-  model?: string;
+  readonly name: string;
+  readonly content: string;
+  readonly model?: string;
 }
 
 export const useCreatePrompt = () => {
@@ -88,9 +88,9 @@ export const useDeletePrompt = () => {
 };
 
 interface CreateVersionInput {
-  promptId: string;
-  content: string;
-  model?: string;
+  readonly promptId: string;
+  readonly content: string;
+  readonly model?: string;
 }
 
 export const useCreateVersion = () => {

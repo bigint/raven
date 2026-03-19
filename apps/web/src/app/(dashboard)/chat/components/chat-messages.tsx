@@ -24,10 +24,10 @@ interface ChatMessage {
 }
 
 interface ChatMessagesProps {
-  isStreaming: boolean;
-  messages: ChatMessage[];
-  onExampleSelect: (message: string) => void;
-  showMetadata: boolean;
+  readonly isStreaming: boolean;
+  readonly messages: ChatMessage[];
+  readonly onExampleSelect: (message: string) => void;
+  readonly showMetadata: boolean;
 }
 
 const ReasoningBlock = ({

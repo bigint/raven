@@ -15,7 +15,11 @@ import { signOut } from "@/lib/auth-client";
 import { useThemeStore } from "@/stores/theme";
 
 interface UserMenuProps {
-  user: { name?: string | null; email?: string | null; role?: string };
+  readonly user: {
+    readonly name?: string | null;
+    readonly email?: string | null;
+    readonly role?: string;
+  };
 }
 
 export const UserMenu = ({ user }: UserMenuProps) => {

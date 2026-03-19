@@ -4,10 +4,10 @@ import { Code, Globe, Lightbulb, PenLine, Shield, Wrench } from "lucide-react";
 import type { ReactNode } from "react";
 
 interface ExamplePrompt {
-  icon: ReactNode;
-  label: string;
-  message: string;
-  category: "general" | "tools" | "guardrails";
+  readonly icon: ReactNode;
+  readonly label: string;
+  readonly message: string;
+  readonly category: "general" | "tools" | "guardrails";
 }
 
 const EXAMPLES: ExamplePrompt[] = [
@@ -55,7 +55,7 @@ const EXAMPLES: ExamplePrompt[] = [
 ];
 
 interface ExamplePromptsProps {
-  onSelect: (message: string) => void;
+  readonly onSelect: (message: string) => void;
 }
 
 const ExamplePrompts = ({ onSelect }: ExamplePromptsProps) => (

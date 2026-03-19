@@ -7,14 +7,14 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export interface Budget {
-  id: string;
-  entityType: string;
-  entityId: string;
-  entityName: string | null;
-  limitAmount: number;
-  period: string;
-  alertThreshold: number;
-  createdAt: string;
+  readonly id: string;
+  readonly entityType: string;
+  readonly entityId: string;
+  readonly entityName: string | null;
+  readonly limitAmount: number;
+  readonly period: string;
+  readonly alertThreshold: number;
+  readonly createdAt: string;
 }
 
 export const ENTITY_TYPE_OPTIONS = [
@@ -39,11 +39,11 @@ export const budgetsQueryOptions = () =>
   });
 
 interface BudgetInput {
-  entityType: string;
-  entityId: string;
-  limitAmount: number;
-  period: string;
-  alertThreshold: number;
+  readonly entityType: string;
+  readonly entityId: string;
+  readonly limitAmount: number;
+  readonly period: string;
+  readonly alertThreshold: number;
 }
 
 export const useCreateBudget = () => {

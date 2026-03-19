@@ -7,16 +7,16 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export interface RoutingRule {
-  id: string;
-  name: string;
-  sourceModel: string;
-  targetModel: string;
-  condition: string;
-  conditionValue: string;
-  priority: number;
-  isEnabled: boolean;
-  createdAt: string;
-  updatedAt: string;
+  readonly id: string;
+  readonly name: string;
+  readonly sourceModel: string;
+  readonly targetModel: string;
+  readonly condition: string;
+  readonly conditionValue: string;
+  readonly priority: number;
+  readonly isEnabled: boolean;
+  readonly createdAt: string;
+  readonly updatedAt: string;
 }
 
 export const CONDITION_OPTIONS = [
@@ -40,13 +40,13 @@ export const routingRulesQueryOptions = () =>
   });
 
 interface RoutingRuleInput {
-  name: string;
-  sourceModel: string;
-  targetModel: string;
-  condition: string;
-  conditionValue: string;
-  priority: number;
-  isEnabled: boolean;
+  readonly name: string;
+  readonly sourceModel: string;
+  readonly targetModel: string;
+  readonly condition: string;
+  readonly conditionValue: string;
+  readonly priority: number;
+  readonly isEnabled: boolean;
 }
 
 export const useCreateRoutingRule = () => {

@@ -25,12 +25,12 @@ import {
 } from "../hooks/use-providers";
 
 interface ProviderListProps {
-  providers: Provider[];
-  loading: boolean;
-  onAdd: () => void;
-  onEdit: (provider: Provider) => void;
-  onDelete: (id: string) => void;
-  onToggleEnabled: (provider: Provider) => void;
+  readonly providers: Provider[];
+  readonly loading: boolean;
+  readonly onAdd: () => void;
+  readonly onEdit: (provider: Provider) => void;
+  readonly onDelete: (id: string) => void;
+  readonly onToggleEnabled: (provider: Provider) => void;
 }
 
 const columns: Column<Provider>[] = [

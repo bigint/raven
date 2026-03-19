@@ -9,8 +9,8 @@ import type { SessionRequest } from "../hooks/use-logs";
 import { useToggleStar } from "../hooks/use-logs";
 
 interface RequestDetailProps {
-  request: SessionRequest | null;
-  onClose: () => void;
+  readonly request: SessionRequest | null;
+  readonly onClose: () => void;
 }
 
 const Field = ({ label, value }: { label: string; value: string }) => (

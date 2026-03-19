@@ -9,36 +9,36 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export interface VirtualKey {
-  id: string;
-  name: string;
-  keyPrefix: string;
-  environment: "live" | "test";
-  rateLimitRpm: number | null;
-  rateLimitRpd: number | null;
-  isActive: boolean;
-  expiresAt: string | null;
-  createdAt: string;
-  lastUsedAt: string | null;
+  readonly id: string;
+  readonly name: string;
+  readonly keyPrefix: string;
+  readonly environment: "live" | "test";
+  readonly rateLimitRpm: number | null;
+  readonly rateLimitRpd: number | null;
+  readonly isActive: boolean;
+  readonly expiresAt: string | null;
+  readonly createdAt: string;
+  readonly lastUsedAt: string | null;
 }
 
 export interface CreateKeyResponse extends VirtualKey {
-  key: string;
+  readonly key: string;
 }
 
 export interface CreateKeyInput {
-  name: string;
-  environment: "live" | "test";
-  expiresAt?: string;
-  rateLimitRpm?: number;
-  rateLimitRpd?: number;
+  readonly name: string;
+  readonly environment: "live" | "test";
+  readonly expiresAt?: string;
+  readonly rateLimitRpm?: number;
+  readonly rateLimitRpd?: number;
 }
 
 export interface UpdateKeyInput {
-  name?: string;
-  expiresAt?: string | null;
-  rateLimitRpm?: number | null;
-  rateLimitRpd?: number | null;
-  isActive?: boolean;
+  readonly name?: string;
+  readonly expiresAt?: string | null;
+  readonly rateLimitRpm?: number | null;
+  readonly rateLimitRpd?: number | null;
+  readonly isActive?: boolean;
 }
 
 export const keysQueryOptions = () =>

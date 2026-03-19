@@ -14,8 +14,8 @@ import { formatCompactNumber, formatShortDate } from "@/lib/format";
 import type { ChartDataPoint } from "../hooks/use-adoption";
 
 interface TokenChartProps {
-  data: ChartDataPoint[];
-  title?: string;
+  readonly data: ChartDataPoint[];
+  readonly title?: string;
 }
 
 export const TokenChart = ({ data, title }: TokenChartProps) => {

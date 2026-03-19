@@ -21,9 +21,9 @@ const DEFAULT_FORM: FormState = {
 };
 
 interface PromptFormProps {
-  open: boolean;
-  onClose: () => void;
-  editingPrompt?: Prompt | null;
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly editingPrompt?: Prompt | null;
 }
 
 const PromptForm = ({ open, onClose, editingPrompt }: PromptFormProps) => {

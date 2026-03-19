@@ -95,9 +95,9 @@ const extractFormFromGuardrail = (g: Guardrail): FormState => ({
 });
 
 interface GuardrailFormProps {
-  open: boolean;
-  onClose: () => void;
-  editingGuardrail?: Guardrail | null;
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly editingGuardrail?: Guardrail | null;
 }
 
 const GuardrailForm = ({

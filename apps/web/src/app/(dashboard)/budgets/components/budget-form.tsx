@@ -31,9 +31,9 @@ const DEFAULT_FORM: FormState = {
 };
 
 interface BudgetFormProps {
-  open: boolean;
-  onClose: () => void;
-  editingBudget?: Budget | null;
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly editingBudget?: Budget | null;
 }
 
 const BudgetForm = ({ open, onClose, editingBudget }: BudgetFormProps) => {

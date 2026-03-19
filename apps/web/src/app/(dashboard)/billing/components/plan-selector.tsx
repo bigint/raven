@@ -5,13 +5,13 @@ import { Check, Zap } from "lucide-react";
 import type { BillingInterval, Plan, Subscription } from "../hooks/use-billing";
 
 interface PlanSelectorProps {
-  plans: Plan[];
-  subscription: Subscription | null;
-  billingInterval: BillingInterval;
-  upgrading: string | null;
-  onIntervalChange: (interval: BillingInterval) => void;
-  onPlanAction: (planId: string) => void;
-  getPlanButtonLabel: (plan: Plan) => string;
+  readonly plans: Plan[];
+  readonly subscription: Subscription | null;
+  readonly billingInterval: BillingInterval;
+  readonly upgrading: string | null;
+  readonly onIntervalChange: (interval: BillingInterval) => void;
+  readonly onPlanAction: (planId: string) => void;
+  readonly getPlanButtonLabel: (plan: Plan) => string;
 }
 
 export const PlanSelector = ({

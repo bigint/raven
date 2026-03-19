@@ -17,43 +17,43 @@ import {
 } from "../lib/date-utils";
 
 interface Stats {
-  totalRequests: number;
-  totalCost: string;
-  avgLatencyMs: string;
-  cacheHitRate: string;
-  totalTokens: number;
-  totalInputTokens: number;
-  totalOutputTokens: number;
-  totalCachedTokens: number;
-  totalReasoningTokens: number;
+  readonly totalRequests: number;
+  readonly totalCost: string;
+  readonly avgLatencyMs: string;
+  readonly cacheHitRate: string;
+  readonly totalTokens: number;
+  readonly totalInputTokens: number;
+  readonly totalOutputTokens: number;
+  readonly totalCachedTokens: number;
+  readonly totalReasoningTokens: number;
 }
 
 interface UsageRow {
-  provider: string;
-  providerConfigName: string | null;
-  model: string;
-  totalRequests: number;
-  totalCost: string;
-  totalInputTokens: string;
-  totalOutputTokens: string;
-  totalCachedTokens: string;
-  totalReasoningTokens: string;
-  avgLatencyMs: string;
+  readonly provider: string;
+  readonly providerConfigName: string | null;
+  readonly model: string;
+  readonly totalRequests: number;
+  readonly totalCost: string;
+  readonly totalInputTokens: string;
+  readonly totalOutputTokens: string;
+  readonly totalCachedTokens: string;
+  readonly totalReasoningTokens: string;
+  readonly avgLatencyMs: string;
 }
 
 interface CacheDailyRow {
-  date: string;
-  hits: number;
-  misses: number;
-  total: number;
+  readonly date: string;
+  readonly hits: number;
+  readonly misses: number;
+  readonly total: number;
 }
 
 interface CacheStats {
-  cacheHits: number;
-  cacheMisses: number;
-  daily: CacheDailyRow[];
-  hitRate: string;
-  totalRequests: number;
+  readonly cacheHits: number;
+  readonly cacheMisses: number;
+  readonly daily: CacheDailyRow[];
+  readonly hitRate: string;
+  readonly totalRequests: number;
 }
 
 type DateRange = ExtendedDateRange;

@@ -9,20 +9,20 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export interface Member {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  joinedAt: string;
+  readonly id: string;
+  readonly name: string;
+  readonly email: string;
+  readonly role: string;
+  readonly joinedAt: string;
 }
 
 export interface Invitation {
-  id: string;
-  email: string;
-  role: string;
-  status: string;
-  createdAt: string;
-  expiresAt: string;
+  readonly id: string;
+  readonly email: string;
+  readonly role: string;
+  readonly status: string;
+  readonly createdAt: string;
+  readonly expiresAt: string;
 }
 
 export const membersQueryOptions = () =>

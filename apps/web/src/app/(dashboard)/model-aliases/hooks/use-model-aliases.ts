@@ -7,11 +7,11 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export interface ModelAlias {
-  id: string;
-  alias: string;
-  targetModel: string;
-  createdAt: string;
-  updatedAt: string;
+  readonly id: string;
+  readonly alias: string;
+  readonly targetModel: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
 }
 
 export const modelAliasesQueryOptions = () =>
@@ -21,8 +21,8 @@ export const modelAliasesQueryOptions = () =>
   });
 
 interface CreateModelAliasInput {
-  alias: string;
-  targetModel: string;
+  readonly alias: string;
+  readonly targetModel: string;
 }
 
 export const useCreateModelAlias = () => {

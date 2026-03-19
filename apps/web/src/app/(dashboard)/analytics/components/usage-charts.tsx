@@ -7,22 +7,22 @@ import { Activity, Clock, DollarSign, Zap } from "lucide-react";
 import type { DateRange, Stats } from "../hooks/use-analytics";
 
 interface UsageChartsProps {
-  stats: Stats | null;
-  loading: boolean;
-  dateRange: DateRange;
-  dateRangeOptions: PillTabOption<DateRange>[];
-  onDateRangeChange: (range: DateRange) => void;
-  customFrom?: string;
-  customTo?: string;
-  onCustomRangeChange?: (from: string, to: string) => void;
+  readonly stats: Stats | null;
+  readonly loading: boolean;
+  readonly dateRange: DateRange;
+  readonly dateRangeOptions: PillTabOption<DateRange>[];
+  readonly onDateRangeChange: (range: DateRange) => void;
+  readonly customFrom?: string;
+  readonly customTo?: string;
+  readonly onCustomRangeChange?: (from: string, to: string) => void;
 }
 
 interface StatCard {
-  bg: string;
-  color: string;
-  icon: LucideIcon;
-  label: string;
-  value: string;
+  readonly bg: string;
+  readonly color: string;
+  readonly icon: LucideIcon;
+  readonly label: string;
+  readonly value: string;
 }
 
 const buildStatCards = (stats: Stats | null): StatCard[] => [

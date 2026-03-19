@@ -15,8 +15,8 @@ const getStatusColor = (statusCode: number): string => {
 };
 
 interface RecentRequestsProps {
-  requests: RecentRequest[];
-  loading: boolean;
+  readonly requests: RecentRequest[];
+  readonly loading: boolean;
 }
 
 const LoadingSkeleton = () => (

@@ -2,11 +2,11 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export interface Org {
-  id: string;
-  name: string;
-  slug: string;
-  role: string;
-  plan: string;
+  readonly id: string;
+  readonly name: string;
+  readonly slug: string;
+  readonly role: string;
+  readonly plan: string;
 }
 
 interface OrgState {

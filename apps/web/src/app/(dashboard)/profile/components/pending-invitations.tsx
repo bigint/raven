@@ -6,12 +6,12 @@ import type { ProfileInvitation } from "../hooks/use-profile";
 import { getRoleBadge } from "./org-list";
 
 interface PendingInvitationsProps {
-  invitations: ProfileInvitation[];
-  invitationsError: string | null;
-  invitationsLoading: boolean;
-  onAcceptInvitation: (id: string) => void;
-  onDeclineInvitation: (id: string) => void;
-  respondingTo: string | null;
+  readonly invitations: ProfileInvitation[];
+  readonly invitationsError: string | null;
+  readonly invitationsLoading: boolean;
+  readonly onAcceptInvitation: (id: string) => void;
+  readonly onDeclineInvitation: (id: string) => void;
+  readonly respondingTo: string | null;
 }
 
 const PendingInvitations = ({
