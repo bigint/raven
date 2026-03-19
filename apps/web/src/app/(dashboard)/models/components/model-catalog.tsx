@@ -3,8 +3,7 @@
 import {
   CAPABILITY_LABELS,
   MODEL_CATEGORIES,
-  type ModelCategory,
-  type ModelDefinition
+  type ModelCategory
 } from "@raven/types";
 import { Badge, Button, EmptyState, Select } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
@@ -24,8 +23,8 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ModelIcon, ProviderIcon } from "@/components/model-icon";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
-import { api } from "@/lib/api";
 import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
+import { allModelsQueryOptions, type CatalogModel } from "@/lib/use-models";
 
 const CAPABILITY_ICONS: Record<string, typeof MessageSquare> = {
   chat: MessageSquare,
@@ -36,7 +35,7 @@ const CAPABILITY_ICONS: Record<string, typeof MessageSquare> = {
   vision: Eye
 };
 
-const CATEGORY_COLORS: Record<ModelCategory, string> = {
+const CATEGORY_COLORS: Record<string, string> = {
   balanced: "info",
   embedding: "neutral",
   fast: "success",
@@ -100,8 +99,9 @@ const CopyableSlug = ({ value }: { value: string }) => {
   );
 };
 
-const ModelCard = ({ model }: { model: ModelDefinition }) => {
-  const categoryMeta = MODEL_CATEGORIES[model.category];
+const ModelCard = ({ model }: { model: CatalogModel }) => {
+  const categoryMeta =
+    MODEL_CATEGORIES[model.category as ModelCategory] ?? null;
 
   return (
     <div className="group rounded-xl border border-border p-5 transition-colors hover:border-foreground/20">
@@ -202,10 +202,7 @@ export const ModelCatalog = () => {
   const [provider, setProvider] = useState("all");
   const [visibleCount, setVisibleCount] = useState(24);
 
-  const { data: models = [], isPending } = useQuery({
-    queryFn: () => api.get<ModelDefinition[]>("/v1/available-models"),
-    queryKey: ["available-models"]
-  });
+  const { data: models = [], isPending } = useQuery(allModelsQueryOptions());
 
   const providerOptions = useMemo(() => {
     const slugs = [...new Set(models.map((m) => m.provider))].sort();

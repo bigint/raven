@@ -54,6 +54,7 @@ interface ChatInputProps {
   readonly onModelChange: (model: string, provider: string) => void;
   readonly settings: PlaygroundSettings;
   readonly onSettingsChange: (settings: PlaygroundSettings) => void;
+  readonly supportsVision?: boolean;
   readonly systemPrompt: string;
   readonly onSystemPromptChange: (value: string) => void;
 }
@@ -79,6 +80,7 @@ export const ChatInput = ({
   onModelChange,
   settings,
   onSettingsChange,
+  supportsVision = false,
   systemPrompt,
   onSystemPromptChange
 }: ChatInputProps) => {
@@ -191,8 +193,8 @@ export const ChatInput = ({
       {/* biome-ignore lint/a11y/noStaticElementInteractions: drop zone for image uploads */}
       <div
         className="mx-auto max-w-3xl rounded-xl border border-border bg-muted/30 shadow-sm transition-colors focus-within:border-ring focus-within:bg-background"
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={handleDrop}
+        onDragOver={supportsVision ? (e) => e.preventDefault() : undefined}
+        onDrop={supportsVision ? handleDrop : undefined}
       >
         {/* Image previews */}
         {images.length > 0 && (
@@ -239,25 +241,28 @@ export const ChatInput = ({
 
         <div className="flex items-center justify-between px-3 pb-2">
           <div className="flex items-center gap-0.5">
-            {/* Image upload */}
-            <button
-              className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-              onClick={() => fileInputRef.current?.click()}
-              title="Attach image"
-              type="button"
-            >
-              <ImagePlus className="size-3.5" />
-            </button>
-            <input
-              accept={ACCEPTED_TYPES.join(",")}
-              className="hidden"
-              multiple
-              onChange={(e) => handleFileSelect(e.target.files)}
-              ref={fileInputRef}
-              type="file"
-            />
-
-            <Sep />
+            {/* Image upload - only shown when model supports vision */}
+            {supportsVision && (
+              <>
+                <button
+                  className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Attach image"
+                  type="button"
+                >
+                  <ImagePlus className="size-3.5" />
+                </button>
+                <input
+                  accept={ACCEPTED_TYPES.join(",")}
+                  className="hidden"
+                  multiple
+                  onChange={(e) => handleFileSelect(e.target.files)}
+                  ref={fileInputRef}
+                  type="file"
+                />
+                <Sep />
+              </>
+            )}
 
             {/* Model selector */}
             <div className="relative">

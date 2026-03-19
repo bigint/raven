@@ -26,26 +26,40 @@ const ChatPage = () => {
     systemPrompt
   } = useChat();
 
-  const { data: models = [], isLoading: modelsLoading } = useQuery(
+  const { data: allModels = [], isLoading: modelsLoading } = useQuery(
     catalogModelsQueryOptions()
   );
 
+  // Filter to chat-capable models for the playground
+  const chatModels = useMemo(
+    () => allModels.filter((m) => m.capabilities.includes("chat")),
+    [allModels]
+  );
+
   useInitialModelSelection({
-    models,
+    models: chatModels,
     selectedModel,
     setSelectedModel,
     setSystemPrompt,
     systemPrompt
   });
 
+  // Check if the selected model supports vision (image uploads)
+  const selectedModelData = useMemo(
+    () => chatModels.find((m) => m.slug === selectedModel?.model),
+    [chatModels, selectedModel?.model]
+  );
+  const supportsVision =
+    selectedModelData?.capabilities.includes("vision") ?? false;
+
   const modelOptions = useMemo(
     () =>
-      models.map((m) => ({
+      chatModels.map((m) => ({
         label: m.name,
         provider: m.provider,
         value: m.slug
       })),
-    [models]
+    [chatModels]
   );
 
   return (
@@ -70,7 +84,7 @@ const ChatPage = () => {
         )}
       </div>
 
-      {!modelsLoading && models.length === 0 ? (
+      {!modelsLoading && chatModels.length === 0 ? (
         <div className="flex flex-1 items-center justify-center rounded-xl border border-border">
           <EmptyState
             action={
@@ -108,6 +122,7 @@ const ChatPage = () => {
             onStop={stopStreaming}
             onSystemPromptChange={setSystemPrompt}
             settings={settings}
+            supportsVision={supportsVision}
             systemPrompt={systemPrompt}
           />
         </div>
