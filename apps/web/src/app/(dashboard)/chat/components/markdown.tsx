@@ -8,9 +8,8 @@
  * No heavy markdown-to-AST library. All content is escaped before rendering.
  */
 
-import { Check, Clipboard } from "lucide-react";
-import { Highlight, themes } from "prism-react-renderer";
-import { type ReactNode, memo, useCallback, useState } from "react";
+import { type ReactNode, memo } from "react";
+import { CodeBlock } from "./code-block";
 
 // ---------------------------------------------------------------------------
 // Safe URL check — only http(s) and mailto links are allowed
@@ -25,42 +24,6 @@ const isSafeHref = (url: string): boolean => {
   } catch {
     return false;
   }
-};
-
-// ---------------------------------------------------------------------------
-// Copy button for code blocks
-// ---------------------------------------------------------------------------
-
-const CopyButton = ({ text }: { readonly text: string }) => {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  }, [text]);
-
-  return (
-    <button
-      aria-label={copied ? "Copied" : "Copy code"}
-      className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-background/80 hover:text-foreground"
-      onClick={handleCopy}
-      type="button"
-    >
-      {copied ? (
-        <>
-          <Check className="size-3" />
-          Copied!
-        </>
-      ) : (
-        <>
-          <Clipboard className="size-3" />
-          Copy
-        </>
-      )}
-    </button>
-  );
 };
 
 // ---------------------------------------------------------------------------
@@ -176,52 +139,6 @@ const parseTableRow = (line: string): string[] => {
 
 const isTableSeparator = (line: string): boolean =>
   TABLE_SEPARATOR_RE.test(line);
-
-// ---------------------------------------------------------------------------
-// Code block with syntax highlighting
-// ---------------------------------------------------------------------------
-
-const CodeBlock = ({
-  code,
-  language
-}: {
-  readonly code: string;
-  readonly language: string;
-}) => {
-  const displayLang = language || "text";
-
-  return (
-    <div className="group/code my-2 overflow-hidden rounded-lg border border-border bg-muted">
-      <div className="flex items-center justify-between border-b border-border bg-muted/50 px-3 py-1.5">
-        <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-          {displayLang}
-        </span>
-        <CopyButton text={code} />
-      </div>
-      {language ? (
-        <Highlight code={code} language={language} theme={themes.nightOwl}>
-          {({ tokens, getLineProps, getTokenProps }) => (
-            <pre className="overflow-x-auto p-3 text-xs font-mono leading-relaxed">
-              <code>
-                {tokens.map((line, i) => (
-                  <div {...getLineProps({ line })} key={i}>
-                    {line.map((token, j) => (
-                      <span {...getTokenProps({ token })} key={j} />
-                    ))}
-                  </div>
-                ))}
-              </code>
-            </pre>
-          )}
-        </Highlight>
-      ) : (
-        <pre className="overflow-x-auto p-3 text-xs font-mono leading-relaxed">
-          <code>{code}</code>
-        </pre>
-      )}
-    </div>
-  );
-};
 
 // ---------------------------------------------------------------------------
 // Main Markdown component
