@@ -27,6 +27,7 @@ import {
   createBillingWebhookModule
 } from "./modules/billing/index";
 import { createBudgetsModule } from "./modules/budgets/index";
+import { createCronModule } from "./modules/cron/index";
 import { createGuardrailsModule } from "./modules/guardrails/index";
 import { createKeysModule } from "./modules/keys/index";
 import { createModelAliasesModule } from "./modules/model-aliases/index";
@@ -145,6 +146,9 @@ app.all("/v1/proxy/*", proxyHandler(db, redis, env));
 
 // Billing webhooks (no auth)
 app.route("/webhooks/billing", createBillingWebhookModule(db, env));
+
+// Cron endpoints (secret header auth)
+app.route("/v1/cron", createCronModule(db, env));
 
 // Public models catalog (no auth required)
 app.route("/v1/models", createModelsModule(db));
