@@ -26,7 +26,7 @@ const CopyableId = ({ value }: { value: string }) => {
     >
       {value}
       {copied ? (
-        <Check className="size-3 text-green-600" />
+        <Check className="size-3 text-success" />
       ) : (
         <Copy className="size-3 opacity-0 group-hover/copy:opacity-100" />
       )}

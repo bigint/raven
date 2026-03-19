@@ -35,16 +35,16 @@ const buildStatCards = (stats: Stats | null): StatCard[] => {
       value: totalRequests.toLocaleString()
     },
     {
-      bg: "bg-green-500/10",
-      color: "text-green-500",
+      bg: "bg-success/10",
+      color: "text-success",
       icon: DollarSign,
       label: "Total Cost",
       sub: "Last 30 days",
       value: `$${totalCost.toFixed(2)}`
     },
     {
-      bg: "bg-yellow-500/10",
-      color: "text-yellow-500",
+      bg: "bg-warning/10",
+      color: "text-warning",
       icon: Clock,
       label: "Avg Latency",
       sub: "Across all requests",
