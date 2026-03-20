@@ -3,7 +3,7 @@ import type { Database } from "@raven/db";
 import * as schema from "@raven/db/schema";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { organization } from "better-auth/plugins";
+import { count, eq } from "drizzle-orm";
 
 const SESSION_EXPIRY_SECONDS = 30 * 24 * 60 * 60; // 30 days
 const SESSION_UPDATE_AGE_SECONDS = 24 * 60 * 60; // 1 day
@@ -34,9 +34,6 @@ export const createAuth = (db: Database, env: Env, options?: AuthOptions) => {
       schema: {
         ...schema,
         account: schema.accounts,
-        invitation: schema.invitations,
-        member: schema.members,
-        organization: schema.organizations,
         session: schema.sessions,
         user: schema.users,
         verification: schema.verifications
@@ -46,6 +43,16 @@ export const createAuth = (db: Database, env: Env, options?: AuthOptions) => {
       user: {
         create: {
           after: async (user) => {
+            const [result] = await db
+              .select({ value: count() })
+              .from(schema.users);
+            if (result?.value === 1) {
+              await db
+                .update(schema.users)
+                .set({ role: "admin" })
+                .where(eq(schema.users.id, user.id));
+            }
+
             if (options?.onUserCreated) {
               options.onUserCreated({
                 email: user.email,
@@ -65,7 +72,6 @@ export const createAuth = (db: Database, env: Env, options?: AuthOptions) => {
           }
         : undefined
     },
-    plugins: [organization()],
     secret: env.BETTER_AUTH_SECRET,
     session: {
       cookieCache: {
