@@ -1,0 +1,71 @@
+services:
+  raven:
+    image: raven:latest
+    build: .
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    environment:
+      - DATABASE_URL=postgresql://raven:raven@postgres:5432/raven
+      - REDIS_URL=redis://redis:6379
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-changeme-generate-a-secret}
+      - BETTER_AUTH_URL=http://raven:3001
+      - ENCRYPTION_SECRET=${ENCRYPTION_SECRET:-changeme-generate-a-32byte-hex}
+      - APP_URL=http://localhost:3000
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - API_PORT=3001
+      - NODE_ENV=production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  raven-cron:
+    image: raven:latest
+    command: ["./docker-entrypoint.sh", "cron"]
+    environment:
+      - DATABASE_URL=postgresql://raven:raven@postgres:5432/raven
+      - REDIS_URL=redis://redis:6379
+      - ENCRYPTION_SECRET=${ENCRYPTION_SECRET:-changeme-generate-a-32byte-hex}
+    depends_on:
+      raven:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:17-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: raven
+      POSTGRES_PASSWORD: raven
+      POSTGRES_DB: raven
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U raven"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
