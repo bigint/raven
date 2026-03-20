@@ -8,7 +8,7 @@ import { Providers } from "./providers";
 const outfit = Outfit({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  description: "Unified AI gateway for teams",
+  description: "Unified AI gateway for managing AI API calls",
   metadataBase: new URL("https://ravenai.dev"),
   openGraph: {
     description:

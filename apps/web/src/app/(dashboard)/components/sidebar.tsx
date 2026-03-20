@@ -102,14 +102,14 @@ export const Sidebar = ({ user }: SidebarProps) => {
       })}
       <Link
         className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
-          pathname === "/settings"
+          pathname === "/profile"
             ? "bg-primary text-primary-foreground font-medium"
             : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
         }`}
-        href="/settings"
+        href="/profile"
       >
         <Settings className="size-4" />
-        Settings
+        Profile
       </Link>
       {isAdmin && (
         <>

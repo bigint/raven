@@ -31,15 +31,10 @@ export const WEBHOOK_EVENTS = [
   "key.created",
   "key.updated",
   "key.deleted",
-  "team.created",
-  "team.updated",
-  "team.deleted",
-  "settings.updated",
-  "subscription.updated"
+  "settings.updated"
 ];
 
 export const EVENT_CATEGORIES: Record<string, string[]> = {
-  Billing: ["subscription.updated"],
   Budgets: [
     "budget.created",
     "budget.updated",
@@ -50,8 +45,7 @@ export const EVENT_CATEGORIES: Record<string, string[]> = {
   Keys: ["key.created", "key.updated", "key.deleted"],
   Providers: ["provider.created", "provider.updated", "provider.deleted"],
   Requests: ["request.created"],
-  Settings: ["settings.updated"],
-  Teams: ["team.created", "team.updated", "team.deleted"]
+  Settings: ["settings.updated"]
 };
 
 export const webhooksQueryOptions = () =>
