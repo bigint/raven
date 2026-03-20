@@ -3,8 +3,8 @@ import { HomePageContent } from "./components/home-page";
 
 export const metadata: Metadata = {
   description:
-    "Route, monitor, and manage AI API calls across OpenAI, Anthropic, Google, and more. Virtual keys, real-time analytics, and smart guardrails for teams.",
-  title: "Raven - Unified AI Gateway for Teams"
+    "Open-source AI model gateway. Unified API for OpenAI, Anthropic, Google, Mistral, and more.",
+  title: "Raven - Open-source AI Model Gateway"
 };
 
 const HomePage = () => {
