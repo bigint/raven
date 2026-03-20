@@ -1,86 +1,109 @@
 import type { Database } from "@raven/db";
 import { models } from "@raven/db";
-import { eq } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import type { Context } from "hono";
+import type { Redis } from "ioredis";
 import {
   deriveCapabilities,
   deriveCategory,
-  fetchModelsDevCached,
-  PROVIDER_SLUG_MAP
+  extractModelSlug,
+  fetchModelsCached,
+  resolveProvider,
+  toPerMillion
 } from "@/lib/model-sync";
 import { refreshPricingCache } from "@/lib/pricing-cache";
 
-export const syncModels = (db: Database) => async (c: Context) => {
-  const data = await fetchModelsDevCached();
-  const now = new Date();
+const LOCK_KEY = "cron:sync-models:lock";
+const LOCK_TTL = 300; // 5 minutes
 
-  let added = 0;
-  let updated = 0;
-  let removed = 0;
-
-  for (const [devSlug, ourSlug] of Object.entries(PROVIDER_SLUG_MAP)) {
-    const providerData = data[devSlug];
-    if (!providerData?.models) continue;
-
-    const upstreamModels = Object.values(providerData.models);
-    const upstreamIds = new Set(
-      upstreamModels.map((m) => `${ourSlug}/${m.id}`)
-    );
-
-    // Get existing models for this provider
-    const existing = await db
-      .select({ id: models.id, slug: models.slug })
-      .from(models)
-      .where(eq(models.provider, ourSlug));
-
-    const existingIds = new Set(existing.map((m) => m.id));
-
-    // Upsert all upstream models
-    for (const m of upstreamModels) {
-      const id = `${ourSlug}/${m.id}`;
-      const inputPrice = m.cost?.input ?? 0;
-      const outputPrice = m.cost?.output ?? 0;
-
-      const values = {
-        capabilities: deriveCapabilities(m),
-        category: deriveCategory(m, inputPrice),
-        contextWindow: m.limit?.context ?? 0,
-        description: "",
-        id,
-        inputPrice: inputPrice.toFixed(4),
-        maxOutput: m.limit?.output ?? 0,
-        name: m.name,
-        outputPrice: outputPrice.toFixed(4),
-        provider: ourSlug,
-        slug: m.id,
-        updatedAt: now
-      };
-
-      if (existingIds.has(id)) {
-        // Update existing
-        const { id: _, ...updateValues } = values;
-        await db.update(models).set(updateValues).where(eq(models.id, id));
-        updated++;
-      } else {
-        // Insert new
-        await db
-          .insert(models)
-          .values({ ...values, createdAt: now })
-          .onConflictDoNothing();
-        added++;
-      }
+export const syncModels =
+  (db: Database, redis: Redis) => async (c: Context) => {
+    const acquired = await redis.set(LOCK_KEY, "1", "EX", LOCK_TTL, "NX");
+    if (!acquired) {
+      return c.json({ reason: "Another sync is in progress", skipped: true });
     }
 
-    // Remove models no longer upstream
-    for (const e of existing) {
-      if (!upstreamIds.has(e.id)) {
-        await db.delete(models).where(eq(models.id, e.id));
-        removed++;
+    try {
+      const data = await fetchModelsCached();
+      const now = new Date();
+
+      const toUpsert: (typeof models.$inferInsert)[] = [];
+      const upstreamIds = new Set<string>();
+
+      for (const m of data) {
+        if (m.type !== "language") continue;
+
+        const provider = resolveProvider(m);
+        if (!provider) continue;
+
+        const id = `${provider}/${extractModelSlug(m.id)}`;
+        upstreamIds.add(id);
+        const inputPrice = toPerMillion(m.pricing?.input);
+        const outputPrice = toPerMillion(m.pricing?.output);
+
+        toUpsert.push({
+          capabilities: deriveCapabilities(m),
+          category: deriveCategory(m, inputPrice),
+          contextWindow: m.context_window ?? 0,
+          createdAt: now,
+          id,
+          inputPrice: inputPrice.toFixed(4),
+          maxOutput: m.max_tokens ?? 0,
+          name: m.name,
+          outputPrice: outputPrice.toFixed(4),
+          provider,
+          slug: extractModelSlug(m.id),
+          updatedAt: now
+        });
       }
+
+      // Fetch all existing model IDs in one query for counting and deletion
+      const existing = await db.select({ id: models.id }).from(models);
+      const existingIds = new Set(existing.map((m) => m.id));
+
+      const added = toUpsert.filter((m) => !existingIds.has(m.id as string)).length;
+      const updated = toUpsert.filter((m) => existingIds.has(m.id as string)).length;
+
+      // Batch upsert in chunks to avoid exceeding parameter limits
+      if (toUpsert.length > 0) {
+        const CHUNK_SIZE = 500;
+        for (let i = 0; i < toUpsert.length; i += CHUNK_SIZE) {
+          const chunk = toUpsert.slice(i, i + CHUNK_SIZE);
+          await db
+            .insert(models)
+            .values(chunk)
+            .onConflictDoUpdate({
+              set: {
+                capabilities: sql`excluded.capabilities`,
+                category: sql`excluded.category`,
+                contextWindow: sql`excluded.context_window`,
+                inputPrice: sql`excluded.input_price`,
+                maxOutput: sql`excluded.max_output`,
+                name: sql`excluded.name`,
+                outputPrice: sql`excluded.output_price`,
+                provider: sql`excluded.provider`,
+                slug: sql`excluded.slug`,
+                updatedAt: sql`excluded.updated_at`
+              },
+              target: models.id
+            });
+        }
+      }
+
+      // Batch delete models no longer upstream
+      const toDelete = existing
+        .filter((m) => !upstreamIds.has(m.id))
+        .map((m) => m.id);
+      const removed = toDelete.length;
+
+      if (toDelete.length > 0) {
+        await db.delete(models).where(inArray(models.id, toDelete));
+      }
+
+      await refreshPricingCache(db);
+
+      return c.json({ data: { added, removed, updated } });
+    } finally {
+      await redis.del(LOCK_KEY);
     }
-  }
-
-  await refreshPricingCache(db);
-
-  return c.json({ data: { added, removed, updated } });
-};
+  };

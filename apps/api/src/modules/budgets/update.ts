@@ -18,16 +18,6 @@ export const updateBudget =
     const id = c.req.param("id") as string;
     const { limitAmount, alertThreshold, period } = c.req.valid("json");
 
-    const [existing] = await db
-      .select({ id: budgets.id })
-      .from(budgets)
-      .where(and(eq(budgets.id, id), eq(budgets.organizationId, orgId)))
-      .limit(1);
-
-    if (!existing) {
-      throw new NotFoundError("Budget not found");
-    }
-
     const updates: Partial<typeof budgets.$inferInsert> = {};
 
     if (limitAmount !== undefined) {
@@ -47,6 +37,10 @@ export const updateBudget =
       .set(updates)
       .where(and(eq(budgets.id, id), eq(budgets.organizationId, orgId)))
       .returning();
+
+    if (!updated) {
+      throw new NotFoundError("Budget not found");
+    }
 
     void publishEvent(orgId, "budget.updated", updated);
     void logAudit(db, {

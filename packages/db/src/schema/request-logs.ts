@@ -75,6 +75,22 @@ export const requestLogs = pgTable(
       t.organizationId,
       t.statusCode,
       t.createdAt
-    )
+    ),
+    index("request_logs_org_deleted_created_idx").on(
+      t.organizationId,
+      t.deletedAt,
+      t.createdAt
+    ),
+    index("request_logs_org_model_created_idx").on(
+      t.organizationId,
+      t.model,
+      t.createdAt
+    ),
+    index("request_logs_org_enduser_created_idx").on(
+      t.organizationId,
+      t.endUser,
+      t.createdAt
+    ),
+    index("request_logs_created_deleted_idx").on(t.createdAt, t.deletedAt)
   ]
 );

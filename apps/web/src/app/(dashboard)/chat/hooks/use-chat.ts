@@ -3,11 +3,9 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { API_URL, api } from "@/lib/api";
-import type {
-  ImageAttachment,
-  PlaygroundSettings
-} from "../components/chat-input";
 import type { ResponseMeta } from "../components/response-metadata";
+import { parseSSEStream } from "../lib/stream-parser";
+import type { ImageAttachment, PlaygroundSettings } from "../lib/types";
 
 interface DisplayMessage {
   readonly content: string;
@@ -34,63 +32,6 @@ type Message = {
 
 const PLAYGROUND_KEY_TTL_MS = 3_600_000; // 1 hour
 
-// SSE helpers
-
-const parseSSEStream = async function* (
-  reader: ReadableStreamDefaultReader<Uint8Array>
-): AsyncGenerator<{
-  reasoning?: string;
-  text: string;
-  usage?: { prompt_tokens: number; completion_tokens: number };
-}> {
-  const decoder = new TextDecoder();
-  let buffer = "";
-  let usage: { prompt_tokens: number; completion_tokens: number } | undefined;
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
-
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed || !trimmed.startsWith("data: ")) continue;
-      const payload = trimmed.slice(6);
-      if (payload === "[DONE]") continue;
-
-      try {
-        const parsed = JSON.parse(payload);
-
-        // Extract usage from finish chunk
-        if (parsed.usage) {
-          usage = {
-            completion_tokens: parsed.usage.completion_tokens ?? 0,
-            prompt_tokens: parsed.usage.prompt_tokens ?? 0
-          };
-        }
-
-        const delta = parsed.choices?.[0]?.delta;
-        if (delta?.content || delta?.reasoning_content) {
-          yield {
-            reasoning: delta.reasoning_content,
-            text: delta.content ?? ""
-          };
-        }
-      } catch {
-        // skip malformed chunks
-      }
-    }
-  }
-
-  // Yield final empty chunk with usage if available
-  if (usage) {
-    yield { text: "", usage };
-  }
-};
-
 // Hook
 
 export const useChat = () => {
@@ -115,6 +56,9 @@ export const useChat = () => {
   const abortRef = useRef<AbortController | null>(null);
   const keyRef = useRef<PlaygroundKey | null>(null);
   const sessionIdRef = useRef(crypto.randomUUID());
+  const streamBufferRef = useRef("");
+  const streamReasoningBufferRef = useRef("");
+  const rafRef = useRef<number | null>(null);
   const queryClient = useQueryClient();
 
   // Keep refs for values used inside sendMessage to avoid stale closures
@@ -175,6 +119,14 @@ export const useChat = () => {
       };
 
       setMessages((prev) => [...prev, userMessage, assistantMessage]);
+      // Strip base64 data from stored messages to prevent memory growth
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.images?.length
+            ? { ...m, images: m.images.map((img) => ({ ...img, base64: "" })) }
+            : m
+        )
+      );
       setIsStreaming(true);
 
       const abortController = new AbortController();
@@ -317,27 +269,52 @@ export const useChat = () => {
             | { prompt_tokens: number; completion_tokens: number }
             | undefined;
 
+          const flushBufferToMessages = () => {
+            const text = streamBufferRef.current;
+            const reasoning = streamReasoningBufferRef.current;
+            streamBufferRef.current = "";
+            streamReasoningBufferRef.current = "";
+            if (!text && !reasoning) return;
+            setMessages((prev) => {
+              const idx = prev.length - 1;
+              const msg = prev[idx];
+              if (!msg || msg.id !== assistantMessage.id) return prev;
+              const updated = [...prev];
+              updated[idx] = {
+                ...msg,
+                content: msg.content + text,
+                ...(reasoning
+                  ? { reasoning: (msg.reasoning ?? "") + reasoning }
+                  : {})
+              };
+              return updated;
+            });
+          };
+
           for await (const chunk of parseSSEStream(reader)) {
             if (chunk.usage) {
               finalUsage = chunk.usage;
             }
             if (chunk.text || chunk.reasoning) {
-              setMessages((prev) => {
-                const idx = prev.length - 1;
-                const msg = prev[idx];
-                if (!msg || msg.id !== assistantMessage.id) return prev;
-                const updated = [...prev];
-                updated[idx] = {
-                  ...msg,
-                  content: msg.content + (chunk.text ?? ""),
-                  ...(chunk.reasoning
-                    ? { reasoning: (msg.reasoning ?? "") + chunk.reasoning }
-                    : {})
-                };
-                return updated;
-              });
+              streamBufferRef.current += chunk.text ?? "";
+              if (chunk.reasoning) {
+                streamReasoningBufferRef.current += chunk.reasoning;
+              }
+              if (!rafRef.current) {
+                rafRef.current = requestAnimationFrame(() => {
+                  rafRef.current = null;
+                  flushBufferToMessages();
+                });
+              }
             }
           }
+
+          // Flush any remaining buffered content after stream ends
+          if (rafRef.current) {
+            cancelAnimationFrame(rafRef.current);
+            rafRef.current = null;
+          }
+          flushBufferToMessages();
 
           const elapsedMs = Math.round(performance.now() - startTime);
           const meta: ResponseMeta = {

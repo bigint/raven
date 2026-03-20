@@ -14,7 +14,8 @@ import { estimateCost } from "./cost-estimator";
 import { getFallbackProviders } from "./fallback";
 import type { GuardrailMatch } from "./guardrails";
 import { updateMetrics } from "./latency-tracker";
-import { logAndPublish, updateLastUsed } from "./logger";
+import { updateLastUsed } from "./last-used";
+import { logAndPublish } from "./logger";
 import type { ParsedRequest } from "./request-parser";
 import {
   formatBufferedResponse,

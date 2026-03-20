@@ -7,7 +7,7 @@ import { listGuardrails } from "./list";
 import { createGuardrailSchema, updateGuardrailSchema } from "./schema";
 import { updateGuardrail } from "./update";
 
-export const createGuardrailsModule = (db: Database) => {
+export const createGuardrailsModule = (db: Database, _redis?: unknown) => {
   const app = new Hono();
 
   app.get("/", listGuardrails(db));

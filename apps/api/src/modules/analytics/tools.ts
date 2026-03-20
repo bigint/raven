@@ -11,18 +11,23 @@ import {
   sql,
   sum
 } from "drizzle-orm";
+import type { Redis } from "ioredis";
 import type { z } from "zod";
+import { cachedQuery } from "@/lib/cache-utils";
 import { buildPaginationMeta, getOffset } from "@/lib/pagination";
 import type { AppContextWithQuery } from "@/lib/types";
 
 import { parseDateRange } from "./helpers";
 import type { dateRangeQuerySchema, logsQuerySchema } from "./schema";
 
+const TOOL_STATS_TTL = 60;
+
 type DateQuery = z.infer<typeof dateRangeQuerySchema>;
 type PagedQuery = z.infer<typeof logsQuerySchema>;
 
 export const getToolStats =
-  (db: Database) => async (c: AppContextWithQuery<DateQuery>) => {
+  (db: Database, redis?: Redis) =>
+  async (c: AppContextWithQuery<DateQuery>) => {
     const orgId = c.get("orgId");
     const { from, to } = c.req.valid("query");
 
@@ -34,24 +39,31 @@ export const getToolStats =
       ...dateConditions
     );
 
-    const rows = await db
-      .select({
-        date: sql<string>`DATE(${requestLogs.createdAt})`.as("date"),
-        totalRequests: count().as("total_requests"),
-        totalToolUses: sum(requestLogs.toolCount).as("total_tool_uses")
-      })
-      .from(requestLogs)
-      .where(where)
-      .groupBy(sql`DATE(${requestLogs.createdAt})`)
-      .orderBy(sql`DATE(${requestLogs.createdAt})`);
+    const queryFn = async () => {
+      const rows = await db
+        .select({
+          date: sql<string>`DATE(${requestLogs.createdAt})`.as("date"),
+          totalRequests: count().as("total_requests"),
+          totalToolUses: sum(requestLogs.toolCount).as("total_tool_uses")
+        })
+        .from(requestLogs)
+        .where(where)
+        .groupBy(sql`DATE(${requestLogs.createdAt})`)
+        .orderBy(sql`DATE(${requestLogs.createdAt})`);
 
-    return c.json({
-      data: rows.map((row) => ({
+      return rows.map((row) => ({
         date: row.date,
         totalRequests: Number(row.totalRequests),
         totalToolUses: Number(row.totalToolUses ?? 0)
-      }))
-    });
+      }));
+    };
+
+    const cacheKey = `analytics:tool-stats:${orgId}:${from ?? ""}:${to ?? ""}`;
+    const data = redis
+      ? await cachedQuery(redis, cacheKey, TOOL_STATS_TTL, queryFn)
+      : await queryFn();
+
+    return c.json({ data });
   };
 
 export const getToolSessions =

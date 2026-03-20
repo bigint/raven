@@ -21,7 +21,8 @@ export const listMembers = (db: Database) => async (c: AppContext) => {
     })
     .from(members)
     .innerJoin(users, eq(members.userId, users.id))
-    .where(eq(members.organizationId, orgId));
+    .where(eq(members.organizationId, orgId))
+    .limit(200);
 
   return success(
     c,

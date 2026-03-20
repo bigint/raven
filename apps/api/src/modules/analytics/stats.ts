@@ -1,16 +1,20 @@
 import type { Database } from "@raven/db";
 import { requestLogs } from "@raven/db";
 import { and, avg, count, eq, isNull, sql, sum } from "drizzle-orm";
+import type { Redis } from "ioredis";
 import type { z } from "zod";
+import { cachedQuery } from "@/lib/cache-utils";
 import type { AppContextWithQuery } from "@/lib/types";
 
 import { parseDateRange } from "./helpers";
 import type { dateRangeQuerySchema } from "./schema";
 
+const STATS_TTL = 30;
+
 type Query = z.infer<typeof dateRangeQuerySchema>;
 
 export const getStats =
-  (db: Database) => async (c: AppContextWithQuery<Query>) => {
+  (db: Database, redis?: Redis) => async (c: AppContextWithQuery<Query>) => {
     const orgId = c.get("orgId");
     const { from, to } = c.req.valid("query");
 
@@ -21,31 +25,31 @@ export const getStats =
       ...dateConditions
     );
 
-    const [row] = await db
-      .select({
-        avgLatencyMs: avg(requestLogs.latencyMs),
-        cacheHits: sum(
-          sql<number>`CASE WHEN ${requestLogs.cacheHit} THEN 1 ELSE 0 END`
-        ),
-        totalCachedTokens: sum(requestLogs.cachedTokens),
-        totalCost: sum(requestLogs.cost),
-        totalInputTokens: sum(requestLogs.inputTokens),
-        totalOutputTokens: sum(requestLogs.outputTokens),
-        totalReasoningTokens: sum(requestLogs.reasoningTokens),
-        totalRequests: count()
-      })
-      .from(requestLogs)
-      .where(where);
+    const queryFn = async () => {
+      const [row] = await db
+        .select({
+          avgLatencyMs: avg(requestLogs.latencyMs),
+          cacheHits: sum(
+            sql<number>`CASE WHEN ${requestLogs.cacheHit} THEN 1 ELSE 0 END`
+          ),
+          totalCachedTokens: sum(requestLogs.cachedTokens),
+          totalCost: sum(requestLogs.cost),
+          totalInputTokens: sum(requestLogs.inputTokens),
+          totalOutputTokens: sum(requestLogs.outputTokens),
+          totalReasoningTokens: sum(requestLogs.reasoningTokens),
+          totalRequests: count()
+        })
+        .from(requestLogs)
+        .where(where);
 
-    const totalRequests = Number(row?.totalRequests ?? 0);
-    const cacheHits = Number(row?.cacheHits ?? 0);
-    const totalInputTokens = Number(row?.totalInputTokens ?? 0);
-    const totalOutputTokens = Number(row?.totalOutputTokens ?? 0);
-    const totalCachedTokens = Number(row?.totalCachedTokens ?? 0);
-    const totalReasoningTokens = Number(row?.totalReasoningTokens ?? 0);
+      const totalRequests = Number(row?.totalRequests ?? 0);
+      const cacheHits = Number(row?.cacheHits ?? 0);
+      const totalInputTokens = Number(row?.totalInputTokens ?? 0);
+      const totalOutputTokens = Number(row?.totalOutputTokens ?? 0);
+      const totalCachedTokens = Number(row?.totalCachedTokens ?? 0);
+      const totalReasoningTokens = Number(row?.totalReasoningTokens ?? 0);
 
-    return c.json({
-      data: {
+      return {
         avgLatencyMs: row?.avgLatencyMs
           ? Number(row.avgLatencyMs).toFixed(2)
           : "0.00",
@@ -62,6 +66,13 @@ export const getStats =
           totalOutputTokens +
           totalCachedTokens +
           totalReasoningTokens
-      }
-    });
+      };
+    };
+
+    const cacheKey = `analytics:stats:${orgId}:${from ?? ""}:${to ?? ""}`;
+    const data = redis
+      ? await cachedQuery(redis, cacheKey, STATS_TTL, queryFn)
+      : await queryFn();
+
+    return c.json({ data });
   };

@@ -26,7 +26,12 @@ export const getFallbackProviders = async (
   primaryProviderName: string
 ): Promise<FallbackProvider[]> => {
   const configs = await db
-    .select()
+    .select({
+      apiKey: providerConfigs.apiKey,
+      id: providerConfigs.id,
+      name: providerConfigs.name,
+      provider: providerConfigs.provider
+    })
     .from(providerConfigs)
     .where(
       and(

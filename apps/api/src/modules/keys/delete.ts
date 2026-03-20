@@ -12,19 +12,14 @@ export const deleteKey = (db: Database) => async (c: AppContext) => {
   const user = c.get("user");
   const id = c.req.param("id") as string;
 
-  const [existing] = await db
-    .select({ id: virtualKeys.id })
-    .from(virtualKeys)
+  const [deleted] = await db
+    .delete(virtualKeys)
     .where(and(eq(virtualKeys.id, id), eq(virtualKeys.organizationId, orgId)))
-    .limit(1);
+    .returning({ id: virtualKeys.id });
 
-  if (!existing) {
+  if (!deleted) {
     throw new NotFoundError("Virtual key not found");
   }
-
-  await db
-    .delete(virtualKeys)
-    .where(and(eq(virtualKeys.id, id), eq(virtualKeys.organizationId, orgId)));
 
   void publishEvent(orgId, "key.deleted", { id });
   void logAudit(db, {

@@ -31,7 +31,12 @@ export const useOrgs = () => {
   const switchOrg = useCallback(
     (org: Org) => {
       setActiveOrg(org);
-      queryClient.invalidateQueries();
+      queryClient.removeQueries({
+        predicate: (query) => {
+          const key = query.queryKey[0];
+          return key !== "session" && key !== "auth";
+        }
+      });
       router.push("/overview");
     },
     [setActiveOrg, queryClient, router]

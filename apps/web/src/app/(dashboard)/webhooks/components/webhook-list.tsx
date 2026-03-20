@@ -3,6 +3,7 @@
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
 import { Pencil, Plus, Trash2, Webhook as WebhookIcon } from "lucide-react";
+import { useMemo } from "react";
 import { TextMorph } from "torph/react";
 import type { Webhook } from "../hooks/use-webhooks";
 
@@ -59,36 +60,39 @@ const WebhookList = ({
   onEdit,
   onDelete
 }: WebhookListProps) => {
-  const allColumns: Column<Webhook>[] = [
-    ...columns,
-    {
-      className: "text-right",
-      header: "Actions",
-      headerClassName: "text-right",
-      key: "actions",
-      render: (webhook) => (
-        <div className="flex items-center justify-end gap-1">
-          <Button
-            onClick={() => onEdit(webhook)}
-            size="sm"
-            title="Edit webhook"
-            variant="ghost"
-          >
-            <Pencil className="size-4" />
-          </Button>
-          <Button
-            className="hover:bg-destructive/10 hover:text-destructive"
-            onClick={() => onDelete(webhook.id)}
-            size="sm"
-            title="Delete webhook"
-            variant="ghost"
-          >
-            <Trash2 className="size-4" />
-          </Button>
-        </div>
-      )
-    }
-  ];
+  const allColumns: Column<Webhook>[] = useMemo(
+    () => [
+      ...columns,
+      {
+        className: "text-right",
+        header: "Actions",
+        headerClassName: "text-right",
+        key: "actions",
+        render: (webhook) => (
+          <div className="flex items-center justify-end gap-1">
+            <Button
+              onClick={() => onEdit(webhook)}
+              size="sm"
+              title="Edit webhook"
+              variant="ghost"
+            >
+              <Pencil className="size-4" />
+            </Button>
+            <Button
+              className="hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => onDelete(webhook.id)}
+              size="sm"
+              title="Delete webhook"
+              variant="ghost"
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          </div>
+        )
+      }
+    ],
+    [onEdit, onDelete]
+  );
 
   return (
     <DataTable

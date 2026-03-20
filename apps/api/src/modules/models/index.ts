@@ -24,7 +24,6 @@ export const createModelsModule = (db: Database) => {
         capabilities: m.capabilities,
         category: m.category,
         contextWindow: m.contextWindow,
-        description: m.description,
         id: m.id,
         inputPrice: parseFloat(m.inputPrice ?? "0"),
         maxOutput: m.maxOutput,

@@ -11,7 +11,8 @@ export const listKeys = (db: Database) => async (c: AppContext) => {
   const keys = await db
     .select()
     .from(virtualKeys)
-    .where(eq(virtualKeys.organizationId, orgId));
+    .where(eq(virtualKeys.organizationId, orgId))
+    .limit(200);
 
   return success(c, keys.map(safeKey));
 };

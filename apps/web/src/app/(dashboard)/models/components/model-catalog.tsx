@@ -20,7 +20,7 @@ import {
   Zap
 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { ModelIcon, ProviderIcon } from "@/components/model-icon";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
@@ -99,7 +99,7 @@ const CopyableSlug = ({ value }: { value: string }) => {
   );
 };
 
-const ModelCard = ({ model }: { model: CatalogModel }) => {
+const ModelCard = memo(function ModelCard({ model }: { model: CatalogModel }) {
   const categoryMeta =
     MODEL_CATEGORIES[model.category as ModelCategory] ?? null;
 
@@ -194,10 +194,11 @@ const ModelCard = ({ model }: { model: CatalogModel }) => {
       </div>
     </div>
   );
-};
+});
 
 export const ModelCatalog = () => {
   const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
   const [category, setCategory] = useState<ModelCategory | "all">("all");
   const [provider, setProvider] = useState("all");
   const [visibleCount, setVisibleCount] = useState(24);
@@ -217,7 +218,7 @@ export const ModelCatalog = () => {
   }, [models]);
 
   const filtered = useMemo(() => {
-    const query = search.toLowerCase().trim();
+    const query = deferredSearch.toLowerCase().trim();
     return models.filter((m) => {
       if (category !== "all" && m.category !== category) return false;
       if (provider !== "all" && m.provider !== provider) return false;
@@ -231,7 +232,7 @@ export const ModelCatalog = () => {
       }
       return true;
     });
-  }, [search, category, provider, models]);
+  }, [deferredSearch, category, provider, models]);
 
   useEffect(() => {
     setVisibleCount(24);

@@ -1,10 +1,7 @@
 import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
-import { modelAliases } from "@raven/db";
-import { and, eq, isNull } from "drizzle-orm";
 import type { Context } from "hono";
 import type { Redis } from "ioredis";
-import { cachedQuery } from "@/lib/cache-utils";
 import { GuardrailError } from "@/lib/errors";
 import { authenticateKey } from "./auth";
 import { checkBudgets } from "./budget-check";
@@ -62,29 +59,6 @@ export const proxyHandler = (
         ?.user_id === "string"
         ? ((parsedBody.metadata as Record<string, unknown>).user_id as string)
         : null);
-
-    // 3.6 Resolve model alias
-    if (typeof parsedBody.model === "string") {
-      const aliasKey = `model-alias:${virtualKey.organizationId}:${parsedBody.model}`;
-      const resolved = await cachedQuery(redis, aliasKey, 300, async () => {
-        const [row] = await db
-          .select({ targetModel: modelAliases.targetModel })
-          .from(modelAliases)
-          .where(
-            and(
-              eq(modelAliases.alias, parsedBody.model as string),
-              eq(modelAliases.organizationId, virtualKey.organizationId),
-              isNull(modelAliases.deletedAt)
-            )
-          )
-          .limit(1);
-        return row ?? null;
-      });
-
-      if (resolved) {
-        parsedBody = { ...parsedBody, model: resolved.targetModel };
-      }
-    }
 
     // 4. Guardrails + content routing
     const messages = Array.isArray(parsedBody.messages)

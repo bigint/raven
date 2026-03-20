@@ -95,6 +95,21 @@ const evaluateContentFilter = (
   return null;
 };
 
+const REGEX_CACHE_MAX = 200;
+const regexCache = new Map<string, RegExp>();
+
+const getCachedRegex = (pattern: string): RegExp => {
+  const cached = regexCache.get(pattern);
+  if (cached) return cached;
+  const regex = new RegExp(pattern);
+  if (regexCache.size >= REGEX_CACHE_MAX) {
+    const firstKey = regexCache.keys().next().value;
+    if (firstKey) regexCache.delete(firstKey);
+  }
+  regexCache.set(pattern, regex);
+  return regex;
+};
+
 const evaluateCustomRegex = (
   contents: string[],
   config: Record<string, unknown>
@@ -106,7 +121,7 @@ const evaluateCustomRegex = (
   if (pattern.length > 500) return null;
 
   try {
-    const regex = new RegExp(pattern);
+    const regex = getCachedRegex(pattern);
     for (const content of contents) {
       // Limit content length evaluated per regex to prevent ReDoS
       const truncated =

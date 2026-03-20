@@ -114,6 +114,8 @@ export const formatBufferedResponse = (
 
 // Streaming response
 
+const encoder = new TextEncoder();
+
 /**
  * Converts AI SDK's fullStream into an OpenAI-compatible SSE ReadableStream.
  *
@@ -126,7 +128,6 @@ export const formatStreamingResponse = (
   includeUsage: boolean,
   onFinish: (usage: TokenUsage) => void
 ): ReadableStream<Uint8Array> => {
-  const encoder = new TextEncoder();
   const completionId = `chatcmpl-${crypto.randomUUID()}`;
   const created = Math.floor(Date.now() / 1000);
 

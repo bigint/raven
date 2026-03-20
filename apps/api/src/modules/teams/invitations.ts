@@ -23,25 +23,46 @@ export const inviteUser =
 
     const { email, role } = c.req.valid("json");
 
-    // Check seat limit (members + pending invitations)
-    const [memberCount] = await db
-      .select({ value: count() })
-      .from(members)
-      .where(eq(members.organizationId, orgId));
-    const [inviteCount] = await db
-      .select({ value: count() })
-      .from(invitations)
-      .where(eq(invitations.organizationId, orgId));
+    // Check seat limit, existing user, and pending invitation in parallel
+    const [
+      [memberCount],
+      [inviteCount],
+      [existingUser],
+      [existingInvitation]
+    ] = await Promise.all([
+      db
+        .select({ value: count() })
+        .from(members)
+        .where(eq(members.organizationId, orgId)),
+      db
+        .select({ value: count() })
+        .from(invitations)
+        .where(eq(invitations.organizationId, orgId)),
+      db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1),
+      db
+        .select({ id: invitations.id })
+        .from(invitations)
+        .where(
+          and(
+            eq(invitations.organizationId, orgId),
+            eq(invitations.email, email)
+          )
+        )
+        .limit(1)
+    ]);
+
     const totalSeats = (memberCount?.value ?? 0) + (inviteCount?.value ?? 0);
     await checkResourceLimit(db, orgId, "maxSeats", totalSeats);
 
-    // Check if user is already a member
-    const [existingUser] = await db
-      .select({ id: users.id })
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
+    if (existingInvitation) {
+      throw new ConflictError("An invitation for this email already exists");
+    }
 
+    // Check if user is already a member
     if (existingUser) {
       const [existingMember] = await db
         .select({ id: members.id })
@@ -59,19 +80,6 @@ export const inviteUser =
           "User is already a member of this organization"
         );
       }
-    }
-
-    // Check for existing pending invitation
-    const [existingInvitation] = await db
-      .select({ id: invitations.id })
-      .from(invitations)
-      .where(
-        and(eq(invitations.organizationId, orgId), eq(invitations.email, email))
-      )
-      .limit(1);
-
-    if (existingInvitation) {
-      throw new ConflictError("An invitation for this email already exists");
     }
 
     const currentUser = c.get("user");

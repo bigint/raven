@@ -35,7 +35,6 @@ export const listAvailableModels = (db: Database) => async (c: AppContext) => {
       capabilities: m.capabilities,
       category: m.category,
       contextWindow: m.contextWindow,
-      description: m.description,
       id: m.id,
       inputPrice: Number.parseFloat(m.inputPrice ?? "0"),
       maxOutput: m.maxOutput,

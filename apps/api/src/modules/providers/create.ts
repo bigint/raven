@@ -2,7 +2,9 @@ import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { count, eq } from "drizzle-orm";
+import type { Redis } from "ioredis";
 import type { z } from "zod";
+import { cacheKeys } from "@/lib/cache-utils";
 import { encrypt } from "@/lib/crypto";
 import { publishEvent } from "@/lib/events";
 import { created } from "@/lib/response";
@@ -15,7 +17,8 @@ import type { createProviderSchema } from "./schema";
 type Body = z.infer<typeof createProviderSchema>;
 
 export const createProvider =
-  (db: Database, env: Env) => async (c: AppContextWithJson<Body>) => {
+  (db: Database, env: Env, redis: Redis) =>
+  async (c: AppContextWithJson<Body>) => {
     const orgId = c.get("orgId");
     const user = c.get("user");
     const { provider, name, apiKey, isEnabled } = c.req.valid("json");
@@ -43,6 +46,10 @@ export const createProvider =
       .returning();
 
     const safe = record as NonNullable<typeof record>;
+
+    // Invalidate provider configs cache for this org + provider
+    void redis.del(cacheKeys.providerConfigs(orgId, provider));
+
     const masked = maskApiKey(safe.apiKey);
     void publishEvent(orgId, "provider.created", { ...safe, apiKey: masked });
     void logAudit(db, {

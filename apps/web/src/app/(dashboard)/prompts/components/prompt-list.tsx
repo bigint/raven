@@ -4,6 +4,7 @@ import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
 import { Eye, MessageSquare, Pencil, Play, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import type { Prompt } from "../hooks/use-prompts";
 
 interface PromptListProps {
@@ -81,54 +82,57 @@ const PromptList = ({
     router.push(`/chat?${params.toString()}`);
   };
 
-  const allColumns: Column<Prompt>[] = [
-    ...columns,
-    {
-      className: "text-right",
-      header: "Actions",
-      headerClassName: "text-right",
-      key: "actions",
-      render: (prompt) => (
-        <div className="flex items-center justify-end gap-1">
-          {prompt.activeVersion && (
+  const allColumns: Column<Prompt>[] = useMemo(
+    () => [
+      ...columns,
+      {
+        className: "text-right",
+        header: "Actions",
+        headerClassName: "text-right",
+        key: "actions",
+        render: (prompt) => (
+          <div className="flex items-center justify-end gap-1">
+            {prompt.activeVersion && (
+              <Button
+                onClick={() => handleTest(prompt)}
+                size="sm"
+                title="Test in Playground"
+                variant="ghost"
+              >
+                <Play className="size-4" />
+              </Button>
+            )}
             <Button
-              onClick={() => handleTest(prompt)}
+              onClick={() => onView(prompt)}
               size="sm"
-              title="Test in Playground"
+              title="View versions"
               variant="ghost"
             >
-              <Play className="size-4" />
+              <Eye className="size-4" />
             </Button>
-          )}
-          <Button
-            onClick={() => onView(prompt)}
-            size="sm"
-            title="View versions"
-            variant="ghost"
-          >
-            <Eye className="size-4" />
-          </Button>
-          <Button
-            onClick={() => onEdit(prompt)}
-            size="sm"
-            title="Edit prompt"
-            variant="ghost"
-          >
-            <Pencil className="size-4" />
-          </Button>
-          <Button
-            className="hover:bg-destructive/10 hover:text-destructive"
-            onClick={() => onDelete(prompt.id)}
-            size="sm"
-            title="Delete prompt"
-            variant="ghost"
-          >
-            <Trash2 className="size-4" />
-          </Button>
-        </div>
-      )
-    }
-  ];
+            <Button
+              onClick={() => onEdit(prompt)}
+              size="sm"
+              title="Edit prompt"
+              variant="ghost"
+            >
+              <Pencil className="size-4" />
+            </Button>
+            <Button
+              className="hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => onDelete(prompt.id)}
+              size="sm"
+              title="Delete prompt"
+              variant="ghost"
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          </div>
+        )
+      }
+    ],
+    [handleTest, onView, onEdit, onDelete]
+  );
 
   return (
     <DataTable

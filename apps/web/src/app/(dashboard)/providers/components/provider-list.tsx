@@ -13,7 +13,7 @@ import {
   X,
   Zap
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { TextMorph } from "torph/react";
 import { ProviderIcon } from "@/components/model-icon";
@@ -93,78 +93,81 @@ const ProviderList = ({
     [testMutation]
   );
 
-  const allColumns: Column<Provider>[] = [
-    ...columns,
-    {
-      header: "Status",
-      key: "status",
-      render: (provider) => (
-        <button
-          className="cursor-pointer"
-          onClick={() => onToggleEnabled(provider)}
-          type="button"
-        >
-          <Badge dot variant={provider.isEnabled ? "success" : "neutral"}>
-            {provider.isEnabled ? (
-              <>
-                <Check className="size-3" />
-                <TextMorph>Enabled</TextMorph>
-              </>
-            ) : (
-              <>
-                <X className="size-3" />
-                <TextMorph>Disabled</TextMorph>
-              </>
-            )}
-          </Badge>
-        </button>
-      )
-    },
-    {
-      className: "text-right",
-      header: "Actions",
-      headerClassName: "text-right",
-      key: "actions",
-      render: (provider) => {
-        const isTesting = testingId === provider.id;
-
-        return (
-          <div className="flex items-center justify-end gap-1">
-            <Button
-              disabled={isTesting}
-              onClick={() => handleTest(provider.id)}
-              size="sm"
-              title="Test connection"
-              variant="ghost"
-            >
-              {isTesting ? (
-                <Loader2 className="size-4 animate-spin" />
+  const allColumns: Column<Provider>[] = useMemo(
+    () => [
+      ...columns,
+      {
+        header: "Status",
+        key: "status",
+        render: (provider) => (
+          <button
+            className="cursor-pointer"
+            onClick={() => onToggleEnabled(provider)}
+            type="button"
+          >
+            <Badge dot variant={provider.isEnabled ? "success" : "neutral"}>
+              {provider.isEnabled ? (
+                <>
+                  <Check className="size-3" />
+                  <TextMorph>Enabled</TextMorph>
+                </>
               ) : (
-                <Zap className="size-4" />
+                <>
+                  <X className="size-3" />
+                  <TextMorph>Disabled</TextMorph>
+                </>
               )}
-            </Button>
-            <Button
-              onClick={() => onEdit(provider)}
-              size="sm"
-              title="Edit provider"
-              variant="ghost"
-            >
-              <Pencil className="size-4" />
-            </Button>
-            <Button
-              className="hover:bg-destructive/10 hover:text-destructive"
-              onClick={() => onDelete(provider.id)}
-              size="sm"
-              title="Delete provider"
-              variant="ghost"
-            >
-              <Trash2 className="size-4" />
-            </Button>
-          </div>
-        );
+            </Badge>
+          </button>
+        )
+      },
+      {
+        className: "text-right",
+        header: "Actions",
+        headerClassName: "text-right",
+        key: "actions",
+        render: (provider) => {
+          const isTesting = testingId === provider.id;
+
+          return (
+            <div className="flex items-center justify-end gap-1">
+              <Button
+                disabled={isTesting}
+                onClick={() => handleTest(provider.id)}
+                size="sm"
+                title="Test connection"
+                variant="ghost"
+              >
+                {isTesting ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Zap className="size-4" />
+                )}
+              </Button>
+              <Button
+                onClick={() => onEdit(provider)}
+                size="sm"
+                title="Edit provider"
+                variant="ghost"
+              >
+                <Pencil className="size-4" />
+              </Button>
+              <Button
+                className="hover:bg-destructive/10 hover:text-destructive"
+                onClick={() => onDelete(provider.id)}
+                size="sm"
+                title="Delete provider"
+                variant="ghost"
+              >
+                <Trash2 className="size-4" />
+              </Button>
+            </div>
+          );
+        }
       }
-    }
-  ];
+    ],
+    [onToggleEnabled, handleTest, onEdit, onDelete, testingId]
+  );
 
   return (
     <DataTable

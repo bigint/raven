@@ -4,7 +4,7 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import { Hono } from "hono";
 import type { AppContext } from "@/lib/types";
 
-export const createAuditLogsModule = (db: Database) => {
+export const createAuditLogsModule = (db: Database, _redis?: unknown) => {
   const app = new Hono();
 
   app.get("/", async (c: AppContext) => {

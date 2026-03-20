@@ -3,6 +3,7 @@
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable, EmptyState, Spinner } from "@raven/ui";
 import { Building2, Check, Crown, Shield, User } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { type Org, useOrgStore } from "@/stores/org";
 
 const ROLE_BADGES: Record<
@@ -26,24 +27,28 @@ interface OrgListProps {
   readonly orgsLoading: boolean;
 }
 
-const handleSwitchOrg = (org: Org) => {
-  useOrgStore.getState().setActiveOrg({
-    id: org.id,
-    name: org.name,
-    plan: org.plan,
-    role: org.role,
-    slug: org.slug
-  });
-  window.location.reload();
-};
-
 const OrgList = ({
   activeOrgId,
   onCreateOrg,
   orgs,
   orgsError,
   orgsLoading
-}: OrgListProps) => (
+}: OrgListProps) => {
+  const router = useRouter();
+
+  const handleSwitchOrg = (org: Org) => {
+    useOrgStore.getState().setActiveOrg({
+      id: org.id,
+      name: org.name,
+      plan: org.plan,
+      role: org.role,
+      slug: org.slug
+    });
+    router.push("/overview");
+    router.refresh();
+  };
+
+  return (
   <div className="rounded-xl border border-border">
     <div className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
       <div className="flex items-center gap-3">
@@ -144,6 +149,7 @@ const OrgList = ({
       )}
     </div>
   </div>
-);
+  );
+};
 
 export { getRoleBadge, OrgList };

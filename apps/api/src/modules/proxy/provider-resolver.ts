@@ -50,12 +50,24 @@ export const resolveProvider = async (
     throw new ValidationError("Provider not specified in path");
   }
 
-  let providerConfig: typeof providerConfigs.$inferSelect | null = null;
+  const providerConfigColumns = {
+    apiKey: providerConfigs.apiKey,
+    id: providerConfigs.id,
+    isEnabled: providerConfigs.isEnabled,
+    name: providerConfigs.name,
+    organizationId: providerConfigs.organizationId,
+    provider: providerConfigs.provider
+  };
+
+  let providerConfig: Pick<
+    typeof providerConfigs.$inferSelect,
+    "apiKey" | "id" | "isEnabled" | "name" | "organizationId" | "provider"
+  > | null = null;
 
   if (configId) {
     const queryFn = async () => {
       const [result] = await db
-        .select()
+        .select(providerConfigColumns)
         .from(providerConfigs)
         .where(
           and(
@@ -84,7 +96,7 @@ export const resolveProvider = async (
       60,
       async () => {
         const [result] = await db
-          .select()
+          .select(providerConfigColumns)
           .from(providerConfigs)
           .where(eq(providerConfigs.id, resolvedId))
           .limit(1);
@@ -93,7 +105,7 @@ export const resolveProvider = async (
     );
   } else {
     const allConfigs = await db
-      .select()
+      .select(providerConfigColumns)
       .from(providerConfigs)
       .where(
         and(

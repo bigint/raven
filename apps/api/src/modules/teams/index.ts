@@ -5,7 +5,7 @@ import { inviteUser, listInvitations, revokeInvitation } from "./invitations";
 import { listMembers, removeMember } from "./members";
 import { inviteSchema } from "./schema";
 
-export const createTeamsModule = (db: Database) => {
+export const createTeamsModule = (db: Database, _redis?: unknown) => {
   const app = new Hono();
 
   // Members

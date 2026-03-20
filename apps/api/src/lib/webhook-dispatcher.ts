@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import type { Database } from "@raven/db";
 import { webhooks } from "@raven/db";
-import { and, arrayOverlaps, eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
 import pRetry from "p-retry";
 
@@ -10,6 +10,75 @@ interface EventPayload {
   timestamp: string;
   type: string;
 }
+
+interface WebhookConfig {
+  events: string[];
+  id: string;
+  secret: string;
+  url: string;
+}
+
+// Module-level concurrency control
+const MAX_CONCURRENT = 10;
+let inFlight = 0;
+const queue: (() => void)[] = [];
+
+const withConcurrency = async <T>(fn: () => Promise<T>): Promise<T> => {
+  if (inFlight >= MAX_CONCURRENT) {
+    await new Promise<void>((resolve) => queue.push(resolve));
+  }
+  inFlight++;
+  try {
+    return await fn();
+  } finally {
+    inFlight--;
+    const next = queue.shift();
+    if (next) next();
+  }
+};
+
+// Simple TTL cache for webhook configs per org
+const WEBHOOK_CONFIG_TTL_MS = 30_000;
+
+interface CacheEntry {
+  configs: WebhookConfig[];
+  expiresAt: number;
+}
+
+const webhookConfigCache = new Map<string, CacheEntry>();
+
+const getWebhookConfigs = async (
+  db: Database,
+  orgId: string,
+  eventType: string
+): Promise<WebhookConfig[]> => {
+  const cacheKey = orgId;
+  const now = Date.now();
+  const cached = webhookConfigCache.get(cacheKey);
+
+  if (cached && cached.expiresAt > now) {
+    return cached.configs.filter((c) => c.events.includes(eventType));
+  }
+
+  const configs = await db
+    .select({
+      events: webhooks.events,
+      id: webhooks.id,
+      secret: webhooks.secret,
+      url: webhooks.url
+    })
+    .from(webhooks)
+    .where(
+      and(eq(webhooks.organizationId, orgId), eq(webhooks.isEnabled, true))
+    );
+
+  webhookConfigCache.set(cacheKey, {
+    configs,
+    expiresAt: now + WEBHOOK_CONFIG_TTL_MS
+  });
+
+  return configs.filter((c) => c.events.includes(eventType));
+};
 
 const signPayload = (payload: string, secret: string): string => {
   return crypto.createHmac("sha256", secret).update(payload).digest("hex");
@@ -77,21 +146,7 @@ export const initWebhookDispatcher = (db: Database, redis: Redis): void => {
 
     void (async () => {
       try {
-        const matchingWebhooks = await db
-          .select({
-            events: webhooks.events,
-            id: webhooks.id,
-            secret: webhooks.secret,
-            url: webhooks.url
-          })
-          .from(webhooks)
-          .where(
-            and(
-              eq(webhooks.organizationId, orgId),
-              eq(webhooks.isEnabled, true),
-              arrayOverlaps(webhooks.events, [event.type])
-            )
-          );
+        const matchingWebhooks = await getWebhookConfigs(db, orgId, event.type);
 
         for (const webhook of matchingWebhooks) {
           const body = JSON.stringify({
@@ -101,7 +156,9 @@ export const initWebhookDispatcher = (db: Database, redis: Redis): void => {
             webhookId: webhook.id
           });
 
-          void deliverWebhook(webhook.url, body, webhook.secret);
+          void withConcurrency(() =>
+            deliverWebhook(webhook.url, body, webhook.secret)
+          );
         }
       } catch (err) {
         console.error("Webhook dispatcher error:", err);

@@ -7,7 +7,7 @@ import { listBudgets } from "./list";
 import { createBudgetSchema, updateBudgetSchema } from "./schema";
 import { updateBudget } from "./update";
 
-export const createBudgetsModule = (db: Database) => {
+export const createBudgetsModule = (db: Database, _redis?: unknown) => {
   const app = new Hono();
 
   app.get("/", listBudgets(db));

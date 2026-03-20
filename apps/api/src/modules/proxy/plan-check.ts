@@ -1,11 +1,13 @@
 import type { Database } from "@raven/db";
 import { PLAN_FEATURES, type Plan } from "@raven/types";
-import { formatDate } from "date-fns";
 import type { Redis } from "ioredis";
 import { PlanLimitError } from "@/lib/errors";
 import { getOrgPlan } from "./plan-gate";
 
-const getCurrentMonth = (): string => formatDate(new Date(), "yyyy-MM");
+const getCurrentMonth = (): string => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+};
 
 export const checkPlanLimit = async (
   db: Database,
@@ -28,16 +30,19 @@ export const checkPlanLimit = async (
   const month = getCurrentMonth();
   const redisKey = `plan:${orgId}:requests:${month}`;
 
-  const count = await redis.incr(redisKey);
+  const currentValue = await redis.get(redisKey);
+  const currentCount = currentValue ? Number.parseInt(currentValue, 10) : 0;
 
-  if (count === 1) {
-    await redis.expire(redisKey, 2_592_000);
-  }
-
-  if (count > limit) {
+  if (currentCount >= limit) {
     throw new PlanLimitError(
       `Monthly request limit of ${limit.toLocaleString()} exceeded for ${plan} plan`,
-      { currentCount: count, limit, plan }
+      { currentCount, limit, plan }
     );
+  }
+
+  const newCount = await redis.incr(redisKey);
+
+  if (newCount === 1) {
+    await redis.expire(redisKey, 2_592_000);
   }
 };

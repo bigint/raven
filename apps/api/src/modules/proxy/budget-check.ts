@@ -21,13 +21,22 @@ export const checkBudgets = async (
 ): Promise<void> => {
   const entityIds = [orgId, virtualKeyId];
 
+  const budgetColumns = {
+    alertThreshold: budgets.alertThreshold,
+    entityId: budgets.entityId,
+    entityType: budgets.entityType,
+    id: budgets.id,
+    limitAmount: budgets.limitAmount,
+    period: budgets.period
+  };
+
   const activeBudgets = await cachedQuery(
     redis,
     cacheKeys.budgets(orgId, virtualKeyId),
     15,
     () =>
       db
-        .select()
+        .select(budgetColumns)
         .from(budgets)
         .where(
           and(
@@ -65,14 +74,18 @@ export const checkBudgets = async (
     }
 
     if (threshold > 0 && spent >= threshold * limit) {
-      void publishEvent(orgId, "budget.alert", {
-        budgetId: budget.id,
-        entityId: budget.entityId,
-        entityType: budget.entityType,
-        limitAmount: limit,
-        spent,
-        threshold
-      });
+      const debounceKey = `budget:alert:${budget.id}`;
+      const isNew = await redis.set(debounceKey, "1", "EX", 3600, "NX");
+      if (isNew) {
+        void publishEvent(orgId, "budget.alert", {
+          budgetId: budget.id,
+          entityId: budget.entityId,
+          entityType: budget.entityType,
+          limitAmount: limit,
+          spent,
+          threshold
+        });
+      }
     }
   }
 };
@@ -90,15 +103,21 @@ export const incrementBudgetSpend = async (
 
   const entityIds = [orgId, virtualKeyId];
 
-  const activeBudgets = await db
-    .select({ id: budgets.id, period: budgets.period })
-    .from(budgets)
-    .where(
-      and(
-        eq(budgets.organizationId, orgId),
-        inArray(budgets.entityId, entityIds)
-      )
-    );
+  const activeBudgets = await cachedQuery(
+    redis,
+    cacheKeys.budgets(orgId, virtualKeyId),
+    15,
+    () =>
+      db
+        .select({ id: budgets.id, period: budgets.period })
+        .from(budgets)
+        .where(
+          and(
+            eq(budgets.organizationId, orgId),
+            inArray(budgets.entityId, entityIds)
+          )
+        )
+  );
 
   if (activeBudgets.length === 0) {
     return;

@@ -42,5 +42,8 @@ export const promptVersions = pgTable(
       .references(() => prompts.id, { onDelete: "cascade" }),
     version: integer("version").notNull()
   },
-  (t) => [index("prompt_versions_prompt_id_idx").on(t.promptId)]
+  (t) => [
+    index("prompt_versions_prompt_id_idx").on(t.promptId),
+    index("prompt_versions_prompt_active_idx").on(t.promptId, t.isActive)
+  ]
 );
