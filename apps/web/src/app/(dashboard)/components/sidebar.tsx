@@ -16,6 +16,7 @@ import {
   ScrollText,
   Settings,
   Shield,
+  ShieldCheck,
   SquareTerminal,
   Webhook,
   X
@@ -24,6 +25,7 @@ import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { useSession } from "@/lib/auth-client";
 import { UserMenu } from "./user-menu";
 
 const useLockBodyScroll = (isLocked: boolean) => {
@@ -69,6 +71,8 @@ interface SidebarProps {
 export const Sidebar = ({ user }: SidebarProps) => {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "admin";
 
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
@@ -109,6 +113,22 @@ export const Sidebar = ({ user }: SidebarProps) => {
         <Settings className="size-4" />
         Settings
       </Link>
+      {isAdmin && (
+        <>
+          <div className="my-2 border-t border-border" />
+          <Link
+            className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
+              pathname.startsWith("/admin")
+                ? "bg-primary text-primary-foreground font-medium"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            }`}
+            href="/admin"
+          >
+            <ShieldCheck className="size-4" />
+            Admin
+          </Link>
+        </>
+      )}
     </>
   );
 
