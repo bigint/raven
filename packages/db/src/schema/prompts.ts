@@ -7,7 +7,6 @@ import {
   text,
   timestamp
 } from "drizzle-orm/pg-core";
-import { organizations } from "./organizations";
 
 export const prompts = pgTable(
   "prompts",
@@ -17,14 +16,11 @@ export const prompts = pgTable(
       .defaultNow(),
     id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),
-    organizationId: text("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .defaultNow()
   },
-  (t) => [index("prompts_org_name_idx").on(t.organizationId, t.name)]
+  (t) => [index("prompts_name_idx").on(t.name)]
 );
 
 export const promptVersions = pgTable(

@@ -7,7 +7,6 @@ import {
   text,
   timestamp
 } from "drizzle-orm/pg-core";
-import { organizations } from "./organizations";
 
 export const routingRules = pgTable(
   "routing_rules",
@@ -20,9 +19,6 @@ export const routingRules = pgTable(
     id: text("id").primaryKey().$defaultFn(createId),
     isEnabled: boolean("is_enabled").notNull().default(true),
     name: text("name").notNull(),
-    organizationId: text("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
     priority: integer("priority").notNull().default(0),
     sourceModel: text("source_model").notNull(),
     targetModel: text("target_model").notNull(),
@@ -31,10 +27,6 @@ export const routingRules = pgTable(
       .defaultNow()
   },
   (t) => [
-    index("routing_rules_org_model_enabled_idx").on(
-      t.organizationId,
-      t.sourceModel,
-      t.isEnabled
-    )
+    index("routing_rules_model_enabled_idx").on(t.sourceModel, t.isEnabled)
   ]
 );

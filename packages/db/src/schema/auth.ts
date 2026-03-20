@@ -4,7 +4,6 @@ import { users } from "./users";
 export const sessions = pgTable(
   "sessions",
   {
-    activeOrganizationId: text("active_organization_id"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),

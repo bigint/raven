@@ -7,10 +7,9 @@ import {
   text,
   timestamp
 } from "drizzle-orm/pg-core";
-import { organizations } from "./organizations";
 
 export const budgetEntityTypeEnum = pgEnum("budget_entity_type", [
-  "organization",
+  "global",
   "key"
 ]);
 export const budgetPeriodEnum = pgEnum("budget_period", ["daily", "monthly"]);
@@ -28,10 +27,7 @@ export const budgets = pgTable(
     entityType: budgetEntityTypeEnum("entity_type").notNull(),
     id: text("id").primaryKey().$defaultFn(createId),
     limitAmount: numeric("limit_amount", { precision: 12, scale: 2 }).notNull(),
-    organizationId: text("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
     period: budgetPeriodEnum("period").notNull().default("monthly")
   },
-  (t) => [index("budgets_org_entity_idx").on(t.organizationId, t.entityId)]
+  (t) => [index("budgets_entity_idx").on(t.entityType, t.entityId)]
 );

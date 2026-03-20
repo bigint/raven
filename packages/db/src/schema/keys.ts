@@ -8,7 +8,6 @@ import {
   text,
   timestamp
 } from "drizzle-orm/pg-core";
-import { organizations } from "./organizations";
 
 export const keyEnvironmentEnum = pgEnum("key_environment", ["live", "test"]);
 
@@ -26,14 +25,11 @@ export const virtualKeys = pgTable(
     keyPrefix: text("key_prefix").notNull(),
     lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
     name: text("name").notNull(),
-    organizationId: text("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
     rateLimitRpd: integer("rate_limit_rpd"),
     rateLimitRpm: integer("rate_limit_rpm")
   },
   (t) => [
     index("virtual_keys_key_hash_idx").on(t.keyHash),
-    index("virtual_keys_org_active_idx").on(t.organizationId, t.isActive)
+    index("virtual_keys_active_idx").on(t.isActive)
   ]
 );

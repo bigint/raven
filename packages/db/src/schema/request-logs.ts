@@ -10,7 +10,6 @@ import {
   timestamp
 } from "drizzle-orm/pg-core";
 import { virtualKeys } from "./keys";
-import { organizations } from "./organizations";
 import { providerConfigs } from "./providers";
 
 export const requestLogs = pgTable(
@@ -33,9 +32,6 @@ export const requestLogs = pgTable(
     latencyMs: integer("latency_ms").notNull().default(0),
     method: text("method").notNull(),
     model: text("model").notNull(),
-    organizationId: text("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "no action" }),
     outputTokens: integer("output_tokens").notNull().default(0),
     path: text("path").notNull(),
     provider: text("provider").notNull(),
@@ -54,43 +50,18 @@ export const requestLogs = pgTable(
     })
   },
   (t) => [
-    index("request_logs_org_created_idx").on(t.organizationId, t.createdAt),
-    index("request_logs_org_key_created_idx").on(
-      t.organizationId,
-      t.virtualKeyId,
-      t.createdAt
-    ),
-    index("request_logs_org_session_created_idx").on(
-      t.organizationId,
-      t.sessionId,
-      t.createdAt
-    ),
-    index("request_logs_provider_model_org_created_idx").on(
+    index("request_logs_created_idx").on(t.createdAt),
+    index("request_logs_key_created_idx").on(t.virtualKeyId, t.createdAt),
+    index("request_logs_session_created_idx").on(t.sessionId, t.createdAt),
+    index("request_logs_provider_model_created_idx").on(
       t.provider,
       t.model,
-      t.organizationId,
       t.createdAt
     ),
-    index("request_logs_org_status_created_idx").on(
-      t.organizationId,
-      t.statusCode,
-      t.createdAt
-    ),
-    index("request_logs_org_deleted_created_idx").on(
-      t.organizationId,
-      t.deletedAt,
-      t.createdAt
-    ),
-    index("request_logs_org_model_created_idx").on(
-      t.organizationId,
-      t.model,
-      t.createdAt
-    ),
-    index("request_logs_org_enduser_created_idx").on(
-      t.organizationId,
-      t.endUser,
-      t.createdAt
-    ),
+    index("request_logs_status_created_idx").on(t.statusCode, t.createdAt),
+    index("request_logs_deleted_created_idx").on(t.deletedAt, t.createdAt),
+    index("request_logs_model_created_idx").on(t.model, t.createdAt),
+    index("request_logs_enduser_created_idx").on(t.endUser, t.createdAt),
     index("request_logs_created_deleted_idx").on(t.createdAt, t.deletedAt)
   ]
 );
