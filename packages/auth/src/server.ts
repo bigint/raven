@@ -103,7 +103,7 @@ export const createAuth = (db: Database, env: Env, options?: AuthOptions) => {
     user: {
       additionalFields: {
         avatarUrl: { required: false, type: "string" },
-        role: { defaultValue: "user", type: "string" }
+        role: { defaultValue: "viewer", type: "string" }
       }
     }
   });
