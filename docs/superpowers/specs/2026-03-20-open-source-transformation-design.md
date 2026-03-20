@@ -105,7 +105,6 @@ No tenant middleware. No plan middleware.
 - `apps/api/src/modules/proxy/plan-gate.ts`
 - `apps/api/src/modules/proxy/plan-check.ts`
 - `apps/web/src/app/(dashboard)/billing/` (entire page)
-- `apps/web/src/app/(dashboard)/[slug]/settings/components/plan-subscription.tsx`
 
 **Concepts removed:**
 - Plan tiers (free/pro/team/enterprise)
@@ -159,8 +158,9 @@ CREATE TABLE settings (
 
 - Runs in the cron container daily
 - Reads `analytics_retention_days` from settings table
-- Deletes `request_logs` where `createdAt < NOW() - retention_days`
-- Deletes `audit_logs` where `createdAt < NOW() - retention_days`
+- **Hard-deletes** `request_logs` where `createdAt < NOW() - retention_days` (regardless of `deletedAt` soft-delete status)
+- **Hard-deletes** `audit_logs` where `createdAt < NOW() - retention_days` (regardless of `deletedAt` soft-delete status)
+- Rationale: retention is about storage management. Both soft-deleted and active records older than the threshold are purged.
 - Logs count of deleted rows to stdout
 
 ---
@@ -189,12 +189,20 @@ All these tables lose their `organizationId` column and associated foreign key/i
 - `routing_rules` — remove `organizationId`, update indexes
 - `webhooks` — remove `organizationId`, update indexes
 - `prompts` — remove `organizationId`, update indexes
+- `sessions` — remove `activeOrganizationId` column (better-auth org plugin artifact)
+
+**Note:** `prompt_versions` has no `organizationId` (references `promptId` FK only) — no changes needed.
 
 ### Tables to MODIFY (other changes)
 
 **`users`:**
 - Change `role` enum from `["user", "admin"]` to `["admin", "member", "viewer"]`
 - Default role: `"viewer"`
+
+**`budgets`:**
+- Change `budgetEntityTypeEnum` from `["organization", "key"]` to `["global", "key"]`
+- Migration maps existing `entityType = "organization"` budgets to `"global"`
+- Budgets with `entityType = "organization"` get their `entityId` set to a sentinel value `"workspace"` since the org ID will be meaningless
 
 ### New Tables
 
@@ -208,9 +216,17 @@ All these tables lose their `organizationId` column and associated foreign key/i
 - `planEnum` (free/pro/team/enterprise)
 - `subscriptionStatusEnum` (active/past_due/cancelled/trialing)
 
+### Enums to MODIFY (additional)
+
+- `budgetEntityTypeEnum`: `["organization", "key"]` → `["global", "key"]`
+
 ### Enums to MODIFY
 
 - `platformRoleEnum`: `["user", "admin"]` → `["admin", "member", "viewer"]`
+
+### Better Auth Tables
+
+The `sessions`, `accounts`, and `verifications` tables are managed by better-auth. The `sessions` table has an `activeOrganizationId` column from the org plugin. This column must be dropped in the migration, and the better-auth organization plugin must be removed from the auth configuration in `packages/auth/src/server.ts`.
 
 ### Migration Strategy
 
@@ -218,8 +234,11 @@ Single Drizzle migration that:
 1. Creates `settings` table with defaults
 2. Drops `subscriptions`, `invitations`, `members`, `organizations` tables
 3. Drops `organizationId` columns from all affected tables
-4. Alters `platformRoleEnum` to new values (map `"user"` → `"member"`)
-5. Drops unused enums
+4. Drops `activeOrganizationId` from `sessions` table
+5. Alters `platformRoleEnum` to new values (map `"user"` → `"member"`)
+6. Alters `budgetEntityTypeEnum` (map `"organization"` → `"global"`)
+7. Updates existing org-level budgets: set `entityId = "workspace"`
+8. Drops unused enums (`planEnum`, `subscriptionStatusEnum`)
 
 ---
 
@@ -392,19 +411,23 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     restart: unless-stopped
 
   raven-cron:
     image: raven:latest
-    command: ["node", "api/cron.js"]
+    command: ["./docker-entrypoint.sh", "cron"]
     environment:
       - DATABASE_URL=postgresql://raven:raven@postgres:5432/raven
       - REDIS_URL=redis://redis:6379
       - ENCRYPTION_SECRET=${ENCRYPTION_SECRET:-changeme-generate-a-32byte-hex}
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
+      raven:
         condition: service_healthy
     restart: unless-stopped
 
@@ -504,6 +527,9 @@ setInterval(() => cleanupRetention(), 24 * 60 * 60 * 1000)
 | `POST /v1/user/orgs` | No orgs |
 | `GET /v1/admin/organizations` | No orgs |
 | `POST /v1/cron/sync-models` | Replaced by cron container |
+| `GET /v1/settings` | Org settings (no orgs) — delete module |
+| `PUT /v1/settings` | Org settings (no orgs) — delete module |
+| `GET /v1/settings/export` | Org data export (no orgs) — delete |
 
 ### New Routes
 
@@ -515,6 +541,7 @@ setInterval(() => cleanupRetention(), 24 * 60 * 60 * 1000)
 | `GET /v1/admin/users/:id` | Get single user (for role management) |
 | `PATCH /v1/admin/users/:id` | Update user role |
 | `DELETE /v1/admin/users/:id` | Delete user |
+| `POST /v1/admin/models/sync` | Manual model sync trigger ("Sync Now" button) |
 
 ### Modified Routes
 
@@ -544,6 +571,25 @@ All existing `/v1/*` routes that currently require `orgId` context:
 | Route | Purpose |
 |-------|---------|
 | `/admin` | Admin page with tabs (in dashboard layout) |
+
+### Unchanged Routes
+
+| Route | Note |
+|-------|------|
+| `/analytics` | Stays, remove plan-gated adoption tab restriction |
+| `/providers` | Stays, remove resource limit check |
+| `/keys` | Stays, remove resource limit check |
+| `/prompts` | Stays as-is |
+| `/models` | Stays as-is |
+| `/routing` | Stays as-is |
+| `/requests` | Stays as-is |
+| `/budgets` | Stays, remove resource limit check |
+| `/guardrails` | Stays, remove feature gate check |
+| `/webhooks` | Stays, remove feature gate check |
+| `/audit-logs` | Stays, remove feature gate check |
+| `/integrations` | Stays as-is |
+| `/chat` | Stays as-is |
+| `/overview` | Stays as-is |
 
 ### Modified Routes
 
@@ -593,6 +639,9 @@ GITHUB_CLIENT_ID=
 GITHUB_CLIENT_SECRET=
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
+
+# Encryption key rotation (optional — set old key here when rotating ENCRYPTION_SECRET)
+ENCRYPTION_SECRET_PREVIOUS=
 ```
 
 ### Removed Variables
@@ -631,6 +680,7 @@ packages/db/src/schema/organizations.ts
 packages/db/src/schema/members.ts
 packages/db/src/schema/invitations.ts
 apps/api/src/modules/teams/index.ts
+apps/api/src/modules/teams/schema.ts
 apps/api/src/modules/teams/members.ts
 apps/api/src/modules/teams/invitations.ts
 apps/api/src/modules/user/invitations.ts
@@ -648,12 +698,18 @@ apps/web/src/app/(admin)/layout.tsx
 apps/web/src/app/(admin)/components/admin-sidebar.tsx
 apps/web/src/app/(admin)/admin/organizations/*
 
+# Existing org settings module (replaced by admin settings)
+apps/api/src/modules/settings/  (entire module — org-scoped, no longer needed)
+
 # Marketing
 apps/web/src/app/(marketing)/pricing/*
 apps/web/src/app/(marketing)/components/pricing-page.tsx
 apps/web/src/app/(marketing)/components/billing-toggle.tsx
+apps/web/src/app/(marketing)/components/home-page.tsx   (SaaS marketing content)
+apps/web/src/app/(marketing)/components/hero-word-rotator.tsx  (SaaS marketing animation)
 apps/web/src/app/(marketing)/privacy/*
 apps/web/src/app/(marketing)/terms/*
+apps/web/src/app/(marketing)/docs/*  (if exists — docs served separately)
 
 # CI/CD
 .github/workflows/sync-models.yml
@@ -669,7 +725,7 @@ packages/db/src/schema/provider-configs.ts
 packages/db/src/schema/request-logs.ts
 packages/db/src/schema/audit-logs.ts
 packages/db/src/schema/budgets.ts
-packages/db/src/schema/guardrails.ts
+packages/db/src/schema/guardrail-rules.ts
 packages/db/src/schema/routing-rules.ts
 packages/db/src/schema/webhooks.ts
 packages/db/src/schema/prompts.ts
@@ -704,8 +760,10 @@ apps/api/src/modules/budgets/*.ts
 apps/api/src/modules/guardrails/*.ts
 apps/api/src/modules/webhooks/*.ts
 apps/api/src/modules/routing-rules/*.ts
-apps/api/src/modules/settings/*.ts
 apps/api/src/modules/user/orgs.ts → user/profile.ts (simplified)
+
+# Auth config (remove org plugin)
+packages/auth/src/server.ts (remove better-auth organization plugin)
 
 # Web
 apps/web/src/app/(dashboard)/layout.tsx
