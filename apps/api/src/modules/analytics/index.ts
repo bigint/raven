@@ -5,6 +5,7 @@ import type { AuthEnv } from "@/lib/types";
 import { queryValidator } from "@/lib/validation";
 import { getAdoptionBreakdown, getAdoptionChart } from "./adoption";
 import { getCache } from "./cache";
+import { clampAnalyticsRetention } from "./helpers";
 import { getLogs } from "./logs";
 import { getModels } from "./models";
 import { getRequests } from "./requests";
@@ -24,6 +25,19 @@ import { getUsage } from "./usage";
 
 export const createAnalyticsModule = (db: Database, redis?: Redis) => {
   const app = new Hono<AuthEnv>();
+
+  app.use("*", async (c, next) => {
+    if (c.req.path.endsWith("/requests/live") || c.req.path.endsWith("/star"))
+      return next();
+    const from = c.req.query("from");
+    const clamped = await clampAnalyticsRetention(db, from);
+    if (clamped) {
+      const url = new URL(c.req.url);
+      url.searchParams.set("from", clamped);
+      c.req.raw = new Request(url, c.req.raw);
+    }
+    return next();
+  });
 
   app.get("/stats", queryValidator(dateRangeQuerySchema), getStats(db, redis));
   app.get("/usage", queryValidator(dateRangeQuerySchema), getUsage(db, redis));
