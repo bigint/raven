@@ -35,11 +35,7 @@ export const getAdminUsers = (db: Database) => async (c: Context) => {
   const hasMore = rows.length > limit;
   const data = rows.slice(0, limit);
 
-  return c.json({
-    data,
-    hasMore,
-    nextCursor: hasMore ? data[data.length - 1]?.id : undefined
-  });
+  return success(c, data);
 };
 
 export const updateUserRole = (db: Database) => async (c: Context) => {

@@ -21,9 +21,9 @@ interface StatCard {
 
 const buildStatCards = (stats: Stats | null): StatCard[] => {
   const totalRequests = stats?.totalRequests ?? 0;
-  const totalCost = Number(stats?.totalCost ?? 0);
-  const avgLatency = Number(stats?.avgLatencyMs ?? 0);
-  const cacheHitRate = Number(stats?.cacheHitRate ?? 0) * 100;
+  const totalCost = Number(stats?.totalCost) || 0;
+  const avgLatency = Number(stats?.avgLatencyMs) || 0;
+  const cacheHitRate = (Number(stats?.cacheHitRate) || 0) * 100;
 
   return [
     {

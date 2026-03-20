@@ -11,10 +11,11 @@ import {
   useUpdateUserRole
 } from "../hooks/use-admin";
 
-const ROLE_OPTIONS = ["user", "admin"] as const;
+const ROLE_OPTIONS = ["admin", "member", "viewer"] as const;
 
 const RoleBadge = ({ role }: { readonly role: string }) => {
-  const variant = role === "admin" ? "primary" : "neutral";
+  const variant =
+    role === "admin" ? "primary" : role === "member" ? "success" : "neutral";
   return <Badge variant={variant}>{role}</Badge>;
 };
 
