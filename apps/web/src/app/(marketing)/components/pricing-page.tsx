@@ -32,7 +32,6 @@ const buildPlanFeatures = (plan: Plan): string[] => {
   ];
 
   if (f.hasGuardrails) lines.push("Guardrails");
-  if (f.hasModelAliases) lines.push("Model aliases");
   if (f.hasWebhooks) lines.push("Webhooks");
   if (f.hasAdoption) lines.push("Adoption analytics");
   if (f.hasAuditLogs) lines.push("Audit logs");
@@ -140,7 +139,6 @@ const comparisonFeatures: ReadonlyArray<{
   numericRow("Analytics retention (days)", "analyticsRetentionDays"),
   numericRow("Budgets", "maxBudgets"),
   booleanRow("Guardrails", "hasGuardrails"),
-  booleanRow("Model aliases", "hasModelAliases"),
   booleanRow("Webhooks", "hasWebhooks"),
   booleanRow("Adoption analytics", "hasAdoption"),
   booleanRow("Audit logs", "hasAuditLogs")

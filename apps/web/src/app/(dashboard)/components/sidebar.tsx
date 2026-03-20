@@ -15,7 +15,6 @@ import {
   Network,
   Plug,
   Receipt,
-  Replace,
   Route,
   ScrollText,
   Settings,
@@ -58,12 +57,6 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/keys", icon: Key, label: "Keys" },
   { href: "/prompts", icon: FileText, label: "Prompts" },
   { href: "/models", icon: Cpu, label: "Models" },
-  {
-    gate: (plan) => PLAN_FEATURES[plan].hasModelAliases,
-    href: "/model-aliases",
-    icon: Replace,
-    label: "Model Aliases"
-  },
   { href: "/routing", icon: Route, label: "Routing" },
   { href: "/requests", icon: Activity, label: "Requests" },
   { href: "/budgets", icon: CreditCard, label: "Budgets" },

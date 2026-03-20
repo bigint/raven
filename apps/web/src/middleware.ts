@@ -13,7 +13,6 @@ const PROTECTED_PREFIXES = [
   "/guardrails",
   "/integrations",
   "/keys",
-  "/model-aliases",
   "/models",
   "/onboarding",
   "/overview",

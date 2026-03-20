@@ -3,6 +3,7 @@
 import type { SelectOption } from "@raven/ui";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { ModelIcon } from "@/components/model-icon";
 import { api } from "./api";
 
 export interface CatalogModel {
@@ -39,6 +40,7 @@ export const useModelOptions = (): readonly SelectOption[] => {
   return useMemo(
     () =>
       models.map((m) => ({
+        icon: ModelIcon({ model: m.slug, provider: m.provider, size: 16 }),
         label: `${m.name} (${m.provider})`,
         value: m.slug
       })),

@@ -2,20 +2,19 @@ import type { Database } from "@raven/db";
 import {
   budgets,
   guardrailRules,
-  modelAliases,
   providerConfigs,
   routingRules,
   virtualKeys,
   webhooks
 } from "@raven/db";
-import { and, eq, isNull } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { success } from "@/lib/response";
 import type { AppContext } from "@/lib/types";
 
 export const exportSettings = (db: Database) => async (c: AppContext) => {
   const orgId = c.get("orgId");
 
-  const [providers, keys, guardrails, routes, hooks, orgBudgets, aliases] =
+  const [providers, keys, guardrails, routes, hooks, orgBudgets] =
     await Promise.all([
       db
         .select({
@@ -75,19 +74,7 @@ export const exportSettings = (db: Database) => async (c: AppContext) => {
           period: budgets.period
         })
         .from(budgets)
-        .where(eq(budgets.organizationId, orgId)),
-      db
-        .select({
-          alias: modelAliases.alias,
-          targetModel: modelAliases.targetModel
-        })
-        .from(modelAliases)
-        .where(
-          and(
-            eq(modelAliases.organizationId, orgId),
-            isNull(modelAliases.deletedAt)
-          )
-        )
+        .where(eq(budgets.organizationId, orgId))
     ]);
 
   return success(c, {
@@ -95,7 +82,6 @@ export const exportSettings = (db: Database) => async (c: AppContext) => {
     exportedAt: new Date().toISOString(),
     guardrails,
     keys,
-    modelAliases: aliases,
     providers,
     routingRules: routes,
     version: "1.0",
