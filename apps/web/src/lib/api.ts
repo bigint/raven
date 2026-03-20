@@ -1,5 +1,4 @@
 import ky from "ky";
-import { useOrgStore } from "@/stores/org";
 
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
@@ -36,14 +35,7 @@ const client = ky.create({
         return error;
       }
     ],
-    beforeRequest: [
-      (request) => {
-        const orgId = useOrgStore.getState().activeOrg?.id;
-        if (orgId) {
-          request.headers.set("X-Org-Id", orgId);
-        }
-      }
-    ]
+    beforeRequest: []
   },
   prefixUrl: API_URL
 });

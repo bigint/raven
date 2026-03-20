@@ -1,7 +1,6 @@
 import { PROVIDER_FILTER_OPTIONS, PROVIDER_LABELS } from "@raven/types";
 import { useEffect, useRef, useState } from "react";
 import { API_URL } from "@/lib/api";
-import { useOrgStore } from "@/stores/org";
 
 export interface RequestLog {
   readonly id: string;
@@ -100,8 +99,7 @@ export const useLiveRequests = (enabled: boolean) => {
     setIsLoading(true);
     setError(null);
 
-    const orgId = useOrgStore.getState().activeOrg?.id ?? null;
-    const url = `${API_URL}/v1/analytics/requests/live${orgId ? `?orgId=${orgId}` : ""}`;
+    const url = `${API_URL}/v1/analytics/requests/live`;
     const es = new EventSource(url, { withCredentials: true });
     eventSourceRef.current = es;
 

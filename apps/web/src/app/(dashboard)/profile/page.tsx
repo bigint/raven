@@ -57,7 +57,7 @@ const ProfilePage = () => {
 
         <OrgList
           activeOrgId={activeOrgId}
-          onCreateOrg={() => router.push("/onboarding")}
+          onCreateOrg={() => router.push("/overview")}
           orgs={orgsQuery.data ?? []}
           orgsError={orgsQuery.isError ? orgsQuery.error.message : null}
           orgsLoading={orgsQuery.isLoading}

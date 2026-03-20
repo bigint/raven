@@ -7,14 +7,12 @@ const AUTH_ROUTES = ["/sign-in", "/sign-up"];
 const PROTECTED_PREFIXES = [
   "/analytics",
   "/audit-logs",
-  "/billing",
   "/budgets",
   "/chat",
   "/guardrails",
   "/integrations",
   "/keys",
   "/models",
-  "/onboarding",
   "/overview",
   "/profile",
   "/prompts",
@@ -22,9 +20,7 @@ const PROTECTED_PREFIXES = [
   "/requests",
   "/routing",
   "/settings",
-  "/team",
-  "/webhooks",
-  "/admin"
+  "/webhooks"
 ];
 
 export const middleware = (request: NextRequest): NextResponse => {

@@ -20,7 +20,7 @@ export const SignUpForm = () => {
 
     try {
       await signUp.email({ email, name, password });
-      router.push("/onboarding");
+      router.push("/overview");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create account");
     } finally {

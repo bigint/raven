@@ -1,15 +1,12 @@
 "use client";
 
-import type { Plan } from "@raven/types";
-import { PLAN_FEATURES } from "@raven/types";
 import { Button, PageHeader, Tabs } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useMemo } from "react";
+import { Suspense } from "react";
 import { match } from "ts-pattern";
-import { subscriptionQueryOptions } from "@/app/(dashboard)/billing/hooks/use-billing";
 import { keysQueryOptions } from "@/app/(dashboard)/keys/hooks/use-keys";
 import { AdoptionTab } from "./components/adoption-tab";
 import { ModelsTab } from "./components/models-tab";
@@ -49,10 +46,6 @@ const AnalyticsPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const { data: subscription } = useQuery(subscriptionQueryOptions());
-  const plan = (subscription?.planId as Plan) ?? "free";
-  const hasAdoption = PLAN_FEATURES[plan].hasAdoption;
-
   const keyId = searchParams.get("keyId") ?? undefined;
 
   const tab = (searchParams.get("tab") as AnalyticsTab) ?? "overview";
@@ -62,17 +55,12 @@ const AnalyticsPage = () => {
     router.replace(`?${params.toString()}`);
   };
 
-  const tabs = useMemo(() => {
-    const base = [
-      { label: "Overview", value: "overview" },
-      { label: "Models", value: "models" },
-      { label: "Tools", value: "tools" }
-    ];
-    if (hasAdoption) {
-      base.push({ label: "Adoption", value: "adoption" });
-    }
-    return base;
-  }, [hasAdoption]);
+  const tabs = [
+    { label: "Overview", value: "overview" },
+    { label: "Models", value: "models" },
+    { label: "Tools", value: "tools" },
+    { label: "Adoption", value: "adoption" }
+  ];
 
   return (
     <div>
@@ -91,9 +79,7 @@ const AnalyticsPage = () => {
           .with("overview", () => <OverviewTab keyId={keyId} />)
           .with("models", () => <ModelsTab keyId={keyId} />)
           .with("tools", () => <ToolsTab keyId={keyId} />)
-          .with("adoption", () =>
-            hasAdoption ? <AdoptionTab keyId={keyId} /> : null
-          )
+          .with("adoption", () => <AdoptionTab keyId={keyId} />)
           .otherwise(() => null)}
       </Suspense>
     </div>

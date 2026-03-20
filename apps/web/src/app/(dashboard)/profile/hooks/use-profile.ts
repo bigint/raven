@@ -6,10 +6,14 @@ import {
   useQueryClient
 } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { orgsQueryOptions } from "@/app/(dashboard)/hooks/use-orgs";
 import { api } from "@/lib/api";
+import type { Org } from "../components/org-list";
 
-export { orgsQueryOptions };
+export const orgsQueryOptions = () =>
+  queryOptions({
+    queryFn: () => api.get<Org[]>("/v1/user/orgs"),
+    queryKey: ["orgs"]
+  });
 
 export interface ProfileInvitation {
   readonly id: string;
