@@ -18,7 +18,6 @@ import { createAuthMiddleware } from "./middleware/auth";
 import { platformAdminMiddleware } from "./middleware/platform-admin";
 import { requestId } from "./middleware/request-id";
 import { requestTiming } from "./middleware/request-timing";
-import { createTenantMiddleware } from "./middleware/tenant";
 import { createAdminModule } from "./modules/admin/index";
 import { createAnalyticsModule } from "./modules/analytics/index";
 import { createAuditLogsModule } from "./modules/audit-logs/index";
@@ -158,7 +157,7 @@ app.route("/v1/cron", createCronModule(db, env, redis));
 // Public models catalog (no auth required)
 app.route("/v1/models", createModelsModule(db));
 
-// User-level routes (session auth, no tenant)
+// User-level routes (session auth)
 const userRoutes = new Hono();
 userRoutes.use("*", createAuthMiddleware(auth));
 userRoutes.route("/", createUserModule(db));
@@ -171,10 +170,9 @@ adminRoutes.use("*", platformAdminMiddleware);
 adminRoutes.route("/", createAdminModule(db, redis));
 app.route("/v1/admin", adminRoutes);
 
-// Protected API routes (session auth + tenant)
+// Protected API routes (session auth)
 const v1 = new Hono();
 v1.use("*", createAuthMiddleware(auth));
-v1.use("*", createTenantMiddleware(db, redis));
 v1.get("/available-models", listAvailableModels(db));
 v1.route("/providers", createProvidersModule(db, env, redis));
 v1.route("/keys", createKeysModule(db, redis));
