@@ -1,21 +1,28 @@
 import type { Database } from "@raven/db";
-import { requestLogs } from "@raven/db";
-import { lt } from "drizzle-orm";
-
-const DEFAULT_RETENTION_DAYS = 90;
+import { auditLogs, requestLogs, settings } from "@raven/db";
+import { eq, lt } from "drizzle-orm";
+import { subDays } from "date-fns";
 
 export const cleanupRetention = async (db: Database) => {
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - DEFAULT_RETENTION_DAYS);
+  const [row] = await db
+    .select({ value: settings.value })
+    .from(settings)
+    .where(eq(settings.key, "analytics_retention_days"));
 
-  const result = await db
+  const retentionDays = row ? Number.parseInt(row.value, 10) : 365;
+  const cutoff = subDays(new Date(), retentionDays);
+
+  const deletedRequests = await db
     .delete(requestLogs)
     .where(lt(requestLogs.createdAt, cutoff))
     .returning({ id: requestLogs.id });
 
-  console.log(
-    `Retention cleanup: removed ${result.length} log entries older than ${DEFAULT_RETENTION_DAYS} days`
-  );
+  const deletedAudits = await db
+    .delete(auditLogs)
+    .where(lt(auditLogs.createdAt, cutoff))
+    .returning({ id: auditLogs.id });
 
-  return { removed: result.length };
+  console.log(
+    `Retention cleanup: deleted ${deletedRequests.length} request logs and ${deletedAudits.length} audit logs older than ${retentionDays} days`
+  );
 };
