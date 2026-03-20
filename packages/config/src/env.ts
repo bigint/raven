@@ -5,9 +5,6 @@ const envSchema = z.object({
   APP_URL: z.string().url(),
   BETTER_AUTH_SECRET: z.string().min(16),
   BETTER_AUTH_URL: z.string().url(),
-  CLOUDFLARE_API_TOKEN: z.string().optional(),
-  CLOUDFLARE_ZONE_ID: z.string().optional(),
-  CRON_SECRET: z.string().min(16).optional(),
   DATABASE_URL: z.string().url(),
   ENCRYPTION_SECRET: z.string().min(32),
   ENCRYPTION_SECRET_PREVIOUS: z.string().min(32).optional(),
@@ -15,8 +12,6 @@ const envSchema = z.object({
   GITHUB_CLIENT_SECRET: z.string().optional(),
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
-  LEMONSQUEEZY_API_KEY: z.string().optional(),
-  LEMONSQUEEZY_WEBHOOK_SECRET: z.string().optional(),
   NEXT_PUBLIC_API_URL: z.string().url(),
   NODE_ENV: z
     .enum(["development", "production", "test"])
