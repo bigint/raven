@@ -45,7 +45,6 @@ interface AdminProvider {
 interface AdminSettings {
   readonly instance_name: string;
   readonly analytics_retention_days: string;
-  readonly allow_registration: string;
 }
 
 // --- Query Options ---

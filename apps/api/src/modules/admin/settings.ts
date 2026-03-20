@@ -4,7 +4,6 @@ import type { Context } from "hono";
 import { success } from "@/lib/response";
 
 const DEFAULT_SETTINGS: Record<string, string> = {
-  allow_registration: "true",
   analytics_retention_days: "365",
   instance_name: "Raven"
 };
@@ -37,11 +36,10 @@ export const updateSettings = (db: Database) => async (c: Context) => {
 export const getPublicSettings = (db: Database) => async (c: Context) => {
   const rows = await db.select().from(settings);
   const result: Record<string, string> = {
-    allow_registration: DEFAULT_SETTINGS.allow_registration ?? "true",
     instance_name: DEFAULT_SETTINGS.instance_name ?? "Raven"
   };
   for (const row of rows) {
-    if (row.key === "allow_registration" || row.key === "instance_name") {
+    if (row.key === "instance_name") {
       result[row.key] = row.value;
     }
   }

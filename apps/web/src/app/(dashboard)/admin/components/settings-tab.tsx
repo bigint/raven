@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input, Spinner, Switch } from "@raven/ui";
+import { Button, Input, Spinner } from "@raven/ui";
 import { useEffect, useState } from "react";
 import { useAdminSettings, useUpdateSettings } from "../hooks/use-admin";
 
@@ -10,13 +10,11 @@ export const SettingsTab = () => {
 
   const [instanceName, setInstanceName] = useState("");
   const [retentionDays, setRetentionDays] = useState(365);
-  const [allowRegistration, setAllowRegistration] = useState(true);
 
   useEffect(() => {
     if (settings) {
       setInstanceName(settings.instance_name ?? "");
       setRetentionDays(Number(settings.analytics_retention_days) || 365);
-      setAllowRegistration(settings.allow_registration !== "false");
     }
   }, [settings]);
 
@@ -38,7 +36,6 @@ export const SettingsTab = () => {
 
   const handleSave = () => {
     updateSettings.mutate({
-      allow_registration: String(allowRegistration),
       analytics_retention_days: String(retentionDays),
       instance_name: instanceName
     });
@@ -47,8 +44,7 @@ export const SettingsTab = () => {
   const hasChanges =
     settings !== undefined &&
     (instanceName !== (settings.instance_name ?? "") ||
-      retentionDays !== (Number(settings.analytics_retention_days) || 365) ||
-      allowRegistration !== (settings.allow_registration !== "false"));
+      retentionDays !== (Number(settings.analytics_retention_days) || 365));
 
   return (
     <div className="max-w-lg space-y-6">
@@ -67,18 +63,6 @@ export const SettingsTab = () => {
         type="number"
         value={retentionDays}
       />
-
-      <div>
-        <Switch
-          checked={allowRegistration}
-          label="Allow Registration"
-          onCheckedChange={setAllowRegistration}
-        />
-        <p className="mt-1.5 text-xs text-muted-foreground">
-          When disabled, new users cannot sign up. Only admins can create
-          accounts.
-        </p>
-      </div>
 
       <Button
         disabled={!hasChanges || updateSettings.isPending}
