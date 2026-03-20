@@ -1,78 +1,16 @@
 "use client";
 
 import { PageHeader } from "@raven/ui";
-import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { OrgList } from "./components/org-list";
-import { PendingInvitations } from "./components/pending-invitations";
 import { ProfileForm } from "./components/profile-form";
-import {
-  orgsQueryOptions,
-  profileInvitationsQueryOptions,
-  useAcceptInvitation,
-  useDeclineInvitation
-} from "./hooks/use-profile";
 
 const ProfilePage = () => {
-  const router = useRouter();
-  const orgsQuery = useQuery(orgsQueryOptions());
-  const invitationsQuery = useQuery(profileInvitationsQueryOptions());
-
-  const acceptInvitation = useAcceptInvitation();
-  const declineInvitation = useDeclineInvitation();
-
-  const [respondingTo, setRespondingTo] = useState<string | null>(null);
-
-  const handleAccept = async (id: string) => {
-    setRespondingTo(id);
-    try {
-      await acceptInvitation.mutateAsync(id);
-    } finally {
-      setRespondingTo(null);
-    }
-  };
-
-  const handleDecline = async (id: string) => {
-    setRespondingTo(id);
-    try {
-      await declineInvitation.mutateAsync(id);
-    } finally {
-      setRespondingTo(null);
-    }
-  };
-
-  const activeOrgId = orgsQuery.data?.[0]?.id ?? null;
-
   return (
     <div>
-      <PageHeader
-        description="Manage your profile, organizations, and invitations."
-        title="Profile"
-      />
+      <PageHeader description="Manage your profile settings." title="Profile" />
 
       <div className="space-y-6">
         <ProfileForm />
-
-        <OrgList
-          activeOrgId={activeOrgId}
-          onCreateOrg={() => router.push("/overview")}
-          orgs={orgsQuery.data ?? []}
-          orgsError={orgsQuery.isError ? orgsQuery.error.message : null}
-          orgsLoading={orgsQuery.isLoading}
-        />
-
-        <PendingInvitations
-          invitations={invitationsQuery.data ?? []}
-          invitationsError={
-            invitationsQuery.isError ? invitationsQuery.error.message : null
-          }
-          invitationsLoading={invitationsQuery.isLoading}
-          onAcceptInvitation={handleAccept}
-          onDeclineInvitation={handleDecline}
-          respondingTo={respondingTo}
-        />
 
         {/* Danger Zone */}
         <div className="rounded-xl border border-destructive/30">
