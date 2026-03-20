@@ -2,6 +2,7 @@
 
 import { Badge, Button, Spinner } from "@raven/ui";
 import { Cpu, RefreshCw } from "lucide-react";
+import { ProviderIcon } from "@/components/model-icon";
 import { useAdminProviders, useSyncModels } from "../hooks/use-admin";
 
 export const ModelsTab = () => {
@@ -24,12 +25,15 @@ export const ModelsTab = () => {
     );
   }
 
+  const totalModels =
+    providers?.reduce((sum, p) => sum + p.modelCount, 0) ?? 0;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Models grouped by provider. Sync to fetch the latest models from each
-          provider.
+          {totalModels} {totalModels === 1 ? "model" : "models"} across{" "}
+          {providers?.length ?? 0} providers
         </p>
         <Button
           disabled={syncModels.isPending}
@@ -58,30 +62,49 @@ export const ModelsTab = () => {
         </div>
       )}
 
-      {providers?.map((provider) => (
-        <div
-          className="rounded-xl border border-border overflow-hidden"
-          key={provider.slug}
-        >
-          <div className="flex items-center justify-between border-b border-border bg-muted/30 px-5 py-3">
-            <span className="text-sm font-medium">{provider.name}</span>
-            <Badge variant="neutral">
-              {provider.modelCount} {provider.modelCount === 1 ? "model" : "models"}
-            </Badge>
-          </div>
-          <div className="px-5 py-3">
-            {provider.modelCount === 0 ? (
-              <p className="py-2 text-sm text-muted-foreground">
-                No models synced yet
-              </p>
-            ) : (
-              <p className="py-2 text-sm text-muted-foreground">
-                {provider.modelCount} {provider.modelCount === 1 ? "model" : "models"} synced
-              </p>
-            )}
-          </div>
+      {providers && providers.length > 0 && (
+        <div className="overflow-hidden rounded-xl border border-border">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-border bg-muted/30">
+                <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Provider
+                </th>
+                <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Models
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {providers.map((provider) => (
+                <tr
+                  className="border-b border-border last:border-b-0"
+                  key={provider.slug}
+                >
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center gap-3">
+                      <div className="flex size-8 items-center justify-center rounded-lg bg-muted">
+                        <ProviderIcon
+                          provider={provider.slug}
+                          size={18}
+                        />
+                      </div>
+                      <span className="text-sm font-medium">
+                        {provider.name}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-5 py-3.5 text-right">
+                    <Badge variant="neutral">
+                      {provider.modelCount}
+                    </Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      ))}
+      )}
     </div>
   );
 };
