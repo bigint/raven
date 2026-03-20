@@ -8,7 +8,6 @@ export {
 } from "./guardrail-rules";
 export { keyEnvironmentEnum, virtualKeys } from "./keys";
 export { models } from "./models";
-export { prompts, promptVersions } from "./prompts";
 export { providerConfigs } from "./providers";
 export { requestLogs } from "./request-logs";
 export { routingRules } from "./routing-rules";

@@ -15,7 +15,6 @@ const PROTECTED_PREFIXES = [
   "/models",
   "/overview",
   "/profile",
-  "/prompts",
   "/providers",
   "/requests",
   "/routing",
