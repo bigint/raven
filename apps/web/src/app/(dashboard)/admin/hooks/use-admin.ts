@@ -63,10 +63,7 @@ export const adminUsersQueryOptions = () =>
 
 export const adminAuditLogsQueryOptions = () =>
   queryOptions({
-    queryFn: async () => {
-      const res = await api.get<{ data: AuditLog[]; hasMore: boolean }>("/v1/admin/audit-logs");
-      return res.data;
-    },
+    queryFn: () => api.get<AuditLog[]>("/v1/admin/audit-logs"),
     queryKey: ["admin", "audit-logs"]
   });
 

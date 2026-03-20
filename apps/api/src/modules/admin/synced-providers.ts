@@ -2,6 +2,7 @@ import type { Database } from "@raven/db";
 import { models } from "@raven/db";
 import { count } from "drizzle-orm";
 import type { Context } from "hono";
+import { success } from "@/lib/response";
 import { SUPPORTED_PROVIDERS } from "@/lib/model-sync";
 
 export const getAdminProviders = (db: Database) => async (c: Context) => {
@@ -18,5 +19,5 @@ export const getAdminProviders = (db: Database) => async (c: Context) => {
     slug: p.slug
   }));
 
-  return c.json({ data });
+  return success(c, data);
 };

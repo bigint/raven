@@ -2,6 +2,7 @@ import type { Database } from "@raven/db";
 import { requestLogs, users } from "@raven/db";
 import { and, count, gte, isNull, sum } from "drizzle-orm";
 import type { Context } from "hono";
+import { success } from "@/lib/response";
 
 export const getAdminStats = (db: Database) => async (c: Context) => {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -26,15 +27,13 @@ export const getAdminStats = (db: Database) => async (c: Context) => {
       )
   ]);
 
-  return c.json({
-    data: {
-      totalCachedTokens: Number(requestStats?.totalCachedTokens ?? 0),
-      totalCost: requestStats?.totalCost ?? "0",
-      totalInputTokens: Number(requestStats?.totalInputTokens ?? 0),
-      totalOutputTokens: Number(requestStats?.totalOutputTokens ?? 0),
-      totalReasoningTokens: Number(requestStats?.totalReasoningTokens ?? 0),
-      totalRequests: requestStats?.totalRequests ?? 0,
-      totalUsers: userCount?.value ?? 0
-    }
+  return success(c, {
+    totalCachedTokens: Number(requestStats?.totalCachedTokens ?? 0),
+    totalCost: requestStats?.totalCost ?? "0",
+    totalInputTokens: Number(requestStats?.totalInputTokens ?? 0),
+    totalOutputTokens: Number(requestStats?.totalOutputTokens ?? 0),
+    totalReasoningTokens: Number(requestStats?.totalReasoningTokens ?? 0),
+    totalRequests: requestStats?.totalRequests ?? 0,
+    totalUsers: userCount?.value ?? 0
   });
 };

@@ -32,7 +32,6 @@ export const getAdminUsers = (db: Database) => async (c: Context) => {
     .orderBy(desc(users.createdAt))
     .limit(limit + 1);
 
-  const hasMore = rows.length > limit;
   const data = rows.slice(0, limit);
 
   return success(c, data);
