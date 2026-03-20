@@ -13,7 +13,7 @@ export interface GatewayModel {
   readonly type: string;
   readonly context_window: number;
   readonly max_tokens: number;
-  readonly tags: readonly string[];
+  readonly tags?: readonly string[];
   readonly pricing?: {
     readonly input?: string;
     readonly output?: string;
@@ -80,7 +80,8 @@ export const deriveCategory = (
 ): string => {
   const slug = model.id.toLowerCase();
 
-  if (model.tags.includes("reasoning")) return "reasoning";
+  const tags = model.tags ?? [];
+  if (tags.includes("reasoning")) return "reasoning";
 
   const lowerName = model.name.toLowerCase();
   if (
@@ -102,11 +103,12 @@ export const deriveCategory = (
 };
 
 export const deriveCapabilities = (model: GatewayModel): string[] => {
+  const tags = model.tags ?? [];
   return [
     "chat",
-    ...(model.tags.includes("vision") ? ["vision"] : []),
-    ...(model.tags.includes("tool-use") ? ["function_calling"] : []),
-    ...(model.tags.includes("reasoning") ? ["reasoning"] : []),
+    ...(tags.includes("vision") ? ["vision"] : []),
+    ...(tags.includes("tool-use") ? ["function_calling"] : []),
+    ...(tags.includes("reasoning") ? ["reasoning"] : []),
     "streaming"
   ];
 };
