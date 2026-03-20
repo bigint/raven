@@ -39,7 +39,7 @@ const AdminModelsPage = () => {
         <div>
           <h1 className="text-xl font-bold sm:text-2xl">Models</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Models are synced automatically from models.dev every 5 minutes.
+            Models are synced automatically every 5 minutes.
           </p>
         </div>
         <button

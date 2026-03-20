@@ -6,8 +6,10 @@ import type { Redis } from "ioredis";
 import {
   deriveCapabilities,
   deriveCategory,
-  fetchModelsDevCached,
-  PROVIDER_SLUG_MAP
+  extractModelSlug,
+  fetchModelsCached,
+  resolveProvider,
+  toPerMillion
 } from "@/lib/model-sync";
 import { refreshPricingCache } from "@/lib/pricing-cache";
 
@@ -18,43 +20,41 @@ export const syncModels =
   (db: Database, redis: Redis) => async (c: Context) => {
     const acquired = await redis.set(LOCK_KEY, "1", "EX", LOCK_TTL, "NX");
     if (!acquired) {
-      return c.json({ skipped: true, reason: "Another sync is in progress" });
+      return c.json({ reason: "Another sync is in progress", skipped: true });
     }
 
     try {
-      const data = await fetchModelsDevCached();
+      const data = await fetchModelsCached();
       const now = new Date();
 
       const toUpsert: (typeof models.$inferInsert)[] = [];
       const upstreamIds = new Set<string>();
 
-      for (const [devSlug, ourSlug] of Object.entries(PROVIDER_SLUG_MAP)) {
-        const providerData = data[devSlug];
-        if (!providerData?.models) continue;
+      for (const m of data) {
+        if (m.type !== "language") continue;
 
-        const upstreamModels = Object.values(providerData.models);
+        const provider = resolveProvider(m);
+        if (!provider) continue;
 
-        for (const m of upstreamModels) {
-          const id = `${ourSlug}/${m.id}`;
-          upstreamIds.add(id);
-          const inputPrice = m.cost?.input ?? 0;
-          const outputPrice = m.cost?.output ?? 0;
+        const id = `${provider}/${extractModelSlug(m.id)}`;
+        upstreamIds.add(id);
+        const inputPrice = toPerMillion(m.pricing?.input);
+        const outputPrice = toPerMillion(m.pricing?.output);
 
-          toUpsert.push({
-            capabilities: deriveCapabilities(m),
-            category: deriveCategory(m, inputPrice),
-            contextWindow: m.limit?.context ?? 0,
-            createdAt: now,
-            id,
-            inputPrice: inputPrice.toFixed(4),
-            maxOutput: m.limit?.output ?? 0,
-            name: m.name,
-            outputPrice: outputPrice.toFixed(4),
-            provider: ourSlug,
-            slug: m.id,
-            updatedAt: now
-          });
-        }
+        toUpsert.push({
+          capabilities: deriveCapabilities(m),
+          category: deriveCategory(m, inputPrice),
+          contextWindow: m.context_window ?? 0,
+          createdAt: now,
+          id,
+          inputPrice: inputPrice.toFixed(4),
+          maxOutput: m.max_tokens ?? 0,
+          name: m.name,
+          outputPrice: outputPrice.toFixed(4),
+          provider,
+          slug: extractModelSlug(m.id),
+          updatedAt: now
+        });
       }
 
       // Fetch all existing model IDs in one query for counting and deletion
@@ -73,7 +73,6 @@ export const syncModels =
             .insert(models)
             .values(chunk)
             .onConflictDoUpdate({
-              target: models.id,
               set: {
                 capabilities: sql`excluded.capabilities`,
                 category: sql`excluded.category`,
@@ -85,7 +84,8 @@ export const syncModels =
                 provider: sql`excluded.provider`,
                 slug: sql`excluded.slug`,
                 updatedAt: sql`excluded.updated_at`
-              }
+              },
+              target: models.id
             });
         }
       }
