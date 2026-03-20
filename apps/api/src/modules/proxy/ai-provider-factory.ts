@@ -63,6 +63,7 @@ export const createProviderModel = (
       const p = createMistral({ apiKey, baseURL: baseUrl, headers });
       return p(modelId);
     }
+    case "deepseek":
     case "openai": {
       const p = createOpenAI({ apiKey, baseURL: baseUrl, headers });
       return p.chat(modelId);

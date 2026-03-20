@@ -7,13 +7,7 @@ import { models } from "@raven/db";
  */
 const pricingCache = new Map<string, { input: number; output: number }>();
 
-const PROVIDER_DEFAULTS: Record<string, { input: number; output: number }> = {
-  anthropic: { input: 3, output: 15 },
-  mistralai: { input: 0.3, output: 0.9 },
-  openai: { input: 2.5, output: 10 }
-};
-
-const DEFAULT_PRICING = { input: 3, output: 15 };
+const ZERO_PRICING = { input: 0, output: 0 };
 
 export const refreshPricingCache = async (db: Database): Promise<void> => {
   const allModels = await db
@@ -34,17 +28,11 @@ export const refreshPricingCache = async (db: Database): Promise<void> => {
 };
 
 /**
- * Get pricing for a model by slug, with per-provider fallback.
- * Drop-in replacement for the old getModelPricing from @raven/types.
+ * Get pricing for a model by slug.
+ * Returns zero if the model is not in the cache.
  */
 export const getModelPricing = (
-  modelId: string,
-  provider?: string
+  modelId: string
 ): { input: number; output: number } => {
-  const exact = pricingCache.get(modelId);
-  if (exact) return exact;
-
-  return provider
-    ? (PROVIDER_DEFAULTS[provider] ?? DEFAULT_PRICING)
-    : DEFAULT_PRICING;
+  return pricingCache.get(modelId) ?? ZERO_PRICING;
 };

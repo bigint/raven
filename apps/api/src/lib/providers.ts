@@ -32,6 +32,14 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
     validationMethod: "POST",
     validationPath: "/messages"
   },
+  deepseek: {
+    authHeaders: bearerAuth,
+    baseUrl: "https://api.deepseek.com/v1",
+    chatEndpoint: "/chat/completions",
+    label: "DeepSeek",
+    modelsEndpoint: "/models",
+    validationPath: "/models"
+  },
   google: {
     authHeaders: bearerAuth,
     baseUrl: "https://generativelanguage.googleapis.com/v1beta",
