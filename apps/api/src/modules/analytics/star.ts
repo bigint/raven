@@ -1,10 +1,9 @@
 import type { Database } from "@raven/db";
 import { requestLogs } from "@raven/db";
 import { and, eq, isNull } from "drizzle-orm";
-import type { AppContext } from "@/lib/types";
+import type { AuthContext } from "@/lib/types";
 
-export const toggleStar = (db: Database) => async (c: AppContext) => {
-  const orgId = c.get("orgId");
+export const toggleStar = (db: Database) => async (c: AuthContext) => {
   const id = c.req.param("id") ?? "";
 
   const [row] = await db
@@ -13,7 +12,6 @@ export const toggleStar = (db: Database) => async (c: AppContext) => {
     .where(
       and(
         eq(requestLogs.id, id),
-        eq(requestLogs.organizationId, orgId),
         isNull(requestLogs.deletedAt)
       )
     )
@@ -28,7 +26,7 @@ export const toggleStar = (db: Database) => async (c: AppContext) => {
   await db
     .update(requestLogs)
     .set({ isStarred: newValue })
-    .where(and(eq(requestLogs.id, id), eq(requestLogs.organizationId, orgId)));
+    .where(eq(requestLogs.id, id));
 
   return c.json({ data: { isStarred: newValue } });
 };

@@ -1,11 +1,10 @@
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
 import type { Redis } from "ioredis";
-import type { AppEnv } from "@/lib/types";
+import type { AuthEnv } from "@/lib/types";
 import { queryValidator } from "@/lib/validation";
 import { getAdoptionBreakdown, getAdoptionChart } from "./adoption";
 import { getCache } from "./cache";
-import { clampAnalyticsRetention } from "./helpers";
 import { getLogs } from "./logs";
 import { getModels } from "./models";
 import { getRequests } from "./requests";
@@ -24,22 +23,7 @@ import { getToolSessions, getToolStats } from "./tools";
 import { getUsage } from "./usage";
 
 export const createAnalyticsModule = (db: Database, redis?: Redis) => {
-  const app = new Hono<AppEnv>();
-
-  // Clamp analytics date range to plan retention limit
-  app.use("*", async (c, next) => {
-    if (c.req.path.endsWith("/requests/live") || c.req.path.endsWith("/star"))
-      return next();
-    const orgId = c.get("orgId");
-    const from = c.req.query("from");
-    const clamped = await clampAnalyticsRetention(db, orgId, from, redis);
-    if (clamped) {
-      const url = new URL(c.req.url);
-      url.searchParams.set("from", clamped);
-      c.req.raw = new Request(url, c.req.raw);
-    }
-    return next();
-  });
+  const app = new Hono<AuthEnv>();
 
   app.get("/stats", queryValidator(dateRangeQuerySchema), getStats(db, redis));
   app.get("/usage", queryValidator(dateRangeQuerySchema), getUsage(db, redis));

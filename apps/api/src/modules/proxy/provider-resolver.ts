@@ -38,7 +38,6 @@ export const parseProviderFromPath = (
 export const resolveProvider = async (
   db: Database,
   env: Env,
-  organizationId: string,
   reqPath: string,
   redis?: Redis,
   strategy?: RoutingStrategy
@@ -55,13 +54,12 @@ export const resolveProvider = async (
     id: providerConfigs.id,
     isEnabled: providerConfigs.isEnabled,
     name: providerConfigs.name,
-    organizationId: providerConfigs.organizationId,
     provider: providerConfigs.provider
   };
 
   let providerConfig: Pick<
     typeof providerConfigs.$inferSelect,
-    "apiKey" | "id" | "isEnabled" | "name" | "organizationId" | "provider"
+    "apiKey" | "id" | "isEnabled" | "name" | "provider"
   > | null = null;
 
   if (configId) {
@@ -72,7 +70,6 @@ export const resolveProvider = async (
         .where(
           and(
             eq(providerConfigs.id, configId),
-            eq(providerConfigs.organizationId, organizationId),
             eq(providerConfigs.provider, providerName)
           )
         )
@@ -86,7 +83,6 @@ export const resolveProvider = async (
     const resolvedId = await resolveWithStrategy(
       db,
       redis,
-      organizationId,
       providerName,
       strategy
     );
@@ -109,7 +105,6 @@ export const resolveProvider = async (
       .from(providerConfigs)
       .where(
         and(
-          eq(providerConfigs.organizationId, organizationId),
           eq(providerConfigs.provider, providerName),
           eq(providerConfigs.isEnabled, true)
         )

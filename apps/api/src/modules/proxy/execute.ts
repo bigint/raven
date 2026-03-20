@@ -40,10 +40,7 @@ export interface ExecuteInput {
   readonly providerConfigId: string;
   readonly providerConfigName: string | null;
   readonly decryptedApiKey: string;
-  readonly virtualKey: {
-    readonly id: string;
-    readonly organizationId: string;
-  };
+  readonly virtualKeyId: string;
   readonly method: string;
   readonly path: string;
   readonly sessionId: string | null;
@@ -89,7 +86,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     providerConfigId,
     providerConfigName,
     decryptedApiKey,
-    virtualKey,
+    virtualKeyId,
     method,
     path,
     sessionId,
@@ -119,14 +116,13 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     imageCount: contentAnalysis.imageCount,
     method,
     model: requestedModel,
-    organizationId: virtualKey.organizationId,
     path,
     sessionId: contentAnalysis.sessionId,
     statusCode: 200,
     toolCount: contentAnalysis.toolCount,
     toolNames: [...contentAnalysis.toolNames],
     userAgent,
-    virtualKeyId: virtualKey.id
+    virtualKeyId
   };
 
   const finalizeLog = (usage: {
@@ -158,7 +154,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
         : baseLogData.toolNames
     };
     logAndPublish(db, logEntry, { redis });
-    updateLastUsed(redis, virtualKey.id);
+    updateLastUsed(redis, virtualKeyId);
     void updateMetrics(redis, activeProvider.configId, latencyMs, usage.cost);
   };
 
@@ -216,7 +212,6 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     const fallbacks = await getFallbackProviders(
       db,
       env,
-      virtualKey.organizationId,
       providerConfigId,
       providerName
     );
@@ -331,7 +326,6 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
 
       void storeCache(
         redis,
-        virtualKey.organizationId,
         activeProvider.name,
         parsedBody,
         formatted.text

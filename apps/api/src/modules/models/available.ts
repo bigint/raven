@@ -1,22 +1,15 @@
 import type { Database } from "@raven/db";
 import { models, providerConfigs } from "@raven/db";
-import { and, eq, inArray } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { success } from "@/lib/response";
-import type { AppContext } from "@/lib/types";
+import type { AuthContext } from "@/lib/types";
 
-export const listAvailableModels = (db: Database) => async (c: AppContext) => {
-  const orgId = c.get("orgId");
-
-  // Get distinct providers configured for this org
+export const listAvailableModels = (db: Database) => async (c: AuthContext) => {
+  // Get distinct providers configured
   const configs = await db
     .selectDistinct({ provider: providerConfigs.provider })
     .from(providerConfigs)
-    .where(
-      and(
-        eq(providerConfigs.organizationId, orgId),
-        eq(providerConfigs.isEnabled, true)
-      )
-    );
+    .where(eq(providerConfigs.isEnabled, true));
 
   const providerNames = configs.map((c) => c.provider);
 

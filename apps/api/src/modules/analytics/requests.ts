@@ -3,7 +3,7 @@ import { providerConfigs, requestLogs } from "@raven/db";
 import { and, count, eq, isNull, sql } from "drizzle-orm";
 import type { z } from "zod";
 import { buildPaginationMeta, getOffset } from "@/lib/pagination";
-import type { AppContextWithQuery } from "@/lib/types";
+import type { AuthContextWithQuery } from "@/lib/types";
 
 import { parseDateRange } from "./helpers";
 import type { requestsQuerySchema } from "./schema";
@@ -11,8 +11,7 @@ import type { requestsQuerySchema } from "./schema";
 type Query = z.infer<typeof requestsQuerySchema>;
 
 export const getRequests =
-  (db: Database) => async (c: AppContextWithQuery<Query>) => {
-    const orgId = c.get("orgId");
+  (db: Database) => async (c: AuthContextWithQuery<Query>) => {
     const query = c.req.valid("query");
 
     const { limit, page } = query;
@@ -21,7 +20,6 @@ export const getRequests =
     const dateConditions = parseDateRange(query.from, query.to);
 
     const where = and(
-      eq(requestLogs.organizationId, orgId),
       isNull(requestLogs.deletedAt),
       ...dateConditions,
       ...(query.endUser ? [eq(requestLogs.endUser, query.endUser)] : []),
@@ -47,7 +45,6 @@ export const getRequests =
           latencyMs: requestLogs.latencyMs,
           method: requestLogs.method,
           model: requestLogs.model,
-          organizationId: requestLogs.organizationId,
           outputTokens: requestLogs.outputTokens,
           path: requestLogs.path,
           provider: requestLogs.provider,

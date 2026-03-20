@@ -1,18 +1,17 @@
 import type { Database } from "@raven/db";
 import { prompts, promptVersions } from "@raven/db";
-import { and, asc, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { NotFoundError } from "@/lib/errors";
 import { success } from "@/lib/response";
-import type { AppContext } from "@/lib/types";
+import type { AuthContext } from "@/lib/types";
 
-export const getPrompt = (db: Database) => async (c: AppContext) => {
-  const orgId = c.get("orgId");
+export const getPrompt = (db: Database) => async (c: AuthContext) => {
   const id = c.req.param("id") as string;
 
   const [prompt] = await db
     .select()
     .from(prompts)
-    .where(and(eq(prompts.id, id), eq(prompts.organizationId, orgId)))
+    .where(eq(prompts.id, id))
     .limit(1);
 
   if (!prompt) {

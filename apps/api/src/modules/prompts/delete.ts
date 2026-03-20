@@ -1,18 +1,17 @@
 import type { Database } from "@raven/db";
 import { prompts } from "@raven/db";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { NotFoundError } from "@/lib/errors";
 import { success } from "@/lib/response";
-import type { AppContext } from "@/lib/types";
+import type { AuthContext } from "@/lib/types";
 
-export const deletePrompt = (db: Database) => async (c: AppContext) => {
-  const orgId = c.get("orgId");
+export const deletePrompt = (db: Database) => async (c: AuthContext) => {
   const id = c.req.param("id") as string;
 
   const [existing] = await db
     .select({ id: prompts.id })
     .from(prompts)
-    .where(and(eq(prompts.id, id), eq(prompts.organizationId, orgId)))
+    .where(eq(prompts.id, id))
     .limit(1);
 
   if (!existing) {
@@ -21,7 +20,7 @@ export const deletePrompt = (db: Database) => async (c: AppContext) => {
 
   await db
     .delete(prompts)
-    .where(and(eq(prompts.id, id), eq(prompts.organizationId, orgId)));
+    .where(eq(prompts.id, id));
 
   return success(c, { success: true });
 };

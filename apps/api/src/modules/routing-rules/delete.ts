@@ -1,33 +1,29 @@
 import type { Database } from "@raven/db";
 import { routingRules } from "@raven/db";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { NotFoundError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
-import type { AppContext } from "@/lib/types";
+import type { AuthContext } from "@/lib/types";
 import { logAudit } from "@/modules/audit-logs/index";
 
-export const deleteRoutingRule = (db: Database) => async (c: AppContext) => {
-  const orgId = c.get("orgId");
+export const deleteRoutingRule = (db: Database) => async (c: AuthContext) => {
   const user = c.get("user");
   const id = c.req.param("id") as string;
 
   const [deleted] = await db
     .delete(routingRules)
-    .where(
-      and(eq(routingRules.id, id), eq(routingRules.organizationId, orgId))
-    )
+    .where(eq(routingRules.id, id))
     .returning({ id: routingRules.id });
 
   if (!deleted) {
     throw new NotFoundError("Routing rule not found");
   }
 
-  void publishEvent(orgId, "routing-rule.deleted", { id });
+  void publishEvent("routing-rule.deleted", { id });
   void logAudit(db, {
     action: "routing-rule.deleted",
     actorId: user.id,
-    orgId,
     resourceId: id,
     resourceType: "routing-rule"
   });

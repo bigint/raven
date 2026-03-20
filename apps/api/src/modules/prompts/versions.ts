@@ -4,14 +4,14 @@ import { and, desc, eq } from "drizzle-orm";
 import type { z } from "zod";
 import { NotFoundError } from "@/lib/errors";
 import { created, success } from "@/lib/response";
-import type { AppContext, AppContextWithJson } from "@/lib/types";
+import type { AuthContext, AuthContextWithJson } from "@/lib/types";
 import type { createVersionSchema } from "./schema";
 
-const findPrompt = async (db: Database, id: string, orgId: string) => {
+const findPrompt = async (db: Database, id: string) => {
   const [prompt] = await db
     .select({ id: prompts.id })
     .from(prompts)
-    .where(and(eq(prompts.id, id), eq(prompts.organizationId, orgId)))
+    .where(eq(prompts.id, id))
     .limit(1);
 
   if (!prompt) {
@@ -24,12 +24,11 @@ const findPrompt = async (db: Database, id: string, orgId: string) => {
 type Body = z.infer<typeof createVersionSchema>;
 
 export const createVersion =
-  (db: Database) => async (c: AppContextWithJson<Body>) => {
-    const orgId = c.get("orgId");
+  (db: Database) => async (c: AuthContextWithJson<Body>) => {
     const id = c.req.param("id") as string;
     const { content, model } = c.req.valid("json");
 
-    await findPrompt(db, id, orgId);
+    await findPrompt(db, id);
 
     // Get latest version number
     const [latest] = await db
@@ -62,12 +61,11 @@ export const createVersion =
     return created(c, version);
   };
 
-export const activateVersion = (db: Database) => async (c: AppContext) => {
-  const orgId = c.get("orgId");
+export const activateVersion = (db: Database) => async (c: AuthContext) => {
   const id = c.req.param("id") as string;
   const versionId = c.req.param("versionId") as string;
 
-  await findPrompt(db, id, orgId);
+  await findPrompt(db, id);
 
   const [version] = await db
     .select({ id: promptVersions.id })

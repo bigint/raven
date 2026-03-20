@@ -14,14 +14,13 @@ export interface FallbackProvider {
 /**
  * Returns fallback provider configs for the same provider type.
  *
- * Cross-provider fallback (e.g. Anthropic → OpenAI) is not supported because
+ * Cross-provider fallback (e.g. Anthropic -> OpenAI) is not supported because
  * the model ID would not resolve on a different provider. Only same-provider
  * fallback (different API keys or endpoints) is returned.
  */
 export const getFallbackProviders = async (
   db: Database,
   env: Env,
-  orgId: string,
   primaryConfigId: string,
   primaryProviderName: string
 ): Promise<FallbackProvider[]> => {
@@ -35,7 +34,6 @@ export const getFallbackProviders = async (
     .from(providerConfigs)
     .where(
       and(
-        eq(providerConfigs.organizationId, orgId),
         eq(providerConfigs.provider, primaryProviderName),
         eq(providerConfigs.isEnabled, true),
         ne(providerConfigs.id, primaryConfigId)

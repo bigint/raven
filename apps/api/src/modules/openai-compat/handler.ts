@@ -10,12 +10,11 @@ import { checkBudgets } from "../proxy/budget-check";
 import { checkCache, serveCacheHit } from "../proxy/cache";
 import { execute } from "../proxy/execute";
 import { evaluateGuardrails } from "../proxy/guardrails";
-import { checkPlanLimit } from "../proxy/plan-check";
 import { resolveProvider } from "../proxy/provider-resolver";
 import { checkRateLimit } from "../proxy/rate-limiter";
 import { parseIncomingRequest } from "../proxy/request-parser";
 
-// Model → provider cache with 5-minute TTL
+// Model -> provider cache with 5-minute TTL
 const modelProviderCache = new Map<string, string>();
 
 const resolveModelProvider = async (
@@ -86,11 +85,10 @@ export const chatCompletionsHandler = (
         virtualKey.rateLimitRpm,
         virtualKey.rateLimitRpd
       ),
-      checkPlanLimit(db, redis, virtualKey.organizationId),
-      checkBudgets(db, redis, virtualKey.organizationId, virtualKey.id)
+      checkBudgets(db, redis, virtualKey.id)
     ]);
 
-    // 5–7. Guardrails, provider resolution, and cache check run in parallel
+    // 5-7. Guardrails, provider resolution, and cache check run in parallel
     const messages = Array.isArray(parsedBody.messages)
       ? parsedBody.messages
       : [];
@@ -101,20 +99,17 @@ export const chatCompletionsHandler = (
       messages.length > 0
         ? evaluateGuardrails(
             db,
-            virtualKey.organizationId,
             messages
           ).catch(() => null)
         : Promise.resolve(null),
       resolveProvider(
         db,
         env,
-        virtualKey.organizationId,
         fakeProxyPath,
         redis
       ),
       checkCache(
         redis,
-        virtualKey.organizationId,
         providerName,
         parsedBody
       )
@@ -132,7 +127,6 @@ export const chatCompletionsHandler = (
         guardrailWarnings,
         method: "POST",
         model: modelSlug,
-        organizationId: virtualKey.organizationId,
         parsedBody,
         path: "/v1/chat/completions",
         providerConfigId,
@@ -187,10 +181,7 @@ export const chatCompletionsHandler = (
       sessionId: c.req.header("x-session-id") ?? null,
       startTime,
       userAgent: c.req.header("user-agent") ?? null,
-      virtualKey: {
-        id: virtualKey.id,
-        organizationId: virtualKey.organizationId
-      }
+      virtualKeyId: virtualKey.id
     });
   };
 };

@@ -1,19 +1,18 @@
 import type { Database } from "@raven/db";
 import { webhooks } from "@raven/db";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { z } from "zod";
 import { NotFoundError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
-import type { AppContextWithJson } from "@/lib/types";
+import type { AuthContextWithJson } from "@/lib/types";
 import { logAudit } from "@/modules/audit-logs/index";
 import type { updateWebhookSchema } from "./schema";
 
 type Body = z.infer<typeof updateWebhookSchema>;
 
 export const updateWebhook =
-  (db: Database) => async (c: AppContextWithJson<Body>) => {
-    const orgId = c.get("orgId");
+  (db: Database) => async (c: AuthContextWithJson<Body>) => {
     const user = c.get("user");
     const id = c.req.param("id") as string;
     const { url, events, isEnabled } = c.req.valid("json");
@@ -21,7 +20,7 @@ export const updateWebhook =
     const [existing] = await db
       .select({ id: webhooks.id })
       .from(webhooks)
-      .where(and(eq(webhooks.id, id), eq(webhooks.organizationId, orgId)))
+      .where(eq(webhooks.id, id))
       .limit(1);
 
     if (!existing) {
@@ -47,16 +46,15 @@ export const updateWebhook =
     const [updated] = await db
       .update(webhooks)
       .set(updates)
-      .where(and(eq(webhooks.id, id), eq(webhooks.organizationId, orgId)))
+      .where(eq(webhooks.id, id))
       .returning();
 
     const record = updated as NonNullable<typeof updated>;
-    void publishEvent(orgId, "webhook.updated", record);
+    void publishEvent("webhook.updated", record);
     void logAudit(db, {
       action: "webhook.updated",
       actorId: user.id,
       metadata: { events, isEnabled, url },
-      orgId,
       resourceId: record.id,
       resourceType: "webhook"
     });

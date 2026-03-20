@@ -2,11 +2,9 @@ import type { Database } from "@raven/db";
 import { prompts, promptVersions } from "@raven/db";
 import { and, eq } from "drizzle-orm";
 import { success } from "@/lib/response";
-import type { AppContext } from "@/lib/types";
+import type { AuthContext } from "@/lib/types";
 
-export const listPrompts = (db: Database) => async (c: AppContext) => {
-  const orgId = c.get("orgId");
-
+export const listPrompts = (db: Database) => async (c: AuthContext) => {
   const rows = await db
     .select({
       activeVersion: {
@@ -22,7 +20,6 @@ export const listPrompts = (db: Database) => async (c: AppContext) => {
         createdAt: prompts.createdAt,
         id: prompts.id,
         name: prompts.name,
-        organizationId: prompts.organizationId,
         updatedAt: prompts.updatedAt
       }
     })
@@ -33,8 +30,7 @@ export const listPrompts = (db: Database) => async (c: AppContext) => {
         eq(promptVersions.promptId, prompts.id),
         eq(promptVersions.isActive, true)
       )
-    )
-    .where(eq(prompts.organizationId, orgId));
+    );
 
   const result = rows.map((row) => ({
     ...row.prompt,

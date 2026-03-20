@@ -13,7 +13,7 @@ import {
 } from "drizzle-orm";
 import type { z } from "zod";
 import { buildPaginationMeta, getOffset } from "@/lib/pagination";
-import type { AppContextWithQuery } from "@/lib/types";
+import type { AuthContextWithQuery } from "@/lib/types";
 
 import { parseDateRange } from "./helpers";
 import type { logsQuerySchema } from "./schema";
@@ -21,8 +21,7 @@ import type { logsQuerySchema } from "./schema";
 type Query = z.infer<typeof logsQuerySchema>;
 
 export const getLogs =
-  (db: Database) => async (c: AppContextWithQuery<Query>) => {
-    const orgId = c.get("orgId");
+  (db: Database) => async (c: AuthContextWithQuery<Query>) => {
     const query = c.req.valid("query");
 
     const { limit, page } = query;
@@ -31,7 +30,6 @@ export const getLogs =
     const dateConditions = parseDateRange(query.from, query.to);
 
     const where = and(
-      eq(requestLogs.organizationId, orgId),
       isNotNull(requestLogs.sessionId),
       isNull(requestLogs.deletedAt),
       ...dateConditions,

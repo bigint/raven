@@ -11,7 +11,6 @@ export type VirtualKey = Pick<
   | "expiresAt"
   | "id"
   | "isActive"
-  | "organizationId"
   | "rateLimitRpd"
   | "rateLimitRpm"
 >;
@@ -42,7 +41,6 @@ export const authenticateKey = async (
         expiresAt: virtualKeys.expiresAt,
         id: virtualKeys.id,
         isActive: virtualKeys.isActive,
-        organizationId: virtualKeys.organizationId,
         rateLimitRpd: virtualKeys.rateLimitRpd,
         rateLimitRpm: virtualKeys.rateLimitRpm
       })

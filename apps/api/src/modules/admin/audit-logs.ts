@@ -1,5 +1,5 @@
 import type { Database } from "@raven/db";
-import { auditLogs, organizations, users } from "@raven/db";
+import { auditLogs, users } from "@raven/db";
 import { and, desc, eq, isNull, lt } from "drizzle-orm";
 import type { Context } from "hono";
 import { z } from "zod";
@@ -25,13 +25,11 @@ export const getAdminAuditLogs = (db: Database) => async (c: Context) => {
       createdAt: auditLogs.createdAt,
       id: auditLogs.id,
       metadata: auditLogs.metadata,
-      orgName: organizations.name,
       resourceId: auditLogs.resourceId,
       resourceType: auditLogs.resourceType
     })
     .from(auditLogs)
     .leftJoin(users, eq(users.id, auditLogs.actorId))
-    .leftJoin(organizations, eq(organizations.id, auditLogs.organizationId))
     .where(and(...conditions))
     .orderBy(desc(auditLogs.createdAt))
     .limit(limit + 1);

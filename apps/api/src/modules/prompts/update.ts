@@ -1,24 +1,23 @@
 import type { Database } from "@raven/db";
 import { prompts } from "@raven/db";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { z } from "zod";
 import { NotFoundError } from "@/lib/errors";
 import { success } from "@/lib/response";
-import type { AppContextWithJson } from "@/lib/types";
+import type { AuthContextWithJson } from "@/lib/types";
 import type { updatePromptSchema } from "./schema";
 
 type Body = z.infer<typeof updatePromptSchema>;
 
 export const updatePrompt =
-  (db: Database) => async (c: AppContextWithJson<Body>) => {
-    const orgId = c.get("orgId");
+  (db: Database) => async (c: AuthContextWithJson<Body>) => {
     const id = c.req.param("id") as string;
     const data = c.req.valid("json");
 
     const [existing] = await db
       .select({ id: prompts.id })
       .from(prompts)
-      .where(and(eq(prompts.id, id), eq(prompts.organizationId, orgId)))
+      .where(eq(prompts.id, id))
       .limit(1);
 
     if (!existing) {
@@ -36,7 +35,7 @@ export const updatePrompt =
     const [updated] = await db
       .update(prompts)
       .set(updates)
-      .where(and(eq(prompts.id, id), eq(prompts.organizationId, orgId)))
+      .where(eq(prompts.id, id))
       .returning();
 
     return success(c, updated);

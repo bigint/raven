@@ -1,7 +1,7 @@
 import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { Context } from "hono";
 import type { Redis } from "ioredis";
 import { cachedQuery, cacheKeys } from "@/lib/cache-utils";
@@ -25,18 +25,12 @@ interface ModelEntry {
 
 export const listProviderModels =
   (db: Database, env: Env, redis: Redis) => async (c: Context) => {
-    const orgId = c.get("orgId" as never) as string;
     const configId = c.req.param("id") ?? "";
 
     const [config] = await db
       .select()
       .from(providerConfigs)
-      .where(
-        and(
-          eq(providerConfigs.id, configId),
-          eq(providerConfigs.organizationId, orgId)
-        )
-      )
+      .where(eq(providerConfigs.id, configId))
       .limit(1);
 
     if (!config) {

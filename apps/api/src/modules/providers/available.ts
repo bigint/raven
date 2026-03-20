@@ -1,7 +1,7 @@
 import { SUPPORTED_PROVIDERS } from "@/lib/model-sync";
 import { success } from "@/lib/response";
-import type { AppContext } from "@/lib/types";
+import type { AuthContext } from "@/lib/types";
 
-export const listAvailableProviders = () => async (c: AppContext) => {
+export const listAvailableProviders = () => async (c: AuthContext) => {
   return success(c, SUPPORTED_PROVIDERS);
 };

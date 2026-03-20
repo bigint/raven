@@ -1,11 +1,11 @@
 import type { Database } from "@raven/db";
 import { virtualKeys } from "@raven/db";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { z } from "zod";
 import { NotFoundError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
-import type { AppContextWithJson } from "@/lib/types";
+import type { AuthContextWithJson } from "@/lib/types";
 import { logAudit } from "@/modules/audit-logs/index";
 import { safeKey } from "./helpers";
 import type { updateKeySchema } from "./schema";
@@ -13,8 +13,7 @@ import type { updateKeySchema } from "./schema";
 type Body = z.infer<typeof updateKeySchema>;
 
 export const updateKey =
-  (db: Database) => async (c: AppContextWithJson<Body>) => {
-    const orgId = c.get("orgId");
+  (db: Database) => async (c: AuthContextWithJson<Body>) => {
     const user = c.get("user");
     const id = c.req.param("id") as string;
     const { name, rateLimitRpm, rateLimitRpd, isActive, expiresAt } =
@@ -45,7 +44,7 @@ export const updateKey =
     const [updated] = await db
       .update(virtualKeys)
       .set(updates)
-      .where(and(eq(virtualKeys.id, id), eq(virtualKeys.organizationId, orgId)))
+      .where(eq(virtualKeys.id, id))
       .returning();
 
     if (!updated) {
@@ -53,12 +52,11 @@ export const updateKey =
     }
 
     const safeKeyData = safeKey(updated as NonNullable<typeof updated>);
-    void publishEvent(orgId, "key.updated", safeKeyData);
+    void publishEvent("key.updated", safeKeyData);
     void logAudit(db, {
       action: "key.updated",
       actorId: user.id,
       metadata: { expiresAt, isActive, name, rateLimitRpd, rateLimitRpm },
-      orgId,
       resourceId: id,
       resourceType: "key"
     });

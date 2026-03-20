@@ -3,7 +3,6 @@ import { requestLogs } from "@raven/db";
 import {
   and,
   count,
-  eq,
   isNotNull,
   isNull,
   max,
@@ -13,7 +12,7 @@ import {
 } from "drizzle-orm";
 import type { z } from "zod";
 import { buildPaginationMeta, getOffset } from "@/lib/pagination";
-import type { AppContext, AppContextWithQuery } from "@/lib/types";
+import type { AuthContext, AuthContextWithQuery } from "@/lib/types";
 
 import { parseDateRange } from "./helpers";
 import type { sessionsQuerySchema } from "./schema";
@@ -21,8 +20,7 @@ import type { sessionsQuerySchema } from "./schema";
 type Query = z.infer<typeof sessionsQuerySchema>;
 
 export const getSessions =
-  (db: Database) => async (c: AppContextWithQuery<Query>) => {
-    const orgId = c.get("orgId");
+  (db: Database) => async (c: AuthContextWithQuery<Query>) => {
     const query = c.req.valid("query");
 
     const { limit, page } = query;
@@ -31,7 +29,6 @@ export const getSessions =
     const dateConditions = parseDateRange(query.from, query.to);
 
     const where = and(
-      eq(requestLogs.organizationId, orgId),
       isNotNull(requestLogs.sessionId),
       isNull(requestLogs.deletedAt),
       ...dateConditions
@@ -104,8 +101,7 @@ export const getSessions =
     });
   };
 
-export const getSessionById = (db: Database) => async (c: AppContext) => {
-  const orgId = c.get("orgId");
+export const getSessionById = (db: Database) => async (c: AuthContext) => {
   const sessionId = c.req.param("sessionId") ?? "";
 
   const rows = await db
@@ -134,7 +130,6 @@ export const getSessionById = (db: Database) => async (c: AppContext) => {
     .from(requestLogs)
     .where(
       and(
-        eq(requestLogs.organizationId, orgId),
         sql`${requestLogs.sessionId} = ${sessionId}`,
         isNull(requestLogs.deletedAt)
       )

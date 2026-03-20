@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { budgets } from "@raven/db";
-import { and, eq, inArray } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 import type { Redis } from "ioredis";
 import { cachedQuery, cacheKeys } from "@/lib/cache-utils";
 import { BudgetExceededError } from "@/lib/errors";
@@ -16,10 +16,9 @@ const redisKey = (budgetId: string): string => `budget:${budgetId}:spent`;
 export const checkBudgets = async (
   db: Database,
   redis: Redis,
-  orgId: string,
   virtualKeyId: string
 ): Promise<void> => {
-  const entityIds = [orgId, virtualKeyId];
+  const entityIds = [virtualKeyId];
 
   const budgetColumns = {
     alertThreshold: budgets.alertThreshold,
@@ -32,18 +31,13 @@ export const checkBudgets = async (
 
   const activeBudgets = await cachedQuery(
     redis,
-    cacheKeys.budgets(orgId, virtualKeyId),
+    cacheKeys.budgets(virtualKeyId),
     15,
     () =>
       db
         .select(budgetColumns)
         .from(budgets)
-        .where(
-          and(
-            eq(budgets.organizationId, orgId),
-            inArray(budgets.entityId, entityIds)
-          )
-        )
+        .where(inArray(budgets.entityId, entityIds))
   );
 
   if (activeBudgets.length === 0) {
@@ -77,7 +71,7 @@ export const checkBudgets = async (
       const debounceKey = `budget:alert:${budget.id}`;
       const isNew = await redis.set(debounceKey, "1", "EX", 3600, "NX");
       if (isNew) {
-        void publishEvent(orgId, "budget.alert", {
+        void publishEvent("budget.alert", {
           budgetId: budget.id,
           entityId: budget.entityId,
           entityType: budget.entityType,
@@ -93,7 +87,6 @@ export const checkBudgets = async (
 export const incrementBudgetSpend = async (
   db: Database,
   redis: Redis,
-  orgId: string,
   virtualKeyId: string,
   cost: number
 ): Promise<void> => {
@@ -101,22 +94,17 @@ export const incrementBudgetSpend = async (
     return;
   }
 
-  const entityIds = [orgId, virtualKeyId];
+  const entityIds = [virtualKeyId];
 
   const activeBudgets = await cachedQuery(
     redis,
-    cacheKeys.budgets(orgId, virtualKeyId),
+    cacheKeys.budgets(virtualKeyId),
     15,
     () =>
       db
         .select({ id: budgets.id, period: budgets.period })
         .from(budgets)
-        .where(
-          and(
-            eq(budgets.organizationId, orgId),
-            inArray(budgets.entityId, entityIds)
-          )
-        )
+        .where(inArray(budgets.entityId, entityIds))
   );
 
   if (activeBudgets.length === 0) {

@@ -1,19 +1,18 @@
 import type { Database } from "@raven/db";
 import { guardrailRules } from "@raven/db";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { z } from "zod";
 import { NotFoundError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
-import type { AppContextWithJson } from "@/lib/types";
+import type { AuthContextWithJson } from "@/lib/types";
 import { logAudit } from "@/modules/audit-logs/index";
 import type { updateGuardrailSchema } from "./schema";
 
 type Body = z.infer<typeof updateGuardrailSchema>;
 
 export const updateGuardrail =
-  (db: Database) => async (c: AppContextWithJson<Body>) => {
-    const orgId = c.get("orgId");
+  (db: Database) => async (c: AuthContextWithJson<Body>) => {
     const user = c.get("user");
     const id = c.req.param("id") as string;
     const { name, type, config, action, isEnabled, priority } =
@@ -22,9 +21,7 @@ export const updateGuardrail =
     const [existing] = await db
       .select({ id: guardrailRules.id })
       .from(guardrailRules)
-      .where(
-        and(eq(guardrailRules.id, id), eq(guardrailRules.organizationId, orgId))
-      )
+      .where(eq(guardrailRules.id, id))
       .limit(1);
 
     if (!existing) {
@@ -60,17 +57,14 @@ export const updateGuardrail =
     const [updated] = await db
       .update(guardrailRules)
       .set(updates)
-      .where(
-        and(eq(guardrailRules.id, id), eq(guardrailRules.organizationId, orgId))
-      )
+      .where(eq(guardrailRules.id, id))
       .returning();
 
-    void publishEvent(orgId, "guardrail.updated", updated);
+    void publishEvent("guardrail.updated", updated);
     void logAudit(db, {
       action: "guardrail.updated",
       actorId: user.id,
       metadata: { action, config, isEnabled, name, priority, type },
-      orgId,
       resourceId: id,
       resourceType: "guardrail"
     });

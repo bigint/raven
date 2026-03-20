@@ -39,11 +39,10 @@ const getMessageCount = (body: Record<string, unknown>): number => {
 
 export const evaluateRoutingRules = async (
   db: Database,
-  orgId: string,
   model: string,
   body: Record<string, unknown>
 ): Promise<{ model: string; ruleApplied: string | null }> => {
-  const cacheKey = `${orgId}:${model}`;
+  const cacheKey = model;
   const cached = rulesCache.get(cacheKey);
   let rules: (typeof routingRules.$inferSelect)[];
 
@@ -55,7 +54,6 @@ export const evaluateRoutingRules = async (
       .from(routingRules)
       .where(
         and(
-          eq(routingRules.organizationId, orgId),
           eq(routingRules.sourceModel, model),
           eq(routingRules.isEnabled, true)
         )

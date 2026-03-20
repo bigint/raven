@@ -5,7 +5,6 @@ import { publishEvent } from "@/lib/events";
 import { incrementBudgetSpend } from "./budget-check";
 
 export interface LogData {
-  organizationId: string;
   virtualKeyId: string;
   provider: string;
   providerConfigId: string;
@@ -77,7 +76,6 @@ const bufferLogEntry = (db: Database, data: LogData): void => {
     latencyMs: data.latencyMs,
     method: data.method,
     model: data.model,
-    organizationId: data.organizationId,
     outputTokens: data.outputTokens,
     path: data.path,
     provider: data.provider,
@@ -106,7 +104,7 @@ export const logAndPublish = (
   data: LogData,
   budgetCtx?: BudgetContext
 ): void => {
-  void publishEvent(data.organizationId, "request.created", {
+  void publishEvent("request.created", {
     ...data,
     cost: data.cost.toFixed(6),
     toolNames: data.toolNames.length > 0 ? [...data.toolNames] : []
@@ -118,7 +116,6 @@ export const logAndPublish = (
     void incrementBudgetSpend(
       db,
       budgetCtx.redis,
-      data.organizationId,
       data.virtualKeyId,
       data.cost
     );

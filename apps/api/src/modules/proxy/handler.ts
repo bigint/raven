@@ -9,7 +9,6 @@ import { checkCache, serveCacheHit } from "./cache";
 import { evaluateRoutingRules } from "./content-router";
 import { execute } from "./execute";
 import { evaluateGuardrails } from "./guardrails";
-import { checkPlanLimit } from "./plan-check";
 import { parseProviderFromPath, resolveProvider } from "./provider-resolver";
 import { checkRateLimit } from "./rate-limiter";
 import { parseIncomingRequest } from "./request-parser";
@@ -29,15 +28,14 @@ export const proxyHandler = (
     // 2. Gate checks + body parse in parallel
     const method = c.req.method;
     const hasBody = method !== "GET" && method !== "HEAD";
-    const [, , , bodyText] = await Promise.all([
+    const [, , bodyText] = await Promise.all([
       checkRateLimit(
         redis,
         virtualKey.id,
         virtualKey.rateLimitRpm,
         virtualKey.rateLimitRpd
       ),
-      checkPlanLimit(db, redis, virtualKey.organizationId),
-      checkBudgets(db, redis, virtualKey.organizationId, virtualKey.id),
+      checkBudgets(db, redis, virtualKey.id),
       hasBody ? c.req.text() : undefined
     ]);
 
@@ -72,7 +70,6 @@ export const proxyHandler = (
       hasMessages
         ? evaluateGuardrails(
             db,
-            virtualKey.organizationId,
             messages,
             redis
           ).catch((err: unknown) => {
@@ -83,7 +80,6 @@ export const proxyHandler = (
       hasModel
         ? evaluateRoutingRules(
             db,
-            virtualKey.organizationId,
             parsedBody.model as string,
             parsedBody
           )
@@ -102,8 +98,8 @@ export const proxyHandler = (
     const { providerName: pathProvider } = parseProviderFromPath(c.req.path);
 
     const [cacheResult, providerResolution] = await Promise.all([
-      checkCache(redis, virtualKey.organizationId, pathProvider, parsedBody),
-      resolveProvider(db, env, virtualKey.organizationId, c.req.path, redis)
+      checkCache(redis, pathProvider, parsedBody),
+      resolveProvider(db, env, c.req.path, redis)
     ]);
 
     const {
@@ -122,7 +118,6 @@ export const proxyHandler = (
         guardrailWarnings,
         method,
         model: requestedModel,
-        organizationId: virtualKey.organizationId,
         parsedBody,
         path: upstreamPath,
         providerConfigId,
@@ -173,10 +168,7 @@ export const proxyHandler = (
       sessionId: c.req.header("x-session-id") ?? null,
       startTime,
       userAgent: c.req.header("user-agent") ?? null,
-      virtualKey: {
-        id: virtualKey.id,
-        organizationId: virtualKey.organizationId
-      }
+      virtualKeyId: virtualKey.id
     });
   };
 };

@@ -1,12 +1,12 @@
 import crypto from "node:crypto";
 import type { z } from "zod";
 import { success } from "@/lib/response";
-import type { AppContextWithJson } from "@/lib/types";
+import type { AuthContextWithJson } from "@/lib/types";
 import type { testWebhookSchema } from "./schema";
 
 type Body = z.infer<typeof testWebhookSchema>;
 
-export const testWebhook = () => async (c: AppContextWithJson<Body>) => {
+export const testWebhook = () => async (c: AuthContextWithJson<Body>) => {
   const { url } = c.req.valid("json");
   const secret = crypto.randomBytes(32).toString("hex");
 

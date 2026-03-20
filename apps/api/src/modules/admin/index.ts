@@ -3,7 +3,6 @@ import { Hono } from "hono";
 import type { Redis } from "ioredis";
 import { syncModels } from "../cron/sync-models";
 import { getAdminAuditLogs } from "./audit-logs";
-import { getAdminOrganizations } from "./organizations";
 import { getAdminStats } from "./stats";
 import { getAdminProviders } from "./synced-providers";
 import { getAdminUsers } from "./users";
@@ -12,7 +11,6 @@ export const createAdminModule = (db: Database, redis: Redis) => {
   const app = new Hono();
   app.get("/stats", getAdminStats(db));
   app.get("/users", getAdminUsers(db));
-  app.get("/organizations", getAdminOrganizations(db));
   app.get("/audit-logs", getAdminAuditLogs(db));
   app.get("/providers", getAdminProviders(db));
   app.post("/models/sync", syncModels(db, redis));
