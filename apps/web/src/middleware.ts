@@ -27,6 +27,12 @@ export const middleware = (request: NextRequest): NextResponse => {
   const { pathname } = request.nextUrl;
   const hasSession = request.cookies.has(SESSION_COOKIE);
 
+  // Root: redirect to dashboard or sign-in
+  if (pathname === "/") {
+    const target = hasSession ? "/overview" : "/sign-in";
+    return NextResponse.redirect(new URL(target, request.url));
+  }
+
   const isAuthRoute = AUTH_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
