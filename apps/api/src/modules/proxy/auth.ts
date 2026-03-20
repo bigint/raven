@@ -8,11 +8,7 @@ import { UnauthorizedError } from "@/lib/errors";
 
 export type VirtualKey = Pick<
   typeof virtualKeys.$inferSelect,
-  | "expiresAt"
-  | "id"
-  | "isActive"
-  | "rateLimitRpd"
-  | "rateLimitRpm"
+  "expiresAt" | "id" | "isActive" | "rateLimitRpd" | "rateLimitRpm"
 >;
 
 export interface AuthResult {

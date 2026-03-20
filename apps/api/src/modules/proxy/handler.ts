@@ -68,21 +68,13 @@ export const proxyHandler = (
 
     const [guardrailResult, routingResult] = await Promise.all([
       hasMessages
-        ? evaluateGuardrails(
-            db,
-            messages,
-            redis
-          ).catch((err: unknown) => {
+        ? evaluateGuardrails(db, messages, redis).catch((err: unknown) => {
             if (err instanceof GuardrailError) throw err;
             return null;
           })
         : null,
       hasModel
-        ? evaluateRoutingRules(
-            db,
-            parsedBody.model as string,
-            parsedBody
-          )
+        ? evaluateRoutingRules(db, parsedBody.model as string, parsedBody)
         : null
     ]);
 

@@ -1,5 +1,5 @@
-import { ForbiddenError } from "@/lib/errors";
 import type { Context, Next } from "hono";
+import { ForbiddenError } from "@/lib/errors";
 
 const MUTATION_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 

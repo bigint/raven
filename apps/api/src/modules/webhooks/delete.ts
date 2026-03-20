@@ -21,9 +21,7 @@ export const deleteWebhook = (db: Database) => async (c: AuthContext) => {
     throw new NotFoundError("Webhook not found");
   }
 
-  await db
-    .delete(webhooks)
-    .where(eq(webhooks.id, id));
+  await db.delete(webhooks).where(eq(webhooks.id, id));
 
   void publishEvent("webhook.deleted", { id });
   void logAudit(db, {

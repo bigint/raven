@@ -18,9 +18,7 @@ export const deletePrompt = (db: Database) => async (c: AuthContext) => {
     throw new NotFoundError("Prompt not found");
   }
 
-  await db
-    .delete(prompts)
-    .where(eq(prompts.id, id));
+  await db.delete(prompts).where(eq(prompts.id, id));
 
   return success(c, { success: true });
 };

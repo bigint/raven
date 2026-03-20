@@ -9,12 +9,7 @@ export const toggleStar = (db: Database) => async (c: AuthContext) => {
   const [row] = await db
     .select({ isStarred: requestLogs.isStarred })
     .from(requestLogs)
-    .where(
-      and(
-        eq(requestLogs.id, id),
-        isNull(requestLogs.deletedAt)
-      )
-    )
+    .where(and(eq(requestLogs.id, id), isNull(requestLogs.deletedAt)))
     .limit(1);
 
   if (!row) {

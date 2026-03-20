@@ -32,10 +32,7 @@ export const createAuthMiddleware = (auth: Auth) => {
       email: session.user.email,
       id: session.user.id,
       name: session.user.name,
-      role: (session.user.role ?? "viewer") as
-        | "admin"
-        | "member"
-        | "viewer"
+      role: (session.user.role ?? "viewer") as "admin" | "member" | "viewer"
     });
     c.set("session", { id: session.session.id });
     await next();

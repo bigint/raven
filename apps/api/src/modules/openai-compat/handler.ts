@@ -97,22 +97,10 @@ export const chatCompletionsHandler = (
 
     const [guardrailResult, providerResult, cacheResult] = await Promise.all([
       messages.length > 0
-        ? evaluateGuardrails(
-            db,
-            messages
-          ).catch(() => null)
+        ? evaluateGuardrails(db, messages).catch(() => null)
         : Promise.resolve(null),
-      resolveProvider(
-        db,
-        env,
-        fakeProxyPath,
-        redis
-      ),
-      checkCache(
-        redis,
-        providerName,
-        parsedBody
-      )
+      resolveProvider(db, env, fakeProxyPath, redis),
+      checkCache(redis, providerName, parsedBody)
     ]);
 
     const guardrailWarnings = guardrailResult?.warnings ?? [];

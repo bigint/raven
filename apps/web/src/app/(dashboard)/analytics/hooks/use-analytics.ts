@@ -114,11 +114,11 @@ const POLL_INTERVAL = 30_000;
 export const useAnalytics = (keyId?: string) => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [customFrom, setCustomFrom] = useState<string>(
-    () => new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0, 10)
+  const [customFrom, setCustomFrom] = useState<string>(() =>
+    new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0, 10)
   );
-  const [customTo, setCustomTo] = useState<string>(
-    () => new Date().toISOString().slice(0, 10)
+  const [customTo, setCustomTo] = useState<string>(() =>
+    new Date().toISOString().slice(0, 10)
   );
 
   const rangeParam = searchParams.get("range") as DateRange | null;

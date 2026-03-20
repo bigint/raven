@@ -14,10 +14,7 @@ export const createRoutingRule =
     const user = c.get("user");
     const data = c.req.valid("json");
 
-    const [record] = await db
-      .insert(routingRules)
-      .values(data)
-      .returning();
+    const [record] = await db.insert(routingRules).values(data).returning();
 
     const safe = record as NonNullable<typeof record>;
     void publishEvent("routing-rule.created", safe);

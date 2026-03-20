@@ -1,8 +1,8 @@
 import { parseEnv } from "@raven/config";
 import { createDatabase } from "@raven/db";
+import { getRedis } from "./lib/redis";
 import { cleanupRetention } from "./modules/admin/retention";
 import { syncModelsJob } from "./modules/cron/sync-models";
-import { getRedis } from "./lib/redis";
 
 const env = parseEnv();
 const db = createDatabase(env.DATABASE_URL);

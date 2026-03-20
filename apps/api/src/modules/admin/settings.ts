@@ -24,10 +24,10 @@ export const updateSettings = (db: Database) => async (c: Context) => {
     if (key in DEFAULT_SETTINGS) {
       await db
         .insert(settings)
-        .values({ key, value: String(value), updatedAt: new Date() })
+        .values({ key, updatedAt: new Date(), value: String(value) })
         .onConflictDoUpdate({
-          target: settings.key,
-          set: { value: String(value), updatedAt: new Date() }
+          set: { updatedAt: new Date(), value: String(value) },
+          target: settings.key
         });
     }
   }
@@ -37,8 +37,8 @@ export const updateSettings = (db: Database) => async (c: Context) => {
 export const getPublicSettings = (db: Database) => async (c: Context) => {
   const rows = await db.select().from(settings);
   const result: Record<string, string> = {
-    allow_registration: DEFAULT_SETTINGS.allow_registration!,
-    instance_name: DEFAULT_SETTINGS.instance_name!
+    allow_registration: DEFAULT_SETTINGS.allow_registration ?? "true",
+    instance_name: DEFAULT_SETTINGS.instance_name ?? "Raven"
   };
   for (const row of rows) {
     if (row.key === "allow_registration" || row.key === "instance_name") {

@@ -1,7 +1,7 @@
 import type { Database } from "@raven/db";
 import { auditLogs, requestLogs, settings } from "@raven/db";
-import { eq, lt } from "drizzle-orm";
 import { subDays } from "date-fns";
+import { eq, lt } from "drizzle-orm";
 
 export const cleanupRetention = async (db: Database) => {
   const [row] = await db

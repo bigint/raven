@@ -4,13 +4,13 @@ import { Input, PillTabs, Select, Spinner } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
-import { LogsTable } from "./logs-table";
-import { RequestDetail } from "./request-detail";
 import {
   type SessionRequest,
   sessionDetailQueryOptions,
   useLogs
 } from "../hooks/use-logs";
+import { LogsTable } from "./logs-table";
+import { RequestDetail } from "./request-detail";
 
 export const SessionsView = () => {
   const {

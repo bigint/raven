@@ -71,9 +71,7 @@ const AnalyticsPage = () => {
       <Tabs onChange={setTab} tabs={tabs} value={tab} />
 
       <Suspense
-        fallback={
-          <div className="h-96 animate-pulse rounded-lg bg-muted" />
-        }
+        fallback={<div className="h-96 animate-pulse rounded-lg bg-muted" />}
       >
         {match(tab)
           .with("overview", () => <OverviewTab keyId={keyId} />)

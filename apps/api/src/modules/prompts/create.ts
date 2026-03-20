@@ -11,10 +11,7 @@ export const createPrompt =
   (db: Database) => async (c: AuthContextWithJson<Body>) => {
     const { name, content, model } = c.req.valid("json");
 
-    const [prompt] = await db
-      .insert(prompts)
-      .values({ name })
-      .returning();
+    const [prompt] = await db.insert(prompts).values({ name }).returning();
 
     const [version] = await db
       .insert(promptVersions)

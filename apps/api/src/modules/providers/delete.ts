@@ -27,9 +27,7 @@ export const deleteProvider =
       throw new NotFoundError("Provider not found");
     }
 
-    await db
-      .delete(providerConfigs)
-      .where(eq(providerConfigs.id, id));
+    await db.delete(providerConfigs).where(eq(providerConfigs.id, id));
 
     // Invalidate provider configs and models cache
     void redis.del(cacheKeys.providerConfigs(existing.provider));

@@ -52,7 +52,7 @@ const handleBudgetAlert = async (
 export const initEmailDispatcher = (
   db: Database,
   redis: Redis,
-  appUrl: string
+  _appUrl: string
 ): void => {
   if (!isEmailConfigured()) {
     console.log("Email dispatcher: RESEND_API_KEY not set, skipping");

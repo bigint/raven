@@ -3,8 +3,8 @@
 import { PillTabs } from "@raven/ui";
 import { Download } from "lucide-react";
 import { exportToCsv } from "@/lib/csv-export";
-import { ModelsTable } from "./models-table";
 import { useModels } from "../hooks/use-models";
+import { ModelsTable } from "./models-table";
 
 export const ModelsTab = ({ keyId }: { keyId?: string }) => {
   const { data, dateRange, dateRangeOptions, error, isLoading, setDateRange } =
