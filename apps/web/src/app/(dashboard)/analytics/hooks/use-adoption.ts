@@ -15,9 +15,11 @@ import {
 export interface ChartDataPoint {
   readonly date: string;
   readonly cached: number;
+  readonly cost: number;
   readonly input: number;
   readonly output: number;
   readonly reasoning: number;
+  readonly requests: number;
 }
 
 export interface BreakdownRow {
@@ -46,10 +48,12 @@ export const adoptionChartQueryOptions = (range: DateRange, keyId?: string) =>
       );
       return fillTimeSeriesGaps(data, range, (date) => ({
         cached: 0,
+        cost: 0,
         date,
         input: 0,
         output: 0,
-        reasoning: 0
+        reasoning: 0,
+        requests: 0
       }));
     },
     queryKey: ["adoption", "chart", { keyId, range }]

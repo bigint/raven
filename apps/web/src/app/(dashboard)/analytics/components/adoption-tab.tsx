@@ -1,6 +1,6 @@
 "use client";
 
-import { PillTabs, Select, Tabs } from "@raven/ui";
+import { PillTabs, Select, Spinner, Tabs } from "@raven/ui";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { UsageBars } from "./usage-bars";
@@ -12,7 +12,11 @@ const TokenChart = dynamic(
     import("./token-chart").then((m) => ({ default: m.TokenChart })),
   {
     ssr: false,
-    loading: () => <div className="h-64 animate-pulse rounded-lg bg-muted" />
+    loading: () => (
+      <div className="flex h-64 items-center justify-center rounded-xl border border-border">
+        <Spinner />
+      </div>
+    )
   }
 );
 
@@ -78,7 +82,11 @@ export const AdoptionTab = ({ keyId }: { keyId?: string }) => {
           value={chartMetric}
         />
       </div>
-      <TokenChart data={chartData} title={CHART_METRIC_TITLES[chartMetric]} />
+      <TokenChart
+        data={chartData}
+        metric={chartMetric}
+        title={CHART_METRIC_TITLES[chartMetric]}
+      />
       <Tabs
         onChange={(v) => setViewTab(v as "table" | "bars")}
         tabs={[

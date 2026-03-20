@@ -33,10 +33,12 @@ export const getAdoptionChart =
       const rows = await db
         .select({
           cached: sum(requestLogs.cachedTokens).as("cached"),
+          cost: sum(requestLogs.cost).as("cost"),
           date: sql<string>`DATE(${requestLogs.createdAt})`.as("date"),
           input: sum(requestLogs.inputTokens).as("input"),
           output: sum(requestLogs.outputTokens).as("output"),
-          reasoning: sum(requestLogs.reasoningTokens).as("reasoning")
+          reasoning: sum(requestLogs.reasoningTokens).as("reasoning"),
+          requests: count().as("requests")
         })
         .from(requestLogs)
         .where(where)
@@ -45,10 +47,12 @@ export const getAdoptionChart =
 
       return rows.map((row) => ({
         cached: Number(row.cached ?? 0),
+        cost: Number(row.cost ?? 0),
         date: row.date,
         input: Number(row.input ?? 0),
         output: Number(row.output ?? 0),
-        reasoning: Number(row.reasoning ?? 0)
+        reasoning: Number(row.reasoning ?? 0),
+        requests: Number(row.requests)
       }));
     };
 

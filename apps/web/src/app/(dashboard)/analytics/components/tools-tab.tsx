@@ -11,7 +11,11 @@ const ToolChart = dynamic(
     import("./tool-chart").then((m) => ({ default: m.ToolChart })),
   {
     ssr: false,
-    loading: () => <div className="h-64 animate-pulse rounded-lg bg-muted" />
+    loading: () => (
+      <div className="flex h-64 items-center justify-center rounded-xl border border-border">
+        <Spinner />
+      </div>
+    )
   }
 );
 
