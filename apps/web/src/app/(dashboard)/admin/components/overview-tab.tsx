@@ -43,8 +43,6 @@ export const OverviewTab = () => {
     );
   }
 
-  const tokenUsage = stats?.tokenUsage;
-
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -58,36 +56,42 @@ export const OverviewTab = () => {
           icon={Hash}
           label="Requests (30d)"
           loading={isPending}
-          value={stats?.requests30d?.toLocaleString() ?? "0"}
+          value={stats?.totalRequests?.toLocaleString() ?? "0"}
         />
         <StatCard
           icon={DollarSign}
           label="Cost (30d)"
           loading={isPending}
-          value={stats ? `$${(Number(stats.cost30d) || 0).toFixed(2)}` : "$0.00"}
+          value={stats ? `$${(Number(stats.totalCost) || 0).toFixed(2)}` : "$0.00"}
         />
       </div>
 
-      {tokenUsage && (
+      {stats && (
         <div>
           <h3 className="mb-3 text-sm font-semibold">Token Usage (30d)</h3>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
             <div className="rounded-xl border border-border p-4">
-              <p className="text-xs text-muted-foreground">Prompt Tokens</p>
+              <p className="text-xs text-muted-foreground">Input Tokens</p>
               <p className="mt-1 text-lg font-semibold">
-                {tokenUsage.promptTokens.toLocaleString()}
+                {(stats.totalInputTokens ?? 0).toLocaleString()}
               </p>
             </div>
             <div className="rounded-xl border border-border p-4">
-              <p className="text-xs text-muted-foreground">Completion Tokens</p>
+              <p className="text-xs text-muted-foreground">Output Tokens</p>
               <p className="mt-1 text-lg font-semibold">
-                {tokenUsage.completionTokens.toLocaleString()}
+                {(stats.totalOutputTokens ?? 0).toLocaleString()}
               </p>
             </div>
             <div className="rounded-xl border border-border p-4">
-              <p className="text-xs text-muted-foreground">Total Tokens</p>
+              <p className="text-xs text-muted-foreground">Cached Tokens</p>
               <p className="mt-1 text-lg font-semibold">
-                {tokenUsage.totalTokens.toLocaleString()}
+                {(stats.totalCachedTokens ?? 0).toLocaleString()}
+              </p>
+            </div>
+            <div className="rounded-xl border border-border p-4">
+              <p className="text-xs text-muted-foreground">Reasoning Tokens</p>
+              <p className="mt-1 text-lg font-semibold">
+                {(stats.totalReasoningTokens ?? 0).toLocaleString()}
               </p>
             </div>
           </div>

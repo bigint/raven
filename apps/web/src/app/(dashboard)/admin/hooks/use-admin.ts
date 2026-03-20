@@ -11,13 +11,12 @@ import { api } from "@/lib/api";
 
 interface AdminStats {
   readonly totalUsers: number;
-  readonly requests30d: number;
-  readonly cost30d: string;
-  readonly tokenUsage: {
-    readonly promptTokens: number;
-    readonly completionTokens: number;
-    readonly totalTokens: number;
-  };
+  readonly totalRequests: number;
+  readonly totalCost: string;
+  readonly totalInputTokens: number;
+  readonly totalOutputTokens: number;
+  readonly totalReasoningTokens: number;
+  readonly totalCachedTokens: number;
 }
 
 interface AdminUser {
@@ -32,27 +31,21 @@ interface AuditLog {
   readonly id: string;
   readonly action: string;
   readonly resourceType: string;
-  readonly actor: string;
+  readonly actorName: string | null;
+  readonly actorEmail: string | null;
   readonly createdAt: string;
 }
 
 interface AdminProvider {
-  readonly id: string;
-  readonly provider: string;
-  readonly name: string | null;
-  readonly isEnabled: boolean;
-  readonly models: AdminProviderModel[];
-}
-
-interface AdminProviderModel {
-  readonly id: string;
+  readonly slug: string;
   readonly name: string;
+  readonly modelCount: number;
 }
 
 interface AdminSettings {
-  readonly instanceName: string;
-  readonly analyticsRetentionDays: number;
-  readonly allowRegistration: boolean;
+  readonly instance_name: string;
+  readonly analytics_retention_days: string;
+  readonly allow_registration: string;
 }
 
 // --- Query Options ---
@@ -71,7 +64,10 @@ export const adminUsersQueryOptions = () =>
 
 export const adminAuditLogsQueryOptions = () =>
   queryOptions({
-    queryFn: () => api.get<AuditLog[]>("/v1/admin/audit-logs"),
+    queryFn: async () => {
+      const res = await api.get<{ data: AuditLog[]; hasMore: boolean }>("/v1/admin/audit-logs");
+      return res.data;
+    },
     queryKey: ["admin", "audit-logs"]
   });
 
@@ -105,8 +101,8 @@ export const useUpdateSettings = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: Partial<AdminSettings>) =>
-      api.put<AdminSettings>("/v1/admin/settings", input),
+    mutationFn: (input: Record<string, string>) =>
+      api.put("/v1/admin/settings", input),
     onError: (err) => {
       toast.error(err.message);
     },
@@ -165,7 +161,6 @@ export const useSyncModels = () => {
 
 export type {
   AdminProvider,
-  AdminProviderModel,
   AdminSettings,
   AdminStats,
   AdminUser,

@@ -61,34 +61,23 @@ export const ModelsTab = () => {
       {providers?.map((provider) => (
         <div
           className="rounded-xl border border-border overflow-hidden"
-          key={provider.id}
+          key={provider.slug}
         >
           <div className="flex items-center justify-between border-b border-border bg-muted/30 px-5 py-3">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">{provider.provider}</span>
-              {provider.name && (
-                <span className="text-xs text-muted-foreground">
-                  ({provider.name})
-                </span>
-              )}
-            </div>
-            <Badge dot variant={provider.isEnabled ? "success" : "neutral"}>
-              {provider.isEnabled ? "Active" : "Disabled"}
+            <span className="text-sm font-medium">{provider.name}</span>
+            <Badge variant="neutral">
+              {provider.modelCount} {provider.modelCount === 1 ? "model" : "models"}
             </Badge>
           </div>
           <div className="px-5 py-3">
-            {provider.models.length === 0 ? (
+            {provider.modelCount === 0 ? (
               <p className="py-2 text-sm text-muted-foreground">
                 No models synced yet
               </p>
             ) : (
-              <div className="flex flex-wrap gap-2">
-                {provider.models.map((model) => (
-                  <Badge key={model.id} variant="neutral">
-                    {model.name}
-                  </Badge>
-                ))}
-              </div>
+              <p className="py-2 text-sm text-muted-foreground">
+                {provider.modelCount} {provider.modelCount === 1 ? "model" : "models"} synced
+              </p>
             )}
           </div>
         </div>

@@ -9,14 +9,14 @@ export const SettingsTab = () => {
   const updateSettings = useUpdateSettings();
 
   const [instanceName, setInstanceName] = useState("");
-  const [retentionDays, setRetentionDays] = useState(90);
+  const [retentionDays, setRetentionDays] = useState(365);
   const [allowRegistration, setAllowRegistration] = useState(true);
 
   useEffect(() => {
     if (settings) {
-      setInstanceName(settings.instanceName);
-      setRetentionDays(settings.analyticsRetentionDays);
-      setAllowRegistration(settings.allowRegistration);
+      setInstanceName(settings.instance_name ?? "");
+      setRetentionDays(Number(settings.analytics_retention_days) || 365);
+      setAllowRegistration(settings.allow_registration !== "false");
     }
   }, [settings]);
 
@@ -38,17 +38,17 @@ export const SettingsTab = () => {
 
   const handleSave = () => {
     updateSettings.mutate({
-      allowRegistration,
-      analyticsRetentionDays: retentionDays,
-      instanceName
+      allow_registration: String(allowRegistration),
+      analytics_retention_days: String(retentionDays),
+      instance_name: instanceName
     });
   };
 
   const hasChanges =
     settings !== undefined &&
-    (instanceName !== settings.instanceName ||
-      retentionDays !== settings.analyticsRetentionDays ||
-      allowRegistration !== settings.allowRegistration);
+    (instanceName !== (settings.instance_name ?? "") ||
+      retentionDays !== (Number(settings.analytics_retention_days) || 365) ||
+      allowRegistration !== (settings.allow_registration !== "false"));
 
   return (
     <div className="max-w-lg space-y-6">

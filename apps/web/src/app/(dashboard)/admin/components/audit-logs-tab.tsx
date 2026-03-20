@@ -26,7 +26,9 @@ export const AuditLogsTab = () => {
       header: "Actor",
       key: "actor",
       render: (log) => (
-        <span className="text-muted-foreground">{log.actor}</span>
+        <span className="text-muted-foreground">
+          {log.actorName || log.actorEmail || "System"}
+        </span>
       )
     },
     {
