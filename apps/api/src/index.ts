@@ -18,14 +18,12 @@ import { createAuthMiddleware } from "./middleware/auth";
 import { platformAdminMiddleware } from "./middleware/platform-admin";
 import { requestId } from "./middleware/request-id";
 import { requestTiming } from "./middleware/request-timing";
+import { createWriterMiddleware } from "./middleware/writer";
 import { createAdminModule } from "./modules/admin/index";
+import { getPublicSettings } from "./modules/admin/settings";
 import { createAnalyticsModule } from "./modules/analytics/index";
 import { createAuditLogsModule } from "./modules/audit-logs/index";
 import { createAuthModule } from "./modules/auth/index";
-import {
-  createBillingModule,
-  createBillingWebhookModule
-} from "./modules/billing/index";
 import { createBudgetsModule } from "./modules/budgets/index";
 import { createGuardrailsModule } from "./modules/guardrails/index";
 import { createKeysModule } from "./modules/keys/index";
@@ -38,8 +36,6 @@ import { proxyHandler } from "./modules/proxy/handler";
 import { flushLastUsed } from "./modules/proxy/last-used";
 import { flushLogBuffer } from "./modules/proxy/logger";
 import { createRoutingRulesModule } from "./modules/routing-rules/index";
-import { createSettingsModule } from "./modules/settings/index";
-import { createTeamsModule } from "./modules/teams/index";
 import { createUserModule } from "./modules/user/index";
 import { createWebhooksModule } from "./modules/webhooks/index";
 
@@ -147,11 +143,11 @@ app.route("/v1", createOpenAICompatModule(db, redis, env));
 
 app.all("/v1/proxy/*", proxyHandler(db, redis, env));
 
-// Billing webhooks (no auth)
-app.route("/webhooks/billing", createBillingWebhookModule(db, env, redis));
-
 // Public models catalog (no auth required)
 app.route("/v1/models", createModelsModule(db));
+
+// Public settings (no auth required)
+app.get("/v1/settings/public", getPublicSettings(db));
 
 // User-level routes (session auth)
 const userRoutes = new Hono();
@@ -166,9 +162,10 @@ adminRoutes.use("*", platformAdminMiddleware);
 adminRoutes.route("/", createAdminModule(db, redis));
 app.route("/v1/admin", adminRoutes);
 
-// Protected API routes (session auth)
+// Protected API routes (session auth + writer middleware for mutations)
 const v1 = new Hono();
 v1.use("*", createAuthMiddleware(auth));
+v1.use("*", createWriterMiddleware());
 v1.get("/available-models", listAvailableModels(db));
 v1.route("/providers", createProvidersModule(db, env, redis));
 v1.route("/keys", createKeysModule(db, redis));
@@ -176,9 +173,6 @@ v1.route("/prompts", createPromptsModule(db));
 v1.route("/budgets", createBudgetsModule(db, redis));
 v1.route("/guardrails", createGuardrailsModule(db, redis));
 v1.route("/analytics", createAnalyticsModule(db, redis));
-v1.route("/teams", createTeamsModule(db, redis));
-v1.route("/settings", createSettingsModule(db, redis));
-v1.route("/billing", createBillingModule(db, redis));
 v1.route("/webhooks", createWebhooksModule(db, redis));
 v1.route("/routing-rules", createRoutingRulesModule(db));
 v1.route("/audit-logs", createAuditLogsModule(db, redis));
