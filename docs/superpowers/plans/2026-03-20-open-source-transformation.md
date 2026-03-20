@@ -354,17 +354,19 @@ git commit -m "feat: remove billing types and simplify env config"
 
 **Files:**
 - Modify: `packages/auth/src/server.ts`
-- Modify: `packages/auth/src/client.ts` (if it exports org-related functions)
+- Modify: `packages/auth/src/client.ts`
 
 - [ ] **Step 1: Update `server.ts`**
 
-In the betterAuth configuration, remove the `organization()` plugin from the `plugins` array. Keep everything else (email/password, GitHub, Google, session config, hooks).
-
-Also update the `user.fields` or schema mapping if the auth config references the organization plugin's tables.
+In the betterAuth configuration:
+1. Remove the `organization()` plugin from the `plugins` array
+2. Remove the schema mapping references to deleted tables: `schema.invitations`, `schema.members`, `schema.organizations` from the drizzle adapter config
+3. Add first-user bootstrap logic in the `onUserCreated` hook: check if the users table is empty (this is the first user), if so update their role to `"admin"`
+4. Keep everything else (email/password, GitHub, Google, session config)
 
 - [ ] **Step 2: Update `client.ts`**
 
-If the auth client exports any organization-related methods (like `organization.create`, `organization.setActive`), remove those exports.
+The auth client at `packages/auth/src/client.ts` imports `organizationClient` from `better-auth/client/plugins` and includes it in the `plugins` array. Remove the `organizationClient` import and remove it from the plugins array.
 
 - [ ] **Step 3: Commit**
 
@@ -570,19 +572,21 @@ git commit -m "feat: remove all feature gates and resource limits from handlers"
 
 ### Task 7: Remove orgId from All Module Handlers
 
-This task covers every remaining handler that references `orgId`, `organizationId`, or `c.get("orgId")`. Each module's list, get, update, delete handlers need updating.
+This task covers every remaining handler that references `orgId`, `organizationId`, or `c.get("orgId")`. There are ~77 files with these references across the API. Each module's list, get, update, delete handlers need updating.
 
-**Files:**
-- Modify: All `list.ts`, `update.ts`, `delete.ts`, `get.ts` files in:
-  - `apps/api/src/modules/providers/`
-  - `apps/api/src/modules/keys/`
-  - `apps/api/src/modules/budgets/`
-  - `apps/api/src/modules/guardrails/`
-  - `apps/api/src/modules/webhooks/`
-  - `apps/api/src/modules/routing-rules/`
-  - `apps/api/src/modules/prompts/`
-  - `apps/api/src/modules/audit-logs/`
-  - `apps/api/src/modules/request-logs/` (if exists)
+**Files (all .ts files in these directories):**
+- Modify: `apps/api/src/modules/providers/` — list.ts, update.ts, delete.ts, test.ts, available.ts, models.ts, helpers.ts
+- Modify: `apps/api/src/modules/keys/` — list.ts, update.ts, delete.ts, helpers.ts
+- Modify: `apps/api/src/modules/budgets/` — list.ts, update.ts, delete.ts
+- Modify: `apps/api/src/modules/guardrails/` — list.ts, update.ts, delete.ts
+- Modify: `apps/api/src/modules/webhooks/` — list.ts, update.ts, delete.ts, test.ts
+- Modify: `apps/api/src/modules/routing-rules/` — list.ts, update.ts, delete.ts
+- Modify: `apps/api/src/modules/prompts/` — list.ts, get.ts, update.ts, delete.ts, versions.ts
+- Modify: `apps/api/src/modules/audit-logs/` — log.ts, list.ts
+- Modify: `apps/api/src/modules/openai-compat/handler.ts` — **CRITICAL: has 8+ orgId references, imports checkPlanLimit**
+- Modify: `apps/api/src/modules/proxy/` — **ALL sub-modules**: handler.ts, auth.ts, logger.ts, guardrails.ts, execute.ts, fallback.ts, content-router.ts, cache.ts, router.ts, provider-resolver.ts
+- Modify: `apps/api/src/modules/analytics/` — **ALL 13 files**: helpers.ts, index.ts, usage.ts, stats.ts, tools.ts, models.ts, cache.ts, adoption.ts, sessions.ts, star.ts, logs.ts, requests.ts, requests-live.ts
+- Modify: `apps/api/src/modules/models/` — available.ts (if it has org refs)
 
 - [ ] **Step 1: For each module, search and replace pattern**
 
@@ -668,13 +672,16 @@ git commit -m "feat: update event system and dispatchers for single workspace"
 
 ---
 
-### Task 9: Update Analytics & Proxy Handlers
+### Task 9: Update Analytics, Proxy, and OpenAI-Compat Handlers
 
 **Files:**
 - Modify: `apps/api/src/modules/analytics/helpers.ts`
 - Modify: `apps/api/src/modules/analytics/index.ts`
+- Modify: All 13 analytics files (usage.ts, stats.ts, tools.ts, models.ts, cache.ts, adoption.ts, sessions.ts, star.ts, logs.ts, requests.ts, requests-live.ts)
 - Modify: `apps/api/src/modules/proxy/handler.ts`
 - Modify: `apps/api/src/modules/proxy/budget-check.ts`
+- Modify: All proxy sub-modules (auth.ts, logger.ts, guardrails.ts, execute.ts, fallback.ts, content-router.ts, cache.ts, router.ts, provider-resolver.ts)
+- Modify: `apps/api/src/modules/openai-compat/handler.ts` — remove checkPlanLimit, orgId refs
 
 - [ ] **Step 1: Rewrite `analytics/helpers.ts`**
 
@@ -715,19 +722,44 @@ Remove the `redis` parameter and plan-checking logic.
 
 Update the middleware that calls `clampAnalyticsRetention` to remove `orgId` and `redis` parameters. Update the `AppEnv` type to `AuthEnv`.
 
-- [ ] **Step 3: Update `proxy/handler.ts`**
+- [ ] **Step 3: Update ALL analytics sub-modules (11 remaining files)**
+
+Every analytics file (usage.ts, stats.ts, tools.ts, models.ts, cache.ts, adoption.ts, sessions.ts, star.ts, logs.ts, requests.ts, requests-live.ts) references `orgId` in WHERE clauses. For each:
+1. Remove `c.get("orgId")` calls
+2. Remove `eq(table.organizationId, orgId)` from query WHERE clauses
+3. Update type imports from `AppContext`/`AppEnv` to `AuthContext`/`AuthEnv`
+
+Run: `grep -r "orgId\|organizationId\|AppContext\|AppEnv" apps/api/src/modules/analytics/ --include="*.ts" -l`
+
+- [ ] **Step 4: Update `proxy/handler.ts`**
 
 Remove the `checkPlanLimit()` call from the parallel gate checks. Remove its import. Keep rate limiting, budget checks, and guardrail evaluation. Remove all `orgId` references — the proxy should resolve the virtual key and then work globally.
 
-- [ ] **Step 4: Update `proxy/budget-check.ts`**
+- [ ] **Step 5: Update ALL proxy sub-modules**
+
+The proxy has many sub-modules that pass `orgId`: auth.ts, logger.ts, guardrails.ts, execute.ts, fallback.ts, content-router.ts, cache.ts, router.ts, provider-resolver.ts. For each:
+1. Remove orgId parameters from function signatures
+2. Remove orgId from database queries
+3. Remove orgId from event publishing calls
+
+Run: `grep -r "orgId\|organizationId" apps/api/src/modules/proxy/ --include="*.ts" -l`
+
+- [ ] **Step 6: Update `proxy/budget-check.ts`**
 
 Remove `orgId` from budget lookups. Budget queries should look up by `entityType` and `entityId` without org scoping.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 7: Update `openai-compat/handler.ts`**
+
+This file has ~8 orgId references and imports `checkPlanLimit` (being deleted). Remove:
+1. `checkPlanLimit` import and call
+2. All `orgId`/`organizationId` references
+3. Update to use the same pattern as proxy/handler.ts
+
+- [ ] **Step 8: Commit**
 
 ```bash
-git add apps/api/src/modules/analytics/ apps/api/src/modules/proxy/
-git commit -m "feat: update analytics and proxy for settings-based retention"
+git add apps/api/src/modules/analytics/ apps/api/src/modules/proxy/ apps/api/src/modules/openai-compat/
+git commit -m "feat: update analytics, proxy, and openai-compat for single workspace"
 ```
 
 ---
@@ -824,18 +856,18 @@ export const cleanupRetention = async (db: Database) => {
   const retentionDays = row ? Number.parseInt(row.value, 10) : 365;
   const cutoff = subDays(new Date(), retentionDays);
 
-  const [requestResult] = await db
+  const deletedRequests = await db
     .delete(requestLogs)
     .where(lt(requestLogs.createdAt, cutoff))
     .returning({ id: requestLogs.id });
 
-  const [auditResult] = await db
+  const deletedAudits = await db
     .delete(auditLogs)
     .where(lt(auditLogs.createdAt, cutoff))
     .returning({ id: auditLogs.id });
 
   console.log(
-    `Retention cleanup: deleted request logs and audit logs older than ${retentionDays} days`
+    `Retention cleanup: deleted ${deletedRequests.length} request logs and ${deletedAudits.length} audit logs older than ${retentionDays} days`
   );
 };
 ```
@@ -907,31 +939,53 @@ git commit -m "feat: add admin settings, user management, and retention cleanup"
 - Create: `apps/api/src/cron.ts`
 - Modify: `apps/api/tsup.config.ts`
 
-- [ ] **Step 1: Create `cron.ts`**
+- [ ] **Step 1: Refactor `modules/cron/sync-models.ts`**
+
+Currently this file exports a Hono handler `(c: Context) => ...`. Extract the core sync logic into a standalone function that can be called without HTTP context:
 
 ```typescript
-import { createDb } from "@raven/db";
-import { cleanupRetention } from "./modules/admin/retention";
+// Export a standalone function for the cron container
+export const syncModelsJob = async (db: Database, redis: Redis) => {
+  // ... existing sync logic without Hono context
+};
 
-// Import the model sync function
+// Keep the Hono handler for the admin /models/sync route
+export const syncModels = (db: Database, redis: Redis) => async (c: Context) => {
+  await syncModelsJob(db, redis);
+  return success(c, { synced: true });
+};
+```
+
+Also delete `modules/cron/index.ts` (the old cron route handler that uses `CRON_SECRET` — this env var is being removed).
+
+- [ ] **Step 2: Create `cron.ts`**
+
+Use the same initialization pattern as `index.ts` (parseEnv, createDatabase, createRedis):
+
+```typescript
+import { parseEnv } from "@raven/config";
+import { createDatabase } from "@raven/db";
+import Redis from "ioredis";
+import { cleanupRetention } from "./modules/admin/retention";
 import { syncModelsJob } from "./modules/cron/sync-models";
 
-const db = createDb();
+const env = parseEnv();
+const db = createDatabase(env.DATABASE_URL);
+const redis = new Redis(env.REDIS_URL, { lazyConnect: true, maxRetriesPerRequest: 3 });
+await redis.connect();
 
 console.log("Raven cron worker started");
 
-// Model sync: run immediately, then every hour
 const runModelSync = async () => {
   try {
     console.log(`[${new Date().toISOString()}] Running model sync...`);
-    await syncModelsJob(db);
+    await syncModelsJob(db, redis);
     console.log(`[${new Date().toISOString()}] Model sync complete`);
   } catch (err) {
     console.error("Model sync failed:", err);
   }
 };
 
-// Retention cleanup: run daily
 const runRetentionCleanup = async () => {
   try {
     console.log(`[${new Date().toISOString()}] Running retention cleanup...`);
@@ -943,17 +997,15 @@ const runRetentionCleanup = async () => {
 };
 
 await runModelSync();
-setInterval(runModelSync, 60 * 60 * 1000); // 1 hour
-setInterval(runRetentionCleanup, 24 * 60 * 60 * 1000); // 24 hours
+setInterval(runModelSync, 60 * 60 * 1000);
+setInterval(runRetentionCleanup, 24 * 60 * 60 * 1000);
 
-// Keep process alive
 process.on("SIGTERM", () => {
   console.log("Cron worker shutting down");
+  redis.disconnect();
   process.exit(0);
 });
 ```
-
-Note: The exact import for syncModels depends on how `modules/cron/sync-models.ts` exports. It currently exports a Hono handler — you'll need to extract the core sync logic into a standalone function that the cron can call directly without an HTTP context.
 
 - [ ] **Step 2: Update `tsup.config.ts`**
 
@@ -1031,6 +1083,8 @@ git commit -m "feat: update API entry point - remove billing, teams, tenant midd
 
 ### Task 13: Delete Unused Frontend Pages & Components
 
+> **IMPORTANT:** Task 16 (Admin Tabbed Page) ports code from `(admin)/`. If running tasks in parallel, Task 16 must READ the old admin files BEFORE this task deletes them.
+
 **Files to delete (entire directories):**
 - `apps/web/src/app/(dashboard)/billing/`
 - `apps/web/src/app/(dashboard)/team/`
@@ -1039,7 +1093,7 @@ git commit -m "feat: update API entry point - remove billing, teams, tenant midd
 - `apps/web/src/app/(dashboard)/hooks/use-orgs.ts`
 - `apps/web/src/stores/org.ts`
 - `apps/web/src/app/onboarding/`
-- `apps/web/src/app/(admin)/` (entire directory)
+- `apps/web/src/app/(admin)/` (entire directory — admin code is ported to new location in Task 16)
 - `apps/web/src/app/(marketing)/pricing/`
 - `apps/web/src/app/(marketing)/privacy/`
 - `apps/web/src/app/(marketing)/terms/`
@@ -1048,6 +1102,12 @@ git commit -m "feat: update API entry point - remove billing, teams, tenant midd
 - `apps/web/src/app/(marketing)/components/billing-toggle.tsx`
 - `apps/web/src/app/(marketing)/components/home-page.tsx`
 - `apps/web/src/app/(marketing)/components/hero-word-rotator.tsx`
+- `apps/web/src/app/(marketing)/components/auth-nav.tsx` (if exists — used by old marketing layout)
+
+**Files to modify (fix broken imports from deleted stores/billing):**
+- Modify: `apps/web/src/app/(dashboard)/analytics/hooks/use-analytics.ts` — remove `Plan`/`PLAN_FEATURES` imports from `@raven/types` and `subscriptionQueryOptions` import from billing hooks. Remove plan-gated adoption tab logic.
+- Modify: `apps/web/src/app/(dashboard)/analytics/page.tsx` — remove plan-based tab restrictions
+- Modify: `apps/web/src/app/(dashboard)/requests/hooks/use-requests.ts` — remove `useOrgStore` import, remove org header injection
 
 - [ ] **Step 1: Delete all listed files and directories**
 
@@ -1070,7 +1130,32 @@ rm -f apps/web/src/app/(marketing)/components/home-page.tsx
 rm -f apps/web/src/app/(marketing)/components/hero-word-rotator.tsx
 ```
 
-- [ ] **Step 2: Commit**
+- [ ] **Step 2: Fix analytics frontend — remove billing/plan imports**
+
+In `apps/web/src/app/(dashboard)/analytics/hooks/use-analytics.ts`:
+- Remove import of `Plan`, `PLAN_FEATURES` from `@raven/types`
+- Remove import of `subscriptionQueryOptions` from billing hooks (file deleted)
+- Remove any plan-based feature gating logic
+
+In `apps/web/src/app/(dashboard)/analytics/page.tsx`:
+- Remove plan-based adoption tab restriction — adoption tab always visible
+- Remove any billing/subscription queries
+
+- [ ] **Step 3: Fix requests frontend — remove org store import**
+
+In `apps/web/src/app/(dashboard)/requests/hooks/use-requests.ts`:
+- Remove `import { useOrgStore } from "@/stores/org"` (file deleted)
+- Remove any org-based filtering
+
+- [ ] **Step 4: Grep for any remaining broken imports**
+
+```bash
+grep -r "useOrgStore\|@/stores/org\|billing\|PLAN_FEATURES\|PLAN_DETAILS\|subscriptionQueryOptions\|useOrgs\|org-switcher" apps/web/src/ --include="*.ts" --include="*.tsx" -l
+```
+
+Fix any remaining references found.
+
+- [ ] **Step 5: Commit**
 
 ```bash
 git add -A apps/web/
@@ -1483,24 +1568,27 @@ Task 2 (Types)  ──┤                              │
 Task 3 (Auth)   ──┘                              ├──→ Task 6 (Remove gates)
                                                  ├──→ Task 7 (Remove orgId)
                                                  ├──→ Task 8 (Core libs)
-                                                 └──→ Task 9 (Analytics/Proxy)
+                                                 └──→ Task 9 (Analytics/Proxy/OpenAI-compat)
                                                           │
                                                           ├──→ Task 10 (Admin API)
                                                           ├──→ Task 11 (Cron)
                                                           └──→ Task 12 (API index)
                                                                     │
-Task 13 (Delete frontend) ──→ Task 14 (API client) ──→ Task 15 (Layout/Sidebar)
-                                                          │
-                                                          ├──→ Task 16 (Admin page)
+                                     Task 16 reads old admin ──→ Task 13 (Delete frontend)
+                                                                    │
+                                                          Task 14 (API client) ──→ Task 15 (Layout/Sidebar)
+                                                                    │
+                                                          ├──→ Task 16 (Admin page — write)
                                                           ├──→ Task 17 (Profile)
                                                           └──→ Task 18 (Landing)
                                                                     │
-                                                          Task 19 (Docker) ──→ Task 20 (Cleanup)
+                                                          Task 12 ──→ Task 19 (Docker) ──→ Task 20 (Cleanup)
 ```
 
 **Parallelizable groups:**
-- Tasks 1, 2, 3 can run in parallel
+- Tasks 1, 2, 3 can run in parallel (but if parallelized, Task 3 must handle schema mapping cleanup atomically since Task 1 deletes the schema files it references)
 - Tasks 6, 7, 8, 9 can run in parallel (after 5)
 - Tasks 10, 11 can run in parallel (after 9)
-- Tasks 13 can run independently
-- Tasks 16, 17, 18 can run in parallel (after 15)
+- Task 16 must READ old admin code before Task 13 deletes it (then Task 13 runs, then Task 16 writes new code)
+- Tasks 17, 18 can run in parallel (after 15)
+- Task 19 depends on Task 12 (API must build) and Task 18 (web must build)
