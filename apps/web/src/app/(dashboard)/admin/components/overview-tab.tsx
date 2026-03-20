@@ -64,7 +64,7 @@ export const OverviewTab = () => {
           icon={DollarSign}
           label="Cost (30d)"
           loading={isPending}
-          value={stats ? `$${Number(stats.cost30d).toFixed(2)}` : "$0.00"}
+          value={stats ? `$${(Number(stats.cost30d) || 0).toFixed(2)}` : "$0.00"}
         />
       </div>
 

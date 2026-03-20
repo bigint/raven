@@ -102,7 +102,7 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
           </span>
         </td>
         <td className="px-5 py-4 text-right tabular-nums">
-          ${Number(session.totalCost).toFixed(4)}
+          ${(Number(session.totalCost) || 0).toFixed(4)}
         </td>
         <td className="px-5 py-4 text-right text-sm text-muted-foreground whitespace-nowrap">
           {formatTimeAgo(session.endTime)}
@@ -183,7 +183,7 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
                           {req.outputTokens.toLocaleString()}
                         </td>
                         <td className="px-3 py-2.5 text-right tabular-nums">
-                          ${Number(req.cost).toFixed(6)}
+                          ${(Number(req.cost) || 0).toFixed(6)}
                         </td>
                         <td className="px-3 py-2.5 text-center">
                           <button

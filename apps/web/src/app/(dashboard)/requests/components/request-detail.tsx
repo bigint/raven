@@ -130,7 +130,7 @@ export const RequestDetail = ({ request, onClose }: RequestDetailProps) => {
                 />
                 <Field
                   label="Cost"
-                  value={`$${Number(request.cost).toFixed(6)}`}
+                  value={`$${(Number(request.cost) || 0).toFixed(6)}`}
                 />
                 <Field
                   label="Tokens/Second"

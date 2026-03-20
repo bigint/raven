@@ -33,7 +33,7 @@ export const ModelsTab = ({ keyId }: { keyId?: string }) => {
         row.outputTokens,
         row.cachedTokens,
         row.reasoningTokens,
-        Number(row.totalCost).toFixed(4),
+        (Number(row.totalCost) || 0).toFixed(4),
         Math.round(row.avgLatencyMs),
         row.lastUsed ?? ""
       ])

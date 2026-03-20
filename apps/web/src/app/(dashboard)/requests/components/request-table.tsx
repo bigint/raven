@@ -79,7 +79,7 @@ const columns: Column<RequestLog>[] = [
     header: "Cost",
     headerClassName: "text-right",
     key: "cost",
-    render: (req) => `$${Number(req.cost).toFixed(6)}`
+    render: (req) => `$${(Number(req.cost) || 0).toFixed(6)}`
   },
   {
     className: "text-center",

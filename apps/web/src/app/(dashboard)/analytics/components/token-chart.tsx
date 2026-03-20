@@ -69,7 +69,7 @@ export const TokenChart = ({
             }}
             formatter={(value) =>
               metric === "cost"
-                ? `$${Number(value).toFixed(4)}`
+                ? `$${(Number(value) || 0).toFixed(4)}`
                 : Number(value).toLocaleString()
             }
             labelFormatter={(label) => formatShortDate(String(label))}
