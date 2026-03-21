@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { SignUpForm } from "./sign-up-form";
 
 export const metadata: Metadata = {
@@ -8,7 +9,11 @@ export const metadata: Metadata = {
 };
 
 const SignUpPage = () => {
-  return <SignUpForm />;
+  return (
+    <Suspense>
+      <SignUpForm />
+    </Suspense>
+  );
 };
 
 export default SignUpPage;
