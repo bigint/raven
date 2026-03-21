@@ -126,11 +126,3 @@ The analytics dashboard includes a live view that shows requests flowing through
 ## Data Export
 
 Export analytics data for external analysis via the API. Supports JSON format with pagination for large datasets.
-
-```bash
-curl http://localhost:4000/v1/analytics \
-  -H "Authorization: Bearer rk_live_abc123" \
-  -G \
-  -d "start=2026-03-01" \
-  -d "end=2026-03-15"
-```

@@ -60,16 +60,6 @@ Navigate to **Admin > Audit Logs** in the dashboard to browse the audit trail. Y
 - **Actor** -- See all actions by a specific team member
 - **Date range** -- Focus on a specific time period
 
-### API
-
-```bash
-curl http://localhost:4000/v1/admin/audit-logs \
-  -H "Authorization: Bearer rk_live_abc123" \
-  -G \
-  -d "resourceType=virtual_key" \
-  -d "action=create"
-```
-
 ## Audit Log Entry Structure
 
 Each audit log entry contains:

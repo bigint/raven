@@ -48,21 +48,6 @@ Budgets can be attached to different levels of your organization hierarchy.
   </Step>
 </Steps>
 
-### Via the API
-
-```bash
-curl -X POST http://localhost:4000/v1/budgets \
-  -H "Authorization: Bearer rk_live_abc123" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "entityType": "organization",
-    "entityId": "org_abc123",
-    "limitAmount": 500.00,
-    "period": "monthly",
-    "alertThreshold": 0.80
-  }'
-```
-
 ## Budget Hierarchy
 
 Budgets are checked hierarchically from organization down to agent. If **any** level in the chain would be exceeded, the request is blocked.
