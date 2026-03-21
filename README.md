@@ -5,8 +5,8 @@
 **Open-source AI gateway for routing, managing, and observing LLM API traffic.**
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Docker](https://img.shields.io/docker/pulls/ravenplatform/raven)](https://hub.docker.com/r/ravenplatform/raven)
-[![CI](https://github.com/ravenplatform/raven/actions/workflows/ci.yml/badge.svg)](https://github.com/ravenplatform/raven/actions/workflows/ci.yml)
+[![Docker](https://img.shields.io/docker/pulls/yoginth/raven)](https://hub.docker.com/r/yoginth/raven)
+[![CI](https://github.com/bigint/raven/actions/workflows/ci.yml/badge.svg)](https://github.com/bigint/raven/actions/workflows/ci.yml)
 
 [Documentation](https://docs.ravenplatform.com) | [Quick Start](#quick-start) | [Self-Host](#docker-deployment) | [Contributing](CONTRIBUTING.md)
 
@@ -78,7 +78,7 @@ Raven is structured as a monorepo managed with pnpm workspaces and Turborepo.
 ### Local Development
 
 ```bash
-git clone https://github.com/ravenplatform/raven.git
+git clone https://github.com/bigint/raven.git
 cd raven
 pnpm install
 cp .env.example .env

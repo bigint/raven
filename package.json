@@ -1,6 +1,6 @@
 {
   "bugs": {
-    "url": "https://github.com/ravenplatform/raven/issues"
+    "url": "https://github.com/bigint/raven/issues"
   },
   "description": "Open-source AI gateway for routing, managing, and observing LLM API traffic",
   "devDependencies": {
@@ -11,7 +11,7 @@
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
-  "homepage": "https://github.com/ravenplatform/raven",
+  "homepage": "https://github.com/bigint/raven",
   "keywords": [
     "ai-gateway",
     "llm",
@@ -37,7 +37,7 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/ravenplatform/raven.git"
+    "url": "https://github.com/bigint/raven.git"
   },
   "scripts": {
     "build": "pnpm -r build",

@@ -38,7 +38,7 @@ Ensure you have the following installed:
 
 ### Getting Started
 
-1. **Fork the repository** on GitHub at [github.com/ravenplatform/raven](https://github.com/ravenplatform/raven).
+1. **Fork the repository** on GitHub at [github.com/bigint/raven](https://github.com/bigint/raven).
 
 2. **Clone your fork** locally:
 
@@ -129,7 +129,7 @@ chore: upgrade dependencies to latest versions
 
 ## Reporting Bugs
 
-If you find a bug, please open a [GitHub Issue](https://github.com/ravenplatform/raven/issues) and include:
+If you find a bug, please open a [GitHub Issue](https://github.com/bigint/raven/issues) and include:
 
 - A clear and descriptive title
 - Steps to reproduce the issue
@@ -141,8 +141,8 @@ If you find a bug, please open a [GitHub Issue](https://github.com/ravenplatform
 
 We welcome feature suggestions. You can:
 
-- Open a [GitHub Issue](https://github.com/ravenplatform/raven/issues) with the "feature request" label
-- Start a [GitHub Discussion](https://github.com/ravenplatform/raven/discussions) to gather community feedback before formal proposals
+- Open a [GitHub Issue](https://github.com/bigint/raven/issues) with the "feature request" label
+- Start a [GitHub Discussion](https://github.com/bigint/raven/discussions) to gather community feedback before formal proposals
 
 Please include:
 
