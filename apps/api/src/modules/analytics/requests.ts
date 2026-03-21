@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { providerConfigs, requestLogs } from "@raven/db";
-import { and, count, eq, isNull, sql } from "drizzle-orm";
+import { and, count, eq, sql } from "drizzle-orm";
 import type { z } from "zod";
 import { buildPaginationMeta, getOffset } from "@/lib/pagination";
 import type { AuthContextWithQuery } from "@/lib/types";
@@ -20,7 +20,6 @@ export const getRequests =
     const dateConditions = parseDateRange(query.from, query.to);
 
     const where = and(
-      isNull(requestLogs.deletedAt),
       ...dateConditions,
       ...(query.endUser ? [eq(requestLogs.endUser, query.endUser)] : []),
       ...(query.provider ? [eq(requestLogs.provider, query.provider)] : []),

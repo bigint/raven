@@ -28,7 +28,6 @@
               "features/virtual-keys",
               "features/models",
               "features/routing-rules",
-              "features/prompt-management",
               "features/chat"
             ]
           },
@@ -76,7 +75,8 @@
             "pages": [
               "guides/openai-compatibility",
               "guides/streaming",
-              "guides/sdk"
+              "guides/sdk",
+              "guides/self-hosting"
             ]
           }
         ]
@@ -121,15 +121,6 @@
             "pages": [
               "api-reference/endpoints/list-models",
               "api-reference/endpoints/get-model"
-            ]
-          },
-          {
-            "group": "Prompts",
-            "pages": [
-              "api-reference/endpoints/list-prompts",
-              "api-reference/endpoints/create-prompt",
-              "api-reference/endpoints/get-prompt",
-              "api-reference/endpoints/create-prompt-version"
             ]
           },
           {

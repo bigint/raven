@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { users } from "@raven/db";
-import { and, desc, eq, isNull, lt } from "drizzle-orm";
+import { and, desc, eq, lt } from "drizzle-orm";
 import type { Context } from "hono";
 import { z } from "zod";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
@@ -14,11 +14,6 @@ const paginationSchema = z.object({
 export const getAdminUsers = (db: Database) => async (c: Context) => {
   const { cursor, limit } = paginationSchema.parse(c.req.query());
 
-  const conditions = [isNull(users.deletedAt)];
-  if (cursor) {
-    conditions.push(lt(users.id, cursor));
-  }
-
   const rows = await db
     .select({
       createdAt: users.createdAt,
@@ -28,7 +23,7 @@ export const getAdminUsers = (db: Database) => async (c: Context) => {
       role: users.role
     })
     .from(users)
-    .where(and(...conditions))
+    .where(cursor ? lt(users.id, cursor) : undefined)
     .orderBy(desc(users.createdAt))
     .limit(limit + 1);
 
@@ -68,8 +63,7 @@ export const deleteUser = (db: Database) => async (c: Context) => {
   }
 
   const [deleted] = await db
-    .update(users)
-    .set({ deletedAt: new Date() })
+    .delete(users)
     .where(eq(users.id, id))
     .returning();
 

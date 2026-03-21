@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { auditLogs, users } from "@raven/db";
-import { desc, eq, isNull } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import type { AuthEnv } from "@/lib/types";
 
@@ -21,7 +21,6 @@ export const createAuditLogsModule = (db: Database, _redis?: unknown) => {
       })
       .from(auditLogs)
       .leftJoin(users, eq(users.id, auditLogs.actorId))
-      .where(isNull(auditLogs.deletedAt))
       .orderBy(desc(auditLogs.createdAt))
       .limit(200);
 

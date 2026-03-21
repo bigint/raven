@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { providerConfigs, requestLogs } from "@raven/db";
-import { desc, eq, isNull } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { streamSSE } from "hono/streaming";
 import { getEventRedis } from "@/lib/events";
 import type { AuthContext } from "@/lib/types";
@@ -37,7 +37,6 @@ export const getRequestsLive = (db: Database) => async (c: AuthContext) => {
         providerConfigs,
         eq(requestLogs.providerConfigId, providerConfigs.id)
       )
-      .where(isNull(requestLogs.deletedAt))
       .orderBy(desc(requestLogs.createdAt))
       .limit(50);
 

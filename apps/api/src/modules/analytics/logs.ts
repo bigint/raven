@@ -5,7 +5,6 @@ import {
   count,
   eq,
   isNotNull,
-  isNull,
   max,
   min,
   sql,
@@ -31,7 +30,6 @@ export const getLogs =
 
     const where = and(
       isNotNull(requestLogs.sessionId),
-      isNull(requestLogs.deletedAt),
       ...dateConditions,
       ...(query.endUser ? [eq(requestLogs.endUser, query.endUser)] : []),
       ...(query.virtualKeyId

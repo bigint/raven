@@ -6,7 +6,6 @@ import {
   eq,
   gt,
   isNotNull,
-  isNull,
   max,
   sql,
   sum
@@ -33,7 +32,6 @@ export const getToolStats =
     const dateConditions = parseDateRange(from, to);
     const where = and(
       gt(requestLogs.toolCount, 0),
-      isNull(requestLogs.deletedAt),
       ...dateConditions
     );
 
@@ -75,7 +73,6 @@ export const getToolSessions =
 
     const where = and(
       isNotNull(requestLogs.sessionId),
-      isNull(requestLogs.deletedAt),
       ...dateConditions
     );
 

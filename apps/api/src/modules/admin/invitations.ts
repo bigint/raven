@@ -40,7 +40,7 @@ export const createInvitation =
     const [existingUser] = await db
       .select({ id: users.id })
       .from(users)
-      .where(and(eq(users.email, email), isNull(users.deletedAt)))
+      .where(eq(users.email, email))
       .limit(1);
 
     if (existingUser) {

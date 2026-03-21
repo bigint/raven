@@ -103,9 +103,6 @@ Requests pass through multiple security layers before reaching a provider:
   <Step title="Guardrail Evaluation">
     Content is scanned for PII, prompt injection, and custom rules. See [Prompt Injection Detection](/security/prompt-injection).
   </Step>
-  <Step title="Data Residency Enforcement">
-    Provider region restrictions are applied. See [Data Residency](/security/data-residency).
-  </Step>
   <Step title="Provider Forwarding">
     The request is forwarded to the upstream provider over TLS with decrypted credentials.
   </Step>
@@ -137,8 +134,5 @@ Requests pass through multiple security layers before reaching a provider:
   </Card>
   <Card title="Prompt Injection" icon="bug" href="/security/prompt-injection">
     Detect and block injection attacks.
-  </Card>
-  <Card title="Data Residency" icon="globe" href="/security/data-residency">
-    Enforce regional data requirements.
   </Card>
 </Columns>

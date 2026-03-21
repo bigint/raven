@@ -3,7 +3,7 @@ title: "Roles & Permissions"
 description: "Role-based access control for organization and team management."
 ---
 
-Raven uses role-based access control (RBAC) to manage permissions at the organization level. Every member is assigned one of five roles, each with a specific set of permissions. The system defines 50+ individual permissions organized by resource category.
+Raven uses role-based access control (RBAC) to manage permissions at the organization level. Every member is assigned one of five roles, each with a specific set of permissions.
 
 ## The Five Roles
 
@@ -41,22 +41,12 @@ Raven uses role-based access control (RBAC) to manage permissions at the organiz
 | `guardrails:write` | Yes | Yes | Yes | No | No |
 | `guardrails:delete` | Yes | Yes | No | No | No |
 
-### Policies
-
-| Permission | Owner | Admin | Manager | Developer | Viewer |
-|------------|-------|-------|---------|-----------|--------|
-| `policies:read` | Yes | Yes | Yes | Yes | No |
-| `policies:write` | Yes | Yes | No | No | No |
-| `policies:delete` | Yes | Yes | No | No | No |
-
-### Analytics and FinOps
+### Analytics
 
 | Permission | Owner | Admin | Manager | Developer | Viewer |
 |------------|-------|-------|---------|-----------|--------|
 | `analytics:view` | Yes | Yes | Yes | Yes | Yes |
 | `analytics:export` | Yes | Yes | No | No | No |
-| `finops:view` | Yes | Yes | Yes | Yes | Yes |
-| `finops:export` | Yes | Yes | No | No | No |
 
 ### Budgets
 
@@ -74,14 +64,6 @@ Raven uses role-based access control (RBAC) to manage permissions at the organiz
 | `teams:write` | Yes | Yes | No | No | No |
 | `teams:delete` | Yes | Yes | No | No | No |
 
-### Agents
-
-| Permission | Owner | Admin | Manager | Developer | Viewer |
-|------------|-------|-------|---------|-----------|--------|
-| `agents:read` | Yes | Yes | Yes | Yes | No |
-| `agents:write` | Yes | Yes | Yes | No | No |
-| `agents:delete` | Yes | Yes | No | No | No |
-
 ### Webhooks
 
 | Permission | Owner | Admin | Manager | Developer | Viewer |
@@ -89,28 +71,6 @@ Raven uses role-based access control (RBAC) to manage permissions at the organiz
 | `webhooks:read` | Yes | Yes | Yes | No | No |
 | `webhooks:write` | Yes | Yes | Yes | No | No |
 | `webhooks:delete` | Yes | Yes | No | No | No |
-
-### MCP Servers
-
-| Permission | Owner | Admin | Manager | Developer | Viewer |
-|------------|-------|-------|---------|-----------|--------|
-| `mcp:read` | Yes | Yes | Yes | Yes | No |
-| `mcp:write` | Yes | Yes | Yes | No | No |
-
-### Experiments
-
-| Permission | Owner | Admin | Manager | Developer | Viewer |
-|------------|-------|-------|---------|-----------|--------|
-| `experiments:read` | Yes | No | Yes | Yes | No |
-| `experiments:write` | Yes | No | Yes | No | No |
-
-### Catalog
-
-| Permission | Owner | Admin | Manager | Developer | Viewer |
-|------------|-------|-------|---------|-----------|--------|
-| `catalog:view` | Yes | Yes | Yes | Yes | Yes |
-| `catalog:submit` | Yes | Yes | Yes | Yes | No |
-| `catalog:approve` | Yes | Yes | No | No | No |
 
 ### Organization Settings
 
@@ -124,8 +84,6 @@ Raven uses role-based access control (RBAC) to manage permissions at the organiz
 | `billing:manage` | Yes | No | No | No | No |
 | `audit-logs:view` | Yes | Yes | No | No | No |
 | `audit-logs:export` | Yes | No | No | No | No |
-| `compliance:view` | Yes | Yes | No | No | No |
-| `compliance:manage` | Yes | Yes | No | No | No |
 
 ## How Permission Checking Works
 

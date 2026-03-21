@@ -12,7 +12,6 @@ export const auditLogs = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
-    deletedAt: timestamp("deleted_at", { withTimezone: true }),
     id: text("id").primaryKey().$defaultFn(createId),
     metadata: jsonb("metadata").$type<Record<string, unknown>>(),
     resourceId: text("resource_id").notNull(),

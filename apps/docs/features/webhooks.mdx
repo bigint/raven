@@ -60,14 +60,6 @@ Subscribe to any combination of events across the system.
 | `guardrail.blocked` | A request was blocked by a guardrail |
 | `guardrail.warned` | A guardrail issued a warning |
 
-### Policy Events
-
-| Event | Description |
-|-------|-------------|
-| `policy.evaluated` | A policy was evaluated against a request |
-| `policy.blocked` | A request was blocked by a policy |
-| `policy.updated` | A policy was updated |
-
 ### Budget Events
 
 | Event | Description |
@@ -92,30 +84,6 @@ Subscribe to any combination of events across the system.
 | `provider.health.degraded` | A provider's health degraded |
 | `provider.health.recovered` | A provider recovered from degraded health |
 | `provider.outage.detected` | A provider outage was detected |
-
-### Agent Events
-
-| Event | Description |
-|-------|-------------|
-| `agent.registered` | A new agent identity was created |
-| `agent.anomaly.detected` | Anomalous agent behavior was detected |
-| `agent.budget.exceeded` | An agent exceeded its budget |
-| `agent.tool.invoked` | An agent invoked a tool |
-
-### Compliance Events
-
-| Event | Description |
-|-------|-------------|
-| `compliance.drift.detected` | Compliance posture changed |
-| `compliance.audit.generated` | A compliance report was generated |
-
-### Experiment Events
-
-| Event | Description |
-|-------|-------------|
-| `experiment.started` | An experiment began running |
-| `experiment.completed` | An experiment was completed |
-| `experiment.variant.selected` | A request was routed to an experiment variant |
 
 ## Webhook Payload
 

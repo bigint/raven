@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { requestLogs, users } from "@raven/db";
-import { and, count, gte, isNull, sum } from "drizzle-orm";
+import { and, count, gte, sum } from "drizzle-orm";
 import type { Context } from "hono";
 import { success } from "@/lib/response";
 
@@ -8,7 +8,7 @@ export const getAdminStats = (db: Database) => async (c: Context) => {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
   const [[userCount], [requestStats]] = await Promise.all([
-    db.select({ value: count() }).from(users).where(isNull(users.deletedAt)),
+    db.select({ value: count() }).from(users),
     db
       .select({
         totalCachedTokens: sum(requestLogs.cachedTokens),
@@ -19,12 +19,7 @@ export const getAdminStats = (db: Database) => async (c: Context) => {
         totalRequests: count()
       })
       .from(requestLogs)
-      .where(
-        and(
-          gte(requestLogs.createdAt, thirtyDaysAgo),
-          isNull(requestLogs.deletedAt)
-        )
-      )
+      .where(gte(requestLogs.createdAt, thirtyDaysAgo))
   ]);
 
   return success(c, {

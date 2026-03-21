@@ -21,7 +21,6 @@ export const requestLogs = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
-    deletedAt: timestamp("deleted_at", { withTimezone: true }),
     endUser: text("end_user"),
     hasImages: boolean("has_images").notNull().default(false),
     hasToolUse: boolean("has_tool_use").notNull().default(false),
@@ -59,9 +58,7 @@ export const requestLogs = pgTable(
       t.createdAt
     ),
     index("request_logs_status_created_idx").on(t.statusCode, t.createdAt),
-    index("request_logs_deleted_created_idx").on(t.deletedAt, t.createdAt),
     index("request_logs_model_created_idx").on(t.model, t.createdAt),
-    index("request_logs_enduser_created_idx").on(t.endUser, t.createdAt),
-    index("request_logs_created_deleted_idx").on(t.createdAt, t.deletedAt)
+    index("request_logs_enduser_created_idx").on(t.endUser, t.createdAt)
   ]
 );

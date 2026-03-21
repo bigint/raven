@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { requestLogs } from "@raven/db";
-import { and, eq, isNull } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { AuthContext } from "@/lib/types";
 
 export const toggleStar = (db: Database) => async (c: AuthContext) => {
@@ -9,7 +9,7 @@ export const toggleStar = (db: Database) => async (c: AuthContext) => {
   const [row] = await db
     .select({ isStarred: requestLogs.isStarred })
     .from(requestLogs)
-    .where(and(eq(requestLogs.id, id), isNull(requestLogs.deletedAt)))
+    .where(eq(requestLogs.id, id))
     .limit(1);
 
   if (!row) {

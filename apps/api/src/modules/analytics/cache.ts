@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { requestLogs } from "@raven/db";
-import { and, count, isNull, sql } from "drizzle-orm";
+import { and, count, sql } from "drizzle-orm";
 import type { Redis } from "ioredis";
 import type { z } from "zod";
 import { cachedQuery } from "@/lib/cache-utils";
@@ -18,7 +18,7 @@ export const getCache =
     const { from, to } = c.req.valid("query");
 
     const dateConditions = parseDateRange(from, to);
-    const where = and(isNull(requestLogs.deletedAt), ...dateConditions);
+    const where = and(...dateConditions);
 
     const queryFn = async () => {
       const [summary] = await db

@@ -39,34 +39,12 @@ A **provider** is a configured connection to an LLM service. You store your cred
 
 ### Supported Providers
 
-<Columns cols={4}>
+<Columns cols={3}>
   <Card title="OpenAI" icon="robot" />
   <Card title="Anthropic" icon="robot" />
-  <Card title="Google" icon="robot" />
-  <Card title="Mistral" icon="robot" />
-  <Card title="Azure OpenAI" icon="robot" />
-  <Card title="Cohere" icon="robot" />
-  <Card title="Groq" icon="robot" />
-  <Card title="Perplexity" icon="robot" />
-  <Card title="xAI" icon="robot" />
-  <Card title="DeepSeek" icon="robot" />
-  <Card title="AWS Bedrock" icon="robot" />
-  <Card title="Together AI" icon="robot" />
-  <Card title="Fireworks" icon="robot" />
-  <Card title="Replicate" icon="robot" />
-  <Card title="HuggingFace" icon="robot" />
-  <Card title="DeepInfra" icon="robot" />
-  <Card title="Cerebras" icon="robot" />
-  <Card title="SambaNova" icon="robot" />
-  <Card title="Databricks" icon="robot" />
-  <Card title="Cloudflare" icon="robot" />
-  <Card title="Ollama" icon="robot" />
-  <Card title="Modal" icon="robot" />
-  <Card title="Lepton AI" icon="robot" />
-  <Card title="Anyscale" icon="robot" />
-  <Card title="Novita AI" icon="robot" />
-  <Card title="Voyage AI" icon="robot" />
 </Columns>
+
+More providers are being added. See the [Providers](/features/providers) page for the latest list.
 
 ## Models
 
@@ -96,11 +74,8 @@ Every request that hits the Raven gateway goes through this pipeline:
   <Step title="Guardrails">
     Runs content through configured guardrail rules (PII, topic blocking, regex).
   </Step>
-  <Step title="Prompt Resolution">
-    Resolves any prompt template references.
-  </Step>
   <Step title="Cache Check">
-    Checks semantic cache for matching previous responses.
+    Checks cache for matching previous responses.
   </Step>
   <Step title="Routing">
     Resolves the target provider and model based on routing rules.
