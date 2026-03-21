@@ -13,22 +13,15 @@ Raven is fully open-source and can be self-hosted on your own infrastructure. Th
 
 ## Quick Start
 
-### 1. Clone the Repository
+### 1. Download the Compose File
 
 ```bash
-git clone https://github.com/ravenplatform/raven.git
-cd raven
+curl -O https://raw.githubusercontent.com/ravenplatform/raven/main/docker-compose.yml
 ```
 
 ### 2. Configure Environment Variables
 
-Copy the example environment file and generate your secrets:
-
-```bash
-cp .env.example .env
-```
-
-Generate required secrets:
+Create an `.env` file and generate your secrets:
 
 ```bash
 # Generate BETTER_AUTH_SECRET (session encryption)
@@ -235,11 +228,8 @@ node apps/cron/dist/index.js &
 To upgrade to a newer version:
 
 ```bash
-# Pull the latest changes
-git pull
-
-# Rebuild
-docker compose build
+# Pull the latest image
+docker compose pull
 
 # Restart (migrations run automatically)
 docker compose up -d

@@ -1,7 +1,6 @@
 services:
   raven:
-    image: raven:latest
-    build: .
+    image: yoginth/raven:latest
     ports:
       - "3000:3000"
       - "3001:3001"
@@ -9,7 +8,7 @@ services:
       - DATABASE_URL=postgresql://raven:raven@postgres:5432/raven
       - REDIS_URL=redis://redis:6379
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-changeme-generate-a-secret}
-      - BETTER_AUTH_URL=http://raven:3001
+      - BETTER_AUTH_URL=http://localhost:3001
       - ENCRYPTION_SECRET=${ENCRYPTION_SECRET:-changeme-generate-a-32byte-hex}
       - APP_URL=http://localhost:3000
       - NEXT_PUBLIC_API_URL=http://localhost:3001
@@ -29,7 +28,7 @@ services:
     restart: unless-stopped
 
   raven-cron:
-    image: raven:latest
+    image: yoginth/raven:latest
     command: ["./docker-entrypoint.sh", "cron"]
     environment:
       - DATABASE_URL=postgresql://raven:raven@postgres:5432/raven
