@@ -1,7 +1,6 @@
 import type { Env } from "@raven/config";
+import { MODEL_CATALOG } from "@raven/data";
 import type { Database } from "@raven/db";
-import { providerConfigs } from "@raven/db";
-import { sql } from "drizzle-orm";
 import type { Context } from "hono";
 import type { Redis } from "ioredis";
 import { NotFoundError, ValidationError } from "@/lib/errors";
@@ -14,34 +13,14 @@ import { resolveProvider } from "../proxy/provider-resolver";
 import { checkRateLimit } from "../proxy/rate-limiter";
 import { parseIncomingRequest } from "../proxy/request-parser";
 
-// Model -> provider cache with 5-minute TTL
-const modelProviderCache = new Map<string, string>();
-
-const resolveModelProvider = async (
-  db: Database,
-  modelSlug: string
-): Promise<string> => {
-  const cached = modelProviderCache.get(modelSlug);
-  if (cached) return cached;
-
-  // Find provider config that has this model in its models array
-  const [config] = await db
-    .select({ provider: providerConfigs.provider })
-    .from(providerConfigs)
-    .where(
-      sql`${providerConfigs.isEnabled} = true AND ${providerConfigs.models}::jsonb @> ${JSON.stringify([modelSlug])}::jsonb`
-    )
-    .limit(1);
-
-  if (!config) {
+const resolveModelProvider = (modelSlug: string): string => {
+  const model = MODEL_CATALOG[modelSlug];
+  if (!model) {
     throw new NotFoundError(
-      `Model "${modelSlug}" not found. Check your provider configuration.`
+      `Model '${modelSlug}' is not supported. Use /v1/models to see available models.`
     );
   }
-
-  modelProviderCache.set(modelSlug, config.provider);
-  setTimeout(() => modelProviderCache.delete(modelSlug), 300_000);
-  return config.provider;
+  return model.provider;
 };
 
 export const chatCompletionsHandler = (
@@ -78,7 +57,7 @@ export const chatCompletionsHandler = (
         : null);
 
     // 3. Resolve provider from model
-    const providerName = await resolveModelProvider(db, modelSlug);
+    const providerName = resolveModelProvider(modelSlug);
 
     // 4. Gate checks
     await Promise.all([

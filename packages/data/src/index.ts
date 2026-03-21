@@ -1,5 +1,4 @@
 export {
-  DEFAULT_MODELS,
   getModelPricing,
   getModelsForProvider,
   MODEL_CATALOG,

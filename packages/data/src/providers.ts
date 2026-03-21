@@ -220,15 +220,6 @@ export const MODEL_CATALOG: Record<string, ModelDefinition> = {
   }
 };
 
-export const DEFAULT_MODELS: Record<string, string[]> = Object.values(
-  MODEL_CATALOG
-).reduce<Record<string, string[]>>((acc, model) => {
-  const list = acc[model.provider] ?? [];
-  list.push(model.id);
-  acc[model.provider] = list;
-  return acc;
-}, {});
-
 export const getModelPricing = (
   modelId: string
 ): { inputPrice: number; outputPrice: number } | null => {

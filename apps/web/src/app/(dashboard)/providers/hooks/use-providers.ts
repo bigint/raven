@@ -27,7 +27,6 @@ export interface Provider {
   readonly name: string | null;
   readonly apiKey: string;
   readonly isEnabled: boolean;
-  readonly models: string[];
   readonly createdAt: string;
   readonly updatedAt: string;
 }
