@@ -126,21 +126,15 @@ const columns: Column<AuditLog>[] = [
     key: "actor",
     render: (log) => {
       const name = log.actorName || "System";
-      const initial = name.charAt(0).toUpperCase();
 
       return (
-        <div className="flex items-center gap-2">
-          <div className="flex size-6 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
-            {initial}
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm">{name}</span>
-            {log.actorEmail && name !== log.actorEmail && (
-              <span className="text-xs text-muted-foreground">
-                {log.actorEmail}
-              </span>
-            )}
-          </div>
+        <div className="flex flex-col">
+          <span className="text-sm">{name}</span>
+          {log.actorEmail && name !== log.actorEmail && (
+            <span className="text-xs text-muted-foreground">
+              {log.actorEmail}
+            </span>
+          )}
         </div>
       );
     }
