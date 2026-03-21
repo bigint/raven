@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@base-ui/react/button";
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ButtonHTMLAttributes, Ref } from "react";
 import { cn } from "../cn";
@@ -41,7 +42,7 @@ const Button = ({
   ref,
   ...props
 }: ButtonProps & { ref?: Ref<HTMLButtonElement> }) => (
-  <button
+  <BaseButton
     className={cn(buttonVariants({ className, size, variant }))}
     ref={ref}
     type={type}
