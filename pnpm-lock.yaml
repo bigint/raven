@@ -53,6 +53,9 @@ importers:
       '@raven/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@raven/data':
+        specifier: workspace:*
+        version: link:../../packages/data
       '@raven/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -114,6 +117,9 @@ importers:
       '@raven/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@raven/data':
+        specifier: workspace:*
+        version: link:../../packages/data
       '@raven/types':
         specifier: workspace:*
         version: link:../../packages/types
