@@ -128,7 +128,7 @@ The analytics dashboard includes a live view that shows requests flowing through
 Export analytics data for external analysis via the API. Supports JSON format with pagination for large datasets.
 
 ```bash
-curl https://api.raven.dev/v1/analytics \
+curl http://localhost:3001/v1/analytics \
   -H "Authorization: Bearer rk_live_abc123" \
   -G \
   -d "start=2026-03-01" \

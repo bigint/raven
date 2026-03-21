@@ -65,7 +65,7 @@ Once your domain is active, use it in place of `api.raven.dev`:
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://ai.yourcompany.com/v1/chat/completions \
+curl -X POST http://localhost:3001/v1/chat/completions \
   -H "Authorization: Bearer rk_live_abc123..." \
   -H "Content-Type: application/json" \
   -d '{
@@ -79,7 +79,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: "rk_live_abc123...",
-  baseURL: "https://ai.yourcompany.com/v1"
+  baseURL: "http://localhost:3001/v1"
 });
 
 const response = await client.chat.completions.create({
@@ -93,7 +93,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="rk_live_abc123...",
-    base_url="https://ai.yourcompany.com/v1"
+    base_url="http://localhost:3001/v1"
 )
 
 response = client.chat.completions.create(

@@ -3,13 +3,9 @@ title: "Quickstart"
 description: "Get up and running with Raven in under 5 minutes."
 ---
 
-<Note>
-  Want to self-host? Follow the [Self-Hosting guide](/guides/self-hosting) to deploy Raven on your own infrastructure with Docker.
-</Note>
+## 1. Deploy Raven
 
-## 1. Create an Account
-
-Sign up at [raven.dev](https://raven.dev/sign-up) and create your organization. Every account starts on the **Free plan** with 10,000 requests per month.
+Follow the [Self-Hosting guide](/guides/self-hosting) to deploy Raven on your infrastructure with Docker Compose. Once running, open [http://localhost:3000](http://localhost:3000) and create your account.
 
 ## 2. Add a Provider
 
@@ -48,7 +44,7 @@ Use the OpenAI-compatible endpoint with your virtual key:
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://api.raven.dev/v1/chat/completions \
+curl -X POST http://localhost:3001/v1/chat/completions \
   -H "Authorization: Bearer rk_live_abc123def456" \
   -H "Content-Type: application/json" \
   -d '{
@@ -64,7 +60,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: "rk_live_abc123def456",
-  baseURL: "https://api.raven.dev/v1"
+  baseURL: "http://localhost:3001/v1"
 });
 
 const response = await client.chat.completions.create({
@@ -80,7 +76,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="rk_live_abc123def456",
-    base_url="https://api.raven.dev/v1"
+    base_url="http://localhost:3001/v1"
 )
 
 response = client.chat.completions.create(

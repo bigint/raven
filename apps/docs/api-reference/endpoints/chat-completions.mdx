@@ -92,7 +92,7 @@ When `content` is an array, each element is a content part:
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://api.raven.dev/v1/chat/completions \
+curl -X POST http://localhost:3001/v1/chat/completions \
   -H "Authorization: Bearer rk_live_abc123..." \
   -H "Content-Type: application/json" \
   -d '{
@@ -111,7 +111,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="rk_live_abc123...",
-    base_url="https://api.raven.dev/v1"
+    base_url="http://localhost:3001/v1"
 )
 
 response = client.chat.completions.create(
@@ -132,7 +132,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: "rk_live_abc123...",
-  baseURL: "https://api.raven.dev/v1"
+  baseURL: "http://localhost:3001/v1"
 });
 
 const response = await client.chat.completions.create({
@@ -181,7 +181,7 @@ console.log(response.choices[0].message.content);
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://api.raven.dev/v1/chat/completions \
+curl -X POST http://localhost:3001/v1/chat/completions \
   -H "Authorization: Bearer rk_live_abc123..." \
   -H "Content-Type: application/json" \
   -N \
@@ -238,7 +238,7 @@ data: [DONE]
 ### Function Calling
 
 ```bash
-curl -X POST https://api.raven.dev/v1/chat/completions \
+curl -X POST http://localhost:3001/v1/chat/completions \
   -H "Authorization: Bearer rk_live_abc123..." \
   -H "Content-Type: application/json" \
   -d '{

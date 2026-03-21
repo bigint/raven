@@ -20,7 +20,7 @@ import { RavenClient } from "@raven/sdk";
 
 const raven = new RavenClient({
   apiKey: "rk_live_abc123...",
-  baseUrl: "https://api.raven.dev"
+  baseUrl: "http://localhost:3001"
 });
 ```
 
@@ -39,7 +39,7 @@ Pass additional headers that are included in every request:
 ```typescript
 const raven = new RavenClient({
   apiKey: "rk_live_...",
-  baseUrl: "https://api.raven.dev",
+  baseUrl: "http://localhost:3001",
   headers: {
     "X-Session-Id": "session_abc123"
   }
@@ -279,7 +279,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: "rk_live_...",
-  baseURL: "https://api.raven.dev/v1"
+  baseURL: "http://localhost:3001/v1"
 });
 
 const response = await client.chat.completions.create({

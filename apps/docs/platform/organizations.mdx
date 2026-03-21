@@ -107,7 +107,7 @@ All resources in Raven are scoped to an organization. There is no sharing of res
 When making management API requests, specify your organization using the `X-Org-Id` header:
 
 ```bash
-curl -X GET https://api.raven.dev/providers \
+curl -X GET http://localhost:3001/providers \
   -H "Authorization: Bearer rk_live_..." \
   -H "X-Org-Id: org_abc123"
 ```

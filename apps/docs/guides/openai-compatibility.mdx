@@ -24,7 +24,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: "rk_live_...",                // Your Raven virtual key
-  baseURL: "https://api.raven.dev/v1"   // Raven endpoint
+  baseURL: "http://localhost:3001/v1"   // Raven endpoint
 });
 ```
 
@@ -35,7 +35,7 @@ Everything else stays exactly the same. `client.chat.completions.create()`, stre
 Raven's primary proxy endpoint is fully compatible with OpenAI's Chat Completions API:
 
 ```
-POST https://api.raven.dev/v1/chat/completions
+POST http://localhost:3001/v1/chat/completions
 ```
 
 When you send a request:
@@ -154,7 +154,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: "rk_live_abc123def456",
-  baseURL: "https://api.raven.dev/v1"
+  baseURL: "http://localhost:3001/v1"
 });
 
 const response = await client.chat.completions.create({
@@ -175,7 +175,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="rk_live_abc123def456",
-    base_url="https://api.raven.dev/v1"
+    base_url="http://localhost:3001/v1"
 )
 
 response = client.chat.completions.create(
@@ -192,7 +192,7 @@ print(response.choices[0].message.content)
 ```
 
 ```bash cURL
-curl -X POST https://api.raven.dev/v1/chat/completions \
+curl -X POST http://localhost:3001/v1/chat/completions \
   -H "Authorization: Bearer rk_live_abc123def456" \
   -H "Content-Type: application/json" \
   -d '{
@@ -264,6 +264,6 @@ For an even more seamless experience, set up a [custom domain](/platform/custom-
 ```typescript
 const client = new OpenAI({
   apiKey: "rk_live_...",
-  baseURL: "https://ai.yourcompany.com/v1"
+  baseURL: "http://localhost:3001/v1"
 });
 ```
