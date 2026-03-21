@@ -68,14 +68,6 @@
             ]
           },
           {
-            "group": "Platform",
-            "pages": [
-              "platform/organizations",
-              "platform/teams",
-              "platform/roles"
-            ]
-          },
-          {
             "group": "Security",
             "pages": [
               "security/overview",
@@ -177,15 +169,6 @@
               "api-reference/endpoints/list-webhooks",
               "api-reference/endpoints/create-webhook",
               "api-reference/endpoints/delete-webhook"
-            ]
-          },
-          {
-            "group": "Organizations",
-            "pages": [
-              "api-reference/endpoints/get-organization",
-              "api-reference/endpoints/update-organization",
-              "api-reference/endpoints/list-members",
-              "api-reference/endpoints/invite-member"
             ]
           }
         ]

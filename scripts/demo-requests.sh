@@ -6,13 +6,13 @@
 #   RAVEN_KEY=rk_... ./scripts/demo-requests.sh
 #
 # Prerequisites:
-#   - API running at localhost:3001
+#   - API running at localhost:4000
 #   - A virtual key created in the dashboard
 #   - At least one OpenAI provider configured with a valid API key
 
 set -euo pipefail
 
-API_URL="${RAVEN_API_URL:-http://localhost:3001}"
+API_URL="${RAVEN_API_URL:-http://localhost:4000}"
 KEY="${RAVEN_KEY:?Set RAVEN_KEY to your virtual key}"
 AUTH="Authorization: Bearer $KEY"
 CT="Content-Type: application/json"

@@ -39,13 +39,13 @@ Edit `.env` and set these values:
 DATABASE_URL=postgresql://raven:raven@postgres:5432/raven
 REDIS_URL=redis://redis:6379
 BETTER_AUTH_SECRET=<your-generated-secret>
-BETTER_AUTH_URL=http://localhost:3001
+BETTER_AUTH_URL=http://localhost:4000
 ENCRYPTION_SECRET=<your-generated-32-byte-hex>
 
 # App URLs
 APP_URL=http://localhost:3000
-NEXT_PUBLIC_API_URL=http://localhost:3001
-API_PORT=3001
+NEXT_PUBLIC_API_URL=http://localhost:4000
+API_PORT=4000
 ```
 
 ### 3. Start Raven
@@ -58,7 +58,7 @@ This starts four services:
 
 | Service | Description | Port |
 |---------|-------------|------|
-| **raven** | Web dashboard + API server | 3000, 3001 |
+| **raven** | Web dashboard + API server | 3000, 4000 |
 | **raven-cron** | Background job processor | -- |
 | **postgres** | PostgreSQL 17 database | 5432 |
 | **redis** | Redis 7 cache | 6379 |
@@ -87,7 +87,7 @@ Open [http://localhost:3000](http://localhost:3000) and create your first accoun
 
 | Variable | Description |
 |----------|-------------|
-| `API_PORT` | API server port (default: `3001`) |
+| `API_PORT` | API server port (default: `4000`) |
 | `ENCRYPTION_SECRET_PREVIOUS` | Previous encryption key for zero-downtime key rotation |
 
 ## Production Deployment
@@ -106,7 +106,7 @@ For production, place a reverse proxy like **Nginx** or **Caddy** in front of Ra
     }
 
     api.raven.example.com {
-        reverse_proxy localhost:3001
+        reverse_proxy localhost:4000
     }
     ```
   </Tab>
@@ -136,7 +136,7 @@ For production, place a reverse proxy like **Nginx** or **Caddy** in front of Ra
         ssl_certificate_key /etc/letsencrypt/live/api.raven.example.com/privkey.pem;
 
         location / {
-            proxy_pass http://localhost:3001;
+            proxy_pass http://localhost:4000;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -271,7 +271,7 @@ docker compose logs raven
 Common issues:
 - **Database not ready** -- The health check ensures PostgreSQL is ready before Raven starts. If it times out, check PostgreSQL logs with `docker compose logs postgres`
 - **Invalid ENCRYPTION_SECRET** -- Must be a valid 32-byte hex string (64 hex characters)
-- **Port conflict** -- Ensure ports 3000 and 3001 are not in use
+- **Port conflict** -- Ensure ports 3000 and 4000 are not in use
 
 ### Database migration fails
 

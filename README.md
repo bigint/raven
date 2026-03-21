@@ -21,7 +21,7 @@
 The fastest way to get Raven running:
 
 ```bash
-docker run -d --name raven -p 3000:3000 -p 3001:3001 yoginth/raven:latest
+docker run -d --name raven -p 3000:3000 -p 4000:4000 yoginth/raven:latest
 ```
 
 Or use Docker Compose to bring up the full stack with PostgreSQL and Redis:
@@ -31,7 +31,7 @@ curl -O https://raw.githubusercontent.com/bigint/raven/main/docker-compose.yml
 docker compose up
 ```
 
-The dashboard will be at `http://localhost:3000` and the API at `http://localhost:3001`.
+The dashboard will be at `http://localhost:3000` and the API at `http://localhost:4000`.
 
 ### Local Development
 

@@ -16,7 +16,7 @@
 
 set -euo pipefail
 
-API_URL="${RAVEN_API_URL:-http://localhost:3001}"
+API_URL="${RAVEN_API_URL:-http://localhost:4000}"
 KEY="${RAVEN_KEY:?Set RAVEN_KEY to your virtual key}"
 AUTH="Authorization: Bearer $KEY"
 CT="Content-Type: application/json"

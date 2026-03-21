@@ -21,7 +21,7 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 const raven = createOpenAICompatible({
   name: "raven",
   apiKey: "rk_live_abc123...",
-  baseURL: "http://localhost:3001/v1",
+  baseURL: "http://localhost:4000/v1",
 });
 ```
 
@@ -34,7 +34,7 @@ import { generateText } from "ai";
 const raven = createOpenAICompatible({
   name: "raven",
   apiKey: "rk_live_abc123...",
-  baseURL: "http://localhost:3001/v1",
+  baseURL: "http://localhost:4000/v1",
 });
 
 const { text } = await generateText({
@@ -76,7 +76,7 @@ import { streamText } from "ai";
 const raven = createOpenAICompatible({
   name: "raven",
   apiKey: "rk_live_abc123...",
-  baseURL: "http://localhost:3001/v1",
+  baseURL: "http://localhost:4000/v1",
 });
 
 const result = streamText({
@@ -101,7 +101,7 @@ import { streamText } from "ai";
 const raven = createOpenAICompatible({
   name: "raven",
   apiKey: process.env.RAVEN_API_KEY!,
-  baseURL: "http://localhost:3001/v1",
+  baseURL: "http://localhost:4000/v1",
 });
 
 export async function POST(req: Request) {
@@ -173,7 +173,7 @@ import { z } from "zod";
 const raven = createOpenAICompatible({
   name: "raven",
   apiKey: "rk_live_abc123...",
-  baseURL: "http://localhost:3001/v1",
+  baseURL: "http://localhost:4000/v1",
 });
 
 const { text, toolResults } = await generateText({
@@ -207,10 +207,10 @@ Then reference it in your provider setup:
 const raven = createOpenAICompatible({
   name: "raven",
   apiKey: process.env.RAVEN_API_KEY!,
-  baseURL: "http://localhost:3001/v1",
+  baseURL: "http://localhost:4000/v1",
 });
 ```
 
 <Note>
-  Replace `http://localhost:3001` with your Raven gateway URL if you deployed it to a different host or port.
+  Replace `http://localhost:4000` with your Raven gateway URL if you deployed it to a different host or port.
 </Note>

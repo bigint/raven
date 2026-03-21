@@ -8,7 +8,7 @@ The Raven API is organized around REST. It accepts JSON-encoded request bodies, 
 ## Base URL
 
 ```
-http://localhost:3001
+http://localhost:4000
 ```
 
 ## Two APIs, One Gateway
@@ -25,7 +25,7 @@ Raven has two distinct API surfaces:
 The proxy API handles AI requests. It is OpenAI-compatible:
 
 ```bash
-POST http://localhost:3001/v1/chat/completions
+POST http://localhost:4000/v1/chat/completions
 Authorization: Bearer rk_live_...
 ```
 
@@ -34,7 +34,7 @@ Authorization: Bearer rk_live_...
 The management API handles resource configuration:
 
 ```bash
-GET http://localhost:3001/providers
+GET http://localhost:4000/providers
 Authorization: Bearer rk_live_...
 X-Org-Id: org_abc123
 ```
@@ -164,7 +164,7 @@ Proxy responses include additional headers:
 You can provide your own provider API key for a request using the `X-Provider-Key` header:
 
 ```bash
-curl -X POST http://localhost:3001/v1/chat/completions \
+curl -X POST http://localhost:4000/v1/chat/completions \
   -H "Authorization: Bearer rk_live_..." \
   -H "X-Provider-Key: sk-your-openai-key" \
   -H "Content-Type: application/json" \
