@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input, Modal, Switch } from "@raven/ui";
+import { Button, Checkbox, Input, Modal, Switch } from "@raven/ui";
 import { type FormEvent, useState } from "react";
 import { TextMorph } from "torph/react";
 import type { Webhook } from "../hooks/use-webhooks";
@@ -212,40 +212,26 @@ const WebhookForm = ({ open, onClose, editingWebhook }: WebhookFormProps) => {
 
               return (
                 <div key={category}>
-                  <label
-                    className="flex items-center gap-2 text-sm font-medium"
-                    htmlFor={`category-${category}`}
-                  >
-                    <input
-                      aria-label={`Select all ${category} events`}
-                      checked={allSelected}
-                      className="accent-primary"
-                      id={`category-${category}`}
-                      onChange={() => toggleCategory(events)}
-                      ref={(el) => {
-                        if (el) el.indeterminate = someSelected;
-                      }}
-                      type="checkbox"
-                    />
-                    {category}
-                  </label>
+                  <Checkbox
+                    aria-label={`Select all ${category} events`}
+                    checked={allSelected}
+                    className="text-sm font-medium"
+                    id={`category-${category}`}
+                    indeterminate={someSelected}
+                    label={category}
+                    onCheckedChange={() => toggleCategory(events)}
+                  />
                   <div className="ml-6 mt-1 space-y-1">
                     {events.map((event) => (
-                      <label
-                        className="flex items-center gap-2 text-sm text-muted-foreground"
-                        htmlFor={`event-${event}`}
+                      <Checkbox
+                        aria-label={`Select ${event} event`}
+                        checked={form.events.includes(event)}
+                        className="text-sm text-muted-foreground"
+                        id={`event-${event}`}
                         key={event}
-                      >
-                        <input
-                          aria-label={`Select ${event} event`}
-                          checked={form.events.includes(event)}
-                          className="accent-primary"
-                          id={`event-${event}`}
-                          onChange={() => toggleEvent(event)}
-                          type="checkbox"
-                        />
-                        {event}
-                      </label>
+                        label={event}
+                        onCheckedChange={() => toggleEvent(event)}
+                      />
                     ))}
                   </div>
                 </div>

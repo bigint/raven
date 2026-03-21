@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input, Modal, Select, Switch, Textarea } from "@raven/ui";
+import { Button, Checkbox, Input, Modal, Select, Switch, Textarea } from "@raven/ui";
 import { type FormEvent, useState } from "react";
 import { TextMorph } from "torph/react";
 import { match } from "ts-pattern";
@@ -247,20 +247,17 @@ const GuardrailForm = ({
             <fieldset className="space-y-2">
               <legend className="text-sm font-medium">PII Types</legend>
               {PII_TYPES.map((pii) => (
-                <label className="flex items-center gap-2 text-sm" key={pii.id}>
-                  <input
-                    checked={form.piiTypes.includes(pii.id)}
-                    className="size-4 rounded border-input accent-primary"
-                    onChange={(e) => {
-                      const next = e.target.checked
-                        ? [...form.piiTypes, pii.id]
-                        : form.piiTypes.filter((t) => t !== pii.id);
-                      setForm((f) => ({ ...f, piiTypes: next }));
-                    }}
-                    type="checkbox"
-                  />
-                  {pii.label}
-                </label>
+                <Checkbox
+                  checked={form.piiTypes.includes(pii.id)}
+                  key={pii.id}
+                  label={pii.label}
+                  onCheckedChange={(checked) => {
+                    const next = checked
+                      ? [...form.piiTypes, pii.id]
+                      : form.piiTypes.filter((t) => t !== pii.id);
+                    setForm((f) => ({ ...f, piiTypes: next }));
+                  }}
+                />
               ))}
             </fieldset>
           ))

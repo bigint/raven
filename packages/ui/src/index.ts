@@ -2,6 +2,7 @@ export { cn } from "./cn";
 export { Avatar, type AvatarProps } from "./components/avatar";
 export { Badge, type BadgeProps, badgeVariants } from "./components/badge";
 export { Button, type ButtonProps, buttonVariants } from "./components/button";
+export { Checkbox, type CheckboxProps } from "./components/checkbox";
 export {
   ConfirmDialog,
   type ConfirmDialogProps

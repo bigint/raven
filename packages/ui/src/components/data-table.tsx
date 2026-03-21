@@ -4,6 +4,7 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import type { ReactNode } from "react";
 import { cn } from "../cn";
+import { Checkbox } from "./checkbox";
 import { EmptyState } from "./empty-state";
 import { Spinner } from "./spinner";
 
@@ -83,17 +84,13 @@ const DataTable = <T,>({
             </summary>
             <div className="absolute right-0 z-10 mt-1 min-w-[160px] rounded-md border border-border bg-background p-2 shadow-md">
               {columns.map((col) => (
-                <label
-                  className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-muted/50"
+                <Checkbox
+                  checked={!hiddenColumns?.includes(col.key)}
+                  className="rounded px-2 py-1 text-sm hover:bg-muted/50"
                   key={col.key}
-                >
-                  <input
-                    checked={!hiddenColumns?.includes(col.key)}
-                    onChange={() => onToggleColumn(col.key)}
-                    type="checkbox"
-                  />
-                  {col.header}
-                </label>
+                  label={col.header}
+                  onCheckedChange={() => onToggleColumn(col.key)}
+                />
               ))}
             </div>
           </details>
