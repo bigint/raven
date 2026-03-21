@@ -18,7 +18,7 @@ export const getUsage =
     const { from, to } = c.req.valid("query");
 
     const dateConditions = parseDateRange(from, to);
-    const where = and(isNull(requestLogs.deletedAt), ...dateConditions);
+    const where = and(...dateConditions);
 
     const queryFn = async () => {
       const rows = await db
