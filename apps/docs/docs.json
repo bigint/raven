@@ -215,13 +215,12 @@
       {
         "label": "Support",
         "href": "mailto:support@raven.dev"
+      },
+      {
+        "label": "GitHub",
+        "href": "https://github.com/bigint/raven"
       }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "GitHub",
-      "href": "https://github.com/bigint/raven"
-    }
+    ]
   },
   "footer": {
     "socials": {
