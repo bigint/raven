@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@raven/ui";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { useSession } from "@/lib/auth-client";
@@ -23,13 +24,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           <p className="mb-4 text-sm text-muted-foreground">
             Unable to verify your session
           </p>
-          <button
-            className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground"
-            onClick={() => window.location.reload()}
-            type="button"
-          >
-            Retry
-          </button>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
         </div>
       </div>
     );
