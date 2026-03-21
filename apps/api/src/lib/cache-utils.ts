@@ -20,6 +20,5 @@ export const cachedQuery = async <T>(
 export const cacheKeys = {
   budgets: (keyId: string) => `budgets:${keyId}`,
   providerConfigs: (provider: string) => `pc:${provider}`,
-  providerModels: (configId: string) => `provider-models:${configId}`,
   virtualKey: (keyHash: string) => `vk:${keyHash}`
 };
