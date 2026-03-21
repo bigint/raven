@@ -27,8 +27,7 @@ Navigate to **Providers** in the dashboard and add your first LLM provider.
 
 Go to **Keys** and create a virtual key. This is the API key your application will use.
 
-```bash
-# Your virtual key looks like this
+```
 rk_live_abc123def456...
 ```
 
@@ -42,18 +41,6 @@ Virtual keys support:
 Use the OpenAI-compatible endpoint with your virtual key:
 
 <CodeGroup>
-
-```bash cURL
-curl -X POST http://localhost:4000/v1/chat/completions \
-  -H "Authorization: Bearer rk_live_abc123def456" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "gpt-4o",
-    "messages": [
-      {"role": "user", "content": "Hello, world!"}
-    ]
-  }'
-```
 
 ```typescript TypeScript
 import OpenAI from "openai";
