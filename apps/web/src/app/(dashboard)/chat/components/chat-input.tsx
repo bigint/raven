@@ -1,6 +1,6 @@
 "use client";
 
-import { Switch, Textarea } from "@raven/ui";
+import { Button, Switch, Textarea } from "@raven/ui";
 import {
   ArrowUp,
   ChevronDown,
@@ -193,13 +193,13 @@ export const ChatInput = ({
                   className="size-16 rounded-lg border border-border object-cover"
                   src={img.preview}
                 />
-                <button
-                  className="absolute -top-1.5 -right-1.5 rounded-full bg-background border border-border p-0.5 opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
+                <Button
+                  className="absolute -top-1.5 -right-1.5 rounded-full bg-background border border-border p-0.5 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:bg-background"
                   onClick={() => removeImage(img.id)}
-                  type="button"
+                  variant="ghost"
                 >
                   <X className="size-3" />
-                </button>
+                </Button>
               </div>
             ))}
           </div>
@@ -231,14 +231,14 @@ export const ChatInput = ({
             {/* Image upload - only shown when model supports vision */}
             {supportsVision && (
               <>
-                <button
-                  className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                <Button
+                  className="p-1"
                   onClick={() => fileInputRef.current?.click()}
                   title="Attach image"
-                  type="button"
+                  variant="ghost"
                 >
                   <ImagePlus className="size-3.5" />
-                </button>
+                </Button>
                 <input
                   accept={ACCEPTED_IMAGE_TYPES.join(",")}
                   className="hidden"
@@ -267,14 +267,14 @@ export const ChatInput = ({
 
                 {/* Temperature */}
                 <div className="relative">
-                  <button
-                    className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                  <Button
+                    className="px-2 py-1 text-[11px] h-auto"
                     onClick={() => toggle("temperature")}
-                    type="button"
+                    variant="ghost"
                   >
                     <Thermometer className="size-3" />
                     {settings.temperature}
-                  </button>
+                  </Button>
 
                   {openPopover === "temperature" && (
                     <Dropdown onClose={() => setOpenPopover(null)}>
@@ -315,22 +315,22 @@ export const ChatInput = ({
             )}
 
             {/* Stream toggle */}
-            <button
-              className="rounded-md px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            <Button
+              className="px-2 py-1 text-[11px] h-auto"
               onClick={() => update("stream", !settings.stream)}
-              type="button"
+              variant="ghost"
             >
               {settings.stream ? "Stream" : "Batch"}
-            </button>
+            </Button>
 
             <Sep />
 
             {/* Chat memory */}
             <div className="relative">
-              <button
-                className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              <Button
+                className="px-2 py-1 text-[11px] h-auto"
                 onClick={() => toggle("memory")}
-                type="button"
+                variant="ghost"
               >
                 <svg
                   className="size-3"
@@ -346,7 +346,7 @@ export const ChatInput = ({
                   />
                 </svg>
                 {settings.chatMemory}
-              </button>
+              </Button>
 
               {openPopover === "memory" && (
                 <Dropdown onClose={() => setOpenPopover(null)}>
@@ -385,11 +385,11 @@ export const ChatInput = ({
 
             {/* Settings popover */}
             <div className="relative">
-              <button
-                className={`rounded-md p-1 transition-colors ${openPopover === "settings" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
+              <Button
+                className={`p-1 ${openPopover === "settings" ? "bg-accent text-accent-foreground" : ""}`}
                 onClick={() => toggle("settings")}
                 title="More settings"
-                type="button"
+                variant="ghost"
               >
                 <svg
                   className="size-3.5"
@@ -402,20 +402,20 @@ export const ChatInput = ({
                   <circle cx="12" cy="5" r="1" />
                   <circle cx="12" cy="19" r="1" />
                 </svg>
-              </button>
+              </Button>
 
               {openPopover === "settings" && (
                 <Dropdown onClose={() => setOpenPopover(null)}>
                   <div className="w-64 p-3 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium">Settings</span>
-                      <button
-                        className="rounded p-0.5 text-muted-foreground hover:text-foreground"
+                      <Button
+                        className="p-0.5"
                         onClick={() => setOpenPopover(null)}
-                        type="button"
+                        variant="ghost"
                       >
                         <X className="size-3" />
-                      </button>
+                      </Button>
                     </div>
 
                     <Textarea
@@ -509,22 +509,21 @@ export const ChatInput = ({
           </div>
 
           {isStreaming ? (
-            <button
-              className="rounded-lg bg-muted p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            <Button
+              className="rounded-lg p-2"
               onClick={onStop}
-              type="button"
+              variant="ghost"
             >
               <Square className="size-4" />
-            </button>
+            </Button>
           ) : (
-            <button
-              className="rounded-lg bg-primary p-2 text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed"
+            <Button
+              className="rounded-lg p-2"
               disabled={(!value.trim() && images.length === 0) || disabled}
               onClick={handleSend}
-              type="button"
             >
               <ArrowUp className="size-4" />
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -572,14 +571,14 @@ const ModelSelector = ({
 
   return (
     <div className="relative">
-      <button
-        className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+      <Button
+        className="px-2 py-1 text-[11px] font-medium h-auto"
         onClick={onToggle}
-        type="button"
+        variant="ghost"
       >
         {model ?? "Select model"}
         <ChevronDown className="size-3" />
-      </button>
+      </Button>
 
       {open && (
         <Dropdown onClose={onClose}>
@@ -598,18 +597,18 @@ const ModelSelector = ({
             </div>
             <div className="max-h-60 overflow-y-auto py-1">
               {filtered.map((opt) => (
-                <button
-                  className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors hover:bg-accent ${opt.value === model ? "font-medium text-foreground" : "text-muted-foreground"}`}
+                <Button
+                  className={`w-full justify-start rounded-none px-3 py-1.5 text-left text-xs h-auto ${opt.value === model ? "font-medium text-foreground" : ""}`}
                   key={opt.value}
                   onClick={() => {
                     onModelChange(opt.value, opt.provider);
                     onClose();
                   }}
-                  type="button"
+                  variant="ghost"
                 >
                   <ProviderIcon provider={opt.provider} size={14} />
                   <span className="truncate">{opt.label}</span>
-                </button>
+                </Button>
               ))}
               {filtered.length === 0 && (
                 <p className="px-3 py-2 text-xs text-muted-foreground">
@@ -634,12 +633,12 @@ const Dropdown = ({
   onClose: () => void;
 }) => (
   <>
-    <button
+    <Button
       aria-label="Close"
-      className="fixed inset-0 z-40 cursor-default"
+      className="fixed inset-0 z-40 cursor-default rounded-none"
       onClick={onClose}
       tabIndex={-1}
-      type="button"
+      variant="ghost"
     />
     <div className="absolute bottom-full left-0 z-50 mb-1 rounded-lg border border-border bg-popover shadow-sm">
       {children}

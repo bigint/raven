@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@raven/ui";
+import { Button, cn } from "@raven/ui";
 import { Star, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef } from "react";
@@ -59,10 +59,10 @@ export const RequestDetail = ({ request, onClose }: RequestDetailProps) => {
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-base font-semibold">Request Details</h2>
-                  <button
-                    className="rounded p-0.5 text-muted-foreground transition-colors hover:text-yellow-500"
+                  <Button
+                    className="rounded p-0.5 hover:text-yellow-500"
                     onClick={() => toggleStar.mutate(request.id)}
-                    type="button"
+                    variant="ghost"
                   >
                     <Star
                       className={cn(
@@ -70,19 +70,19 @@ export const RequestDetail = ({ request, onClose }: RequestDetailProps) => {
                         request.isStarred && "fill-yellow-500 text-yellow-500"
                       )}
                     />
-                  </button>
+                  </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   ID: {request.id}
                 </p>
               </div>
-              <button
-                className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              <Button
+                className="p-1.5"
                 onClick={onClose}
-                type="button"
+                variant="ghost"
               >
                 <X className="size-4" />
-              </button>
+              </Button>
             </div>
 
             <div className="border-b border-border px-6 py-5">

@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge } from "@raven/ui";
+import { Badge, Button } from "@raven/ui";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
@@ -30,10 +30,10 @@ const ResponseMetadata = ({ meta, show }: ResponseMetadataProps) => {
 
   return (
     <div className="mt-1.5">
-      <button
-        className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+      <Button
+        className="text-[10px] px-0 py-0 h-auto"
         onClick={() => setExpanded(!expanded)}
-        type="button"
+        variant="ghost"
       >
         {expanded ? (
           <ChevronDown className="size-3" />
@@ -41,7 +41,7 @@ const ResponseMetadata = ({ meta, show }: ResponseMetadataProps) => {
           <ChevronRight className="size-3" />
         )}
         Request Details
-      </button>
+      </Button>
 
       {expanded && (
         <div className="mt-1.5 flex flex-wrap items-center gap-1.5">

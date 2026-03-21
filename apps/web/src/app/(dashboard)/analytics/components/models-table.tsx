@@ -1,7 +1,7 @@
 "use client";
 
 import { PROVIDER_LABELS } from "@raven/types";
-import { Spinner } from "@raven/ui";
+import { Button, Spinner } from "@raven/ui";
 import { Check, Copy, Cpu } from "lucide-react";
 import { ModelIcon } from "@/components/model-icon";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
@@ -16,11 +16,11 @@ const CopyableId = ({ value }: { value: string }) => {
   };
 
   return (
-    <button
-      className="group/copy mt-0.5 flex items-center gap-1 font-mono text-xs text-muted-foreground hover:text-foreground"
+    <Button
+      className="group/copy mt-0.5 font-mono text-xs px-0 py-0 h-auto"
       onClick={handleCopy}
       title="Copy model ID"
-      type="button"
+      variant="ghost"
     >
       {value}
       {copied ? (
@@ -28,7 +28,7 @@ const CopyableId = ({ value }: { value: string }) => {
       ) : (
         <Copy className="size-3 opacity-0 group-hover/copy:opacity-100" />
       )}
-    </button>
+    </Button>
   );
 };
 

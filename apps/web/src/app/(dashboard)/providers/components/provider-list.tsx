@@ -100,10 +100,10 @@ const ProviderList = ({
         header: "Status",
         key: "status",
         render: (provider) => (
-          <button
-            className="cursor-pointer"
+          <Button
+            className="cursor-pointer p-0"
             onClick={() => onToggleEnabled(provider)}
-            type="button"
+            variant="ghost"
           >
             <Badge dot variant={provider.isEnabled ? "success" : "neutral"}>
               {provider.isEnabled ? (
@@ -118,7 +118,7 @@ const ProviderList = ({
                 </>
               )}
             </Badge>
-          </button>
+          </Button>
         )
       },
       {

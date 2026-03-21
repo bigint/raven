@@ -1,6 +1,6 @@
 "use client";
 
-import { PillTabs } from "@raven/ui";
+import { Button, PillTabs } from "@raven/ui";
 import { Download } from "lucide-react";
 import { exportToCsv } from "@/lib/csv-export";
 import { useModels } from "../hooks/use-models";
@@ -53,16 +53,15 @@ export const ModelsTab = ({ keyId }: { keyId?: string }) => {
           options={dateRangeOptions}
           value={dateRange}
         />
-        <button
-          className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border px-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
+        <Button
           disabled={isLoading || data.length === 0}
           onClick={handleExportCsv}
           title="Export as CSV"
-          type="button"
+          variant="secondary"
         >
           <Download className="size-4" />
           <span>Export</span>
-        </button>
+        </Button>
       </div>
       <ModelsTable data={data} loading={isLoading} />
     </>

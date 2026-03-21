@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@raven/ui";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
@@ -150,13 +151,13 @@ export const SignUpForm = () => {
                 value={password}
               />
             </div>
-            <button
-              className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            <Button
+              className="w-full rounded-lg py-2.5"
               disabled={isLoading}
               type="submit"
             >
               {isLoading ? "Creating account..." : "Create account"}
-            </button>
+            </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">

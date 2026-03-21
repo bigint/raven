@@ -91,11 +91,11 @@ const CopyableSlug = ({ value }: { value: string }) => {
   };
 
   return (
-    <button
-      className="group/copy mt-0.5 flex items-center gap-1 font-mono text-[11px] text-muted-foreground hover:text-foreground"
+    <Button
+      className="group/copy mt-0.5 font-mono text-[11px] px-0 py-0 h-auto"
       onClick={handleCopy}
       title="Copy model ID"
-      type="button"
+      variant="ghost"
     >
       {value}
       {copied ? (
@@ -103,7 +103,7 @@ const CopyableSlug = ({ value }: { value: string }) => {
       ) : (
         <Copy className="size-3 opacity-0 group-hover/copy:opacity-100" />
       )}
-    </button>
+    </Button>
   );
 };
 

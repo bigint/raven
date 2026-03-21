@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@raven/ui";
 import { Check, Clipboard } from "lucide-react";
 import { Highlight, themes } from "prism-react-renderer";
 import { useCallback, useState } from "react";
@@ -19,11 +20,11 @@ export const CopyButton = ({ text }: { readonly text: string }) => {
   }, [text]);
 
   return (
-    <button
+    <Button
       aria-label={copied ? "Copied" : "Copy code"}
-      className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-background/80 hover:text-foreground"
+      className="rounded px-1.5 py-0.5 text-xs"
       onClick={handleCopy}
-      type="button"
+      variant="ghost"
     >
       {copied ? (
         <>
@@ -36,7 +37,7 @@ export const CopyButton = ({ text }: { readonly text: string }) => {
           Copy
         </>
       )}
-    </button>
+    </Button>
   );
 };
 

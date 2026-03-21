@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@raven/ui";
 import type { LucideIcon } from "lucide-react";
 import {
   Activity,
@@ -151,14 +152,14 @@ export const Sidebar = ({ user }: SidebarProps) => {
           </div>
           <span className="text-sm font-semibold truncate">Raven</span>
         </div>
-        <button
+        <Button
           aria-label="Open menu"
-          className="p-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+          className="p-1.5"
           onClick={() => setDrawerOpen(true)}
-          type="button"
+          variant="ghost"
         >
           <Menu className="size-5" />
-        </button>
+        </Button>
       </div>
 
       {/* Mobile bottom drawer */}
@@ -198,14 +199,14 @@ export const Sidebar = ({ user }: SidebarProps) => {
                   </div>
                   <span className="font-semibold truncate">Raven</span>
                 </div>
-                <button
+                <Button
                   aria-label="Close menu"
-                  className="p-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                  className="p-1.5"
                   onClick={closeDrawer}
-                  type="button"
+                  variant="ghost"
                 >
                   <X className="size-5" />
-                </button>
+                </Button>
               </div>
 
               {/* Nav items */}

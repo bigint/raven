@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, cn } from "@raven/ui";
+import { Badge, Button, cn } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, MessageSquare, Star, Wrench } from "lucide-react";
 import { useState } from "react";
@@ -186,13 +186,13 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
                           ${(Number(req.cost) || 0).toFixed(6)}
                         </td>
                         <td className="px-3 py-2.5 text-center">
-                          <button
-                            className="rounded p-0.5 text-muted-foreground transition-colors hover:text-yellow-500"
+                          <Button
+                            className="rounded p-0.5 hover:text-yellow-500"
                             onClick={(e) => {
                               e.stopPropagation();
                               toggleStar.mutate(req.id);
                             }}
-                            type="button"
+                            variant="ghost"
                           >
                             <Star
                               className={cn(
@@ -201,7 +201,7 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
                                   "fill-yellow-500 text-yellow-500"
                               )}
                             />
-                          </button>
+                          </Button>
                         </td>
                       </tr>
                     ))}

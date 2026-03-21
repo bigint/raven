@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@raven/ui";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { memo, useEffect, useRef, useState } from "react";
 import { match } from "ts-pattern";
@@ -42,10 +43,10 @@ const ReasoningBlock = ({
 
   return (
     <div className="mb-2 rounded-lg border border-border/50 bg-background/50">
-      <button
-        className="flex w-full items-center gap-1.5 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+      <Button
+        className="w-full justify-start px-3 py-1.5 text-xs h-auto"
         onClick={() => setExpanded(!expanded)}
-        type="button"
+        variant="ghost"
       >
         {expanded ? (
           <ChevronDown className="size-3" />
@@ -56,7 +57,7 @@ const ReasoningBlock = ({
         {isStreaming && !expanded && (
           <span className="ml-1 inline-block h-3 w-1 animate-pulse rounded-sm bg-current" />
         )}
-      </button>
+      </Button>
       {expanded && (
         <div className="border-t border-border/50 px-3 py-2 text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">
           {content}

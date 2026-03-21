@@ -1,7 +1,7 @@
 "use client";
 
 import type { Column } from "@raven/ui";
-import { Badge, ConfirmDialog, DataTable } from "@raven/ui";
+import { Badge, Button, ConfirmDialog, DataTable } from "@raven/ui";
 import { Mail, Trash2 } from "lucide-react";
 import { useState } from "react";
 import type { Invitation } from "../hooks/use-admin";
@@ -64,14 +64,14 @@ export const InvitationsTab = () => {
       header: "",
       key: "actions",
       render: (invitation) => (
-        <button
-          className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+        <Button
+          className="p-1.5 hover:bg-destructive/10 hover:text-destructive"
           onClick={() => setRevokeTarget(invitation)}
           title="Revoke invitation"
-          type="button"
+          variant="ghost"
         >
           <Trash2 className="size-4" />
-        </button>
+        </Button>
       )
     }
   ];

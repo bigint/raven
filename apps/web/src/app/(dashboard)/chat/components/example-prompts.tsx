@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@raven/ui";
 import { Code, Globe, Lightbulb, PenLine, Shield, Wrench } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -68,15 +69,15 @@ const ExamplePrompts = ({ onSelect }: ExamplePromptsProps) => (
     </div>
     <div className="grid w-full max-w-2xl grid-cols-1 gap-2 sm:grid-cols-2">
       {EXAMPLES.map((example) => (
-        <button
-          className="flex items-center gap-3 rounded-lg border border-border px-4 py-3 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+        <Button
+          className="justify-start gap-3 rounded-lg border border-border px-4 py-3 text-left h-auto"
           key={example.label}
           onClick={() => onSelect(example.message)}
-          type="button"
+          variant="ghost"
         >
           <span className="shrink-0 text-muted-foreground">{example.icon}</span>
           <span>{example.label}</span>
-        </button>
+        </Button>
       ))}
     </div>
   </div>

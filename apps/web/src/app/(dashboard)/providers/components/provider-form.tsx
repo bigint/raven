@@ -164,18 +164,18 @@ const ProviderForm = ({
               type={showApiKey ? "text" : "password"}
               value={form.apiKey}
             />
-            <button
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+            <Button
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-0"
               onClick={() => setShowApiKey((v) => !v)}
               tabIndex={-1}
-              type="button"
+              variant="ghost"
             >
               {showApiKey ? (
                 <EyeOff className="size-4" />
               ) : (
                 <Eye className="size-4" />
               )}
-            </button>
+            </Button>
           </div>
         </div>
 
