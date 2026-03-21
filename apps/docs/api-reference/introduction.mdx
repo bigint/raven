@@ -163,12 +163,8 @@ Proxy responses include additional headers:
 
 You can provide your own provider API key for a request using the `X-Provider-Key` header:
 
-```bash
-curl -X POST http://localhost:4000/v1/chat/completions \
-  -H "Authorization: Bearer rk_live_..." \
-  -H "X-Provider-Key: sk-your-openai-key" \
-  -H "Content-Type: application/json" \
-  -d '{"model": "gpt-4o", "messages": [...]}'
+```http
+X-Provider-Key: sk-your-openai-key
 ```
 
 When `X-Provider-Key` is present, that key is used instead of the organization's stored provider key. All gateway features (logging, guardrails, rate limiting, budgets) still apply.

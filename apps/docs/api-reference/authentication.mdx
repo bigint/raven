@@ -35,14 +35,8 @@ rk_live_abc123def456ghi789...
 
 Include your virtual key in the `Authorization` header as a Bearer token:
 
-```bash
-curl -X POST http://localhost:4000/v1/chat/completions \
-  -H "Authorization: Bearer rk_live_abc123..." \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "gpt-4o",
-    "messages": [{"role": "user", "content": "Hello"}]
-  }'
+```http
+Authorization: Bearer rk_live_abc123...
 ```
 
 ### Creating a Virtual Key
@@ -65,12 +59,11 @@ curl -X POST http://localhost:4000/v1/chat/completions \
 
 ## X-Org-Id Header
 
-For management API requests, specify which organization to operate on:
+For management API requests, specify which organization to operate on using the `X-Org-Id` header:
 
-```bash
-curl -X GET http://localhost:4000/providers \
-  -H "Authorization: Bearer rk_live_abc123..." \
-  -H "X-Org-Id: org_abc123"
+```http
+Authorization: Bearer rk_live_abc123...
+X-Org-Id: org_abc123
 ```
 
 For proxy requests (`/v1/chat/completions`), the organization is determined automatically from the virtual key -- no `X-Org-Id` header is needed.
