@@ -17,15 +17,6 @@ interface AdminUser {
   readonly createdAt: string;
 }
 
-interface AuditLog {
-  readonly id: string;
-  readonly action: string;
-  readonly resourceType: string;
-  readonly actorName: string | null;
-  readonly actorEmail: string | null;
-  readonly createdAt: string;
-}
-
 interface AdminSettings {
   readonly instance_name: string;
   readonly analytics_retention_days: string;
@@ -39,12 +30,6 @@ export const adminUsersQueryOptions = () =>
     queryKey: ["admin", "users"]
   });
 
-export const adminAuditLogsQueryOptions = () =>
-  queryOptions({
-    queryFn: () => api.get<AuditLog[]>("/v1/admin/audit-logs"),
-    queryKey: ["admin", "audit-logs"]
-  });
-
 export const adminSettingsQueryOptions = () =>
   queryOptions({
     queryFn: () => api.get<AdminSettings>("/v1/admin/settings"),
@@ -54,8 +39,6 @@ export const adminSettingsQueryOptions = () =>
 // --- Query Hooks ---
 
 export const useAdminUsers = () => useQuery(adminUsersQueryOptions());
-
-export const useAdminAuditLogs = () => useQuery(adminAuditLogsQueryOptions());
 
 export const useAdminSettings = () => useQuery(adminSettingsQueryOptions());
 
@@ -110,6 +93,5 @@ export const useDeleteUser = () => {
 
 export type {
   AdminSettings,
-  AdminUser,
-  AuditLog
+  AdminUser
 };

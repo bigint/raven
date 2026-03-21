@@ -134,7 +134,7 @@ export const Sidebar = ({ user }: SidebarProps) => {
             href="/settings"
           >
             <Settings className="size-4" />
-            Settings
+            Instance Settings
           </Link>
         </>
       )}

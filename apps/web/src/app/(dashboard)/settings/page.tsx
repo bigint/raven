@@ -30,7 +30,7 @@ const SettingsPage = () => {
     <div>
       <PageHeader
         description="Manage instance settings."
-        title="Settings"
+        title="Instance Settings"
       />
       <SettingsTab />
     </div>
