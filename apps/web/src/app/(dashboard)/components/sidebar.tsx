@@ -10,7 +10,6 @@ import {
   LayoutDashboard,
   Menu,
   Network,
-  Plug,
   Route,
   ScrollText,
   Settings,
@@ -55,8 +54,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/budgets", icon: CreditCard, label: "Budgets" },
   { href: "/guardrails", icon: Shield, label: "Guardrails" },
   { href: "/audit-logs", icon: ScrollText, label: "Audit Logs" },
-  { href: "/webhooks", icon: Webhook, label: "Webhooks" },
-  { href: "/integrations", icon: Plug, label: "Integrations" }
+  { href: "/webhooks", icon: Webhook, label: "Webhooks" }
 ];
 
 interface SidebarProps {
