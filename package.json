@@ -1,14 +1,17 @@
 {
-  "description": "Open-source AI gateway for routing, managing, and observing LLM API traffic",
-  "homepage": "https://github.com/ravenplatform/raven",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ravenplatform/raven.git"
-  },
   "bugs": {
     "url": "https://github.com/ravenplatform/raven/issues"
   },
-  "license": "Apache-2.0",
+  "description": "Open-source AI gateway for routing, managing, and observing LLM API traffic",
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.8",
+    "@paralleldrive/cuid2": "^3.3.0",
+    "@types/node": "^25.5.0",
+    "drizzle-orm": "^0.45.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "homepage": "https://github.com/ravenplatform/raven",
   "keywords": [
     "ai-gateway",
     "llm",
@@ -21,14 +24,7 @@
     "routing",
     "observability"
   ],
-  "devDependencies": {
-    "@biomejs/biome": "^2.4.8",
-    "@paralleldrive/cuid2": "^3.3.0",
-    "@types/node": "^25.5.0",
-    "drizzle-orm": "^0.45.1",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
-  },
+  "license": "Apache-2.0",
   "name": "raven",
   "packageManager": "pnpm@10.27.0",
   "pnpm": {
@@ -39,6 +35,10 @@
     ]
   },
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ravenplatform/raven.git"
+  },
   "scripts": {
     "build": "pnpm -r build",
     "db:generate": "pnpm --filter @raven/db generate",
