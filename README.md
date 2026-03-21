@@ -8,11 +8,44 @@
 [![Docker](https://img.shields.io/docker/pulls/yoginth/raven)](https://hub.docker.com/r/yoginth/raven)
 [![CI](https://github.com/bigint/raven/actions/workflows/ci.yml/badge.svg)](https://github.com/bigint/raven/actions/workflows/ci.yml)
 
-[Documentation](https://docs.ravenplatform.com) | [Quick Start](#quick-start) | [Self-Host](#docker-deployment) | [Contributing](CONTRIBUTING.md)
+[Documentation](https://docs.ravenplatform.com) | [Quick Start](#quick-start) | [Self-Host](#docker) | [Contributing](CONTRIBUTING.md)
 
 </div>
 
 ---
+
+## Quick Start
+
+### Docker
+
+The fastest way to get Raven running:
+
+```bash
+docker run -d --name raven -p 3000:3000 -p 3001:3001 yoginth/raven:latest
+```
+
+Or use Docker Compose to bring up the full stack with PostgreSQL and Redis:
+
+```bash
+curl -O https://raw.githubusercontent.com/bigint/raven/main/docker-compose.yml
+docker compose up
+```
+
+The dashboard will be at `http://localhost:3000` and the API at `http://localhost:3001`.
+
+### Local Development
+
+**Prerequisites:** Node.js 22+, pnpm 10.27+, PostgreSQL 17, Redis 7
+
+```bash
+git clone https://github.com/bigint/raven.git
+cd raven
+pnpm install
+cp .env.example .env
+# Edit .env with your database credentials
+pnpm db:migrate
+pnpm dev
+```
 
 ## Overview
 
@@ -66,44 +99,9 @@ Raven is structured as a monorepo managed with pnpm workspaces and Turborepo.
 - **Email:** Resend + React Email
 - **Tooling:** pnpm, Turborepo, Biome
 
-## Quick Start
-
-### Prerequisites
-
-- Node.js 22+
-- pnpm 10.27+
-- PostgreSQL 17
-- Redis 7
-
-### Local Development
-
-```bash
-git clone https://github.com/bigint/raven.git
-cd raven
-pnpm install
-cp .env.example .env
-```
-
-Edit `.env` with your database credentials and any required API keys. See the [Environment Variables](#environment-variables) section for details.
-
-```bash
-pnpm db:migrate
-pnpm dev
-```
-
-The dashboard will be available at `http://localhost:3000` and the API server at `http://localhost:3001`.
-
-### Docker Deployment
-
-```bash
-docker compose up
-```
-
-This starts all services including PostgreSQL and Redis. The dashboard is available at `http://localhost:3000` and the API at `http://localhost:3001`.
-
 ## Environment Variables
 
-All environment variables are documented in the `.env.example` file at the root of the repository. Copy it to `.env` and fill in the required values before starting the application.
+All environment variables are documented in `.env.example`. Copy it and fill in the required values:
 
 ```bash
 cp .env.example .env
@@ -114,8 +112,6 @@ At a minimum, you will need to configure:
 - Database connection (PostgreSQL)
 - Redis connection
 - At least one LLM provider API key
-
-Refer to `.env.example` for the full list of supported variables and their descriptions.
 
 ## Available Scripts
 

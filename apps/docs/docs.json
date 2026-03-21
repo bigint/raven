@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "Raven Docs",
   "colors": {
-    "primary": "#6D28D9",
-    "light": "#8B5CF6",
-    "dark": "#5B21B6"
+    "primary": "#171717",
+    "light": "#737373",
+    "dark": "#FAFAFA"
   },
   "favicon": "/favicon.svg",
   "navigation": {
@@ -181,7 +181,7 @@
       "anchors": [
         {
           "anchor": "GitHub",
-          "href": "https://github.com/ravenplatform/raven",
+          "href": "https://github.com/bigint/raven",
           "icon": "github"
         },
         {
@@ -212,7 +212,7 @@
   "footer": {
     "socials": {
       "x": "https://x.com/ravenplatform",
-      "github": "https://github.com/ravenplatform/raven"
+      "github": "https://github.com/bigint/raven"
     }
   }
 }
