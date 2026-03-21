@@ -1,3 +1,5 @@
+import { Avatar as BaseAvatar } from "@base-ui/react/avatar";
+
 import { cn } from "../cn";
 
 interface AvatarProps {
@@ -16,26 +18,23 @@ const sizeMap = {
 const Avatar = ({ name, src, size = "md", className }: AvatarProps) => {
   const initials = name?.charAt(0)?.toUpperCase() ?? "?";
 
-  if (src) {
-    return (
-      <img
-        alt={name ?? "Avatar"}
-        className={cn("rounded-full object-cover", sizeMap[size], className)}
-        src={src}
-      />
-    );
-  }
-
   return (
-    <div
-      className={cn(
-        "flex items-center justify-center rounded-full bg-primary/10 font-medium",
-        sizeMap[size],
-        className
-      )}
+    <BaseAvatar.Root
+      className={cn("rounded-full", sizeMap[size], className)}
     >
-      {initials}
-    </div>
+      {src && (
+        <BaseAvatar.Image
+          alt={name ?? "Avatar"}
+          className="size-full rounded-full object-cover"
+          src={src}
+        />
+      )}
+      <BaseAvatar.Fallback
+        className="flex size-full items-center justify-center rounded-full bg-primary/10 font-medium"
+      >
+        {initials}
+      </BaseAvatar.Fallback>
+    </BaseAvatar.Root>
   );
 };
 
