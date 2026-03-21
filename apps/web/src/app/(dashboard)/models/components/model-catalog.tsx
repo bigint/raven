@@ -3,7 +3,8 @@
 import {
   CAPABILITY_LABELS,
   MODEL_CATEGORIES,
-  type ModelCategory
+  type ModelCategory,
+  type ModelDefinition
 } from "@raven/types";
 import { Badge, Button, EmptyState, Select } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
@@ -31,7 +32,7 @@ import {
 import { ModelIcon, ProviderIcon } from "@/components/model-icon";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
-import { allModelsQueryOptions, type CatalogModel } from "@/lib/use-models";
+import { allModelsQueryOptions } from "@/lib/use-models";
 
 const CAPABILITY_ICONS: Record<string, typeof MessageSquare> = {
   chat: MessageSquare,
@@ -106,7 +107,7 @@ const CopyableSlug = ({ value }: { value: string }) => {
   );
 };
 
-const ModelCard = memo(function ModelCard({ model }: { model: CatalogModel }) {
+const ModelCard = memo(function ModelCard({ model }: { model: ModelDefinition }) {
   const categoryMeta =
     MODEL_CATEGORIES[model.category as ModelCategory] ?? null;
 
