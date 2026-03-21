@@ -158,7 +158,7 @@ app.route("/v1/user", userRoutes);
 const adminRoutes = new Hono();
 adminRoutes.use("*", createAuthMiddleware(auth));
 adminRoutes.use("*", platformAdminMiddleware);
-adminRoutes.route("/", createAdminModule(db, redis));
+adminRoutes.route("/", createAdminModule(db, redis, env));
 app.route("/v1/admin", adminRoutes);
 
 // Protected API routes (session auth + writer middleware for mutations)
