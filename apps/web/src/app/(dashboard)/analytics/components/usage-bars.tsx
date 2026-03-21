@@ -1,6 +1,7 @@
 "use client";
 
 import { formatCompactNumber } from "@/lib/format";
+import { Meter } from "@base-ui/react/meter";
 import type { BreakdownRow } from "../hooks/use-adoption";
 
 interface UsageBarsProps {
@@ -17,23 +18,27 @@ export const UsageBars = ({ data, metric }: UsageBarsProps) => {
     <div className="space-y-3">
       {data.map((row) => {
         const value = row[metric];
-        const pct = maxValue > 0 ? (value / maxValue) * 100 : 0;
 
         return (
-          <div className="rounded-lg border border-border p-4" key={row.label}>
+          <Meter.Root
+            className="rounded-lg border border-border p-4"
+            key={row.label}
+            max={maxValue}
+            min={0}
+            value={value}
+          >
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-sm font-medium">{row.label}</span>
-              <span className="text-sm tabular-nums text-muted-foreground">
-                {formatCompactNumber(value)}
-              </span>
+              <Meter.Label className="text-sm font-medium">
+                {row.label}
+              </Meter.Label>
+              <Meter.Value className="text-sm tabular-nums text-muted-foreground">
+                {() => formatCompactNumber(value)}
+              </Meter.Value>
             </div>
-            <div className="h-2 w-full rounded-full bg-muted">
-              <div
-                className="h-2 rounded-full bg-primary transition-all"
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-          </div>
+            <Meter.Track className="h-2 w-full rounded-full bg-muted">
+              <Meter.Indicator className="h-2 rounded-full bg-primary transition-all" />
+            </Meter.Track>
+          </Meter.Root>
         );
       })}
     </div>

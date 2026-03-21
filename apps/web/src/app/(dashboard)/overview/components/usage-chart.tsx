@@ -1,5 +1,6 @@
 "use client";
 
+import { Meter } from "@base-ui/react/meter";
 import { PROVIDER_LABELS } from "@raven/types";
 import { ArrowRight, Network, TrendingUp } from "lucide-react";
 import Link from "next/link";
@@ -54,42 +55,38 @@ export const UsageChart = ({
         <EmptyState />
       ) : (
         <div className="space-y-3">
-          {usage.slice(0, 5).map((row, idx) => {
-            const pct =
-              totalRequests > 0
-                ? (Number(row.totalRequests) / totalRequests) * 100
-                : 0;
-            return (
-              <div key={`${row.provider}-${row.model}-${idx}`}>
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">
-                      {row.providerConfigName ? (
-                        <>
-                          {row.providerConfigName}
-                          <span className="ml-1 text-xs font-normal text-muted-foreground">
-                            {PROVIDER_LABELS[row.provider] ?? row.provider}
-                          </span>
-                        </>
-                      ) : (
-                        (PROVIDER_LABELS[row.provider] ?? row.provider)
-                      )}
-                    </span>
-                    <span className="text-muted-foreground">{row.model}</span>
-                  </div>
-                  <span className="tabular-nums text-muted-foreground">
-                    {Number(row.totalRequests).toLocaleString()}
-                  </span>
+          {usage.slice(0, 5).map((row, idx) => (
+            <Meter.Root
+              key={`${row.provider}-${row.model}-${idx}`}
+              max={totalRequests}
+              min={0}
+              value={Math.max(Number(row.totalRequests), totalRequests * 0.02)}
+            >
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <Meter.Label className="font-medium">
+                    {row.providerConfigName ? (
+                      <>
+                        {row.providerConfigName}
+                        <span className="ml-1 text-xs font-normal text-muted-foreground">
+                          {PROVIDER_LABELS[row.provider] ?? row.provider}
+                        </span>
+                      </>
+                    ) : (
+                      (PROVIDER_LABELS[row.provider] ?? row.provider)
+                    )}
+                  </Meter.Label>
+                  <span className="text-muted-foreground">{row.model}</span>
                 </div>
-                <div className="mt-1.5 h-1.5 w-full rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-primary/60"
-                    style={{ width: `${Math.max(pct, 2)}%` }}
-                  />
-                </div>
+                <span className="tabular-nums text-muted-foreground">
+                  {Number(row.totalRequests).toLocaleString()}
+                </span>
               </div>
-            );
-          })}
+              <Meter.Track className="mt-1.5 h-1.5 w-full rounded-full bg-muted">
+                <Meter.Indicator className="h-full rounded-full bg-primary/60" />
+              </Meter.Track>
+            </Meter.Root>
+          ))}
         </div>
       )}
     </div>

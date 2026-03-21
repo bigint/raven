@@ -2,6 +2,7 @@
 
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable } from "@raven/ui";
+import { Meter } from "@base-ui/react/meter";
 import { DollarSign, Pencil, Plus, Trash2 } from "lucide-react";
 import type { Budget } from "../hooks/use-budgets";
 import { ENTITY_TYPE_LABELS } from "../hooks/use-budgets";
@@ -45,17 +46,19 @@ const columns: Column<Budget>[] = [
     header: "Alert Threshold",
     key: "alertThreshold",
     render: (budget) => (
-      <div className="flex items-center gap-2">
-        <div className="h-1.5 w-20 rounded-full bg-muted">
-          <div
-            className="h-1.5 rounded-full bg-primary"
-            style={{ width: `${Number(budget.alertThreshold) * 100}%` }}
-          />
-        </div>
-        <span className="text-sm text-muted-foreground">
-          {Math.round(Number(budget.alertThreshold) * 100)}%
-        </span>
-      </div>
+      <Meter.Root
+        className="flex items-center gap-2"
+        max={100}
+        min={0}
+        value={Math.round(Number(budget.alertThreshold) * 100)}
+      >
+        <Meter.Track className="h-1.5 w-20 rounded-full bg-muted">
+          <Meter.Indicator className="h-1.5 rounded-full bg-primary" />
+        </Meter.Track>
+        <Meter.Value className="text-sm text-muted-foreground">
+          {(formattedValue) => `${formattedValue}%`}
+        </Meter.Value>
+      </Meter.Root>
     )
   }
 ];
