@@ -9,6 +9,7 @@ import { publishEvent } from "@/lib/events";
 import { created } from "@/lib/response";
 import type { AuthContextWithJson } from "@/lib/types";
 import { logAudit } from "@/modules/audit-logs/index";
+import { syncModelsForProvider } from "@/modules/cron/sync-models";
 import { maskApiKey, validateApiKey } from "./helpers";
 import type { createProviderSchema } from "./schema";
 
@@ -39,6 +40,9 @@ export const createProvider =
 
     // Invalidate provider configs cache for this provider
     void redis.del(cacheKeys.providerConfigs(provider));
+
+    // Sync models for this provider in the background
+    void syncModelsForProvider(db, safe.provider, apiKey);
 
     const masked = maskApiKey(safe.apiKey);
     void publishEvent("provider.created", { ...safe, apiKey: masked });
