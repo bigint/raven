@@ -2,7 +2,7 @@
 set -e
 
 echo "Running database migrations..."
-npx drizzle-kit migrate
+node migrate.mjs
 
 echo "Starting Raven..."
 if [ "$1" = "serve" ]; then
