@@ -1,6 +1,4 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { createMistral } from "@ai-sdk/mistral";
 import { createOpenAI } from "@ai-sdk/openai";
 import type { LanguageModel } from "ai";
 
@@ -42,7 +40,6 @@ export const filterPassthroughHeaders = (
  *
  * Each call creates a fresh provider instance with the provided credentials.
  * The AI SDK handles API version headers, endpoint mapping, and auth internally.
- * Unknown providers fall back to OpenAI-compatible protocol.
  */
 export const createProviderModel = (
   input: ProviderFactoryInput,
@@ -55,15 +52,6 @@ export const createProviderModel = (
       const p = createAnthropic({ apiKey, baseURL: baseUrl, headers });
       return p(modelId);
     }
-    case "google": {
-      const p = createGoogleGenerativeAI({ apiKey, baseURL: baseUrl, headers });
-      return p(modelId);
-    }
-    case "mistralai": {
-      const p = createMistral({ apiKey, baseURL: baseUrl, headers });
-      return p(modelId);
-    }
-    case "deepseek":
     case "openai": {
       const p = createOpenAI({ apiKey, baseURL: baseUrl, headers });
       return p.chat(modelId);
