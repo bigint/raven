@@ -46,7 +46,7 @@ Audit logs cover every resource type in Raven.
 | `webhook` | Registered webhook endpoint, disabled webhook |
 | `routing_rule` | Created cost-optimized routing, updated fallback |
 | `team` | Created team, added member |
-| `organization` | Updated org settings, changed plan |
+| `organization` | Updated org settings |
 | `member` | Invited member, changed role |
 
 ## Viewing Audit Logs
@@ -103,16 +103,3 @@ Audit logs can be exported for external analysis or long-term archival:
 <Note>
   Audit logs are append-only and immutable. Once an entry is created, it cannot be modified or deleted -- even by organization admins.
 </Note>
-
-## Retention by Plan
-
-| Plan | Audit Logs Available |
-|------|---------------------|
-| Free | No |
-| Pro | No |
-| Team | No |
-| Enterprise | Yes |
-
-<Warning>
-  Audit logs are an Enterprise feature. Contact sales to enable audit logging for your organization.
-</Warning>

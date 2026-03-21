@@ -18,7 +18,6 @@ Your App → Raven Gateway → Provider (OpenAI, Anthropic, etc.)
 An **organization** is your workspace in Raven. All resources — providers, keys, budgets, team members — belong to an organization.
 
 - Each user can belong to multiple organizations
-- Billing is per-organization
 - Resources are isolated between organizations
 
 ## Virtual Keys
@@ -64,9 +63,6 @@ Every request that hits the Raven gateway goes through this pipeline:
   </Step>
   <Step title="Rate Limiting">
     Checks RPM/RPD limits for the virtual key.
-  </Step>
-  <Step title="Plan Check">
-    Verifies the organization's subscription allows this request.
   </Step>
   <Step title="Budget Check">
     Ensures the request won't exceed any configured budgets.

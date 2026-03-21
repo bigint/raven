@@ -94,9 +94,6 @@ Requests pass through multiple security layers before reaching a provider:
   <Step title="Rate Limiting">
     RPM and RPD counters are checked in parallel via Redis.
   </Step>
-  <Step title="Plan Limit Check">
-    The organization's monthly request quota is verified.
-  </Step>
   <Step title="Budget Check">
     Organization-level, team-level, and key-level budgets are verified.
   </Step>

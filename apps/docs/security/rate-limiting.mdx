@@ -17,7 +17,7 @@ Each virtual key can have two independent rate limits:
 Both limits are checked **in parallel** when a request arrives. If either limit is exceeded, the request is rejected immediately -- before any guardrail evaluation or provider call is made.
 
 <Info>
-  If neither RPM nor RPD is set on a virtual key, rate limiting is skipped entirely for that key. Plan-level monthly quotas still apply.
+  If neither RPM nor RPD is set on a virtual key, rate limiting is skipped entirely for that key.
 </Info>
 
 ## Configuring Rate Limits
@@ -101,19 +101,6 @@ Or for daily limits:
 <Tip>
   When you receive a 429, wait before retrying. For RPM limits, waiting a few seconds is usually sufficient. For RPD limits, the counter resets 24 hours after the first request in the current window.
 </Tip>
-
-## Plan-Level Quotas
-
-In addition to per-key rate limits, Raven enforces plan-level monthly request quotas:
-
-| Plan | Requests Per Month |
-|------|--------------------|
-| Free | 10,000 |
-| Pro | 500,000 |
-| Team | 2,000,000 |
-| Enterprise | Unlimited |
-
-Plan quotas are checked independently from key-level rate limits. Even if a key has no RPM/RPD limits configured, the organization's plan quota still applies.
 
 ## Rate Limits vs. Budgets
 
