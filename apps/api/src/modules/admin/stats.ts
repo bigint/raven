@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { requestLogs, users } from "@raven/db";
-import { and, count, gte, sum } from "drizzle-orm";
+import { count, gte, sum } from "drizzle-orm";
 import type { Context } from "hono";
 import { success } from "@/lib/response";
 

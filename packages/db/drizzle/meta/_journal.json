@@ -8,6 +8,13 @@
       "when": 1774104387128,
       "tag": "0000_old_catseye",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1774108446226,
+      "tag": "0001_classy_psylocke",
+      "breakpoints": true
     }
   ]
 }

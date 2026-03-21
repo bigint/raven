@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { requestLogs, virtualKeys } from "@raven/db";
-import { and, count, eq, isNull, sql, sum } from "drizzle-orm";
+import { and, count, eq, sql, sum } from "drizzle-orm";
 import type { Redis } from "ioredis";
 import type { z } from "zod";
 import { cachedQuery } from "@/lib/cache-utils";
@@ -22,7 +22,7 @@ export const getAdoptionChart =
     const { from, to } = c.req.valid("query");
 
     const dateConditions = parseDateRange(from, to);
-    const where = and(isNull(requestLogs.deletedAt), ...dateConditions);
+    const where = and(...dateConditions);
 
     const queryFn = async () => {
       const rows = await db
@@ -66,7 +66,7 @@ export const getAdoptionBreakdown =
     const { from, to, groupBy } = c.req.valid("query");
 
     const dateConditions = parseDateRange(from, to);
-    const where = and(isNull(requestLogs.deletedAt), ...dateConditions);
+    const where = and(...dateConditions);
 
     const mapBreakdownRows = (
       rows: {

@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { users } from "@raven/db";
-import { and, desc, eq, lt } from "drizzle-orm";
+import { desc, eq, lt } from "drizzle-orm";
 import type { Context } from "hono";
 import { z } from "zod";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
