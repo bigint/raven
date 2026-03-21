@@ -25,6 +25,7 @@
     "db:studio": "pnpm --filter @raven/db studio",
     "dev": "pnpm -r --parallel dev",
     "dev:api": "pnpm --filter @raven/api dev",
+    "dev:cron": "pnpm --filter @raven/cron dev",
     "dev:web": "pnpm --filter @raven/web dev",
     "format": "biome format --write .",
     "lint": "biome check --write .",

@@ -17,6 +17,7 @@ export { Input, type InputProps } from "./components/input";
 export { Modal, type ModalProps } from "./components/modal";
 export { FadeIn, StaggerItem, StaggerList } from "./components/motion";
 export { PageHeader, type PageHeaderProps } from "./components/page-header";
+export { RavenLogo } from "./components/raven-logo";
 export {
   type PillTabOption,
   PillTabs,

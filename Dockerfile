@@ -3,6 +3,7 @@ RUN corepack enable && corepack prepare pnpm@10.27.0 --activate
 WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package.json apps/api/
+COPY apps/cron/package.json apps/cron/
 COPY apps/web/package.json apps/web/
 COPY packages/auth/package.json packages/auth/
 COPY packages/config/package.json packages/config/
@@ -22,6 +23,7 @@ RUN apk add --no-cache wget
 WORKDIR /app
 
 COPY --from=builder /app/apps/api/dist ./api/
+COPY --from=builder /app/apps/cron/dist ./cron/
 COPY --from=builder /app/apps/web/.next/standalone ./web/
 COPY --from=builder /app/apps/web/.next/static ./web/.next/static
 COPY --from=builder /app/apps/web/public ./web/public

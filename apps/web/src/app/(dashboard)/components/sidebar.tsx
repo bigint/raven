@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@raven/ui";
+import { Button, RavenLogo } from "@raven/ui";
 import type { LucideIcon } from "lucide-react";
 import {
   Activity,
@@ -145,11 +145,7 @@ export const Sidebar = ({ user }: SidebarProps) => {
       {/* Mobile header */}
       <div className="flex md:hidden items-center justify-between border-b border-border bg-muted/50 px-4 py-3">
         <div className="flex items-center gap-2">
-          <div className="size-6 rounded-md bg-primary flex items-center justify-center">
-            <span className="text-[10px] font-bold text-primary-foreground">
-              R
-            </span>
-          </div>
+          <RavenLogo className="size-6 text-primary" />
           <span className="text-sm font-semibold truncate">Raven</span>
         </div>
         <Button
@@ -192,11 +188,7 @@ export const Sidebar = ({ user }: SidebarProps) => {
               {/* Drawer header */}
               <div className="flex items-center justify-between px-4 pb-3">
                 <div className="flex items-center gap-2">
-                  <div className="size-7 rounded-lg bg-primary flex items-center justify-center">
-                    <span className="text-xs font-bold text-primary-foreground">
-                      R
-                    </span>
-                  </div>
+                  <RavenLogo className="size-7 text-primary" />
                   <span className="font-semibold truncate">Raven</span>
                 </div>
                 <Button
@@ -224,9 +216,7 @@ export const Sidebar = ({ user }: SidebarProps) => {
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-60 border-r border-border bg-muted/50 flex-col shrink-0 h-screen sticky top-0">
         <div className="shrink-0 flex items-center gap-2 px-4 py-4 border-b border-border">
-          <div className="size-7 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-xs font-bold text-primary-foreground">R</span>
-          </div>
+          <RavenLogo className="size-7 text-primary" />
           <span className="font-semibold">Raven</span>
         </div>
         <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">

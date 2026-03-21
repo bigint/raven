@@ -1,6 +1,6 @@
 import { parseEnv } from "@raven/config";
 import { createDatabase } from "@raven/db";
-import { cleanupRetention } from "./modules/admin/retention";
+import { cleanupRetention } from "./jobs/retention";
 
 const env = parseEnv();
 const db = createDatabase(env.DATABASE_URL);
@@ -17,6 +17,7 @@ const runRetentionCleanup = async () => {
   }
 };
 
+runRetentionCleanup();
 setInterval(runRetentionCleanup, 24 * 60 * 60 * 1000);
 
 process.on("SIGTERM", () => {

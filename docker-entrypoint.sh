@@ -9,7 +9,7 @@ if [ "$1" = "serve" ]; then
   node api/index.js &
   node web/server.js
 elif [ "$1" = "cron" ]; then
-  node api/cron.js
+  node cron/index.js
 else
   exec "$@"
 fi
