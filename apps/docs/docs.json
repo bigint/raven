@@ -71,7 +71,6 @@
             "group": "Security",
             "pages": [
               "security/overview",
-              "security/ip-allowlists",
               "security/rate-limiting",
               "security/prompt-injection"
             ]

@@ -97,8 +97,6 @@ The Raven dashboard uses session-based authentication via HTTP cookies. This is 
 | Method |
 |--------|
 | **Email/password** |
-| **GitHub OAuth** |
-| **Google OAuth** |
 
 ## Security Best Practices
 
@@ -117,9 +115,6 @@ The Raven dashboard uses session-based authentication via HTTP cookies. This is 
   </Accordion>
   <Accordion title="Set expiration dates">
     Configure an expiration date when creating keys. This ensures keys are rotated regularly and reduces the risk from leaked credentials.
-  </Accordion>
-  <Accordion title="Use IP allowlists">
-    Restrict virtual keys to specific IP ranges for production environments. See [IP Allowlists](/security/ip-allowlists).
   </Accordion>
   <Accordion title="Set rate limits">
     Configure RPM and RPD limits on every key to prevent abuse. See [Rate Limiting](/security/rate-limiting).

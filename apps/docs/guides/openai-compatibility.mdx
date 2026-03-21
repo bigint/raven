@@ -68,17 +68,6 @@ await client.chat.completions.create({
   messages: [{ role: "user", content: "Hello" }]
 });
 
-// Routes to Google
-await client.chat.completions.create({
-  model: "gemini-2.5-pro",
-  messages: [{ role: "user", content: "Hello" }]
-});
-
-// Routes to Mistral
-await client.chat.completions.create({
-  model: "mistral-large-latest",
-  messages: [{ role: "user", content: "Hello" }]
-});
 ```
 
 ## Supported Parameters
@@ -114,7 +103,7 @@ for await (const chunk of stream) {
 }
 ```
 
-Raven normalizes streaming output from all providers to the OpenAI SSE format, so even Anthropic and Google streams arrive in the same format. See [Streaming](/guides/streaming) for details.
+Raven normalizes streaming output from all providers to the OpenAI SSE format, so even Anthropic streams arrive in the same format. See [Streaming](/guides/streaming) for details.
 
 ## Function Calling
 
@@ -216,14 +205,6 @@ The power of Raven is that you use the **same OpenAI-compatible API** to access 
 // Access Anthropic models through the OpenAI SDK
 const response = await client.chat.completions.create({
   model: "claude-sonnet-4-20250514",
-  messages: [{ role: "user", content: "Hello" }]
-});
-```
-
-```typescript
-// Access Google models through the OpenAI SDK
-const response = await client.chat.completions.create({
-  model: "gemini-2.5-pro",
   messages: [{ role: "user", content: "Hello" }]
 });
 ```

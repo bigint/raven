@@ -55,7 +55,7 @@ Whether you are managing API keys across a team, enforcing budgets and rate limi
 
 ## Features
 
-- **Multi-provider routing** -- Send requests to OpenAI, Anthropic, Google, and Mistral through a unified, OpenAI-compatible API endpoint.
+- **Multi-provider routing** -- Send requests to OpenAI and Anthropic through a unified, OpenAI-compatible API endpoint.
 - **Virtual API keys** -- Issue scoped keys with per-key budgets, rate limits, and provider restrictions.
 - **Analytics and logging** -- Track every request with detailed logs, latency metrics, token counts, and cost breakdowns.
 - **Guardrails** -- Detect prompt injection attempts and filter content before it reaches your models.

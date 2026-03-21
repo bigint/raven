@@ -114,9 +114,6 @@ Different providers use different streaming formats. Raven normalizes all of the
 |----------|---------------|--------------|
 | **OpenAI** | OpenAI SSE | Passed through unchanged |
 | **Anthropic** | Anthropic SSE (content_block_delta) | Normalized to OpenAI format |
-| **Google** | Google SSE | Normalized to OpenAI format |
-| **Mistral** | OpenAI-compatible SSE | Passed through |
-| **Groq** | OpenAI-compatible SSE | Passed through |
 
 This normalization is handled by each provider's `normalizeStreamChunk` adapter method. Your application always receives the same OpenAI-compatible format regardless of which provider serves the request.
 

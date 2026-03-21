@@ -85,9 +85,6 @@ Requests pass through multiple security layers before reaching a provider:
   <Step title="TLS Termination">
     HTTPS connection is established. Plaintext is rejected.
   </Step>
-  <Step title="IP Allowlisting">
-    If configured, the client IP is checked against the organization's allowlist. See [IP Allowlists](/security/ip-allowlists).
-  </Step>
   <Step title="Authentication">
     The virtual key is hashed and verified against the database.
   </Step>
@@ -123,9 +120,6 @@ Requests pass through multiple security layers before reaching a provider:
 ## Next Steps
 
 <Columns cols={2}>
-  <Card title="IP Allowlists" icon="shield-check" href="/security/ip-allowlists">
-    Restrict access to trusted IPs.
-  </Card>
   <Card title="Rate Limiting" icon="gauge" href="/security/rate-limiting">
     Control request throughput per key.
   </Card>
