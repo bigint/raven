@@ -64,13 +64,16 @@ export const useUpdateUserRole = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, role }: { id: string; role: string }) =>
-      api.patch<AdminUser>(`/v1/admin/users/${id}`, { role }),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: ({ id, role }: { id: string; role: string }) => {
+      const promise = api.patch<AdminUser>(`/v1/admin/users/${id}`, { role });
+      toast.promise(promise, {
+        loading: "Updating role...",
+        success: "User role updated",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
-      toast.success("User role updated");
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
     }
   });
