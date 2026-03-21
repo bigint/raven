@@ -36,11 +36,8 @@ rk_test_xyz789...  → Test/development environment
 
 Pass your virtual key in the `Authorization` header:
 
-```bash
-curl -X POST http://localhost:4000/v1/chat/completions \
-  -H "Authorization: Bearer rk_live_abc123..." \
-  -H "Content-Type: application/json" \
-  -d '{"model": "gpt-4o", "messages": [{"role": "user", "content": "Hello"}]}'
+```
+Authorization: Bearer rk_live_abc123...
 ```
 
 ## Rate Limiting

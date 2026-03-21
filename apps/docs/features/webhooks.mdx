@@ -22,22 +22,6 @@ Webhooks send HTTP POST requests to your endpoints when specific events occur in
   </Step>
 </Steps>
 
-### Via the API
-
-```bash
-curl -X POST http://localhost:4000/v1/webhooks \
-  -H "Authorization: Bearer rk_live_abc123" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "url": "https://your-app.com/webhooks/raven",
-    "events": [
-      "request.completed",
-      "budget.exceeded",
-      "guardrail.blocked"
-    ]
-  }'
-```
-
 ## Event Types
 
 Subscribe to any combination of events across the system.

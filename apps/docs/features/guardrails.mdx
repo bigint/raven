@@ -60,23 +60,6 @@ You can enable all PII types or select specific ones in the guardrail configurat
   </Step>
 </Steps>
 
-### Via the API
-
-```bash
-curl -X POST http://localhost:4000/v1/guardrails \
-  -H "Authorization: Bearer rk_live_abc123" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Block PII in prompts",
-    "type": "pii_detection",
-    "action": "block",
-    "priority": 1,
-    "config": {
-      "piiTypes": ["ssn", "creditCard", "email"]
-    }
-  }'
-```
-
 ## Configuration Examples
 
 <Tabs>
