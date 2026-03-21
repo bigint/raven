@@ -45,7 +45,7 @@ const ProviderForm = ({
         }
       : { apiKey: "", isEnabled: true, name: "", provider: "" }
   );
-  // Set default provider once available providers load
+
   useEffect(() => {
     if (!isEdit && !form.provider && defaultProvider) {
       setForm((f) => ({ ...f, provider: defaultProvider }));

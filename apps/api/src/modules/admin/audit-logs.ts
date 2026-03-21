@@ -1,22 +1,10 @@
 import type { Database } from "@raven/db";
-import { auditLogs, organizations, users } from "@raven/db";
-import { and, desc, eq, isNull, lt } from "drizzle-orm";
+import { auditLogs, users } from "@raven/db";
+import { desc, eq, isNull } from "drizzle-orm";
 import type { Context } from "hono";
-import { z } from "zod";
-
-const paginationSchema = z.object({
-  cursor: z.string().optional(),
-  limit: z.coerce.number().int().min(1).max(200).default(50)
-});
+import { success } from "@/lib/response";
 
 export const getAdminAuditLogs = (db: Database) => async (c: Context) => {
-  const { cursor, limit } = paginationSchema.parse(c.req.query());
-
-  const conditions = [isNull(auditLogs.deletedAt)];
-  if (cursor) {
-    conditions.push(lt(auditLogs.id, cursor));
-  }
-
   const rows = await db
     .select({
       action: auditLogs.action,
@@ -24,24 +12,13 @@ export const getAdminAuditLogs = (db: Database) => async (c: Context) => {
       actorName: users.name,
       createdAt: auditLogs.createdAt,
       id: auditLogs.id,
-      metadata: auditLogs.metadata,
-      orgName: organizations.name,
-      resourceId: auditLogs.resourceId,
       resourceType: auditLogs.resourceType
     })
     .from(auditLogs)
     .leftJoin(users, eq(users.id, auditLogs.actorId))
-    .leftJoin(organizations, eq(organizations.id, auditLogs.organizationId))
-    .where(and(...conditions))
+    .where(isNull(auditLogs.deletedAt))
     .orderBy(desc(auditLogs.createdAt))
-    .limit(limit + 1);
+    .limit(50);
 
-  const hasMore = rows.length > limit;
-  const data = rows.slice(0, limit);
-
-  return c.json({
-    data,
-    hasMore,
-    nextCursor: hasMore ? data[data.length - 1]?.id : undefined
-  });
+  return success(c, rows);
 };

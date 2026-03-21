@@ -8,12 +8,7 @@ import { UnauthorizedError } from "@/lib/errors";
 
 export type VirtualKey = Pick<
   typeof virtualKeys.$inferSelect,
-  | "expiresAt"
-  | "id"
-  | "isActive"
-  | "organizationId"
-  | "rateLimitRpd"
-  | "rateLimitRpm"
+  "expiresAt" | "id" | "isActive" | "rateLimitRpd" | "rateLimitRpm"
 >;
 
 export interface AuthResult {
@@ -42,7 +37,6 @@ export const authenticateKey = async (
         expiresAt: virtualKeys.expiresAt,
         id: virtualKeys.id,
         isActive: virtualKeys.isActive,
-        organizationId: virtualKeys.organizationId,
         rateLimitRpd: virtualKeys.rateLimitRpd,
         rateLimitRpm: virtualKeys.rateLimitRpm
       })

@@ -32,30 +32,6 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
     validationMethod: "POST",
     validationPath: "/messages"
   },
-  deepseek: {
-    authHeaders: bearerAuth,
-    baseUrl: "https://api.deepseek.com/v1",
-    chatEndpoint: "/chat/completions",
-    label: "DeepSeek",
-    modelsEndpoint: "/models",
-    validationPath: "/models"
-  },
-  google: {
-    authHeaders: bearerAuth,
-    baseUrl: "https://generativelanguage.googleapis.com/v1beta",
-    chatEndpoint: "/chat/completions",
-    label: "Google",
-    modelsEndpoint: "/openai/models",
-    validationPath: "/openai/models"
-  },
-  mistralai: {
-    authHeaders: bearerAuth,
-    baseUrl: "https://api.mistral.ai/v1",
-    chatEndpoint: "/chat/completions",
-    label: "Mistral AI",
-    modelsEndpoint: "/models",
-    validationPath: "/models"
-  },
   openai: {
     authHeaders: bearerAuth,
     baseUrl: "https://api.openai.com/v1",

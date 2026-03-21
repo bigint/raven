@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import type { Database } from "@raven/db";
 import { webhooks } from "@raven/db";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
 import pRetry from "p-retry";
 
@@ -37,7 +37,7 @@ const withConcurrency = async <T>(fn: () => Promise<T>): Promise<T> => {
   }
 };
 
-// Simple TTL cache for webhook configs per org
+// Simple TTL cache for webhook configs
 const WEBHOOK_CONFIG_TTL_MS = 30_000;
 
 interface CacheEntry {
@@ -45,19 +45,18 @@ interface CacheEntry {
   expiresAt: number;
 }
 
-const webhookConfigCache = new Map<string, CacheEntry>();
+let webhookConfigCache: CacheEntry | null = null;
 
 const getWebhookConfigs = async (
   db: Database,
-  orgId: string,
   eventType: string
 ): Promise<WebhookConfig[]> => {
-  const cacheKey = orgId;
   const now = Date.now();
-  const cached = webhookConfigCache.get(cacheKey);
 
-  if (cached && cached.expiresAt > now) {
-    return cached.configs.filter((c) => c.events.includes(eventType));
+  if (webhookConfigCache && webhookConfigCache.expiresAt > now) {
+    return webhookConfigCache.configs.filter((c) =>
+      c.events.includes(eventType)
+    );
   }
 
   const configs = await db
@@ -68,14 +67,12 @@ const getWebhookConfigs = async (
       url: webhooks.url
     })
     .from(webhooks)
-    .where(
-      and(eq(webhooks.organizationId, orgId), eq(webhooks.isEnabled, true))
-    );
+    .where(eq(webhooks.isEnabled, true));
 
-  webhookConfigCache.set(cacheKey, {
+  webhookConfigCache = {
     configs,
     expiresAt: now + WEBHOOK_CONFIG_TTL_MS
-  });
+  };
 
   return configs.filter((c) => c.events.includes(eventType));
 };
@@ -129,14 +126,11 @@ export const initWebhookDispatcher = (db: Database, redis: Redis): void => {
     console.error("Webhook dispatcher Redis error:", err);
   });
 
-  subscriber.psubscribe("org:*:events").catch((err) => {
+  subscriber.subscribe("raven:events").catch((err) => {
     console.error("Failed to subscribe to events:", err);
   });
 
-  subscriber.on("pmessage", (_pattern, channel, message) => {
-    const orgId = channel.split(":")[1];
-    if (!orgId) return;
-
+  subscriber.on("message", (_channel, message) => {
     let event: EventPayload;
     try {
       event = JSON.parse(message) as EventPayload;
@@ -146,7 +140,7 @@ export const initWebhookDispatcher = (db: Database, redis: Redis): void => {
 
     void (async () => {
       try {
-        const matchingWebhooks = await getWebhookConfigs(db, orgId, event.type);
+        const matchingWebhooks = await getWebhookConfigs(db, event.type);
 
         for (const webhook of matchingWebhooks) {
           const body = JSON.stringify({

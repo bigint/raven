@@ -1,7 +1,7 @@
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
 import type { Redis } from "ioredis";
-import type { AppEnv } from "@/lib/types";
+import type { AuthEnv } from "@/lib/types";
 import { queryValidator } from "@/lib/validation";
 import { getAdoptionBreakdown, getAdoptionChart } from "./adoption";
 import { getCache } from "./cache";
@@ -24,15 +24,13 @@ import { getToolSessions, getToolStats } from "./tools";
 import { getUsage } from "./usage";
 
 export const createAnalyticsModule = (db: Database, redis?: Redis) => {
-  const app = new Hono<AppEnv>();
+  const app = new Hono<AuthEnv>();
 
-  // Clamp analytics date range to plan retention limit
   app.use("*", async (c, next) => {
     if (c.req.path.endsWith("/requests/live") || c.req.path.endsWith("/star"))
       return next();
-    const orgId = c.get("orgId");
     const from = c.req.query("from");
-    const clamped = await clampAnalyticsRetention(db, orgId, from, redis);
+    const clamped = await clampAnalyticsRetention(db, from);
     if (clamped) {
       const url = new URL(c.req.url);
       url.searchParams.set("from", clamped);

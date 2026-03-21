@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  ChevronDown,
-  LogOut,
-  Moon,
-  Settings,
-  ShieldCheck,
-  Sun
-} from "lucide-react";
+import { ChevronDown, LogOut, Moon, Settings, Sun } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { useClickOutside } from "@/hooks/use-click-outside";
@@ -18,7 +11,6 @@ interface UserMenuProps {
   readonly user: {
     readonly name?: string | null;
     readonly email?: string | null;
-    readonly role?: string;
   };
 }
 
@@ -41,25 +33,14 @@ export const UserMenu = ({ user }: UserMenuProps) => {
           className="absolute bottom-full left-2 right-2 mb-1 rounded-md border border-border bg-popover py-1 shadow-md ring-1 ring-black/5"
           role="menu"
         >
-          {user.role === "admin" && (
-            <Link
-              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-              href="/admin"
-              onClick={() => setOpen(false)}
-              role="menuitem"
-            >
-              <ShieldCheck className="size-4" />
-              Admin Panel
-            </Link>
-          )}
           <Link
             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-            href="/settings"
+            href="/profile"
             onClick={() => setOpen(false)}
             role="menuitem"
           >
             <Settings className="size-4" />
-            Settings
+            Profile
           </Link>
           <button
             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground text-left"

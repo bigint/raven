@@ -36,9 +36,7 @@ const OverviewPage = () => {
 
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Suspense
-          fallback={
-            <div className="h-64 animate-pulse rounded-lg bg-muted" />
-          }
+          fallback={<div className="h-64 animate-pulse rounded-lg bg-muted" />}
         >
           {match(usage)
             .with({ isError: true }, ({ error }) => (
@@ -55,9 +53,7 @@ const OverviewPage = () => {
             ))}
         </Suspense>
         <Suspense
-          fallback={
-            <div className="h-64 animate-pulse rounded-lg bg-muted" />
-          }
+          fallback={<div className="h-64 animate-pulse rounded-lg bg-muted" />}
         >
           {match(requests)
             .with({ isError: true }, ({ error }) => (

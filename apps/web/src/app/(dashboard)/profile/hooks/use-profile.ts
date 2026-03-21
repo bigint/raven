@@ -1,28 +1,8 @@
 "use client";
 
-import {
-  queryOptions,
-  useMutation,
-  useQueryClient
-} from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { orgsQueryOptions } from "@/app/(dashboard)/hooks/use-orgs";
 import { api } from "@/lib/api";
-
-export { orgsQueryOptions };
-
-export interface ProfileInvitation {
-  readonly id: string;
-  readonly orgName: string;
-  readonly role: string;
-  readonly expiresAt: string;
-}
-
-export const profileInvitationsQueryOptions = () =>
-  queryOptions({
-    queryFn: () => api.get<ProfileInvitation[]>("/v1/user/invitations"),
-    queryKey: ["user", "invitations"]
-  });
 
 export const useUpdateProfile = () => {
   const queryClient = useQueryClient();
@@ -33,34 +13,6 @@ export const useUpdateProfile = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["session"] });
-    }
-  });
-};
-
-export const useAcceptInvitation = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (invitationId: string) =>
-      api.post(`/v1/user/invitations/${invitationId}/accept`),
-    onError: (err) => {
-      toast.error(err.message);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user"] });
-    }
-  });
-};
-
-export const useDeclineInvitation = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (invitationId: string) =>
-      api.post(`/v1/user/invitations/${invitationId}/decline`),
-    onError: (err) => {
-      toast.error(err.message);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user", "invitations"] });
     }
   });
 };

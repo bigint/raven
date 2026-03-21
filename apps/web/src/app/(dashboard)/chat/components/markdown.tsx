@@ -8,7 +8,7 @@
  * No heavy markdown-to-AST library. All content is escaped before rendering.
  */
 
-import { type ReactNode, memo } from "react";
+import { memo, type ReactNode } from "react";
 import { CodeBlock } from "./code-block";
 
 // ---------------------------------------------------------------------------
@@ -144,7 +144,11 @@ const isTableSeparator = (line: string): boolean =>
 // Main Markdown component
 // ---------------------------------------------------------------------------
 
-const Markdown = memo(function Markdown({ content }: { readonly content: string }) {
+const Markdown = memo(function Markdown({
+  content
+}: {
+  readonly content: string;
+}) {
   const lines = content.split("\n");
   const elements: ReactNode[] = [];
   let i = 0;

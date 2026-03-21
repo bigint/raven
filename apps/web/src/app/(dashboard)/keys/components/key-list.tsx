@@ -24,21 +24,6 @@ const KeyList = ({
   onDelete,
   onEdit
 }: KeyListProps) => {
-  if (!loading && keys.length === 0) {
-    return (
-      <EmptyState
-        action={
-          <Button onClick={onCreate}>
-            <Plus className="size-4" />
-            Create your first key
-          </Button>
-        }
-        icon={<Key className="size-8" />}
-        title="No keys yet"
-      />
-    );
-  }
-
   const allColumns = useMemo(
     () =>
       [
@@ -51,9 +36,7 @@ const KeyList = ({
           header: "Environment",
           key: "environment",
           render: (key) => (
-            <Badge
-              variant={key.environment === "live" ? "success" : "warning"}
-            >
+            <Badge variant={key.environment === "live" ? "success" : "warning"}>
               {key.environment === "live" ? "Live" : "Test"}
             </Badge>
           )
@@ -70,14 +53,10 @@ const KeyList = ({
             return (
               <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
                 {key.rateLimitRpm !== null && (
-                  <span>
-                    {Number(key.rateLimitRpm).toLocaleString()} / min
-                  </span>
+                  <span>{Number(key.rateLimitRpm).toLocaleString()} / min</span>
                 )}
                 {key.rateLimitRpd !== null && (
-                  <span>
-                    {Number(key.rateLimitRpd).toLocaleString()} / day
-                  </span>
+                  <span>{Number(key.rateLimitRpd).toLocaleString()} / day</span>
                 )}
               </div>
             );
@@ -175,6 +154,21 @@ const KeyList = ({
       ] satisfies Column<VirtualKey>[],
     [onEdit, onDelete]
   );
+
+  if (!loading && keys.length === 0) {
+    return (
+      <EmptyState
+        action={
+          <Button onClick={onCreate}>
+            <Plus className="size-4" />
+            Create your first key
+          </Button>
+        }
+        icon={<Key className="size-8" />}
+        title="No keys yet"
+      />
+    );
+  }
 
   return (
     <DataTable

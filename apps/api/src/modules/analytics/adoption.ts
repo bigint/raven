@@ -4,7 +4,7 @@ import { and, count, eq, isNull, sql, sum } from "drizzle-orm";
 import type { Redis } from "ioredis";
 import type { z } from "zod";
 import { cachedQuery } from "@/lib/cache-utils";
-import type { AppContextWithQuery } from "@/lib/types";
+import type { AuthContextWithQuery } from "@/lib/types";
 
 import { parseDateRange } from "./helpers";
 import type { adoptionQuerySchema, dateRangeQuerySchema } from "./schema";
@@ -18,16 +18,11 @@ type AdoptionQuery = z.infer<typeof adoptionQuerySchema>;
 /** Daily token breakdown for stacked chart */
 export const getAdoptionChart =
   (db: Database, redis?: Redis) =>
-  async (c: AppContextWithQuery<DateQuery>) => {
-    const orgId = c.get("orgId");
+  async (c: AuthContextWithQuery<DateQuery>) => {
     const { from, to } = c.req.valid("query");
 
     const dateConditions = parseDateRange(from, to);
-    const where = and(
-      eq(requestLogs.organizationId, orgId),
-      isNull(requestLogs.deletedAt),
-      ...dateConditions
-    );
+    const where = and(isNull(requestLogs.deletedAt), ...dateConditions);
 
     const queryFn = async () => {
       const rows = await db
@@ -56,7 +51,7 @@ export const getAdoptionChart =
       }));
     };
 
-    const cacheKey = `analytics:adoption-chart:${orgId}:${from ?? ""}:${to ?? ""}`;
+    const cacheKey = `analytics:adoption-chart:${from ?? ""}:${to ?? ""}`;
     const data = redis
       ? await cachedQuery(redis, cacheKey, ADOPTION_CHART_TTL, queryFn)
       : await queryFn();
@@ -67,16 +62,11 @@ export const getAdoptionChart =
 /** Per-key or per-model usage breakdown */
 export const getAdoptionBreakdown =
   (db: Database, redis?: Redis) =>
-  async (c: AppContextWithQuery<AdoptionQuery>) => {
-    const orgId = c.get("orgId");
+  async (c: AuthContextWithQuery<AdoptionQuery>) => {
     const { from, to, groupBy } = c.req.valid("query");
 
     const dateConditions = parseDateRange(from, to);
-    const where = and(
-      eq(requestLogs.organizationId, orgId),
-      isNull(requestLogs.deletedAt),
-      ...dateConditions
-    );
+    const where = and(isNull(requestLogs.deletedAt), ...dateConditions);
 
     const mapBreakdownRows = (
       rows: {
@@ -154,7 +144,7 @@ export const getAdoptionBreakdown =
       return mapBreakdownRows(rows);
     };
 
-    const cacheKey = `analytics:adoption-breakdown:${orgId}:${groupBy ?? "key"}:${from ?? ""}:${to ?? ""}`;
+    const cacheKey = `analytics:adoption-breakdown:${groupBy ?? "key"}:${from ?? ""}:${to ?? ""}`;
     const data = redis
       ? await cachedQuery(redis, cacheKey, ADOPTION_BREAKDOWN_TTL, queryFn)
       : await queryFn();

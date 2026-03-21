@@ -33,7 +33,7 @@ const columns: Column<Budget>[] = [
     className: "font-medium",
     header: "Limit",
     key: "limitAmount",
-    render: (budget) => `$${Number(budget.limitAmount).toFixed(2)}`
+    render: (budget) => `$${(Number(budget.limitAmount) || 0).toFixed(2)}`
   },
   {
     className: "capitalize text-muted-foreground",

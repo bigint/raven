@@ -21,9 +21,9 @@ import {
 import { ProviderIcon } from "@/components/model-icon";
 import {
   ACCEPTED_IMAGE_TYPES,
-  MAX_IMAGE_SIZE,
   compressImage,
-  fileToBase64
+  fileToBase64,
+  MAX_IMAGE_SIZE
 } from "../lib/image-utils";
 import type { ImageAttachment, PlaygroundSettings } from "../lib/types";
 
@@ -97,7 +97,9 @@ export const ChatInput = ({
     if ((!value.trim() && images.length === 0) || disabled) return;
     onSend(value, images.length > 0 ? images : undefined);
     setValue("");
-    images.forEach((img) => URL.revokeObjectURL(img.preview));
+    for (const img of images) {
+      URL.revokeObjectURL(img.preview);
+    }
     setImages([]);
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";

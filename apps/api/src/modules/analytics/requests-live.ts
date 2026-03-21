@@ -1,13 +1,11 @@
 import type { Database } from "@raven/db";
 import { providerConfigs, requestLogs } from "@raven/db";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { desc, eq, isNull } from "drizzle-orm";
 import { streamSSE } from "hono/streaming";
 import { getEventRedis } from "@/lib/events";
-import type { AppContext } from "@/lib/types";
+import type { AuthContext } from "@/lib/types";
 
-export const getRequestsLive = (db: Database) => async (c: AppContext) => {
-  const orgId = c.get("orgId");
-
+export const getRequestsLive = (db: Database) => async (c: AuthContext) => {
   return streamSSE(c, async (stream) => {
     let aborted = false;
 
@@ -27,7 +25,6 @@ export const getRequestsLive = (db: Database) => async (c: AppContext) => {
         latencyMs: requestLogs.latencyMs,
         method: requestLogs.method,
         model: requestLogs.model,
-        organizationId: requestLogs.organizationId,
         outputTokens: requestLogs.outputTokens,
         path: requestLogs.path,
         provider: requestLogs.provider,
@@ -40,12 +37,7 @@ export const getRequestsLive = (db: Database) => async (c: AppContext) => {
         providerConfigs,
         eq(requestLogs.providerConfigId, providerConfigs.id)
       )
-      .where(
-        and(
-          eq(requestLogs.organizationId, orgId),
-          isNull(requestLogs.deletedAt)
-        )
-      )
+      .where(isNull(requestLogs.deletedAt))
       .orderBy(desc(requestLogs.createdAt))
       .limit(50);
 
@@ -67,7 +59,7 @@ export const getRequestsLive = (db: Database) => async (c: AppContext) => {
     }
 
     const sub = redis.duplicate();
-    const channel = `org:${orgId}:events`;
+    const channel = "raven:events";
 
     await sub.subscribe(channel);
 

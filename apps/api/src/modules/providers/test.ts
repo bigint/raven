@@ -1,26 +1,20 @@
 import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { decrypt } from "@/lib/crypto";
 import { NotFoundError, UnauthorizedError } from "@/lib/errors";
-import type { AppContext } from "@/lib/types";
+import type { AuthContext } from "@/lib/types";
 import { validateApiKey } from "./helpers";
 
 export const testProvider =
-  (db: Database, env: Env) => async (c: AppContext) => {
-    const orgId = c.get("orgId");
+  (db: Database, env: Env) => async (c: AuthContext) => {
     const id = c.req.param("id") as string;
 
     const [provider] = await db
       .select()
       .from(providerConfigs)
-      .where(
-        and(
-          eq(providerConfigs.id, id),
-          eq(providerConfigs.organizationId, orgId)
-        )
-      )
+      .where(eq(providerConfigs.id, id))
       .limit(1);
 
     if (!provider) {

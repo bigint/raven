@@ -20,7 +20,7 @@ export const SignUpForm = () => {
 
     try {
       await signUp.email({ email, name, password });
-      router.push("/onboarding");
+      router.push("/overview");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create account");
     } finally {
@@ -39,7 +39,7 @@ export const SignUpForm = () => {
           </div>
           <h2 className="text-2xl font-bold text-primary-foreground">Raven</h2>
           <p className="mt-2 text-sm text-primary-foreground/60">
-            Unified AI Gateway for Teams
+            Unified AI Gateway
           </p>
         </div>
       </div>

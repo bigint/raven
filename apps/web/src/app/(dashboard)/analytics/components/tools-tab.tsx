@@ -3,19 +3,18 @@
 import { PillTabs, Spinner } from "@raven/ui";
 import dynamic from "next/dynamic";
 import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
-import { ToolSessionsTable } from "./tool-sessions-table";
 import { useTools } from "../hooks/use-tools";
+import { ToolSessionsTable } from "./tool-sessions-table";
 
 const ToolChart = dynamic(
-  () =>
-    import("./tool-chart").then((m) => ({ default: m.ToolChart })),
+  () => import("./tool-chart").then((m) => ({ default: m.ToolChart })),
   {
-    ssr: false,
     loading: () => (
       <div className="flex h-64 items-center justify-center rounded-xl border border-border">
         <Spinner />
       </div>
-    )
+    ),
+    ssr: false
   }
 );
 

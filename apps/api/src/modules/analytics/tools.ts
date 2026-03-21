@@ -15,7 +15,7 @@ import type { Redis } from "ioredis";
 import type { z } from "zod";
 import { cachedQuery } from "@/lib/cache-utils";
 import { buildPaginationMeta, getOffset } from "@/lib/pagination";
-import type { AppContextWithQuery } from "@/lib/types";
+import type { AuthContextWithQuery } from "@/lib/types";
 
 import { parseDateRange } from "./helpers";
 import type { dateRangeQuerySchema, logsQuerySchema } from "./schema";
@@ -27,13 +27,11 @@ type PagedQuery = z.infer<typeof logsQuerySchema>;
 
 export const getToolStats =
   (db: Database, redis?: Redis) =>
-  async (c: AppContextWithQuery<DateQuery>) => {
-    const orgId = c.get("orgId");
+  async (c: AuthContextWithQuery<DateQuery>) => {
     const { from, to } = c.req.valid("query");
 
     const dateConditions = parseDateRange(from, to);
     const where = and(
-      eq(requestLogs.organizationId, orgId),
       gt(requestLogs.toolCount, 0),
       isNull(requestLogs.deletedAt),
       ...dateConditions
@@ -58,7 +56,7 @@ export const getToolStats =
       }));
     };
 
-    const cacheKey = `analytics:tool-stats:${orgId}:${from ?? ""}:${to ?? ""}`;
+    const cacheKey = `analytics:tool-stats:${from ?? ""}:${to ?? ""}`;
     const data = redis
       ? await cachedQuery(redis, cacheKey, TOOL_STATS_TTL, queryFn)
       : await queryFn();
@@ -67,8 +65,7 @@ export const getToolStats =
   };
 
 export const getToolSessions =
-  (db: Database) => async (c: AppContextWithQuery<PagedQuery>) => {
-    const orgId = c.get("orgId");
+  (db: Database) => async (c: AuthContextWithQuery<PagedQuery>) => {
     const query = c.req.valid("query");
 
     const { limit, page } = query;
@@ -77,7 +74,6 @@ export const getToolSessions =
     const dateConditions = parseDateRange(query.from, query.to);
 
     const where = and(
-      eq(requestLogs.organizationId, orgId),
       isNotNull(requestLogs.sessionId),
       isNull(requestLogs.deletedAt),
       ...dateConditions

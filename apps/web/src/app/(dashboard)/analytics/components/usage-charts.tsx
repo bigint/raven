@@ -38,7 +38,7 @@ const buildStatCards = (stats: Stats | null): StatCard[] => [
     color: "text-green-500",
     icon: DollarSign,
     label: "Total Cost",
-    value: stats ? `$${Number(stats.totalCost).toFixed(4)}` : "\u2014"
+    value: stats ? `$${(Number(stats.totalCost) || 0).toFixed(4)}` : "\u2014"
   },
   {
     bg: "bg-orange-500/10",

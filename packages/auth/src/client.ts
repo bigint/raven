@@ -1,4 +1,4 @@
-import { organizationClient } from "better-auth/client/plugins";
+import { inferAdditionalFields } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
 export const createBetterAuthClient = (baseURL: string) => {
@@ -7,7 +7,14 @@ export const createBetterAuthClient = (baseURL: string) => {
     fetchOptions: {
       credentials: "include"
     },
-    plugins: [organizationClient()]
+    plugins: [
+      inferAdditionalFields({
+        user: {
+          avatarUrl: { required: false, type: "string" },
+          role: { defaultValue: "viewer", type: "string" }
+        }
+      })
+    ]
   });
 };
 

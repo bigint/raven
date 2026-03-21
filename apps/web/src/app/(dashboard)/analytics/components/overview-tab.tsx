@@ -1,10 +1,10 @@
 "use client";
 
+import { useAnalytics } from "../hooks/use-analytics";
 import { CacheStats } from "./cache-stats";
 import { TokenBreakdown } from "./token-breakdown";
 import { TokenStats } from "./token-stats";
 import { UsageCharts } from "./usage-charts";
-import { useAnalytics } from "../hooks/use-analytics";
 
 export const OverviewTab = ({ keyId }: { keyId?: string }) => {
   const {

@@ -1,19 +1,15 @@
 "use client";
 
-import type { Plan } from "@raven/types";
-import { PLAN_FEATURES } from "@raven/types";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { subscriptionQueryOptions } from "@/app/(dashboard)/billing/hooks/use-billing";
 import { api } from "@/lib/api";
 import type { ExtendedDateRange } from "../lib/date-utils";
 import {
   EXTENDED_DATE_RANGE_OPTIONS,
   EXTENDED_VALID_RANGES,
   extendedRangeToFrom,
-  keyFilter,
-  RANGE_DAYS
+  keyFilter
 } from "../lib/date-utils";
 
 interface Stats {
@@ -118,28 +114,18 @@ const POLL_INTERVAL = 30_000;
 export const useAnalytics = (keyId?: string) => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [customFrom, setCustomFrom] = useState<string>(
-    () => new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0, 10)
+  const [customFrom, setCustomFrom] = useState<string>(() =>
+    new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0, 10)
   );
-  const [customTo, setCustomTo] = useState<string>(
-    () => new Date().toISOString().slice(0, 10)
+  const [customTo, setCustomTo] = useState<string>(() =>
+    new Date().toISOString().slice(0, 10)
   );
-
-  const subscriptionQuery = useQuery(subscriptionQueryOptions());
-  const currentPlan = (subscriptionQuery.data?.planId as Plan) ?? "free";
-  const retentionDays = PLAN_FEATURES[currentPlan].analyticsRetentionDays;
 
   const rangeParam = searchParams.get("range") as DateRange | null;
-  const maxAllowedRange =
-    EXTENDED_VALID_RANGES.filter(
-      (r) => r === "custom" || (RANGE_DAYS[r] ?? 0) <= retentionDays
-    ).pop() ?? "7d";
   const dateRange =
-    rangeParam &&
-    EXTENDED_VALID_RANGES.includes(rangeParam) &&
-    (rangeParam === "custom" || (RANGE_DAYS[rangeParam] ?? 0) <= retentionDays)
+    rangeParam && EXTENDED_VALID_RANGES.includes(rangeParam)
       ? rangeParam
-      : maxAllowedRange;
+      : "30d";
 
   const setDateRange = (range: DateRange) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -152,18 +138,7 @@ export const useAnalytics = (keyId?: string) => {
     setCustomTo(to);
   };
 
-  const dateRangeOptions = EXTENDED_DATE_RANGE_OPTIONS.map((opt) => {
-    if (opt.value === "custom") return opt;
-    const days = RANGE_DAYS[opt.value] ?? 0;
-    const allowed = days <= retentionDays;
-    return {
-      ...opt,
-      disabled: !allowed,
-      tooltip: allowed
-        ? undefined
-        : `Upgrade to access ${opt.label.toLowerCase()} analytics`
-    };
-  });
+  const dateRangeOptions = EXTENDED_DATE_RANGE_OPTIONS;
 
   const isCustomReady = dateRange !== "custom" || (!!customFrom && !!customTo);
 

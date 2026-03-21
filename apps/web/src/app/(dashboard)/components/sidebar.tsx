@@ -1,20 +1,15 @@
 "use client";
 
-import type { Plan } from "@raven/types";
-import { PLAN_FEATURES } from "@raven/types";
 import type { LucideIcon } from "lucide-react";
 import {
   Activity,
   BarChart3,
   Cpu,
   CreditCard,
-  FileText,
   Key,
   LayoutDashboard,
   Menu,
   Network,
-  Plug,
-  Receipt,
   Route,
   ScrollText,
   Settings,
@@ -27,9 +22,8 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import type { Org } from "@/stores/org";
-import { OrgSwitcher } from "./org-switcher";
+import { useCallback, useEffect, useState } from "react";
+import { useSession } from "@/lib/auth-client";
 import { UserMenu } from "./user-menu";
 
 const useLockBodyScroll = (isLocked: boolean) => {
@@ -46,7 +40,6 @@ interface NavItem {
   readonly href: string;
   readonly label: string;
   readonly icon: LucideIcon;
-  readonly gate?: (plan: Plan) => boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -55,61 +48,27 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/analytics", icon: BarChart3, label: "Analytics" },
   { href: "/providers", icon: Network, label: "Providers" },
   { href: "/keys", icon: Key, label: "Keys" },
-  { href: "/prompts", icon: FileText, label: "Prompts" },
   { href: "/models", icon: Cpu, label: "Models" },
   { href: "/routing", icon: Route, label: "Routing" },
   { href: "/requests", icon: Activity, label: "Requests" },
   { href: "/budgets", icon: CreditCard, label: "Budgets" },
-  {
-    gate: (plan) => PLAN_FEATURES[plan].hasGuardrails,
-    href: "/guardrails",
-    icon: Shield,
-    label: "Guardrails"
-  },
-  { href: "/team", icon: Users, label: "Team" },
-  {
-    gate: (plan) => PLAN_FEATURES[plan].hasAuditLogs,
-    href: "/audit-logs",
-    icon: ScrollText,
-    label: "Audit Logs"
-  },
-  { href: "/billing", icon: Receipt, label: "Billing" },
-  {
-    gate: (plan) => PLAN_FEATURES[plan].hasWebhooks,
-    href: "/webhooks",
-    icon: Webhook,
-    label: "Webhooks"
-  },
-  { href: "/integrations", icon: Plug, label: "Integrations" }
+  { href: "/guardrails", icon: Shield, label: "Guardrails" },
+  { href: "/audit-logs", icon: ScrollText, label: "Audit Logs" },
+  { href: "/webhooks", icon: Webhook, label: "Webhooks" }
 ];
 
 interface SidebarProps {
-  readonly activeOrg: Org | null;
-  readonly orgs: Org[];
   readonly user: {
     readonly name?: string | null;
     readonly email?: string | null;
   };
-  readonly onSwitchOrg: (org: Org) => void;
 }
 
-export const Sidebar = ({
-  activeOrg,
-  orgs,
-  user,
-  onSwitchOrg
-}: SidebarProps) => {
+export const Sidebar = ({ user }: SidebarProps) => {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const orgSettingsHref = activeOrg
-    ? `/${activeOrg.slug}/settings`
-    : "/settings";
-  const plan = (activeOrg?.plan ?? "free") as Plan;
-
-  const visibleItems = useMemo(
-    () => NAV_ITEMS.filter((item) => !item.gate || item.gate(plan)),
-    [plan]
-  );
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "admin";
 
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
@@ -121,7 +80,7 @@ export const Sidebar = ({
 
   const navLinks = (
     <>
-      {visibleItems.map((item) => {
+      {NAV_ITEMS.map((item) => {
         const isActive = pathname === item.href;
         const Icon = item.icon;
         return (
@@ -141,15 +100,42 @@ export const Sidebar = ({
       })}
       <Link
         className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
-          pathname === orgSettingsHref
+          pathname === "/profile"
             ? "bg-primary text-primary-foreground font-medium"
             : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
         }`}
-        href={orgSettingsHref}
+        href="/profile"
       >
         <Settings className="size-4" />
-        Settings
+        Profile
       </Link>
+      {isAdmin && (
+        <>
+          <div className="my-2 border-t border-border" />
+          <Link
+            className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
+              pathname === "/users"
+                ? "bg-primary text-primary-foreground font-medium"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            }`}
+            href="/users"
+          >
+            <Users className="size-4" />
+            Users
+          </Link>
+          <Link
+            className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
+              pathname === "/settings"
+                ? "bg-primary text-primary-foreground font-medium"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            }`}
+            href="/settings"
+          >
+            <Settings className="size-4" />
+            Instance Settings
+          </Link>
+        </>
+      )}
     </>
   );
 
@@ -160,12 +146,10 @@ export const Sidebar = ({
         <div className="flex items-center gap-2">
           <div className="size-6 rounded-md bg-primary flex items-center justify-center">
             <span className="text-[10px] font-bold text-primary-foreground">
-              {activeOrg?.name?.charAt(0)?.toUpperCase() ?? "R"}
+              R
             </span>
           </div>
-          <span className="text-sm font-semibold truncate">
-            {activeOrg?.name ?? "Raven"}
-          </span>
+          <span className="text-sm font-semibold truncate">Raven</span>
         </div>
         <button
           aria-label="Open menu"
@@ -209,12 +193,10 @@ export const Sidebar = ({
                 <div className="flex items-center gap-2">
                   <div className="size-7 rounded-lg bg-primary flex items-center justify-center">
                     <span className="text-xs font-bold text-primary-foreground">
-                      {activeOrg?.name?.charAt(0)?.toUpperCase() ?? "R"}
+                      R
                     </span>
                   </div>
-                  <span className="font-semibold truncate">
-                    {activeOrg?.name ?? "Raven"}
-                  </span>
+                  <span className="font-semibold truncate">Raven</span>
                 </div>
                 <button
                   aria-label="Close menu"
@@ -240,12 +222,11 @@ export const Sidebar = ({
 
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-60 border-r border-border bg-muted/50 flex-col shrink-0 h-screen sticky top-0">
-        <div className="shrink-0">
-          <OrgSwitcher
-            activeOrg={activeOrg}
-            onSwitch={onSwitchOrg}
-            orgs={orgs}
-          />
+        <div className="shrink-0 flex items-center gap-2 px-4 py-4 border-b border-border">
+          <div className="size-7 rounded-lg bg-primary flex items-center justify-center">
+            <span className="text-xs font-bold text-primary-foreground">R</span>
+          </div>
+          <span className="font-semibold">Raven</span>
         </div>
         <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
           {navLinks}

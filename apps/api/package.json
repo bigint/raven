@@ -7,9 +7,7 @@
     "dev": "tsx watch --env-file=../../.env src/index.ts",
     "build": "tsup",
     "start": "node dist/index.js",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.63",
@@ -20,6 +18,7 @@
     "@hono/zod-validator": "^0.7.6",
     "@raven/auth": "workspace:*",
     "@raven/config": "workspace:*",
+    "@raven/data": "workspace:*",
     "@raven/db": "workspace:*",
     "@raven/email": "workspace:*",
     "@raven/types": "workspace:*",
@@ -38,7 +37,6 @@
     "@types/node": "^25.5.0",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3",
-    "vitest": "^4.1.0"
+    "typescript": "^5.9.3"
   }
 }

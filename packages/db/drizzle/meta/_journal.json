@@ -134,6 +134,20 @@
       "when": 1773930737517,
       "tag": "0018_jittery_warpath",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1774300000000,
+      "tag": "0019_open_source_transformation",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1774400000000,
+      "tag": "0020_provider_models",
+      "breakpoints": true
     }
   ]
 }

@@ -4,13 +4,11 @@ import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { useSession } from "@/lib/auth-client";
 import { Sidebar } from "./components/sidebar";
-import { useOrgs } from "./hooks/use-orgs";
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const { data: session, error, isPending: isSessionPending } = useSession();
-  const { orgs, activeOrg, isPending: isOrgsPending, switchOrg } = useOrgs();
 
-  if (isSessionPending || (session && isOrgsPending)) {
+  if (isSessionPending) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="size-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
@@ -41,18 +39,9 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
     redirect("/sign-in");
   }
 
-  if (!isOrgsPending && orgs.length === 0) {
-    redirect("/onboarding");
-  }
-
   return (
     <div className="flex h-screen flex-col overflow-hidden md:flex-row">
-      <Sidebar
-        activeOrg={activeOrg}
-        onSwitchOrg={switchOrg}
-        orgs={orgs}
-        user={session.user}
-      />
+      <Sidebar user={session.user} />
       <main className="flex-1 overflow-auto overscroll-contain">
         <div className="px-4 py-4 md:px-8 md:py-6">{children}</div>
       </main>

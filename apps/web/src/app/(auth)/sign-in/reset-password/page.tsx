@@ -140,7 +140,7 @@ const ResetPasswordPage = () => {
           </div>
           <h2 className="text-2xl font-bold text-primary-foreground">Raven</h2>
           <p className="mt-2 text-sm text-primary-foreground/60">
-            Unified AI Gateway for Teams
+            Unified AI Gateway
           </p>
         </div>
       </div>

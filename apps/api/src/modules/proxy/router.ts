@@ -18,13 +18,12 @@ export type RoutingStrategy =
 export const resolveWithStrategy = async (
   db: Database,
   redis: Redis,
-  orgId: string,
   providerName: string,
   strategy: RoutingStrategy = "random"
 ): Promise<string> => {
   const configs = await cachedQuery(
     redis,
-    cacheKeys.providerConfigs(orgId, providerName),
+    cacheKeys.providerConfigs(providerName),
     60,
     () =>
       db
@@ -32,7 +31,6 @@ export const resolveWithStrategy = async (
         .from(providerConfigs)
         .where(
           and(
-            eq(providerConfigs.organizationId, orgId),
             eq(providerConfigs.provider, providerName),
             eq(providerConfigs.isEnabled, true)
           )
@@ -53,7 +51,7 @@ export const resolveWithStrategy = async (
 
   switch (strategy) {
     case "round-robin":
-      return roundRobin(redis, orgId, providerName, configs);
+      return roundRobin(redis, providerName, configs);
     case "least-latency":
       return leastLatency(redis, configs);
     case "least-cost":
@@ -71,11 +69,10 @@ const pickRandom = (configs: { id: string }[]): string => {
 
 const roundRobin = async (
   redis: Redis,
-  orgId: string,
   provider: string,
   configs: { id: string }[]
 ): Promise<string> => {
-  const key = `rr:${orgId}:${provider}`;
+  const key = `rr:${provider}`;
   const counter = await redis.incr(key);
   await redis.expire(key, 86400);
   const idx = (counter - 1) % configs.length;

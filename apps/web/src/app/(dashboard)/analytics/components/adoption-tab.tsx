@@ -3,20 +3,19 @@
 import { PillTabs, Select, Spinner, Tabs } from "@raven/ui";
 import dynamic from "next/dynamic";
 import { useState } from "react";
+import { type GroupBy, useAdoption } from "../hooks/use-adoption";
 import { UsageBars } from "./usage-bars";
 import { UsageTable } from "./usage-table";
-import { type GroupBy, useAdoption } from "../hooks/use-adoption";
 
 const TokenChart = dynamic(
-  () =>
-    import("./token-chart").then((m) => ({ default: m.TokenChart })),
+  () => import("./token-chart").then((m) => ({ default: m.TokenChart })),
   {
-    ssr: false,
     loading: () => (
       <div className="flex h-64 items-center justify-center rounded-xl border border-border">
         <Spinner />
       </div>
-    )
+    ),
+    ssr: false
   }
 );
 

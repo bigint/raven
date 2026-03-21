@@ -3,8 +3,13 @@ import { ForbiddenError } from "@/lib/errors";
 
 type AuthEnv = {
   Variables: {
-    user: { id: string; email: string; name: string; role: string };
-    session: { id: string; userId: string };
+    user: {
+      id: string;
+      email: string;
+      name: string;
+      role: "admin" | "member" | "viewer";
+    };
+    session: { id: string };
   };
 };
 

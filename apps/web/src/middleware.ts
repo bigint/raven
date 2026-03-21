@@ -7,29 +7,30 @@ const AUTH_ROUTES = ["/sign-in", "/sign-up"];
 const PROTECTED_PREFIXES = [
   "/analytics",
   "/audit-logs",
-  "/billing",
   "/budgets",
   "/chat",
   "/guardrails",
   "/integrations",
   "/keys",
   "/models",
-  "/onboarding",
   "/overview",
   "/profile",
-  "/prompts",
   "/providers",
   "/requests",
   "/routing",
   "/settings",
-  "/team",
-  "/webhooks",
-  "/admin"
+  "/webhooks"
 ];
 
 export const middleware = (request: NextRequest): NextResponse => {
   const { pathname } = request.nextUrl;
   const hasSession = request.cookies.has(SESSION_COOKIE);
+
+  // Root: redirect to dashboard or sign-in
+  if (pathname === "/") {
+    const target = hasSession ? "/overview" : "/sign-in";
+    return NextResponse.redirect(new URL(target, request.url));
+  }
 
   const isAuthRoute = AUTH_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)

@@ -159,7 +159,10 @@ const DataTable = <T,>({
                     )}
                     {...(isLargeDataset
                       ? {}
-                      : { exit: { opacity: 0 }, initial: { opacity: 0, y: -8 } })}
+                      : {
+                          exit: { opacity: 0 },
+                          initial: { opacity: 0, y: -8 }
+                        })}
                     key={keyExtractor(item)}
                     transition={{ duration: 0.2, ease: "easeOut" }}
                   >

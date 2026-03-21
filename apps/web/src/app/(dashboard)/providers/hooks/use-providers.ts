@@ -31,23 +31,10 @@ export interface Provider {
   readonly updatedAt: string;
 }
 
-interface ProviderModel {
-  readonly id: string;
-  readonly name: string;
-  readonly provider: string;
-}
-
 export const providersQueryOptions = () =>
   queryOptions({
     queryFn: () => api.get<Provider[]>("/v1/providers"),
     queryKey: ["providers"]
-  });
-
-export const providerModelsQueryOptions = (providerId: string) =>
-  queryOptions({
-    queryFn: () =>
-      api.get<ProviderModel[]>(`/v1/providers/${providerId}/models`),
-    queryKey: ["providers", providerId, "models"]
   });
 
 interface CreateProviderInput {

@@ -5,14 +5,14 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
-import { RequestFilters } from "./request-filters";
-import { RequestTable } from "./request-table";
 import {
   buildRequestsUrl,
   type DateRange,
   type RequestsResponse,
   useLiveRequests
 } from "../hooks/use-requests";
+import { RequestFilters } from "./request-filters";
+import { RequestTable } from "./request-table";
 
 export const RequestsView = () => {
   const [provider, setProvider] = useState("");

@@ -3,8 +3,8 @@
 import { PillTabs } from "@raven/ui";
 import { Download } from "lucide-react";
 import { exportToCsv } from "@/lib/csv-export";
-import { ModelsTable } from "./models-table";
 import { useModels } from "../hooks/use-models";
+import { ModelsTable } from "./models-table";
 
 export const ModelsTab = ({ keyId }: { keyId?: string }) => {
   const { data, dateRange, dateRangeOptions, error, isLoading, setDateRange } =
@@ -33,7 +33,7 @@ export const ModelsTab = ({ keyId }: { keyId?: string }) => {
         row.outputTokens,
         row.cachedTokens,
         row.reasoningTokens,
-        Number(row.totalCost).toFixed(4),
+        (Number(row.totalCost) || 0).toFixed(4),
         Math.round(row.avgLatencyMs),
         row.lastUsed ?? ""
       ])

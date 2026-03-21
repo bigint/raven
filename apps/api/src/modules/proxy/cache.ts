@@ -22,7 +22,6 @@ export interface CacheMissResult {
 export type CacheResult = CacheCheckResult | CacheMissResult;
 
 const buildCacheKey = (
-  orgId: string,
   provider: string,
   model: string,
   body: Record<string, unknown>
@@ -31,14 +30,13 @@ const buildCacheKey = (
   const temperature = body.temperature ?? null;
   const system = body.system ?? null;
   const tools = body.tools ?? null;
-  const payload = `${orgId}:${provider}:${model}:${JSON.stringify(content)}:${temperature}:${JSON.stringify(system)}:${JSON.stringify(tools)}`;
+  const payload = `${provider}:${model}:${JSON.stringify(content)}:${temperature}:${JSON.stringify(system)}:${JSON.stringify(tools)}`;
   const hash = createHash("sha256").update(payload).digest("hex");
   return `cache:resp:${hash}`;
 };
 
 export const checkCache = async (
   redis: Redis,
-  orgId: string,
   provider: string,
   requestBody: Record<string, unknown>
 ): Promise<CacheResult> => {
@@ -47,7 +45,7 @@ export const checkCache = async (
   }
 
   const model = (requestBody.model as string) ?? "unknown";
-  const key = buildCacheKey(orgId, provider, model, requestBody);
+  const key = buildCacheKey(provider, model, requestBody);
   const cached = await redis.get(key);
 
   if (!cached) {
@@ -66,7 +64,6 @@ export const checkCache = async (
 
 export const storeCache = async (
   redis: Redis,
-  orgId: string,
   provider: string,
   requestBody: Record<string, unknown>,
   responseBody: string,
@@ -77,7 +74,7 @@ export const storeCache = async (
   }
 
   const model = (requestBody.model as string) ?? "unknown";
-  const key = buildCacheKey(orgId, provider, model, requestBody);
+  const key = buildCacheKey(provider, model, requestBody);
   await redis.set(key, responseBody, "EX", ttlSeconds);
 };
 
@@ -94,7 +91,6 @@ export const serveCacheHit = (
     guardrailWarnings: string[];
     method: string;
     model: string;
-    organizationId: string;
     parsedBody: Record<string, unknown>;
     path: string;
     providerConfigId: string;
@@ -127,7 +123,6 @@ export const serveCacheHit = (
       latencyMs,
       method: opts.method,
       model: extractModel(cacheResult.parsed, opts.model),
-      organizationId: opts.organizationId,
       outputTokens: usage.outputTokens,
       path: opts.path,
       provider: opts.providerName,

@@ -1,15 +1,13 @@
 import type { Database } from "@raven/db";
 import { auditLogs, users } from "@raven/db";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { desc, eq, isNull } from "drizzle-orm";
 import { Hono } from "hono";
-import type { AppContext } from "@/lib/types";
+import type { AuthEnv } from "@/lib/types";
 
 export const createAuditLogsModule = (db: Database, _redis?: unknown) => {
-  const app = new Hono();
+  const app = new Hono<AuthEnv>();
 
-  app.get("/", async (c: AppContext) => {
-    const orgId = c.get("orgId");
-
+  app.get("/", async (c) => {
     const rows = await db
       .select({
         action: auditLogs.action,
@@ -23,9 +21,7 @@ export const createAuditLogsModule = (db: Database, _redis?: unknown) => {
       })
       .from(auditLogs)
       .leftJoin(users, eq(users.id, auditLogs.actorId))
-      .where(
-        and(eq(auditLogs.organizationId, orgId), isNull(auditLogs.deletedAt))
-      )
+      .where(isNull(auditLogs.deletedAt))
       .orderBy(desc(auditLogs.createdAt))
       .limit(200);
 

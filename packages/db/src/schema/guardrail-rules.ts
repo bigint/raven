@@ -9,7 +9,6 @@ import {
   text,
   timestamp
 } from "drizzle-orm/pg-core";
-import { organizations } from "./organizations";
 
 export const guardrailTypeEnum = pgEnum("guardrail_type", [
   "block_topics",
@@ -34,16 +33,11 @@ export const guardrailRules = pgTable(
     id: text("id").primaryKey().$defaultFn(createId),
     isEnabled: boolean("is_enabled").notNull().default(true),
     name: text("name").notNull(),
-    organizationId: text("organization_id")
-      .notNull()
-      .references(() => organizations.id, { onDelete: "cascade" }),
     priority: integer("priority").notNull().default(0),
     type: guardrailTypeEnum("type").notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .defaultNow()
   },
-  (t) => [
-    index("guardrail_rules_org_enabled_idx").on(t.organizationId, t.isEnabled)
-  ]
+  (t) => [index("guardrail_rules_enabled_idx").on(t.isEnabled)]
 );

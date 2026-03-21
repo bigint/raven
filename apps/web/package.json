@@ -13,6 +13,7 @@
   "dependencies": {
     "@base-ui/react": "^1.3.0",
     "@raven/auth": "workspace:*",
+    "@raven/data": "workspace:*",
     "@raven/types": "workspace:*",
     "@raven/ui": "workspace:*",
     "@tanstack/react-query": "^5.91.3",

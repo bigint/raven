@@ -124,7 +124,7 @@ export const ModelsTable = ({ data, loading }: ModelsTableProps) => {
                 {row.reasoningTokens.toLocaleString()}
               </td>
               <td className="px-5 py-4 text-right tabular-nums">
-                ${Number(row.totalCost).toFixed(4)}
+                ${(Number(row.totalCost) || 0).toFixed(4)}
               </td>
               <td className="px-5 py-4 text-right tabular-nums">
                 {Math.round(row.avgLatencyMs)}ms

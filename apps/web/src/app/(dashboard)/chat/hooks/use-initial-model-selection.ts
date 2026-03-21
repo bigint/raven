@@ -2,10 +2,10 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import type { CatalogModel } from "@/lib/use-models";
+import type { ModelDefinition } from "@raven/types";
 
 interface UseInitialModelSelectionParams {
-  readonly models: readonly CatalogModel[];
+  readonly models: readonly ModelDefinition[];
   readonly selectedModel: {
     readonly model: string;
     readonly provider: string;

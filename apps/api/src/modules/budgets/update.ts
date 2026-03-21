@@ -1,19 +1,18 @@
 import type { Database } from "@raven/db";
 import { budgets } from "@raven/db";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { z } from "zod";
 import { NotFoundError } from "@/lib/errors";
 import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
-import type { AppContextWithJson } from "@/lib/types";
+import type { AuthContextWithJson } from "@/lib/types";
 import { logAudit } from "@/modules/audit-logs/index";
 import type { updateBudgetSchema } from "./schema";
 
 type Body = z.infer<typeof updateBudgetSchema>;
 
 export const updateBudget =
-  (db: Database) => async (c: AppContextWithJson<Body>) => {
-    const orgId = c.get("orgId");
+  (db: Database) => async (c: AuthContextWithJson<Body>) => {
     const user = c.get("user");
     const id = c.req.param("id") as string;
     const { limitAmount, alertThreshold, period } = c.req.valid("json");
@@ -35,19 +34,18 @@ export const updateBudget =
     const [updated] = await db
       .update(budgets)
       .set(updates)
-      .where(and(eq(budgets.id, id), eq(budgets.organizationId, orgId)))
+      .where(eq(budgets.id, id))
       .returning();
 
     if (!updated) {
       throw new NotFoundError("Budget not found");
     }
 
-    void publishEvent(orgId, "budget.updated", updated);
+    void publishEvent("budget.updated", updated);
     void logAudit(db, {
       action: "budget.updated",
       actorId: user.id,
       metadata: { alertThreshold, limitAmount, period },
-      orgId,
       resourceId: id,
       resourceType: "budget"
     });

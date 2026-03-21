@@ -9,7 +9,6 @@ import { logger } from "hono/logger";
 import { initEmailDispatcher } from "./lib/email-dispatcher";
 import { AppError } from "./lib/errors";
 import { initEventBus } from "./lib/events";
-import { refreshPricingCache } from "./lib/pricing-cache";
 import { getRedis } from "./lib/redis";
 import { sendPasswordResetEmail } from "./lib/send-password-reset-email";
 import { sendWelcomeEmail } from "./lib/send-welcome-email";
@@ -18,30 +17,23 @@ import { createAuthMiddleware } from "./middleware/auth";
 import { platformAdminMiddleware } from "./middleware/platform-admin";
 import { requestId } from "./middleware/request-id";
 import { requestTiming } from "./middleware/request-timing";
-import { createTenantMiddleware } from "./middleware/tenant";
+import { createWriterMiddleware } from "./middleware/writer";
 import { createAdminModule } from "./modules/admin/index";
+import { getPublicSettings } from "./modules/admin/settings";
 import { createAnalyticsModule } from "./modules/analytics/index";
 import { createAuditLogsModule } from "./modules/audit-logs/index";
 import { createAuthModule } from "./modules/auth/index";
-import {
-  createBillingModule,
-  createBillingWebhookModule
-} from "./modules/billing/index";
 import { createBudgetsModule } from "./modules/budgets/index";
-import { createCronModule } from "./modules/cron/index";
 import { createGuardrailsModule } from "./modules/guardrails/index";
 import { createKeysModule } from "./modules/keys/index";
 import { listAvailableModels } from "./modules/models/available";
 import { createModelsModule } from "./modules/models/index";
 import { createOpenAICompatModule } from "./modules/openai-compat/index";
-import { createPromptsModule } from "./modules/prompts/index";
 import { createProvidersModule } from "./modules/providers/index";
 import { proxyHandler } from "./modules/proxy/handler";
 import { flushLastUsed } from "./modules/proxy/last-used";
 import { flushLogBuffer } from "./modules/proxy/logger";
 import { createRoutingRulesModule } from "./modules/routing-rules/index";
-import { createSettingsModule } from "./modules/settings/index";
-import { createTeamsModule } from "./modules/teams/index";
 import { createUserModule } from "./modules/user/index";
 import { createWebhooksModule } from "./modules/webhooks/index";
 
@@ -56,11 +48,6 @@ initEmailDispatcher(db, redis, env.APP_URL);
 const flushInterval = setInterval(() => {
   void flushLastUsed(db, redis);
 }, 60_000);
-
-// Load pricing cache from DB
-void refreshPricingCache(db).catch((err) =>
-  console.error("Failed to load pricing cache:", err)
-);
 
 const auth = createAuth(db, env, {
   onResetPassword: (user, url) => void sendPasswordResetEmail(user, url),
@@ -149,16 +136,13 @@ app.route("/v1", createOpenAICompatModule(db, redis, env));
 
 app.all("/v1/proxy/*", proxyHandler(db, redis, env));
 
-// Billing webhooks (no auth)
-app.route("/webhooks/billing", createBillingWebhookModule(db, env, redis));
-
-// Cron endpoints (secret header auth)
-app.route("/v1/cron", createCronModule(db, env, redis));
-
 // Public models catalog (no auth required)
 app.route("/v1/models", createModelsModule(db));
 
-// User-level routes (session auth, no tenant)
+// Public settings (no auth required)
+app.get("/v1/settings/public", getPublicSettings(db));
+
+// User-level routes (session auth)
 const userRoutes = new Hono();
 userRoutes.use("*", createAuthMiddleware(auth));
 userRoutes.route("/", createUserModule(db));
@@ -168,23 +152,19 @@ app.route("/v1/user", userRoutes);
 const adminRoutes = new Hono();
 adminRoutes.use("*", createAuthMiddleware(auth));
 adminRoutes.use("*", platformAdminMiddleware);
-adminRoutes.route("/", createAdminModule(db, redis));
+adminRoutes.route("/", createAdminModule(db));
 app.route("/v1/admin", adminRoutes);
 
-// Protected API routes (session auth + tenant)
+// Protected API routes (session auth + writer middleware for mutations)
 const v1 = new Hono();
 v1.use("*", createAuthMiddleware(auth));
-v1.use("*", createTenantMiddleware(db, redis));
+v1.use("*", createWriterMiddleware());
 v1.get("/available-models", listAvailableModels(db));
 v1.route("/providers", createProvidersModule(db, env, redis));
 v1.route("/keys", createKeysModule(db, redis));
-v1.route("/prompts", createPromptsModule(db));
 v1.route("/budgets", createBudgetsModule(db, redis));
 v1.route("/guardrails", createGuardrailsModule(db, redis));
 v1.route("/analytics", createAnalyticsModule(db, redis));
-v1.route("/teams", createTeamsModule(db, redis));
-v1.route("/settings", createSettingsModule(db, redis));
-v1.route("/billing", createBillingModule(db, redis));
 v1.route("/webhooks", createWebhooksModule(db, redis));
 v1.route("/routing-rules", createRoutingRulesModule(db));
 v1.route("/audit-logs", createAuditLogsModule(db, redis));

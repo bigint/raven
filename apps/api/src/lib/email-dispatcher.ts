@@ -1,7 +1,7 @@
 import type { Database } from "@raven/db";
-import { budgets, members, organizations, users } from "@raven/db";
-import { sendBudgetAlertEmail, sendInvitationEmail } from "@raven/email";
-import { and, eq } from "drizzle-orm";
+import { budgets, users } from "@raven/db";
+import { sendBudgetAlertEmail } from "@raven/email";
+import { eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
 
 interface EventPayload {
@@ -12,40 +12,8 @@ interface EventPayload {
 
 const isEmailConfigured = (): boolean => !!process.env.RESEND_API_KEY;
 
-const handleInvitationCreated = async (
-  db: Database,
-  appUrl: string,
-  data: Record<string, unknown>
-): Promise<void> => {
-  const email = data.email as string;
-  const orgId = data.organizationId as string;
-  const inviterId = data.inviterId as string;
-  if (!email || !orgId || !inviterId) return;
-
-  const [[org], [inviter]] = await Promise.all([
-    db
-      .select({ name: organizations.name })
-      .from(organizations)
-      .where(eq(organizations.id, orgId))
-      .limit(1),
-    db
-      .select({ name: users.name })
-      .from(users)
-      .where(eq(users.id, inviterId))
-      .limit(1)
-  ]);
-
-  await sendInvitationEmail(
-    email,
-    inviter?.name ?? "A teammate",
-    org?.name ?? "an organization",
-    `${appUrl}/sign-in`
-  );
-};
-
 const handleBudgetAlert = async (
   db: Database,
-  orgId: string,
   data: Record<string, unknown>
 ): Promise<void> => {
   const budgetId = data.budgetId as string;
@@ -63,14 +31,13 @@ const handleBudgetAlert = async (
     ? `${budget.entityType}:${budget.entityId}`
     : budgetId;
 
-  const orgAdmins = await db
+  const adminUsers = await db
     .select({ email: users.email })
-    .from(members)
-    .innerJoin(users, eq(users.id, members.userId))
-    .where(and(eq(members.organizationId, orgId), eq(members.role, "owner")));
+    .from(users)
+    .where(eq(users.role, "admin"));
 
   await Promise.all(
-    orgAdmins.map((admin) =>
+    adminUsers.map((admin) =>
       sendBudgetAlertEmail(
         admin.email,
         budgetName,
@@ -85,7 +52,7 @@ const handleBudgetAlert = async (
 export const initEmailDispatcher = (
   db: Database,
   redis: Redis,
-  appUrl: string
+  _appUrl: string
 ): void => {
   if (!isEmailConfigured()) {
     console.log("Email dispatcher: RESEND_API_KEY not set, skipping");
@@ -98,14 +65,11 @@ export const initEmailDispatcher = (
     console.error("Email dispatcher Redis error:", err);
   });
 
-  subscriber.psubscribe("org:*:events").catch((err) => {
+  subscriber.subscribe("raven:events").catch((err) => {
     console.error("Failed to subscribe to events for email:", err);
   });
 
-  subscriber.on("pmessage", (_pattern, channel, message) => {
-    const orgId = channel.split(":")[1];
-    if (!orgId) return;
-
+  subscriber.on("message", (_channel, message) => {
     let event: EventPayload;
     try {
       event = JSON.parse(message) as EventPayload;
@@ -116,11 +80,8 @@ export const initEmailDispatcher = (
     void (async () => {
       try {
         switch (event.type) {
-          case "invitation.created":
-            await handleInvitationCreated(db, appUrl, event.data);
-            break;
           case "budget.alert":
-            await handleBudgetAlert(db, orgId, event.data);
+            await handleBudgetAlert(db, event.data);
             break;
         }
       } catch (err) {

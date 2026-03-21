@@ -1,10 +1,10 @@
 import type { Database } from "@raven/db";
 import { requestLogs } from "@raven/db";
-import { and, count, eq, isNull, sql } from "drizzle-orm";
+import { and, count, isNull, sql } from "drizzle-orm";
 import type { Redis } from "ioredis";
 import type { z } from "zod";
 import { cachedQuery } from "@/lib/cache-utils";
-import type { AppContextWithQuery } from "@/lib/types";
+import type { AuthContextWithQuery } from "@/lib/types";
 
 import { parseDateRange } from "./helpers";
 import type { dateRangeQuerySchema } from "./schema";
@@ -14,16 +14,11 @@ const CACHE_TTL = 30;
 type Query = z.infer<typeof dateRangeQuerySchema>;
 
 export const getCache =
-  (db: Database, redis?: Redis) => async (c: AppContextWithQuery<Query>) => {
-    const orgId = c.get("orgId");
+  (db: Database, redis?: Redis) => async (c: AuthContextWithQuery<Query>) => {
     const { from, to } = c.req.valid("query");
 
     const dateConditions = parseDateRange(from, to);
-    const where = and(
-      eq(requestLogs.organizationId, orgId),
-      isNull(requestLogs.deletedAt),
-      ...dateConditions
-    );
+    const where = and(isNull(requestLogs.deletedAt), ...dateConditions);
 
     const queryFn = async () => {
       const [summary] = await db
@@ -58,7 +53,7 @@ export const getCache =
       return { cacheHits, cacheMisses, daily, hitRate, totalRequests };
     };
 
-    const cacheKey = `analytics:cache:${orgId}:${from ?? ""}:${to ?? ""}`;
+    const cacheKey = `analytics:cache:${from ?? ""}:${to ?? ""}`;
     const data = redis
       ? await cachedQuery(redis, cacheKey, CACHE_TTL, queryFn)
       : await queryFn();
