@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
-import { models } from "@raven/db";
-import { and, eq, type SQL } from "drizzle-orm";
+import { providerConfigs } from "@raven/db";
+import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 
 export const createModelsModule = (db: Database) => {
@@ -8,31 +8,30 @@ export const createModelsModule = (db: Database) => {
 
   app.get("/", async (c) => {
     const provider = c.req.query("provider");
-    const category = c.req.query("category");
 
-    const conditions: SQL[] = [];
-    if (provider) conditions.push(eq(models.provider, provider));
-    if (category) conditions.push(eq(models.category, category));
+    const configs = await db
+      .select({
+        models: providerConfigs.models,
+        provider: providerConfigs.provider
+      })
+      .from(providerConfigs)
+      .where(eq(providerConfigs.isEnabled, true));
 
-    const result = await db
-      .select()
-      .from(models)
-      .where(conditions.length > 0 ? and(...conditions) : undefined);
+    const result: { id: string; object: string; owned_by: string }[] = [];
 
-    return c.json({
-      data: result.map((m) => ({
-        capabilities: m.capabilities,
-        category: m.category,
-        contextWindow: m.contextWindow,
-        id: m.id,
-        inputPrice: parseFloat(m.inputPrice ?? "0"),
-        maxOutput: m.maxOutput,
-        name: m.name,
-        outputPrice: parseFloat(m.outputPrice ?? "0"),
-        provider: m.provider,
-        slug: m.slug
-      }))
-    });
+    for (const config of configs) {
+      if (provider && config.provider !== provider) continue;
+      const models = config.models as string[];
+      for (const model of models) {
+        result.push({
+          id: model,
+          object: "model",
+          owned_by: config.provider
+        });
+      }
+    }
+
+    return c.json({ data: result, object: "list" });
   });
 
   return app;

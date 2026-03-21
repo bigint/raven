@@ -36,12 +36,6 @@ interface AuditLog {
   readonly createdAt: string;
 }
 
-interface AdminProvider {
-  readonly slug: string;
-  readonly name: string;
-  readonly modelCount: number;
-}
-
 interface AdminSettings {
   readonly instance_name: string;
   readonly analytics_retention_days: string;
@@ -67,12 +61,6 @@ export const adminAuditLogsQueryOptions = () =>
     queryKey: ["admin", "audit-logs"]
   });
 
-export const adminProvidersQueryOptions = () =>
-  queryOptions({
-    queryFn: () => api.get<AdminProvider[]>("/v1/admin/providers"),
-    queryKey: ["admin", "providers"]
-  });
-
 export const adminSettingsQueryOptions = () =>
   queryOptions({
     queryFn: () => api.get<AdminSettings>("/v1/admin/settings"),
@@ -86,8 +74,6 @@ export const useAdminStats = () => useQuery(adminStatsQueryOptions());
 export const useAdminUsers = () => useQuery(adminUsersQueryOptions());
 
 export const useAdminAuditLogs = () => useQuery(adminAuditLogsQueryOptions());
-
-export const useAdminProviders = () => useQuery(adminProvidersQueryOptions());
 
 export const useAdminSettings = () => useQuery(adminSettingsQueryOptions());
 
@@ -140,23 +126,7 @@ export const useDeleteUser = () => {
   });
 };
 
-export const useSyncModels = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: () => api.post("/v1/admin/models/sync"),
-    onError: (err) => {
-      toast.error(err.message);
-    },
-    onSuccess: () => {
-      toast.success("Models synced successfully");
-      queryClient.invalidateQueries({ queryKey: ["admin", "providers"] });
-    }
-  });
-};
-
 export type {
-  AdminProvider,
   AdminSettings,
   AdminStats,
   AdminUser,

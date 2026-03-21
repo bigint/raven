@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSession } from "@/lib/auth-client";
 import { AuditLogsTab } from "./components/audit-logs-tab";
-import { ModelsTab } from "./components/models-tab";
 import { OverviewTab } from "./components/overview-tab";
 import { SettingsTab } from "./components/settings-tab";
 import { UsersTab } from "./components/users-tab";
@@ -13,14 +12,12 @@ import { UsersTab } from "./components/users-tab";
 const TABS = [
   { label: "Overview", value: "overview" },
   { label: "Users", value: "users" },
-  { label: "Models", value: "models" },
   { label: "Audit Logs", value: "audit-logs" },
   { label: "Settings", value: "settings" }
 ];
 
 const TAB_COMPONENTS: Record<string, React.ComponentType> = {
   "audit-logs": AuditLogsTab,
-  models: ModelsTab,
   overview: OverviewTab,
   settings: SettingsTab,
   users: UsersTab
@@ -54,7 +51,7 @@ const AdminPage = () => {
   return (
     <div>
       <PageHeader
-        description="Manage users, models, and instance settings."
+        description="Manage users and instance settings."
         title="Admin"
       />
       <Tabs onChange={setActiveTab} tabs={TABS} value={activeTab} />

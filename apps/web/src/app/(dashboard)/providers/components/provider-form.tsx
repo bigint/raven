@@ -1,8 +1,8 @@
 "use client";
 
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { Check, Eye, EyeOff, Loader2, X } from "lucide-react";
+import { type FormEvent, type KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { TextMorph } from "torph/react";
 import { ProviderIcon } from "@/components/model-icon";
@@ -18,6 +18,7 @@ interface FormState {
   name: string;
   apiKey: string;
   isEnabled: boolean;
+  models: string[];
 }
 
 interface ProviderFormProps {
@@ -25,6 +26,27 @@ interface ProviderFormProps {
   readonly onClose: () => void;
   readonly editingProvider?: Provider | null;
 }
+
+const DEFAULT_MODELS: Record<string, string[]> = {
+  anthropic: [
+    "claude-opus-4-6",
+    "claude-sonnet-4-6",
+    "claude-sonnet-4-5-20250929",
+    "claude-sonnet-4-5",
+    "claude-haiku-4-5-20251001",
+    "claude-haiku-4-5"
+  ],
+  openai: [
+    "gpt-4.1",
+    "gpt-4.1-mini",
+    "gpt-4.1-nano",
+    "gpt-4o",
+    "gpt-4o-mini",
+    "o3",
+    "o3-mini",
+    "o4-mini"
+  ]
+};
 
 const ProviderForm = ({
   open,
@@ -40,20 +62,39 @@ const ProviderForm = ({
       ? {
           apiKey: "",
           isEnabled: editingProvider.isEnabled,
+          models: editingProvider.models ?? [],
           name: editingProvider.name ?? "",
           provider: editingProvider.provider
         }
-      : { apiKey: "", isEnabled: true, name: "", provider: "" }
+      : { apiKey: "", isEnabled: true, models: [], name: "", provider: "" }
   );
-  // Set default provider once available providers load
+
   useEffect(() => {
     if (!isEdit && !form.provider && defaultProvider) {
-      setForm((f) => ({ ...f, provider: defaultProvider }));
+      setForm((f) => ({
+        ...f,
+        models: DEFAULT_MODELS[defaultProvider] ?? [],
+        provider: defaultProvider
+      }));
     }
   }, [defaultProvider, isEdit, form.provider]);
 
   const [showApiKey, setShowApiKey] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [modelInput, setModelInput] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const modelInputRef = useRef<HTMLInputElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  const suggestions = useMemo(() => {
+    const all = DEFAULT_MODELS[form.provider] ?? [];
+    const available = all.filter((m) => !form.models.includes(m));
+    if (!modelInput) return available;
+    return available.filter((m) =>
+      m.toLowerCase().includes(modelInput.toLowerCase())
+    );
+  }, [form.provider, form.models, modelInput]);
 
   const providerOptionsWithIcons = useMemo(
     () =>
@@ -68,18 +109,71 @@ const ProviderForm = ({
   const createMutation = useCreateProvider();
   const updateMutation = useUpdateProvider();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
-  const update = (field: keyof FormState, value: string | boolean) =>
+  const update = (field: keyof FormState, value: string | boolean | string[]) =>
     setForm((f) => ({ ...f, [field]: value }));
+
+  const addModel = (value: string) => {
+    const trimmed = value.trim();
+    if (trimmed && !form.models.includes(trimmed)) {
+      update("models", [...form.models, trimmed]);
+    }
+    setModelInput("");
+    setHighlightedIndex(-1);
+  };
+
+  const removeModel = (model: string) => {
+    update("models", form.models.filter((m) => m !== model));
+  };
+
+  const handleModelKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setShowSuggestions(true);
+      setHighlightedIndex((i) =>
+        i < suggestions.length - 1 ? i + 1 : 0
+      );
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex((i) =>
+        i > 0 ? i - 1 : suggestions.length - 1
+      );
+    } else if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      if (highlightedIndex >= 0 && suggestions[highlightedIndex]) {
+        addModel(suggestions[highlightedIndex]);
+      } else {
+        addModel(modelInput);
+      }
+    } else if (e.key === "Escape") {
+      setShowSuggestions(false);
+      setHighlightedIndex(-1);
+    } else if (e.key === "Backspace" && !modelInput && form.models.length > 0) {
+      removeModel(form.models[form.models.length - 1]!);
+    }
+  };
+
+  const handleModelPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData("text");
+    const items = text.split(/[,\n]+/).map((s) => s.trim()).filter(Boolean);
+    const unique = items.filter((item) => !form.models.includes(item));
+    if (unique.length > 0) {
+      update("models", [...form.models, ...unique]);
+    }
+    setModelInput("");
+  };
 
   const handleClose = () => {
     setForm({
       apiKey: "",
       isEnabled: true,
+      models: [],
       name: "",
       provider: defaultProvider
     });
     setShowApiKey(false);
     setFormError(null);
+    setModelInput("");
     onClose();
   };
 
@@ -90,11 +184,16 @@ const ProviderForm = ({
       setFormError("API key is required");
       return;
     }
+    if (form.models.length === 0) {
+      setFormError("At least one model is required");
+      return;
+    }
 
     try {
       if (isEdit && editingProvider) {
-        const body: { apiKey?: string; isEnabled?: boolean; name?: string } = {
+        const body: { apiKey?: string; isEnabled?: boolean; models?: string[]; name?: string } = {
           isEnabled: form.isEnabled,
+          models: form.models,
           name: form.name.trim() || undefined
         };
         if (form.apiKey.trim()) body.apiKey = form.apiKey.trim();
@@ -103,6 +202,7 @@ const ProviderForm = ({
         await createMutation.mutateAsync({
           apiKey: form.apiKey.trim(),
           isEnabled: form.isEnabled,
+          models: form.models,
           name: form.name.trim() || undefined,
           provider: form.provider
         });
@@ -137,7 +237,10 @@ const ProviderForm = ({
           <Select
             disabled={isEdit}
             id="provider-select"
-            onChange={(v) => update("provider", v)}
+            onChange={(v) => {
+              update("provider", v);
+              if (!isEdit) update("models", DEFAULT_MODELS[v] ?? []);
+            }}
             options={providerOptionsWithIcons}
             searchable
             value={form.provider}
@@ -179,6 +282,74 @@ const ProviderForm = ({
               )}
             </button>
           </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium" htmlFor="models-input">
+            Models
+          </label>
+          <div className="relative">
+            <div className="flex min-h-[42px] flex-wrap gap-1.5 rounded-md border border-input bg-background px-2 py-1.5 transition-colors focus-within:ring-2 focus-within:ring-ring">
+              {form.models.map((model) => (
+                <span
+                  className="inline-flex items-center gap-1 rounded-md bg-primary px-2 py-0.5 text-xs font-medium text-primary-foreground"
+                  key={model}
+                >
+                  {model}
+                  <button
+                    className="rounded-sm hover:bg-primary-foreground/20"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeModel(model);
+                    }}
+                    type="button"
+                  >
+                    <X className="size-3" />
+                  </button>
+                </span>
+              ))}
+              <input
+                className="min-w-[120px] flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                id="models-input"
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                onChange={(e) => {
+                  setModelInput(e.target.value);
+                  setShowSuggestions(true);
+                  setHighlightedIndex(-1);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onKeyDown={handleModelKeyDown}
+                onPaste={handleModelPaste}
+                placeholder={form.models.length === 0 ? "Search or type a model ID..." : "Add more..."}
+                ref={modelInputRef}
+                value={modelInput}
+              />
+            </div>
+            {showSuggestions && suggestions.length > 0 && (
+              <div
+                className="absolute z-50 mt-1 max-h-48 w-full overflow-y-auto rounded-md border border-border bg-popover shadow-md"
+                ref={suggestionsRef}
+              >
+                {suggestions.map((model, i) => (
+                  <button
+                    className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm transition-colors hover:bg-accent ${i === highlightedIndex ? "bg-accent" : ""}`}
+                    key={model}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      addModel(model);
+                    }}
+                    type="button"
+                  >
+                    <Check className={`size-3.5 ${form.models.includes(model) ? "opacity-100" : "opacity-0"}`} />
+                    {model}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Select from suggestions or type a custom model ID and press Enter.
+          </p>
         </div>
 
         <Switch

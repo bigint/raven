@@ -18,6 +18,7 @@
     "@hono/zod-validator": "^0.7.6",
     "@raven/auth": "workspace:*",
     "@raven/config": "workspace:*",
+    "@raven/data": "workspace:*",
     "@raven/db": "workspace:*",
     "@raven/email": "workspace:*",
     "@raven/types": "workspace:*",

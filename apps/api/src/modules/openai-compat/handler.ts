@@ -1,7 +1,7 @@
 import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
-import { models } from "@raven/db";
-import { eq } from "drizzle-orm";
+import { providerConfigs } from "@raven/db";
+import { sql } from "drizzle-orm";
 import type { Context } from "hono";
 import type { Redis } from "ioredis";
 import { NotFoundError, ValidationError } from "@/lib/errors";
@@ -24,21 +24,24 @@ const resolveModelProvider = async (
   const cached = modelProviderCache.get(modelSlug);
   if (cached) return cached;
 
-  const [model] = await db
-    .select({ provider: models.provider })
-    .from(models)
-    .where(eq(models.slug, modelSlug))
+  // Find provider config that has this model in its models array
+  const [config] = await db
+    .select({ provider: providerConfigs.provider })
+    .from(providerConfigs)
+    .where(
+      sql`${providerConfigs.isEnabled} = true AND ${providerConfigs.models}::jsonb @> ${JSON.stringify([modelSlug])}::jsonb`
+    )
     .limit(1);
 
-  if (!model) {
+  if (!config) {
     throw new NotFoundError(
-      `Model "${modelSlug}" not found. Use GET /v1/models to see available models.`
+      `Model "${modelSlug}" not found. Check your provider configuration.`
     );
   }
 
-  modelProviderCache.set(modelSlug, model.provider);
+  modelProviderCache.set(modelSlug, config.provider);
   setTimeout(() => modelProviderCache.delete(modelSlug), 300_000);
-  return model.provider;
+  return config.provider;
 };
 
 export const chatCompletionsHandler = (

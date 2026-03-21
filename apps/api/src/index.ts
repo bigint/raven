@@ -9,7 +9,6 @@ import { logger } from "hono/logger";
 import { initEmailDispatcher } from "./lib/email-dispatcher";
 import { AppError } from "./lib/errors";
 import { initEventBus } from "./lib/events";
-import { refreshPricingCache } from "./lib/pricing-cache";
 import { getRedis } from "./lib/redis";
 import { sendPasswordResetEmail } from "./lib/send-password-reset-email";
 import { sendWelcomeEmail } from "./lib/send-welcome-email";
@@ -49,11 +48,6 @@ initEmailDispatcher(db, redis, env.APP_URL);
 const flushInterval = setInterval(() => {
   void flushLastUsed(db, redis);
 }, 60_000);
-
-// Load pricing cache from DB
-void refreshPricingCache(db).catch((err) =>
-  console.error("Failed to load pricing cache:", err)
-);
 
 const auth = createAuth(db, env, {
   onResetPassword: (user, url) => void sendPasswordResetEmail(user, url),
@@ -158,7 +152,7 @@ app.route("/v1/user", userRoutes);
 const adminRoutes = new Hono();
 adminRoutes.use("*", createAuthMiddleware(auth));
 adminRoutes.use("*", platformAdminMiddleware);
-adminRoutes.route("/", createAdminModule(db, redis, env));
+adminRoutes.route("/", createAdminModule(db));
 app.route("/v1/admin", adminRoutes);
 
 // Protected API routes (session auth + writer middleware for mutations)

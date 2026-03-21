@@ -27,6 +27,7 @@ export interface Provider {
   readonly name: string | null;
   readonly apiKey: string;
   readonly isEnabled: boolean;
+  readonly models: string[];
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -55,6 +56,7 @@ interface CreateProviderInput {
   readonly name?: string;
   readonly apiKey: string;
   readonly isEnabled: boolean;
+  readonly models: string[];
 }
 
 interface UpdateProviderInput {
@@ -62,6 +64,7 @@ interface UpdateProviderInput {
   readonly name?: string;
   readonly apiKey?: string;
   readonly isEnabled?: boolean;
+  readonly models?: string[];
 }
 
 export const useCreateProvider = () => {

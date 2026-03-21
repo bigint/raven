@@ -1,40 +1,26 @@
 import type { Database } from "@raven/db";
-import { models, providerConfigs } from "@raven/db";
-import { eq, inArray } from "drizzle-orm";
+import { providerConfigs } from "@raven/db";
+import { eq } from "drizzle-orm";
 import { success } from "@/lib/response";
 import type { AuthContext } from "@/lib/types";
 
 export const listAvailableModels = (db: Database) => async (c: AuthContext) => {
-  // Get distinct providers configured
   const configs = await db
-    .selectDistinct({ provider: providerConfigs.provider })
+    .select({
+      models: providerConfigs.models,
+      provider: providerConfigs.provider
+    })
     .from(providerConfigs)
     .where(eq(providerConfigs.isEnabled, true));
 
-  const providerNames = configs.map((c) => c.provider);
+  const result: { id: string; provider: string }[] = [];
 
-  if (providerNames.length === 0) {
-    return success(c, []);
+  for (const config of configs) {
+    const models = config.models as string[];
+    for (const model of models) {
+      result.push({ id: model, provider: config.provider });
+    }
   }
 
-  const result = await db
-    .select()
-    .from(models)
-    .where(inArray(models.provider, providerNames));
-
-  return success(
-    c,
-    result.map((m) => ({
-      capabilities: m.capabilities,
-      category: m.category,
-      contextWindow: m.contextWindow,
-      id: m.id,
-      inputPrice: Number.parseFloat(m.inputPrice ?? "0"),
-      maxOutput: m.maxOutput,
-      name: m.name,
-      outputPrice: Number.parseFloat(m.outputPrice ?? "0"),
-      provider: m.provider,
-      slug: m.slug
-    }))
-  );
+  return success(c, result);
 };
