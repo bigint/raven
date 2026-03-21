@@ -1,4 +1,5 @@
 import type { Env } from "@raven/config";
+import { MODEL_CATALOG } from "@raven/data";
 import type { Database } from "@raven/db";
 import type { Context } from "hono";
 import type { Redis } from "ioredis";
@@ -65,6 +66,18 @@ export const proxyHandler = (
     const hasMessages =
       Object.keys(parsedBody).length > 0 && messages.length > 0;
     const hasModel = typeof parsedBody.model === "string";
+
+    if (hasModel && !MODEL_CATALOG[parsedBody.model as string]) {
+      return c.json(
+        {
+          error: {
+            code: "UNSUPPORTED_MODEL",
+            message: `Model '${parsedBody.model}' is not supported. Use /v1/models to see available models.`
+          }
+        },
+        400
+      );
+    }
 
     const [guardrailResult, routingResult] = await Promise.all([
       hasMessages
