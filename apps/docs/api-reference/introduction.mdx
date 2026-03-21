@@ -24,7 +24,7 @@ Raven has two distinct API surfaces:
 
 The proxy API handles AI requests. It is OpenAI-compatible:
 
-```bash
+```http
 POST http://localhost:4000/v1/chat/completions
 Authorization: Bearer rk_live_...
 ```
@@ -33,7 +33,7 @@ Authorization: Bearer rk_live_...
 
 The management API handles resource configuration:
 
-```bash
+```http
 GET http://localhost:4000/providers
 Authorization: Bearer rk_live_...
 X-Org-Id: org_abc123
