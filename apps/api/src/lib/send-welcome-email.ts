@@ -1,13 +1,17 @@
+import type { Database } from "@raven/db";
 import { sendWelcomeEmail as send } from "@raven/email";
+import { getEmailConfig } from "./email-config";
 
 export const sendWelcomeEmail = async (
+  db: Database,
   user: { name: string; email: string },
   appUrl: string
 ): Promise<void> => {
-  if (!process.env.RESEND_API_KEY) return;
+  const config = await getEmailConfig(db);
+  if (!config) return;
 
   try {
-    await send(user.email, user.name, appUrl);
+    await send(config, user.email, user.name, appUrl);
   } catch (err) {
     console.error("Failed to send welcome email:", err);
   }

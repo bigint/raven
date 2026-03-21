@@ -1,3 +1,4 @@
+export type { EmailConfig } from "./send";
 export {
   sendBudgetAlertEmail,
   sendEmail,

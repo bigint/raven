@@ -19,10 +19,7 @@ export const getSessions =
 
     const dateConditions = parseDateRange(query.from, query.to);
 
-    const where = and(
-      isNotNull(requestLogs.sessionId),
-      ...dateConditions
-    );
+    const where = and(isNotNull(requestLogs.sessionId), ...dateConditions);
 
     const [rows, countResult] = await Promise.all([
       db
@@ -118,9 +115,7 @@ export const getSessionById = (db: Database) => async (c: AuthContext) => {
       virtualKeyId: requestLogs.virtualKeyId
     })
     .from(requestLogs)
-    .where(
-      sql`${requestLogs.sessionId} = ${sessionId}`
-    )
+    .where(sql`${requestLogs.sessionId} = ${sessionId}`)
     .orderBy(sql`${requestLogs.createdAt} ASC`);
 
   return c.json({ data: rows });

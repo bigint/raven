@@ -3,6 +3,7 @@ import { budgets, users } from "@raven/db";
 import { sendBudgetAlertEmail } from "@raven/email";
 import { eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
+import { getEmailConfig } from "./email-config";
 
 interface EventPayload {
   data: Record<string, unknown>;
@@ -10,12 +11,13 @@ interface EventPayload {
   type: string;
 }
 
-const isEmailConfigured = (): boolean => !!process.env.RESEND_API_KEY;
-
 const handleBudgetAlert = async (
   db: Database,
   data: Record<string, unknown>
 ): Promise<void> => {
+  const config = await getEmailConfig(db);
+  if (!config) return;
+
   const budgetId = data.budgetId as string;
   const spent = data.spent as number;
   const limitAmount = data.limitAmount as number;
@@ -39,6 +41,7 @@ const handleBudgetAlert = async (
   await Promise.all(
     adminUsers.map((admin) =>
       sendBudgetAlertEmail(
+        config,
         admin.email,
         budgetName,
         spent,
@@ -54,11 +57,6 @@ export const initEmailDispatcher = (
   redis: Redis,
   _appUrl: string
 ): void => {
-  if (!isEmailConfigured()) {
-    console.log("Email dispatcher: RESEND_API_KEY not set, skipping");
-    return;
-  }
-
   const subscriber = redis.duplicate();
 
   subscriber.on("error", (err) => {

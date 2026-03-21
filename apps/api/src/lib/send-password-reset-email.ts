@@ -1,13 +1,17 @@
+import type { Database } from "@raven/db";
 import { sendPasswordResetEmail as send } from "@raven/email";
+import { getEmailConfig } from "./email-config";
 
 export const sendPasswordResetEmail = async (
+  db: Database,
   user: { email: string },
   resetUrl: string
 ): Promise<void> => {
-  if (!process.env.RESEND_API_KEY) return;
+  const config = await getEmailConfig(db);
+  if (!config) return;
 
   try {
-    await send(user.email, resetUrl);
+    await send(config, user.email, resetUrl);
   } catch (err) {
     console.error("Failed to send password reset email:", err);
   }

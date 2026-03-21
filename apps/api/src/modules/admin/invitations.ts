@@ -5,6 +5,7 @@ import { sendInvitationEmail } from "@raven/email";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import type { Context } from "hono";
 import { z } from "zod";
+import { getEmailConfig } from "@/lib/email-config";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/errors";
 import { created, success } from "@/lib/response";
 import { logAudit } from "@/modules/audit-logs/log";
@@ -90,13 +91,17 @@ export const createInvitation =
     // Send invitation email (best-effort)
     const inviteUrl = `${appUrl}/sign-up?token=${token}`;
     try {
-      const instanceName = await getInstanceName(db);
-      await sendInvitationEmail(
-        email,
-        currentUser.name,
-        instanceName,
-        inviteUrl
-      );
+      const emailConfig = await getEmailConfig(db);
+      if (emailConfig) {
+        const instanceName = await getInstanceName(db);
+        await sendInvitationEmail(
+          emailConfig,
+          email,
+          currentUser.name,
+          instanceName,
+          inviteUrl
+        );
+      }
     } catch {
       // Email sending is best-effort — invite link still works
     }

@@ -10,11 +10,15 @@ export const SettingsTab = () => {
 
   const [instanceName, setInstanceName] = useState("");
   const [retentionDays, setRetentionDays] = useState(365);
+  const [resendApiKey, setResendApiKey] = useState("");
+  const [resendFromEmail, setResendFromEmail] = useState("");
 
   useEffect(() => {
     if (settings) {
       setInstanceName(settings.instance_name ?? "");
       setRetentionDays(Number(settings.analytics_retention_days) || 365);
+      setResendApiKey(settings.resend_api_key ?? "");
+      setResendFromEmail(settings.resend_from_email ?? "");
     }
   }, [settings]);
 
@@ -37,14 +41,18 @@ export const SettingsTab = () => {
   const handleSave = () => {
     updateSettings.mutate({
       analytics_retention_days: String(retentionDays),
-      instance_name: instanceName
+      instance_name: instanceName,
+      resend_api_key: resendApiKey,
+      resend_from_email: resendFromEmail
     });
   };
 
   const hasChanges =
     settings !== undefined &&
     (instanceName !== (settings.instance_name ?? "") ||
-      retentionDays !== (Number(settings.analytics_retention_days) || 365));
+      retentionDays !== (Number(settings.analytics_retention_days) || 365) ||
+      resendApiKey !== (settings.resend_api_key ?? "") ||
+      resendFromEmail !== (settings.resend_from_email ?? ""));
 
   return (
     <div className="max-w-lg space-y-6">
@@ -63,6 +71,28 @@ export const SettingsTab = () => {
         type="number"
         value={retentionDays}
       />
+
+      <div className="border-t pt-6">
+        <h3 className="mb-4 text-sm font-medium">Email (Resend)</h3>
+        <div className="space-y-4">
+          <Input
+            description="API key from resend.com for sending emails"
+            label="Resend API Key"
+            onChange={(e) => setResendApiKey(e.target.value)}
+            placeholder="re_..."
+            type="password"
+            value={resendApiKey}
+          />
+
+          <Input
+            description="Sender address for outgoing emails (e.g. Raven <noreply@yourdomain.com>)"
+            label="From Email"
+            onChange={(e) => setResendFromEmail(e.target.value)}
+            placeholder="Raven <noreply@yourdomain.com>"
+            value={resendFromEmail}
+          />
+        </div>
+      </div>
 
       <Button
         disabled={!hasChanges || updateSettings.isPending}

@@ -5,7 +5,9 @@ import { success } from "@/lib/response";
 
 const DEFAULT_SETTINGS: Record<string, string> = {
   analytics_retention_days: "365",
-  instance_name: "Raven"
+  instance_name: "Raven",
+  resend_api_key: "",
+  resend_from_email: ""
 };
 
 export const getSettings = (db: Database) => async (c: Context) => {

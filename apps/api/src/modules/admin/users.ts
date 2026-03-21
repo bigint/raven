@@ -62,10 +62,7 @@ export const deleteUser = (db: Database) => async (c: Context) => {
     throw new ForbiddenError("Cannot delete yourself");
   }
 
-  const [deleted] = await db
-    .delete(users)
-    .where(eq(users.id, id))
-    .returning();
+  const [deleted] = await db.delete(users).where(eq(users.id, id)).returning();
 
   if (!deleted) {
     throw new NotFoundError("User not found");

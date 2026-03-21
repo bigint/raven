@@ -51,8 +51,8 @@ const flushInterval = setInterval(() => {
 }, 60_000);
 
 const auth = createAuth(db, env, {
-  onResetPassword: (user, url) => void sendPasswordResetEmail(user, url),
-  onUserCreated: (user) => void sendWelcomeEmail(user, env.APP_URL)
+  onResetPassword: (user, url) => void sendPasswordResetEmail(db, user, url),
+  onUserCreated: (user) => void sendWelcomeEmail(db, user, env.APP_URL)
 });
 
 const app = new Hono();

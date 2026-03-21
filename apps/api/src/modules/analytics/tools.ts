@@ -1,15 +1,6 @@
 import type { Database } from "@raven/db";
 import { requestLogs, virtualKeys } from "@raven/db";
-import {
-  and,
-  count,
-  eq,
-  gt,
-  isNotNull,
-  max,
-  sql,
-  sum
-} from "drizzle-orm";
+import { and, count, eq, gt, isNotNull, max, sql, sum } from "drizzle-orm";
 import type { Redis } from "ioredis";
 import type { z } from "zod";
 import { cachedQuery } from "@/lib/cache-utils";
@@ -30,10 +21,7 @@ export const getToolStats =
     const { from, to } = c.req.valid("query");
 
     const dateConditions = parseDateRange(from, to);
-    const where = and(
-      gt(requestLogs.toolCount, 0),
-      ...dateConditions
-    );
+    const where = and(gt(requestLogs.toolCount, 0), ...dateConditions);
 
     const queryFn = async () => {
       const rows = await db
@@ -71,10 +59,7 @@ export const getToolSessions =
 
     const dateConditions = parseDateRange(query.from, query.to);
 
-    const where = and(
-      isNotNull(requestLogs.sessionId),
-      ...dateConditions
-    );
+    const where = and(isNotNull(requestLogs.sessionId), ...dateConditions);
 
     const [rows, countResult] = await Promise.all([
       db

@@ -1,24 +1,59 @@
 import { parseEnv } from "@raven/config";
 import { createDatabase } from "@raven/db";
+import { cleanupExpiredInvitations } from "./jobs/invitations";
+import { deactivateExpiredKeys } from "./jobs/keys";
 import { cleanupRetention } from "./jobs/retention";
+import { cleanupExpiredSessions } from "./jobs/sessions";
+import { cleanupExpiredVerifications } from "./jobs/verifications";
 
 const env = parseEnv();
 const db = createDatabase(env.DATABASE_URL);
 
-console.log("Raven cron worker started");
+const HOUR = 60 * 60 * 1000;
+const DAY = 24 * HOUR;
 
-const runRetentionCleanup = async () => {
+const runJob = async (name: string, fn: () => Promise<void>) => {
   try {
-    console.log(`[${new Date().toISOString()}] Running retention cleanup...`);
-    await cleanupRetention(db);
-    console.log(`[${new Date().toISOString()}] Retention cleanup complete`);
+    console.log(`[${new Date().toISOString()}] Running ${name}...`);
+    await fn();
+    console.log(`[${new Date().toISOString()}] ${name} complete`);
   } catch (err) {
-    console.error("Retention cleanup failed:", err);
+    console.error(`${name} failed:`, err);
   }
 };
 
-runRetentionCleanup();
-setInterval(runRetentionCleanup, 24 * 60 * 60 * 1000);
+// Run all jobs on startup
+const runAllJobs = async () => {
+  await runJob("retention cleanup", () => cleanupRetention(db));
+  await runJob("session cleanup", () => cleanupExpiredSessions(db));
+  await runJob("verification cleanup", () => cleanupExpiredVerifications(db));
+  await runJob("invitation cleanup", () => cleanupExpiredInvitations(db));
+  await runJob("key deactivation", () => deactivateExpiredKeys(db));
+};
+
+console.log("Raven cron worker started");
+runAllJobs();
+
+// Hourly: expired key deactivation
+setInterval(
+  () => runJob("key deactivation", () => deactivateExpiredKeys(db)),
+  HOUR
+);
+
+// Daily: cleanup jobs
+setInterval(() => runJob("retention cleanup", () => cleanupRetention(db)), DAY);
+setInterval(
+  () => runJob("session cleanup", () => cleanupExpiredSessions(db)),
+  DAY
+);
+setInterval(
+  () => runJob("verification cleanup", () => cleanupExpiredVerifications(db)),
+  DAY
+);
+setInterval(
+  () => runJob("invitation cleanup", () => cleanupExpiredInvitations(db)),
+  DAY
+);
 
 process.on("SIGTERM", () => {
   console.log("Cron worker shutting down");

@@ -98,7 +98,6 @@ Open [http://localhost:3000](http://localhost:3000) and create your first accoun
 | `GITHUB_CLIENT_SECRET` | GitHub OAuth app client secret |
 | `GOOGLE_CLIENT_ID` | Google OAuth client ID |
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
-| `RESEND_API_KEY` | [Resend](https://resend.com) API key for sending emails (invitations, password reset) |
 | `ENCRYPTION_SECRET_PREVIOUS` | Previous encryption key for zero-downtime key rotation |
 
 ## Production Deployment
@@ -260,7 +259,7 @@ Email is optional but required for features like member invitations and password
 
 1. Create an account at [resend.com](https://resend.com)
 2. Generate an API key
-3. Set `RESEND_API_KEY` in your environment
+3. Go to **Instance Settings** in the admin dashboard and enter your Resend API key and from email address
 
 Without email configured, you can still use Raven — users just need to sign up directly instead of being invited.
 
