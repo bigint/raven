@@ -55,10 +55,14 @@ export const useCreateProvider = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: CreateProviderInput) =>
-      api.post<Provider>("/v1/providers", input),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: (input: CreateProviderInput) => {
+      const promise = api.post<Provider>("/v1/providers", input);
+      toast.promise(promise, {
+        loading: "Creating provider...",
+        success: "Provider created",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["providers"] });
@@ -70,10 +74,14 @@ export const useUpdateProvider = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, ...body }: UpdateProviderInput) =>
-      api.put<Provider>(`/v1/providers/${id}`, body),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: ({ id, ...body }: UpdateProviderInput) => {
+      const promise = api.put<Provider>(`/v1/providers/${id}`, body);
+      toast.promise(promise, {
+        loading: "Updating provider...",
+        success: "Provider updated",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["providers"] });
@@ -85,9 +93,14 @@ export const useDeleteProvider = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => api.delete(`/v1/providers/${id}`),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: (id: string) => {
+      const promise = api.delete(`/v1/providers/${id}`);
+      toast.promise(promise, {
+        loading: "Deleting provider...",
+        success: "Provider deleted",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["providers"] });
@@ -103,8 +116,5 @@ interface TestProviderResult {
 export const useTestProvider = () =>
   useMutation({
     mutationFn: (id: string) =>
-      api.post<TestProviderResult>(`/v1/providers/${id}/test`),
-    onError: (err) => {
-      toast.error(err.message);
-    }
+      api.post<TestProviderResult>(`/v1/providers/${id}/test`)
   });

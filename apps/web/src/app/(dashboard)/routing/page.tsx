@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Network, Plus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { toast } from "sonner";
 import { useSetupStatus } from "@/lib/use-setup-status";
 import { RoutingRuleForm } from "./components/routing-rule-form";
 import { RoutingRuleList } from "./components/routing-rule-list";
@@ -34,9 +33,8 @@ const RoutingPage = () => {
     try {
       await deleteMutation.mutateAsync(deleteId);
       setDeleteId(null);
-      toast.success("Routing rule deleted");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to delete");
+    } catch {
+      // Error is handled by toast.promise in the mutation hook
     }
   };
 

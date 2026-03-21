@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Network, Plus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { toast } from "sonner";
 import { useSetupStatus } from "@/lib/use-setup-status";
 import { GuardrailForm } from "./components/guardrail-form";
 import { GuardrailList } from "./components/guardrail-list";
@@ -36,9 +35,8 @@ const GuardrailsPage = () => {
     try {
       await deleteMutation.mutateAsync(deleteId);
       setDeleteId(null);
-      toast.success("Guardrail deleted");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to delete");
+    } catch {
+      // Error is handled by toast.promise in the mutation hook
     }
   };
 

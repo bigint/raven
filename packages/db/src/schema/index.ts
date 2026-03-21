@@ -1,5 +1,6 @@
 export { auditLogs } from "./audit-logs";
 export { accounts, sessions, verifications } from "./auth";
+export { invitations } from "./invitations";
 export { budgetEntityTypeEnum, budgetPeriodEnum, budgets } from "./budgets";
 export {
   guardrailActionEnum,

@@ -2,7 +2,6 @@
 
 import { Button, Input, Modal, Select, Switch, Textarea } from "@raven/ui";
 import { type FormEvent, useState } from "react";
-import { toast } from "sonner";
 import { TextMorph } from "torph/react";
 import { match } from "ts-pattern";
 import type { Guardrail } from "../hooks/use-guardrails";
@@ -162,7 +161,6 @@ const GuardrailForm = ({
       } else {
         await createMutation.mutateAsync(body);
       }
-      toast.success(isEdit ? "Guardrail updated" : "Guardrail created");
       handleClose();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Something went wrong");

@@ -22,6 +22,23 @@ interface AdminSettings {
   readonly analytics_retention_days: string;
 }
 
+interface Invitation {
+  readonly id: string;
+  readonly email: string;
+  readonly role: string;
+  readonly invitedBy: string;
+  readonly expiresAt: string;
+  readonly createdAt: string;
+}
+
+interface CreateInvitationResponse {
+  readonly id: string;
+  readonly email: string;
+  readonly role: string;
+  readonly expiresAt: string;
+  readonly inviteUrl: string;
+}
+
 // --- Query Options ---
 
 export const adminUsersQueryOptions = () =>
@@ -36,11 +53,20 @@ export const adminSettingsQueryOptions = () =>
     queryKey: ["admin", "settings"]
   });
 
+export const adminInvitationsQueryOptions = () =>
+  queryOptions({
+    queryFn: () => api.get<Invitation[]>("/v1/admin/invitations"),
+    queryKey: ["admin", "invitations"]
+  });
+
 // --- Query Hooks ---
 
 export const useAdminUsers = () => useQuery(adminUsersQueryOptions());
 
 export const useAdminSettings = () => useQuery(adminSettingsQueryOptions());
+
+export const useAdminInvitations = () =>
+  useQuery(adminInvitationsQueryOptions());
 
 // --- Mutations ---
 
@@ -48,13 +74,16 @@ export const useUpdateSettings = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: Record<string, string>) =>
-      api.put("/v1/admin/settings", input),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: (input: Record<string, string>) => {
+      const promise = api.put("/v1/admin/settings", input);
+      toast.promise(promise, {
+        loading: "Updating settings...",
+        success: "Settings updated",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
-      toast.success("Settings updated");
       queryClient.invalidateQueries({ queryKey: ["admin", "settings"] });
     }
   });
@@ -83,18 +112,65 @@ export const useDeleteUser = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => api.delete(`/v1/admin/users/${id}`),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: (id: string) => {
+      const promise = api.delete(`/v1/admin/users/${id}`);
+      toast.promise(promise, {
+        loading: "Deleting user...",
+        success: "User deleted",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
-      toast.success("User deleted");
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+    }
+  });
+};
+
+export const useCreateInvitation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: { email: string; role: string }) => {
+      const promise = api.post<CreateInvitationResponse>(
+        "/v1/admin/invitations",
+        input
+      );
+      toast.promise(promise, {
+        error: (err) => err.message,
+        loading: "Sending invitation...",
+        success: "Invitation sent"
+      });
+      return promise;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "invitations"] });
+    }
+  });
+};
+
+export const useRevokeInvitation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => {
+      const promise = api.delete(`/v1/admin/invitations/${id}`);
+      toast.promise(promise, {
+        error: (err) => err.message,
+        loading: "Revoking invitation...",
+        success: "Invitation revoked"
+      });
+      return promise;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "invitations"] });
     }
   });
 };
 
 export type {
   AdminSettings,
-  AdminUser
+  AdminUser,
+  CreateInvitationResponse,
+  Invitation
 };

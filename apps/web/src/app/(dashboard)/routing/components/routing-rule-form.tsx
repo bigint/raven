@@ -2,7 +2,6 @@
 
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
 import { type FormEvent, useState } from "react";
-import { toast } from "sonner";
 import { TextMorph } from "torph/react";
 import { useModelOptions } from "@/lib/use-models";
 import type { RoutingRule } from "../hooks/use-routing-rules";
@@ -115,7 +114,6 @@ const RoutingRuleForm = ({
       } else {
         await createMutation.mutateAsync(body);
       }
-      toast.success(isEdit ? "Routing rule updated" : "Routing rule created");
       handleClose();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Something went wrong");

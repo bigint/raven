@@ -53,10 +53,14 @@ export const useCreateRoutingRule = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: RoutingRuleInput) =>
-      api.post<RoutingRule>("/v1/routing-rules", input),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: (input: RoutingRuleInput) => {
+      const promise = api.post<RoutingRule>("/v1/routing-rules", input);
+      toast.promise(promise, {
+        loading: "Creating routing rule...",
+        success: "Routing rule created",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["routing-rules"] });
@@ -68,10 +72,14 @@ export const useUpdateRoutingRule = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, ...body }: RoutingRuleInput & { id: string }) =>
-      api.put<RoutingRule>(`/v1/routing-rules/${id}`, body),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: ({ id, ...body }: RoutingRuleInput & { id: string }) => {
+      const promise = api.put<RoutingRule>(`/v1/routing-rules/${id}`, body);
+      toast.promise(promise, {
+        loading: "Updating routing rule...",
+        success: "Routing rule updated",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["routing-rules"] });
@@ -83,9 +91,14 @@ export const useDeleteRoutingRule = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => api.delete(`/v1/routing-rules/${id}`),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: (id: string) => {
+      const promise = api.delete(`/v1/routing-rules/${id}`);
+      toast.promise(promise, {
+        loading: "Deleting routing rule...",
+        success: "Routing rule deleted",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["routing-rules"] });

@@ -3,7 +3,6 @@
 import { Button, Input } from "@raven/ui";
 import { User } from "lucide-react";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import { TextMorph } from "torph/react";
 import { useSession } from "@/lib/auth-client";
 import { useUpdateProfile } from "../hooks/use-profile";
@@ -23,9 +22,8 @@ const ProfileForm = () => {
     if (!name.trim()) return;
     try {
       await updateProfile.mutateAsync({ name: name.trim() });
-      toast.success("Profile updated successfully");
     } catch {
-      // Error is handled by mutation state
+      // Error is handled by toast.promise in the mutation hook
     }
   };
 

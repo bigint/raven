@@ -50,10 +50,14 @@ export const keysQueryOptions = () =>
 export const useCreateKey = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateKeyInput) =>
-      api.post<CreateKeyResponse>("/v1/keys", data),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: (data: CreateKeyInput) => {
+      const promise = api.post<CreateKeyResponse>("/v1/keys", data);
+      toast.promise(promise, {
+        loading: "Creating key...",
+        success: "Key created",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["keys"] });
@@ -64,10 +68,14 @@ export const useCreateKey = () => {
 export const useUpdateKey = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateKeyInput }) =>
-      api.put<VirtualKey>(`/v1/keys/${id}`, data),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: ({ id, data }: { id: string; data: UpdateKeyInput }) => {
+      const promise = api.put<VirtualKey>(`/v1/keys/${id}`, data);
+      toast.promise(promise, {
+        loading: "Updating key...",
+        success: "Key updated",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["keys"] });
@@ -78,9 +86,14 @@ export const useUpdateKey = () => {
 export const useDeleteKey = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => api.delete(`/v1/keys/${id}`),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: (id: string) => {
+      const promise = api.delete(`/v1/keys/${id}`);
+      toast.promise(promise, {
+        loading: "Deleting key...",
+        success: "Key deleted",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["keys"] });

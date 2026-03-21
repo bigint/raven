@@ -63,10 +63,14 @@ export const useCreateGuardrail = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: GuardrailInput) =>
-      api.post<Guardrail>("/v1/guardrails", input),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: (input: GuardrailInput) => {
+      const promise = api.post<Guardrail>("/v1/guardrails", input);
+      toast.promise(promise, {
+        loading: "Creating guardrail...",
+        success: "Guardrail created",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["guardrails"] });
@@ -78,10 +82,14 @@ export const useUpdateGuardrail = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, ...body }: GuardrailInput & { id: string }) =>
-      api.put<Guardrail>(`/v1/guardrails/${id}`, body),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: ({ id, ...body }: GuardrailInput & { id: string }) => {
+      const promise = api.put<Guardrail>(`/v1/guardrails/${id}`, body);
+      toast.promise(promise, {
+        loading: "Updating guardrail...",
+        success: "Guardrail updated",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["guardrails"] });
@@ -93,9 +101,14 @@ export const useDeleteGuardrail = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => api.delete(`/v1/guardrails/${id}`),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: (id: string) => {
+      const promise = api.delete(`/v1/guardrails/${id}`);
+      toast.promise(promise, {
+        loading: "Deleting guardrail...",
+        success: "Guardrail deleted",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["guardrails"] });

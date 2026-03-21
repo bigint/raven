@@ -71,10 +71,14 @@ export const useCreateWebhook = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: WebhookCreateInput) =>
-      api.post<Webhook>("/v1/webhooks", input),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: (input: WebhookCreateInput) => {
+      const promise = api.post<Webhook>("/v1/webhooks", input);
+      toast.promise(promise, {
+        loading: "Creating webhook...",
+        success: "Webhook created",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["webhooks"] });
@@ -86,10 +90,14 @@ export const useUpdateWebhook = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, ...body }: WebhookUpdateInput) =>
-      api.put<Webhook>(`/v1/webhooks/${id}`, body),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: ({ id, ...body }: WebhookUpdateInput) => {
+      const promise = api.put<Webhook>(`/v1/webhooks/${id}`, body);
+      toast.promise(promise, {
+        loading: "Updating webhook...",
+        success: "Webhook updated",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["webhooks"] });
@@ -101,9 +109,14 @@ export const useDeleteWebhook = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => api.delete(`/v1/webhooks/${id}`),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: (id: string) => {
+      const promise = api.delete(`/v1/webhooks/${id}`);
+      toast.promise(promise, {
+        loading: "Deleting webhook...",
+        success: "Webhook deleted",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["webhooks"] });
@@ -119,8 +132,5 @@ interface TestWebhookResult {
 export const useTestWebhook = () =>
   useMutation({
     mutationFn: (url: string) =>
-      api.post<TestWebhookResult>("/v1/webhooks/test", { url }),
-    onError: (err) => {
-      toast.error(err.message);
-    }
+      api.post<TestWebhookResult>("/v1/webhooks/test", { url })
   });

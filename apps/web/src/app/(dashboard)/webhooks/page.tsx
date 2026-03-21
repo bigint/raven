@@ -4,7 +4,6 @@ import { Button, ConfirmDialog, PageHeader } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { WebhookForm } from "./components/webhook-form";
 import { WebhookList } from "./components/webhook-list";
 import {
@@ -31,9 +30,8 @@ const WebhooksPage = () => {
     try {
       await deleteMutation.mutateAsync(deleteId);
       setDeleteId(null);
-      toast.success("Webhook deleted");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to delete");
+    } catch {
+      // Error is handled by toast.promise in the mutation hook
     }
   };
 

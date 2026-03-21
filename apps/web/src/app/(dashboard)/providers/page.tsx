@@ -4,7 +4,6 @@ import { Button, ConfirmDialog, PageHeader } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { ProviderForm } from "./components/provider-form";
 import { ProviderList } from "./components/provider-list";
 import {
@@ -37,9 +36,8 @@ const ProvidersPage = () => {
     try {
       await deleteMutation.mutateAsync(deleteId);
       setDeleteId(null);
-      toast.success("Provider deleted");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to delete");
+    } catch {
+      // Error is handled by toast.promise in the mutation hook
     }
   };
 

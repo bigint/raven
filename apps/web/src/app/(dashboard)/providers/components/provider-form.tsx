@@ -3,7 +3,6 @@
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
 import { TextMorph } from "torph/react";
 import { ProviderIcon } from "@/components/model-icon";
 import type { Provider } from "../hooks/use-providers";
@@ -107,7 +106,6 @@ const ProviderForm = ({
           provider: form.provider
         });
       }
-      toast.success(isEdit ? "Provider updated" : "Provider created");
       handleClose();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Something went wrong");

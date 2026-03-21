@@ -3,7 +3,6 @@
 import { Button, Input, Modal, Select } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { type FormEvent, useMemo, useState } from "react";
-import { toast } from "sonner";
 import { TextMorph } from "torph/react";
 import { keysQueryOptions } from "../../keys/hooks/use-keys";
 import type { Budget } from "../hooks/use-budgets";
@@ -108,7 +107,6 @@ const BudgetForm = ({ open, onClose, editingBudget }: BudgetFormProps) => {
       } else {
         await createMutation.mutateAsync(body);
       }
-      toast.success(isEdit ? "Budget updated" : "Budget created");
       handleClose();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Something went wrong");

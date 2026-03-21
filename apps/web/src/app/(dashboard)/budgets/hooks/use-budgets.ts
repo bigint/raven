@@ -50,9 +50,14 @@ export const useCreateBudget = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: BudgetInput) => api.post<Budget>("/v1/budgets", input),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: (input: BudgetInput) => {
+      const promise = api.post<Budget>("/v1/budgets", input);
+      toast.promise(promise, {
+        loading: "Creating budget...",
+        success: "Budget created",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["budgets"] });
@@ -64,10 +69,14 @@ export const useUpdateBudget = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, ...body }: BudgetInput & { id: string }) =>
-      api.put<Budget>(`/v1/budgets/${id}`, body),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: ({ id, ...body }: BudgetInput & { id: string }) => {
+      const promise = api.put<Budget>(`/v1/budgets/${id}`, body);
+      toast.promise(promise, {
+        loading: "Updating budget...",
+        success: "Budget updated",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["budgets"] });
@@ -79,9 +88,14 @@ export const useDeleteBudget = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => api.delete(`/v1/budgets/${id}`),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: (id: string) => {
+      const promise = api.delete(`/v1/budgets/${id}`);
+      toast.promise(promise, {
+        loading: "Deleting budget...",
+        success: "Budget deleted",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["budgets"] });

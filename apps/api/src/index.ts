@@ -28,6 +28,7 @@ import { createGuardrailsModule } from "./modules/guardrails/index";
 import { createKeysModule } from "./modules/keys/index";
 import { listAvailableModels } from "./modules/models/available";
 import { createModelsModule } from "./modules/models/index";
+import { createInvitationsModule } from "./modules/invitations/index";
 import { createOpenAICompatModule } from "./modules/openai-compat/index";
 import { createProvidersModule } from "./modules/providers/index";
 import { proxyHandler } from "./modules/proxy/handler";
@@ -142,6 +143,9 @@ app.route("/v1/models", createModelsModule(db));
 // Public settings (no auth required)
 app.get("/v1/settings/public", getPublicSettings(db));
 
+// Public invitation validation (no auth required)
+app.route("/v1/invitations", createInvitationsModule(db));
+
 // User-level routes (session auth)
 const userRoutes = new Hono();
 userRoutes.use("*", createAuthMiddleware(auth));
@@ -152,7 +156,7 @@ app.route("/v1/user", userRoutes);
 const adminRoutes = new Hono();
 adminRoutes.use("*", createAuthMiddleware(auth));
 adminRoutes.use("*", platformAdminMiddleware);
-adminRoutes.route("/", createAdminModule(db));
+adminRoutes.route("/", createAdminModule(db, env.APP_URL));
 app.route("/v1/admin", adminRoutes);
 
 // Protected API routes (session auth + writer middleware for mutations)

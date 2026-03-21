@@ -84,10 +84,16 @@ export const useToggleStar = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) =>
-      api.patch<{ isStarred: boolean }>(`/v1/analytics/requests/${id}/star`),
-    onError: (err) => {
-      toast.error(err.message);
+    mutationFn: (id: string) => {
+      const promise = api.patch<{ isStarred: boolean }>(
+        `/v1/analytics/requests/${id}/star`
+      );
+      toast.promise(promise, {
+        loading: "Updating...",
+        success: "Star toggled",
+        error: (err) => err.message
+      });
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["session"] });

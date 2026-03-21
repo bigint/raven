@@ -2,7 +2,6 @@
 
 import { Button, Input, Modal, Switch } from "@raven/ui";
 import { type FormEvent, useState } from "react";
-import { toast } from "sonner";
 import { TextMorph } from "torph/react";
 import type { Webhook } from "../hooks/use-webhooks";
 import {
@@ -143,7 +142,6 @@ const WebhookForm = ({ open, onClose, editingWebhook }: WebhookFormProps) => {
           url: form.url.trim()
         });
       }
-      toast.success(isEdit ? "Webhook updated" : "Webhook created");
       handleClose();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Something went wrong");
