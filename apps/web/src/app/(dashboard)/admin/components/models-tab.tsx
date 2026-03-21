@@ -1,7 +1,8 @@
 "use client";
 
 import { Badge, Button, Spinner } from "@raven/ui";
-import { Cpu, RefreshCw } from "lucide-react";
+import { Cpu, Plus, RefreshCw } from "lucide-react";
+import Link from "next/link";
 import { ProviderIcon } from "@/components/model-icon";
 import { useAdminProviders, useSyncModels } from "../hooks/use-admin";
 
@@ -59,6 +60,12 @@ export const ModelsTab = () => {
           <p className="mt-1 text-sm text-muted-foreground">
             Add a provider first, then sync models.
           </p>
+          <Link className="mt-4 inline-block" href="/providers">
+            <Button size="sm" variant="secondary">
+              <Plus className="size-4" />
+              Add Provider
+            </Button>
+          </Link>
         </div>
       )}
 
@@ -95,9 +102,18 @@ export const ModelsTab = () => {
                     </div>
                   </td>
                   <td className="px-5 py-3.5 text-right">
-                    <Badge variant="neutral">
-                      {provider.modelCount}
-                    </Badge>
+                    {provider.modelCount === 0 ? (
+                      <Link href="/providers">
+                        <Button size="sm" variant="secondary">
+                          <Plus className="size-3.5" />
+                          Add Key
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Badge variant="neutral">
+                        {provider.modelCount}
+                      </Badge>
+                    )}
                   </td>
                 </tr>
               ))}

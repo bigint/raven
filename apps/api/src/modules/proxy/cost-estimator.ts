@@ -9,9 +9,6 @@ import type { TokenUsage } from "./usage-mapper";
  */
 const CACHE_MULTIPLIERS: Record<string, { read: number; write: number }> = {
   anthropic: { read: 0.1, write: 1.25 },
-  deepseek: { read: 0.1, write: 1 },
-  google: { read: 0.5, write: 1 },
-  mistralai: { read: 0.5, write: 0 },
   openai: { read: 0.5, write: 0 }
 };
 
