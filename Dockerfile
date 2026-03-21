@@ -15,6 +15,7 @@ RUN pnpm install --frozen-lockfile
 FROM deps AS builder
 COPY . .
 RUN pnpm build
+RUN mkdir -p /app/apps/web/public
 
 FROM node:22-alpine AS runner
 RUN corepack enable && corepack prepare pnpm@10.27.0 --activate
