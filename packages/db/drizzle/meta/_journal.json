@@ -148,6 +148,13 @@
       "when": 1774400000000,
       "tag": "0020_provider_models",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1774500000000,
+      "tag": "0021_add_invitations",
+      "breakpoints": true
     }
   ]
 }

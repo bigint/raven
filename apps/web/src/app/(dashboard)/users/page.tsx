@@ -1,14 +1,24 @@
 "use client";
 
-import { PageHeader } from "@raven/ui";
+import { Button, PageHeader, Tabs } from "@raven/ui";
+import { UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "@/lib/auth-client";
+import { InvitationsTab } from "../admin/components/invitations-tab";
+import { InviteModal } from "../admin/components/invite-modal";
 import { UsersTab } from "../admin/components/users-tab";
+
+const TABS = [
+  { label: "Users", value: "users" },
+  { label: "Pending Invitations", value: "invitations" }
+];
 
 const UsersPage = () => {
   const { data: session, isPending } = useSession();
   const router = useRouter();
+  const [tab, setTab] = useState("users");
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   useEffect(() => {
     if (!isPending && session?.user?.role !== "admin") {
@@ -29,10 +39,20 @@ const UsersPage = () => {
   return (
     <div>
       <PageHeader
-        description="Manage users and roles."
+        actions={
+          <Button onClick={() => setInviteOpen(true)}>
+            <UserPlus className="size-4" />
+            Invite User
+          </Button>
+        }
+        description="Manage users, roles, and invitations."
         title="Users"
       />
-      <UsersTab />
+      <Tabs onChange={setTab} tabs={TABS} value={tab} />
+      <div className="mt-4">
+        {tab === "users" ? <UsersTab /> : <InvitationsTab />}
+      </div>
+      <InviteModal onClose={() => setInviteOpen(false)} open={inviteOpen} />
     </div>
   );
 };

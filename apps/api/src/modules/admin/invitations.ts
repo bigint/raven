@@ -73,6 +73,10 @@ export const createInvitation =
       })
       .returning();
 
+    if (!invitation) {
+      throw new ValidationError("Failed to create invitation");
+    }
+
     await logAudit(db, {
       action: "invitation.created",
       actorId: currentUser.id,

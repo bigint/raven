@@ -72,14 +72,7 @@ export const UsageCharts = ({
 
   return (
     <div>
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Analytics</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Track usage, costs, and performance across providers.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
+      <div className="mb-8 flex flex-wrap items-center gap-3">
           <PillTabs
             onChange={onDateRangeChange}
             options={dateRangeOptions}
@@ -105,7 +98,6 @@ export const UsageCharts = ({
               />
             </div>
           )}
-        </div>
       </div>
 
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

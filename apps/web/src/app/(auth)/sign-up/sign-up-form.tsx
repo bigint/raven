@@ -1,17 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { type FormEvent, useEffect, useState } from "react";
+import { api } from "@/lib/api";
 import { signUp } from "@/lib/auth-client";
+
+interface InvitationInfo {
+  email: string;
+  role: string;
+}
 
 export const SignUpForm = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [invitation, setInvitation] = useState<InvitationInfo | null>(null);
+
+  useEffect(() => {
+    if (!token) return;
+    api
+      .get<InvitationInfo>(`/v1/invitations/${token}`)
+      .then((data) => {
+        setInvitation(data);
+        setEmail(data.email);
+      })
+      .catch(() => {
+        setError("Invalid or expired invitation link");
+      });
+  }, [token]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -20,6 +42,16 @@ export const SignUpForm = () => {
 
     try {
       await signUp.email({ email, name, password });
+
+      // Accept the invitation to apply the invited role
+      if (token && invitation) {
+        try {
+          await api.post(`/v1/invitations/${token}/accept`, { email });
+        } catch {
+          // Invitation acceptance failed but account was created
+        }
+      }
+
       router.push("/overview");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create account");
@@ -55,9 +87,13 @@ export const SignUpForm = () => {
             <span className="text-lg font-semibold">Raven</span>
           </div>
 
-          <h1 className="text-2xl font-bold">Create your account</h1>
+          <h1 className="text-2xl font-bold">
+            {invitation ? "Accept Invitation" : "Create your account"}
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Get started with Raven for free
+            {invitation
+              ? `You've been invited to join as ${invitation.role}`
+              : "Get started with Raven for free"}
           </p>
 
           {error && (
@@ -89,7 +125,8 @@ export const SignUpForm = () => {
                 Email
               </label>
               <input
-                className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
+                className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-60"
+                disabled={!!invitation}
                 id="email"
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
