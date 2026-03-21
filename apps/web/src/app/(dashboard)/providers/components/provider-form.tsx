@@ -5,7 +5,6 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { TextMorph } from "torph/react";
-import { DEFAULT_MODELS, getModelsForProvider } from "@raven/data";
 import { ProviderIcon } from "@/components/model-icon";
 import type { Provider } from "../hooks/use-providers";
 import {
@@ -19,7 +18,6 @@ interface FormState {
   name: string;
   apiKey: string;
   isEnabled: boolean;
-  models: string[];
 }
 
 interface ProviderFormProps {
@@ -42,30 +40,20 @@ const ProviderForm = ({
       ? {
           apiKey: "",
           isEnabled: editingProvider.isEnabled,
-          models: editingProvider.models ?? [],
           name: editingProvider.name ?? "",
           provider: editingProvider.provider
         }
-      : { apiKey: "", isEnabled: true, models: [], name: "", provider: "" }
+      : { apiKey: "", isEnabled: true, name: "", provider: "" }
   );
 
   useEffect(() => {
     if (!isEdit && !form.provider && defaultProvider) {
-      setForm((f) => ({
-        ...f,
-        models: DEFAULT_MODELS[defaultProvider] ?? [],
-        provider: defaultProvider
-      }));
+      setForm((f) => ({ ...f, provider: defaultProvider }));
     }
   }, [defaultProvider, isEdit, form.provider]);
 
   const [showApiKey, setShowApiKey] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-
-  const providerModels = useMemo(
-    () => getModelsForProvider(form.provider),
-    [form.provider]
-  );
 
   const providerOptionsWithIcons = useMemo(
     () =>
@@ -80,31 +68,13 @@ const ProviderForm = ({
   const createMutation = useCreateProvider();
   const updateMutation = useUpdateProvider();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
-  const update = (field: keyof FormState, value: string | boolean | string[]) =>
+  const update = (field: keyof FormState, value: string | boolean) =>
     setForm((f) => ({ ...f, [field]: value }));
-
-  const toggleModel = (modelId: string) => {
-    setForm((f) => ({
-      ...f,
-      models: f.models.includes(modelId)
-        ? f.models.filter((m) => m !== modelId)
-        : [...f.models, modelId]
-    }));
-  };
-
-  const selectAll = () => {
-    update("models", providerModels.map((m) => m.id));
-  };
-
-  const selectNone = () => {
-    update("models", []);
-  };
 
   const handleClose = () => {
     setForm({
       apiKey: "",
       isEnabled: true,
-      models: [],
       name: "",
       provider: defaultProvider
     });
@@ -120,16 +90,11 @@ const ProviderForm = ({
       setFormError("API key is required");
       return;
     }
-    if (form.models.length === 0) {
-      setFormError("At least one model is required");
-      return;
-    }
 
     try {
       if (isEdit && editingProvider) {
-        const body: { apiKey?: string; isEnabled?: boolean; models?: string[]; name?: string } = {
+        const body: { apiKey?: string; isEnabled?: boolean; name?: string } = {
           isEnabled: form.isEnabled,
-          models: form.models,
           name: form.name.trim() || undefined
         };
         if (form.apiKey.trim()) body.apiKey = form.apiKey.trim();
@@ -138,7 +103,6 @@ const ProviderForm = ({
         await createMutation.mutateAsync({
           apiKey: form.apiKey.trim(),
           isEnabled: form.isEnabled,
-          models: form.models,
           name: form.name.trim() || undefined,
           provider: form.provider
         });
@@ -173,12 +137,7 @@ const ProviderForm = ({
           <Select
             disabled={isEdit}
             id="provider-select"
-            onChange={(v) => {
-              update("provider", v);
-              if (!isEdit) {
-                update("models", DEFAULT_MODELS[v] ?? []);
-              }
-            }}
+            onChange={(v) => update("provider", v)}
             options={providerOptionsWithIcons}
             searchable
             value={form.provider}
@@ -218,47 +177,6 @@ const ProviderForm = ({
               ) : (
                 <Eye className="size-4" />
               )}
-            </button>
-          </div>
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium">Models</label>
-          <div className="max-h-60 overflow-y-auto rounded-md border border-input">
-            {providerModels.map((model) => (
-              <label
-                key={model.id}
-                className="flex cursor-pointer items-center gap-3 px-3 py-2 transition-colors hover:bg-muted/50"
-              >
-                <input
-                  checked={form.models.includes(model.id)}
-                  className="size-4 rounded border-input accent-primary"
-                  onChange={() => toggleModel(model.id)}
-                  type="checkbox"
-                />
-                <div>
-                  <span className="text-sm font-medium">{model.name}</span>
-                  <span className="ml-2 text-xs text-muted-foreground">
-                    {model.id}
-                  </span>
-                </div>
-              </label>
-            ))}
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              className="text-xs text-muted-foreground transition-colors hover:text-foreground"
-              onClick={selectAll}
-              type="button"
-            >
-              Select all
-            </button>
-            <button
-              className="text-xs text-muted-foreground transition-colors hover:text-foreground"
-              onClick={selectNone}
-              type="button"
-            >
-              Deselect all
             </button>
           </div>
         </div>

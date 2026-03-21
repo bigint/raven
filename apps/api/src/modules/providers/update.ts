@@ -22,7 +22,7 @@ export const updateProvider =
   async (c: AuthContextWithJson<Body>) => {
     const user = c.get("user");
     const id = c.req.param("id") as string;
-    const { name, apiKey, isEnabled, models } = c.req.valid("json");
+    const { name, apiKey, isEnabled } = c.req.valid("json");
 
     const [existing] = await db
       .select()
@@ -59,10 +59,6 @@ export const updateProvider =
 
     if (isEnabled !== undefined) {
       updates.isEnabled = isEnabled;
-    }
-
-    if (models !== undefined) {
-      updates.models = models;
     }
 
     const [updated] = await db

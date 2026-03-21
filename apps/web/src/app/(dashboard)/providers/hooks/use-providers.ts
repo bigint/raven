@@ -43,7 +43,6 @@ interface CreateProviderInput {
   readonly name?: string;
   readonly apiKey: string;
   readonly isEnabled: boolean;
-  readonly models: string[];
 }
 
 interface UpdateProviderInput {
@@ -51,7 +50,6 @@ interface UpdateProviderInput {
   readonly name?: string;
   readonly apiKey?: string;
   readonly isEnabled?: boolean;
-  readonly models?: string[];
 }
 
 export const useCreateProvider = () => {

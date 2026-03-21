@@ -18,7 +18,7 @@ export const createProvider =
   (db: Database, env: Env, redis: Redis) =>
   async (c: AuthContextWithJson<Body>) => {
     const user = c.get("user");
-    const { provider, name, apiKey, isEnabled, models } = c.req.valid("json");
+    const { provider, name, apiKey, isEnabled } = c.req.valid("json");
 
     // Validate the API key against the provider before saving
     await validateApiKey(provider, apiKey);
@@ -30,7 +30,6 @@ export const createProvider =
       .values({
         apiKey: encryptedKey,
         isEnabled,
-        models,
         name: name ?? null,
         provider
       })
