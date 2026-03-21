@@ -31,3 +31,4 @@ export { Spinner, type SpinnerProps } from "./components/spinner";
 export { Switch, type SwitchProps } from "./components/switch";
 export { type Tab, Tabs, type TabsProps } from "./components/tabs";
 export { Textarea, type TextareaProps } from "./components/textarea";
+export { Tooltip, type TooltipProps } from "./components/tooltip";

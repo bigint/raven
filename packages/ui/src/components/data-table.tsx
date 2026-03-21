@@ -1,5 +1,6 @@
 "use client";
 
+import { Popover } from "@base-ui/react/popover";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import type { ReactNode } from "react";
@@ -78,22 +79,26 @@ const DataTable = <T,>({
     <div>
       {onToggleColumn && (
         <div className="mb-2 flex justify-end">
-          <details className="relative">
-            <summary className="cursor-pointer rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted/50">
+          <Popover.Root>
+            <Popover.Trigger className="cursor-pointer rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted/50">
               Columns
-            </summary>
-            <div className="absolute right-0 z-10 mt-1 min-w-[160px] rounded-md border border-border bg-background p-2 shadow-md">
-              {columns.map((col) => (
-                <Checkbox
-                  checked={!hiddenColumns?.includes(col.key)}
-                  className="rounded px-2 py-1 text-sm hover:bg-muted/50"
-                  key={col.key}
-                  label={col.header}
-                  onCheckedChange={() => onToggleColumn(col.key)}
-                />
-              ))}
-            </div>
-          </details>
+            </Popover.Trigger>
+            <Popover.Portal>
+              <Popover.Positioner align="end" sideOffset={4}>
+                <Popover.Popup className="min-w-[160px] rounded-md border border-border bg-background p-2 shadow-md outline-none">
+                  {columns.map((col) => (
+                    <Checkbox
+                      checked={!hiddenColumns?.includes(col.key)}
+                      className="rounded px-2 py-1 text-sm hover:bg-muted/50"
+                      key={col.key}
+                      label={col.header}
+                      onCheckedChange={() => onToggleColumn(col.key)}
+                    />
+                  ))}
+                </Popover.Popup>
+              </Popover.Positioner>
+            </Popover.Portal>
+          </Popover.Root>
         </div>
       )}
       <div className="rounded-xl border border-border overflow-hidden overflow-x-auto">

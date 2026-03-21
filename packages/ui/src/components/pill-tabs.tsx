@@ -1,8 +1,7 @@
 "use client";
 
-import { LayoutGroup, motion } from "motion/react";
+import { Tabs } from "@base-ui/react/tabs";
 import type { ReactNode } from "react";
-import { useId } from "react";
 import { cn } from "../cn";
 
 interface PillTabOption<T extends string = string> {
@@ -25,63 +24,37 @@ const PillTabs = <T extends string = string>({
   value,
   onChange,
   className
-}: PillTabsProps<T>) => {
-  const id = useId();
-
-  return (
-    <LayoutGroup id={id}>
-      <div
-        className={cn(
-          "flex h-9 items-center gap-1 overflow-x-auto rounded-md border border-border px-1 w-fit",
-          className
-        )}
-        role="tablist"
-      >
-        {options.map((opt) => (
-          <button
-            aria-selected={value === opt.value}
-            className={cn(
-              "relative shrink-0 rounded-md px-3 py-1 text-sm font-medium transition-colors",
-              opt.disabled && "cursor-not-allowed opacity-50"
-            )}
-            disabled={opt.disabled}
-            key={opt.value}
-            onClick={() => !opt.disabled && onChange(opt.value)}
-            role="tab"
-            tabIndex={value === opt.value ? 0 : -1}
-            title={opt.tooltip}
-            type="button"
-          >
-            {value === opt.value && !opt.disabled && (
-              <motion.div
-                className="absolute inset-0 rounded-md bg-primary"
-                layoutId="pill-indicator"
-                transition={{
-                  bounce: 0.15,
-                  duration: 0.35,
-                  type: "spring"
-                }}
-              />
-            )}
-            <span
-              className={cn(
-                "relative z-10",
-                opt.disabled
-                  ? "text-muted-foreground"
-                  : value === opt.value
-                    ? "text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {opt.label}
-              {opt.extra}
-            </span>
-          </button>
-        ))}
-      </div>
-    </LayoutGroup>
-  );
-};
+}: PillTabsProps<T>) => (
+  <Tabs.Root onValueChange={(v) => onChange(v as T)} value={value}>
+    <Tabs.List
+      activateOnFocus
+      className={cn(
+        "flex h-9 w-fit items-center gap-1 overflow-x-auto rounded-md border border-border px-1",
+        className
+      )}
+    >
+      {options.map((opt) => (
+        <Tabs.Tab
+          className={cn(
+            "relative z-0 shrink-0 cursor-pointer rounded-md px-3 py-1 text-sm font-medium transition-colors",
+            "text-muted-foreground hover:text-foreground data-active:text-primary-foreground",
+            opt.disabled && "cursor-not-allowed opacity-50"
+          )}
+          disabled={opt.disabled}
+          key={opt.value}
+          title={opt.tooltip}
+          value={opt.value}
+        >
+          <span className="relative z-10">
+            {opt.label}
+            {opt.extra}
+          </span>
+        </Tabs.Tab>
+      ))}
+      <Tabs.Indicator className="-z-1 rounded-md bg-primary transition-all duration-300 ease-[cubic-bezier(0.65,0,0.35,1)]" />
+    </Tabs.List>
+  </Tabs.Root>
+);
 
 export type { PillTabOption, PillTabsProps };
 export { PillTabs };
