@@ -15,8 +15,8 @@ import {
   ScrollText,
   Settings,
   Shield,
-  ShieldCheck,
   SquareTerminal,
+  Users,
   Webhook,
   X
 } from "lucide-react";
@@ -116,14 +116,25 @@ export const Sidebar = ({ user }: SidebarProps) => {
           <div className="my-2 border-t border-border" />
           <Link
             className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
-              pathname.startsWith("/admin")
+              pathname === "/users"
                 ? "bg-primary text-primary-foreground font-medium"
                 : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             }`}
-            href="/admin"
+            href="/users"
           >
-            <ShieldCheck className="size-4" />
-            Admin
+            <Users className="size-4" />
+            Users
+          </Link>
+          <Link
+            className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
+              pathname === "/settings"
+                ? "bg-primary text-primary-foreground font-medium"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            }`}
+            href="/settings"
+          >
+            <Settings className="size-4" />
+            Settings
           </Link>
         </>
       )}

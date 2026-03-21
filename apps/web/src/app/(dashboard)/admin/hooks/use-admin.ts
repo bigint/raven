@@ -9,16 +9,6 @@ import { api } from "@/lib/api";
 
 // --- Types ---
 
-interface AdminStats {
-  readonly totalUsers: number;
-  readonly totalRequests: number;
-  readonly totalCost: string;
-  readonly totalInputTokens: number;
-  readonly totalOutputTokens: number;
-  readonly totalReasoningTokens: number;
-  readonly totalCachedTokens: number;
-}
-
 interface AdminUser {
   readonly id: string;
   readonly name: string;
@@ -43,12 +33,6 @@ interface AdminSettings {
 
 // --- Query Options ---
 
-export const adminStatsQueryOptions = () =>
-  queryOptions({
-    queryFn: () => api.get<AdminStats>("/v1/admin/stats"),
-    queryKey: ["admin", "stats"]
-  });
-
 export const adminUsersQueryOptions = () =>
   queryOptions({
     queryFn: () => api.get<AdminUser[]>("/v1/admin/users"),
@@ -68,8 +52,6 @@ export const adminSettingsQueryOptions = () =>
   });
 
 // --- Query Hooks ---
-
-export const useAdminStats = () => useQuery(adminStatsQueryOptions());
 
 export const useAdminUsers = () => useQuery(adminUsersQueryOptions());
 
@@ -128,7 +110,6 @@ export const useDeleteUser = () => {
 
 export type {
   AdminSettings,
-  AdminStats,
   AdminUser,
   AuditLog
 };
