@@ -53,9 +53,9 @@ export const useCreateKey = () => {
     mutationFn: (data: CreateKeyInput) => {
       const promise = api.post<CreateKeyResponse>("/v1/keys", data);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Creating key...",
-        success: "Key created",
-        error: (err) => err.message
+        success: "Key created"
       });
       return promise;
     },
@@ -71,9 +71,9 @@ export const useUpdateKey = () => {
     mutationFn: ({ id, data }: { id: string; data: UpdateKeyInput }) => {
       const promise = api.put<VirtualKey>(`/v1/keys/${id}`, data);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Updating key...",
-        success: "Key updated",
-        error: (err) => err.message
+        success: "Key updated"
       });
       return promise;
     },
@@ -89,9 +89,9 @@ export const useDeleteKey = () => {
     mutationFn: (id: string) => {
       const promise = api.delete(`/v1/keys/${id}`);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Deleting key...",
-        success: "Key deleted",
-        error: (err) => err.message
+        success: "Key deleted"
       });
       return promise;
     },

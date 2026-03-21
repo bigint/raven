@@ -108,7 +108,11 @@ const CopyableSlug = ({ value }: { value: string }) => {
   );
 };
 
-const ModelCard = memo(function ModelCard({ model }: { model: ModelDefinition }) {
+const ModelCard = memo(function ModelCard({
+  model
+}: {
+  model: ModelDefinition;
+}) {
   const categoryMeta =
     MODEL_CATEGORIES[model.category as ModelCategory] ?? null;
 

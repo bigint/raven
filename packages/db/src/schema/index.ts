@@ -1,12 +1,12 @@
 export { auditLogs } from "./audit-logs";
 export { accounts, sessions, verifications } from "./auth";
-export { invitations } from "./invitations";
 export { budgetEntityTypeEnum, budgetPeriodEnum, budgets } from "./budgets";
 export {
   guardrailActionEnum,
   guardrailRules,
   guardrailTypeEnum
 } from "./guardrail-rules";
+export { invitations } from "./invitations";
 export { keyEnvironmentEnum, virtualKeys } from "./keys";
 export { providerConfigs } from "./providers";
 export { requestLogs } from "./request-logs";

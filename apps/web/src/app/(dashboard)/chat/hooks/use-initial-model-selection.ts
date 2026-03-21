@@ -1,8 +1,8 @@
 "use client";
 
+import type { ModelDefinition } from "@raven/types";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import type { ModelDefinition } from "@raven/types";
 
 interface UseInitialModelSelectionParams {
   readonly models: readonly ModelDefinition[];

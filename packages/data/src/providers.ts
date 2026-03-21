@@ -6,217 +6,215 @@ export const SUPPORTED_PROVIDERS = [
 ] as const;
 
 export const MODEL_CATALOG: Record<string, ModelDefinition> = {
-  // Anthropic models
-  "claude-opus-4-6": {
-    id: "claude-opus-4-6",
-    slug: "claude-opus-4-6",
-    name: "Claude Opus 4.6",
-    provider: "anthropic",
-    category: "flagship",
-    description:
-      "Most capable Anthropic model for complex tasks requiring deep reasoning",
-    contextWindow: 1_000_000,
-    maxOutput: 32_768,
-    inputPrice: 5,
-    outputPrice: 25,
-    capabilities: [
-      "chat",
-      "vision",
-      "function_calling",
-      "streaming",
-      "reasoning"
-    ]
-  },
-  "claude-sonnet-4-6": {
-    id: "claude-sonnet-4-6",
-    slug: "claude-sonnet-4-6",
-    name: "Claude Sonnet 4.6",
-    provider: "anthropic",
-    category: "balanced",
-    description:
-      "Strong balance of intelligence and speed for everyday tasks",
-    contextWindow: 1_000_000,
-    maxOutput: 16_384,
-    inputPrice: 3,
-    outputPrice: 15,
-    capabilities: [
-      "chat",
-      "vision",
-      "function_calling",
-      "streaming",
-      "reasoning"
-    ]
-  },
-  "claude-sonnet-4-5-20250929": {
-    id: "claude-sonnet-4-5-20250929",
-    slug: "claude-sonnet-4-5-20250929",
-    name: "Claude Sonnet 4.5 (2025-09-29)",
-    provider: "anthropic",
-    category: "balanced",
-    description:
-      "Strong balance of intelligence and speed with pinned version",
+  "claude-haiku-4-5": {
+    capabilities: ["chat", "vision", "function_calling", "streaming"],
+    category: "fast",
     contextWindow: 200_000,
-    maxOutput: 16_384,
-    inputPrice: 3,
-    outputPrice: 15,
-    capabilities: [
-      "chat",
-      "vision",
-      "function_calling",
-      "streaming",
-      "reasoning"
-    ]
-  },
-  "claude-sonnet-4-5": {
-    id: "claude-sonnet-4-5",
-    slug: "claude-sonnet-4-5",
-    name: "Claude Sonnet 4.5",
+    description: "Fast and cost-effective for simple tasks",
+    id: "claude-haiku-4-5",
+    inputPrice: 1,
+    maxOutput: 8_192,
+    name: "Claude Haiku 4.5",
+    outputPrice: 5,
     provider: "anthropic",
-    category: "balanced",
-    description: "Strong balance of intelligence and speed for everyday tasks",
-    contextWindow: 200_000,
-    maxOutput: 16_384,
-    inputPrice: 3,
-    outputPrice: 15,
-    capabilities: [
-      "chat",
-      "vision",
-      "function_calling",
-      "streaming",
-      "reasoning"
-    ]
+    slug: "claude-haiku-4-5"
   },
   "claude-haiku-4-5-20251001": {
-    id: "claude-haiku-4-5-20251001",
-    slug: "claude-haiku-4-5-20251001",
-    name: "Claude Haiku 4.5 (2025-10-01)",
-    provider: "anthropic",
+    capabilities: ["chat", "vision", "function_calling", "streaming"],
     category: "fast",
+    contextWindow: 200_000,
     description: "Fast and cost-effective with pinned version",
-    contextWindow: 200_000,
-    maxOutput: 8_192,
+    id: "claude-haiku-4-5-20251001",
     inputPrice: 1,
+    maxOutput: 8_192,
+    name: "Claude Haiku 4.5 (2025-10-01)",
     outputPrice: 5,
-    capabilities: ["chat", "vision", "function_calling", "streaming"]
-  },
-  "claude-haiku-4-5": {
-    id: "claude-haiku-4-5",
-    slug: "claude-haiku-4-5",
-    name: "Claude Haiku 4.5",
     provider: "anthropic",
-    category: "fast",
-    description: "Fast and cost-effective for simple tasks",
+    slug: "claude-haiku-4-5-20251001"
+  },
+  // Anthropic models
+  "claude-opus-4-6": {
+    capabilities: [
+      "chat",
+      "vision",
+      "function_calling",
+      "streaming",
+      "reasoning"
+    ],
+    category: "flagship",
+    contextWindow: 1_000_000,
+    description:
+      "Most capable Anthropic model for complex tasks requiring deep reasoning",
+    id: "claude-opus-4-6",
+    inputPrice: 5,
+    maxOutput: 32_768,
+    name: "Claude Opus 4.6",
+    outputPrice: 25,
+    provider: "anthropic",
+    slug: "claude-opus-4-6"
+  },
+  "claude-sonnet-4-5": {
+    capabilities: [
+      "chat",
+      "vision",
+      "function_calling",
+      "streaming",
+      "reasoning"
+    ],
+    category: "balanced",
     contextWindow: 200_000,
-    maxOutput: 8_192,
-    inputPrice: 1,
-    outputPrice: 5,
-    capabilities: ["chat", "vision", "function_calling", "streaming"]
+    description: "Strong balance of intelligence and speed for everyday tasks",
+    id: "claude-sonnet-4-5",
+    inputPrice: 3,
+    maxOutput: 16_384,
+    name: "Claude Sonnet 4.5",
+    outputPrice: 15,
+    provider: "anthropic",
+    slug: "claude-sonnet-4-5"
+  },
+  "claude-sonnet-4-5-20250929": {
+    capabilities: [
+      "chat",
+      "vision",
+      "function_calling",
+      "streaming",
+      "reasoning"
+    ],
+    category: "balanced",
+    contextWindow: 200_000,
+    description: "Strong balance of intelligence and speed with pinned version",
+    id: "claude-sonnet-4-5-20250929",
+    inputPrice: 3,
+    maxOutput: 16_384,
+    name: "Claude Sonnet 4.5 (2025-09-29)",
+    outputPrice: 15,
+    provider: "anthropic",
+    slug: "claude-sonnet-4-5-20250929"
+  },
+  "claude-sonnet-4-6": {
+    capabilities: [
+      "chat",
+      "vision",
+      "function_calling",
+      "streaming",
+      "reasoning"
+    ],
+    category: "balanced",
+    contextWindow: 1_000_000,
+    description: "Strong balance of intelligence and speed for everyday tasks",
+    id: "claude-sonnet-4-6",
+    inputPrice: 3,
+    maxOutput: 16_384,
+    name: "Claude Sonnet 4.6",
+    outputPrice: 15,
+    provider: "anthropic",
+    slug: "claude-sonnet-4-6"
   },
 
   // OpenAI models
   "gpt-4.1": {
-    id: "gpt-4.1",
-    slug: "gpt-4.1",
-    name: "GPT-4.1",
-    provider: "openai",
+    capabilities: ["chat", "vision", "function_calling", "streaming"],
     category: "flagship",
-    description: "Most capable OpenAI model for complex tasks",
     contextWindow: 1_000_000,
-    maxOutput: 32_768,
+    description: "Most capable OpenAI model for complex tasks",
+    id: "gpt-4.1",
     inputPrice: 2,
+    maxOutput: 32_768,
+    name: "GPT-4.1",
     outputPrice: 8,
-    capabilities: ["chat", "vision", "function_calling", "streaming"]
+    provider: "openai",
+    slug: "gpt-4.1"
   },
   "gpt-4.1-mini": {
-    id: "gpt-4.1-mini",
-    slug: "gpt-4.1-mini",
-    name: "GPT-4.1 Mini",
-    provider: "openai",
+    capabilities: ["chat", "vision", "function_calling", "streaming"],
     category: "balanced",
-    description: "Balanced performance at lower cost",
     contextWindow: 1_000_000,
-    maxOutput: 16_384,
+    description: "Balanced performance at lower cost",
+    id: "gpt-4.1-mini",
     inputPrice: 0.4,
+    maxOutput: 16_384,
+    name: "GPT-4.1 Mini",
     outputPrice: 1.6,
-    capabilities: ["chat", "vision", "function_calling", "streaming"]
+    provider: "openai",
+    slug: "gpt-4.1-mini"
   },
   "gpt-4.1-nano": {
-    id: "gpt-4.1-nano",
-    slug: "gpt-4.1-nano",
-    name: "GPT-4.1 Nano",
-    provider: "openai",
+    capabilities: ["chat", "function_calling", "streaming"],
     category: "fast",
-    description: "Fastest and most cost-effective OpenAI model",
     contextWindow: 1_000_000,
-    maxOutput: 16_384,
+    description: "Fastest and most cost-effective OpenAI model",
+    id: "gpt-4.1-nano",
     inputPrice: 0.1,
+    maxOutput: 16_384,
+    name: "GPT-4.1 Nano",
     outputPrice: 0.4,
-    capabilities: ["chat", "function_calling", "streaming"]
+    provider: "openai",
+    slug: "gpt-4.1-nano"
   },
   "gpt-4o": {
-    id: "gpt-4o",
-    slug: "gpt-4o",
-    name: "GPT-4o",
-    provider: "openai",
+    capabilities: ["chat", "vision", "function_calling", "streaming"],
     category: "balanced",
-    description: "Versatile multimodal model with strong performance",
     contextWindow: 128_000,
-    maxOutput: 16_384,
+    description: "Versatile multimodal model with strong performance",
+    id: "gpt-4o",
     inputPrice: 2.5,
+    maxOutput: 16_384,
+    name: "GPT-4o",
     outputPrice: 10,
-    capabilities: ["chat", "vision", "function_calling", "streaming"]
+    provider: "openai",
+    slug: "gpt-4o"
   },
   "gpt-4o-mini": {
-    id: "gpt-4o-mini",
-    slug: "gpt-4o-mini",
-    name: "GPT-4o Mini",
-    provider: "openai",
+    capabilities: ["chat", "vision", "function_calling", "streaming"],
     category: "fast",
-    description: "Small and fast multimodal model for lightweight tasks",
     contextWindow: 128_000,
-    maxOutput: 16_384,
+    description: "Small and fast multimodal model for lightweight tasks",
+    id: "gpt-4o-mini",
     inputPrice: 0.15,
+    maxOutput: 16_384,
+    name: "GPT-4o Mini",
     outputPrice: 0.6,
-    capabilities: ["chat", "vision", "function_calling", "streaming"]
+    provider: "openai",
+    slug: "gpt-4o-mini"
   },
   o3: {
-    id: "o3",
-    slug: "o3",
-    name: "o3",
-    provider: "openai",
+    capabilities: ["chat", "function_calling", "streaming", "reasoning"],
     category: "reasoning",
-    description: "Advanced reasoning model for complex problem solving",
     contextWindow: 200_000,
-    maxOutput: 100_000,
+    description: "Advanced reasoning model for complex problem solving",
+    id: "o3",
     inputPrice: 2,
+    maxOutput: 100_000,
+    name: "o3",
     outputPrice: 8,
-    capabilities: ["chat", "function_calling", "streaming", "reasoning"]
+    provider: "openai",
+    slug: "o3"
   },
   "o3-mini": {
-    id: "o3-mini",
-    slug: "o3-mini",
-    name: "o3 Mini",
-    provider: "openai",
+    capabilities: ["chat", "function_calling", "streaming", "reasoning"],
     category: "reasoning",
-    description: "Cost-effective reasoning model",
     contextWindow: 200_000,
-    maxOutput: 100_000,
+    description: "Cost-effective reasoning model",
+    id: "o3-mini",
     inputPrice: 1.1,
+    maxOutput: 100_000,
+    name: "o3 Mini",
     outputPrice: 4.4,
-    capabilities: ["chat", "function_calling", "streaming", "reasoning"]
+    provider: "openai",
+    slug: "o3-mini"
   },
   "o4-mini": {
-    id: "o4-mini",
-    slug: "o4-mini",
-    name: "o4 Mini",
-    provider: "openai",
+    capabilities: ["chat", "function_calling", "streaming", "reasoning"],
     category: "reasoning",
-    description: "Latest cost-effective reasoning model",
     contextWindow: 200_000,
-    maxOutput: 100_000,
+    description: "Latest cost-effective reasoning model",
+    id: "o4-mini",
     inputPrice: 1.1,
+    maxOutput: 100_000,
+    name: "o4 Mini",
     outputPrice: 4.4,
-    capabilities: ["chat", "function_calling", "streaming", "reasoning"]
+    provider: "openai",
+    slug: "o4-mini"
   }
 };
 

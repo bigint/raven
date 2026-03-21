@@ -74,9 +74,9 @@ export const useCreateWebhook = () => {
     mutationFn: (input: WebhookCreateInput) => {
       const promise = api.post<Webhook>("/v1/webhooks", input);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Creating webhook...",
-        success: "Webhook created",
-        error: (err) => err.message
+        success: "Webhook created"
       });
       return promise;
     },
@@ -93,9 +93,9 @@ export const useUpdateWebhook = () => {
     mutationFn: ({ id, ...body }: WebhookUpdateInput) => {
       const promise = api.put<Webhook>(`/v1/webhooks/${id}`, body);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Updating webhook...",
-        success: "Webhook updated",
-        error: (err) => err.message
+        success: "Webhook updated"
       });
       return promise;
     },
@@ -112,9 +112,9 @@ export const useDeleteWebhook = () => {
     mutationFn: (id: string) => {
       const promise = api.delete(`/v1/webhooks/${id}`);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Deleting webhook...",
-        success: "Webhook deleted",
-        error: (err) => err.message
+        success: "Webhook deleted"
       });
       return promise;
     },

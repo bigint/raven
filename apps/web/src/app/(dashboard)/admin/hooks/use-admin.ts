@@ -77,9 +77,9 @@ export const useUpdateSettings = () => {
     mutationFn: (input: Record<string, string>) => {
       const promise = api.put("/v1/admin/settings", input);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Updating settings...",
-        success: "Settings updated",
-        error: (err) => err.message
+        success: "Settings updated"
       });
       return promise;
     },
@@ -96,9 +96,9 @@ export const useUpdateUserRole = () => {
     mutationFn: ({ id, role }: { id: string; role: string }) => {
       const promise = api.patch<AdminUser>(`/v1/admin/users/${id}`, { role });
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Updating role...",
-        success: "User role updated",
-        error: (err) => err.message
+        success: "User role updated"
       });
       return promise;
     },
@@ -115,9 +115,9 @@ export const useDeleteUser = () => {
     mutationFn: (id: string) => {
       const promise = api.delete(`/v1/admin/users/${id}`);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Deleting user...",
-        success: "User deleted",
-        error: (err) => err.message
+        success: "User deleted"
       });
       return promise;
     },
@@ -168,9 +168,4 @@ export const useRevokeInvitation = () => {
   });
 };
 
-export type {
-  AdminSettings,
-  AdminUser,
-  CreateInvitationResponse,
-  Invitation
-};
+export type { AdminSettings, AdminUser, CreateInvitationResponse, Invitation };

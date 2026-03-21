@@ -1,7 +1,7 @@
 "use client";
 
-import { formatCompactNumber } from "@/lib/format";
 import { Meter } from "@base-ui/react/meter";
+import { formatCompactNumber } from "@/lib/format";
 import type { BreakdownRow } from "../hooks/use-adoption";
 
 interface UsageBarsProps {

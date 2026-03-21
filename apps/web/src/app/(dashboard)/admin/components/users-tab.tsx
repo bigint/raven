@@ -12,9 +12,9 @@ import {
 } from "../hooks/use-admin";
 
 const ROLE_OPTIONS = [
-  { value: "admin", label: "Admin" },
-  { value: "member", label: "Member" },
-  { value: "viewer", label: "Viewer" },
+  { label: "Admin", value: "admin" },
+  { label: "Member", value: "member" },
+  { label: "Viewer", value: "viewer" }
 ];
 
 export const UsersTab = () => {
@@ -44,9 +44,7 @@ export const UsersTab = () => {
       render: (user) => (
         <Select
           className="w-32"
-          onChange={(value) =>
-            updateRole.mutate({ id: user.id, role: value })
-          }
+          onChange={(value) => updateRole.mutate({ id: user.id, role: value })}
           options={ROLE_OPTIONS}
           value={user.role}
         />

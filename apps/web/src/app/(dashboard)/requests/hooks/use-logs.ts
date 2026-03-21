@@ -89,9 +89,9 @@ export const useToggleStar = () => {
         `/v1/analytics/requests/${id}/star`
       );
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Updating...",
-        success: "Star toggled",
-        error: (err) => err.message
+        success: "Star toggled"
       });
       return promise;
     },

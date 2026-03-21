@@ -21,9 +21,7 @@ const columns: Column<Webhook>[] = [
     key: "url",
     render: (webhook) => (
       <Tooltip content={webhook.url}>
-        <span className="truncate max-w-[280px] block">
-          {webhook.url}
-        </span>
+        <span className="truncate max-w-[280px] block">{webhook.url}</span>
       </Tooltip>
     )
   },
@@ -73,11 +71,7 @@ const WebhookList = ({
         render: (webhook) => (
           <div className="flex items-center justify-end gap-1">
             <Tooltip content="Edit webhook">
-              <Button
-                onClick={() => onEdit(webhook)}
-                size="sm"
-                variant="ghost"
-              >
+              <Button onClick={() => onEdit(webhook)} size="sm" variant="ghost">
                 <Pencil className="size-4" />
               </Button>
             </Tooltip>

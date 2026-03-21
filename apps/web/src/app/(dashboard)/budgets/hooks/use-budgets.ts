@@ -53,9 +53,9 @@ export const useCreateBudget = () => {
     mutationFn: (input: BudgetInput) => {
       const promise = api.post<Budget>("/v1/budgets", input);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Creating budget...",
-        success: "Budget created",
-        error: (err) => err.message
+        success: "Budget created"
       });
       return promise;
     },
@@ -72,9 +72,9 @@ export const useUpdateBudget = () => {
     mutationFn: ({ id, ...body }: BudgetInput & { id: string }) => {
       const promise = api.put<Budget>(`/v1/budgets/${id}`, body);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Updating budget...",
-        success: "Budget updated",
-        error: (err) => err.message
+        success: "Budget updated"
       });
       return promise;
     },
@@ -91,9 +91,9 @@ export const useDeleteBudget = () => {
     mutationFn: (id: string) => {
       const promise = api.delete(`/v1/budgets/${id}`);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Deleting budget...",
-        success: "Budget deleted",
-        error: (err) => err.message
+        success: "Budget deleted"
       });
       return promise;
     },

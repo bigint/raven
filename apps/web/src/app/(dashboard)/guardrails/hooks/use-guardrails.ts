@@ -66,9 +66,9 @@ export const useCreateGuardrail = () => {
     mutationFn: (input: GuardrailInput) => {
       const promise = api.post<Guardrail>("/v1/guardrails", input);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Creating guardrail...",
-        success: "Guardrail created",
-        error: (err) => err.message
+        success: "Guardrail created"
       });
       return promise;
     },
@@ -85,9 +85,9 @@ export const useUpdateGuardrail = () => {
     mutationFn: ({ id, ...body }: GuardrailInput & { id: string }) => {
       const promise = api.put<Guardrail>(`/v1/guardrails/${id}`, body);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Updating guardrail...",
-        success: "Guardrail updated",
-        error: (err) => err.message
+        success: "Guardrail updated"
       });
       return promise;
     },
@@ -104,9 +104,9 @@ export const useDeleteGuardrail = () => {
     mutationFn: (id: string) => {
       const promise = api.delete(`/v1/guardrails/${id}`);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Deleting guardrail...",
-        success: "Guardrail deleted",
-        error: (err) => err.message
+        success: "Guardrail deleted"
       });
       return promise;
     },

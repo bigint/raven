@@ -511,11 +511,7 @@ export const ChatInput = ({
           </div>
 
           {isStreaming ? (
-            <Button
-              className="rounded-lg p-2"
-              onClick={onStop}
-              variant="ghost"
-            >
+            <Button className="rounded-lg p-2" onClick={onStop} variant="ghost">
               <Square className="size-4" />
             </Button>
           ) : (

@@ -73,31 +73,29 @@ export const UsageCharts = ({
   return (
     <div>
       <div className="mb-8 flex flex-wrap items-center gap-3">
-          <PillTabs
-            onChange={onDateRangeChange}
-            options={dateRangeOptions}
-            value={dateRange}
-          />
-          {dateRange === "custom" && onCustomRangeChange && (
-            <div className="flex items-center gap-2">
-              <input
-                className="h-9 rounded-md border border-input bg-background px-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
-                onChange={(e) => onCustomRangeChange(e.target.value, customTo)}
-                type="date"
-                value={customFrom}
-              />
-              <span className="text-sm text-muted-foreground">to</span>
-              <input
-                className="h-9 rounded-md border border-input bg-background px-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
-                min={customFrom}
-                onChange={(e) =>
-                  onCustomRangeChange(customFrom, e.target.value)
-                }
-                type="date"
-                value={customTo}
-              />
-            </div>
-          )}
+        <PillTabs
+          onChange={onDateRangeChange}
+          options={dateRangeOptions}
+          value={dateRange}
+        />
+        {dateRange === "custom" && onCustomRangeChange && (
+          <div className="flex items-center gap-2">
+            <input
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+              onChange={(e) => onCustomRangeChange(e.target.value, customTo)}
+              type="date"
+              value={customFrom}
+            />
+            <span className="text-sm text-muted-foreground">to</span>
+            <input
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+              min={customFrom}
+              onChange={(e) => onCustomRangeChange(customFrom, e.target.value)}
+              type="date"
+              value={customTo}
+            />
+          </div>
+        )}
       </div>
 
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

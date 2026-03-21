@@ -19,9 +19,7 @@ const Avatar = ({ name, src, size = "md", className }: AvatarProps) => {
   const initials = name?.charAt(0)?.toUpperCase() ?? "?";
 
   return (
-    <BaseAvatar.Root
-      className={cn("rounded-full", sizeMap[size], className)}
-    >
+    <BaseAvatar.Root className={cn("rounded-full", sizeMap[size], className)}>
       {src && (
         <BaseAvatar.Image
           alt={name ?? "Avatar"}
@@ -29,9 +27,7 @@ const Avatar = ({ name, src, size = "md", className }: AvatarProps) => {
           src={src}
         />
       )}
-      <BaseAvatar.Fallback
-        className="flex size-full items-center justify-center rounded-full bg-primary/10 font-medium"
-      >
+      <BaseAvatar.Fallback className="flex size-full items-center justify-center rounded-full bg-primary/10 font-medium">
         {initials}
       </BaseAvatar.Fallback>
     </BaseAvatar.Root>

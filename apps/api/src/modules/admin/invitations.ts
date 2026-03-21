@@ -1,13 +1,13 @@
+import { createId } from "@paralleldrive/cuid2";
 import type { Database } from "@raven/db";
 import { invitations, settings, users } from "@raven/db";
 import { sendInvitationEmail } from "@raven/email";
-import { createId } from "@paralleldrive/cuid2";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import type { Context } from "hono";
 import { z } from "zod";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/errors";
-import { logAudit } from "@/modules/audit-logs/log";
 import { created, success } from "@/lib/response";
+import { logAudit } from "@/modules/audit-logs/log";
 
 const INVITE_EXPIRY_DAYS = 7;
 
@@ -55,7 +55,9 @@ export const createInvitation =
       .limit(1);
 
     if (existingInvite) {
-      throw new ConflictError("An invitation for this email is already pending");
+      throw new ConflictError(
+        "An invitation for this email is already pending"
+      );
     }
 
     const token = createId();

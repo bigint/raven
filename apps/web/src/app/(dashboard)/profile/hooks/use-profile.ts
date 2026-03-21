@@ -10,9 +10,9 @@ export const useUpdateProfile = () => {
     mutationFn: (data: { name: string }) => {
       const promise = api.put("/v1/user/profile", data);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Updating profile...",
-        success: "Profile updated successfully",
-        error: (err) => err.message
+        success: "Profile updated successfully"
       });
       return promise;
     },

@@ -58,9 +58,9 @@ export const useCreateProvider = () => {
     mutationFn: (input: CreateProviderInput) => {
       const promise = api.post<Provider>("/v1/providers", input);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Creating provider...",
-        success: "Provider created",
-        error: (err) => err.message
+        success: "Provider created"
       });
       return promise;
     },
@@ -77,9 +77,9 @@ export const useUpdateProvider = () => {
     mutationFn: ({ id, ...body }: UpdateProviderInput) => {
       const promise = api.put<Provider>(`/v1/providers/${id}`, body);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Updating provider...",
-        success: "Provider updated",
-        error: (err) => err.message
+        success: "Provider updated"
       });
       return promise;
     },
@@ -96,9 +96,9 @@ export const useDeleteProvider = () => {
     mutationFn: (id: string) => {
       const promise = api.delete(`/v1/providers/${id}`);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Deleting provider...",
-        success: "Provider deleted",
-        error: (err) => err.message
+        success: "Provider deleted"
       });
       return promise;
     },

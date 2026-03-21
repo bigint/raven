@@ -93,11 +93,7 @@ export const InviteModal = ({ open, onClose }: InviteModalProps) => {
             <label className="block text-sm font-medium" htmlFor="invite-role">
               Role
             </label>
-            <Select
-              onChange={setRole}
-              options={ROLE_OPTIONS}
-              value={role}
-            />
+            <Select onChange={setRole} options={ROLE_OPTIONS} value={role} />
           </div>
           <div className="flex justify-end gap-2">
             <Button onClick={handleClose} type="button" variant="secondary">

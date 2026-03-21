@@ -1,8 +1,8 @@
 "use client";
 
+import { Meter } from "@base-ui/react/meter";
 import type { Column } from "@raven/ui";
 import { Badge, Button, DataTable, Tooltip } from "@raven/ui";
-import { Meter } from "@base-ui/react/meter";
 import { DollarSign, Pencil, Plus, Trash2 } from "lucide-react";
 import type { Budget } from "../hooks/use-budgets";
 import { ENTITY_TYPE_LABELS } from "../hooks/use-budgets";
@@ -80,11 +80,7 @@ const BudgetList = ({
       render: (budget) => (
         <div className="flex items-center justify-end gap-1">
           <Tooltip content="Edit budget">
-            <Button
-              onClick={() => onEdit(budget)}
-              size="sm"
-              variant="ghost"
-            >
+            <Button onClick={() => onEdit(budget)} size="sm" variant="ghost">
               <Pencil className="size-4" />
             </Button>
           </Tooltip>

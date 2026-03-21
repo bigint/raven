@@ -56,9 +56,9 @@ export const useCreateRoutingRule = () => {
     mutationFn: (input: RoutingRuleInput) => {
       const promise = api.post<RoutingRule>("/v1/routing-rules", input);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Creating routing rule...",
-        success: "Routing rule created",
-        error: (err) => err.message
+        success: "Routing rule created"
       });
       return promise;
     },
@@ -75,9 +75,9 @@ export const useUpdateRoutingRule = () => {
     mutationFn: ({ id, ...body }: RoutingRuleInput & { id: string }) => {
       const promise = api.put<RoutingRule>(`/v1/routing-rules/${id}`, body);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Updating routing rule...",
-        success: "Routing rule updated",
-        error: (err) => err.message
+        success: "Routing rule updated"
       });
       return promise;
     },
@@ -94,9 +94,9 @@ export const useDeleteRoutingRule = () => {
     mutationFn: (id: string) => {
       const promise = api.delete(`/v1/routing-rules/${id}`);
       toast.promise(promise, {
+        error: (err) => err.message,
         loading: "Deleting routing rule...",
-        success: "Routing rule deleted",
-        error: (err) => err.message
+        success: "Routing rule deleted"
       });
       return promise;
     },

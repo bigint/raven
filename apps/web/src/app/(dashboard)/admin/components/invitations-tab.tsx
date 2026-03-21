@@ -5,10 +5,7 @@ import { Badge, Button, ConfirmDialog, DataTable, Tooltip } from "@raven/ui";
 import { Mail, Trash2 } from "lucide-react";
 import { useState } from "react";
 import type { Invitation } from "../hooks/use-admin";
-import {
-  useAdminInvitations,
-  useRevokeInvitation
-} from "../hooks/use-admin";
+import { useAdminInvitations, useRevokeInvitation } from "../hooks/use-admin";
 
 export const InvitationsTab = () => {
   const { data: invitations, isPending } = useAdminInvitations();
@@ -39,9 +36,7 @@ export const InvitationsTab = () => {
         const expired = new Date(invitation.expiresAt) < new Date();
         return (
           <span
-            className={
-              expired ? "text-destructive" : "text-muted-foreground"
-            }
+            className={expired ? "text-destructive" : "text-muted-foreground"}
           >
             {expired
               ? "Expired"

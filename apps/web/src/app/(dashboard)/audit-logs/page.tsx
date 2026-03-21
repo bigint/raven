@@ -69,8 +69,7 @@ const ActionBadge = ({ action }: { action: string }) => {
   const meta = ACTION_VERBS[verb];
   if (!meta) return <Badge variant="neutral">{action}</Badge>;
 
-  const Icon =
-    verb === "created" ? Plus : verb === "deleted" ? Trash2 : Pencil;
+  const Icon = verb === "created" ? Plus : verb === "deleted" ? Trash2 : Pencil;
 
   return (
     <Badge variant={meta.variant}>

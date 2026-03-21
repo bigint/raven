@@ -85,11 +85,7 @@ const RoutingRuleList = ({
         render: (rule) => (
           <div className="flex items-center justify-end gap-1">
             <Tooltip content="Edit routing rule">
-              <Button
-                onClick={() => onEdit(rule)}
-                size="sm"
-                variant="ghost"
-              >
+              <Button onClick={() => onEdit(rule)} size="sm" variant="ghost">
                 <Pencil className="size-4" />
               </Button>
             </Tooltip>

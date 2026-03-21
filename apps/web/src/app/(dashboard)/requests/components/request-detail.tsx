@@ -76,11 +76,7 @@ export const RequestDetail = ({ request, onClose }: RequestDetailProps) => {
                   ID: {request.id}
                 </p>
               </div>
-              <Button
-                className="p-1.5"
-                onClick={onClose}
-                variant="ghost"
-              >
+              <Button className="p-1.5" onClick={onClose} variant="ghost">
                 <X className="size-4" />
               </Button>
             </div>
