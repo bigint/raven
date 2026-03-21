@@ -95,7 +95,7 @@ Raven is structured as a monorepo managed with pnpm workspaces and Turborepo.
 - **Frontend:** Next.js 16, React 19, Tailwind CSS 4, Base UI
 - **Backend:** Hono, Node.js 22, Better Auth, Drizzle ORM
 - **Database:** PostgreSQL 17, Redis 7
-- **AI SDKs:** Anthropic, Google, Mistral, OpenAI
+- **AI SDKs:** Anthropic, OpenAI
 - **Email:** Resend + React Email
 - **Tooling:** pnpm, Turborepo, Biome
 
