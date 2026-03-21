@@ -38,5 +38,15 @@ coverage/
 # Drizzle
 drizzle/
 
+# Secrets & credentials
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.csr
+.credentials/
+secrets/
+
 # Superpowers
 .superpowers/

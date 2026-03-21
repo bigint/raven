@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation
+    url: https://github.com/ravenplatform/raven/tree/main/apps/docs
+    about: Check the documentation for answers

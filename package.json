@@ -1,4 +1,26 @@
 {
+  "description": "Open-source AI gateway for routing, managing, and observing LLM API traffic",
+  "homepage": "https://github.com/ravenplatform/raven",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ravenplatform/raven.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ravenplatform/raven/issues"
+  },
+  "license": "Apache-2.0",
+  "keywords": [
+    "ai-gateway",
+    "llm",
+    "openai",
+    "anthropic",
+    "proxy",
+    "typescript",
+    "open-source",
+    "ai",
+    "routing",
+    "observability"
+  ],
   "devDependencies": {
     "@biomejs/biome": "^2.4.8",
     "@paralleldrive/cuid2": "^3.3.0",
