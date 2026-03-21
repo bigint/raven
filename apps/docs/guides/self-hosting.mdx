@@ -94,10 +94,6 @@ Open [http://localhost:3000](http://localhost:3000) and create your first accoun
 | Variable | Description |
 |----------|-------------|
 | `API_PORT` | API server port (default: `3001`) |
-| `GITHUB_CLIENT_ID` | GitHub OAuth app client ID |
-| `GITHUB_CLIENT_SECRET` | GitHub OAuth app client secret |
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
 | `ENCRYPTION_SECRET_PREVIOUS` | Previous encryption key for zero-downtime key rotation |
 
 ## Production Deployment
@@ -262,22 +258,6 @@ Email is optional but required for features like member invitations and password
 3. Go to **Instance Settings** in the admin dashboard and enter your Resend API key and from email address
 
 Without email configured, you can still use Raven — users just need to sign up directly instead of being invited.
-
-## Social Login
-
-To enable GitHub or Google sign-in, create OAuth applications and set the corresponding environment variables.
-
-### GitHub
-
-1. Go to **GitHub > Settings > Developer settings > OAuth Apps**
-2. Set the callback URL to `{BETTER_AUTH_URL}/api/auth/callback/github`
-3. Set `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`
-
-### Google
-
-1. Go to **Google Cloud Console > APIs & Services > Credentials**
-2. Create an OAuth 2.0 client with the redirect URI `{BETTER_AUTH_URL}/api/auth/callback/google`
-3. Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`
 
 ## Encryption Key Rotation
 

@@ -8,10 +8,6 @@ const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   ENCRYPTION_SECRET: z.string().min(32),
   ENCRYPTION_SECRET_PREVIOUS: z.string().min(32).optional(),
-  GITHUB_CLIENT_ID: z.string().optional(),
-  GITHUB_CLIENT_SECRET: z.string().optional(),
-  GOOGLE_CLIENT_ID: z.string().optional(),
-  GOOGLE_CLIENT_SECRET: z.string().optional(),
   NEXT_PUBLIC_API_URL: z.string().url(),
   NODE_ENV: z
     .enum(["development", "production", "test"])
