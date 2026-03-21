@@ -219,8 +219,8 @@
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://raven.dev"
+      "label": "GitHub",
+      "href": "https://github.com/bigint/raven"
     }
   },
   "footer": {

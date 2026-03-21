@@ -45,7 +45,6 @@ Navigate to **Settings** to configure your organization:
 
 ### Infrastructure
 
-- **Custom Domains** -- Add custom domains for the API proxy (see [Custom Domains](/platform/custom-domains))
 - **Cache** -- Enable or disable semantic response caching
 
 ### Danger Zone
@@ -100,7 +99,6 @@ All resources in Raven are scoped to an organization. There is no sharing of res
 | **Analytics** | Organization |
 | **Audit Logs** | Organization |
 | **Webhooks** | Organization |
-| **Custom Domains** | Organization |
 
 ## API Access
 
@@ -114,15 +112,3 @@ curl -X GET http://localhost:3001/providers \
 
 For proxy requests (chat completions), the organization is determined automatically from the virtual key.
 
-## Plan Limits by Organization
-
-Each organization's plan determines its resource limits:
-
-| Resource | Free | Pro | Team | Enterprise |
-|----------|------|-----|------|------------|
-| **Seats** | 1 | 1 | 30 | Unlimited |
-| **Providers** | 2 | 10 | Unlimited | Unlimited |
-| **Virtual Keys** | 3 | 20 | Unlimited | Unlimited |
-| **Monthly Requests** | 10,000 | 500,000 | 2,000,000 | Unlimited |
-
-See [Billing & Plans](/platform/billing) for the complete feature comparison.

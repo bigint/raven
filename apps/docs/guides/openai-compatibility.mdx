@@ -257,13 +257,22 @@ Raven adds informational headers to every response:
 
 These headers are additive and do not break OpenAI SDK compatibility.
 
-## Custom Domain
+## Vercel AI SDK
 
-For an even more seamless experience, set up a [custom domain](/platform/custom-domains) so your API endpoint uses your own domain:
+You can also use Raven with the [Vercel AI SDK](/guides/vercel-ai-sdk) for `generateText`, `streamText`, and `useChat`:
 
 ```typescript
-const client = new OpenAI({
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { generateText } from "ai";
+
+const raven = createOpenAICompatible({
+  name: "raven",
   apiKey: "rk_live_...",
-  baseURL: "http://localhost:3001/v1"
+  baseURL: "http://localhost:3001/v1",
+});
+
+const { text } = await generateText({
+  model: raven("gpt-4o"),
+  prompt: "Hello!",
 });
 ```
