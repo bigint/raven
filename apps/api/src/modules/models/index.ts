@@ -1,5 +1,7 @@
 import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
+import { MODEL_CATALOG } from "@raven/data";
+import type { ModelDefinition } from "@raven/types";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 
@@ -17,17 +19,19 @@ export const createModelsModule = (db: Database) => {
       .from(providerConfigs)
       .where(eq(providerConfigs.isEnabled, true));
 
-    const result: { id: string; object: string; owned_by: string }[] = [];
+    const seen = new Set<string>();
+    const result: ModelDefinition[] = [];
 
     for (const config of configs) {
       if (provider && config.provider !== provider) continue;
       const models = config.models as string[];
-      for (const model of models) {
-        result.push({
-          id: model,
-          object: "model",
-          owned_by: config.provider
-        });
+      for (const modelId of models) {
+        if (seen.has(modelId)) continue;
+        seen.add(modelId);
+        const catalogEntry = MODEL_CATALOG[modelId];
+        if (catalogEntry) {
+          result.push(catalogEntry);
+        }
       }
     }
 
