@@ -1,7 +1,7 @@
 "use client";
 
 import type { Column } from "@raven/ui";
-import { Badge, ConfirmDialog, DataTable } from "@raven/ui";
+import { ConfirmDialog, DataTable } from "@raven/ui";
 import { Trash2, Users } from "lucide-react";
 import { useState } from "react";
 import type { AdminUser } from "../hooks/use-admin";
@@ -13,11 +13,6 @@ import {
 
 const ROLE_OPTIONS = ["admin", "member", "viewer"] as const;
 
-const RoleBadge = ({ role }: { readonly role: string }) => {
-  const variant =
-    role === "admin" ? "primary" : role === "member" ? "success" : "neutral";
-  return <Badge variant={variant}>{role}</Badge>;
-};
 
 export const UsersTab = () => {
   const { data: users, isPending } = useAdminUsers();
@@ -44,22 +39,19 @@ export const UsersTab = () => {
       header: "Role",
       key: "role",
       render: (user) => (
-        <div className="flex items-center gap-2">
-          <RoleBadge role={user.role} />
-          <select
-            className="rounded-md border border-border bg-background px-2 py-1 text-xs"
-            onChange={(e) =>
-              updateRole.mutate({ id: user.id, role: e.target.value })
-            }
-            value={user.role}
-          >
-            {ROLE_OPTIONS.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
-        </div>
+        <select
+          className="rounded border border-border bg-background px-2 py-1 text-[13px] text-foreground"
+          onChange={(e) =>
+            updateRole.mutate({ id: user.id, role: e.target.value })
+          }
+          value={user.role}
+        >
+          {ROLE_OPTIONS.map((r) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
+          ))}
+        </select>
       )
     },
     {
