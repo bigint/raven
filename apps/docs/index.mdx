@@ -1,35 +1,40 @@
 ---
 title: "Raven"
-description: "The unified AI gateway for managing LLM providers, costs, and governance at scale."
+description: "The open-source AI gateway you can self-host. Manage LLM providers, costs, and governance on your own infrastructure."
 ---
 
 ## What is Raven?
 
-Raven is an open-source AI gateway platform that sits between your application and LLM providers. It provides a single API to manage costs, enforce guardrails, and monitor usage — all through an OpenAI-compatible interface.
+Raven is an open-source AI gateway that you deploy on your own infrastructure. It sits between your application and LLM providers, giving you a single API to manage costs, enforce guardrails, and monitor usage — with full control over your data.
 
-<Card title="Quickstart" icon="rocket" href="/getting-started/quickstart" horizontal>
-  Get up and running with Raven in under 5 minutes.
-</Card>
+<Columns cols={2}>
+  <Card title="Self-Host with Docker" icon="server" href="/guides/self-hosting" horizontal>
+    Deploy Raven on your infrastructure in under 5 minutes with Docker Compose.
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/getting-started/quickstart" horizontal>
+    Try the managed cloud version at raven.dev.
+  </Card>
+</Columns>
 
-## Why Raven?
+## Why Self-Host?
 
 <Columns cols={3}>
-  <Card title="Unified API" icon="plug">
-    One OpenAI-compatible endpoint for multiple LLM providers. Switch models without changing code.
+  <Card title="Own Your Data" icon="lock">
+    Your API keys, request logs, and usage data never leave your infrastructure.
   </Card>
-  <Card title="Cost Control" icon="wallet">
-    Set budgets, track spend in real-time, and route requests to optimize costs.
+  <Card title="No Vendor Lock-in" icon="code-branch">
+    Fully open-source. Fork it, extend it, and run it however you want.
   </Card>
-  <Card title="Governance" icon="shield-check">
-    Enforce guardrails, detect PII, block sensitive topics, and maintain audit logs.
+  <Card title="Zero Added Latency" icon="gauge-high">
+    Deploy in the same network as your application for the fastest possible routing.
   </Card>
 </Columns>
 
 ## Core Features
 
 <Columns cols={2}>
-  <Card title="Providers" icon="server" href="/features/providers">
-    Connect and manage LLM provider credentials in one place.
+  <Card title="Unified API" icon="plug" href="/features/providers">
+    One OpenAI-compatible endpoint for multiple LLM providers. Switch models without changing code.
   </Card>
   <Card title="Virtual Keys" icon="key" href="/features/virtual-keys">
     Create scoped API keys with rate limits, budgets, and environment separation.
@@ -40,11 +45,11 @@ Raven is an open-source AI gateway platform that sits between your application a
   <Card title="Guardrails" icon="shield" href="/features/guardrails">
     Block harmful content, detect PII, and enforce content policies.
   </Card>
+  <Card title="Cost Control" icon="wallet" href="/features/budgets">
+    Set budgets, track spend in real-time, and get alerts before you overspend.
+  </Card>
   <Card title="Analytics" icon="chart-line" href="/features/analytics">
     Monitor usage, costs, and performance across all providers and models.
-  </Card>
-  <Card title="Webhooks" icon="bell" href="/features/webhooks">
-    Get notified about events in real-time via webhook integrations.
   </Card>
 </Columns>
 
@@ -56,8 +61,5 @@ Raven is an open-source AI gateway platform that sits between your application a
   </Card>
   <Card title="OpenAI Compatibility" icon="arrows-rotate" href="/guides/openai-compatibility">
     Drop-in replacement for the OpenAI SDK — change one line of code.
-  </Card>
-  <Card title="Self-Hosting" icon="server" href="/guides/self-hosting">
-    Deploy Raven on your own infrastructure with Docker.
   </Card>
 </Columns>

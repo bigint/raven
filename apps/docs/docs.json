@@ -32,6 +32,12 @@
             ]
           },
           {
+            "group": "Self-Hosting",
+            "pages": [
+              "guides/self-hosting"
+            ]
+          },
+          {
             "group": "Core Features",
             "pages": [
               "features/providers",
@@ -85,8 +91,7 @@
             "pages": [
               "guides/openai-compatibility",
               "guides/streaming",
-              "guides/sdk",
-              "guides/self-hosting"
+              "guides/sdk"
             ]
           }
         ]
