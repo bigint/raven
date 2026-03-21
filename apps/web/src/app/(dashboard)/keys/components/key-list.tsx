@@ -1,7 +1,7 @@
 "use client";
 
 import type { Column } from "@raven/ui";
-import { Badge, Button, DataTable, EmptyState } from "@raven/ui";
+import { Badge, Button, DataTable, EmptyState, Tooltip } from "@raven/ui";
 import { BarChart3, Check, Key, Pencil, Plus, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
@@ -120,34 +120,33 @@ const KeyList = ({
           render: (key) => (
             <div className="flex items-center justify-end gap-1">
               <Link href={`/analytics?keyId=${key.id}`}>
+                <Tooltip content="View analytics">
+                  <Button size="sm" type="button" variant="ghost">
+                    <BarChart3 className="size-4" />
+                  </Button>
+                </Tooltip>
+              </Link>
+              <Tooltip content="Edit key">
                 <Button
+                  onClick={() => onEdit(key)}
                   size="sm"
-                  title="View analytics"
                   type="button"
                   variant="ghost"
                 >
-                  <BarChart3 className="size-4" />
+                  <Pencil className="size-4" />
                 </Button>
-              </Link>
-              <Button
-                onClick={() => onEdit(key)}
-                size="sm"
-                title="Edit key"
-                type="button"
-                variant="ghost"
-              >
-                <Pencil className="size-4" />
-              </Button>
-              <Button
-                className="hover:bg-destructive/10 hover:text-destructive"
-                onClick={() => onDelete(key.id)}
-                size="sm"
-                title="Delete key"
-                type="button"
-                variant="ghost"
-              >
-                <Trash2 className="size-4" />
-              </Button>
+              </Tooltip>
+              <Tooltip content="Delete key">
+                <Button
+                  className="hover:bg-destructive/10 hover:text-destructive"
+                  onClick={() => onDelete(key.id)}
+                  size="sm"
+                  type="button"
+                  variant="ghost"
+                >
+                  <Trash2 className="size-4" />
+                </Button>
+              </Tooltip>
             </div>
           )
         }

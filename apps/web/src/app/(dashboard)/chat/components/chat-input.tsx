@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Switch, Textarea } from "@raven/ui";
+import { Button, Switch, Textarea, Tooltip } from "@raven/ui";
 import {
   ArrowUp,
   ChevronDown,
@@ -231,14 +231,15 @@ export const ChatInput = ({
             {/* Image upload - only shown when model supports vision */}
             {supportsVision && (
               <>
-                <Button
-                  className="p-1"
-                  onClick={() => fileInputRef.current?.click()}
-                  title="Attach image"
-                  variant="ghost"
-                >
-                  <ImagePlus className="size-3.5" />
-                </Button>
+                <Tooltip content="Attach image">
+                  <Button
+                    className="p-1"
+                    onClick={() => fileInputRef.current?.click()}
+                    variant="ghost"
+                  >
+                    <ImagePlus className="size-3.5" />
+                  </Button>
+                </Tooltip>
                 <input
                   accept={ACCEPTED_IMAGE_TYPES.join(",")}
                   className="hidden"
@@ -385,24 +386,25 @@ export const ChatInput = ({
 
             {/* Settings popover */}
             <div className="relative">
-              <Button
-                className={`p-1 ${openPopover === "settings" ? "bg-accent text-accent-foreground" : ""}`}
-                onClick={() => toggle("settings")}
-                title="More settings"
-                variant="ghost"
-              >
-                <svg
-                  className="size-3.5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  viewBox="0 0 24 24"
+              <Tooltip content="More settings">
+                <Button
+                  className={`p-1 ${openPopover === "settings" ? "bg-accent text-accent-foreground" : ""}`}
+                  onClick={() => toggle("settings")}
+                  variant="ghost"
                 >
-                  <circle cx="12" cy="12" r="1" />
-                  <circle cx="12" cy="5" r="1" />
-                  <circle cx="12" cy="19" r="1" />
-                </svg>
-              </Button>
+                  <svg
+                    className="size-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    viewBox="0 0 24 24"
+                  >
+                    <circle cx="12" cy="12" r="1" />
+                    <circle cx="12" cy="5" r="1" />
+                    <circle cx="12" cy="19" r="1" />
+                  </svg>
+                </Button>
+              </Tooltip>
 
               {openPopover === "settings" && (
                 <Dropdown onClose={() => setOpenPopover(null)}>

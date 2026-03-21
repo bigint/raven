@@ -1,7 +1,6 @@
 "use client";
 
 import { Menu } from "@base-ui/react/menu";
-import { Button } from "@raven/ui";
 import { ChevronDown, LogOut, Moon, Settings, Sun } from "lucide-react";
 import Link from "next/link";
 import { signOut } from "@/lib/auth-client";
@@ -44,7 +43,7 @@ export const UserMenu = ({ user }: UserMenuProps) => {
           <Menu.Positioner align="start" side="top" sideOffset={4}>
             <Menu.Popup className="min-w-[calc(var(--anchor-width))] rounded-md border border-border bg-popover py-1 shadow-md outline-none">
               <Menu.Item
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground outline-none select-none transition-colors data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground outline-none select-none transition-colors data-highlighted:bg-accent data-highlighted:text-accent-foreground"
                 closeOnClick
                 render={<Link href="/profile" />}
               >
@@ -52,7 +51,7 @@ export const UserMenu = ({ user }: UserMenuProps) => {
                 Profile
               </Menu.Item>
               <Menu.Item
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground outline-none select-none transition-colors data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground outline-none select-none transition-colors data-highlighted:bg-accent data-highlighted:text-accent-foreground"
                 onClick={toggleTheme}
               >
                 {theme === "light" ? (
@@ -64,7 +63,7 @@ export const UserMenu = ({ user }: UserMenuProps) => {
               </Menu.Item>
               <div className="my-1 border-t border-border" />
               <Menu.Item
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive outline-none select-none transition-colors data-[highlighted]:bg-destructive/10 data-[highlighted]:text-destructive"
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive outline-none select-none transition-colors data-highlighted:bg-destructive/10 data-highlighted:text-destructive"
                 onClick={handleSignOut}
               >
                 <LogOut className="size-4" />

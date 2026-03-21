@@ -2,7 +2,7 @@
 
 import { PROVIDER_LABELS } from "@raven/types";
 import type { Column } from "@raven/ui";
-import { Badge, Button, DataTable } from "@raven/ui";
+import { Badge, Button, DataTable, Tooltip } from "@raven/ui";
 import {
   Check,
   Loader2,
@@ -131,36 +131,39 @@ const ProviderList = ({
 
           return (
             <div className="flex items-center justify-end gap-1">
-              <Button
-                disabled={isTesting}
-                onClick={() => handleTest(provider.id)}
-                size="sm"
-                title="Test connection"
-                variant="ghost"
-              >
-                {isTesting ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  <Zap className="size-4" />
-                )}
-              </Button>
-              <Button
-                onClick={() => onEdit(provider)}
-                size="sm"
-                title="Edit provider"
-                variant="ghost"
-              >
-                <Pencil className="size-4" />
-              </Button>
-              <Button
-                className="hover:bg-destructive/10 hover:text-destructive"
-                onClick={() => onDelete(provider.id)}
-                size="sm"
-                title="Delete provider"
-                variant="ghost"
-              >
-                <Trash2 className="size-4" />
-              </Button>
+              <Tooltip content="Test connection">
+                <Button
+                  disabled={isTesting}
+                  onClick={() => handleTest(provider.id)}
+                  size="sm"
+                  variant="ghost"
+                >
+                  {isTesting ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Zap className="size-4" />
+                  )}
+                </Button>
+              </Tooltip>
+              <Tooltip content="Edit provider">
+                <Button
+                  onClick={() => onEdit(provider)}
+                  size="sm"
+                  variant="ghost"
+                >
+                  <Pencil className="size-4" />
+                </Button>
+              </Tooltip>
+              <Tooltip content="Delete provider">
+                <Button
+                  className="hover:bg-destructive/10 hover:text-destructive"
+                  onClick={() => onDelete(provider.id)}
+                  size="sm"
+                  variant="ghost"
+                >
+                  <Trash2 className="size-4" />
+                </Button>
+              </Tooltip>
             </div>
           );
         }

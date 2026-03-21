@@ -6,7 +6,7 @@ import {
   type ModelCategory,
   type ModelDefinition
 } from "@raven/types";
-import { Badge, Button, EmptyState, Select } from "@raven/ui";
+import { Badge, Button, EmptyState, Select, Tooltip } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import {
   Brain,
@@ -91,19 +91,20 @@ const CopyableSlug = ({ value }: { value: string }) => {
   };
 
   return (
-    <Button
-      className="group/copy mt-0.5 font-mono text-[11px] px-0 py-0 h-auto"
-      onClick={handleCopy}
-      title="Copy model ID"
-      variant="ghost"
-    >
-      {value}
-      {copied ? (
-        <Check className="size-3 text-green-600" />
-      ) : (
-        <Copy className="size-3 opacity-0 group-hover/copy:opacity-100" />
-      )}
-    </Button>
+    <Tooltip content="Copy model ID">
+      <Button
+        className="group/copy mt-0.5 font-mono text-[11px] px-0 py-0 h-auto"
+        onClick={handleCopy}
+        variant="ghost"
+      >
+        {value}
+        {copied ? (
+          <Check className="size-3 text-green-600" />
+        ) : (
+          <Copy className="size-3 opacity-0 group-hover/copy:opacity-100" />
+        )}
+      </Button>
+    </Tooltip>
   );
 };
 
@@ -145,12 +146,11 @@ const ModelCard = memo(function ModelCard({ model }: { model: ModelDefinition })
         </Badge>
       </div>
 
-      <p
-        className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground"
-        title={model.description}
-      >
-        {model.description}
-      </p>
+      <Tooltip content={model.description} side="bottom">
+        <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+          {model.description}
+        </p>
+      </Tooltip>
 
       <div className="mt-4 grid grid-cols-3 gap-3">
         <div className="rounded-lg bg-muted/50 px-3 py-2">

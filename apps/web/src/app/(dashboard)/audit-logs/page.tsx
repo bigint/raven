@@ -1,7 +1,7 @@
 "use client";
 
 import type { Column } from "@raven/ui";
-import { Badge, DataTable, PageHeader } from "@raven/ui";
+import { Badge, DataTable, PageHeader, Tooltip } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import {
   Key,
@@ -145,12 +145,11 @@ const columns: Column<AuditLog>[] = [
     headerClassName: "text-right",
     key: "createdAt",
     render: (log) => (
-      <span
-        className="text-sm text-muted-foreground tabular-nums"
-        title={new Date(log.createdAt).toLocaleString()}
-      >
-        {formatRelativeTime(log.createdAt)}
-      </span>
+      <Tooltip content={new Date(log.createdAt).toLocaleString()}>
+        <span className="text-sm text-muted-foreground tabular-nums">
+          {formatRelativeTime(log.createdAt)}
+        </span>
+      </Tooltip>
     )
   }
 ];

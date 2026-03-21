@@ -1,7 +1,7 @@
 "use client";
 
 import type { Column } from "@raven/ui";
-import { Badge, Button, DataTable } from "@raven/ui";
+import { Badge, Button, DataTable, Tooltip } from "@raven/ui";
 import { Meter } from "@base-ui/react/meter";
 import { DollarSign, Pencil, Plus, Trash2 } from "lucide-react";
 import type { Budget } from "../hooks/use-budgets";
@@ -79,23 +79,25 @@ const BudgetList = ({
       key: "actions",
       render: (budget) => (
         <div className="flex items-center justify-end gap-1">
-          <Button
-            onClick={() => onEdit(budget)}
-            size="sm"
-            title="Edit budget"
-            variant="ghost"
-          >
-            <Pencil className="size-4" />
-          </Button>
-          <Button
-            className="hover:bg-destructive/10 hover:text-destructive"
-            onClick={() => onDelete(budget.id)}
-            size="sm"
-            title="Delete budget"
-            variant="ghost"
-          >
-            <Trash2 className="size-4" />
-          </Button>
+          <Tooltip content="Edit budget">
+            <Button
+              onClick={() => onEdit(budget)}
+              size="sm"
+              variant="ghost"
+            >
+              <Pencil className="size-4" />
+            </Button>
+          </Tooltip>
+          <Tooltip content="Delete budget">
+            <Button
+              className="hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => onDelete(budget.id)}
+              size="sm"
+              variant="ghost"
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          </Tooltip>
         </div>
       )
     }

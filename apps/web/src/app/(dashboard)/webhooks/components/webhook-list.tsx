@@ -1,7 +1,7 @@
 "use client";
 
 import type { Column } from "@raven/ui";
-import { Badge, Button, DataTable } from "@raven/ui";
+import { Badge, Button, DataTable, Tooltip } from "@raven/ui";
 import { Pencil, Plus, Trash2, Webhook as WebhookIcon } from "lucide-react";
 import { useMemo } from "react";
 import { TextMorph } from "torph/react";
@@ -20,9 +20,11 @@ const columns: Column<Webhook>[] = [
     header: "URL",
     key: "url",
     render: (webhook) => (
-      <span className="truncate max-w-[280px] block" title={webhook.url}>
-        {webhook.url}
-      </span>
+      <Tooltip content={webhook.url}>
+        <span className="truncate max-w-[280px] block">
+          {webhook.url}
+        </span>
+      </Tooltip>
     )
   },
   {
@@ -70,23 +72,25 @@ const WebhookList = ({
         key: "actions",
         render: (webhook) => (
           <div className="flex items-center justify-end gap-1">
-            <Button
-              onClick={() => onEdit(webhook)}
-              size="sm"
-              title="Edit webhook"
-              variant="ghost"
-            >
-              <Pencil className="size-4" />
-            </Button>
-            <Button
-              className="hover:bg-destructive/10 hover:text-destructive"
-              onClick={() => onDelete(webhook.id)}
-              size="sm"
-              title="Delete webhook"
-              variant="ghost"
-            >
-              <Trash2 className="size-4" />
-            </Button>
+            <Tooltip content="Edit webhook">
+              <Button
+                onClick={() => onEdit(webhook)}
+                size="sm"
+                variant="ghost"
+              >
+                <Pencil className="size-4" />
+              </Button>
+            </Tooltip>
+            <Tooltip content="Delete webhook">
+              <Button
+                className="hover:bg-destructive/10 hover:text-destructive"
+                onClick={() => onDelete(webhook.id)}
+                size="sm"
+                variant="ghost"
+              >
+                <Trash2 className="size-4" />
+              </Button>
+            </Tooltip>
           </div>
         )
       }

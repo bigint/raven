@@ -1,7 +1,7 @@
 "use client";
 
 import type { Column } from "@raven/ui";
-import { Button, ConfirmDialog, DataTable, Select } from "@raven/ui";
+import { Button, ConfirmDialog, DataTable, Select, Tooltip } from "@raven/ui";
 import { Trash2, Users } from "lucide-react";
 import { useState } from "react";
 import type { AdminUser } from "../hooks/use-admin";
@@ -66,14 +66,15 @@ export const UsersTab = () => {
       header: "",
       key: "actions",
       render: (user) => (
-        <Button
-          className="p-1.5 hover:bg-destructive/10 hover:text-destructive"
-          onClick={() => setDeleteTarget(user)}
-          title="Delete user"
-          variant="ghost"
-        >
-          <Trash2 className="size-4" />
-        </Button>
+        <Tooltip content="Delete user">
+          <Button
+            className="p-1.5 hover:bg-destructive/10 hover:text-destructive"
+            onClick={() => setDeleteTarget(user)}
+            variant="ghost"
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        </Tooltip>
       )
     }
   ];

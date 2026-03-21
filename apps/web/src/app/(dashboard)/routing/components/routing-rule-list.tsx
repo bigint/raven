@@ -1,7 +1,7 @@
 "use client";
 
 import type { Column } from "@raven/ui";
-import { Badge, Button, DataTable } from "@raven/ui";
+import { Badge, Button, DataTable, Tooltip } from "@raven/ui";
 import { GitBranch, Pencil, Plus, Trash2 } from "lucide-react";
 import { useMemo } from "react";
 import { TextMorph } from "torph/react";
@@ -84,23 +84,25 @@ const RoutingRuleList = ({
         key: "actions",
         render: (rule) => (
           <div className="flex items-center justify-end gap-1">
-            <Button
-              onClick={() => onEdit(rule)}
-              size="sm"
-              title="Edit routing rule"
-              variant="ghost"
-            >
-              <Pencil className="size-4" />
-            </Button>
-            <Button
-              className="hover:bg-destructive/10 hover:text-destructive"
-              onClick={() => onDelete(rule.id)}
-              size="sm"
-              title="Delete routing rule"
-              variant="ghost"
-            >
-              <Trash2 className="size-4" />
-            </Button>
+            <Tooltip content="Edit routing rule">
+              <Button
+                onClick={() => onEdit(rule)}
+                size="sm"
+                variant="ghost"
+              >
+                <Pencil className="size-4" />
+              </Button>
+            </Tooltip>
+            <Tooltip content="Delete routing rule">
+              <Button
+                className="hover:bg-destructive/10 hover:text-destructive"
+                onClick={() => onDelete(rule.id)}
+                size="sm"
+                variant="ghost"
+              >
+                <Trash2 className="size-4" />
+              </Button>
+            </Tooltip>
           </div>
         )
       }

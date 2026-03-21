@@ -1,7 +1,7 @@
 "use client";
 
 import type { Column } from "@raven/ui";
-import { Badge, Button, DataTable } from "@raven/ui";
+import { Badge, Button, DataTable, Tooltip } from "@raven/ui";
 import { Pencil, Plus, Shield, Trash2 } from "lucide-react";
 import { useMemo } from "react";
 import { TextMorph } from "torph/react";
@@ -81,23 +81,25 @@ const GuardrailList = ({
         key: "actions",
         render: (guardrail) => (
           <div className="flex items-center justify-end gap-1">
-            <Button
-              onClick={() => onEdit(guardrail)}
-              size="sm"
-              title="Edit guardrail"
-              variant="ghost"
-            >
-              <Pencil className="size-4" />
-            </Button>
-            <Button
-              className="hover:bg-destructive/10 hover:text-destructive"
-              onClick={() => onDelete(guardrail.id)}
-              size="sm"
-              title="Delete guardrail"
-              variant="ghost"
-            >
-              <Trash2 className="size-4" />
-            </Button>
+            <Tooltip content="Edit guardrail">
+              <Button
+                onClick={() => onEdit(guardrail)}
+                size="sm"
+                variant="ghost"
+              >
+                <Pencil className="size-4" />
+              </Button>
+            </Tooltip>
+            <Tooltip content="Delete guardrail">
+              <Button
+                className="hover:bg-destructive/10 hover:text-destructive"
+                onClick={() => onDelete(guardrail.id)}
+                size="sm"
+                variant="ghost"
+              >
+                <Trash2 className="size-4" />
+              </Button>
+            </Tooltip>
           </div>
         )
       }

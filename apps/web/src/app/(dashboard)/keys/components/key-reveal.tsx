@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Modal } from "@raven/ui";
+import { Button, Modal, Tooltip } from "@raven/ui";
 import { AlertTriangle, Check, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
@@ -35,20 +35,21 @@ const KeyReveal = ({ keyValue, onClose }: KeyRevealProps) => {
             <span className="flex-1 truncate font-mono text-sm">
               {keyValue}
             </span>
-            <Button
-              className="shrink-0"
-              onClick={handleCopy}
-              size="sm"
-              title="Copy key"
-              type="button"
-              variant="ghost"
-            >
-              {copied ? (
-                <Check className="size-4 text-green-600" />
-              ) : (
-                <Copy className="size-4" />
-              )}
-            </Button>
+            <Tooltip content="Copy key">
+              <Button
+                className="shrink-0"
+                onClick={handleCopy}
+                size="sm"
+                type="button"
+                variant="ghost"
+              >
+                {copied ? (
+                  <Check className="size-4 text-green-600" />
+                ) : (
+                  <Copy className="size-4" />
+                )}
+              </Button>
+            </Tooltip>
           </div>
         </div>
       </div>
