@@ -1,5 +1,9 @@
 name: Docker
 
+concurrency:
+  group: docker-deploy
+  cancel-in-progress: true
+
 on:
   push:
     branches:
