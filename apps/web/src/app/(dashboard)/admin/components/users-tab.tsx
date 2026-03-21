@@ -1,7 +1,7 @@
 "use client";
 
 import type { Column } from "@raven/ui";
-import { ConfirmDialog, DataTable } from "@raven/ui";
+import { ConfirmDialog, DataTable, Select } from "@raven/ui";
 import { Trash2, Users } from "lucide-react";
 import { useState } from "react";
 import type { AdminUser } from "../hooks/use-admin";
@@ -11,8 +11,11 @@ import {
   useUpdateUserRole
 } from "../hooks/use-admin";
 
-const ROLE_OPTIONS = ["admin", "member", "viewer"] as const;
-
+const ROLE_OPTIONS = [
+  { value: "admin", label: "Admin" },
+  { value: "member", label: "Member" },
+  { value: "viewer", label: "Viewer" },
+];
 
 export const UsersTab = () => {
   const { data: users, isPending } = useAdminUsers();
@@ -39,19 +42,14 @@ export const UsersTab = () => {
       header: "Role",
       key: "role",
       render: (user) => (
-        <select
-          className="rounded border border-border bg-background px-2 py-1 text-[13px] text-foreground"
-          onChange={(e) =>
-            updateRole.mutate({ id: user.id, role: e.target.value })
+        <Select
+          className="w-32"
+          onChange={(value) =>
+            updateRole.mutate({ id: user.id, role: value })
           }
+          options={ROLE_OPTIONS}
           value={user.role}
-        >
-          {ROLE_OPTIONS.map((r) => (
-            <option key={r} value={r}>
-              {r}
-            </option>
-          ))}
-        </select>
+        />
       )
     },
     {
