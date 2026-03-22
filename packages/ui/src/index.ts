@@ -1,35 +1,18 @@
 export { cn } from "./cn";
-export { Avatar, type AvatarProps } from "./components/avatar";
-export { Badge, type BadgeProps, badgeVariants } from "./components/badge";
-export { Button, type ButtonProps, buttonVariants } from "./components/button";
-export { Checkbox, type CheckboxProps } from "./components/checkbox";
-export {
-  ConfirmDialog,
-  type ConfirmDialogProps
-} from "./components/confirm-dialog";
-export {
-  type Column,
-  DataTable,
-  type DataTableProps
-} from "./components/data-table";
-export { EmptyState, type EmptyStateProps } from "./components/empty-state";
-export { Input, type InputProps } from "./components/input";
-export { Modal, type ModalProps } from "./components/modal";
-export { FadeIn, StaggerItem, StaggerList } from "./components/motion";
-export { PageHeader, type PageHeaderProps } from "./components/page-header";
-export {
-  type PillTabOption,
-  PillTabs,
-  type PillTabsProps
-} from "./components/pill-tabs";
+export { Badge } from "./components/badge";
+export { Button } from "./components/button";
+export { Checkbox } from "./components/checkbox";
+export { ConfirmDialog } from "./components/confirm-dialog";
+export { type Column, DataTable } from "./components/data-table";
+export { EmptyState } from "./components/empty-state";
+export { Input } from "./components/input";
+export { Modal } from "./components/modal";
+export { PageHeader } from "./components/page-header";
+export { type PillTabOption, PillTabs } from "./components/pill-tabs";
 export { RavenLogo } from "./components/raven-logo";
-export {
-  Select,
-  type SelectOption,
-  type SelectProps
-} from "./components/select";
-export { Spinner, type SpinnerProps } from "./components/spinner";
-export { Switch, type SwitchProps } from "./components/switch";
-export { type Tab, Tabs, type TabsProps } from "./components/tabs";
-export { Textarea, type TextareaProps } from "./components/textarea";
-export { Tooltip, type TooltipProps } from "./components/tooltip";
+export { Select, type SelectOption } from "./components/select";
+export { Spinner } from "./components/spinner";
+export { Switch } from "./components/switch";
+export { Tabs } from "./components/tabs";
+export { Textarea } from "./components/textarea";
+export { Tooltip } from "./components/tooltip";

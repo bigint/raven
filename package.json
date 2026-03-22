@@ -51,7 +51,6 @@
     "dev:web": "pnpm --filter @raven/web dev",
     "format": "biome format --write .",
     "lint": "biome check --write .",
-    "sync:models": "tsx --env-file=.env apps/api/src/sync-models.ts",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck"
   },
