@@ -35,8 +35,9 @@ coverage/
 # Logs
 *.log
 
-# Drizzle
+# Drizzle (keep packages/db/drizzle/ tracked for migrations)
 drizzle/
+!packages/db/drizzle/
 
 # Secrets & credentials
 *.key
