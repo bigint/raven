@@ -52,11 +52,7 @@ const handleBudgetAlert = async (
   );
 };
 
-export const initEmailDispatcher = (
-  db: Database,
-  redis: Redis,
-  _appUrl: string
-): void => {
+export const initEmailDispatcher = (db: Database, redis: Redis): void => {
   const subscriber = redis.duplicate();
 
   subscriber.on("error", (err) => {

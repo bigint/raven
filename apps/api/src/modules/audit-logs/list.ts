@@ -4,7 +4,7 @@ import { desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import type { AuthEnv } from "@/lib/types";
 
-export const createAuditLogsModule = (db: Database, _redis?: unknown) => {
+export const createAuditLogsModule = (db: Database) => {
   const app = new Hono<AuthEnv>();
 
   app.get("/", async (c) => {

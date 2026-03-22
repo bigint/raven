@@ -265,7 +265,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
       (usage) => {
         finalizeLog({
           cachedTokens: usage.cachedTokens,
-          cost: estimateCost(activeProvider.name, requestedModel, usage),
+          cost: estimateCost(requestedModel, usage),
           inputTokens: usage.inputTokens,
           outputTokens: usage.outputTokens,
           reasoningTokens: usage.reasoningTokens
@@ -309,11 +309,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
 
       finalizeLog({
         cachedTokens: formatted.usage.cachedTokens,
-        cost: estimateCost(
-          activeProvider.name,
-          requestedModel,
-          formatted.usage
-        ),
+        cost: estimateCost(requestedModel, formatted.usage),
         hasToolUse: result.toolCalls?.length ? true : undefined,
         inputTokens: formatted.usage.inputTokens,
         outputTokens: formatted.usage.outputTokens,

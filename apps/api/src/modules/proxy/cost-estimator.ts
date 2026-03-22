@@ -2,11 +2,7 @@ import { getModelPricing } from "@raven/data";
 
 import type { TokenUsage } from "./usage-mapper";
 
-export const estimateCost = (
-  _provider: string,
-  model: string,
-  usage: TokenUsage
-): number => {
+export const estimateCost = (model: string, usage: TokenUsage): number => {
   const pricing = getModelPricing(model);
   if (!pricing) return 0;
 

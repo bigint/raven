@@ -43,7 +43,7 @@ export const db = createDatabase(env.DATABASE_URL);
 export const redis = getRedis(env.REDIS_URL);
 initEventBus(redis);
 initWebhookDispatcher(db, redis);
-initEmailDispatcher(db, redis, env.APP_URL);
+initEmailDispatcher(db, redis);
 
 // Flush buffered lastUsedAt timestamps every 60 seconds
 const flushInterval = setInterval(() => {
@@ -165,13 +165,13 @@ v1.use("*", createAuthMiddleware(auth));
 v1.use("*", createWriterMiddleware());
 v1.get("/available-models", listAvailableModels(db));
 v1.route("/providers", createProvidersModule(db, env, redis));
-v1.route("/keys", createKeysModule(db, redis));
-v1.route("/budgets", createBudgetsModule(db, redis));
-v1.route("/guardrails", createGuardrailsModule(db, redis));
+v1.route("/keys", createKeysModule(db));
+v1.route("/budgets", createBudgetsModule(db));
+v1.route("/guardrails", createGuardrailsModule(db));
 v1.route("/analytics", createAnalyticsModule(db, redis));
-v1.route("/webhooks", createWebhooksModule(db, redis));
+v1.route("/webhooks", createWebhooksModule(db));
 v1.route("/routing-rules", createRoutingRulesModule(db));
-v1.route("/audit-logs", createAuditLogsModule(db, redis));
+v1.route("/audit-logs", createAuditLogsModule(db));
 app.route("/v1", v1);
 
 app.notFound((c) =>
