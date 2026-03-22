@@ -27,7 +27,7 @@ COPY --from=builder /app/apps/cron/dist ./cron/
 COPY --from=builder /app/apps/web/.next/standalone ./web/
 COPY --from=builder /app/apps/web/.next/static ./web/.next/static
 COPY --from=builder /app/packages/db/drizzle ./drizzle/
-COPY --from=builder /app/packages/db/src/migrate.mjs ./migrate.mjs
+COPY --from=builder /app/packages/db/dist/migrate.mjs ./migrate.mjs
 COPY --from=builder /app/node_modules ./node_modules/
 COPY docker-entrypoint.sh ./
 

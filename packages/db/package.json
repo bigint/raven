@@ -14,6 +14,7 @@
     }
   },
   "scripts": {
+    "build": "esbuild src/migrate.mjs --bundle --platform=node --format=esm --outfile=dist/migrate.mjs",
     "generate": "set -a && . ../../.env && set +a && drizzle-kit generate",
     "migrate": "set -a && . ../../.env && set +a && drizzle-kit migrate",
     "studio": "set -a && . ../../.env && set +a && drizzle-kit studio",
@@ -27,6 +28,7 @@
   "devDependencies": {
     "@types/node": "^25.5.0",
     "drizzle-kit": "^0.31.10",
+    "esbuild": "^0.25.12",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
