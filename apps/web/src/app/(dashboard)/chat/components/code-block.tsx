@@ -9,7 +9,7 @@ import { useCallback, useState } from "react";
 // Copy button for code blocks
 // ---------------------------------------------------------------------------
 
-export const CopyButton = ({ text }: { readonly text: string }) => {
+const CopyButton = ({ text }: { readonly text: string }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(() => {

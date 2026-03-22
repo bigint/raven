@@ -19,7 +19,7 @@ const getResend = (apiKey: string): Resend => {
   return cachedClient.client;
 };
 
-export const sendEmail = async (
+const sendEmail = async (
   config: EmailConfig,
   options: {
     to: string;
