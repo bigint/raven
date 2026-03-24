@@ -1,4 +1,5 @@
 import Redis from "ioredis";
+import { log } from "./logger";
 
 let redis: Redis | null = null;
 
@@ -9,7 +10,7 @@ export const getRedis = (url: string): Redis => {
       maxRetriesPerRequest: 3
     });
     redis.on("error", (err) => {
-      console.error("Redis connection error:", err);
+      log.error("Redis connection error", err);
     });
   }
   return redis;

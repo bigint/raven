@@ -2,6 +2,7 @@ import type { Database } from "@raven/db";
 import { requestLogs } from "@raven/db";
 import type { Redis } from "ioredis";
 import { publishEvent } from "@/lib/events";
+import { log } from "@/lib/logger";
 import { incrementBudgetSpend } from "./budget-check";
 
 export interface LogData {
@@ -59,7 +60,7 @@ export const flushLogBuffer = async (): Promise<void> => {
   await bufferDb
     .insert(requestLogs)
     .values(batch)
-    .catch((err) => console.error("Failed to flush log buffer:", err));
+    .catch((err) => log.error("Failed to flush log buffer", err));
 };
 
 const bufferLogEntry = (db: Database, data: LogData): void => {

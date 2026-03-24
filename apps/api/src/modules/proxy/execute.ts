@@ -3,6 +3,7 @@ import type { Database } from "@raven/db";
 import type { LanguageModel, ToolSet } from "ai";
 import { generateText, jsonSchema, streamText, tool } from "ai";
 import type { Redis } from "ioredis";
+import { log } from "@/lib/logger";
 import { PROVIDERS } from "@/lib/providers";
 import {
   createProviderModel,
@@ -223,10 +224,10 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
         activeProvider.name = fb.providerName;
         return await tryExecute(makeModel(fb.decryptedApiKey, fb.providerName));
       } catch (fbErr) {
-        console.error(
-          `Fallback ${fb.providerName} (${fb.providerConfigId}) failed:`,
-          fbErr instanceof Error ? fbErr.message : fbErr
-        );
+        log.error("Fallback provider failed", fbErr, {
+          provider: fb.providerName,
+          providerConfigId: fb.providerConfigId
+        });
       }
     }
 

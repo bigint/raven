@@ -109,14 +109,15 @@ const deliverWebhook = async (
       factor: 2,
       minTimeout: 1000,
       onFailedAttempt: (ctx) => {
-        console.error(
-          `Webhook attempt ${ctx.attemptNumber} failed for ${url}: ${ctx.error.message}`
-        );
+        log.error("Webhook delivery attempt failed", ctx.error, {
+          attempt: ctx.attemptNumber,
+          url
+        });
       },
       retries: 3
     }
   ).catch(() => {
-    console.error(`Webhook delivery failed after all retries: ${url}`);
+    log.error("Webhook delivery failed after all retries", undefined, { url });
   });
 };
 
@@ -124,11 +125,11 @@ export const initWebhookDispatcher = (db: Database, redis: Redis): void => {
   const subscriber = redis.duplicate();
 
   subscriber.on("error", (err) => {
-    console.error("Webhook dispatcher Redis error:", err);
+    log.error("Webhook dispatcher Redis error", err);
   });
 
   subscriber.subscribe("raven:events").catch((err) => {
-    console.error("Failed to subscribe to events:", err);
+    log.error("Failed to subscribe to events", err);
   });
 
   subscriber.on("message", (_channel, message) => {
@@ -156,7 +157,7 @@ export const initWebhookDispatcher = (db: Database, redis: Redis): void => {
           );
         }
       } catch (err) {
-        console.error("Webhook dispatcher error:", err);
+        log.error("Webhook dispatcher error", err);
       }
     })();
   });

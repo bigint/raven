@@ -3,6 +3,7 @@ import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { and, eq, ne } from "drizzle-orm";
 import { decrypt } from "@/lib/crypto";
+import { log } from "@/lib/logger";
 
 export interface FallbackProvider {
   decryptedApiKey: string;
@@ -53,9 +54,10 @@ export const getFallbackProviders = async (
         providerName: config.provider
       });
     } catch {
-      console.error(
-        `Failed to decrypt fallback provider credentials: ${config.provider} (${config.id})`
-      );
+      log.error("Failed to decrypt fallback provider credentials", undefined, {
+        provider: config.provider,
+        providerConfigId: config.id
+      });
     }
   }
 

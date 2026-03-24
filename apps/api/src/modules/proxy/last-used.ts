@@ -2,11 +2,12 @@ import type { Database } from "@raven/db";
 import { virtualKeys } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
+import { log } from "@/lib/logger";
 
 export const updateLastUsed = (redis: Redis, keyId: string): void => {
   redis
     .set(`lastused:${keyId}`, Date.now().toString(), "EX", 300)
-    .catch((err) => console.error("Failed to buffer lastUsedAt:", err));
+    .catch((err) => log.error("Failed to buffer lastUsedAt", err));
 };
 
 /**
@@ -44,7 +45,7 @@ export const flushLastUsed = async (
         .update(virtualKeys)
         .set({ lastUsedAt: timestamp })
         .where(eq(virtualKeys.id, keyId))
-        .catch((err) => console.error("Failed to flush lastUsedAt:", err))
+        .catch((err) => log.error("Failed to flush lastUsedAt", err))
     )
   );
 
@@ -52,7 +53,7 @@ export const flushLastUsed = async (
     await redis
       .del(...keysToDelete)
       .catch((err) =>
-        console.error("Failed to delete lastUsed Redis keys:", err)
+        log.error("Failed to delete lastUsed Redis keys", err)
       );
   }
 };

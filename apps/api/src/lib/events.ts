@@ -1,4 +1,5 @@
 import type { Redis } from "ioredis";
+import { log } from "./logger";
 
 let redisInstance: Redis | null = null;
 
@@ -17,6 +18,6 @@ export const publishEvent = async (
   await redisInstance
     .publish("raven:events", JSON.stringify(event))
     .catch((err) => {
-      console.error("Failed to publish event:", err);
+      log.error("Failed to publish event", err, { type });
     });
 };
