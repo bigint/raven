@@ -53,13 +53,6 @@ export const SettingsTab = () => {
   return (
     <div className="max-w-lg space-y-6">
       <Input
-        label="Instance Name"
-        onChange={(e) => setInstanceName(e.target.value)}
-        placeholder="My Raven Instance"
-        value={instanceName}
-      />
-
-      <Input
         description="Number of days to retain analytics data"
         label="Analytics Retention (days)"
         min={1}

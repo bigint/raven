@@ -16,7 +16,6 @@ const SEED_USERS = [
 
 const DEFAULT_SETTINGS = [
   { key: 'analytics_retention_days', value: '365' },
-  { key: 'instance_name', value: 'Raven' },
 ]
 
 async function seed() {
