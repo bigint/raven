@@ -9,7 +9,7 @@
     "@types/node": "^25.5.0",
     "drizzle-orm": "^0.45.1",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.2"
   },
   "homepage": "https://github.com/bigint/raven",
   "keywords": [
