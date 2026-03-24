@@ -53,9 +53,7 @@ export const SetupWizard = () => {
       });
       router.push("/overview");
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to complete setup"
-      );
+      setError(err instanceof Error ? err.message : "Failed to complete setup");
     } finally {
       setIsLoading(false);
     }
@@ -134,10 +132,7 @@ export const SetupWizard = () => {
 
               <form className="mt-8 space-y-4" onSubmit={handleNext}>
                 <div className="space-y-1.5">
-                  <label
-                    className="block text-sm font-medium"
-                    htmlFor="name"
-                  >
+                  <label className="block text-sm font-medium" htmlFor="name">
                     Name
                   </label>
                   <input
@@ -151,10 +146,7 @@ export const SetupWizard = () => {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label
-                    className="block text-sm font-medium"
-                    htmlFor="email"
-                  >
+                  <label className="block text-sm font-medium" htmlFor="email">
                     Email
                   </label>
                   <input
@@ -185,10 +177,7 @@ export const SetupWizard = () => {
                     value={data.password}
                   />
                 </div>
-                <Button
-                  className="w-full rounded-lg py-2.5"
-                  type="submit"
-                >
+                <Button className="w-full rounded-lg py-2.5" type="submit">
                   Next
                 </Button>
               </form>
@@ -237,7 +226,7 @@ export const SetupWizard = () => {
                     className="flex-1 rounded-lg py-2.5"
                     onClick={handleBack}
                     type="button"
-                    variant="outline"
+                    variant="secondary"
                   >
                     Back
                   </Button>
