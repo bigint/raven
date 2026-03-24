@@ -44,16 +44,18 @@ A two-step onboarding wizard at `/setup` that appears on fresh instances (zero u
 2. **Instance Name** — single text input, pre-filled with "Raven", can be changed
 
 **Middleware changes (`apps/web/src/middleware.ts`):**
-- On every request, check setup status (cached — see below)
+- Use the session cookie as a proxy for "setup is done": if a session cookie exists, setup is definitely complete (a user exists). No API call needed for authenticated users.
+- For unauthenticated requests: the middleware calls `GET /v1/setup/status` only when there is no session cookie and the user is hitting a non-setup route. This limits the API call to the narrow window where setup might be needed.
 - If `needsSetup` is true and path is not `/setup`, redirect to `/setup`
 - If `needsSetup` is false and path is `/setup`, redirect to `/overview`
 - Add `/setup` to the matcher
+- The API base URL is available via `process.env.NEXT_PUBLIC_API_URL` (available at build time in Next.js middleware via `next.config.ts` env configuration, or hardcoded as the existing `API_URL` pattern)
 
-**Setup status caching:**
-- The middleware calls `GET /v1/setup/status` on each request
-- Once setup is complete, the API always returns `needsSetup: false` (there will always be ≥1 user)
-- The API endpoint is lightweight (single count query) so no complex caching needed
-- After setup completes, the redirect to `/overview` triggers a normal auth flow
+**Short-circuit logic:**
+- Session cookie present → skip setup check entirely (users exist)
+- No session cookie + path is `/setup` → allow through (they may be doing setup)
+- No session cookie + path is auth route (`/sign-in`, `/sign-up`) → call `GET /v1/setup/status` to determine if setup is needed; if so, redirect to `/setup`
+- If the API is unreachable during the setup check, fall through to normal routing (don't block the app)
 
 ### API Module
 
@@ -63,13 +65,13 @@ A two-step onboarding wizard at `/setup` that appears on fresh instances (zero u
 
 **Registration in `apps/api/src/index.ts`:**
 - Mount as public routes (no auth middleware): `app.route("/v1/setup", createSetupModule(db, auth, env))`
-- Placed alongside other public routes (models, public settings, invitations)
+- Must be registered after the OpenAI-compat module (line 136) and proxy catch-all (line 138), but before the protected v1 group (line 175) — alongside the other public routes at lines 141-147 (models, public settings, invitations)
 
 ## Step Flow
 
 ```
-User visits any page
-  → Middleware checks GET /v1/setup/status
+User visits any page (no session cookie)
+  → Middleware calls GET /v1/setup/status
   → needsSetup: true → redirect to /setup
   → /setup Step 1: Admin account form
   → User fills name, email, password → clicks "Next"
