@@ -37,16 +37,15 @@ export const createSetupModule = (db: Database, auth: Auth) => {
 
     // Create admin user via Better Auth (database hook auto-promotes first user to admin)
     // TOCTOU race is acceptable; signUpEmail will fail if email is already taken
-    let result;
-    try {
-      result = await auth.api.signUpEmail({
+    const result = await auth.api
+      .signUpEmail({
         body: { email, name, password }
+      })
+      .catch(() => {
+        throw new ConflictError(
+          "Failed to create admin account — email may already be registered"
+        );
       });
-    } catch {
-      throw new ConflictError(
-        "Failed to create admin account — email may already be registered"
-      );
-    }
 
     // Save instance name if provided
     if (instanceName) {
