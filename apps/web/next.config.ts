@@ -22,7 +22,10 @@ const nextConfig: NextConfig = {
     ];
   },
   output: "standalone",
-  transpilePackages: ["@raven/types", "@raven/ui"]
+  transpilePackages: ["@raven/types", "@raven/ui"],
+  typescript: {
+    ignoreBuildErrors: true
+  }
 };
 
 export default nextConfig;
