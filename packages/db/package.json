@@ -30,6 +30,6 @@
     "drizzle-kit": "^0.31.10",
     "esbuild": "^0.27.4",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.2"
   }
 }

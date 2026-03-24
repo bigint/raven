@@ -10,8 +10,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.63",
-    "@ai-sdk/openai": "^3.0.47",
+    "@ai-sdk/anthropic": "^3.0.64",
+    "@ai-sdk/openai": "^3.0.48",
     "@hono/node-server": "^1.19.11",
     "@hono/zod-validator": "^0.7.6",
     "@raven/auth": "workspace:*",
@@ -20,11 +20,11 @@
     "@raven/db": "workspace:*",
     "@raven/email": "workspace:*",
     "@raven/types": "workspace:*",
-    "ai": "^6.0.134",
+    "ai": "^6.0.137",
     "better-auth": "^1.5.6",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.45.1",
-    "hono": "^4.12.8",
+    "hono": "^4.12.9",
     "ioredis": "^5.10.1",
     "js-tiktoken": "^1.0.21",
     "p-retry": "^7.1.1",
@@ -35,6 +35,6 @@
     "@types/node": "^25.5.0",
     "esbuild": "^0.27.4",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.2"
   }
 }
