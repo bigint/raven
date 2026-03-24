@@ -4,6 +4,7 @@ import { Button } from "@raven/ui";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { api } from "@/lib/api";
+import { signIn } from "@/lib/auth-client";
 
 export const SetupWizard = () => {
   const router = useRouter();
@@ -20,6 +21,7 @@ export const SetupWizard = () => {
 
     try {
       await api.post("/v1/setup/complete", { email, name, password });
+      await signIn.email({ email, password });
       router.push("/overview");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to complete setup");

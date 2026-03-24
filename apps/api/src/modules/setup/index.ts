@@ -47,30 +47,13 @@ export const createSetupModule = (db: Database, auth: Auth) => {
         );
       });
 
-    // Return session headers so the user is signed in
-    const authHeaders =
-      "headers" in result ? (result.headers as Headers) : undefined;
-    const responseHeaders: Record<string, string> = {
-      "Content-Type": "application/json"
-    };
-    if (authHeaders) {
-      for (const [key, value] of authHeaders.entries()) {
-        responseHeaders[key] = value;
+    return success(c, {
+      user: {
+        email: result.user.email,
+        id: result.user.id,
+        name: result.user.name
       }
-    }
-
-    return new Response(
-      JSON.stringify({
-        data: {
-          user: {
-            email: result.user.email,
-            id: result.user.id,
-            name: result.user.name
-          }
-        }
-      }),
-      { headers: responseHeaders, status: 200 }
-    );
+    });
   });
 
   return app;
