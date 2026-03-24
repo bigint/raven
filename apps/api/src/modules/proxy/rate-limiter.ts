@@ -51,7 +51,7 @@ export const checkRateLimit = async (
       if (rpm !== null) {
         await getLimiter(redis, "rl:rpm", rpm, 60)
           .reward(keyId)
-          .catch(() => {});
+          .catch(() => undefined); // Best-effort RPM token refund; failure is non-critical
       }
       throw new RateLimitError("Rate limit exceeded (requests per day)");
     }

@@ -4,6 +4,7 @@ import { sendBudgetAlertEmail } from "@raven/email";
 import { eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
 import { getEmailConfig } from "./email-config";
+import { log } from "./logger";
 
 interface EventPayload {
   data: Record<string, unknown>;
@@ -56,11 +57,11 @@ export const initEmailDispatcher = (db: Database, redis: Redis): void => {
   const subscriber = redis.duplicate();
 
   subscriber.on("error", (err) => {
-    console.error("Email dispatcher Redis error:", err);
+    log.error("Email dispatcher Redis error", err);
   });
 
   subscriber.subscribe("raven:events").catch((err) => {
-    console.error("Failed to subscribe to events for email:", err);
+    log.error("Failed to subscribe to events for email", err);
   });
 
   subscriber.on("message", (_channel, message) => {
@@ -79,10 +80,10 @@ export const initEmailDispatcher = (db: Database, redis: Redis): void => {
             break;
         }
       } catch (err) {
-        console.error(`Email dispatcher error (${event.type}):`, err);
+        log.error("Email dispatcher error", err, { eventType: event.type });
       }
     })();
   });
 
-  console.log("Email dispatcher: listening for events");
+  log.info("Email dispatcher: listening for events");
 };

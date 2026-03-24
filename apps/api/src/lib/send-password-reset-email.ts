@@ -1,6 +1,7 @@
 import type { Database } from "@raven/db";
 import { sendPasswordResetEmail as send } from "@raven/email";
 import { getEmailConfig } from "./email-config";
+import { log } from "./logger";
 
 export const sendPasswordResetEmail = async (
   db: Database,
@@ -13,6 +14,6 @@ export const sendPasswordResetEmail = async (
   try {
     await send(config, user.email, resetUrl);
   } catch (err) {
-    console.error("Failed to send password reset email:", err);
+    log.error("Failed to send password reset email", err);
   }
 };

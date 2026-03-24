@@ -5,14 +5,14 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Button } from "./button";
 
 interface ConfirmDialogProps {
-  open: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  title: string;
-  description: string;
-  confirmLabel?: string;
-  loading?: boolean;
-  variant?: "destructive" | "primary";
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly onConfirm: () => void;
+  readonly title: string;
+  readonly description: string;
+  readonly confirmLabel?: string;
+  readonly loading?: boolean;
+  readonly variant?: "destructive" | "primary";
 }
 
 const ConfirmDialog = ({

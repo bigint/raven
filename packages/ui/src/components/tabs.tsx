@@ -4,15 +4,15 @@ import { Tabs as BaseTabs } from "@base-ui/react/tabs";
 import { cn } from "../cn";
 
 interface Tab {
-  value: string;
-  label: string;
-  count?: number;
+  readonly value: string;
+  readonly label: string;
+  readonly count?: number;
 }
 
 interface TabsProps {
-  tabs: Tab[];
-  value: string;
-  onChange: (value: string) => void;
+  readonly tabs: Tab[];
+  readonly value: string;
+  readonly onChange: (value: string) => void;
 }
 
 const Tabs = ({ tabs, value, onChange }: TabsProps) => (

@@ -170,7 +170,7 @@ The app uses modern web technologies:
 ### File Naming Conventions
 
 - **React Components**: `snake-case.tsx` (e.g., `user-profile.tsx`)
-- **Utility Files**: `camelCase.ts` (e.g., `formatDate.ts`)
+- **Utility Files**: `kebab-case.ts` (e.g., `format-date.ts`)
 - **Hooks**: `use-*.ts` (e.g., `use-profile.ts`)
 - **Types**: `*.types.ts` (e.g., `profile.types.ts`)
 - **Route Files**: Next.js App Router conventions (`page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`)

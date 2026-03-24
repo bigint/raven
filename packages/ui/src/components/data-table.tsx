@@ -10,30 +10,30 @@ import { EmptyState } from "./empty-state";
 import { Spinner } from "./spinner";
 
 interface Column<T> {
-  key: string;
-  header: string;
-  sortable?: boolean;
-  className?: string;
-  headerClassName?: string;
-  render: (item: T, index: number) => ReactNode;
+  readonly key: string;
+  readonly header: string;
+  readonly sortable?: boolean;
+  readonly className?: string;
+  readonly headerClassName?: string;
+  readonly render: (item: T, index: number) => ReactNode;
 }
 
 interface DataTableProps<T> {
-  columns: Column<T>[];
-  data: T[];
-  keyExtractor: (item: T) => string;
-  loading?: boolean;
-  loadingMessage?: string;
-  emptyIcon?: ReactNode;
-  emptyTitle?: string;
-  emptyAction?: ReactNode;
-  animateRows?: boolean;
-  hiddenColumns?: string[];
-  onToggleColumn?: (key: string) => void;
-  sortKey?: string;
-  sortDirection?: "asc" | "desc";
-  onSort?: (key: string) => void;
-  maxDisplayRows?: number;
+  readonly columns: Column<T>[];
+  readonly data: T[];
+  readonly keyExtractor: (item: T) => string;
+  readonly loading?: boolean;
+  readonly loadingMessage?: string;
+  readonly emptyIcon?: ReactNode;
+  readonly emptyTitle?: string;
+  readonly emptyAction?: ReactNode;
+  readonly animateRows?: boolean;
+  readonly hiddenColumns?: string[];
+  readonly onToggleColumn?: (key: string) => void;
+  readonly sortKey?: string;
+  readonly sortDirection?: "asc" | "desc";
+  readonly onSort?: (key: string) => void;
+  readonly maxDisplayRows?: number;
 }
 
 const DataTable = <T,>({

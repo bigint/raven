@@ -7,6 +7,7 @@ import { compress } from "hono/compress";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { initEmailDispatcher } from "./lib/email-dispatcher";
+import { log } from "./lib/logger";
 import { AppError } from "./lib/errors";
 import { initEventBus } from "./lib/events";
 import { getRedis } from "./lib/redis";
@@ -114,7 +115,7 @@ app.onError((err, c) => {
     });
   }
 
-  console.error("Unhandled error:", err);
+  log.error("Unhandled error", err);
   return c.json(
     {
       detail: "Internal server error",
@@ -194,19 +195,19 @@ app.notFound((c) =>
 const server = serve(
   { fetch: app.fetch, hostname: env.API_HOST, port: env.API_PORT },
   (info) => {
-    console.log(`Raven API running on http://localhost:${info.port}`);
+    log.info("Raven API started", { host: env.API_HOST, port: info.port });
   }
 );
 
 const shutdown = async (): Promise<void> => {
-  console.log("Shutting down gracefully...");
+  log.info("Shutting down gracefully");
   server.close();
   clearInterval(flushInterval);
   await flushLogBuffer().catch((err) =>
-    console.error("Failed to flush log buffer on shutdown:", err)
+    log.error("Failed to flush log buffer on shutdown", err)
   );
   await flushLastUsed(db, redis).catch((err) =>
-    console.error("Failed to flush lastUsed on shutdown:", err)
+    log.error("Failed to flush lastUsed on shutdown", err)
   );
   await redis.quit();
   process.exit(0);

@@ -18,7 +18,7 @@ interface WelcomeEmailProps {
 
 export const WelcomeEmail = ({
   name,
-  dashboardUrl = "https://app.raven.dev"
+  dashboardUrl = "https://app.yoginth.com"
 }: WelcomeEmailProps) => (
   <Html>
     <Head />

@@ -4,6 +4,7 @@ import { webhooks } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
 import pRetry from "p-retry";
+import { log } from "./logger";
 
 interface EventPayload {
   data: unknown;

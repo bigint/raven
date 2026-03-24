@@ -29,7 +29,7 @@ const sendEmail = async (
 ): Promise<void> => {
   const client = getResend(config.apiKey);
   await client.emails.send({
-    from: config.fromEmail || "Raven <noreply@raven.dev>",
+    from: config.fromEmail || "Raven <noreply@yoginth.com>",
     html: options.html,
     subject: options.subject,
     to: options.to

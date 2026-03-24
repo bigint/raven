@@ -5,18 +5,18 @@ import type { ReactNode } from "react";
 import { cn } from "../cn";
 
 interface PillTabOption<T extends string = string> {
-  value: T;
-  label: string;
-  extra?: ReactNode;
-  disabled?: boolean;
-  tooltip?: string;
+  readonly value: T;
+  readonly label: string;
+  readonly extra?: ReactNode;
+  readonly disabled?: boolean;
+  readonly tooltip?: string;
 }
 
 interface PillTabsProps<T extends string = string> {
-  options: PillTabOption<T>[];
-  value: T;
-  onChange: (value: T) => void;
-  className?: string;
+  readonly options: PillTabOption<T>[];
+  readonly value: T;
+  readonly onChange: (value: T) => void;
+  readonly className?: string;
 }
 
 const PillTabs = <T extends string = string>({

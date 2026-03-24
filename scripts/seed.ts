@@ -9,9 +9,9 @@ const db = createDatabase(env.DATABASE_URL)
 const auth = createAuth(db, env)
 
 const SEED_USERS = [
-  { name: 'Admin', email: 'admin@raven.dev', password: 'password123', role: 'admin' as const },
-  { name: 'Member', email: 'member@raven.dev', password: 'password123', role: 'member' as const },
-  { name: 'Viewer', email: 'viewer@raven.dev', password: 'password123', role: 'viewer' as const },
+  { name: 'Admin', email: 'yoginth+admin@hey.com', password: 'password123', role: 'admin' as const },
+  { name: 'Member', email: 'yoginth+member@hey.com', password: 'password123', role: 'member' as const },
+  { name: 'Viewer', email: 'yoginth+viewer@hey.com', password: 'password123', role: 'viewer' as const },
 ]
 
 const DEFAULT_SETTINGS = [
@@ -60,9 +60,9 @@ async function seed() {
 
   console.log('\n---')
   console.log('Seed complete! Sign in with:')
-  console.log('  Admin:  admin@raven.dev / password123')
-  console.log('  Member: member@raven.dev / password123')
-  console.log('  Viewer: viewer@raven.dev / password123')
+  console.log('  Admin:  yoginth+admin@hey.com / password123')
+  console.log('  Member: yoginth+member@hey.com / password123')
+  console.log('  Viewer: yoginth+viewer@hey.com / password123')
 
   process.exit(0)
 }
