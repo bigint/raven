@@ -28,7 +28,7 @@ WORKDIR /app
 COPY --from=builder /app/apps/api/dist ./api/
 COPY --from=builder /app/apps/cron/dist ./cron/
 COPY --from=builder /app/apps/web/.next/standalone ./web/
-COPY --from=builder /app/apps/web/.next/static ./web/.next/static
+COPY --from=builder /app/apps/web/.next/static ./web/apps/web/.next/static
 COPY --from=builder /app/packages/db/drizzle ./drizzle/
 COPY --from=builder /app/packages/db/dist/migrate.mjs ./migrate.mjs
 COPY --chmod=755 docker-entrypoint.sh ./
