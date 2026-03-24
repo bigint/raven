@@ -52,8 +52,6 @@ export const flushLastUsed = async (
   if (keysToDelete.length > 0) {
     await redis
       .del(...keysToDelete)
-      .catch((err) =>
-        log.error("Failed to delete lastUsed Redis keys", err)
-      );
+      .catch((err) => log.error("Failed to delete lastUsed Redis keys", err));
   }
 };

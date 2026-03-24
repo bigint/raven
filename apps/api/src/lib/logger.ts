@@ -19,13 +19,11 @@ const formatEntry = (
 });
 
 export const log = {
-  info: (message: string, meta?: Record<string, unknown>): void => {
-    console.log(JSON.stringify(formatEntry("info", message, meta)));
-  },
-  warn: (message: string, meta?: Record<string, unknown>): void => {
-    console.warn(JSON.stringify(formatEntry("warn", message, meta)));
-  },
-  error: (message: string, error?: unknown, meta?: Record<string, unknown>): void => {
+  error: (
+    message: string,
+    error?: unknown,
+    meta?: Record<string, unknown>
+  ): void => {
     const errorMeta: Record<string, unknown> = { ...meta };
     if (error instanceof Error) {
       errorMeta.error = error.message;
@@ -34,5 +32,11 @@ export const log = {
       errorMeta.error = String(error);
     }
     console.error(JSON.stringify(formatEntry("error", message, errorMeta)));
+  },
+  info: (message: string, meta?: Record<string, unknown>): void => {
+    console.log(JSON.stringify(formatEntry("info", message, meta)));
+  },
+  warn: (message: string, meta?: Record<string, unknown>): void => {
+    console.warn(JSON.stringify(formatEntry("warn", message, meta)));
   }
 };
