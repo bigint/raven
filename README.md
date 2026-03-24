@@ -8,7 +8,7 @@
 [![Docker](https://img.shields.io/docker/pulls/yoginth/raven)](https://hub.docker.com/r/yoginth/raven)
 [![CI](https://github.com/bigint/raven/actions/workflows/ci.yml/badge.svg)](https://github.com/bigint/raven/actions/workflows/ci.yml)
 
-[Get Started](#get-started) | [Documentation](https://docs.ravenplatform.com) | [Self-Host](#self-host-with-docker)
+[Get Started](#get-started) | [Documentation](https://raven.yoginth.com) | [Self-Host](#self-host-with-docker)
 
 </div>
 
@@ -74,11 +74,11 @@ curl http://localhost:4000/v1/chat/completions \
 
 Raven is designed to run anywhere Docker runs. The `docker-compose.yml` includes everything you need: the Raven app, PostgreSQL, and Redis.
 
-For detailed deployment guides covering production setups, environment variables, and scaling, see the [self-hosting docs](https://docs.ravenplatform.com).
+For detailed deployment guides covering production setups, environment variables, and scaling, see the [self-hosting docs](https://raven.yoginth.com).
 
 ## Documentation
 
-Visit **[docs.ravenplatform.com](https://docs.ravenplatform.com)** for guides on:
+Visit **[raven.yoginth.com](https://raven.yoginth.com)** for guides on:
 
 - Connecting providers (OpenAI, Anthropic, and more)
 - Managing virtual API keys and budgets
