@@ -111,11 +111,6 @@
           "anchor": "GitHub",
           "href": "https://github.com/bigint/raven",
           "icon": "github"
-        },
-        {
-          "anchor": "Community",
-          "href": "https://discord.gg/raven",
-          "icon": "discord"
         }
       ]
     }
