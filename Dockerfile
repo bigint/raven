@@ -20,8 +20,9 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN pnpm build
 
 FROM node:22-alpine AS runner
-RUN corepack enable && corepack prepare pnpm@10.27.0 --activate
-RUN apk add --no-cache wget
+RUN apk add --no-cache postgresql redis
+RUN mkdir -p /var/lib/postgresql/data /run/postgresql && \
+    chown -R postgres:postgres /var/lib/postgresql /run/postgresql
 WORKDIR /app
 
 COPY --from=builder /app/apps/api/dist ./api/
@@ -30,10 +31,14 @@ COPY --from=builder /app/apps/web/.next/standalone ./web/
 COPY --from=builder /app/apps/web/.next/static ./web/.next/static
 COPY --from=builder /app/packages/db/drizzle ./drizzle/
 COPY --from=builder /app/packages/db/dist/migrate.mjs ./migrate.mjs
-COPY --from=builder /app/node_modules ./node_modules/
 COPY docker-entrypoint.sh ./
 
 RUN chmod +x docker-entrypoint.sh
+
+ENV DATABASE_URL=postgresql://raven:raven@localhost:5432/raven
+ENV REDIS_URL=redis://localhost:6379
+
+VOLUME /var/lib/postgresql/data
 
 EXPOSE 3000 4000
 
