@@ -3,7 +3,7 @@
 import { Button } from "@raven/ui";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { useState } from "react";
 import { signIn } from "@/lib/auth-client";
 
 export const SignInForm = () => {
@@ -13,7 +13,7 @@ export const SignInForm = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);

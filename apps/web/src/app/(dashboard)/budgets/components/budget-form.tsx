@@ -2,7 +2,7 @@
 
 import { Button, Input, Modal, Select } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
-import { type FormEvent, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { TextMorph } from "torph/react";
 import { keysQueryOptions } from "../../keys/hooks/use-keys";
 import type { Budget } from "../hooks/use-budgets";
@@ -76,7 +76,7 @@ const BudgetForm = ({ open, onClose, editingBudget }: BudgetFormProps) => {
     onClose();
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormError(null);
     if (!form.limitAmount.trim() || Number.isNaN(Number(form.limitAmount))) {

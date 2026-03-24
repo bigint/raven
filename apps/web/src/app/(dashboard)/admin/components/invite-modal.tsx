@@ -2,7 +2,7 @@
 
 import { Button, Input, Modal, Select } from "@raven/ui";
 import { Copy } from "lucide-react";
-import { type FormEvent, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import type { CreateInvitationResponse } from "../hooks/use-admin";
 import { useCreateInvitation } from "../hooks/use-admin";
@@ -31,7 +31,7 @@ export const InviteModal = ({ open, onClose }: InviteModalProps) => {
     onClose();
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     createInvitation.mutate(
       { email, role },

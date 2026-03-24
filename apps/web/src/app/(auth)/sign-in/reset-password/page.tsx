@@ -3,7 +3,7 @@
 import { Button } from "@raven/ui";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { type FormEvent, Suspense, useState } from "react";
+import { Suspense, useState } from "react";
 import { resetPassword } from "@/lib/auth-client";
 
 const ResetPasswordForm = () => {
@@ -33,7 +33,7 @@ const ResetPasswordForm = () => {
     );
   }
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
 

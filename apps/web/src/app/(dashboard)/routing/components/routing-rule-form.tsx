@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
-import { type FormEvent, useState } from "react";
+import { useState } from "react";
 import { TextMorph } from "torph/react";
 import { useModelOptions } from "@/lib/use-models";
 import type { RoutingRule } from "../hooks/use-routing-rules";
@@ -71,7 +71,7 @@ const RoutingRuleForm = ({
     onClose();
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormError(null);
 

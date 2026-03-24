@@ -2,7 +2,7 @@
 
 import { Button } from "@raven/ui";
 import Link from "next/link";
-import { type FormEvent, useState } from "react";
+import { useState } from "react";
 import { forgetPassword } from "@/lib/auth-client";
 
 const ForgotPasswordPage = () => {
@@ -11,7 +11,7 @@ const ForgotPasswordPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);

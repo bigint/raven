@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Checkbox, Input, Modal, Switch } from "@raven/ui";
-import { type FormEvent, useState } from "react";
+import { useState } from "react";
 import { TextMorph } from "torph/react";
 import type { Webhook } from "../hooks/use-webhooks";
 import {
@@ -106,7 +106,7 @@ const WebhookForm = ({ open, onClose, editingWebhook }: WebhookFormProps) => {
     onClose();
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormError(null);
 

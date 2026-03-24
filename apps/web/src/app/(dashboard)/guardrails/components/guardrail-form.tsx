@@ -9,7 +9,7 @@ import {
   Switch,
   Textarea
 } from "@raven/ui";
-import { type FormEvent, useState } from "react";
+import { useState } from "react";
 import { TextMorph } from "torph/react";
 import { match } from "ts-pattern";
 import type { Guardrail } from "../hooks/use-guardrails";
@@ -131,7 +131,7 @@ const GuardrailForm = ({
     onClose();
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormError(null);
 

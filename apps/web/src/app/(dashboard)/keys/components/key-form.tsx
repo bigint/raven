@@ -2,7 +2,7 @@
 
 import { ENVIRONMENT_OPTIONS } from "@raven/types";
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
-import { type FormEvent, useState } from "react";
+import { useState } from "react";
 import { TextMorph } from "torph/react";
 import type { VirtualKey } from "../hooks/use-keys";
 
@@ -60,7 +60,7 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
 

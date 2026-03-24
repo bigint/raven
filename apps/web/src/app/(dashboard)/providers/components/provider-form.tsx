@@ -2,7 +2,7 @@
 
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { TextMorph } from "torph/react";
 import { ProviderIcon } from "@/components/model-icon";
 import type { Provider } from "../hooks/use-providers";
@@ -82,7 +82,7 @@ const ProviderForm = ({
     onClose();
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormError(null);
     if (!isEdit && !form.apiKey.trim()) {
