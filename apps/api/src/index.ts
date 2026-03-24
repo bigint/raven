@@ -35,6 +35,7 @@ import { proxyHandler } from "./modules/proxy/handler";
 import { flushLastUsed } from "./modules/proxy/last-used";
 import { flushLogBuffer } from "./modules/proxy/logger";
 import { createRoutingRulesModule } from "./modules/routing-rules/index";
+import { createSetupModule } from "./modules/setup/index";
 import { createUserModule } from "./modules/user/index";
 import { createWebhooksModule } from "./modules/webhooks/index";
 
@@ -145,6 +146,9 @@ app.get("/v1/settings/public", getPublicSettings(db));
 
 // Public invitation validation (no auth required)
 app.route("/v1/invitations", createInvitationsModule(db));
+
+// Public setup (no auth required)
+app.route("/v1/setup", createSetupModule(db, auth));
 
 // User-level routes (session auth)
 const userRoutes = new Hono();
