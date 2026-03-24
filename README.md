@@ -2,146 +2,96 @@
 
 # Raven
 
-**Open-source AI gateway for routing, managing, and observing LLM API traffic.**
+**Take control of your AI spending. One API, every provider, full visibility.**
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Docker](https://img.shields.io/docker/pulls/yoginth/raven)](https://hub.docker.com/r/yoginth/raven)
 [![CI](https://github.com/bigint/raven/actions/workflows/ci.yml/badge.svg)](https://github.com/bigint/raven/actions/workflows/ci.yml)
 
-[Documentation](https://docs.ravenplatform.com) | [Quick Start](#quick-start) | [Self-Host](#docker) | [Contributing](CONTRIBUTING.md)
+[Get Started](#get-started) | [Documentation](https://docs.ravenplatform.com) | [Self-Host](#self-host-with-docker)
 
 </div>
 
 ---
 
-## Quick Start
+## What is Raven?
 
-### Docker
+Raven is an open-source AI gateway that sits between your apps and LLM providers like OpenAI and Anthropic. Instead of managing multiple API keys, juggling provider SDKs, and guessing how much you're spending, Raven gives you one unified endpoint with complete control.
 
-The fastest way to get Raven running:
+**No code changes required.** Raven is fully compatible with the OpenAI API format, so any app or tool that works with OpenAI works with Raven out of the box.
+
+## Why Raven?
+
+- **One API for every provider** -- Use OpenAI, Anthropic, and more through a single endpoint. Switch providers without changing your code.
+- **Know exactly what you're spending** -- See cost breakdowns per key, per user, and per model in real time. No more surprise bills.
+- **Set budgets and rate limits** -- Create virtual API keys with spending caps and rate limits. Give your team access without giving away the farm.
+- **Keep your prompts safe** -- Built-in guardrails detect prompt injection attempts and filter harmful content before it reaches your models.
+- **See everything** -- Every request is logged with latency, token counts, and costs. Debug issues in seconds, not hours.
+- **Stay in control** -- Full audit trail of who changed what and when. Get notified of events via webhooks.
+- **Manage your team** -- Invite team members, assign roles, and organize access with built-in team management.
+- **Own your data** -- Self-host on your own infrastructure. Your prompts and data never leave your servers.
+
+## Get Started
+
+### 1. Run Raven
+
+The fastest way to get up and running:
 
 ```bash
 docker run -d --name raven -p 3000:3000 -p 4000:4000 yoginth/raven:latest
 ```
 
-Or use Docker Compose to bring up the full stack with PostgreSQL and Redis:
+Or use Docker Compose for the full setup with a database:
 
 ```bash
 curl -O https://raw.githubusercontent.com/bigint/raven/main/docker-compose.yml
 docker compose up
 ```
 
-The dashboard will be at `http://localhost:3000` and the API at `http://localhost:4000`.
+### 2. Open the Dashboard
 
-### Local Development
+Go to **http://localhost:3000** to set up your account and connect your first provider.
 
-**Prerequisites:** Node.js 22+, pnpm 10.27+, PostgreSQL 17, Redis 7
+### 3. Create a Virtual Key
 
-```bash
-git clone https://github.com/bigint/raven.git
-cd raven
-pnpm install
-cp .env.example .env
-# Edit .env with your database credentials
-pnpm db:migrate
-pnpm dev
-```
+In the dashboard, create a virtual API key. Set a budget, choose which providers it can access, and copy the key.
 
-## Overview
+### 4. Start Making Requests
 
-Raven is a self-hostable AI gateway that sits between your applications and LLM providers. It gives you a single, OpenAI-compatible API endpoint to route requests across multiple providers while providing full visibility into usage, costs, and performance.
-
-Whether you are managing API keys across a team, enforcing budgets and rate limits, or monitoring prompt traffic for safety, Raven provides the control plane you need to operate LLMs in production.
-
-## Features
-
-- **Multi-provider routing** -- Send requests to OpenAI and Anthropic through a unified, OpenAI-compatible API endpoint.
-- **Virtual API keys** -- Issue scoped keys with per-key budgets, rate limits, and provider restrictions.
-- **Analytics and logging** -- Track every request with detailed logs, latency metrics, token counts, and cost breakdowns.
-- **Guardrails** -- Detect prompt injection attempts and filter content before it reaches your models.
-- **Audit logs** -- Maintain a full audit trail of configuration changes and administrative actions.
-- **Webhooks** -- Get notified of events in real time via configurable webhook endpoints.
-- **Team management** -- Organize users into teams with role-based access control.
-- **Self-hostable** -- Deploy anywhere with Docker. You own your data.
-
-## Architecture
-
-Raven is structured as a monorepo managed with pnpm workspaces and Turborepo.
-
-### Apps
-
-| Directory | Description | Stack |
-|-----------|-------------|-------|
-| `apps/web` | Dashboard | Next.js 16, React 19, Tailwind CSS 4 |
-| `apps/api` | API server | Hono, Node.js 22 |
-| `apps/cron` | Scheduled tasks | Node.js |
-| `apps/docs` | Documentation site | Mintlify |
-
-### Packages
-
-| Directory | Description |
-|-----------|-------------|
-| `packages/auth` | Authentication (Better Auth) |
-| `packages/config` | Configuration and validation (Zod) |
-| `packages/db` | Database schema and migrations (Drizzle ORM + PostgreSQL) |
-| `packages/data` | Data access layer |
-| `packages/email` | Transactional email (React Email + Resend) |
-| `packages/types` | Shared TypeScript type definitions |
-| `packages/ui` | Component library (Base UI) |
-
-### Tech Stack
-
-- **Language:** TypeScript 5.9
-- **Frontend:** Next.js 16, React 19, Tailwind CSS 4, Base UI
-- **Backend:** Hono, Node.js 22, Better Auth, Drizzle ORM
-- **Database:** PostgreSQL 17, Redis 7
-- **AI SDKs:** Anthropic, OpenAI
-- **Email:** Resend + React Email
-- **Tooling:** pnpm, Turborepo, Biome
-
-## Environment Variables
-
-All environment variables are documented in `.env.example`. Copy it and fill in the required values:
+Point your existing tools at Raven's API (`http://localhost:4000`) using your virtual key. That's it -- no SDK changes needed.
 
 ```bash
-cp .env.example .env
+curl http://localhost:4000/v1/chat/completions \
+  -H "Authorization: Bearer your-virtual-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
 ```
 
-At a minimum, you will need to configure:
+## Self-Host with Docker
 
-- Database connection (PostgreSQL)
-- Redis connection
-- At least one LLM provider API key
+Raven is designed to run anywhere Docker runs. The `docker-compose.yml` includes everything you need: the Raven app, PostgreSQL, and Redis.
 
-## Available Scripts
-
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Start all apps in development mode |
-| `pnpm build` | Build all apps and packages |
-| `pnpm lint` | Lint the codebase with Biome |
-| `pnpm typecheck` | Run TypeScript type checks |
-| `pnpm format` | Format code with Biome |
-| `pnpm db:migrate` | Run database migrations |
-| `pnpm db:studio` | Open Drizzle Studio for database inspection |
+For detailed deployment guides covering production setups, environment variables, and scaling, see the [self-hosting docs](https://docs.ravenplatform.com).
 
 ## Documentation
 
-Full documentation is available at [docs.ravenplatform.com](https://docs.ravenplatform.com), covering:
+Visit **[docs.ravenplatform.com](https://docs.ravenplatform.com)** for guides on:
 
+- Connecting providers (OpenAI, Anthropic, and more)
+- Managing virtual API keys and budgets
+- Setting up guardrails and content filtering
+- Team management and access control
 - API reference
-- Provider configuration
-- Virtual key management
-- Guardrails setup
-- Self-hosting guides
-- Team and organization management
 
 ## Contributing
 
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get started, submit issues, and open pull requests.
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get started.
 
 ## License
 
-Raven is open-source software licensed under the [Apache License 2.0](LICENSE).
+Raven is open-source under the [Apache License 2.0](LICENSE).
 
 Copyright 2025 Bigint Studio.
