@@ -1,14 +1,21 @@
 "use client";
 
-import { PageHeader } from "@raven/ui";
+import { PageHeader, Tabs } from "@raven/ui";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "@/lib/auth-client";
-import { SettingsTab } from "../admin/components/settings-tab";
+import { EmailSettingsTab } from "../admin/components/email-settings-tab";
+import { GeneralSettingsTab } from "../admin/components/general-settings-tab";
+
+const TABS = [
+  { label: "General", value: "general" },
+  { label: "Email", value: "email" }
+];
 
 const SettingsPage = () => {
   const { data: session, isPending } = useSession();
   const router = useRouter();
+  const [tab, setTab] = useState("general");
 
   useEffect(() => {
     if (!isPending && session?.user?.role !== "admin") {
@@ -28,11 +35,11 @@ const SettingsPage = () => {
 
   return (
     <div>
-      <PageHeader
-        description="Manage instance settings."
-        title="Instance Settings"
-      />
-      <SettingsTab />
+      <PageHeader description="Manage instance settings." title="Settings" />
+      <Tabs onChange={setTab} tabs={TABS} value={tab} />
+      <div className="mt-4">
+        {tab === "general" ? <GeneralSettingsTab /> : <EmailSettingsTab />}
+      </div>
     </div>
   );
 };
