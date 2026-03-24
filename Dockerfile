@@ -35,7 +35,10 @@ COPY docker-entrypoint.sh ./
 
 RUN chmod +x docker-entrypoint.sh
 
+ENV APP_URL=http://localhost:3000
+ENV BETTER_AUTH_URL=http://localhost:4000
 ENV DATABASE_URL=postgresql://raven:raven@localhost:5432/raven
+ENV NEXT_PUBLIC_API_URL=http://localhost:4000
 ENV REDIS_URL=redis://localhost:6379
 
 VOLUME /var/lib/postgresql/data

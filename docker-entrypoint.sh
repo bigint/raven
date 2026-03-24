@@ -23,6 +23,14 @@ run_migrations() {
   node migrate.mjs
 }
 
+if [ -z "$BETTER_AUTH_SECRET" ]; then
+  export BETTER_AUTH_SECRET=$(head -c 32 /dev/urandom | base64)
+fi
+
+if [ -z "$ENCRYPTION_SECRET" ]; then
+  export ENCRYPTION_SECRET=$(head -c 32 /dev/urandom | base64)
+fi
+
 echo "Starting Raven..."
 
 start_postgres
