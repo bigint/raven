@@ -1,15 +1,29 @@
 #!/bin/sh
 set -e
 
-echo "Running database migrations..."
-node migrate.mjs
+run_migrations() {
+  echo "Running database migrations..."
+  node migrate.mjs
+}
 
 echo "Starting Raven..."
-if [ "$1" = "serve" ]; then
-  node api/index.js &
-  node web/server.js
-elif [ "$1" = "cron" ]; then
-  node cron/index.js
-else
-  exec "$@"
-fi
+case "$1" in
+  serve)
+    run_migrations
+    node api/index.js &
+    node web/server.js
+    ;;
+  api)
+    run_migrations
+    node api/index.js
+    ;;
+  web)
+    node web/server.js
+    ;;
+  cron)
+    node cron/index.js
+    ;;
+  *)
+    exec "$@"
+    ;;
+esac

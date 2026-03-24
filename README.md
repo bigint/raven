@@ -8,6 +8,8 @@
 [![Docker](https://img.shields.io/docker/pulls/yoginth/raven)](https://hub.docker.com/r/yoginth/raven)
 [![CI](https://github.com/bigint/raven/actions/workflows/ci.yml/badge.svg)](https://github.com/bigint/raven/actions/workflows/ci.yml)
 
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/raven)
+
 [Documentation](https://docs.ravenplatform.com) | [Quick Start](#quick-start) | [Self-Host](#docker) | [Contributing](CONTRIBUTING.md)
 
 </div>
