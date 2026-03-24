@@ -7,6 +7,7 @@ COPY apps/cron/package.json apps/cron/
 COPY apps/web/package.json apps/web/
 COPY packages/auth/package.json packages/auth/
 COPY packages/config/package.json packages/config/
+COPY packages/data/package.json packages/data/
 COPY packages/db/package.json packages/db/
 COPY packages/email/package.json packages/email/
 COPY packages/types/package.json packages/types/
@@ -15,6 +16,7 @@ RUN pnpm install --frozen-lockfile
 
 FROM deps AS builder
 COPY . .
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN pnpm build
 
 FROM node:22-alpine AS runner
