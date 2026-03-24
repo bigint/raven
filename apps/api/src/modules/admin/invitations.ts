@@ -1,6 +1,6 @@
 import { createId } from "@paralleldrive/cuid2";
 import type { Database } from "@raven/db";
-import { invitations, settings, users } from "@raven/db";
+import { invitations, users } from "@raven/db";
 import { sendInvitationEmail } from "@raven/email";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import type { Context } from "hono";
@@ -16,15 +16,6 @@ const createInvitationSchema = z.object({
   email: z.string().email(),
   role: z.enum(["admin", "member", "viewer"]).default("member")
 });
-
-const getInstanceName = async (db: Database): Promise<string> => {
-  const [row] = await db
-    .select({ value: settings.value })
-    .from(settings)
-    .where(eq(settings.key, "instance_name"))
-    .limit(1);
-  return row?.value ?? "Raven";
-};
 
 export const createInvitation =
   (db: Database, appUrl: string) => async (c: Context) => {
@@ -93,12 +84,11 @@ export const createInvitation =
     try {
       const emailConfig = await getEmailConfig(db);
       if (emailConfig) {
-        const instanceName = await getInstanceName(db);
         await sendInvitationEmail(
           emailConfig,
           email,
           currentUser.name,
-          instanceName,
+          "Raven",
           inviteUrl
         );
       }

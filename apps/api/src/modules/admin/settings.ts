@@ -5,7 +5,6 @@ import { success } from "@/lib/response";
 
 const DEFAULT_SETTINGS: Record<string, string> = {
   analytics_retention_days: "365",
-  instance_name: "Raven",
   resend_api_key: "",
   resend_from_email: ""
 };
@@ -35,15 +34,6 @@ export const updateSettings = (db: Database) => async (c: Context) => {
   return success(c, { updated: true });
 };
 
-export const getPublicSettings = (db: Database) => async (c: Context) => {
-  const rows = await db.select().from(settings);
-  const result: Record<string, string> = {
-    instance_name: DEFAULT_SETTINGS.instance_name ?? "Raven"
-  };
-  for (const row of rows) {
-    if (row.key === "instance_name") {
-      result[row.key] = row.value;
-    }
-  }
-  return success(c, result);
+export const getPublicSettings = (_db: Database) => async (c: Context) => {
+  return success(c, {});
 };

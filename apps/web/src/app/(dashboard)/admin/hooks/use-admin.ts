@@ -18,7 +18,6 @@ interface AdminUser {
 }
 
 interface AdminSettings {
-  readonly instance_name: string;
   readonly analytics_retention_days: string;
   readonly resend_api_key: string;
   readonly resend_from_email: string;

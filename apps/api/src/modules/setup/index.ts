@@ -1,6 +1,6 @@
 import type { Auth } from "@raven/auth";
 import type { Database } from "@raven/db";
-import { settings, users } from "@raven/db";
+import { users } from "@raven/db";
 import { count } from "drizzle-orm";
 import { Hono } from "hono";
 import { ConflictError, ValidationError } from "@/lib/errors";
@@ -16,7 +16,7 @@ export const createSetupModule = (db: Database, auth: Auth) => {
     return success(c, { needsSetup: result?.value === 0 });
   });
 
-  // Public: complete initial setup (create admin + set instance name)
+  // Public: complete initial setup (create admin account)
   app.post("/complete", async (c) => {
     const body = await c.req.json();
     const parsed = setupCompleteSchema.safeParse(body);
@@ -27,7 +27,7 @@ export const createSetupModule = (db: Database, auth: Auth) => {
       });
     }
 
-    const { email, instanceName, name, password } = parsed.data;
+    const { email, name, password } = parsed.data;
 
     // Guard: reject if any users already exist
     const [userCount] = await db.select({ value: count() }).from(users);
@@ -46,21 +46,6 @@ export const createSetupModule = (db: Database, auth: Auth) => {
           "Failed to create admin account — email may already be registered"
         );
       });
-
-    // Save instance name if provided
-    if (instanceName) {
-      await db
-        .insert(settings)
-        .values({
-          key: "instance_name",
-          updatedAt: new Date(),
-          value: instanceName
-        })
-        .onConflictDoUpdate({
-          set: { updatedAt: new Date(), value: instanceName },
-          target: settings.key
-        });
-    }
 
     // Return session headers so the user is signed in
     return new Response(
