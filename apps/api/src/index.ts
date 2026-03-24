@@ -187,9 +187,12 @@ app.notFound((c) =>
   )
 );
 
-const server = serve({ fetch: app.fetch, port: env.API_PORT }, (info) => {
-  console.log(`Raven API running on http://localhost:${info.port}`);
-});
+const server = serve(
+  { fetch: app.fetch, hostname: env.API_HOST, port: env.API_PORT },
+  (info) => {
+    console.log(`Raven API running on http://localhost:${info.port}`);
+  }
+);
 
 const shutdown = async (): Promise<void> => {
   console.log("Shutting down gracefully...");

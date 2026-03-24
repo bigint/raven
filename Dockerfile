@@ -20,8 +20,8 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN pnpm build
 
 FROM node:22-alpine AS runner
-RUN apk add --no-cache postgresql redis
-RUN mkdir -p /var/lib/postgresql/data /run/postgresql && \
+RUN apk add --no-cache postgresql redis && \
+    mkdir -p /var/lib/postgresql/data /run/postgresql && \
     chown -R postgres:postgres /var/lib/postgresql /run/postgresql
 WORKDIR /app
 
@@ -31,19 +31,23 @@ COPY --from=builder /app/apps/web/.next/standalone ./web/
 COPY --from=builder /app/apps/web/.next/static ./web/.next/static
 COPY --from=builder /app/packages/db/drizzle ./drizzle/
 COPY --from=builder /app/packages/db/dist/migrate.mjs ./migrate.mjs
-COPY docker-entrypoint.sh ./
+COPY --chmod=755 docker-entrypoint.sh ./
 
-RUN chmod +x docker-entrypoint.sh
-
-ENV APP_URL=http://localhost:3000
-ENV BETTER_AUTH_URL=http://localhost:4000
-ENV DATABASE_URL=postgresql://raven:raven@localhost:5432/raven
-ENV NEXT_PUBLIC_API_URL=http://localhost:4000
-ENV REDIS_URL=redis://localhost:6379
+ENV NODE_ENV=production \
+    HOSTNAME=0.0.0.0 \
+    PORT=3000 \
+    API_PORT=4000 \
+    APP_URL=http://localhost:3000 \
+    BETTER_AUTH_URL=http://localhost:4000 \
+    DATABASE_URL=postgresql://raven:raven@localhost:5432/raven \
+    NEXT_PUBLIC_API_URL=http://localhost:4000 \
+    REDIS_URL=redis://localhost:6379
 
 VOLUME /var/lib/postgresql/data
-
 EXPOSE 3000 4000
+
+HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=3 \
+  CMD wget -q --spider http://localhost:4000/health || exit 1
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["serve"]

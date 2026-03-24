@@ -3,8 +3,10 @@
 **/dist
 .git
 .env
-.env.local
+.env.*
+.github
+.turbo
+.vscode
 apps/docs
 *.md
 !README.md
-.github
