@@ -8,10 +8,14 @@ export const GeneralSettingsTab = () => {
   const { data: settings, isPending, error } = useAdminSettings();
   const updateSettings = useUpdateSettings();
 
+  const [instanceName, setInstanceName] = useState("Raven");
+  const [instanceUrl, setInstanceUrl] = useState("");
   const [retentionDays, setRetentionDays] = useState(365);
 
   useEffect(() => {
     if (settings) {
+      setInstanceName(settings.instance_name || "Raven");
+      setInstanceUrl(settings.instance_url || "");
       setRetentionDays(Number(settings.analytics_retention_days) || 365);
     }
   }, [settings]);
@@ -34,16 +38,41 @@ export const GeneralSettingsTab = () => {
 
   const handleSave = () => {
     updateSettings.mutate({
-      analytics_retention_days: String(retentionDays)
+      analytics_retention_days: String(retentionDays),
+      instance_name: instanceName,
+      instance_url: instanceUrl
     });
   };
 
   const hasChanges =
     settings !== undefined &&
-    retentionDays !== (Number(settings.analytics_retention_days) || 365);
+    (instanceName !== (settings.instance_name || "Raven") ||
+      instanceUrl !== (settings.instance_url || "") ||
+      retentionDays !== (Number(settings.analytics_retention_days) || 365));
 
   return (
     <div className="max-w-lg space-y-6">
+      <Input
+        autoComplete="off"
+        description="Display name for this Raven instance"
+        label="Instance Name"
+        name="instanceName"
+        onChange={(e) => setInstanceName(e.target.value)}
+        placeholder="Raven"
+        value={instanceName}
+      />
+
+      <Input
+        autoComplete="off"
+        description="Base URL used in emails and webhook payloads"
+        label="Instance URL"
+        name="instanceUrl"
+        onChange={(e) => setInstanceUrl(e.target.value)}
+        placeholder="https://raven.example.com"
+        type="url"
+        value={instanceUrl}
+      />
+
       <Input
         autoComplete="off"
         description="Number of days to retain analytics data"
@@ -59,7 +88,7 @@ export const GeneralSettingsTab = () => {
         disabled={!hasChanges || updateSettings.isPending}
         onClick={handleSave}
       >
-        {updateSettings.isPending ? "Saving..." : "Save Settings"}
+        {updateSettings.isPending ? "Saving…" : "Save Settings"}
       </Button>
     </div>
   );

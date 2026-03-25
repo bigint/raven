@@ -92,7 +92,15 @@ app.use(
   })
 );
 
-app.use("*", compress());
+app.use("*", async (c, next) => {
+  if (
+    c.req.path.startsWith("/v1/proxy/") ||
+    c.req.path === "/v1/chat/completions"
+  ) {
+    return next();
+  }
+  return compress()(c, next);
+});
 
 // Security headers
 app.use("*", async (c, next) => {

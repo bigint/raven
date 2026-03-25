@@ -26,7 +26,7 @@ const Tabs = ({ tabs, value, onChange }: TabsProps) => (
           className={cn(
             "relative z-0 flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-t-md px-4 py-2 text-sm font-medium transition-colors",
             "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-            "data-active:text-foreground"
+            "data-active:bg-accent data-active:text-foreground"
           )}
           key={tab.value}
           value={tab.value}

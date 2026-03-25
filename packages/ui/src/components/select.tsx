@@ -177,7 +177,10 @@ const SearchableSelect = ({
               />
               <div
                 className="max-h-48 overflow-y-auto p-1"
-                style={{ minWidth: "var(--anchor-width)", width: "max-content" }}
+                style={{
+                  minWidth: "var(--anchor-width)",
+                  width: "max-content"
+                }}
               >
                 {filtered.map((option, i) => (
                   <button

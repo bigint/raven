@@ -18,7 +18,31 @@ interface AdminUser {
 }
 
 interface AdminSettings {
+  // General
+  readonly instance_name: string;
+  readonly instance_url: string;
   readonly analytics_retention_days: string;
+  // Security
+  readonly signup_enabled: string;
+  readonly session_timeout_hours: string;
+  readonly password_min_length: string;
+  // Proxy
+  readonly global_rate_limit_rpm: string;
+  readonly global_rate_limit_rpd: string;
+  readonly max_request_body_size_mb: string;
+  readonly request_timeout_seconds: string;
+  readonly default_max_tokens: string;
+  // Logging
+  readonly log_request_bodies: string;
+  readonly log_response_bodies: string;
+  // Webhooks
+  readonly webhook_timeout_seconds: string;
+  readonly webhook_retry_count: string;
+  // Notifications
+  readonly email_notifications_enabled: string;
+  readonly notify_on_budget_exceeded: string;
+  readonly notify_on_provider_error_spike: string;
+  // Email
   readonly resend_api_key: string;
   readonly resend_from_email: string;
 }

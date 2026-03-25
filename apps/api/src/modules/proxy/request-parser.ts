@@ -154,9 +154,7 @@ const ensureToolSchema = (schema: unknown): Record<string, unknown> => {
   if (!schema || typeof schema !== "object") {
     return { properties: {}, type: "object" };
   }
-  const s = JSON.parse(JSON.stringify(schema)) as Record<string, unknown>;
-  delete s.$id;
-  delete s.$schema;
+  const { $id, $schema, ...s } = schema as Record<string, unknown>;
   if (!s.type) s.type = "object";
   return s;
 };
