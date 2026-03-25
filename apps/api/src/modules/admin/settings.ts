@@ -5,35 +5,29 @@ import type { Redis } from "ioredis";
 import { invalidateSettingsCache } from "@/lib/instance-settings";
 import { success } from "@/lib/response";
 
-const DEFAULT_SETTINGS: Record<string, string> = {
-  analytics_retention_days: "365",
-  default_max_tokens: "4096",
-  // Notifications
-  email_notifications_enabled: "false",
-  global_rate_limit_rpd: "1000",
-  // Proxy
-  global_rate_limit_rpm: "60",
-  // General
-  instance_name: "Raven",
-  instance_url: "",
-  // Logging
-  log_request_bodies: "true",
-  log_response_bodies: "false",
-  max_request_body_size_mb: "10",
-  notify_on_budget_exceeded: "true",
-  notify_on_provider_error_spike: "true",
-  password_min_length: "8",
-  request_timeout_seconds: "300",
-  // Email
-  resend_api_key: "",
-  resend_from_email: "",
-  session_timeout_hours: "24",
-  // Security
-  signup_enabled: "true",
-  webhook_retry_count: "3",
-  // Webhooks
-  webhook_timeout_seconds: "10"
-};
+/** All recognized setting keys — used to validate writes */
+const VALID_KEYS = new Set([
+  "analytics_retention_days",
+  "default_max_tokens",
+  "email_notifications_enabled",
+  "global_rate_limit_rpd",
+  "global_rate_limit_rpm",
+  "instance_name",
+  "instance_url",
+  "log_request_bodies",
+  "log_response_bodies",
+  "max_request_body_size_mb",
+  "notify_on_budget_exceeded",
+  "notify_on_provider_error_spike",
+  "password_min_length",
+  "request_timeout_seconds",
+  "resend_api_key",
+  "resend_from_email",
+  "session_timeout_hours",
+  "signup_enabled",
+  "webhook_retry_count",
+  "webhook_timeout_seconds"
+]);
 
 /** Keys safe to expose without authentication */
 const PUBLIC_KEYS = new Set([
@@ -45,7 +39,7 @@ const PUBLIC_KEYS = new Set([
 
 export const getSettings = (db: Database) => async (c: Context) => {
   const rows = await db.select().from(settings);
-  const result = { ...DEFAULT_SETTINGS };
+  const result: Record<string, string> = {};
   for (const row of rows) {
     result[row.key] = row.value;
   }
@@ -56,7 +50,7 @@ export const updateSettings =
   (db: Database, redis: Redis) => async (c: Context) => {
     const body = await c.req.json<Record<string, string>>();
     for (const [key, value] of Object.entries(body)) {
-      if (key in DEFAULT_SETTINGS) {
+      if (VALID_KEYS.has(key)) {
         await db
           .insert(settings)
           .values({ key, updatedAt: new Date(), value: String(value) })
@@ -73,9 +67,6 @@ export const updateSettings =
 export const getPublicSettings = (db: Database) => async (c: Context) => {
   const rows = await db.select().from(settings);
   const result: Record<string, string> = {};
-  for (const key of PUBLIC_KEYS) {
-    result[key] = DEFAULT_SETTINGS[key] ?? "";
-  }
   for (const row of rows) {
     if (PUBLIC_KEYS.has(row.key)) {
       result[row.key] = row.value;

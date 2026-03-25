@@ -1,23 +1,12 @@
 "use client";
 
-import { Button, Spinner } from "@raven/ui";
-import { useEffect, useState } from "react";
+import { Spinner } from "@raven/ui";
 import { useAdminSettings, useUpdateSettings } from "../hooks/use-admin";
 import { SwitchField } from "./switch-field";
 
 export const LoggingSettingsTab = () => {
   const { data: settings, isPending, error } = useAdminSettings();
   const updateSettings = useUpdateSettings();
-
-  const [logRequestBodies, setLogRequestBodies] = useState(true);
-  const [logResponseBodies, setLogResponseBodies] = useState(false);
-
-  useEffect(() => {
-    if (settings) {
-      setLogRequestBodies(settings.log_request_bodies !== "false");
-      setLogResponseBodies(settings.log_response_bodies === "true");
-    }
-  }, [settings]);
 
   if (error) {
     return (
@@ -35,40 +24,25 @@ export const LoggingSettingsTab = () => {
     );
   }
 
-  const handleSave = () => {
-    updateSettings.mutate({
-      log_request_bodies: String(logRequestBodies),
-      log_response_bodies: String(logResponseBodies)
-    });
+  const toggle = (key: string, value: boolean) => {
+    updateSettings.mutate({ [key]: String(value) });
   };
-
-  const hasChanges =
-    settings !== undefined &&
-    (logRequestBodies !== (settings.log_request_bodies !== "false") ||
-      logResponseBodies !== (settings.log_response_bodies === "true"));
 
   return (
     <div className="max-w-lg space-y-6">
       <SwitchField
-        checked={logRequestBodies}
+        checked={settings?.log_request_bodies === "true"}
         description="Store full request payloads for debugging. Increases storage usage."
         label="Log Request Bodies"
-        onCheckedChange={setLogRequestBodies}
+        onCheckedChange={(v) => toggle("log_request_bodies", v)}
       />
 
       <SwitchField
-        checked={logResponseBodies}
+        checked={settings?.log_response_bodies === "true"}
         description="Store full response payloads. Can significantly increase storage usage."
         label="Log Response Bodies"
-        onCheckedChange={setLogResponseBodies}
+        onCheckedChange={(v) => toggle("log_response_bodies", v)}
       />
-
-      <Button
-        disabled={!hasChanges || updateSettings.isPending}
-        onClick={handleSave}
-      >
-        {updateSettings.isPending ? "Saving…" : "Save Settings"}
-      </Button>
     </div>
   );
 };

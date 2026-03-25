@@ -9,13 +9,11 @@ export const SecuritySettingsTab = () => {
   const { data: settings, isPending, error } = useAdminSettings();
   const updateSettings = useUpdateSettings();
 
-  const [signupEnabled, setSignupEnabled] = useState(true);
   const [sessionTimeout, setSessionTimeout] = useState(24);
   const [passwordMinLength, setPasswordMinLength] = useState(8);
 
   useEffect(() => {
     if (settings) {
-      setSignupEnabled(settings.signup_enabled !== "false");
       setSessionTimeout(Number(settings.session_timeout_hours) || 24);
       setPasswordMinLength(Number(settings.password_min_length) || 8);
     }
@@ -40,24 +38,24 @@ export const SecuritySettingsTab = () => {
   const handleSave = () => {
     updateSettings.mutate({
       password_min_length: String(passwordMinLength),
-      session_timeout_hours: String(sessionTimeout),
-      signup_enabled: String(signupEnabled)
+      session_timeout_hours: String(sessionTimeout)
     });
   };
 
   const hasChanges =
     settings !== undefined &&
-    (signupEnabled !== (settings.signup_enabled !== "false") ||
-      sessionTimeout !== (Number(settings.session_timeout_hours) || 24) ||
+    (sessionTimeout !== (Number(settings.session_timeout_hours) || 24) ||
       passwordMinLength !== (Number(settings.password_min_length) || 8));
 
   return (
     <div className="max-w-lg space-y-6">
       <SwitchField
-        checked={signupEnabled}
+        checked={settings?.signup_enabled === "true"}
         description="Allow new users to register. When disabled, only admins can invite users."
         label="User Registration"
-        onCheckedChange={setSignupEnabled}
+        onCheckedChange={(v) =>
+          updateSettings.mutate({ signup_enabled: String(v) })
+        }
       />
 
       <Input

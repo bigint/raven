@@ -12,7 +12,7 @@ import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
 import type { AuthContextWithJson } from "@/lib/types";
 import { logAudit } from "@/modules/audit-logs/index";
-import { maskApiKey, validateApiKey } from "./helpers";
+import { maskApiKey } from "./helpers";
 import type { updateProviderSchema } from "./schema";
 
 type Body = z.infer<typeof updateProviderSchema>;
@@ -53,7 +53,6 @@ export const updateProvider =
     }
 
     if (apiKey !== undefined) {
-      await validateApiKey(existing.provider, apiKey);
       updates.apiKey = encrypt(apiKey, env.ENCRYPTION_SECRET);
     }
 

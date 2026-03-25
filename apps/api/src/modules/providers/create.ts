@@ -9,7 +9,7 @@ import { publishEvent } from "@/lib/events";
 import { created } from "@/lib/response";
 import type { AuthContextWithJson } from "@/lib/types";
 import { logAudit } from "@/modules/audit-logs/index";
-import { maskApiKey, validateApiKey } from "./helpers";
+import { maskApiKey } from "./helpers";
 import type { createProviderSchema } from "./schema";
 
 type Body = z.infer<typeof createProviderSchema>;
@@ -19,9 +19,6 @@ export const createProvider =
   async (c: AuthContextWithJson<Body>) => {
     const user = c.get("user");
     const { provider, name, apiKey, isEnabled } = c.req.valid("json");
-
-    // Validate the API key against the provider before saving
-    await validateApiKey(provider, apiKey);
 
     const encryptedKey = encrypt(apiKey, env.ENCRYPTION_SECRET);
 

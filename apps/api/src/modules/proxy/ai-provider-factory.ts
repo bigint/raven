@@ -48,6 +48,7 @@ export const createProviderModel = (
 ): LanguageModel => {
   const { apiKey, baseUrl, headers, provider } = input;
 
+  console.log("[ai-factory] provider=%s model=%s baseUrl=%s", provider, modelId, baseUrl);
   switch (provider) {
     case "anthropic": {
       const p = createAnthropic({ apiKey, baseURL: baseUrl, headers });
