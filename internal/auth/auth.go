@@ -93,7 +93,7 @@ func (s *Service) handleSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID := cuid2.Generate()
+	userID, _ := cuid2.CreateId()
 	now := time.Now().UTC()
 
 	// Check if this is the first user (auto-admin)
@@ -125,7 +125,7 @@ func (s *Service) handleSignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insert account (email/password provider)
-	accountID := cuid2.Generate()
+	accountID, _ := cuid2.CreateId()
 	_, err = tx.Exec(ctx,
 		`INSERT INTO accounts (id, user_id, account_id, provider_id, password, created_at, updated_at)
 		 VALUES ($1, $2, $3, $4, $5, $6, $7)`,
@@ -328,7 +328,7 @@ func (s *Service) handleForgetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	verificationID := cuid2.Generate()
+	verificationID, _ := cuid2.CreateId()
 	now := time.Now().UTC()
 	expiresAt := now.Add(verificationTokenExpiry)
 

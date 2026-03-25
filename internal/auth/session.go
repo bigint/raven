@@ -45,7 +45,7 @@ func GenerateSessionToken() (string, error) {
 
 // CreateSession inserts a new session into the database.
 func CreateSession(ctx context.Context, pool *pgxpool.Pool, userID, token string, expiresAt time.Time, ipAddress, userAgent string) (*Session, error) {
-	id := cuid2.Generate()
+	id, _ := cuid2.CreateId()
 	now := time.Now().UTC()
 
 	s := &Session{

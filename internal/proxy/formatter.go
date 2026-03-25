@@ -12,21 +12,6 @@ import (
 	"github.com/bigint/raven/internal/logger"
 )
 
-// TokenUsage holds normalized token counts across all providers.
-type TokenUsage struct {
-	InputTokens     int `json:"inputTokens"`
-	OutputTokens    int `json:"outputTokens"`
-	ReasoningTokens int `json:"reasoningTokens"`
-	CacheReadTokens int `json:"cacheReadTokens"`
-	CacheWriteTokens int `json:"cacheWriteTokens"`
-	CachedTokens    int `json:"cachedTokens"`
-}
-
-// ZeroUsage returns a TokenUsage with all fields set to zero.
-func ZeroUsage() TokenUsage {
-	return TokenUsage{}
-}
-
 // BufferedResult holds the parsed result from a non-streaming provider response.
 type BufferedResult struct {
 	Text         string
@@ -200,7 +185,7 @@ func FormatStreamingResponse(
 		}
 
 		if !finished {
-			onFinish(ZeroUsage())
+			onFinish(TokenUsage{})
 		}
 	}()
 
@@ -397,7 +382,6 @@ func handleGoogleSSE(
 ) {
 	candidates, _ := event["candidates"].([]any)
 	if len(candidates) == 0 {
-		// Check for usage-only events
 		if u, ok := event["usageMetadata"].(map[string]any); ok {
 			extractGoogleUsage(u, usage)
 		}
@@ -457,7 +441,6 @@ func handleGoogleSSE(
 		}
 	}
 
-	// Check finish reason
 	if fr, ok := candidate["finishReason"].(string); ok && fr != "" {
 		chunk := copyMap(baseChunk)
 		chunk["choices"] = []any{
@@ -478,7 +461,6 @@ func handleGoogleSSE(
 		writeSSE(chunk)
 	}
 
-	// Extract usage from event
 	if u, ok := event["usageMetadata"].(map[string]any); ok {
 		extractGoogleUsage(u, usage)
 	}
@@ -529,21 +511,11 @@ func extractOpenAIStreamUsage(event map[string]any, usage *TokenUsage) {
 func FormatErrorResponse(err error) (body string, status int) {
 	status = http.StatusInternalServerError
 
-	// Check for AppError with status code
-	type statusCoder interface {
-		StatusCode() int
-	}
-	if sc, ok := err.(statusCoder); ok {
-		status = sc.StatusCode()
-	}
-
-	// Check for response body passthrough
-	type responseBodyer interface {
-		ResponseBody() string
-	}
-	if rb, ok := err.(responseBodyer); ok {
-		if b := rb.ResponseBody(); b != "" {
-			return b, status
+	// Check for ProviderError with status code
+	if pe, ok := err.(*ProviderError); ok {
+		status = pe.Status
+		if pe.RawBody != "" {
+			return pe.RawBody, status
 		}
 	}
 
@@ -564,21 +536,13 @@ func FormatErrorResponse(err error) (body string, status int) {
 
 // ProviderError wraps an upstream provider error with status code and optional raw body.
 type ProviderError struct {
-	Message      string
-	Status       int
-	RawBody      string
+	Message string
+	Status  int
+	RawBody string
 }
 
 func (e *ProviderError) Error() string {
 	return e.Message
-}
-
-func (e *ProviderError) StatusCode() int {
-	return e.Status
-}
-
-func (e *ProviderError) ResponseBody() string {
-	return e.RawBody
 }
 
 // copyMap creates a shallow copy of a map.

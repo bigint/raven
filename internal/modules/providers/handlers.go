@@ -85,7 +85,7 @@ func (h *Handler) createProvider(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := cuid2.Generate()
+	id, _ := cuid2.CreateId()
 	now := time.Now().UTC()
 
 	_, err = h.Pool.Exec(r.Context(),
