@@ -34,7 +34,7 @@ func InitDispatcher(pool *pgxpool.Pool, rdb *redis.Client) {
 			go func(evt eventPayload) {
 				switch evt.Type {
 				case "budget.alert":
-					handleBudgetAlert(context.Background(), pool, rdb, evt.Data)
+					handleBudgetAlert(context.Background(), pool, evt.Data)
 				}
 			}(event)
 		}
@@ -43,7 +43,7 @@ func InitDispatcher(pool *pgxpool.Pool, rdb *redis.Client) {
 	logger.Info("email dispatcher: listening for events")
 }
 
-func handleBudgetAlert(ctx context.Context, pool *pgxpool.Pool, rdb *redis.Client, data map[string]any) {
+func handleBudgetAlert(ctx context.Context, pool *pgxpool.Pool, data map[string]any) {
 	// Check email settings
 	if !checkEmailSettings(ctx, pool) {
 		return

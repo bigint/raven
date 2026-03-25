@@ -23,128 +23,47 @@ var providerClient = &http.Client{Timeout: 0}
 
 const maxProviderRetries = 2
 
-// GuardrailMatch describes a matched guardrail rule for logging.
-type GuardrailMatch struct {
-	RuleName       string `json:"ruleName"`
-	RuleType       string `json:"ruleType"`
-	Action         string `json:"action"`
-	MatchedContent string `json:"matchedContent"`
-}
-
 // ExecuteInput contains all parameters needed to execute a proxy request.
 type ExecuteInput struct {
-	Pool              *pgxpool.Pool
-	Redis             *redis.Client
-	Env               *config.Env
-	EndUser           string
-	StartTime         time.Time
-	ParsedBody        map[string]any
-	Parsed            *ParsedRequest
-	RequestedModel    string
-	ProviderName      string
-	ProviderConfigID  string
+	Pool               *pgxpool.Pool
+	Redis              *redis.Client
+	Env                *config.Env
+	EndUser            string
+	StartTime          time.Time
+	ParsedBody         map[string]any
+	Parsed             *ParsedRequest
+	RequestedModel     string
+	ProviderName       string
+	ProviderConfigID   string
 	ProviderConfigName string
-	DecryptedAPIKey   string
-	VirtualKeyID      string
-	Method            string
-	Path              string
-	SessionID         string
-	UserAgent         string
-	GuardrailWarnings []string
-	GuardrailMatches  []GuardrailMatch
-	IncomingHeaders   map[string]string
-	ExtraHeaders      map[string]string
-	RequestTimeoutMs  int
-	LogRequestBodies  bool
-	LogResponseBodies bool
-	BodyText          string
+	DecryptedAPIKey    string
+	VirtualKeyID       string
+	Method             string
+	Path               string
+	SessionID          string
+	UserAgent          string
+	GuardrailWarnings  []string
+	GuardrailMatches   []GuardrailMatch
+	IncomingHeaders    map[string]string
+	ExtraHeaders       map[string]string
+	RequestTimeoutMs   int
+	LogRequestBodies   bool
+	LogResponseBodies  bool
+	BodyText           string
 }
 
-// ContentAnalysis holds metadata about the request content.
-type ContentAnalysis struct {
-	HasImages  bool
-	ImageCount int
-	HasToolUse bool
-	ToolCount  int
-	ToolNames  []string
-	SessionID  string
-}
-
-// analyzeContent extracts metadata from the request body for logging.
-func analyzeContent(body map[string]any, sessionID string) ContentAnalysis {
-	analysis := ContentAnalysis{SessionID: sessionID}
-
-	if sessionID == "" {
-		analysis.SessionID = fmt.Sprintf("sess-%d", time.Now().UnixNano())
-	}
-
-	// Count images
-	if messages, ok := body["messages"].([]any); ok {
-		for _, raw := range messages {
-			msg, ok := raw.(map[string]any)
-			if !ok {
-				continue
-			}
-			content, ok := msg["content"].([]any)
-			if !ok {
-				continue
-			}
-			for _, block := range content {
-				b, ok := block.(map[string]any)
-				if !ok {
-					continue
-				}
-				blockType, _ := b["type"].(string)
-				if blockType == "image_url" || blockType == "image" {
-					analysis.ImageCount++
-				}
-			}
-		}
-	}
-	analysis.HasImages = analysis.ImageCount > 0
-
-	// Detect tools
-	if tools, ok := body["tools"].([]any); ok && len(tools) > 0 {
-		analysis.HasToolUse = true
-		analysis.ToolCount = len(tools)
-		for _, raw := range tools {
-			t, ok := raw.(map[string]any)
-			if !ok {
-				continue
-			}
-			if fn, ok := t["function"].(map[string]any); ok {
-				if name, ok := fn["name"].(string); ok {
-					analysis.ToolNames = append(analysis.ToolNames, name)
-				}
-			} else if name, ok := t["name"].(string); ok {
-				analysis.ToolNames = append(analysis.ToolNames, name)
-			}
-		}
-	}
-
-	return analysis
-}
-
-// estimateCost calculates the estimated cost based on token usage and model pricing.
-func estimateCost(model string, inputTokens, outputTokens int) float64 {
-	inputPrice, outputPrice, ok := data.GetModelPricing(model)
-	if !ok {
-		return 0
-	}
-	return (float64(inputTokens)/1_000_000)*inputPrice +
-		(float64(outputTokens)/1_000_000)*outputPrice
+// activeProvider tracks the current provider during execution (may change on fallback).
+type activeProvider struct {
+	name       string
+	configID   string
+	configName string
 }
 
 // Execute performs the actual LLM API call, handling both streaming and buffered responses.
 func Execute(ctx context.Context, input *ExecuteInput) (*http.Response, error) {
-	contentAnalysis := analyzeContent(input.ParsedBody, input.SessionID)
+	contentAnalysis := AnalyzeContent(input.ParsedBody, input.SessionID)
 
-	// Active provider tracking for fallback updates
-	activeProvider := struct {
-		name       string
-		configID   string
-		configName string
-	}{
+	active := &activeProvider{
 		name:       input.ProviderName,
 		configID:   input.ProviderConfigID,
 		configName: input.ProviderConfigName,
@@ -174,7 +93,6 @@ func Execute(ctx context.Context, input *ExecuteInput) (*http.Response, error) {
 		)
 	}
 
-	// Try execution with primary provider
 	doRequest := func(apiKey, providerName string) (*http.Response, error) {
 		var lastErr error
 		for attempt := 0; attempt <= maxProviderRetries; attempt++ {
@@ -184,10 +102,9 @@ func Execute(ctx context.Context, input *ExecuteInput) (*http.Response, error) {
 			}
 
 			if input.RequestTimeoutMs > 0 {
-				var cancel context.CancelFunc
-				reqCtx, cancel := context.WithTimeout(ctx, time.Duration(input.RequestTimeoutMs)*time.Millisecond)
-				req = req.WithContext(reqCtx)
-				_ = cancel // cancel will be called when response is consumed or on error
+				timeoutCtx, cancel := context.WithTimeout(ctx, time.Duration(input.RequestTimeoutMs)*time.Millisecond)
+				req = req.WithContext(timeoutCtx)
+				_ = cancel
 			} else {
 				req = req.WithContext(ctx)
 			}
@@ -222,20 +139,42 @@ func Execute(ctx context.Context, input *ExecuteInput) (*http.Response, error) {
 		return nil, lastErr
 	}
 
+	// Try primary provider
 	resp, err := doRequest(input.DecryptedAPIKey, input.ProviderName)
 	if err != nil {
-		// Log the primary failure
 		logger.Error("primary provider failed", err,
 			"provider", input.ProviderName,
 			"providerConfigId", input.ProviderConfigID,
 		)
 
-		// Fallback providers would be fetched from DB here.
-		// For now, return the error formatted as a response.
+		// Try fallback providers
+		fallbacks, fbErr := GetFallbackProviders(ctx, input.Pool, input.Env, input.ProviderConfigID, input.ProviderName)
+		if fbErr == nil {
+			for _, fb := range fallbacks {
+				active.configID = fb.ProviderConfigID
+				active.configName = fb.ProviderConfigName
+				active.name = fb.ProviderName
+
+				fbResp, fbErr := doRequest(fb.DecryptedAPIKey, fb.ProviderName)
+				if fbErr != nil {
+					logger.Error("fallback provider failed", fbErr,
+						"provider", fb.ProviderName,
+						"providerConfigId", fb.ProviderConfigID,
+					)
+					continue
+				}
+
+				// Fallback succeeded
+				if input.Parsed.IsStreaming {
+					return handleStreamingResponse(fbResp, input, active, &contentAnalysis)
+				}
+				return handleBufferedResponse(fbResp, input, active, &contentAnalysis)
+			}
+		}
+
+		// All providers failed
 		body, status := FormatErrorResponse(err)
-
-		logEntry(input, &activeProvider, &contentAnalysis, status, ZeroUsage(), 0, "")
-
+		emitLogEntry(input, active, &contentAnalysis, status, TokenUsage{}, 0, "")
 		return &http.Response{
 			StatusCode: status,
 			Header:     buildResponseHeaders(input, false),
@@ -243,13 +182,11 @@ func Execute(ctx context.Context, input *ExecuteInput) (*http.Response, error) {
 		}, nil
 	}
 
-	// Handle streaming response
+	// Primary succeeded
 	if input.Parsed.IsStreaming {
-		return handleStreamingResponse(resp, input, &activeProvider, &contentAnalysis)
+		return handleStreamingResponse(resp, input, active, &contentAnalysis)
 	}
-
-	// Handle buffered response
-	return handleBufferedResponse(resp, input, &activeProvider, &contentAnalysis)
+	return handleBufferedResponse(resp, input, active, &contentAnalysis)
 }
 
 // prepareProviderBody transforms the request body to the target provider's format.
@@ -269,11 +206,7 @@ func prepareProviderBody(provider string, body map[string]any) ([]byte, error) {
 func handleStreamingResponse(
 	providerResp *http.Response,
 	input *ExecuteInput,
-	activeProvider *struct {
-		name       string
-		configID   string
-		configName string
-	},
+	active *activeProvider,
 	contentAnalysis *ContentAnalysis,
 ) (*http.Response, error) {
 	pr, pw := io.Pipe()
@@ -286,12 +219,16 @@ func handleStreamingResponse(
 		FormatStreamingResponse(
 			rw,
 			providerResp.Body,
-			activeProvider.name,
+			active.name,
 			input.RequestedModel,
 			input.Parsed.IncludeUsage,
 			func(usage TokenUsage) {
-				cost := estimateCost(input.RequestedModel, usage.InputTokens, usage.OutputTokens)
-				logEntry(input, activeProvider, contentAnalysis, http.StatusOK, usage, cost, "")
+				cost := EstimateCost(input.RequestedModel, usage.InputTokens, usage.OutputTokens)
+				emitLogEntry(input, active, contentAnalysis, http.StatusOK, usage, cost, "")
+
+				// Update last used and metrics
+				go UpdateLastUsed(context.Background(), input.Redis, input.VirtualKeyID)
+				go UpdateMetrics(context.Background(), input.Redis, active.configID, time.Since(input.StartTime).Milliseconds(), cost)
 			},
 		)
 	}()
@@ -309,16 +246,12 @@ func handleStreamingResponse(
 func handleBufferedResponse(
 	providerResp *http.Response,
 	input *ExecuteInput,
-	activeProvider *struct {
-		name       string
-		configID   string
-		configName string
-	},
+	active *activeProvider,
 	contentAnalysis *ContentAnalysis,
 ) (*http.Response, error) {
 	defer providerResp.Body.Close()
 
-	result, err := parseProviderResponse(providerResp.Body, activeProvider.name)
+	result, err := parseProviderResponse(providerResp.Body, active.name)
 	if err != nil {
 		body, status := FormatErrorResponse(err)
 		return &http.Response{
@@ -330,9 +263,20 @@ func handleBufferedResponse(
 
 	formatted := FormatBufferedResponse(result, input.RequestedModel)
 
-	cost := estimateCost(input.RequestedModel, formatted.Usage.InputTokens, formatted.Usage.OutputTokens)
+	cost := EstimateCost(input.RequestedModel, formatted.Usage.InputTokens, formatted.Usage.OutputTokens)
+	latencyMs := time.Since(input.StartTime).Milliseconds()
 
-	logEntry(input, activeProvider, contentAnalysis, http.StatusOK, formatted.Usage, cost, formatted.Text)
+	responseText := ""
+	if input.LogResponseBodies {
+		responseText = formatted.Text
+	}
+
+	emitLogEntry(input, active, contentAnalysis, http.StatusOK, formatted.Usage, cost, responseText)
+
+	// Async post-processing
+	go UpdateLastUsed(context.Background(), input.Redis, input.VirtualKeyID)
+	go UpdateMetrics(context.Background(), input.Redis, active.configID, latencyMs, cost)
+	go StoreCache(context.Background(), input.Redis, active.name, input.ParsedBody, formatted.Text, 0)
 
 	headers := buildResponseHeaders(input, false)
 
@@ -369,9 +313,9 @@ func parseProviderResponse(body io.Reader, provider string) (*BufferedResult, er
 
 		openAIResp := providers.GoogleToOpenAIResponse(resp)
 		return extractBufferedResult(openAIResp, TokenUsage{
-			InputTokens:    usage.PromptTokens,
-			OutputTokens:   usage.CompletionTokens,
-			CachedTokens:   usage.CachedTokens,
+			InputTokens:     usage.PromptTokens,
+			OutputTokens:    usage.CompletionTokens,
+			CachedTokens:    usage.CachedTokens,
 			CacheReadTokens: usage.CachedTokens,
 		})
 
@@ -452,14 +396,10 @@ func extractBufferedResult(resp map[string]any, usage TokenUsage) (*BufferedResu
 	return result, nil
 }
 
-// logEntry logs the request metrics (placeholder for full logging integration).
-func logEntry(
+// emitLogEntry builds and sends a log entry for the request.
+func emitLogEntry(
 	input *ExecuteInput,
-	activeProvider *struct {
-		name       string
-		configID   string
-		configName string
-	},
+	active *activeProvider,
 	contentAnalysis *ContentAnalysis,
 	statusCode int,
 	usage TokenUsage,
@@ -468,24 +408,41 @@ func logEntry(
 ) {
 	latencyMs := time.Since(input.StartTime).Milliseconds()
 
-	logger.Info("proxy request",
-		"provider", activeProvider.name,
-		"providerConfigId", activeProvider.configID,
-		"model", input.RequestedModel,
-		"method", input.Method,
-		"path", input.Path,
-		"statusCode", statusCode,
-		"inputTokens", usage.InputTokens,
-		"outputTokens", usage.OutputTokens,
-		"reasoningTokens", usage.ReasoningTokens,
-		"cachedTokens", usage.CachedTokens,
-		"cost", fmt.Sprintf("%.6f", cost),
-		"latencyMs", latencyMs,
-		"hasImages", contentAnalysis.HasImages,
-		"hasToolUse", contentAnalysis.HasToolUse,
-		"virtualKeyId", input.VirtualKeyID,
-		"sessionId", contentAnalysis.SessionID,
-	)
+	logData := LogData{
+		VirtualKeyID:       input.VirtualKeyID,
+		Provider:           active.name,
+		ProviderConfigID:   active.configID,
+		ProviderConfigName: active.configName,
+		Model:              input.RequestedModel,
+		Method:             input.Method,
+		Path:               input.Path,
+		StatusCode:         statusCode,
+		InputTokens:        usage.InputTokens,
+		OutputTokens:       usage.OutputTokens,
+		ReasoningTokens:    usage.ReasoningTokens,
+		Cost:               cost,
+		LatencyMs:          latencyMs,
+		CachedTokens:       usage.CachedTokens,
+		CacheHit:           false,
+		EndUser:            input.EndUser,
+		HasImages:          contentAnalysis.HasImages,
+		ImageCount:         contentAnalysis.ImageCount,
+		HasToolUse:         contentAnalysis.HasToolUse,
+		ToolCount:          contentAnalysis.ToolCount,
+		ToolNames:          contentAnalysis.ToolNames,
+		SessionID:          contentAnalysis.SessionID,
+		UserAgent:          input.UserAgent,
+		GuardrailMatches:   input.GuardrailMatches,
+	}
+
+	if input.LogRequestBodies && input.BodyText != "" {
+		logData.RequestBody = input.BodyText
+	}
+	if responseText != "" {
+		logData.ResponseBody = responseText
+	}
+
+	LogAndPublish(input.Pool, logData, input.Redis)
 }
 
 // buildResponseHeaders constructs the response headers.
@@ -536,10 +493,6 @@ func (w *pipeResponseWriter) Write(data []byte) (int, error) {
 	return w.pw.Write(data)
 }
 
-func (w *pipeResponseWriter) WriteHeader(statusCode int) {
-	// No-op for pipe writer; status is set on the http.Response directly
-}
+func (w *pipeResponseWriter) WriteHeader(_ int) {}
 
-func (w *pipeResponseWriter) Flush() {
-	// Pipe writes are unbuffered; no explicit flush needed
-}
+func (w *pipeResponseWriter) Flush() {}

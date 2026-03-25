@@ -19,6 +19,7 @@ import (
 	"github.com/redis/go-redis/v9"
 
 	"github.com/bigint/raven/internal/config"
+	"github.com/bigint/raven/internal/data"
 	"github.com/bigint/raven/internal/database"
 	"github.com/bigint/raven/internal/events"
 	"github.com/bigint/raven/internal/logger"
