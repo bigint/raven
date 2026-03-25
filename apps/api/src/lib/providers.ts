@@ -33,7 +33,7 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
     validationPath: "/messages"
   },
   google: {
-    authHeaders: bearerAuth,
+    authHeaders: (apiKey) => ({ "x-goog-api-key": apiKey }),
     baseUrl: "https://generativelanguage.googleapis.com/v1beta",
     chatEndpoint: "/chat/completions",
     label: "Google",
