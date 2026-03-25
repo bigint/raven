@@ -83,7 +83,7 @@ func (h *Handler) createKey(w http.ResponseWriter, r *http.Request) {
 	keyHash := crypto.HashSHA256(rawKey)
 	keyPrefix := rawKey[:12]
 
-	id, _ := cuid2.CreateId()
+	id := cuid2.Generate()
 	now := time.Now().UTC()
 
 	_, err := h.Pool.Exec(r.Context(),
