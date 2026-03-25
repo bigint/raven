@@ -1,18 +1,8 @@
 import type { Env } from "@raven/config";
-import { MODEL_CATALOG } from "@raven/data";
 import type { Database } from "@raven/db";
 import type { Context } from "hono";
 import type { Redis } from "ioredis";
-import { GuardrailError } from "@/lib/errors";
-import { authenticateKey } from "./auth";
-import { checkBudgets } from "./budget-check";
-import { checkCache, serveCacheHit } from "./cache";
-import { evaluateRoutingRules } from "./content-router";
-import { execute } from "./execute";
-import { evaluateGuardrails } from "./guardrails";
-import { parseProviderFromPath, resolveProvider } from "./provider-resolver";
-import { checkRateLimit } from "./rate-limiter";
-import { parseIncomingRequest } from "./request-parser";
+import { runPipeline } from "./pipeline";
 
 export const proxyHandler = (
   db: Database,
@@ -20,160 +10,22 @@ export const proxyHandler = (
   env: Env
 ): ((c: Context) => Promise<Response>) => {
   return async (c: Context): Promise<Response> => {
-    const startTime = Date.now();
-
-    // 1. Auth
-    const authHeader = c.req.header("Authorization") ?? "";
-    const { virtualKey } = await authenticateKey(db, authHeader, redis);
-
-    // 2. Gate checks + body parse in parallel
     const method = c.req.method;
     const hasBody = method !== "GET" && method !== "HEAD";
-    const [, , bodyText] = await Promise.all([
-      checkRateLimit(
-        redis,
-        virtualKey.id,
-        virtualKey.rateLimitRpm,
-        virtualKey.rateLimitRpd
-      ),
-      checkBudgets(db, redis, virtualKey.id),
-      hasBody ? c.req.text() : undefined
-    ]);
 
-    // 3. Parse body
-    let parsedBody: Record<string, unknown> = {};
-    if (bodyText) {
-      try {
-        parsedBody = JSON.parse(bodyText);
-      } catch {
-        // Non-JSON body
-      }
-    }
-
-    // 3.5 Extract end-user identity
-    const endUser =
-      (c.req.header("x-user-id") as string | undefined) ??
-      (typeof parsedBody.user === "string" ? parsedBody.user : null) ??
-      (typeof (parsedBody.metadata as Record<string, unknown> | undefined)
-        ?.user_id === "string"
-        ? ((parsedBody.metadata as Record<string, unknown>).user_id as string)
-        : null);
-
-    // 4. Guardrails + content routing
-    const messages = Array.isArray(parsedBody.messages)
-      ? parsedBody.messages
-      : [];
-    const hasMessages =
-      Object.keys(parsedBody).length > 0 && messages.length > 0;
-    const hasModel = typeof parsedBody.model === "string";
-
-    if (hasModel && !MODEL_CATALOG[parsedBody.model as string]) {
-      return c.json(
-        {
-          error: {
-            code: "UNSUPPORTED_MODEL",
-            message: `Model '${parsedBody.model}' is not supported. Use /v1/models to see available models.`
-          }
-        },
-        400
-      );
-    }
-
-    const [guardrailResult, routingResult] = await Promise.all([
-      hasMessages
-        ? evaluateGuardrails(db, messages, redis).catch((err: unknown) => {
-            if (err instanceof GuardrailError) throw err;
-            return null;
-          })
-        : null,
-      hasModel
-        ? evaluateRoutingRules(db, parsedBody.model as string, parsedBody)
-        : null
-    ]);
-
-    const guardrailWarnings = guardrailResult?.warnings ?? [];
-    const guardrailMatches = guardrailResult?.matches ?? [];
-
-    // Apply routing result immutably — create new object instead of mutating
-    if (routingResult?.ruleApplied) {
-      parsedBody = { ...parsedBody, model: routingResult.model };
-    }
-
-    // 5. Cache check + provider resolution in parallel
-    const { providerName: pathProvider } = parseProviderFromPath(c.req.path);
-
-    const [cacheResult, providerResolution] = await Promise.all([
-      checkCache(redis, pathProvider, parsedBody),
-      resolveProvider(db, env, c.req.path, redis)
-    ]);
-
-    const {
-      decryptedApiKey,
-      providerConfigId,
-      providerConfigName,
-      providerName,
-      upstreamPath
-    } = providerResolution;
-    const requestedModel = (parsedBody.model as string) ?? "unknown";
-
-    if (cacheResult.hit) {
-      return serveCacheHit(db, cacheResult, {
-        endUser,
-        guardrailMatches,
-        guardrailWarnings,
-        method,
-        model: requestedModel,
-        parsedBody,
-        path: upstreamPath,
-        providerConfigId,
-        providerConfigName,
-        providerName,
-        redis,
-        sessionHeader: c.req.header("x-session-id") ?? null,
-        startTime,
-        userAgent: c.req.header("user-agent") ?? null,
-        virtualKeyId: virtualKey.id
-      });
-    }
-
-    // 6. Parse + execute
-    const parsed = parseIncomingRequest(parsedBody, providerName);
-
-    if (parsed.requiresRawProxy) {
-      return c.json(
-        {
-          error: {
-            code: "UNSUPPORTED_PARAMETER",
-            message:
-              'Parameter "n" > 1 is not currently supported. Please send separate requests.'
-          }
-        },
-        400
-      );
-    }
-
-    return execute({
+    return runPipeline({
+      authHeader: c.req.header("Authorization") ?? "",
+      bodyText: hasBody ? await c.req.text() : undefined,
       db,
-      decryptedApiKey,
-      endUser,
       env,
-      extraResponseHeaders: undefined,
-      guardrailMatches,
-      guardrailWarnings,
       incomingHeaders: c.req.header(),
       method,
-      parsed,
-      parsedBody,
-      path: upstreamPath,
-      providerConfigId,
-      providerConfigName,
-      providerName,
+      path: c.req.path,
+      providerPath: c.req.path,
       redis,
-      requestedModel,
       sessionId: c.req.header("x-session-id") ?? null,
-      startTime,
       userAgent: c.req.header("user-agent") ?? null,
-      virtualKeyId: virtualKey.id
+      userIdHeader: c.req.header("x-user-id")
     });
   };
 };
