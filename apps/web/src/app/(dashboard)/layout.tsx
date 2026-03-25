@@ -24,7 +24,14 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           <p className="mb-4 text-sm text-muted-foreground">
             Unable to verify your session
           </p>
-          <Button onClick={() => window.location.reload()}>Retry</Button>
+          <Button
+            onClick={() => {
+              localStorage.clear();
+              window.location.href = "/api/logout";
+            }}
+          >
+            Logout
+          </Button>
         </div>
       </div>
     );
