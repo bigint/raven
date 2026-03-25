@@ -15,15 +15,10 @@ import (
 	"github.com/bigint/raven/internal/errors"
 )
 
-type ProviderResolution struct {
-	DecryptedAPIKey    string
-	ProviderConfigID   string
-	ProviderConfigName string
-	ProviderName       string
-	UpstreamPath       string
-}
+// ProviderResolution is defined in pipeline.go
 
-type ParsedPath struct {
+// ParsedProviderPath holds the parsed components of a provider path.
+type ParsedProviderPath struct {
 	ProviderName string
 	ConfigID     string
 	UpstreamPath string
@@ -37,7 +32,9 @@ type providerConfigRow struct {
 	IsEnabled bool   `json:"isEnabled"`
 }
 
-func ParseProviderFromPath(reqPath string) ParsedPath {
+// ParseProviderFromPath extracts provider name, config ID, and upstream path from
+// a URL path like "/v1/proxy/anthropic~configId/messages".
+func ParseProviderFromPath(reqPath string) ParsedProviderPath {
 	// Strip "/v1/proxy/" prefix
 	trimmed := strings.TrimPrefix(reqPath, "/v1/proxy/")
 	trimmed = strings.TrimPrefix(trimmed, "/")
@@ -52,20 +49,21 @@ func ParseProviderFromPath(reqPath string) ParsedPath {
 
 	tildeIdx := strings.Index(providerSegment, "~")
 	if tildeIdx == -1 {
-		return ParsedPath{
+		return ParsedProviderPath{
 			ProviderName: providerSegment,
 			ConfigID:     "",
 			UpstreamPath: upstreamPath,
 		}
 	}
 
-	return ParsedPath{
+	return ParsedProviderPath{
 		ProviderName: providerSegment[:tildeIdx],
 		ConfigID:     providerSegment[tildeIdx+1:],
 		UpstreamPath: upstreamPath,
 	}
 }
 
+// ResolveProvider resolves a provider config, decrypts the API key, and returns the resolution.
 func ResolveProvider(ctx context.Context, pool *pgxpool.Pool, env *config.Env, reqPath string, rdb *redis.Client, strategy RoutingStrategy) (*ProviderResolution, error) {
 	parsed := ParseProviderFromPath(reqPath)
 

@@ -10,13 +10,9 @@ import (
 	"github.com/bigint/raven/internal/crypto"
 )
 
-const defaultCacheTTL = time.Hour
+// CacheResult is defined in pipeline.go
 
-type CacheResult struct {
-	Hit    bool
-	Body   string
-	Parsed map[string]any
-}
+const defaultCacheTTL = time.Hour
 
 func buildCacheKey(provider, model string, body map[string]any) string {
 	content := body["messages"]
@@ -46,7 +42,8 @@ func buildCacheKey(provider, model string, body map[string]any) string {
 	return "cache:resp:" + hash
 }
 
-func CheckCache(ctx context.Context, rdb *redis.Client, provider string, requestBody map[string]any) *CacheResult {
+// CheckResponseCache checks if a cached response exists for the given request.
+func CheckResponseCache(ctx context.Context, rdb *redis.Client, provider string, requestBody map[string]any) *CacheResult {
 	// Skip caching for streaming requests
 	if stream, ok := requestBody["stream"].(bool); ok && stream {
 		return &CacheResult{Hit: false}
@@ -63,19 +60,14 @@ func CheckCache(ctx context.Context, rdb *redis.Client, provider string, request
 		return &CacheResult{Hit: false}
 	}
 
-	var parsed map[string]any
-	if jsonErr := json.Unmarshal([]byte(cached), &parsed); jsonErr != nil {
-		parsed = make(map[string]any)
-	}
-
 	return &CacheResult{
-		Hit:    true,
-		Body:   cached,
-		Parsed: parsed,
+		Hit:  true,
+		Body: cached,
 	}
 }
 
-func StoreCache(ctx context.Context, rdb *redis.Client, provider string, requestBody map[string]any, responseBody string, ttl time.Duration) {
+// StoreResponseCache stores a response in the cache with the given TTL.
+func StoreResponseCache(ctx context.Context, rdb *redis.Client, provider string, requestBody map[string]any, responseBody string, ttl time.Duration) {
 	// Skip caching for streaming requests
 	if stream, ok := requestBody["stream"].(bool); ok && stream {
 		return

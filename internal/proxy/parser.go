@@ -7,20 +7,20 @@ import (
 
 // ParsedRequest holds the normalized representation of an incoming OpenAI-format request.
 type ParsedRequest struct {
-	Messages         []Message              `json:"messages"`
-	System           string                 `json:"system,omitempty"`
-	Tools            map[string]ToolDef     `json:"tools,omitempty"`
-	ToolChoice       any                    `json:"toolChoice,omitempty"`
-	Temperature      *float64               `json:"temperature,omitempty"`
-	TopP             *float64               `json:"topP,omitempty"`
-	MaxTokens        *int                   `json:"maxTokens,omitempty"`
-	StopSequences    []string               `json:"stopSequences,omitempty"`
-	FrequencyPenalty *float64               `json:"frequencyPenalty,omitempty"`
-	PresencePenalty  *float64               `json:"presencePenalty,omitempty"`
-	Seed             *int                   `json:"seed,omitempty"`
-	IsStreaming      bool                   `json:"isStreaming"`
-	IncludeUsage     bool                   `json:"includeUsage"`
-	RequiresRawProxy bool                   `json:"requiresRawProxy"`
+	Messages         []Message                 `json:"messages"`
+	System           string                    `json:"system,omitempty"`
+	Tools            map[string]ToolDef        `json:"tools,omitempty"`
+	ToolChoice       any                       `json:"toolChoice,omitempty"`
+	Temperature      *float64                  `json:"temperature,omitempty"`
+	TopP             *float64                  `json:"topP,omitempty"`
+	MaxTokens        *int                      `json:"maxTokens,omitempty"`
+	StopSequences    []string                  `json:"stopSequences,omitempty"`
+	FrequencyPenalty *float64                  `json:"frequencyPenalty,omitempty"`
+	PresencePenalty  *float64                  `json:"presencePenalty,omitempty"`
+	Seed             *int                      `json:"seed,omitempty"`
+	IsStreaming      bool                      `json:"isStreaming"`
+	IncludeUsage     bool                      `json:"includeUsage"`
+	RequiresRawProxy bool                      `json:"requiresRawProxy"`
 	ProviderOptions  map[string]map[string]any `json:"providerOptions,omitempty"`
 }
 
@@ -316,7 +316,6 @@ func convertContent(content any) any {
 
 // toImagePart creates an image part from a URL or data URI.
 func toImagePart(url string) MessagePart {
-	// Check for data URI: data:<mime>;base64,<data>
 	if strings.HasPrefix(url, "data:") {
 		parts := strings.SplitN(url, ";base64,", 2)
 		if len(parts) == 2 {
