@@ -42,16 +42,7 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
     getInstanceSettings(input.db, input.redis)
   ]);
 
-  // 2. Gate checks — fall back to global rate limits when per-key limits are null
-  const rpm = virtualKey.rateLimitRpm ?? cfg.global_rate_limit_rpm;
-  const rpd = virtualKey.rateLimitRpd ?? cfg.global_rate_limit_rpd;
-
-  await Promise.all([
-    checkRateLimit(input.redis, virtualKey.id, rpm, rpd),
-    checkBudgets(input.db, input.redis, virtualKey.id)
-  ]);
-
-  // 3. Parse body
+  // 2. Parse body (sync — no await needed)
   let parsedBody: Record<string, unknown> = {};
   if (input.bodyText) {
     try {
@@ -63,21 +54,11 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
     }
   }
 
-
-  // 4. Extract end-user identity
-  const endUser =
-    (input.userIdHeader as string | undefined) ??
-    (typeof parsedBody.user === "string" ? parsedBody.user : null) ??
-    (typeof (parsedBody.metadata as Record<string, unknown> | undefined)
-      ?.user_id === "string"
-      ? ((parsedBody.metadata as Record<string, unknown>).user_id as string)
-      : null);
-
-  // 5. Guardrails + content routing
+  // 3. Model validation (sync — fast bail before any async work)
   const messages = Array.isArray(parsedBody.messages)
     ? parsedBody.messages
     : [];
-  const hasMessages = Object.keys(parsedBody).length > 0 && messages.length > 0;
+  const hasMessages = messages.length > 0;
   const hasModel = typeof parsedBody.model === "string";
 
   if (hasModel && !MODEL_CATALOG[parsedBody.model as string]) {
@@ -92,7 +73,13 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
     );
   }
 
-  const [guardrailResult, routingResult] = await Promise.all([
+  // 4. Gate checks + guardrails + routing — all in parallel
+  const rpm = virtualKey.rateLimitRpm ?? cfg.global_rate_limit_rpm;
+  const rpd = virtualKey.rateLimitRpd ?? cfg.global_rate_limit_rpd;
+
+  const [, , guardrailResult, routingResult] = await Promise.all([
+    checkRateLimit(input.redis, virtualKey.id, rpm, rpd),
+    checkBudgets(input.db, input.redis, virtualKey.id),
     hasMessages
       ? evaluateGuardrails(input.db, messages, input.redis).catch(
           (err: unknown) => {
@@ -106,6 +93,15 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
       : null
   ]);
 
+  // 5. Extract end-user identity
+  const endUser =
+    (input.userIdHeader as string | undefined) ??
+    (typeof parsedBody.user === "string" ? parsedBody.user : null) ??
+    (typeof (parsedBody.metadata as Record<string, unknown> | undefined)
+      ?.user_id === "string"
+      ? ((parsedBody.metadata as Record<string, unknown>).user_id as string)
+      : null);
+
   const guardrailWarnings = guardrailResult?.warnings ?? [];
   const guardrailMatches = guardrailResult?.matches ?? [];
 
@@ -113,7 +109,7 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
     parsedBody = { ...parsedBody, model: routingResult.model };
   }
 
-  // 6. Cache check + provider resolution in parallel
+  // 6. Cache + provider resolution in parallel
   const { providerName: pathProvider } = parseProviderFromPath(
     input.providerPath
   );

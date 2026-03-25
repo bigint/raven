@@ -1,4 +1,4 @@
-import { createId } from "@paralleldrive/cuid2";
+import { randomUUID } from "node:crypto";
 
 export interface ContentAnalysis {
   readonly hasImages: boolean;
@@ -88,7 +88,7 @@ export const analyzeContent = (
     if (metadata && typeof metadata.session_id === "string") {
       return metadata.session_id;
     }
-    return createId();
+    return randomUUID();
   })();
 
   return {
