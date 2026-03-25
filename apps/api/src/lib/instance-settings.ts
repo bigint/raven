@@ -91,9 +91,7 @@ export const getInstanceSettings = async (
   const parsed = parse(raw);
 
   if (redis) {
-    await redis
-      .set(CACHE_KEY, JSON.stringify(parsed))
-      .catch(() => undefined);
+    await redis.set(CACHE_KEY, JSON.stringify(parsed)).catch(() => undefined);
   }
 
   return parsed;

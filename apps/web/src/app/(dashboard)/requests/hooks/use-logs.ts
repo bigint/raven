@@ -56,6 +56,8 @@ export interface SessionRequest {
   readonly userAgent: string | null;
   readonly isStarred: boolean;
   readonly virtualKeyId: string;
+  readonly requestBody: string | null;
+  readonly responseBody: string | null;
 }
 
 interface LogsResponse {

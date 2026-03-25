@@ -8,6 +8,14 @@ import { ModelIcon } from "@/components/model-icon";
 import type { SessionRequest } from "../hooks/use-logs";
 import { useToggleStar } from "../hooks/use-logs";
 
+const tryFormatJson = (str: string): string => {
+  try {
+    return JSON.stringify(JSON.parse(str), null, 2);
+  } catch {
+    return str;
+  }
+};
+
 interface RequestDetailProps {
   readonly request: SessionRequest | null;
   readonly onClose: () => void;
@@ -196,6 +204,28 @@ export const RequestDetail = ({ request, onClose }: RequestDetailProps) => {
                 </p>
               )}
             </div>
+
+            {request.requestBody && (
+              <div className="border-b border-border px-6 py-5">
+                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Request Body
+                </h3>
+                <pre className="max-h-80 overflow-auto rounded-md bg-muted p-3 text-xs">
+                  <code>{tryFormatJson(request.requestBody)}</code>
+                </pre>
+              </div>
+            )}
+
+            {request.responseBody && (
+              <div className="border-b border-border px-6 py-5">
+                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Response Body
+                </h3>
+                <pre className="max-h-80 overflow-auto rounded-md bg-muted p-3 text-xs">
+                  <code>{tryFormatJson(request.responseBody)}</code>
+                </pre>
+              </div>
+            )}
           </motion.div>
         </>
       )}

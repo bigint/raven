@@ -107,6 +107,8 @@ export const getSessionById = (db: Database) => async (c: AuthContext) => {
       path: requestLogs.path,
       provider: requestLogs.provider,
       reasoningTokens: requestLogs.reasoningTokens,
+      requestBody: requestLogs.requestBody,
+      responseBody: requestLogs.responseBody,
       sessionId: requestLogs.sessionId,
       statusCode: requestLogs.statusCode,
       toolCount: requestLogs.toolCount,
