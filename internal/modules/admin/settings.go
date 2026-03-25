@@ -157,5 +157,3 @@ func strDefault(v, fallback string) string {
 	return v
 }
 
-// Unused but preserves the time import for cache TTL operations if needed.
-var _ = time.Second
