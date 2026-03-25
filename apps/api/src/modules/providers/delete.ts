@@ -2,12 +2,11 @@ import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
+import { auditAndPublish } from "@/lib/audit";
 import { cacheKeys } from "@/lib/cache-utils";
 import { NotFoundError } from "@/lib/errors";
-import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
 import type { AuthContext } from "@/lib/types";
-import { logAudit } from "@/modules/audit-logs/index";
 
 export const deleteProvider =
   (db: Database, redis: Redis) => async (c: AuthContext) => {
@@ -32,12 +31,6 @@ export const deleteProvider =
     // Invalidate provider configs cache
     void redis.del(cacheKeys.providerConfigs(existing.provider));
 
-    void publishEvent("provider.deleted", { id });
-    void logAudit(db, {
-      action: "provider.deleted",
-      actorId: user.id,
-      resourceId: id,
-      resourceType: "provider"
-    });
+    void auditAndPublish(db, user, "provider", "deleted", { resourceId: id });
     return success(c, { success: true });
   };

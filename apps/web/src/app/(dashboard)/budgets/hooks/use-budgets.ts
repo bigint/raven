@@ -1,10 +1,6 @@
-import {
-  queryOptions,
-  useMutation,
-  useQueryClient
-} from "@tanstack/react-query";
-import { toast } from "sonner";
+import { queryOptions } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { createCrudHooks } from "@/lib/crud-hooks";
 
 export interface Budget {
   readonly id: string;
@@ -46,59 +42,14 @@ interface BudgetInput {
   readonly alertThreshold: number;
 }
 
-export const useCreateBudget = () => {
-  const queryClient = useQueryClient();
+const {
+  useCreate: useCreateBudget,
+  useUpdate: useUpdateBudget,
+  useDelete: useDeleteBudget
+} = createCrudHooks<Budget, BudgetInput, BudgetInput & { id: string }>({
+  endpoint: "/v1/budgets",
+  labels: { plural: "Budgets", singular: "Budget" },
+  queryKey: ["budgets"]
+});
 
-  return useMutation({
-    mutationFn: (input: BudgetInput) => {
-      const promise = api.post<Budget>("/v1/budgets", input);
-      toast.promise(promise, {
-        error: (err) => err.message,
-        loading: "Creating budget...",
-        success: "Budget created"
-      });
-      return promise;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budgets"] });
-    }
-  });
-};
-
-export const useUpdateBudget = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, ...body }: BudgetInput & { id: string }) => {
-      const promise = api.put<Budget>(`/v1/budgets/${id}`, body);
-      toast.promise(promise, {
-        error: (err) => err.message,
-        loading: "Updating budget...",
-        success: "Budget updated"
-      });
-      return promise;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budgets"] });
-    }
-  });
-};
-
-export const useDeleteBudget = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => {
-      const promise = api.delete(`/v1/budgets/${id}`);
-      toast.promise(promise, {
-        error: (err) => err.message,
-        loading: "Deleting budget...",
-        success: "Budget deleted"
-      });
-      return promise;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budgets"] });
-    }
-  });
-};
+export { useCreateBudget, useDeleteBudget, useUpdateBudget };

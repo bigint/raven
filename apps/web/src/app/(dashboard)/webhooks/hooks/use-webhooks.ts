@@ -1,10 +1,6 @@
-import {
-  queryOptions,
-  useMutation,
-  useQueryClient
-} from "@tanstack/react-query";
-import { toast } from "sonner";
+import { queryOptions, useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { createCrudHooks } from "@/lib/crud-hooks";
 
 export interface Webhook {
   readonly id: string;
@@ -67,62 +63,17 @@ interface WebhookUpdateInput {
   readonly isEnabled?: boolean;
 }
 
-export const useCreateWebhook = () => {
-  const queryClient = useQueryClient();
+const {
+  useCreate: useCreateWebhook,
+  useUpdate: useUpdateWebhook,
+  useDelete: useDeleteWebhook
+} = createCrudHooks<Webhook, WebhookCreateInput, WebhookUpdateInput>({
+  endpoint: "/v1/webhooks",
+  labels: { plural: "Webhooks", singular: "Webhook" },
+  queryKey: ["webhooks"]
+});
 
-  return useMutation({
-    mutationFn: (input: WebhookCreateInput) => {
-      const promise = api.post<Webhook>("/v1/webhooks", input);
-      toast.promise(promise, {
-        error: (err) => err.message,
-        loading: "Creating webhook...",
-        success: "Webhook created"
-      });
-      return promise;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["webhooks"] });
-    }
-  });
-};
-
-export const useUpdateWebhook = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, ...body }: WebhookUpdateInput) => {
-      const promise = api.put<Webhook>(`/v1/webhooks/${id}`, body);
-      toast.promise(promise, {
-        error: (err) => err.message,
-        loading: "Updating webhook...",
-        success: "Webhook updated"
-      });
-      return promise;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["webhooks"] });
-    }
-  });
-};
-
-export const useDeleteWebhook = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => {
-      const promise = api.delete(`/v1/webhooks/${id}`);
-      toast.promise(promise, {
-        error: (err) => err.message,
-        loading: "Deleting webhook...",
-        success: "Webhook deleted"
-      });
-      return promise;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["webhooks"] });
-    }
-  });
-};
+export { useCreateWebhook, useDeleteWebhook, useUpdateWebhook };
 
 interface TestWebhookResult {
   readonly ok: boolean;

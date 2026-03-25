@@ -2,11 +2,11 @@ import type { Database } from "@raven/db";
 import { webhooks } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { z } from "zod";
+import { auditAndPublish } from "@/lib/audit";
 import { NotFoundError } from "@/lib/errors";
-import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
 import type { AuthContextWithJson } from "@/lib/types";
-import { logAudit } from "@/modules/audit-logs/index";
+import { filterUndefined } from "@/lib/utils";
 import type { updateWebhookSchema } from "./schema";
 
 type Body = z.infer<typeof updateWebhookSchema>;
@@ -17,46 +17,23 @@ export const updateWebhook =
     const id = c.req.param("id") as string;
     const { url, events, isEnabled } = c.req.valid("json");
 
-    const [existing] = await db
-      .select({ id: webhooks.id })
-      .from(webhooks)
-      .where(eq(webhooks.id, id))
-      .limit(1);
-
-    if (!existing) {
-      throw new NotFoundError("Webhook not found");
-    }
-
-    const updates: Partial<typeof webhooks.$inferInsert> = {};
-
-    if (url !== undefined) {
-      updates.url = url;
-    }
-
-    if (events !== undefined) {
-      updates.events = events;
-    }
-
-    if (isEnabled !== undefined) {
-      updates.isEnabled = isEnabled;
-    }
-
-    updates.updatedAt = new Date();
-
     const [updated] = await db
       .update(webhooks)
-      .set(updates)
+      .set({
+        ...filterUndefined({ events, isEnabled, url }),
+        updatedAt: new Date()
+      })
       .where(eq(webhooks.id, id))
       .returning();
 
-    const record = updated as NonNullable<typeof updated>;
-    void publishEvent("webhook.updated", record);
-    void logAudit(db, {
-      action: "webhook.updated",
-      actorId: user.id,
+    if (!updated) {
+      throw new NotFoundError("Webhook not found");
+    }
+
+    void auditAndPublish(db, user, "webhook", "updated", {
+      data: updated,
       metadata: { events, isEnabled, url },
-      resourceId: record.id,
-      resourceType: "webhook"
+      resourceId: updated.id
     });
-    return success(c, record);
+    return success(c, updated);
   };

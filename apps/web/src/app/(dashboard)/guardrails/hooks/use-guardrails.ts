@@ -1,10 +1,6 @@
-import {
-  queryOptions,
-  useMutation,
-  useQueryClient
-} from "@tanstack/react-query";
-import { toast } from "sonner";
+import { queryOptions } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { createCrudHooks } from "@/lib/crud-hooks";
 
 export interface Guardrail {
   readonly id: string;
@@ -59,59 +55,16 @@ interface GuardrailInput {
   readonly priority: number;
 }
 
-export const useCreateGuardrail = () => {
-  const queryClient = useQueryClient();
+const {
+  useCreate: useCreateGuardrail,
+  useUpdate: useUpdateGuardrail,
+  useDelete: useDeleteGuardrail
+} = createCrudHooks<Guardrail, GuardrailInput, GuardrailInput & { id: string }>(
+  {
+    endpoint: "/v1/guardrails",
+    labels: { plural: "Guardrails", singular: "Guardrail" },
+    queryKey: ["guardrails"]
+  }
+);
 
-  return useMutation({
-    mutationFn: (input: GuardrailInput) => {
-      const promise = api.post<Guardrail>("/v1/guardrails", input);
-      toast.promise(promise, {
-        error: (err) => err.message,
-        loading: "Creating guardrail...",
-        success: "Guardrail created"
-      });
-      return promise;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["guardrails"] });
-    }
-  });
-};
-
-export const useUpdateGuardrail = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, ...body }: GuardrailInput & { id: string }) => {
-      const promise = api.put<Guardrail>(`/v1/guardrails/${id}`, body);
-      toast.promise(promise, {
-        error: (err) => err.message,
-        loading: "Updating guardrail...",
-        success: "Guardrail updated"
-      });
-      return promise;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["guardrails"] });
-    }
-  });
-};
-
-export const useDeleteGuardrail = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => {
-      const promise = api.delete(`/v1/guardrails/${id}`);
-      toast.promise(promise, {
-        error: (err) => err.message,
-        loading: "Deleting guardrail...",
-        success: "Guardrail deleted"
-      });
-      return promise;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["guardrails"] });
-    }
-  });
-};
+export { useCreateGuardrail, useDeleteGuardrail, useUpdateGuardrail };

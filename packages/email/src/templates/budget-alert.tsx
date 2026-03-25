@@ -10,6 +10,8 @@ import {
   Text
 } from "@react-email/components";
 
+import { body, container, footer, heading, hr, text } from "../styles";
+
 interface BudgetAlertEmailProps {
   readonly budgetName: string;
   readonly currentUsage: number;
@@ -85,35 +87,6 @@ export const BudgetAlertEmail = ({
   );
 };
 
-const body = {
-  backgroundColor: "#f6f9fc",
-  fontFamily:
-    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
-};
-
-const container = {
-  backgroundColor: "#ffffff",
-  borderRadius: "8px",
-  margin: "0 auto",
-  maxWidth: "480px",
-  padding: "40px 24px"
-};
-
-const heading = {
-  color: "#111827",
-  fontSize: "24px",
-  fontWeight: "700" as const,
-  margin: "0 0 24px",
-  textAlign: "center" as const
-};
-
-const text = {
-  color: "#374151",
-  fontSize: "15px",
-  lineHeight: "24px",
-  margin: "0 0 16px"
-};
-
 const statsSection = {
   margin: "24px 0"
 };
@@ -159,16 +132,4 @@ const barLabel = {
   fontSize: "12px",
   margin: "4px 0 0",
   textAlign: "right" as const
-};
-
-const hr = {
-  borderColor: "#e5e7eb",
-  margin: "24px 0"
-};
-
-const footer = {
-  color: "#6b7280",
-  fontSize: "13px",
-  lineHeight: "20px",
-  margin: "0"
 };

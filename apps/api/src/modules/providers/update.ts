@@ -1,17 +1,16 @@
+import { createHash } from "node:crypto";
 import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
 import type { z } from "zod";
+import { auditAndPublish } from "@/lib/audit";
 import { cacheKeys } from "@/lib/cache-utils";
 import { encrypt } from "@/lib/crypto";
 import { NotFoundError, PreconditionFailedError } from "@/lib/errors";
-import { checkIfMatch, generateETag } from "@/lib/etag";
-import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
 import type { AuthContextWithJson } from "@/lib/types";
-import { logAudit } from "@/modules/audit-logs/index";
 import { maskApiKey } from "./helpers";
 import type { updateProviderSchema } from "./schema";
 
@@ -35,10 +34,10 @@ export const updateProvider =
     }
 
     const currentData = { ...existing, apiKey: maskApiKey(existing.apiKey) };
-    const currentETag = generateETag(currentData);
+    const currentETag = `"${createHash("sha256").update(JSON.stringify(currentData)).digest("hex").slice(0, 16)}"`;
     const ifMatch = c.req.header("If-Match");
 
-    if (!checkIfMatch(ifMatch, currentETag)) {
+    if (ifMatch && ifMatch !== currentETag) {
       throw new PreconditionFailedError(
         "Resource has been modified by another request"
       );
@@ -72,16 +71,10 @@ export const updateProvider =
     void redis.del(cacheKeys.providerConfigs(record.provider));
 
     const masked = maskApiKey(record.apiKey);
-    void publishEvent("provider.updated", {
-      ...record,
-      apiKey: masked
-    });
-    void logAudit(db, {
-      action: "provider.updated",
-      actorId: user.id,
+    void auditAndPublish(db, user, "provider", "updated", {
+      data: { ...record, apiKey: masked },
       metadata: { apiKeyChanged: apiKey !== undefined, isEnabled, name },
-      resourceId: record.id,
-      resourceType: "provider"
+      resourceId: record.id
     });
     return success(c, { ...record, apiKey: masked });
   };

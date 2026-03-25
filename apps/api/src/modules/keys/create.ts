@@ -1,10 +1,9 @@
 import type { Database } from "@raven/db";
 import { virtualKeys } from "@raven/db";
 import type { z } from "zod";
-import { publishEvent } from "@/lib/events";
+import { auditAndPublish } from "@/lib/audit";
 import { created } from "@/lib/response";
 import type { AuthContextWithJson } from "@/lib/types";
-import { logAudit } from "@/modules/audit-logs/index";
 import { generateKey, safeKey } from "./helpers";
 import type { createKeySchema } from "./schema";
 
@@ -33,16 +32,10 @@ export const createKey =
 
     // Return full plaintext key ONLY on creation
     const safe = safeKey(record as NonNullable<typeof record>);
-    void publishEvent("key.created", {
-      ...safe,
-      key: undefined
-    });
-    void logAudit(db, {
-      action: "key.created",
-      actorId: user.id,
+    void auditAndPublish(db, user, "key", "created", {
+      data: { ...safe, key: undefined },
       metadata: { environment, name },
-      resourceId: safe.id,
-      resourceType: "key"
+      resourceId: safe.id
     });
     return created(c, { ...safe, key });
   };

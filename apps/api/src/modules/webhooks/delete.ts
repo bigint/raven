@@ -1,11 +1,10 @@
 import type { Database } from "@raven/db";
 import { webhooks } from "@raven/db";
 import { eq } from "drizzle-orm";
+import { auditAndPublish } from "@/lib/audit";
 import { NotFoundError } from "@/lib/errors";
-import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
 import type { AuthContext } from "@/lib/types";
-import { logAudit } from "@/modules/audit-logs/index";
 
 export const deleteWebhook = (db: Database) => async (c: AuthContext) => {
   const user = c.get("user");
@@ -23,12 +22,6 @@ export const deleteWebhook = (db: Database) => async (c: AuthContext) => {
 
   await db.delete(webhooks).where(eq(webhooks.id, id));
 
-  void publishEvent("webhook.deleted", { id });
-  void logAudit(db, {
-    action: "webhook.deleted",
-    actorId: user.id,
-    resourceId: id,
-    resourceType: "webhook"
-  });
+  void auditAndPublish(db, user, "webhook", "deleted", { resourceId: id });
   return success(c, { success: true });
 };

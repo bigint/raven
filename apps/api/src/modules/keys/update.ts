@@ -2,11 +2,11 @@ import type { Database } from "@raven/db";
 import { virtualKeys } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { z } from "zod";
+import { auditAndPublish } from "@/lib/audit";
 import { NotFoundError } from "@/lib/errors";
-import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
 import type { AuthContextWithJson } from "@/lib/types";
-import { logAudit } from "@/modules/audit-logs/index";
+import { filterUndefined } from "@/lib/utils";
 import { safeKey } from "./helpers";
 import type { updateKeySchema } from "./schema";
 
@@ -19,31 +19,14 @@ export const updateKey =
     const { name, rateLimitRpm, rateLimitRpd, isActive, expiresAt } =
       c.req.valid("json");
 
-    const updates: Partial<typeof virtualKeys.$inferInsert> = {};
-
-    if (name !== undefined) {
-      updates.name = name;
-    }
-
-    if (rateLimitRpm !== undefined) {
-      updates.rateLimitRpm = rateLimitRpm;
-    }
-
-    if (rateLimitRpd !== undefined) {
-      updates.rateLimitRpd = rateLimitRpd;
-    }
-
-    if (isActive !== undefined) {
-      updates.isActive = isActive;
-    }
-
-    if (expiresAt !== undefined) {
-      updates.expiresAt = expiresAt ? new Date(expiresAt) : null;
-    }
-
     const [updated] = await db
       .update(virtualKeys)
-      .set(updates)
+      .set({
+        ...filterUndefined({ isActive, name, rateLimitRpd, rateLimitRpm }),
+        ...(expiresAt !== undefined && {
+          expiresAt: expiresAt ? new Date(expiresAt) : null
+        })
+      })
       .where(eq(virtualKeys.id, id))
       .returning();
 
@@ -52,13 +35,10 @@ export const updateKey =
     }
 
     const safeKeyData = safeKey(updated as NonNullable<typeof updated>);
-    void publishEvent("key.updated", safeKeyData);
-    void logAudit(db, {
-      action: "key.updated",
-      actorId: user.id,
+    void auditAndPublish(db, user, "key", "updated", {
+      data: safeKeyData,
       metadata: { expiresAt, isActive, name, rateLimitRpd, rateLimitRpm },
-      resourceId: id,
-      resourceType: "key"
+      resourceId: id
     });
     return success(c, safeKeyData);
   };

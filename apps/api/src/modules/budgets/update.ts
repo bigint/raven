@@ -2,11 +2,11 @@ import type { Database } from "@raven/db";
 import { budgets } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { z } from "zod";
+import { auditAndPublish } from "@/lib/audit";
 import { NotFoundError } from "@/lib/errors";
-import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
 import type { AuthContextWithJson } from "@/lib/types";
-import { logAudit } from "@/modules/audit-logs/index";
+import { filterUndefined } from "@/lib/utils";
 import type { updateBudgetSchema } from "./schema";
 
 type Body = z.infer<typeof updateBudgetSchema>;
@@ -17,23 +17,17 @@ export const updateBudget =
     const id = c.req.param("id") as string;
     const { limitAmount, alertThreshold, period } = c.req.valid("json");
 
-    const updates: Partial<typeof budgets.$inferInsert> = {};
-
-    if (limitAmount !== undefined) {
-      updates.limitAmount = limitAmount.toFixed(2);
-    }
-
-    if (alertThreshold !== undefined) {
-      updates.alertThreshold = alertThreshold.toFixed(2);
-    }
-
-    if (period !== undefined) {
-      updates.period = period;
-    }
-
     const [updated] = await db
       .update(budgets)
-      .set(updates)
+      .set({
+        ...filterUndefined({ period }),
+        ...(limitAmount !== undefined && {
+          limitAmount: limitAmount.toFixed(2)
+        }),
+        ...(alertThreshold !== undefined && {
+          alertThreshold: alertThreshold.toFixed(2)
+        })
+      })
       .where(eq(budgets.id, id))
       .returning();
 
@@ -41,13 +35,10 @@ export const updateBudget =
       throw new NotFoundError("Budget not found");
     }
 
-    void publishEvent("budget.updated", updated);
-    void logAudit(db, {
-      action: "budget.updated",
-      actorId: user.id,
+    void auditAndPublish(db, user, "budget", "updated", {
+      data: updated,
       metadata: { alertThreshold, limitAmount, period },
-      resourceId: id,
-      resourceType: "budget"
+      resourceId: id
     });
     return success(c, updated);
   };

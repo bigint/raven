@@ -2,10 +2,9 @@ import crypto from "node:crypto";
 import type { Database } from "@raven/db";
 import { webhooks } from "@raven/db";
 import type { z } from "zod";
-import { publishEvent } from "@/lib/events";
+import { auditAndPublish } from "@/lib/audit";
 import { created } from "@/lib/response";
 import type { AuthContextWithJson } from "@/lib/types";
-import { logAudit } from "@/modules/audit-logs/index";
 import type { createWebhookSchema } from "./schema";
 
 type Body = z.infer<typeof createWebhookSchema>;
@@ -27,13 +26,10 @@ export const createWebhook =
       .returning();
 
     const safe = record as NonNullable<typeof record>;
-    void publishEvent("webhook.created", safe);
-    void logAudit(db, {
-      action: "webhook.created",
-      actorId: user.id,
+    void auditAndPublish(db, user, "webhook", "created", {
+      data: safe,
       metadata: { events, url },
-      resourceId: safe.id,
-      resourceType: "webhook"
+      resourceId: safe.id
     });
     return created(c, safe);
   };

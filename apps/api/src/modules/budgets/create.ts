@@ -1,10 +1,9 @@
 import type { Database } from "@raven/db";
 import { budgets } from "@raven/db";
 import type { z } from "zod";
-import { publishEvent } from "@/lib/events";
+import { auditAndPublish } from "@/lib/audit";
 import { created } from "@/lib/response";
 import type { AuthContextWithJson } from "@/lib/types";
-import { logAudit } from "@/modules/audit-logs/index";
 import type { createBudgetSchema } from "./schema";
 
 type Body = z.infer<typeof createBudgetSchema>;
@@ -27,13 +26,10 @@ export const createBudget =
       .returning();
 
     const safe = record as NonNullable<typeof record>;
-    void publishEvent("budget.created", safe);
-    void logAudit(db, {
-      action: "budget.created",
-      actorId: user.id,
+    void auditAndPublish(db, user, "budget", "created", {
+      data: safe,
       metadata: { entityId, entityType, limitAmount, period },
-      resourceId: safe.id,
-      resourceType: "budget"
+      resourceId: safe.id
     });
     return created(c, safe);
   };

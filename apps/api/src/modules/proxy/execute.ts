@@ -1,4 +1,5 @@
 import type { Env } from "@raven/config";
+import { getModelPricing } from "@raven/data";
 import type { Database } from "@raven/db";
 import type { LanguageModel, ToolSet } from "ai";
 import { generateText, jsonSchema, streamText, tool } from "ai";
@@ -11,7 +12,6 @@ import {
 } from "./ai-provider-factory";
 import { storeCache } from "./cache";
 import { analyzeContent } from "./content-analyzer";
-import { estimateCost } from "./cost-estimator";
 import { getFallbackProviders } from "./fallback";
 import type { GuardrailMatch } from "./guardrails";
 import { updateLastUsed } from "./last-used";
@@ -25,6 +25,18 @@ import {
 } from "./response-formatter";
 
 const MAX_PROVIDER_RETRIES = 2;
+
+const estimateCost = (
+  model: string,
+  usage: { inputTokens: number; outputTokens: number }
+): number => {
+  const pricing = getModelPricing(model);
+  if (!pricing) return 0;
+  return (
+    (usage.inputTokens / 1_000_000) * pricing.inputPrice +
+    (usage.outputTokens / 1_000_000) * pricing.outputPrice
+  );
+};
 
 // Types
 
