@@ -55,7 +55,7 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, _ := cuid2.CreateId()
+	id := cuid2.Generate()
 
 	var result map[string]any
 	err := h.pool.QueryRow(r.Context(),

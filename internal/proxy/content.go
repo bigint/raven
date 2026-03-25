@@ -5,6 +5,16 @@ import (
 	"fmt"
 )
 
+// ContentAnalysis holds metadata about the request content.
+type ContentAnalysis struct {
+	HasImages  bool
+	ImageCount int
+	HasToolUse bool
+	ToolCount  int
+	ToolNames  []string
+	SessionID  string
+}
+
 // AnalyzeContent extracts metadata from the request body for logging.
 // This is the standalone version for use outside of Execute().
 func AnalyzeContent(body map[string]any, sessionHeader string) ContentAnalysis {

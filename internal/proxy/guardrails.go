@@ -20,8 +20,20 @@ const (
 	contentTruncateLen = 10_000
 )
 
-// GuardrailMatch is defined in execute.go
-// GuardrailResult is defined in pipeline.go
+// GuardrailMatch describes a matched guardrail rule for logging.
+type GuardrailMatch struct {
+	RuleName       string `json:"ruleName"`
+	RuleType       string `json:"ruleType"`
+	Action         string `json:"action"`
+	MatchedContent string `json:"matchedContent"`
+}
+
+// GuardrailResult holds the result of guardrail evaluation.
+type GuardrailResult struct {
+	Blocked  bool             `json:"blocked"`
+	Warnings []string         `json:"warnings"`
+	Matches  []GuardrailMatch `json:"matches"`
+}
 
 type guardrailRule struct {
 	ID        string
