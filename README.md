@@ -4,7 +4,7 @@
 
 **Take control of your AI spending. One API, every provider, full visibility.**
 
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Docker](https://img.shields.io/docker/pulls/yoginth/raven)](https://hub.docker.com/r/yoginth/raven)
 [![CI](https://github.com/bigint/raven/actions/workflows/ci.yml/badge.svg)](https://github.com/bigint/raven/actions/workflows/ci.yml)
 
@@ -92,6 +92,6 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get 
 
 ## License
 
-Raven is open-source under the [Apache License 2.0](LICENSE).
+Raven is open-source under the [MIT License](LICENSE).
 
-Copyright 2025 Bigint Studio.
+Copyright 2026 BigInt Studio.
