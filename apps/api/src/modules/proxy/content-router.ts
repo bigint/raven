@@ -1,8 +1,6 @@
 import type { Database } from "@raven/db";
 import { routingRules } from "@raven/db";
 import { and, asc, eq } from "drizzle-orm";
-import { encodingForModel } from "js-tiktoken";
-
 // In-memory cache for routing rules (avoids DB hit on every request)
 const rulesCache = new Map<
   string,
@@ -16,9 +14,7 @@ interface Message {
   readonly role?: string;
 }
 
-const encoder = encodingForModel("gpt-4o");
-
-const estimateTokens = (text: string): number => encoder.encode(text).length;
+const estimateTokens = (text: string): number => Math.ceil(text.length / 4);
 
 const extractMessagesText = (body: Record<string, unknown>): string => {
   const messages = body.messages;
