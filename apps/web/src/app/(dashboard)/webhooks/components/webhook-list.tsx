@@ -71,12 +71,18 @@ const WebhookList = ({
         render: (webhook) => (
           <div className="flex items-center justify-end gap-1">
             <Tooltip content="Edit webhook">
-              <Button onClick={() => onEdit(webhook)} size="sm" variant="ghost">
+              <Button
+                aria-label="Edit webhook"
+                onClick={() => onEdit(webhook)}
+                size="sm"
+                variant="ghost"
+              >
                 <Pencil className="size-4" />
               </Button>
             </Tooltip>
             <Tooltip content="Delete webhook">
               <Button
+                aria-label="Delete webhook"
                 className="hover:bg-destructive/10 hover:text-destructive"
                 onClick={() => onDelete(webhook.id)}
                 size="sm"

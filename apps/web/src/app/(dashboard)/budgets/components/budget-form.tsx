@@ -164,9 +164,11 @@ const BudgetForm = ({ open, onClose, editingBudget }: BudgetFormProps) => {
 
         <div className="grid grid-cols-2 gap-4">
           <Input
+            autoComplete="off"
             id="limit-amount"
             label="Limit ($)"
             min="0"
+            name="limitAmount"
             onChange={(e) => update("limitAmount", e.target.value)}
             placeholder="100.00"
             step="0.01"

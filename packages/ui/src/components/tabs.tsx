@@ -46,7 +46,7 @@ const Tabs = ({ tabs, value, onChange }: TabsProps) => (
           )}
         </BaseTabs.Tab>
       ))}
-      <BaseTabs.Indicator className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-primary transition-all duration-300 ease-[cubic-bezier(0.65,0,0.35,1)]" />
+      <BaseTabs.Indicator className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-primary transition-[left,width] duration-300 ease-[cubic-bezier(0.65,0,0.35,1)]" />
     </BaseTabs.List>
   </BaseTabs.Root>
 );

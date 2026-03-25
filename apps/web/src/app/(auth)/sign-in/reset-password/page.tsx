@@ -24,7 +24,7 @@ const ResetPasswordForm = () => {
           This password reset link is invalid or has expired.
         </p>
         <Link
-          className="mt-6 inline-block text-sm font-medium text-primary hover:underline"
+          className="mt-6 inline-block text-sm font-medium text-primary hover:underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           href="/sign-in/forgot-password"
         >
           Request a new link
@@ -80,9 +80,11 @@ const ResetPasswordForm = () => {
             New password
           </label>
           <input
-            className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
+            autoComplete="new-password"
+            className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm focus-visible:outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
             id="password"
             minLength={8}
+            name="password"
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Min. 8 characters"
             required
@@ -98,9 +100,11 @@ const ResetPasswordForm = () => {
             Confirm password
           </label>
           <input
-            className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
+            autoComplete="new-password"
+            className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm focus-visible:outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
             id="confirmPassword"
             minLength={8}
+            name="confirmPassword"
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Re-enter your password"
             required
@@ -113,13 +117,13 @@ const ResetPasswordForm = () => {
           disabled={isLoading}
           type="submit"
         >
-          {isLoading ? "Resetting..." : "Reset password"}
+          {isLoading ? "Resetting\u2026" : "Reset password"}
         </Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
         <Link
-          className="font-medium text-primary hover:underline"
+          className="font-medium text-primary hover:underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           href="/sign-in"
         >
           Back to sign in

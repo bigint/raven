@@ -1,8 +1,8 @@
 "use client";
 
 import { PageHeader, Tabs } from "@raven/ui";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { useSession } from "@/lib/auth-client";
 import { EmailSettingsTab } from "../admin/components/email-settings-tab";
 import { GeneralSettingsTab } from "../admin/components/general-settings-tab";
@@ -15,7 +15,13 @@ const TABS = [
 const SettingsPage = () => {
   const { data: session, isPending } = useSession();
   const router = useRouter();
-  const [tab, setTab] = useState("general");
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab") ?? "general";
+  const setTab = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", value);
+    router.replace(`?${params.toString()}`);
+  };
 
   useEffect(() => {
     if (!isPending && session?.user?.role !== "admin") {

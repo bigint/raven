@@ -84,6 +84,7 @@ const Modal = ({
                   className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                 >
                   <svg
+                    aria-hidden="true"
                     className="size-4"
                     fill="none"
                     stroke="currentColor"

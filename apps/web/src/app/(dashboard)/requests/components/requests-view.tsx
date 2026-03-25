@@ -94,12 +94,12 @@ export const RequestsView = () => {
         animateRows={isLive}
         emptyMessage={
           isLive
-            ? "Waiting for new requests..."
+            ? "Waiting for new requests\u2026"
             : "No requests found for the selected filters."
         }
         loading={loading}
         loadingMessage={
-          isLive ? "Connecting to live stream..." : "Loading requests..."
+          isLive ? "Connecting to live stream\u2026" : "Loading requests\u2026"
         }
         requests={requests}
       />

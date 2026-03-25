@@ -128,7 +128,8 @@ export const ModelsTable = ({ data, loading }: ModelsTableProps) => {
                 ${(Number(row.totalCost) || 0).toFixed(4)}
               </td>
               <td className="px-5 py-4 text-right tabular-nums">
-                {Math.round(row.avgLatencyMs)}ms
+                {Math.round(row.avgLatencyMs)}
+                {"\u00A0"}ms
               </td>
               <td className="px-5 py-4 text-right text-sm text-muted-foreground whitespace-nowrap">
                 {formatTimeAgo(row.lastUsed)}

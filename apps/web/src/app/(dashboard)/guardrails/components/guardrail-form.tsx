@@ -192,8 +192,10 @@ const GuardrailForm = ({
         )}
 
         <Input
+          autoComplete="off"
           id="guardrail-name"
           label="Name"
+          name="name"
           onChange={(e) => update("name", e.target.value)}
           placeholder="e.g. Block harmful topics"
           value={form.name}
@@ -225,9 +227,11 @@ const GuardrailForm = ({
         </div>
 
         <Input
+          autoComplete="off"
           id="guardrail-priority"
           label="Priority"
           min="0"
+          name="priority"
           onChange={(e) => update("priority", e.target.value)}
           placeholder="0"
           type="number"
@@ -281,10 +285,13 @@ const GuardrailForm = ({
           ))
           .with("custom_regex", () => (
             <Input
+              autoComplete="off"
               id="guardrail-pattern"
               label="Regex Pattern"
+              name="pattern"
               onChange={(e) => update("pattern", e.target.value)}
               placeholder="e.g. \\b\\d{3}-\\d{2}-\\d{4}\\b"
+              spellCheck={false}
               value={form.pattern}
             />
           ))

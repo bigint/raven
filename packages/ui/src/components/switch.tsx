@@ -10,6 +10,7 @@ interface SwitchProps {
   label?: string;
   disabled?: boolean;
   className?: string;
+  "aria-label"?: string;
 }
 
 const Switch = ({
@@ -17,13 +18,15 @@ const Switch = ({
   onCheckedChange,
   label,
   disabled = false,
-  className
+  className,
+  "aria-label": ariaLabel
 }: SwitchProps) => {
   const labelId = useId();
 
   return (
     <label className={cn("flex items-center gap-3", className)}>
       <BaseSwitch.Root
+        aria-label={label ? undefined : ariaLabel}
         aria-labelledby={label ? labelId : undefined}
         checked={checked}
         className={cn(

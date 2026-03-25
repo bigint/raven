@@ -143,8 +143,10 @@ const RoutingRuleForm = ({
         )}
 
         <Input
+          autoComplete="off"
           id="name"
           label="Name"
+          name="name"
           onChange={(e) => update("name", e.target.value)}
           placeholder="e.g. Route small requests"
           value={form.name}
@@ -184,8 +186,10 @@ const RoutingRuleForm = ({
         </div>
 
         <Input
+          autoComplete="off"
           id="condition-value"
           label="Condition Value"
+          name="conditionValue"
           onChange={(e) => update("conditionValue", e.target.value)}
           placeholder={conditionValuePlaceholder}
           type={conditionValueType}
@@ -194,9 +198,11 @@ const RoutingRuleForm = ({
 
         <div className="grid grid-cols-2 gap-4">
           <Input
+            autoComplete="off"
             id="priority"
             label="Priority"
             min="0"
+            name="priority"
             onChange={(e) => update("priority", e.target.value)}
             placeholder="0"
             type="number"

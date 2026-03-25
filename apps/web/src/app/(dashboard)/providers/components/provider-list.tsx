@@ -108,12 +108,12 @@ const ProviderList = ({
             <Badge dot variant={provider.isEnabled ? "success" : "neutral"}>
               {provider.isEnabled ? (
                 <>
-                  <Check className="size-3" />
+                  <Check aria-hidden="true" className="size-3" />
                   <TextMorph>Enabled</TextMorph>
                 </>
               ) : (
                 <>
-                  <X className="size-3" />
+                  <X aria-hidden="true" className="size-3" />
                   <TextMorph>Disabled</TextMorph>
                 </>
               )}
@@ -133,6 +133,7 @@ const ProviderList = ({
             <div className="flex items-center justify-end gap-1">
               <Tooltip content="Test connection">
                 <Button
+                  aria-label="Test provider"
                   disabled={isTesting}
                   onClick={() => handleTest(provider.id)}
                   size="sm"
@@ -147,6 +148,7 @@ const ProviderList = ({
               </Tooltip>
               <Tooltip content="Edit provider">
                 <Button
+                  aria-label="Edit provider"
                   onClick={() => onEdit(provider)}
                   size="sm"
                   variant="ghost"
@@ -156,6 +158,7 @@ const ProviderList = ({
               </Tooltip>
               <Tooltip content="Delete provider">
                 <Button
+                  aria-label="Delete provider"
                   className="hover:bg-destructive/10 hover:text-destructive"
                   onClick={() => onDelete(provider.id)}
                   size="sm"

@@ -45,9 +45,11 @@ export const GeneralSettingsTab = () => {
   return (
     <div className="max-w-lg space-y-6">
       <Input
+        autoComplete="off"
         description="Number of days to retain analytics data"
         label="Analytics Retention (days)"
         min={1}
+        name="retentionDays"
         onChange={(e) => setRetentionDays(Number(e.target.value))}
         type="number"
         value={retentionDays}

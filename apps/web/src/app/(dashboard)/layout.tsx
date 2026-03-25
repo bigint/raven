@@ -37,7 +37,10 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   return (
     <div className="flex h-screen flex-col overflow-hidden md:flex-row">
       <Sidebar user={session.user} />
-      <main className="flex-1 overflow-auto overscroll-contain">
+      <main
+        className="flex-1 overflow-auto overscroll-contain"
+        id="main-content"
+      >
         <div className="px-4 py-4 md:px-8 md:py-6">{children}</div>
       </main>
     </div>

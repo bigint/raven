@@ -60,6 +60,9 @@ export const RequestDetail = ({ request, onClose }: RequestDetailProps) => {
                 <div className="flex items-center gap-2">
                   <h2 className="text-base font-semibold">Request Details</h2>
                   <Button
+                    aria-label={
+                      request.isStarred ? "Unstar request" : "Star request"
+                    }
                     className="rounded p-0.5 hover:text-yellow-500"
                     onClick={() => toggleStar.mutate(request.id)}
                     variant="ghost"
@@ -76,7 +79,12 @@ export const RequestDetail = ({ request, onClose }: RequestDetailProps) => {
                   ID: {request.id}
                 </p>
               </div>
-              <Button className="p-1.5" onClick={onClose} variant="ghost">
+              <Button
+                aria-label="Close"
+                className="p-1.5"
+                onClick={onClose}
+                variant="ghost"
+              >
                 <X className="size-4" />
               </Button>
             </div>
@@ -106,7 +114,7 @@ export const RequestDetail = ({ request, onClose }: RequestDetailProps) => {
                 </div>
                 <Field
                   label="Duration"
-                  value={`${request.latencyMs.toLocaleString()} ms`}
+                  value={`${request.latencyMs.toLocaleString()}\u00A0ms`}
                 />
                 <Field
                   label="Input Tokens"

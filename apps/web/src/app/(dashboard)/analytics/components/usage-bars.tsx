@@ -36,7 +36,7 @@ export const UsageBars = ({ data, metric }: UsageBarsProps) => {
               </Meter.Value>
             </div>
             <Meter.Track className="h-2 w-full rounded-full bg-muted">
-              <Meter.Indicator className="h-2 rounded-full bg-primary transition-all" />
+              <Meter.Indicator className="h-2 rounded-full bg-primary transition-[width]" />
             </Meter.Track>
           </Meter.Root>
         );

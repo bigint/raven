@@ -67,7 +67,7 @@ const SearchableSelect = ({
   value,
   onChange,
   options,
-  placeholder = "Select...",
+  placeholder = "Select\u2026",
   disabled = false,
   id,
   className,
@@ -119,12 +119,12 @@ const SearchableSelect = ({
   return (
     <div className={cn("flex flex-col gap-1", className)}>
       {label && (
-        <span
+        <label
           className="text-sm font-medium"
           id={id ? `${id}-label` : undefined}
         >
           {label}
-        </span>
+        </label>
       )}
 
       <Popover.Root
@@ -163,13 +163,14 @@ const SearchableSelect = ({
           <Popover.Positioner align="start" className="z-[200]" sideOffset={4}>
             <Popover.Popup className="overflow-hidden rounded-md border border-border bg-popover shadow-lg outline-none">
               <input
-                className="w-full border-b border-border bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground"
+                aria-label="Search options"
+                className="w-full border-b border-border bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring placeholder:text-muted-foreground"
                 onChange={(e) => {
                   setSearch(e.target.value);
                   setHighlightedIndex(0);
                 }}
                 onKeyDown={handleKeyDown}
-                placeholder="Search..."
+                placeholder="Search\u2026"
                 ref={inputRef}
                 type="text"
                 value={search}
@@ -218,7 +219,7 @@ const StandardSelect = ({
   value,
   onChange,
   options,
-  placeholder = "Select...",
+  placeholder = "Select\u2026",
   disabled = false,
   id,
   className,
@@ -227,9 +228,12 @@ const StandardSelect = ({
 }: Omit<SelectProps, "searchable">) => (
   <div className={cn("flex flex-col gap-1", className)}>
     {label && (
-      <span className="text-sm font-medium" id={id ? `${id}-label` : undefined}>
+      <label
+        className="text-sm font-medium"
+        id={id ? `${id}-label` : undefined}
+      >
         {label}
-      </span>
+      </label>
     )}
     <BaseSelect.Root
       disabled={disabled}

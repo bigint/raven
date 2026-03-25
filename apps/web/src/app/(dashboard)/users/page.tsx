@@ -2,7 +2,7 @@
 
 import { Button, PageHeader, Tabs } from "@raven/ui";
 import { UserPlus } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSession } from "@/lib/auth-client";
 import { InvitationsTab } from "../admin/components/invitations-tab";
@@ -17,7 +17,13 @@ const TABS = [
 const UsersPage = () => {
   const { data: session, isPending } = useSession();
   const router = useRouter();
-  const [tab, setTab] = useState("users");
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab") ?? "users";
+  const setTab = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", value);
+    router.replace(`?${params.toString()}`);
+  };
   const [inviteOpen, setInviteOpen] = useState(false);
 
   useEffect(() => {

@@ -143,9 +143,11 @@ const ProviderForm = ({
         </div>
 
         <Input
+          autoComplete="off"
           description="Optional"
           id="provider-name"
           label="Name"
+          name="name"
           onChange={(e) => update("name", e.target.value)}
           placeholder={`e.g. Production ${availableProviders?.find((p) => p.slug === form.provider)?.name ?? form.provider}`}
           value={form.name}
@@ -157,17 +159,19 @@ const ProviderForm = ({
           </label>
           <div className="relative">
             <input
+              autoComplete="off"
               className="w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
               id="api-key-input"
+              name="apiKey"
               onChange={(e) => update("apiKey", e.target.value)}
               placeholder={isEdit ? "--------" : "sk-..."}
               type={showApiKey ? "text" : "password"}
               value={form.apiKey}
             />
             <Button
+              aria-label="Toggle API key visibility"
               className="absolute right-3 top-1/2 -translate-y-1/2 p-0"
               onClick={() => setShowApiKey((v) => !v)}
-              tabIndex={-1}
               variant="ghost"
             >
               {showApiKey ? (
@@ -212,7 +216,9 @@ const ProviderForm = ({
             Cancel
           </Button>
           <Button disabled={isSubmitting} type="submit">
-            {isSubmitting && <Loader2 className="size-3.5 animate-spin" />}
+            {isSubmitting && (
+              <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />
+            )}
             <TextMorph>
               {isSubmitting
                 ? isEdit

@@ -35,6 +35,13 @@ const ToolSessionRow = ({ session }: { session: ToolSession }) => {
       <tr
         className="cursor-pointer border-b border-border transition-colors hover:bg-muted/30"
         onClick={() => setExpanded(!expanded)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setExpanded(!expanded);
+          }
+        }}
+        tabIndex={0}
       >
         <td className="px-5 py-4">
           <ChevronRight

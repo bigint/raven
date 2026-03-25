@@ -50,9 +50,9 @@ const Checkbox = ({
       >
         <BaseCheckbox.Indicator className="flex items-center justify-center">
           {indeterminate ? (
-            <MinusIcon className="size-3" />
+            <MinusIcon aria-hidden="true" className="size-3" />
           ) : (
-            <CheckIcon className="size-3" />
+            <CheckIcon aria-hidden="true" className="size-3" />
           )}
         </BaseCheckbox.Indicator>
       </BaseCheckbox.Root>

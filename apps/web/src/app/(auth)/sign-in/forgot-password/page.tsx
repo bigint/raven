@@ -68,7 +68,7 @@ const ForgotPasswordPage = () => {
                 reset link.
               </p>
               <Link
-                className="mt-6 inline-block text-sm font-medium text-primary hover:underline"
+                className="mt-6 inline-block text-sm font-medium text-primary hover:underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 href="/sign-in"
               >
                 Back to sign in
@@ -96,11 +96,14 @@ const ForgotPasswordPage = () => {
                     Email
                   </label>
                   <input
-                    className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
+                    autoComplete="email"
+                    className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm focus-visible:outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
                     id="email"
+                    name="email"
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     required
+                    spellCheck={false}
                     type="email"
                     value={email}
                   />
@@ -110,13 +113,13 @@ const ForgotPasswordPage = () => {
                   disabled={isLoading}
                   type="submit"
                 >
-                  {isLoading ? "Sending..." : "Send reset link"}
+                  {isLoading ? "Sending\u2026" : "Send reset link"}
                 </Button>
               </form>
 
               <p className="mt-6 text-center text-sm text-muted-foreground">
                 <Link
-                  className="font-medium text-primary hover:underline"
+                  className="font-medium text-primary hover:underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   href="/sign-in"
                 >
                   Back to sign in

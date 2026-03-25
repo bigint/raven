@@ -27,8 +27,8 @@ const Textarea = ({
     )}
     <textarea
       className={cn(
-        "w-full resize-y rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[80px] transition-colors focus:outline-none focus:ring-2 focus:ring-ring",
-        error && "border-destructive focus:ring-destructive",
+        "w-full resize-y rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[80px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        error && "border-destructive focus-visible:ring-destructive",
         className
       )}
       id={id}
