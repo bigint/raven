@@ -97,8 +97,10 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
           </div>
         )}
         <Input
+          autoComplete="off"
           id="key-name"
           label="Name"
+          name="name"
           onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
           placeholder="My API Key"
           type="text"
@@ -117,9 +119,11 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
         )}
         <div className="grid grid-cols-2 gap-3">
           <Input
+            autoComplete="off"
             id="key-rpm"
             label="Rate Limit (RPM)"
             min="1"
+            name="rateLimitRpm"
             onChange={(e) =>
               setForm((f) => ({ ...f, rateLimitRpm: e.target.value }))
             }
@@ -128,9 +132,11 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
             value={form.rateLimitRpm}
           />
           <Input
+            autoComplete="off"
             id="key-rpd"
             label="Rate Limit (RPD)"
             min="1"
+            name="rateLimitRpd"
             onChange={(e) =>
               setForm((f) => ({ ...f, rateLimitRpd: e.target.value }))
             }
@@ -140,9 +146,11 @@ const KeyForm = ({ editingKey, mode, onClose, onSubmit }: KeyFormProps) => {
           />
         </div>
         <Input
+          autoComplete="off"
           disabled={mode === "edit" && !!editingKey?.expiresAt}
           id="key-expires"
           label="Expiration Date"
+          name="expiresAt"
           onChange={(e) =>
             setForm((f) => ({ ...f, expiresAt: e.target.value }))
           }

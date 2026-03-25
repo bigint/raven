@@ -4,6 +4,7 @@ interface RavenLogoProps {
 
 export const RavenLogo = ({ className }: RavenLogoProps) => (
   <svg
+    aria-hidden="true"
     className={className}
     fill="none"
     viewBox="0 0 32 32"

@@ -51,7 +51,7 @@ const PillTabs = <T extends string = string>({
           </span>
         </Tabs.Tab>
       ))}
-      <Tabs.Indicator className="-z-1 rounded-md bg-primary transition-all duration-300 ease-[cubic-bezier(0.65,0,0.35,1)]" />
+      <Tabs.Indicator className="-z-1 rounded-md bg-primary transition-[left,width] duration-300 ease-[cubic-bezier(0.65,0,0.35,1)]" />
     </Tabs.List>
   </Tabs.Root>
 );

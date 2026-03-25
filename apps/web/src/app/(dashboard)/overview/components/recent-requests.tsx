@@ -79,8 +79,8 @@ export const RecentRequests = ({ requests, loading }: RecentRequestsProps) => (
                     <span className="text-muted-foreground">{req.model}</span>
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {req.latencyMs}ms &middot; $
-                    {(Number(req.cost) || 0).toFixed(4)}
+                    {req.latencyMs}
+                    {"\u00A0"}ms &middot; ${(Number(req.cost) || 0).toFixed(4)}
                   </p>
                 </div>
               </div>

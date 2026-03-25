@@ -41,7 +41,7 @@ const DataTable = <T,>({
   data,
   keyExtractor,
   loading = false,
-  loadingMessage = "Loading...",
+  loadingMessage = "Loading\u2026",
   emptyIcon,
   emptyTitle = "No data",
   emptyAction,
@@ -80,7 +80,10 @@ const DataTable = <T,>({
       {onToggleColumn && (
         <div className="mb-2 flex justify-end">
           <Popover.Root>
-            <Popover.Trigger className="cursor-pointer rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted/50">
+            <Popover.Trigger
+              aria-label="Toggle columns"
+              className="cursor-pointer rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted/50"
+            >
               Columns
             </Popover.Trigger>
             <Popover.Portal>
@@ -125,12 +128,14 @@ const DataTable = <T,>({
                   >
                     {isSortable ? (
                       <button
+                        aria-label={`Sort by ${col.header}`}
                         className="inline-flex items-center gap-1 cursor-pointer select-none"
                         onClick={() => onSort(col.key)}
                         type="button"
                       >
                         {col.header}
                         <SortIcon
+                          aria-hidden="true"
                           className={cn(
                             "size-3.5",
                             isActiveSort
@@ -171,7 +176,7 @@ const DataTable = <T,>({
                     {visibleColumns.map((col) => (
                       <td
                         className={cn(
-                          "px-3 py-3 sm:px-5 sm:py-4",
+                          "px-3 py-3 tabular-nums sm:px-5 sm:py-4",
                           col.className
                         )}
                         key={col.key}
@@ -193,7 +198,10 @@ const DataTable = <T,>({
                 >
                   {visibleColumns.map((col) => (
                     <td
-                      className={cn("px-3 py-3 sm:px-5 sm:py-4", col.className)}
+                      className={cn(
+                        "px-3 py-3 tabular-nums sm:px-5 sm:py-4",
+                        col.className
+                      )}
                       key={col.key}
                     >
                       {col.render(item, idx)}

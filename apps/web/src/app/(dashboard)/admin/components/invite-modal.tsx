@@ -64,7 +64,12 @@ export const InviteModal = ({ open, onClose }: InviteModalProps) => {
               readOnly
               value={result.inviteUrl}
             />
-            <Button onClick={copyInviteUrl} size="sm" variant="secondary">
+            <Button
+              aria-label="Copy invite link"
+              onClick={copyInviteUrl}
+              size="sm"
+              variant="secondary"
+            >
               <Copy className="size-4" />
             </Button>
           </div>
@@ -81,10 +86,12 @@ export const InviteModal = ({ open, onClose }: InviteModalProps) => {
               Email
             </label>
             <Input
+              autoComplete="email"
               id="invite-email"
               onChange={(e) => setEmail(e.target.value)}
               placeholder="user@example.com"
               required
+              spellCheck={false}
               type="email"
               value={email}
             />

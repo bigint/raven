@@ -166,8 +166,10 @@ const WebhookForm = ({ open, onClose, editingWebhook }: WebhookFormProps) => {
 
         <div className="space-y-2">
           <Input
+            autoComplete="off"
             id="webhook-url"
             label="URL"
+            name="url"
             onChange={(e) => {
               setForm((f) => ({ ...f, url: e.target.value }));
               setTestResult(null);

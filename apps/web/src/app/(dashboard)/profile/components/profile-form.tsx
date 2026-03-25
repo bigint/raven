@@ -48,8 +48,10 @@ const ProfileForm = () => {
         )}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input
+            autoComplete="name"
             id="profile-name"
             label="Name"
+            name="name"
             onChange={(e) => setName(e.target.value)}
             type="text"
             value={name}

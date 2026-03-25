@@ -77,8 +77,10 @@ export const SetupWizard = () => {
                 Name
               </label>
               <input
-                className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
+                autoComplete="name"
+                className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm focus-visible:outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
                 id="name"
+                name="name"
                 onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
                 required
@@ -91,11 +93,14 @@ export const SetupWizard = () => {
                 Email
               </label>
               <input
-                className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
+                autoComplete="email"
+                className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm focus-visible:outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
                 id="email"
+                name="email"
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@example.com"
                 required
+                spellCheck={false}
                 type="email"
                 value={email}
               />
@@ -105,9 +110,11 @@ export const SetupWizard = () => {
                 Password
               </label>
               <input
-                className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
+                autoComplete="new-password"
+                className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm focus-visible:outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
                 id="password"
                 minLength={8}
+                name="password"
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Min. 8 characters"
                 required
@@ -120,7 +127,7 @@ export const SetupWizard = () => {
               disabled={isLoading}
               type="submit"
             >
-              {isLoading ? "Setting up..." : "Complete Setup"}
+              {isLoading ? "Setting up\u2026" : "Complete Setup"}
             </Button>
           </form>
         </div>

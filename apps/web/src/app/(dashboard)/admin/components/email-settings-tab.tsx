@@ -49,17 +49,22 @@ export const EmailSettingsTab = () => {
   return (
     <div className="max-w-lg space-y-6">
       <Input
+        autoComplete="off"
         description="API key from resend.com for sending emails"
         label="Resend API Key"
+        name="resendApiKey"
         onChange={(e) => setResendApiKey(e.target.value)}
         placeholder="re_..."
+        spellCheck={false}
         type="password"
         value={resendApiKey}
       />
 
       <Input
+        autoComplete="off"
         description="Sender address for outgoing emails (e.g. Raven <noreply@yourdomain.com>)"
         label="From Email"
+        name="resendFromEmail"
         onChange={(e) => setResendFromEmail(e.target.value)}
         placeholder="Raven <noreply@yourdomain.com>"
         value={resendFromEmail}

@@ -80,12 +80,18 @@ const BudgetList = ({
       render: (budget) => (
         <div className="flex items-center justify-end gap-1">
           <Tooltip content="Edit budget">
-            <Button onClick={() => onEdit(budget)} size="sm" variant="ghost">
+            <Button
+              aria-label="Edit budget"
+              onClick={() => onEdit(budget)}
+              size="sm"
+              variant="ghost"
+            >
               <Pencil className="size-4" />
             </Button>
           </Tooltip>
           <Tooltip content="Delete budget">
             <Button
+              aria-label="Delete budget"
               className="hover:bg-destructive/10 hover:text-destructive"
               onClick={() => onDelete(budget.id)}
               size="sm"

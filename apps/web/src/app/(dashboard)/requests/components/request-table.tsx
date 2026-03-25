@@ -68,14 +68,19 @@ const columns: Column<RequestLog>[] = [
     render: (req) => getStatusBadge(req.statusCode)
   },
   {
-    className: "text-right",
+    className: "text-right tabular-nums",
     header: "Latency",
     headerClassName: "text-right",
     key: "latency",
-    render: (req) => `${req.latencyMs}ms`
+    render: (req) => (
+      <>
+        {req.latencyMs}
+        {"\u00A0"}ms
+      </>
+    )
   },
   {
-    className: "text-right",
+    className: "text-right tabular-nums",
     header: "Cost",
     headerClassName: "text-right",
     key: "cost",

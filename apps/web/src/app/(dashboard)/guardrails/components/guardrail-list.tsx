@@ -83,6 +83,7 @@ const GuardrailList = ({
           <div className="flex items-center justify-end gap-1">
             <Tooltip content="Edit guardrail">
               <Button
+                aria-label="Edit guardrail"
                 onClick={() => onEdit(guardrail)}
                 size="sm"
                 variant="ghost"
@@ -92,6 +93,7 @@ const GuardrailList = ({
             </Tooltip>
             <Tooltip content="Delete guardrail">
               <Button
+                aria-label="Delete guardrail"
                 className="hover:bg-destructive/10 hover:text-destructive"
                 onClick={() => onDelete(guardrail.id)}
                 size="sm"

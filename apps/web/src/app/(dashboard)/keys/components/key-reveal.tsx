@@ -23,7 +23,10 @@ const KeyReveal = ({ keyValue, onClose }: KeyRevealProps) => {
     <Modal onClose={onClose} open={keyValue !== null} title="Key Created">
       <div className="space-y-4">
         <div className="flex items-start gap-3 rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-4 py-3">
-          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-yellow-600" />
+          <AlertTriangle
+            aria-hidden="true"
+            className="mt-0.5 size-4 shrink-0 text-yellow-600"
+          />
           <p className="text-sm text-yellow-700">
             This key won't be shown again. Copy it now and store it somewhere
             safe.
@@ -37,6 +40,7 @@ const KeyReveal = ({ keyValue, onClose }: KeyRevealProps) => {
             </span>
             <Tooltip content="Copy key">
               <Button
+                aria-label="Copy key"
                 className="shrink-0"
                 onClick={handleCopy}
                 size="sm"

@@ -61,6 +61,7 @@ export const InvitationsTab = () => {
       render: (invitation) => (
         <Tooltip content="Revoke invitation">
           <Button
+            aria-label="Revoke invitation"
             className="p-1.5 hover:bg-destructive/10 hover:text-destructive"
             onClick={() => setRevokeTarget(invitation)}
             variant="ghost"

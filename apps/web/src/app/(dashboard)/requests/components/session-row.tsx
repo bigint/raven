@@ -42,6 +42,13 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
       <tr
         className="cursor-pointer border-b border-border transition-colors hover:bg-muted/30"
         onClick={() => setExpanded(!expanded)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setExpanded(!expanded);
+          }
+        }}
+        tabIndex={0}
       >
         <td className="px-5 py-4">
           <ChevronRight
@@ -154,6 +161,14 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
                           e.stopPropagation();
                           onRequestClick(req.id, session.sessionId ?? "");
                         }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onRequestClick(req.id, session.sessionId ?? "");
+                          }
+                        }}
+                        tabIndex={0}
                       >
                         <td className="px-3 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
                           {new Date(req.createdAt).toLocaleString(undefined, {
@@ -174,7 +189,8 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
                           {getStatusBadge(req.statusCode)}
                         </td>
                         <td className="px-3 py-2.5 text-right tabular-nums">
-                          {req.latencyMs.toLocaleString()}ms
+                          {req.latencyMs.toLocaleString()}
+                          {"\u00A0"}ms
                         </td>
                         <td className="px-3 py-2.5 text-right tabular-nums">
                           {req.inputTokens.toLocaleString()}
@@ -187,6 +203,9 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
                         </td>
                         <td className="px-3 py-2.5 text-center">
                           <Button
+                            aria-label={
+                              req.isStarred ? "Unstar session" : "Star session"
+                            }
                             className="rounded p-0.5 hover:text-yellow-500"
                             onClick={(e) => {
                               e.stopPropagation();

@@ -98,8 +98,10 @@ const MessageBubble = memo(
                       <img
                         alt={img.name}
                         className="max-h-48 max-w-full rounded-lg"
+                        height={512}
                         key={img.id}
                         src={img.preview}
+                        width={512}
                       />
                     ))}
                   </div>

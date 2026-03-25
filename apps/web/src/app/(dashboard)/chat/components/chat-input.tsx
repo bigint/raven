@@ -194,6 +194,7 @@ export const ChatInput = ({
                   src={img.preview}
                 />
                 <Button
+                  aria-label="Remove image"
                   className="absolute -top-1.5 -right-1.5 rounded-full bg-background border border-border p-0.5 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:bg-background"
                   onClick={() => removeImage(img.id)}
                   variant="ghost"
@@ -207,7 +208,7 @@ export const ChatInput = ({
 
         <textarea
           aria-label="Message input"
-          className="w-full resize-none bg-transparent px-4 pt-3 pb-2 text-sm placeholder:text-muted-foreground focus:outline-none"
+          className="w-full resize-none bg-transparent px-4 pt-3 pb-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none"
           disabled={isStreaming}
           onChange={(e) => {
             setValue(e.target.value);
@@ -217,8 +218,8 @@ export const ChatInput = ({
           onPaste={handlePaste}
           placeholder={
             images.length > 0
-              ? "Add a message about the image(s)..."
-              : "Start a new message..."
+              ? "Add a message about the image(s)\u2026"
+              : "Start a new message\u2026"
           }
           ref={textareaRef}
           rows={1}
@@ -334,6 +335,7 @@ export const ChatInput = ({
                 variant="ghost"
               >
                 <svg
+                  aria-hidden="true"
                   className="size-3"
                   fill="none"
                   stroke="currentColor"
@@ -393,6 +395,7 @@ export const ChatInput = ({
                   variant="ghost"
                 >
                   <svg
+                    aria-hidden="true"
                     className="size-3.5"
                     fill="none"
                     stroke="currentColor"
@@ -511,11 +514,17 @@ export const ChatInput = ({
           </div>
 
           {isStreaming ? (
-            <Button className="rounded-lg p-2" onClick={onStop} variant="ghost">
+            <Button
+              aria-label="Stop generating"
+              className="rounded-lg p-2"
+              onClick={onStop}
+              variant="ghost"
+            >
               <Square className="size-4" />
             </Button>
           ) : (
             <Button
+              aria-label="Send message"
               className="rounded-lg p-2"
               disabled={(!value.trim() && images.length === 0) || disabled}
               onClick={handleSend}
@@ -585,9 +594,9 @@ const ModelSelector = ({
               <div className="relative">
                 <Search className="absolute left-2 top-1/2 size-3 -translate-y-1/2 text-muted-foreground" />
                 <input
-                  className="w-full bg-transparent py-1 pl-7 pr-2 text-xs outline-none placeholder:text-muted-foreground"
+                  className="w-full bg-transparent py-1 pl-7 pr-2 text-xs focus-visible:outline-none placeholder:text-muted-foreground"
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search models..."
+                  placeholder="Search models\u2026"
                   ref={searchRef}
                   value={search}
                 />

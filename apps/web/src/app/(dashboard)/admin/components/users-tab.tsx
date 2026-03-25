@@ -66,6 +66,7 @@ export const UsersTab = () => {
       render: (user) => (
         <Tooltip content="Delete user">
           <Button
+            aria-label="Remove user"
             className="p-1.5 hover:bg-destructive/10 hover:text-destructive"
             onClick={() => setDeleteTarget(user)}
             variant="ghost"

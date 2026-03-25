@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
 import type { ReactNode } from "react";
 import { Toaster } from "sonner";
@@ -34,10 +34,15 @@ export const metadata: Metadata = {
   }
 };
 
+export const viewport: Viewport = {
+  themeColor: "#09090b"
+};
+
 const RootLayout = ({ children }: { children: ReactNode }) => {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link href="https://models.dev" rel="preconnect" />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var d=JSON.parse(localStorage.getItem("theme")||"{}");if(d.state&&d.state.theme==="dark")document.documentElement.classList.add("dark")}catch(e){}})()`
@@ -47,6 +52,12 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
       <body
         className={`${outfit.className} min-h-screen bg-background text-foreground antialiased`}
       >
+        <a
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-background focus:text-foreground focus:rounded-md focus:ring-2 focus:ring-ring"
+          href="#main-content"
+        >
+          Skip to main content
+        </a>
         <Providers>
           {children}
           <Toaster position="bottom-right" />

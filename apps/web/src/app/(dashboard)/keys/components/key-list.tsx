@@ -93,12 +93,12 @@ const KeyList = ({
             <Badge variant={key.isActive ? "success" : "neutral"}>
               {key.isActive ? (
                 <>
-                  <Check className="size-3" />
+                  <Check aria-hidden="true" className="size-3" />
                   <TextMorph>Active</TextMorph>
                 </>
               ) : (
                 <>
-                  <X className="size-3" />
+                  <X aria-hidden="true" className="size-3" />
                   <TextMorph>Inactive</TextMorph>
                 </>
               )}
@@ -121,13 +121,19 @@ const KeyList = ({
             <div className="flex items-center justify-end gap-1">
               <Link href={`/analytics?keyId=${key.id}`}>
                 <Tooltip content="View analytics">
-                  <Button size="sm" type="button" variant="ghost">
+                  <Button
+                    aria-label="View analytics"
+                    size="sm"
+                    type="button"
+                    variant="ghost"
+                  >
                     <BarChart3 className="size-4" />
                   </Button>
                 </Tooltip>
               </Link>
               <Tooltip content="Edit key">
                 <Button
+                  aria-label="Edit key"
                   onClick={() => onEdit(key)}
                   size="sm"
                   type="button"
@@ -138,6 +144,7 @@ const KeyList = ({
               </Tooltip>
               <Tooltip content="Delete key">
                 <Button
+                  aria-label="Delete key"
                   className="hover:bg-destructive/10 hover:text-destructive"
                   onClick={() => onDelete(key.id)}
                   size="sm"

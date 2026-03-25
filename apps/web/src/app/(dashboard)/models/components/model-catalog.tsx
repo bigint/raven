@@ -296,9 +296,9 @@ export const ModelCatalog = () => {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <input
-            className="h-9 w-full rounded-md border border-border bg-background pl-9 pr-4 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/30"
+            className="h-9 w-full rounded-md border border-border bg-background pl-9 pr-4 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent"
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search models by name, ID, or description..."
+            placeholder="Search models by name, ID, or description\u2026"
             type="text"
             value={search}
           />

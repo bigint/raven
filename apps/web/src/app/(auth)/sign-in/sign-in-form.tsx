@@ -77,11 +77,14 @@ export const SignInForm = () => {
                 Email
               </label>
               <input
-                className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
+                autoComplete="email"
+                className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm focus-visible:outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
                 id="email"
+                name="email"
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
+                spellCheck={false}
                 type="email"
                 value={email}
               />
@@ -91,8 +94,10 @@ export const SignInForm = () => {
                 Password
               </label>
               <input
-                className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
+                autoComplete="current-password"
+                className="block w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm focus-visible:outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring"
                 id="password"
+                name="password"
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
@@ -102,7 +107,7 @@ export const SignInForm = () => {
             </div>
             <div className="flex items-center justify-end">
               <Link
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 href="/sign-in/forgot-password"
               >
                 Forgot password?
@@ -113,14 +118,14 @@ export const SignInForm = () => {
               disabled={isLoading}
               type="submit"
             >
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading ? "Signing in\u2026" : "Sign in"}
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
             <Link
-              className="font-medium text-primary hover:underline"
+              className="font-medium text-primary hover:underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               href="/sign-up"
             >
               Sign up
