@@ -1,4 +1,5 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import type { LanguageModel } from "ai";
 
@@ -50,6 +51,10 @@ export const createProviderModel = (
   switch (provider) {
     case "anthropic": {
       const p = createAnthropic({ apiKey, baseURL: baseUrl, headers });
+      return p(modelId);
+    }
+    case "google": {
+      const p = createGoogleGenerativeAI({ apiKey, baseURL: baseUrl, headers });
       return p(modelId);
     }
     case "openai": {

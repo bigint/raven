@@ -2,6 +2,7 @@ import type { ModelDefinition } from "@raven/types";
 
 export const SUPPORTED_PROVIDERS = [
   { name: "Anthropic", slug: "anthropic" },
+  { name: "Google", slug: "google" },
   { name: "OpenAI", slug: "openai" }
 ] as const;
 
@@ -109,6 +110,61 @@ export const MODEL_CATALOG: Record<string, ModelDefinition> = {
     outputPrice: 15,
     provider: "anthropic",
     slug: "claude-sonnet-4-6"
+  },
+
+  // Google models
+  "gemini-2.5-flash": {
+    capabilities: [
+      "chat",
+      "vision",
+      "function_calling",
+      "streaming",
+      "reasoning"
+    ],
+    category: "fast",
+    contextWindow: 1_000_000,
+    description:
+      "Fast and efficient model with thinking capabilities for everyday tasks",
+    id: "gemini-2.5-flash",
+    inputPrice: 0.15,
+    maxOutput: 65_536,
+    name: "Gemini 2.5 Flash",
+    outputPrice: 0.6,
+    provider: "google",
+    slug: "gemini-2.5-flash"
+  },
+  "gemini-2.5-flash-lite": {
+    capabilities: ["chat", "vision", "function_calling", "streaming"],
+    category: "fast",
+    contextWindow: 1_000_000,
+    description: "Lightest and most cost-effective Gemini model",
+    id: "gemini-2.5-flash-lite",
+    inputPrice: 0.075,
+    maxOutput: 65_536,
+    name: "Gemini 2.5 Flash Lite",
+    outputPrice: 0.3,
+    provider: "google",
+    slug: "gemini-2.5-flash-lite"
+  },
+  "gemini-2.5-pro": {
+    capabilities: [
+      "chat",
+      "vision",
+      "function_calling",
+      "streaming",
+      "reasoning"
+    ],
+    category: "flagship",
+    contextWindow: 1_000_000,
+    description:
+      "Most capable Gemini model for complex reasoning and coding tasks",
+    id: "gemini-2.5-pro",
+    inputPrice: 1.25,
+    maxOutput: 65_536,
+    name: "Gemini 2.5 Pro",
+    outputPrice: 10,
+    provider: "google",
+    slug: "gemini-2.5-pro"
   },
 
   // OpenAI models

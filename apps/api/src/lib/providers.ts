@@ -32,6 +32,14 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
     validationMethod: "POST",
     validationPath: "/messages"
   },
+  google: {
+    authHeaders: bearerAuth,
+    baseUrl: "https://generativelanguage.googleapis.com/v1beta",
+    chatEndpoint: "/chat/completions",
+    label: "Google",
+    modelsEndpoint: "/models",
+    validationPath: "/models"
+  },
   openai: {
     authHeaders: bearerAuth,
     baseUrl: "https://api.openai.com/v1",
