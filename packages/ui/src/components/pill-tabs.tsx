@@ -29,7 +29,7 @@ const PillTabs = <T extends string = string>({
     <Tabs.List
       activateOnFocus
       className={cn(
-        "flex h-9 w-fit items-center gap-1 overflow-x-auto rounded-md border border-border px-1",
+        "relative flex h-9 w-fit items-center gap-1 overflow-x-auto rounded-md border border-border px-1",
         className
       )}
     >
@@ -37,7 +37,7 @@ const PillTabs = <T extends string = string>({
         <Tabs.Tab
           className={cn(
             "relative z-0 shrink-0 cursor-pointer rounded-md px-3 py-1 text-sm font-medium transition-colors",
-            "text-muted-foreground hover:text-foreground data-active:text-primary-foreground",
+            "text-muted-foreground hover:text-foreground data-active:text-background",
             opt.disabled && "cursor-not-allowed opacity-50"
           )}
           disabled={opt.disabled}
@@ -51,7 +51,7 @@ const PillTabs = <T extends string = string>({
           </span>
         </Tabs.Tab>
       ))}
-      <Tabs.Indicator className="-z-1 rounded-md bg-primary transition-[left,width] duration-300 ease-[cubic-bezier(0.65,0,0.35,1)]" />
+      <Tabs.Indicator className="absolute top-[var(--active-tab-top)] left-[var(--active-tab-left)] h-[var(--active-tab-height)] w-[var(--active-tab-width)] -z-1 rounded-md bg-foreground transition-all duration-300 ease-[cubic-bezier(0.65,0,0.35,1)]" />
     </Tabs.List>
   </Tabs.Root>
 );

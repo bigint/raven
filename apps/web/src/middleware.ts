@@ -24,17 +24,17 @@ const PROTECTED_PREFIXES = [
   "/webhooks"
 ];
 
-const checkSetupNeeded = async (): Promise<boolean> => {
+const checkSetupNeeded = async (): Promise<boolean | null> => {
   try {
     const response = await fetch(`${API_URL}/v1/setup/status`, {
       headers: { Accept: "application/json" },
       signal: AbortSignal.timeout(3000)
     });
-    if (!response.ok) return false;
+    if (!response.ok) return null;
     const body = await response.json();
     return body?.data?.needsSetup === true;
   } catch {
-    return false;
+    return null;
   }
 };
 
@@ -70,15 +70,15 @@ export const middleware = async (
   // No session cookie — check if setup is needed
   const needsSetup = await checkSetupNeeded();
 
-  // Handle /setup route: allow through only if setup is actually needed
+  // Handle /setup route: allow through if setup is needed or API is unreachable
   if (pathname === "/setup" || pathname.startsWith("/setup/")) {
-    if (needsSetup) {
+    if (needsSetup !== false) {
       return NextResponse.next();
     }
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
-  if (needsSetup) {
+  if (needsSetup !== false) {
     return NextResponse.redirect(new URL("/setup", request.url));
   }
 
