@@ -199,6 +199,11 @@ const server = serve(
   }
 );
 
+// Allow long-running proxy requests (large context windows, streaming)
+server.setTimeout(0);
+(server as unknown as import("node:http").Server).requestTimeout = 0;
+(server as unknown as import("node:http").Server).headersTimeout = 60_000;
+
 const shutdown = async (): Promise<void> => {
   log.info("Shutting down gracefully");
   server.close();
