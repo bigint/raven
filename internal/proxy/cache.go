@@ -47,8 +47,8 @@ func buildCacheKey(provider, model string, body map[string]any) string {
 	return "cache:resp:" + hash
 }
 
-// CheckResponseCache checks if a cached response exists for the given request.
-func CheckResponseCache(ctx context.Context, rdb *redis.Client, provider string, requestBody map[string]any) *CacheResult {
+// CheckCache checks if a cached response exists for the given request.
+func CheckCache(ctx context.Context, rdb *redis.Client, provider string, requestBody map[string]any) *CacheResult {
 	// Skip caching for streaming requests
 	if stream, ok := requestBody["stream"].(bool); ok && stream {
 		return &CacheResult{Hit: false}
@@ -65,9 +65,15 @@ func CheckResponseCache(ctx context.Context, rdb *redis.Client, provider string,
 		return &CacheResult{Hit: false}
 	}
 
+	var parsed map[string]any
+	if jsonErr := json.Unmarshal([]byte(cached), &parsed); jsonErr != nil {
+		parsed = make(map[string]any)
+	}
+
 	return &CacheResult{
-		Hit:  true,
-		Body: cached,
+		Hit:    true,
+		Body:   cached,
+		Parsed: parsed,
 	}
 }
 
