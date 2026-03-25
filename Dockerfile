@@ -46,7 +46,7 @@ ENV NODE_ENV=production \
 VOLUME /var/lib/postgresql/data
 EXPOSE 3000 4000
 
-HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=3 \
+HEALTHCHECK --interval=10s --timeout=5s --start-period=120s --retries=3 \
   CMD wget -q --spider http://localhost:4000/health || exit 1
 
 ENTRYPOINT ["./docker-entrypoint.sh"]

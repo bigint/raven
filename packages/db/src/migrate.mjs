@@ -11,7 +11,13 @@ if (!databaseUrl) {
 const sql = postgres(databaseUrl, { max: 1 });
 const db = drizzle(sql);
 
-await migrate(db, { migrationsFolder: "./drizzle" });
-await sql.end();
-
-console.log("Migrations complete.");
+// Advisory lock prevents concurrent migration from multiple containers
+const lockId = 728191; // arbitrary fixed ID for migration lock
+try {
+  await sql`SELECT pg_advisory_lock(${lockId})`;
+  await migrate(db, { migrationsFolder: "./drizzle" });
+  console.log("Migrations complete.");
+} finally {
+  await sql`SELECT pg_advisory_unlock(${lockId})`;
+  await sql.end();
+}
