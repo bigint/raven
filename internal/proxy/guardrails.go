@@ -20,12 +20,7 @@ const (
 	contentTruncateLen = 10_000
 )
 
-type GuardrailMatch struct {
-	RuleName       string `json:"ruleName"`
-	RuleType       string `json:"ruleType"`
-	Action         string `json:"action"`
-	MatchedContent string `json:"matchedContent"`
-}
+// GuardrailMatch is defined in execute.go
 
 type GuardrailResult struct {
 	Blocked  bool             `json:"blocked"`

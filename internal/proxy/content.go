@@ -5,18 +5,11 @@ import (
 	"fmt"
 )
 
-type ContentAnalysis struct {
-	HasImages  bool     `json:"hasImages"`
-	ImageCount int      `json:"imageCount"`
-	HasToolUse bool     `json:"hasToolUse"`
-	ToolCount  int      `json:"toolCount"`
-	ToolNames  []string `json:"toolNames"`
-	SessionID  string   `json:"sessionId"`
-}
-
-func AnalyzeContent(body map[string]any, sessionHeader string) *ContentAnalysis {
-	analysis := &ContentAnalysis{
-		ToolNames: []string{},
+// AnalyzeContent extracts metadata from the request body for logging.
+// This is the standalone version for use outside of Execute().
+func AnalyzeContent(body map[string]any, sessionHeader string) ContentAnalysis {
+	analysis := ContentAnalysis{
+		SessionID: sessionHeader,
 	}
 
 	if body == nil {
@@ -25,7 +18,7 @@ func AnalyzeContent(body map[string]any, sessionHeader string) *ContentAnalysis 
 
 	// Count images in messages
 	if messages, ok := body["messages"].([]any); ok {
-		analysis.ImageCount = countImages(messages)
+		analysis.ImageCount = countImageBlocks(messages)
 		analysis.HasImages = analysis.ImageCount > 0
 	}
 
@@ -33,19 +26,19 @@ func AnalyzeContent(body map[string]any, sessionHeader string) *ContentAnalysis 
 	if tools, ok := body["tools"].([]any); ok && len(tools) > 0 {
 		analysis.HasToolUse = true
 		analysis.ToolCount = len(tools)
-		analysis.ToolNames = extractToolNames(tools)
+		analysis.ToolNames = extractToolNamesList(tools)
 	} else if functions, ok := body["functions"].([]any); ok && len(functions) > 0 {
 		analysis.HasToolUse = true
 		analysis.ToolCount = len(functions)
-		analysis.ToolNames = extractFunctionNames(functions)
+		analysis.ToolNames = extractFuncNamesList(functions)
 	}
 
-	// Extract session ID
-	if sessionHeader != "" {
-		analysis.SessionID = sessionHeader
-	} else if metadata, ok := body["metadata"].(map[string]any); ok {
-		if sid, ok := metadata["session_id"].(string); ok {
-			analysis.SessionID = sid
+	// Extract session ID from header or body metadata
+	if analysis.SessionID == "" {
+		if metadata, ok := body["metadata"].(map[string]any); ok {
+			if sid, ok := metadata["session_id"].(string); ok {
+				analysis.SessionID = sid
+			}
 		}
 	}
 	if analysis.SessionID == "" {
@@ -55,7 +48,7 @@ func AnalyzeContent(body map[string]any, sessionHeader string) *ContentAnalysis 
 	return analysis
 }
 
-func countImages(messages []any) int {
+func countImageBlocks(messages []any) int {
 	count := 0
 	for _, msg := range messages {
 		m, ok := msg.(map[string]any)
@@ -71,12 +64,8 @@ func countImages(messages []any) int {
 			if !ok {
 				continue
 			}
-			// OpenAI: type: "image_url"
-			if b["type"] == "image_url" {
-				count++
-			}
-			// Anthropic: type: "image"
-			if b["type"] == "image" {
+			blockType, _ := b["type"].(string)
+			if blockType == "image_url" || blockType == "image" {
 				count++
 			}
 		}
@@ -84,7 +73,7 @@ func countImages(messages []any) int {
 	return count
 }
 
-func extractToolNames(tools []any) []string {
+func extractToolNamesList(tools []any) []string {
 	var names []string
 	for _, tool := range tools {
 		t, ok := tool.(map[string]any)
@@ -103,13 +92,10 @@ func extractToolNames(tools []any) []string {
 			names = append(names, name)
 		}
 	}
-	if names == nil {
-		return []string{}
-	}
 	return names
 }
 
-func extractFunctionNames(functions []any) []string {
+func extractFuncNamesList(functions []any) []string {
 	var names []string
 	for _, fn := range functions {
 		f, ok := fn.(map[string]any)
@@ -119,9 +105,6 @@ func extractFunctionNames(functions []any) []string {
 		if name, ok := f["name"].(string); ok {
 			names = append(names, name)
 		}
-	}
-	if names == nil {
-		return []string{}
 	}
 	return names
 }
