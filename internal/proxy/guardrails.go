@@ -43,7 +43,9 @@ type guardrailRule struct {
 	Priority  int
 }
 
-type Message struct {
+// GuardrailMessage is used for guardrail evaluation input.
+// Unlike the parser's Message type, Content is always a plain string here.
+type GuardrailMessage struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
 }
@@ -87,7 +89,7 @@ func getCachedRegex(pattern string) (*regexp.Regexp, error) {
 	return re, nil
 }
 
-func extractTextContent(messages []Message) []string {
+func extractTextContent(messages []GuardrailMessage) []string {
 	var contents []string
 	for _, m := range messages {
 		if m.Content != "" {
@@ -274,7 +276,7 @@ func loadGuardrailRules(ctx context.Context, pool *pgxpool.Pool, rdb *redis.Clie
 	return rules, nil
 }
 
-func EvaluateGuardrails(ctx context.Context, pool *pgxpool.Pool, rdb *redis.Client, messages []Message) (*GuardrailResult, error) {
+func EvaluateGuardrails(ctx context.Context, pool *pgxpool.Pool, rdb *redis.Client, messages []GuardrailMessage) (*GuardrailResult, error) {
 	rules, err := loadGuardrailRules(ctx, pool, rdb)
 	if err != nil {
 		return nil, err
