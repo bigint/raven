@@ -26,7 +26,7 @@ interface SelectProps {
 }
 
 const TRIGGER_CLASS =
-  "flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50";
+  "flex h-9 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50";
 
 const ChevronIcon = () => (
   <svg
@@ -177,7 +177,7 @@ const SearchableSelect = ({
               />
               <div
                 className="max-h-48 overflow-y-auto p-1"
-                style={{ width: "var(--anchor-width)" }}
+                style={{ minWidth: "var(--anchor-width)", width: "max-content" }}
               >
                 {filtered.map((option, i) => (
                   <button

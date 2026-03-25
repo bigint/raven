@@ -3,6 +3,7 @@
 import { Input, PillTabs, Select, Spinner } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import { ModelIcon } from "@/components/model-icon";
 import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
 import {
   type SessionRequest,
@@ -109,8 +110,13 @@ export const SessionsView = () => {
           onChange={setModelFilter}
           options={[
             { label: "All Models", value: "" },
-            ...uniqueModels.map((model) => ({ label: model, value: model }))
+            ...uniqueModels.map((model) => ({
+              icon: <ModelIcon model={model} size={14} />,
+              label: model,
+              value: model
+            }))
           ]}
+          searchable
           value={modelFilter}
         />
       </div>
