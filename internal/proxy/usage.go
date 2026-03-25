@@ -4,19 +4,11 @@ import (
 	"github.com/bigint/raven/internal/data"
 )
 
-type TokenUsage struct {
-	InputTokens     int     `json:"inputTokens"`
-	OutputTokens    int     `json:"outputTokens"`
-	ReasoningTokens int     `json:"reasoningTokens"`
-	CachedTokens    int     `json:"cachedTokens"`
-	CacheReadTokens int     `json:"cacheReadTokens"`
-	CacheWriteTokens int    `json:"cacheWriteTokens"`
-}
-
 // MapUsage extracts token usage from a provider response body.
 // Handles OpenAI, Anthropic, and Google response formats.
-func MapUsage(providerResponse map[string]any) *TokenUsage {
-	usage := &TokenUsage{}
+// Returns the TokenUsage type defined in formatter.go.
+func MapUsage(providerResponse map[string]any) TokenUsage {
+	usage := TokenUsage{}
 
 	usageObj, ok := providerResponse["usage"].(map[string]any)
 	if !ok {
