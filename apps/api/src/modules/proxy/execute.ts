@@ -50,6 +50,10 @@ export interface ExecuteInput {
   readonly guardrailMatches: readonly GuardrailMatch[];
   readonly incomingHeaders: Readonly<Record<string, string>>;
   readonly extraResponseHeaders?: Readonly<Record<string, string>>;
+  readonly requestTimeoutMs: number;
+  readonly logRequestBodies: boolean;
+  readonly logResponseBodies: boolean;
+  readonly bodyText?: string;
 }
 
 // Tool building
@@ -75,6 +79,7 @@ const buildTools = (tools: ParsedRequest["tools"]): ToolSet | undefined => {
 
 export const execute = async (input: ExecuteInput): Promise<Response> => {
   const {
+    bodyText,
     db,
     redis,
     endUser,
@@ -95,7 +100,10 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     guardrailWarnings,
     guardrailMatches,
     incomingHeaders,
-    extraResponseHeaders
+    extraResponseHeaders,
+    requestTimeoutMs,
+    logRequestBodies,
+    logResponseBodies
   } = input;
 
   const contentAnalysis = analyzeContent(parsedBody, sessionId);
@@ -135,6 +143,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     hasToolUse?: boolean;
     toolCount?: number;
     toolNames?: readonly string[];
+    responseText?: string;
   }) => {
     const latencyMs = Date.now() - startTime;
     const logEntry = {
@@ -149,6 +158,11 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
       providerConfigId: activeProvider.configId,
       providerConfigName: activeProvider.configName,
       reasoningTokens: usage.reasoningTokens,
+      requestBody: logRequestBodies ? bodyText : undefined,
+      responseBody:
+        logResponseBodies && usage.responseText
+          ? usage.responseText
+          : undefined,
       toolCount: usage.toolCount ?? baseLogData.toolCount,
       toolNames: usage.toolNames
         ? [...baseLogData.toolNames, ...usage.toolNames]
@@ -186,6 +200,8 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
   const aiTools = buildTools(parsed.tools);
 
   const baseParams = {
+    abortSignal:
+      requestTimeoutMs > 0 ? AbortSignal.timeout(requestTimeoutMs) : undefined,
     frequencyPenalty: parsed.frequencyPenalty,
     maxRetries: MAX_PROVIDER_RETRIES,
     maxTokens: parsed.maxTokens,
@@ -315,6 +331,7 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
         inputTokens: formatted.usage.inputTokens,
         outputTokens: formatted.usage.outputTokens,
         reasoningTokens: formatted.usage.reasoningTokens,
+        responseText: formatted.text,
         toolCount: result.toolCalls?.length
           ? baseLogData.toolCount + result.toolCalls.length
           : undefined,

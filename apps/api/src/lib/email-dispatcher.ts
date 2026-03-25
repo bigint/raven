@@ -4,6 +4,7 @@ import { sendBudgetAlertEmail } from "@raven/email";
 import { eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
 import { getEmailConfig } from "./email-config";
+import { getInstanceSettings } from "./instance-settings";
 import { log } from "./logger";
 
 interface EventPayload {
@@ -14,8 +15,13 @@ interface EventPayload {
 
 const handleBudgetAlert = async (
   db: Database,
+  redis: Redis,
   data: Record<string, unknown>
 ): Promise<void> => {
+  const cfg = await getInstanceSettings(db, redis);
+  if (!cfg.email_notifications_enabled || !cfg.notify_on_budget_exceeded)
+    return;
+
   const config = await getEmailConfig(db);
   if (!config) return;
 
@@ -76,7 +82,7 @@ export const initEmailDispatcher = (db: Database, redis: Redis): void => {
       try {
         switch (event.type) {
           case "budget.alert":
-            await handleBudgetAlert(db, event.data);
+            await handleBudgetAlert(db, redis, event.data);
             break;
         }
       } catch (err) {

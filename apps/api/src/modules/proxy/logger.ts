@@ -29,6 +29,8 @@ export interface LogData {
   toolNames: readonly string[];
   sessionId: string | null;
   userAgent: string | null;
+  requestBody?: string;
+  responseBody?: string;
   guardrailMatches?: readonly {
     ruleName: string;
     ruleType: string;
@@ -82,6 +84,8 @@ const bufferLogEntry = (db: Database, data: LogData): void => {
     provider: data.provider,
     providerConfigId: data.providerConfigId,
     reasoningTokens: data.reasoningTokens,
+    requestBody: data.requestBody,
+    responseBody: data.responseBody,
     sessionId: data.sessionId,
     statusCode: data.statusCode,
     toolCount: data.toolCount,

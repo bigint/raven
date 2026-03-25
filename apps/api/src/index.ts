@@ -9,6 +9,7 @@ import { logger } from "hono/logger";
 import { initEmailDispatcher } from "./lib/email-dispatcher";
 import { AppError } from "./lib/errors";
 import { initEventBus } from "./lib/events";
+import { getInstanceSettings } from "./lib/instance-settings";
 import { log } from "./lib/logger";
 import { getRedis } from "./lib/redis";
 import { sendPasswordResetEmail } from "./lib/send-password-reset-email";
@@ -52,9 +53,12 @@ const flushInterval = setInterval(() => {
   void flushLastUsed(db, redis);
 }, 60_000);
 
+const instanceSettings = await getInstanceSettings(db, redis);
+
 const auth = createAuth(db, env, {
   onResetPassword: (user, url) => void sendPasswordResetEmail(db, user, url),
-  onUserCreated: (user) => void sendWelcomeEmail(db, user, env.APP_URL)
+  onUserCreated: (user) => void sendWelcomeEmail(db, user, env.APP_URL),
+  sessionTimeoutHours: instanceSettings.session_timeout_hours
 });
 
 const app = new Hono();
@@ -64,10 +68,11 @@ if (env.NODE_ENV !== "production") {
   app.use("*", logger());
 }
 
-// Request body size limit (10MB)
+// Request body size limit
+const maxBodyBytes = instanceSettings.max_request_body_size_mb * 1024 * 1024;
 app.use("*", async (c, next) => {
   const contentLength = c.req.header("content-length");
-  if (contentLength && Number.parseInt(contentLength, 10) > 10 * 1024 * 1024) {
+  if (contentLength && Number.parseInt(contentLength, 10) > maxBodyBytes) {
     return c.json(
       {
         detail: "Request body too large",
@@ -140,7 +145,7 @@ app.onError((err, c) => {
 app.get("/health", (c) => c.json({ status: "ok" }));
 
 // Auth routes (no auth middleware)
-app.route("/api/auth", createAuthModule(auth));
+app.route("/api/auth", createAuthModule(auth, db, redis));
 
 // OpenAI-compatible endpoints (before proxy catch-all)
 app.route("/v1", createOpenAICompatModule(db, redis, env));
@@ -169,7 +174,7 @@ app.route("/v1/user", userRoutes);
 const adminRoutes = new Hono();
 adminRoutes.use("*", createAuthMiddleware(auth));
 adminRoutes.use("*", platformAdminMiddleware);
-adminRoutes.route("/", createAdminModule(db, env.APP_URL));
+adminRoutes.route("/", createAdminModule(db, env.APP_URL, redis));
 app.route("/v1/admin", adminRoutes);
 
 // Protected API routes (session auth + writer middleware for mutations)

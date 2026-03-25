@@ -231,6 +231,17 @@ const buildProviderOptions = (
     opts.anthropic = anthropicOpts;
   }
 
+  if (provider === "google") {
+    const reasoning = body.reasoning as Msg | undefined;
+    if (reasoning?.budget_tokens) {
+      opts.google = {
+        thinkingConfig: {
+          thinkingBudget: reasoning.budget_tokens as number
+        }
+      };
+    }
+  }
+
   return Object.keys(opts).length > 0 ? opts : undefined;
 };
 

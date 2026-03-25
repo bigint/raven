@@ -1,5 +1,6 @@
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
+import type { Redis } from "ioredis";
 import { getAdminAuditLogs } from "./audit-logs";
 import {
   createInvitation,
@@ -10,7 +11,11 @@ import { getSettings, updateSettings } from "./settings";
 import { getAdminStats } from "./stats";
 import { deleteUser, getAdminUsers, updateUserRole } from "./users";
 
-export const createAdminModule = (db: Database, appUrl: string) => {
+export const createAdminModule = (
+  db: Database,
+  appUrl: string,
+  redis: Redis
+) => {
   const app = new Hono();
   app.get("/stats", getAdminStats(db));
   app.get("/users", getAdminUsers(db));
@@ -21,6 +26,6 @@ export const createAdminModule = (db: Database, appUrl: string) => {
   app.delete("/invitations/:id", deleteInvitation(db));
   app.get("/audit-logs", getAdminAuditLogs(db));
   app.get("/settings", getSettings(db));
-  app.put("/settings", updateSettings(db));
+  app.put("/settings", updateSettings(db, redis));
   return app;
 };

@@ -4,6 +4,7 @@ import { webhooks } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
 import pRetry from "p-retry";
+import { getInstanceSettings } from "./instance-settings";
 import { log } from "./logger";
 
 interface EventPayload {
@@ -85,7 +86,9 @@ const signPayload = (payload: string, secret: string): string => {
 const deliverWebhook = async (
   url: string,
   body: string,
-  secret: string
+  secret: string,
+  timeoutMs: number,
+  retries: number
 ): Promise<void> => {
   const signature = signPayload(body, secret);
 
@@ -98,7 +101,7 @@ const deliverWebhook = async (
           "X-Raven-Signature": signature
         },
         method: "POST",
-        signal: AbortSignal.timeout(10000)
+        signal: AbortSignal.timeout(timeoutMs)
       });
 
       if (!response.ok) {
@@ -114,7 +117,7 @@ const deliverWebhook = async (
           url
         });
       },
-      retries: 3
+      retries
     }
   ).catch(() => {
     log.error("Webhook delivery failed after all retries", undefined, { url });
@@ -142,7 +145,13 @@ export const initWebhookDispatcher = (db: Database, redis: Redis): void => {
 
     void (async () => {
       try {
-        const matchingWebhooks = await getWebhookConfigs(db, event.type);
+        const [matchingWebhooks, cfg] = await Promise.all([
+          getWebhookConfigs(db, event.type),
+          getInstanceSettings(db, redis)
+        ]);
+
+        const timeoutMs = cfg.webhook_timeout_seconds * 1000;
+        const retries = cfg.webhook_retry_count;
 
         for (const webhook of matchingWebhooks) {
           const body = JSON.stringify({
@@ -153,7 +162,13 @@ export const initWebhookDispatcher = (db: Database, redis: Redis): void => {
           });
 
           void withConcurrency(() =>
-            deliverWebhook(webhook.url, body, webhook.secret)
+            deliverWebhook(
+              webhook.url,
+              body,
+              webhook.secret,
+              timeoutMs,
+              retries
+            )
           );
         }
       } catch (err) {

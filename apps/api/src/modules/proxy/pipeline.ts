@@ -3,6 +3,7 @@ import { MODEL_CATALOG } from "@raven/data";
 import type { Database } from "@raven/db";
 import type { Redis } from "ioredis";
 import { GuardrailError, ValidationError } from "@/lib/errors";
+import { getInstanceSettings } from "@/lib/instance-settings";
 import { authenticateKey } from "./auth";
 import { checkBudgets } from "./budget-check";
 import { checkCache, serveCacheHit } from "./cache";
@@ -35,21 +36,18 @@ interface PipelineInput {
 export const runPipeline = async (input: PipelineInput): Promise<Response> => {
   const startTime = Date.now();
 
-  // 1. Auth
-  const { virtualKey } = await authenticateKey(
-    input.db,
-    input.authHeader,
-    input.redis
-  );
+  // 1. Auth + settings
+  const [{ virtualKey }, cfg] = await Promise.all([
+    authenticateKey(input.db, input.authHeader, input.redis),
+    getInstanceSettings(input.db, input.redis)
+  ]);
 
-  // 2. Gate checks + body parse
+  // 2. Gate checks — fall back to global rate limits when per-key limits are null
+  const rpm = virtualKey.rateLimitRpm ?? cfg.global_rate_limit_rpm;
+  const rpd = virtualKey.rateLimitRpd ?? cfg.global_rate_limit_rpd;
+
   await Promise.all([
-    checkRateLimit(
-      input.redis,
-      virtualKey.id,
-      virtualKey.rateLimitRpm,
-      virtualKey.rateLimitRpd
-    ),
+    checkRateLimit(input.redis, virtualKey.id, rpm, rpd),
     checkBudgets(input.db, input.redis, virtualKey.id)
   ]);
 
@@ -157,6 +155,11 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
   // 7. Parse + execute
   const parsed = parseIncomingRequest(parsedBody, providerName);
 
+  // Apply default max tokens from settings when not specified by client
+  if (parsed.maxTokens === undefined) {
+    parsed.maxTokens = cfg.default_max_tokens;
+  }
+
   if (parsed.requiresRawProxy) {
     return Response.json(
       {
@@ -171,6 +174,7 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
   }
 
   return execute({
+    bodyText: input.bodyText,
     db: input.db,
     decryptedApiKey,
     endUser,
@@ -179,6 +183,8 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
     guardrailMatches,
     guardrailWarnings,
     incomingHeaders: input.incomingHeaders,
+    logRequestBodies: cfg.log_request_bodies,
+    logResponseBodies: cfg.log_response_bodies,
     method: input.method,
     parsed,
     parsedBody,
@@ -188,6 +194,7 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
     providerName,
     redis: input.redis,
     requestedModel,
+    requestTimeoutMs: cfg.request_timeout_seconds * 1000,
     sessionId: input.sessionId,
     startTime,
     userAgent: input.userAgent,

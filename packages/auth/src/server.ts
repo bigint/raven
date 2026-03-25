@@ -5,7 +5,6 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { count, eq } from "drizzle-orm";
 
-const SESSION_EXPIRY_SECONDS = 30 * 24 * 60 * 60; // 30 days
 const SESSION_UPDATE_AGE_SECONDS = 24 * 60 * 60; // 1 day
 
 interface AuthOptions {
@@ -15,9 +14,13 @@ interface AuthOptions {
     name: string;
     email: string;
   }) => void;
+  /** Session timeout in hours. Defaults to 720 (30 days). */
+  readonly sessionTimeoutHours?: number;
 }
 
 export const createAuth = (db: Database, env: Env, options?: AuthOptions) => {
+  const sessionExpirySeconds = (options?.sessionTimeoutHours ?? 720) * 60 * 60;
+
   return betterAuth({
     advanced: {
       defaultCookieAttributes: {
@@ -78,7 +81,7 @@ export const createAuth = (db: Database, env: Env, options?: AuthOptions) => {
         enabled: true,
         maxAge: 5 * 60
       },
-      expiresIn: SESSION_EXPIRY_SECONDS,
+      expiresIn: sessionExpirySeconds,
       updateAge: SESSION_UPDATE_AGE_SECONDS
     },
     trustedOrigins: [env.APP_URL],
