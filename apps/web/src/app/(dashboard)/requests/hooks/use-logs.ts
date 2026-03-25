@@ -90,8 +90,8 @@ export const useToggleStar = () => {
       );
       toast.promise(promise, {
         error: (err) => err.message,
-        loading: "Updating...",
-        success: "Star toggled"
+        loading: "Updating…",
+        success: (data) => (data.isStarred ? "Starred" : "Unstarred")
       });
       return promise;
     },
