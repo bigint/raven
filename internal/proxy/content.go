@@ -1,7 +1,8 @@
 package proxy
 
 import (
-	"github.com/google/uuid"
+	"crypto/rand"
+	"fmt"
 )
 
 type ContentAnalysis struct {
@@ -48,7 +49,7 @@ func AnalyzeContent(body map[string]any, sessionHeader string) *ContentAnalysis 
 		}
 	}
 	if analysis.SessionID == "" {
-		analysis.SessionID = uuid.New().String()
+		analysis.SessionID = newUUID()
 	}
 
 	return analysis
