@@ -43,7 +43,7 @@ type ExecuteInput struct {
 	SessionID          string
 	UserAgent          string
 	GuardrailWarnings  []string
-	GuardrailMatches   []GuardrailMatch
+	GuardrailMatches   []GuardrailMatch // GuardrailMatch defined in guardrails.go
 	IncomingHeaders    map[string]string
 	ExtraHeaders       map[string]string
 	RequestTimeoutMs   int

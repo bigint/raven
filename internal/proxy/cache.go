@@ -10,7 +10,12 @@ import (
 	"github.com/bigint/raven/internal/crypto"
 )
 
-// CacheResult is defined in pipeline.go
+// CacheResult holds the result of a cache lookup.
+type CacheResult struct {
+	Hit    bool
+	Body   string
+	Parsed map[string]any
+}
 
 const defaultCacheTTL = time.Hour
 

@@ -15,7 +15,14 @@ import (
 	"github.com/bigint/raven/internal/errors"
 )
 
-// ProviderResolution is defined in pipeline.go
+// ProviderResolution holds the resolved provider details.
+type ProviderResolution struct {
+	DecryptedAPIKey    string
+	ProviderConfigID   string
+	ProviderConfigName string
+	ProviderName       string
+	UpstreamPath       string
+}
 
 // ParsedProviderPath holds the parsed components of a provider path.
 type ParsedProviderPath struct {

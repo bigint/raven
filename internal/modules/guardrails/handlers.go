@@ -59,7 +59,7 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, _ := cuid2.CreateId()
+	id := cuid2.Generate()
 
 	var retID, name, ruleType, action string
 	var config json.RawMessage

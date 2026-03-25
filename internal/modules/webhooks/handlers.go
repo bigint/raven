@@ -57,7 +57,7 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, _ := cuid2.CreateId()
+	id := cuid2.Generate()
 
 	secretBytes, err := crypto.RandomBytes(32)
 	if err != nil {
