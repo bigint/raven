@@ -164,13 +164,13 @@ const SearchableSelect = ({
             <Popover.Popup className="overflow-hidden rounded-md border border-border bg-popover shadow-lg outline-none">
               <input
                 aria-label="Search options"
-                className="w-full border-b border-border bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring placeholder:text-muted-foreground"
+                className="w-full border-b border-border bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground"
                 onChange={(e) => {
                   setSearch(e.target.value);
                   setHighlightedIndex(0);
                 }}
                 onKeyDown={handleKeyDown}
-                placeholder="Search\u2026"
+                placeholder="Search…"
                 ref={inputRef}
                 type="text"
                 value={search}
