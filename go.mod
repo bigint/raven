@@ -4,7 +4,7 @@ go 1.26.1
 
 require (
 	github.com/go-chi/chi/v5 v5.2.5
-	github.com/go-chi/cors v1.2.1
+	github.com/go-chi/cors v1.2.2
 	github.com/jackc/pgx/v5 v5.9.1
 	github.com/nrednav/cuid2 v1.1.0
 	github.com/redis/go-redis/v9 v9.18.0

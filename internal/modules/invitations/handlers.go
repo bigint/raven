@@ -111,7 +111,7 @@ func (h *Handler) accept(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Rollback(r.Context())
 
-	userID, _ := cuid2.Generate()
+	userID := cuid2.Generate()
 
 	_, err = tx.Exec(r.Context(),
 		"INSERT INTO users (id, name, email, role) VALUES ($1, $2, $3, $4)",
