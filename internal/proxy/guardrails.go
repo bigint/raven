@@ -273,7 +273,6 @@ func EvaluateGuardrails(ctx context.Context, pool *pgxpool.Pool, rdb *redis.Clie
 	}
 
 	result := &GuardrailResult{
-		Blocked:  false,
 		Warnings: []string{},
 		Matches:  []GuardrailMatch{},
 	}
