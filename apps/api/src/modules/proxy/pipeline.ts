@@ -63,7 +63,6 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
     }
   }
 
-  console.log("[pipeline] model=%s provider=%s stream=%s", parsedBody.model, input.providerPath, parsedBody.stream);
 
   // 4. Extract end-user identity
   const endUser =
@@ -155,9 +154,7 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
   }
 
   // 7. Parse + execute
-  console.log("[pipeline] resolved provider=%s configId=%s path=%s", providerName, providerConfigId, resolvedPath);
   const parsed = parseIncomingRequest(parsedBody, providerName);
-  console.log("[pipeline] parsed: streaming=%s providerOptions=%j maxTokens=%s", parsed.isStreaming, parsed.providerOptions, parsed.maxTokens);
 
   // Apply default max tokens from settings when not specified by client
   if (parsed.maxTokens === undefined) {

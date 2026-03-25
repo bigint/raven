@@ -196,7 +196,6 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
       requestedModel
     );
 
-  console.log("[execute] provider=%s model=%s baseUrl=%s", providerName, requestedModel, providerBaseUrl);
   const aiModel = makeModel(decryptedApiKey, providerName);
   const aiTools = buildTools(parsed.tools);
 
@@ -225,10 +224,8 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     parsed.isStreaming ? doStream(model) : doBuffered(model);
 
   try {
-    console.log("[execute] calling AI SDK, streaming=%s", parsed.isStreaming);
     return await tryExecute(aiModel);
   } catch (err) {
-    console.error("[execute] primary provider failed:", err);
     const fallbacks = await getFallbackProviders(
       db,
       env,
