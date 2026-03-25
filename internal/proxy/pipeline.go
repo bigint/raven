@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -14,6 +13,7 @@ import (
 
 	"github.com/bigint/raven/internal/config"
 	"github.com/bigint/raven/internal/data"
+	"github.com/bigint/raven/internal/errors"
 	"github.com/bigint/raven/internal/logger"
 )
 
@@ -37,32 +37,64 @@ type PipelineInput struct {
 	StrictBody           bool
 }
 
+// InstanceSettings holds instance-level configuration loaded from the database.
+type InstanceSettings struct {
+	GlobalRateLimitRPM    *int
+	GlobalRateLimitRPD    *int
+	DefaultMaxTokens      int
+	RequestTimeoutSeconds int
+	LogRequestBodies      bool
+	LogResponseBodies     bool
+}
+
 // RunPipeline orchestrates the full proxy request flow from authentication through execution.
 func RunPipeline(w http.ResponseWriter, r *http.Request, input *PipelineInput) {
 	ctx := r.Context()
 	startTime := time.Now()
 
-	// 1. Auth + settings (would run in parallel in production)
-	// authenticateKey and getInstanceSettings are external dependencies;
-	// we define the expected interfaces and call them.
-	authResult, err := authenticateKey(ctx, input.Pool, input.Redis, input.AuthHeader)
-	if err != nil {
-		writeErrorResponse(w, err)
-		return
+	// 1. Auth + settings in parallel
+	type authResult struct {
+		vk  *VirtualKey
+		err error
+	}
+	type settingsResult struct {
+		cfg *InstanceSettings
+		err error
 	}
 
-	settings, err := getInstanceSettings(ctx, input.Pool, input.Redis)
-	if err != nil {
-		writeErrorResponse(w, err)
+	authCh := make(chan authResult, 1)
+	settingsCh := make(chan settingsResult, 1)
+
+	go func() {
+		vk, err := AuthenticateKey(ctx, input.Pool, input.Redis, input.AuthHeader)
+		authCh <- authResult{vk, err}
+	}()
+
+	go func() {
+		cfg, err := LoadInstanceSettings(ctx, input.Pool, input.Redis)
+		settingsCh <- settingsResult{cfg, err}
+	}()
+
+	authRes := <-authCh
+	if authRes.err != nil {
+		writeAppError(w, r, authRes.err)
 		return
 	}
+	virtualKey := authRes.vk
+
+	settingsRes := <-settingsCh
+	if settingsRes.err != nil {
+		writeAppError(w, r, settingsRes.err)
+		return
+	}
+	cfg := settingsRes.cfg
 
 	// 2. Parse JSON body
 	var parsedBody map[string]any
 	if input.BodyText != "" {
 		if err := json.Unmarshal([]byte(input.BodyText), &parsedBody); err != nil {
 			if input.StrictBody {
-				writeJSONError(w, http.StatusBadRequest, "VALIDATION_ERROR", "Invalid JSON body")
+				errors.Validation("Invalid JSON body").WriteJSON(w, r.URL.Path)
 				return
 			}
 			parsedBody = make(map[string]any)
@@ -84,49 +116,83 @@ func RunPipeline(w http.ResponseWriter, r *http.Request, input *PipelineInput) {
 		}
 	}
 
-	// 4. Gate checks (rate limit, budget, guardrails, routing) — would run in parallel
-	virtualKeyID := authResult.VirtualKeyID
-	rpm := authResult.RateLimitRPM
-	rpd := authResult.RateLimitRPD
+	// 4. Gate checks in parallel: rate limit, budget, guardrails, routing
+	rpm := virtualKey.RateLimitRpm
+	rpd := virtualKey.RateLimitRpd
 
-	if rpm == 0 {
-		rpm = settings.GlobalRateLimitRPM
+	if rpm == nil {
+		rpm = cfg.GlobalRateLimitRPM
 	}
-	if rpd == 0 {
-		rpd = settings.GlobalRateLimitRPD
+	if rpd == nil {
+		rpd = cfg.GlobalRateLimitRPD
 	}
 
-	if err := checkRateLimit(ctx, input.Redis, virtualKeyID, rpm, rpd); err != nil {
-		writeErrorResponse(w, err)
+	type gateResults struct {
+		rateLimitErr    error
+		budgetErr       error
+		guardrailResult *GuardrailResult
+		guardrailErr    error
+		routingResult   *RoutingRuleResult
+	}
+
+	gates := make(chan gateResults, 1)
+	go func() {
+		var gr gateResults
+
+		// Rate limit
+		gr.rateLimitErr = CheckRateLimit(ctx, input.Redis, virtualKey.ID, rpm, rpd)
+
+		// Budget
+		if gr.rateLimitErr == nil {
+			gr.budgetErr = CheckBudgets(ctx, input.Pool, input.Redis, virtualKey.ID)
+		}
+
+		// Guardrails
+		if hasMessages && gr.rateLimitErr == nil && gr.budgetErr == nil {
+			var guardrailMessages []GuardrailMessage
+			for _, raw := range messages {
+				msg, ok := raw.(map[string]any)
+				if !ok {
+					continue
+				}
+				role, _ := msg["role"].(string)
+				var contentStr string
+				switch c := msg["content"].(type) {
+				case string:
+					contentStr = c
+				default:
+					b, _ := json.Marshal(c)
+					contentStr = string(b)
+				}
+				guardrailMessages = append(guardrailMessages, GuardrailMessage{
+					Role:    role,
+					Content: contentStr,
+				})
+			}
+			gr.guardrailResult, gr.guardrailErr = EvaluateGuardrails(ctx, input.Pool, input.Redis, guardrailMessages)
+		}
+
+		// Routing
+		if hasModel && !input.SkipRouting && gr.rateLimitErr == nil && gr.budgetErr == nil {
+			gr.routingResult = EvaluateRoutingRules(ctx, input.Pool, input.Redis, modelStr, parsedBody)
+		}
+
+		gates <- gr
+	}()
+
+	gr := <-gates
+
+	if gr.rateLimitErr != nil {
+		writeAppError(w, r, gr.rateLimitErr)
 		return
 	}
-
-	if err := checkBudgets(ctx, input.Pool, input.Redis, virtualKeyID); err != nil {
-		writeErrorResponse(w, err)
+	if gr.budgetErr != nil {
+		writeAppError(w, r, gr.budgetErr)
 		return
 	}
-
-	var guardrailWarnings []string
-	var guardrailMatches []GuardrailMatch
-	if hasMessages {
-		result, err := evaluateGuardrails(ctx, input.Pool, input.Redis, messages)
-		if err != nil {
-			writeErrorResponse(w, err)
-			return
-		}
-		if result != nil {
-			guardrailWarnings = result.Warnings
-			guardrailMatches = result.Matches
-		}
-	}
-
-	// Routing rules
-	if hasModel && !input.SkipRouting {
-		routingResult, err := evaluateRoutingRules(ctx, input.Pool, modelStr, parsedBody)
-		if err == nil && routingResult != nil && routingResult.RuleApplied {
-			parsedBody["model"] = routingResult.Model
-			modelStr = routingResult.Model
-		}
+	if gr.guardrailErr != nil {
+		writeAppError(w, r, gr.guardrailErr)
+		return
 	}
 
 	// 5. Extract end-user identity
@@ -144,21 +210,46 @@ func RunPipeline(w http.ResponseWriter, r *http.Request, input *PipelineInput) {
 		}
 	}
 
-	// 6. Cache check + provider resolution (would run in parallel)
-	providerPath := input.ProviderPath
-	providerName, _, upstreamPath := parseProviderFromPath(providerPath)
+	// 6. Apply routing rule result
+	guardrailWarnings := []string{}
+	var guardrailMatches []GuardrailMatch
+	if gr.guardrailResult != nil {
+		guardrailWarnings = gr.guardrailResult.Warnings
+		guardrailMatches = gr.guardrailResult.Matches
+	}
 
-	cacheResult := checkCache(ctx, input.Redis, providerName, parsedBody)
+	if gr.routingResult != nil && gr.routingResult.RuleApplied {
+		parsedBody["model"] = gr.routingResult.Model
+		modelStr = gr.routingResult.Model
+	}
 
-	providerResolution, err := resolveProvider(ctx, input.Pool, input.Env, input.Redis, providerPath)
-	if err != nil {
-		writeErrorResponse(w, err)
+	// 7. Cache + provider resolution in parallel
+	parsed := ParseProviderFromPath(input.ProviderPath)
+
+	type resolveResults struct {
+		cacheResult *CacheResult
+		resolution  *ProviderResolution
+		resolveErr  error
+	}
+
+	resolveCh := make(chan resolveResults, 1)
+	go func() {
+		var rr resolveResults
+		rr.cacheResult = CheckCache(ctx, input.Redis, parsed.ProviderName, parsedBody)
+		rr.resolution, rr.resolveErr = ResolveProvider(ctx, input.Pool, input.Env, input.ProviderPath, input.Redis, StrategyRandom)
+		resolveCh <- rr
+	}()
+
+	rr := <-resolveCh
+
+	if rr.resolveErr != nil {
+		writeAppError(w, r, rr.resolveErr)
 		return
 	}
 
 	resolvedPath := input.UpstreamPathOverride
 	if resolvedPath == "" {
-		resolvedPath = upstreamPath
+		resolvedPath = rr.resolution.UpstreamPath
 	}
 
 	requestedModel := modelStr
@@ -166,26 +257,28 @@ func RunPipeline(w http.ResponseWriter, r *http.Request, input *PipelineInput) {
 		requestedModel = "unknown"
 	}
 
-	// Serve cache hit
-	if cacheResult != nil && cacheResult.Hit {
-		serveCacheHit(w, cacheResult, requestedModel)
+	// 8. Serve cache hit
+	if rr.cacheResult != nil && rr.cacheResult.Hit {
+		serveCacheHitResponse(w, input, rr.cacheResult, requestedModel, startTime,
+			rr.resolution, endUser, guardrailWarnings, guardrailMatches, virtualKey.ID)
 		return
 	}
 
-	// 7. Parse + execute
-	parsed := ParseIncomingRequest(parsedBody, providerResolution.ProviderName)
+	// 9. Parse incoming request
+	parsedReq := ParseIncomingRequest(parsedBody, rr.resolution.ProviderName)
 
-	// Apply default max tokens from settings when not specified
-	if parsed.MaxTokens == nil && settings.DefaultMaxTokens > 0 {
-		parsed.MaxTokens = &settings.DefaultMaxTokens
+	// 10. Apply default max tokens from settings when not specified
+	if parsedReq.MaxTokens == nil && cfg.DefaultMaxTokens > 0 {
+		parsedReq.MaxTokens = &cfg.DefaultMaxTokens
 	}
 
-	if parsed.RequiresRawProxy {
+	if parsedReq.RequiresRawProxy {
 		writeJSONError(w, http.StatusBadRequest, "UNSUPPORTED_PARAMETER",
 			`Parameter "n" > 1 is not currently supported. Please send separate requests.`)
 		return
 	}
 
+	// 11. Execute
 	resp, err := Execute(ctx, &ExecuteInput{
 		Pool:               input.Pool,
 		Redis:              input.Redis,
@@ -193,13 +286,13 @@ func RunPipeline(w http.ResponseWriter, r *http.Request, input *PipelineInput) {
 		EndUser:            endUser,
 		StartTime:          startTime,
 		ParsedBody:         parsedBody,
-		Parsed:             parsed,
+		Parsed:             parsedReq,
 		RequestedModel:     requestedModel,
-		ProviderName:       providerResolution.ProviderName,
-		ProviderConfigID:   providerResolution.ProviderConfigID,
-		ProviderConfigName: providerResolution.ProviderConfigName,
-		DecryptedAPIKey:    providerResolution.DecryptedAPIKey,
-		VirtualKeyID:       virtualKeyID,
+		ProviderName:       rr.resolution.ProviderName,
+		ProviderConfigID:   rr.resolution.ProviderConfigID,
+		ProviderConfigName: rr.resolution.ProviderConfigName,
+		DecryptedAPIKey:    rr.resolution.DecryptedAPIKey,
+		VirtualKeyID:       virtualKey.ID,
 		Method:             input.Method,
 		Path:               resolvedPath,
 		SessionID:          input.SessionID,
@@ -208,18 +301,145 @@ func RunPipeline(w http.ResponseWriter, r *http.Request, input *PipelineInput) {
 		GuardrailMatches:   guardrailMatches,
 		IncomingHeaders:    input.IncomingHeaders,
 		ExtraHeaders:       input.ExtraResponseHeaders,
-		RequestTimeoutMs:   settings.RequestTimeoutSeconds * 1000,
-		LogRequestBodies:   settings.LogRequestBodies,
-		LogResponseBodies:  settings.LogResponseBodies,
+		RequestTimeoutMs:   cfg.RequestTimeoutSeconds * 1000,
+		LogRequestBodies:   cfg.LogRequestBodies,
+		LogResponseBodies:  cfg.LogResponseBodies,
 		BodyText:           input.BodyText,
 	})
 	if err != nil {
-		writeErrorResponse(w, err)
+		writeAppError(w, r, err)
 		return
 	}
 
 	// Write response to client
-	writeProxyResponse(w, resp, parsed.IsStreaming)
+	writeProxyResponse(w, resp, parsedReq.IsStreaming)
+}
+
+// RoutingRuleResult holds the result of routing rule evaluation.
+type RoutingRuleResult struct {
+	RuleApplied bool
+	Model       string
+}
+
+// EvaluateRoutingRules evaluates routing rules for model selection.
+// This is a stub that calls into the content router module.
+func EvaluateRoutingRules(ctx context.Context, pool *pgxpool.Pool, rdb *redis.Client, model string, body map[string]any) *RoutingRuleResult {
+	// Placeholder: routing rules will be loaded from the database and evaluated.
+	// Returns nil when no rules match.
+	return nil
+}
+
+// LoadInstanceSettings retrieves instance-level settings from the database.
+// This is a stub that will be replaced by the actual settings module.
+func LoadInstanceSettings(ctx context.Context, pool *pgxpool.Pool, rdb *redis.Client) (*InstanceSettings, error) {
+	cacheKey := "instance:settings"
+
+	if rdb != nil {
+		cached, err := rdb.Get(ctx, cacheKey).Result()
+		if err == nil && cached != "" {
+			var settings InstanceSettings
+			if jsonErr := json.Unmarshal([]byte(cached), &settings); jsonErr == nil {
+				return &settings, nil
+			}
+		}
+	}
+
+	var settings InstanceSettings
+	err := pool.QueryRow(ctx,
+		`SELECT
+			COALESCE(global_rate_limit_rpm, 60),
+			COALESCE(global_rate_limit_rpd, 1000),
+			COALESCE(default_max_tokens, 4096),
+			COALESCE(request_timeout_seconds, 300),
+			COALESCE(log_request_bodies, false),
+			COALESCE(log_response_bodies, false)
+		FROM instance_settings LIMIT 1`,
+	).Scan(
+		&settings.GlobalRateLimitRPM,
+		&settings.GlobalRateLimitRPD,
+		&settings.DefaultMaxTokens,
+		&settings.RequestTimeoutSeconds,
+		&settings.LogRequestBodies,
+		&settings.LogResponseBodies,
+	)
+	if err != nil {
+		// Return defaults if no settings found
+		defaultRPM := 60
+		defaultRPD := 1000
+		return &InstanceSettings{
+			GlobalRateLimitRPM:    &defaultRPM,
+			GlobalRateLimitRPD:    &defaultRPD,
+			DefaultMaxTokens:      4096,
+			RequestTimeoutSeconds: 300,
+			LogRequestBodies:      false,
+			LogResponseBodies:     false,
+		}, nil
+	}
+
+	if rdb != nil {
+		data, jsonErr := json.Marshal(&settings)
+		if jsonErr == nil {
+			rdb.Set(ctx, cacheKey, data, 30*time.Second)
+		}
+	}
+
+	return &settings, nil
+}
+
+// serveCacheHitResponse writes a cached response to the client and logs it.
+func serveCacheHitResponse(
+	w http.ResponseWriter,
+	input *PipelineInput,
+	cacheResult *CacheResult,
+	model string,
+	startTime time.Time,
+	resolution *ProviderResolution,
+	endUser string,
+	guardrailWarnings []string,
+	guardrailMatches []GuardrailMatch,
+	virtualKeyID string,
+) {
+	// Extract usage from cached body
+	usage := MapUsage(cacheResult.Parsed)
+	cost := EstimateCost(model, usage.InputTokens, usage.OutputTokens)
+	latencyMs := time.Since(startTime).Milliseconds()
+
+	LogAndPublish(input.Pool, LogData{
+		VirtualKeyID:       virtualKeyID,
+		Provider:           resolution.ProviderName,
+		ProviderConfigID:   resolution.ProviderConfigID,
+		ProviderConfigName: resolution.ProviderConfigName,
+		Model:              model,
+		Method:             input.Method,
+		Path:               resolution.UpstreamPath,
+		StatusCode:         http.StatusOK,
+		InputTokens:        usage.InputTokens,
+		OutputTokens:       usage.OutputTokens,
+		ReasoningTokens:    usage.ReasoningTokens,
+		Cost:               cost,
+		LatencyMs:          latencyMs,
+		CachedTokens:       usage.CachedTokens,
+		CacheHit:           true,
+		EndUser:            endUser,
+		SessionID:          input.SessionID,
+		UserAgent:          input.UserAgent,
+		GuardrailMatches:   guardrailMatches,
+	}, input.Redis)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Cache", "HIT")
+	if len(guardrailWarnings) > 0 {
+		warnings := ""
+		for i, gw := range guardrailWarnings {
+			if i > 0 {
+				warnings += "; "
+			}
+			warnings += gw
+		}
+		w.Header().Set("X-Guardrail-Warnings", warnings)
+	}
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, cacheResult.Body)
 }
 
 // writeProxyResponse forwards the Execute response to the client.
@@ -239,7 +459,6 @@ func writeProxyResponse(w http.ResponseWriter, resp *http.Response, isStreaming 
 
 		flusher, ok := w.(http.Flusher)
 		if ok {
-			// Stream the response body
 			buf := make([]byte, 4096)
 			for {
 				n, err := resp.Body.Read(buf)
@@ -262,8 +481,13 @@ func writeProxyResponse(w http.ResponseWriter, resp *http.Response, isStreaming 
 	resp.Body.Close()
 }
 
-// writeErrorResponse writes an error as an HTTP response.
-func writeErrorResponse(w http.ResponseWriter, err error) {
+// writeAppError writes an error as an HTTP response, handling AppError types.
+func writeAppError(w http.ResponseWriter, r *http.Request, err error) {
+	if appErr, ok := errors.IsAppError(err); ok {
+		appErr.WriteJSON(w, r.URL.Path)
+		return
+	}
+
 	body, status := FormatErrorResponse(err)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
@@ -282,157 +506,10 @@ func writeJSONError(w http.ResponseWriter, status int, code, message string) {
 	})
 }
 
-// parseProviderFromPath extracts the provider name, config ID, and upstream path from a URL path.
-func parseProviderFromPath(reqPath string) (providerName, configID, upstreamPath string) {
-	trimmed := strings.TrimPrefix(reqPath, "/v1/proxy/")
-	trimmed = strings.TrimPrefix(trimmed, "/")
-
-	segments := strings.SplitN(trimmed, "/", 2)
-	providerSegment := segments[0]
-
-	if len(segments) > 1 {
-		upstreamPath = "/" + segments[1]
-	} else {
-		upstreamPath = "/"
+// writeSettingsError is used for initialization errors that are not AppError.
+func init() {
+	// Ensure logger is available even if Init hasn't been called
+	if logger.Log == nil {
+		logger.Init(false)
 	}
-
-	tildeIdx := strings.Index(providerSegment, "~")
-	if tildeIdx == -1 {
-		providerName = providerSegment
-	} else {
-		providerName = providerSegment[:tildeIdx]
-		configID = providerSegment[tildeIdx+1:]
-	}
-
-	return
-}
-
-// --- Stub types and functions for pipeline dependencies ---
-// These represent interfaces to other modules that will be implemented separately.
-
-// AuthResult holds the result of key authentication.
-type AuthResult struct {
-	VirtualKeyID string
-	RateLimitRPM int
-	RateLimitRPD int
-}
-
-// InstanceSettings holds instance-level configuration.
-type InstanceSettings struct {
-	GlobalRateLimitRPM    int
-	GlobalRateLimitRPD    int
-	DefaultMaxTokens      int
-	RequestTimeoutSeconds int
-	LogRequestBodies      bool
-	LogResponseBodies     bool
-}
-
-// ProviderResolution holds the resolved provider details.
-type ProviderResolution struct {
-	DecryptedAPIKey    string
-	ProviderConfigID   string
-	ProviderConfigName string
-	ProviderName       string
-	UpstreamPath       string
-}
-
-// GuardrailResult holds the result of guardrail evaluation.
-type GuardrailResult struct {
-	Warnings []string
-	Matches  []GuardrailMatch
-}
-
-// RoutingResult holds the result of routing rule evaluation.
-type RoutingResult struct {
-	RuleApplied bool
-	Model       string
-}
-
-// CacheResult holds the result of a cache lookup.
-type CacheResult struct {
-	Hit  bool
-	Body string
-}
-
-// authenticateKey validates the API key and returns virtual key info.
-// This is a stub that will be replaced by the actual auth module.
-func authenticateKey(ctx context.Context, pool *pgxpool.Pool, rdb *redis.Client, authHeader string) (*AuthResult, error) {
-	if authHeader == "" {
-		return nil, &ProviderError{Message: "Unauthorized", Status: http.StatusUnauthorized}
-	}
-	// Placeholder: actual implementation queries the database
-	logger.Info("authenticateKey called", "authHeader", "***")
-	return &AuthResult{VirtualKeyID: "pending"}, nil
-}
-
-// getInstanceSettings retrieves instance-level settings.
-// This is a stub that will be replaced by the actual settings module.
-func getInstanceSettings(ctx context.Context, pool *pgxpool.Pool, rdb *redis.Client) (*InstanceSettings, error) {
-	return &InstanceSettings{
-		GlobalRateLimitRPM:    60,
-		GlobalRateLimitRPD:    1000,
-		DefaultMaxTokens:      4096,
-		RequestTimeoutSeconds: 300,
-		LogRequestBodies:      false,
-		LogResponseBodies:     false,
-	}, nil
-}
-
-// checkRateLimit enforces rate limits for a virtual key.
-// This is a stub that will be replaced by the actual rate limiter module.
-func checkRateLimit(ctx context.Context, rdb *redis.Client, virtualKeyID string, rpm, rpd int) error {
-	return nil
-}
-
-// checkBudgets verifies budget constraints for a virtual key.
-// This is a stub that will be replaced by the actual budget module.
-func checkBudgets(ctx context.Context, pool *pgxpool.Pool, rdb *redis.Client, virtualKeyID string) error {
-	return nil
-}
-
-// evaluateGuardrails checks messages against guardrail rules.
-// This is a stub that will be replaced by the actual guardrails module.
-func evaluateGuardrails(ctx context.Context, pool *pgxpool.Pool, rdb *redis.Client, messages []any) (*GuardrailResult, error) {
-	return nil, nil
-}
-
-// evaluateRoutingRules evaluates routing rules for model selection.
-// This is a stub that will be replaced by the actual routing module.
-func evaluateRoutingRules(ctx context.Context, pool *pgxpool.Pool, model string, body map[string]any) (*RoutingResult, error) {
-	return nil, nil
-}
-
-// checkCache checks for a cached response.
-// This is a stub that will be replaced by the actual cache module.
-func checkCache(ctx context.Context, rdb *redis.Client, provider string, body map[string]any) *CacheResult {
-	return nil
-}
-
-// serveCacheHit writes a cached response to the client.
-// This is a stub that will be replaced by the actual cache module.
-func serveCacheHit(w http.ResponseWriter, cacheResult *CacheResult, model string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("X-Cache", "HIT")
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, cacheResult.Body)
-}
-
-// resolveProvider resolves the provider configuration for a request.
-// This is a stub that will be replaced by the actual provider resolver module.
-func resolveProvider(ctx context.Context, pool *pgxpool.Pool, env *config.Env, rdb *redis.Client, providerPath string) (*ProviderResolution, error) {
-	providerName, configID, upstreamPath := parseProviderFromPath(providerPath)
-	_ = configID
-
-	if providerName == "" {
-		return nil, &ProviderError{Message: "Provider not specified in path", Status: http.StatusBadRequest}
-	}
-
-	// Placeholder: actual implementation queries the database and decrypts API key
-	return &ProviderResolution{
-		ProviderName:       providerName,
-		ProviderConfigID:   "pending",
-		ProviderConfigName: "",
-		DecryptedAPIKey:    "",
-		UpstreamPath:       upstreamPath,
-	}, nil
 }

@@ -12,6 +12,21 @@ import (
 	"github.com/bigint/raven/internal/logger"
 )
 
+// TokenUsage holds normalized token counts across all providers.
+type TokenUsage struct {
+	InputTokens      int `json:"inputTokens"`
+	OutputTokens     int `json:"outputTokens"`
+	ReasoningTokens  int `json:"reasoningTokens"`
+	CacheReadTokens  int `json:"cacheReadTokens"`
+	CacheWriteTokens int `json:"cacheWriteTokens"`
+	CachedTokens     int `json:"cachedTokens"`
+}
+
+// ZeroUsage returns a TokenUsage with all fields set to zero.
+func ZeroUsage() TokenUsage {
+	return TokenUsage{}
+}
+
 // BufferedResult holds the parsed result from a non-streaming provider response.
 type BufferedResult struct {
 	Text         string
