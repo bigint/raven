@@ -33,71 +33,48 @@ export interface ProblemDetails {
   [key: string]: unknown;
 }
 
-export class NotFoundError extends AppError {
-  constructor(message = "Not found", details?: Record<string, unknown>) {
-    super(message, 404, "NOT_FOUND", details);
-  }
-}
+const createErrorClass = (
+  statusCode: number,
+  code: string,
+  defaultMessage: string
+) => {
+  return class extends AppError {
+    constructor(message = defaultMessage, details?: Record<string, unknown>) {
+      super(message, statusCode, code, details);
+    }
+  };
+};
 
-export class UnauthorizedError extends AppError {
-  constructor(message = "Unauthorized", details?: Record<string, unknown>) {
-    super(message, 401, "UNAUTHORIZED", details);
-  }
-}
-
-export class ForbiddenError extends AppError {
-  constructor(message = "Forbidden", details?: Record<string, unknown>) {
-    super(message, 403, "FORBIDDEN", details);
-  }
-}
-
-export class ValidationError extends AppError {
-  constructor(
-    message = "Validation failed",
-    details?: Record<string, unknown>
-  ) {
-    super(message, 400, "VALIDATION_ERROR", details);
-  }
-}
-
-export class ConflictError extends AppError {
-  constructor(message = "Conflict", details?: Record<string, unknown>) {
-    super(message, 409, "CONFLICT", details);
-  }
-}
-
-export class RateLimitError extends AppError {
-  constructor(
-    message = "Too many requests",
-    details?: Record<string, unknown>
-  ) {
-    super(message, 429, "RATE_LIMITED", details);
-  }
-}
-
-export class GuardrailError extends AppError {
-  constructor(
-    message = "Request blocked by guardrail",
-    details?: Record<string, unknown>
-  ) {
-    super(message, 403, "GUARDRAIL_BLOCKED", details);
-  }
-}
-
-export class BudgetExceededError extends AppError {
-  constructor(
-    message = "Budget limit exceeded",
-    details?: Record<string, unknown>
-  ) {
-    super(message, 429, "BUDGET_EXCEEDED", details);
-  }
-}
-
-export class PreconditionFailedError extends AppError {
-  constructor(
-    message = "Precondition failed",
-    details?: Record<string, unknown>
-  ) {
-    super(message, 412, "PRECONDITION_FAILED", details);
-  }
-}
+export const NotFoundError = createErrorClass(404, "NOT_FOUND", "Not found");
+export const UnauthorizedError = createErrorClass(
+  401,
+  "UNAUTHORIZED",
+  "Unauthorized"
+);
+export const ForbiddenError = createErrorClass(403, "FORBIDDEN", "Forbidden");
+export const ValidationError = createErrorClass(
+  400,
+  "VALIDATION_ERROR",
+  "Validation failed"
+);
+export const ConflictError = createErrorClass(409, "CONFLICT", "Conflict");
+export const RateLimitError = createErrorClass(
+  429,
+  "RATE_LIMITED",
+  "Too many requests"
+);
+export const GuardrailError = createErrorClass(
+  403,
+  "GUARDRAIL_BLOCKED",
+  "Request blocked by guardrail"
+);
+export const BudgetExceededError = createErrorClass(
+  429,
+  "BUDGET_EXCEEDED",
+  "Budget limit exceeded"
+);
+export const PreconditionFailedError = createErrorClass(
+  412,
+  "PRECONDITION_FAILED",
+  "Precondition failed"
+);

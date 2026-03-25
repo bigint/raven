@@ -2,11 +2,10 @@ import type { Database } from "@raven/db";
 import { routingRules } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { z } from "zod";
+import { auditAndPublish } from "@/lib/audit";
 import { NotFoundError } from "@/lib/errors";
-import { publishEvent } from "@/lib/events";
 import { success } from "@/lib/response";
 import type { AuthContextWithJson } from "@/lib/types";
-import { logAudit } from "@/modules/audit-logs/index";
 import type { updateRoutingRuleSchema } from "./schema";
 
 type Body = z.infer<typeof updateRoutingRuleSchema>;
@@ -34,13 +33,10 @@ export const updateRoutingRule =
       .returning();
 
     const record = updated as NonNullable<typeof updated>;
-    void publishEvent("routing-rule.updated", record);
-    void logAudit(db, {
-      action: "routing-rule.updated",
-      actorId: user.id,
+    void auditAndPublish(db, user, "routing-rule", "updated", {
+      data: record,
       metadata: { ...data },
-      resourceId: record.id,
-      resourceType: "routing-rule"
+      resourceId: record.id
     });
     return success(c, record);
   };

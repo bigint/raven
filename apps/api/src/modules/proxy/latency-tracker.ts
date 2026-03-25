@@ -68,9 +68,7 @@ export const updateMetrics = async (
 
   await (
     redis as Redis & {
-      updateMetricsLua: (
-        ...args: (string | number)[]
-      ) => Promise<number>;
+      updateMetricsLua: (...args: (string | number)[]) => Promise<number>;
     }
   ).updateMetricsLua(
     latencyKey,

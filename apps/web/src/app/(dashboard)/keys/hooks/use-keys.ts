@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { createCrudHooks } from "@/lib/crud-hooks";
 
 export interface VirtualKey {
   readonly id: string;
@@ -47,6 +48,8 @@ export const keysQueryOptions = () =>
     queryKey: ["keys"]
   });
 
+// Create returns CreateKeyResponse (includes the raw key), which differs from
+// the entity type VirtualKey, so it must stay manual.
 export const useCreateKey = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -65,38 +68,14 @@ export const useCreateKey = () => {
   });
 };
 
-export const useUpdateKey = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateKeyInput }) => {
-      const promise = api.put<VirtualKey>(`/v1/keys/${id}`, data);
-      toast.promise(promise, {
-        error: (err) => err.message,
-        loading: "Updating key...",
-        success: "Key updated"
-      });
-      return promise;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["keys"] });
-    }
-  });
-};
+const { useUpdate: useUpdateKey, useDelete: useDeleteKey } = createCrudHooks<
+  VirtualKey,
+  CreateKeyInput,
+  { id: string; data: UpdateKeyInput }
+>({
+  endpoint: "/v1/keys",
+  labels: { plural: "Keys", singular: "Key" },
+  queryKey: ["keys"]
+});
 
-export const useDeleteKey = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) => {
-      const promise = api.delete(`/v1/keys/${id}`);
-      toast.promise(promise, {
-        error: (err) => err.message,
-        loading: "Deleting key...",
-        success: "Key deleted"
-      });
-      return promise;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["keys"] });
-    }
-  });
-};
+export { useDeleteKey, useUpdateKey };

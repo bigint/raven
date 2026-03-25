@@ -1,10 +1,9 @@
 import type { Database } from "@raven/db";
 import { guardrailRules } from "@raven/db";
 import type { z } from "zod";
-import { publishEvent } from "@/lib/events";
+import { auditAndPublish } from "@/lib/audit";
 import { created } from "@/lib/response";
 import type { AuthContextWithJson } from "@/lib/types";
-import { logAudit } from "@/modules/audit-logs/index";
 import type { createGuardrailSchema } from "./schema";
 
 type Body = z.infer<typeof createGuardrailSchema>;
@@ -29,13 +28,10 @@ export const createGuardrail =
       .returning();
 
     const safe = record as NonNullable<typeof record>;
-    void publishEvent("guardrail.created", safe);
-    void logAudit(db, {
-      action: "guardrail.created",
-      actorId: user.id,
+    void auditAndPublish(db, user, "guardrail", "created", {
+      data: safe,
       metadata: { action, name, type },
-      resourceId: safe.id,
-      resourceType: "guardrail"
+      resourceId: safe.id
     });
     return created(c, safe);
   };

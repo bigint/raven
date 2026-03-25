@@ -1,11 +1,6 @@
-import {
-  queryOptions,
-  useMutation,
-  useQuery,
-  useQueryClient
-} from "@tanstack/react-query";
-import { toast } from "sonner";
+import { queryOptions, useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { createCrudHooks } from "@/lib/crud-hooks";
 
 export interface AvailableProvider {
   readonly slug: string;
@@ -51,62 +46,17 @@ interface UpdateProviderInput {
   readonly isEnabled?: boolean;
 }
 
-export const useCreateProvider = () => {
-  const queryClient = useQueryClient();
+const {
+  useCreate: useCreateProvider,
+  useUpdate: useUpdateProvider,
+  useDelete: useDeleteProvider
+} = createCrudHooks<Provider, CreateProviderInput, UpdateProviderInput>({
+  endpoint: "/v1/providers",
+  labels: { plural: "Providers", singular: "Provider" },
+  queryKey: ["providers"]
+});
 
-  return useMutation({
-    mutationFn: (input: CreateProviderInput) => {
-      const promise = api.post<Provider>("/v1/providers", input);
-      toast.promise(promise, {
-        error: (err) => err.message,
-        loading: "Creating provider...",
-        success: "Provider created"
-      });
-      return promise;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["providers"] });
-    }
-  });
-};
-
-export const useUpdateProvider = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, ...body }: UpdateProviderInput) => {
-      const promise = api.put<Provider>(`/v1/providers/${id}`, body);
-      toast.promise(promise, {
-        error: (err) => err.message,
-        loading: "Updating provider...",
-        success: "Provider updated"
-      });
-      return promise;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["providers"] });
-    }
-  });
-};
-
-export const useDeleteProvider = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => {
-      const promise = api.delete(`/v1/providers/${id}`);
-      toast.promise(promise, {
-        error: (err) => err.message,
-        loading: "Deleting provider...",
-        success: "Provider deleted"
-      });
-      return promise;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["providers"] });
-    }
-  });
-};
+export { useCreateProvider, useDeleteProvider, useUpdateProvider };
 
 interface TestProviderResult {
   readonly success: boolean;

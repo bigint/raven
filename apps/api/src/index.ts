@@ -12,8 +12,7 @@ import { initEventBus } from "./lib/events";
 import { getInstanceSettings } from "./lib/instance-settings";
 import { log } from "./lib/logger";
 import { getRedis } from "./lib/redis";
-import { sendPasswordResetEmail } from "./lib/send-password-reset-email";
-import { sendWelcomeEmail } from "./lib/send-welcome-email";
+import { sendPasswordResetEmail, sendWelcomeEmail } from "./lib/send-email";
 import { initWebhookDispatcher } from "./lib/webhook-dispatcher";
 import { createAuthMiddleware } from "./middleware/auth";
 import { platformAdminMiddleware } from "./middleware/platform-admin";
@@ -33,9 +32,9 @@ import { listAvailableModels } from "./modules/models/available";
 import { createModelsModule } from "./modules/models/index";
 import { createOpenAICompatModule } from "./modules/openai-compat/index";
 import { createProvidersModule } from "./modules/providers/index";
-import { proxyHandler } from "./modules/proxy/handler";
 import { flushLastUsed } from "./modules/proxy/last-used";
 import { flushLogBuffer } from "./modules/proxy/logger";
+import { runPipeline } from "./modules/proxy/pipeline";
 import { createRoutingRulesModule } from "./modules/routing-rules/index";
 import { createSetupModule } from "./modules/setup/index";
 import { createUserModule } from "./modules/user/index";
@@ -150,7 +149,24 @@ app.route("/api/auth", createAuthModule(auth, db, redis));
 // OpenAI-compatible endpoints (before proxy catch-all)
 app.route("/v1", createOpenAICompatModule(db, redis, env));
 
-app.all("/v1/proxy/*", proxyHandler(db, redis, env));
+app.all("/v1/proxy/*", async (c) => {
+  const method = c.req.method;
+  const hasBody = method !== "GET" && method !== "HEAD";
+  return runPipeline({
+    authHeader: c.req.header("Authorization") ?? "",
+    bodyText: hasBody ? await c.req.text() : undefined,
+    db,
+    env,
+    incomingHeaders: c.req.header(),
+    method,
+    path: c.req.path,
+    providerPath: c.req.path,
+    redis,
+    sessionId: c.req.header("x-session-id") ?? null,
+    userAgent: c.req.header("user-agent") ?? null,
+    userIdHeader: c.req.header("x-user-id")
+  });
+});
 
 // Public models catalog (no auth required)
 app.route("/v1/models", createModelsModule(db));

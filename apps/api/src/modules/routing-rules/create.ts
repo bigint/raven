@@ -1,10 +1,9 @@
 import type { Database } from "@raven/db";
 import { routingRules } from "@raven/db";
 import type { z } from "zod";
-import { publishEvent } from "@/lib/events";
+import { auditAndPublish } from "@/lib/audit";
 import { created } from "@/lib/response";
 import type { AuthContextWithJson } from "@/lib/types";
-import { logAudit } from "@/modules/audit-logs/index";
 import type { createRoutingRuleSchema } from "./schema";
 
 type Body = z.infer<typeof createRoutingRuleSchema>;
@@ -17,13 +16,10 @@ export const createRoutingRule =
     const [record] = await db.insert(routingRules).values(data).returning();
 
     const safe = record as NonNullable<typeof record>;
-    void publishEvent("routing-rule.created", safe);
-    void logAudit(db, {
-      action: "routing-rule.created",
-      actorId: user.id,
+    void auditAndPublish(db, user, "routing-rule", "created", {
+      data: safe,
       metadata: { ...data },
-      resourceId: safe.id,
-      resourceType: "routing-rule"
+      resourceId: safe.id
     });
     return created(c, safe);
   };

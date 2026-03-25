@@ -1,10 +1,6 @@
-import {
-  queryOptions,
-  useMutation,
-  useQueryClient
-} from "@tanstack/react-query";
-import { toast } from "sonner";
+import { queryOptions } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { createCrudHooks } from "@/lib/crud-hooks";
 
 export interface RoutingRule {
   readonly id: string;
@@ -49,59 +45,18 @@ interface RoutingRuleInput {
   readonly isEnabled: boolean;
 }
 
-export const useCreateRoutingRule = () => {
-  const queryClient = useQueryClient();
+const {
+  useCreate: useCreateRoutingRule,
+  useUpdate: useUpdateRoutingRule,
+  useDelete: useDeleteRoutingRule
+} = createCrudHooks<
+  RoutingRule,
+  RoutingRuleInput,
+  RoutingRuleInput & { id: string }
+>({
+  endpoint: "/v1/routing-rules",
+  labels: { plural: "Routing rules", singular: "Routing rule" },
+  queryKey: ["routing-rules"]
+});
 
-  return useMutation({
-    mutationFn: (input: RoutingRuleInput) => {
-      const promise = api.post<RoutingRule>("/v1/routing-rules", input);
-      toast.promise(promise, {
-        error: (err) => err.message,
-        loading: "Creating routing rule...",
-        success: "Routing rule created"
-      });
-      return promise;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["routing-rules"] });
-    }
-  });
-};
-
-export const useUpdateRoutingRule = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, ...body }: RoutingRuleInput & { id: string }) => {
-      const promise = api.put<RoutingRule>(`/v1/routing-rules/${id}`, body);
-      toast.promise(promise, {
-        error: (err) => err.message,
-        loading: "Updating routing rule...",
-        success: "Routing rule updated"
-      });
-      return promise;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["routing-rules"] });
-    }
-  });
-};
-
-export const useDeleteRoutingRule = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => {
-      const promise = api.delete(`/v1/routing-rules/${id}`);
-      toast.promise(promise, {
-        error: (err) => err.message,
-        loading: "Deleting routing rule...",
-        success: "Routing rule deleted"
-      });
-      return promise;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["routing-rules"] });
-    }
-  });
-};
+export { useCreateRoutingRule, useDeleteRoutingRule, useUpdateRoutingRule };

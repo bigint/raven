@@ -3,12 +3,11 @@ import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import type { Redis } from "ioredis";
 import type { z } from "zod";
+import { auditAndPublish } from "@/lib/audit";
 import { cacheKeys } from "@/lib/cache-utils";
 import { encrypt } from "@/lib/crypto";
-import { publishEvent } from "@/lib/events";
 import { created } from "@/lib/response";
 import type { AuthContextWithJson } from "@/lib/types";
-import { logAudit } from "@/modules/audit-logs/index";
 import { maskApiKey } from "./helpers";
 import type { createProviderSchema } from "./schema";
 
@@ -38,13 +37,10 @@ export const createProvider =
     void redis.del(cacheKeys.providerConfigs(provider));
 
     const masked = maskApiKey(safe.apiKey);
-    void publishEvent("provider.created", { ...safe, apiKey: masked });
-    void logAudit(db, {
-      action: "provider.created",
-      actorId: user.id,
+    void auditAndPublish(db, user, "provider", "created", {
+      data: { ...safe, apiKey: masked },
       metadata: { name: safe.name, provider: safe.provider },
-      resourceId: safe.id,
-      resourceType: "provider"
+      resourceId: safe.id
     });
     return created(c, { ...safe, apiKey: masked });
   };
