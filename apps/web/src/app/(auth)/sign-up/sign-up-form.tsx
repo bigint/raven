@@ -163,7 +163,7 @@ export const SignUpForm = () => {
               disabled={isLoading}
               type="submit"
             >
-              {isLoading ? "Creating account\u2026" : "Create account"}
+              {isLoading ? "Creating account…" : "Create account"}
             </Button>
           </form>
 

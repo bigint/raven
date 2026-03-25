@@ -87,7 +87,7 @@ const ConfirmDialog = ({
                   onClick={onConfirm}
                   variant={variant}
                 >
-                  {loading ? "Processing\u2026" : confirmLabel}
+                  {loading ? "Processing…" : confirmLabel}
                 </Button>
               </div>
             </AlertDialog.Popup>

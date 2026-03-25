@@ -127,7 +127,7 @@ export const SetupWizard = () => {
               disabled={isLoading}
               type="submit"
             >
-              {isLoading ? "Setting up\u2026" : "Complete Setup"}
+              {isLoading ? "Setting up…" : "Complete Setup"}
             </Button>
           </form>
         </div>

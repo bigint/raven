@@ -118,7 +118,7 @@ export const SignInForm = () => {
               disabled={isLoading}
               type="submit"
             >
-              {isLoading ? "Signing in\u2026" : "Sign in"}
+              {isLoading ? "Signing in…" : "Sign in"}
             </Button>
           </form>
 

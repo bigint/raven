@@ -113,7 +113,7 @@ const ForgotPasswordPage = () => {
                   disabled={isLoading}
                   type="submit"
                 >
-                  {isLoading ? "Sending\u2026" : "Send reset link"}
+                  {isLoading ? "Sending…" : "Send reset link"}
                 </Button>
               </form>
 

@@ -117,7 +117,7 @@ const ResetPasswordForm = () => {
           disabled={isLoading}
           type="submit"
         >
-          {isLoading ? "Resetting\u2026" : "Reset password"}
+          {isLoading ? "Resetting…" : "Reset password"}
         </Button>
       </form>
 

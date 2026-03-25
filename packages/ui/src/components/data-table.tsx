@@ -41,7 +41,7 @@ const DataTable = <T,>({
   data,
   keyExtractor,
   loading = false,
-  loadingMessage = "Loading\u2026",
+  loadingMessage = "Loading…",
   emptyIcon,
   emptyTitle = "No data",
   emptyAction,

@@ -218,8 +218,8 @@ export const ChatInput = ({
           onPaste={handlePaste}
           placeholder={
             images.length > 0
-              ? "Add a message about the image(s)\u2026"
-              : "Start a new message\u2026"
+              ? "Add a message about the image(s)…"
+              : "Start a new message…"
           }
           ref={textareaRef}
           rows={1}
@@ -596,7 +596,7 @@ const ModelSelector = ({
                 <input
                   className="w-full bg-transparent py-1 pl-7 pr-2 text-xs focus-visible:outline-none placeholder:text-muted-foreground"
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search models\u2026"
+                  placeholder="Search models…"
                   ref={searchRef}
                   value={search}
                 />
