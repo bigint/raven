@@ -7,19 +7,12 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	apperrors "github.com/bigint/raven/internal/errors"
+	"github.com/bigint/raven/internal/errors"
 	"github.com/bigint/raven/internal/logger"
 )
 
-type contextKey string
-
-const (
-	UserIDKey contextKey = "userId"
-	UserRoleKey contextKey = "userRole"
-)
-
 // SessionAuth validates the session token from cookies or Authorization header
-// and injects the userId and userRole into the request context.
+// and injects the AuthUser into the request context.
 func SessionAuth(pool *pgxpool.Pool) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -44,25 +37,31 @@ func SessionAuth(pool *pgxpool.Pool) func(http.Handler) http.Handler {
 			}
 
 			if token == "" {
-				apperrors.Unauthorized().WriteJSON(w, r.URL.Path)
+				errors.Unauthorized().WriteJSON(w, r.URL.Path)
 				return
 			}
 
-			var userID, userRole string
+			var userID, email, name, role string
 			err := pool.QueryRow(r.Context(),
-				`SELECT s.user_id, u.role FROM sessions s
+				`SELECT u.id, u.email, u.name, u.role FROM sessions s
 				 JOIN users u ON u.id = s.user_id
 				 WHERE s.token = $1 AND s.expires_at > NOW()`,
 				token,
-			).Scan(&userID, &userRole)
+			).Scan(&userID, &email, &name, &role)
 			if err != nil {
 				logger.Warn("session auth failed", "error", err)
-				apperrors.Unauthorized().WriteJSON(w, r.URL.Path)
+				errors.Unauthorized().WriteJSON(w, r.URL.Path)
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), UserIDKey, userID)
-			ctx = context.WithValue(ctx, UserRoleKey, userRole)
+			user := &AuthUser{
+				ID:    userID,
+				Email: email,
+				Name:  name,
+				Role:  role,
+			}
+
+			ctx := context.WithValue(r.Context(), UserContextKey, user)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
@@ -71,23 +70,11 @@ func SessionAuth(pool *pgxpool.Pool) func(http.Handler) http.Handler {
 // RequireAdmin checks that the authenticated user has the "admin" role.
 func RequireAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		role, _ := r.Context().Value(UserRoleKey).(string)
-		if role != "admin" {
-			apperrors.Forbidden("Admin access required").WriteJSON(w, r.URL.Path)
+		user := UserFromContext(r.Context())
+		if user == nil || user.Role != "admin" {
+			errors.Forbidden("Admin access required").WriteJSON(w, r.URL.Path)
 			return
 		}
 		next.ServeHTTP(w, r)
 	})
-}
-
-// GetUserID extracts the user ID from the request context.
-func GetUserID(ctx context.Context) string {
-	id, _ := ctx.Value(UserIDKey).(string)
-	return id
-}
-
-// GetUserRole extracts the user role from the request context.
-func GetUserRole(ctx context.Context) string {
-	role, _ := ctx.Value(UserRoleKey).(string)
-	return role
 }

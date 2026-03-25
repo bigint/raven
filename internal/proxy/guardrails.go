@@ -21,12 +21,7 @@ const (
 )
 
 // GuardrailMatch is defined in execute.go
-
-type GuardrailResult struct {
-	Blocked  bool             `json:"blocked"`
-	Warnings []string         `json:"warnings"`
-	Matches  []GuardrailMatch `json:"matches"`
-}
+// GuardrailResult is defined in pipeline.go
 
 type guardrailRule struct {
 	ID        string

@@ -9,6 +9,7 @@ import (
 
 	apperrors "github.com/bigint/raven/internal/errors"
 	"github.com/bigint/raven/internal/logger"
+	"github.com/bigint/raven/internal/middleware"
 )
 
 type Handler struct {
@@ -26,8 +27,8 @@ func (h *Handler) Routes() chi.Router {
 }
 
 func (h *Handler) getProfile(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("userId")
-	if userID == nil {
+	user := middleware.UserFromContext(r.Context())
+	if user == nil {
 		apperrors.Unauthorized().WriteJSON(w, r.URL.Path)
 		return
 	}
@@ -38,7 +39,7 @@ func (h *Handler) getProfile(w http.ResponseWriter, r *http.Request) {
 
 	err := h.pool.QueryRow(r.Context(),
 		"SELECT id, name, email, role, image, created_at FROM users WHERE id = $1",
-		userID,
+		user.ID,
 	).Scan(&id, &name, &email, &role, &image, &createdAt)
 	if err != nil {
 		logger.Error("failed to get user profile", err)
