@@ -245,9 +245,8 @@ func chatCompletionsHandler(pool *pgxpool.Pool, rdb *redis.Client, env *config.E
 		modelStr, _ := parsed["model"].(string)
 		providerPath := ""
 		if modelStr != "" {
-			// Look up provider from model catalog
-			if modelDef, ok := proxy.LookupModelProvider(modelStr); ok {
-				providerPath = "/v1/proxy/" + modelDef
+			if modelDef, ok := data.ModelCatalog[modelStr]; ok {
+				providerPath = "/v1/proxy/" + modelDef.Provider
 			}
 		}
 
