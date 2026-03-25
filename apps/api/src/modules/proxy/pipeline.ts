@@ -32,9 +32,7 @@ interface PipelineInput {
   readonly strictBody?: boolean;
 }
 
-export const runPipeline = async (
-  input: PipelineInput
-): Promise<Response> => {
+export const runPipeline = async (input: PipelineInput): Promise<Response> => {
   const startTime = Date.now();
 
   // 1. Auth
@@ -80,8 +78,7 @@ export const runPipeline = async (
   const messages = Array.isArray(parsedBody.messages)
     ? parsedBody.messages
     : [];
-  const hasMessages =
-    Object.keys(parsedBody).length > 0 && messages.length > 0;
+  const hasMessages = Object.keys(parsedBody).length > 0 && messages.length > 0;
   const hasModel = typeof parsedBody.model === "string";
 
   if (hasModel && !MODEL_CATALOG[parsedBody.model as string]) {
