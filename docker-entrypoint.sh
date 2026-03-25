@@ -22,7 +22,7 @@ start_redis() {
 }
 
 export BETTER_AUTH_SECRET="${BETTER_AUTH_SECRET:-$(head -c 32 /dev/urandom | base64)}"
-export ENCRYPTION_SECRET="${ENCRYPTION_SECRET:-$(head -c 32 /dev/urandom | base64)}"
+export ENCRYPTION_SECRET="${ENCRYPTION_SECRET:-$(head -c 48 /dev/urandom | base64)}"
 
 case "$DATABASE_URL" in *localhost*|*127.0.0.1*) start_postgres ;; esac
 case "$REDIS_URL" in *localhost*|*127.0.0.1*) start_redis ;; esac
@@ -31,20 +31,18 @@ echo "Starting Raven..."
 
 case "$1" in
   serve)
-    node migrate.mjs
-    node api/index.js &
-    node cron/index.js &
+    ./api &
+    ./cron &
     node web/apps/web/server.js
     ;;
   api)
-    node migrate.mjs
-    node api/index.js
+    ./api
+    ;;
+  cron)
+    ./cron
     ;;
   web)
     node web/apps/web/server.js
-    ;;
-  cron)
-    node cron/index.js
     ;;
   *)
     exec "$@"

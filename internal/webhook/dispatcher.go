@@ -19,11 +19,9 @@ import (
 )
 
 const (
-	eventsChannel   = "raven:events"
-	maxConcurrent   = 10
-	configCacheTTL  = 30 * time.Second
-	defaultTimeout  = 10 * time.Second
-	defaultRetries  = 3
+	eventsChannel  = "raven:events"
+	maxConcurrent  = 10
+	configCacheTTL = 30 * time.Second
 )
 
 type eventPayload struct {
