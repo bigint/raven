@@ -221,11 +221,11 @@ func (h *Handler) createInvitation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, _ := cuid2.CreateId()
+	id := cuid2.Generate()
 
 	token := req.Token
 	if token == "" {
-		token, _ = cuid2.CreateId()
+		token = cuid2.Generate()
 	}
 
 	var expiresAt *time.Time

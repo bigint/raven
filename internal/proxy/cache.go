@@ -77,8 +77,8 @@ func CheckCache(ctx context.Context, rdb *redis.Client, provider string, request
 	}
 }
 
-// StoreResponseCache stores a response in the cache with the given TTL.
-func StoreResponseCache(ctx context.Context, rdb *redis.Client, provider string, requestBody map[string]any, responseBody string, ttl time.Duration) {
+// StoreCache stores a response in the cache with the given TTL.
+func StoreCache(ctx context.Context, rdb *redis.Client, provider string, requestBody map[string]any, responseBody string, ttl time.Duration) {
 	// Skip caching for streaming requests
 	if stream, ok := requestBody["stream"].(bool); ok && stream {
 		return
