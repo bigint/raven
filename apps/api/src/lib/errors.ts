@@ -93,15 +93,6 @@ export class BudgetExceededError extends AppError {
   }
 }
 
-export class PlanLimitError extends AppError {
-  constructor(
-    message = "Plan request limit exceeded",
-    details?: Record<string, unknown>
-  ) {
-    super(message, 429, "PLAN_LIMIT_EXCEEDED", details);
-  }
-}
-
 export class PreconditionFailedError extends AppError {
   constructor(
     message = "Precondition failed",

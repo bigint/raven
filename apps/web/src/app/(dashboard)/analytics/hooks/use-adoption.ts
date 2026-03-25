@@ -40,7 +40,7 @@ const GROUP_BY_OPTIONS: { value: GroupBy; label: string }[] = [
   { label: "User Agents", value: "userAgent" }
 ];
 
-export const adoptionChartQueryOptions = (range: DateRange, keyId?: string) =>
+const adoptionChartQueryOptions = (range: DateRange, keyId?: string) =>
   queryOptions({
     queryFn: async () => {
       const data = await api.get<ChartDataPoint[]>(
@@ -59,7 +59,7 @@ export const adoptionChartQueryOptions = (range: DateRange, keyId?: string) =>
     queryKey: ["adoption", "chart", { keyId, range }]
   });
 
-export const adoptionBreakdownQueryOptions = (
+const adoptionBreakdownQueryOptions = (
   range: DateRange,
   groupBy: GroupBy,
   keyId?: string

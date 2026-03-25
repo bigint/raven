@@ -30,9 +30,3 @@ export type AuthContextWithQuery<T> = Context<
   string,
   { in: { query: T }; out: { query: T } }
 >;
-
-// Backward-compatible aliases (downstream tasks will clean these up)
-export type AppEnv = AuthEnv;
-export type AppContext = AuthContext;
-export type AppContextWithJson<T> = AuthContextWithJson<T>;
-export type AppContextWithQuery<T> = AuthContextWithQuery<T>;

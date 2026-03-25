@@ -5,7 +5,6 @@
   "description": "Open-source AI gateway for routing, managing, and observing LLM API traffic",
   "devDependencies": {
     "@biomejs/biome": "^2.4.8",
-    "@paralleldrive/cuid2": "^3.3.0",
     "@types/node": "^25.5.0",
     "drizzle-orm": "^0.45.1",
     "tsx": "^4.21.0",
@@ -51,7 +50,6 @@
     "dev:web": "pnpm --filter @raven/web dev",
     "format": "biome format --write .",
     "lint": "biome check --write .",
-    "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck"
   },
   "type": "module"

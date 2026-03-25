@@ -8,12 +8,6 @@ export const RANGE_MS: Record<DateRange, number> = {
   "90d": 7_776_000_000
 };
 
-export const RANGE_DAYS: Record<DateRange, number> = {
-  "7d": 7,
-  "30d": 30,
-  "90d": 90
-};
-
 export const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
   { label: "Last 7 days", value: "7d" },
   { label: "Last 30 days", value: "30d" },

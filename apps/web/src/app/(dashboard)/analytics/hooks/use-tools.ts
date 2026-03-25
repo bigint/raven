@@ -49,7 +49,7 @@ export type { DateRange };
 
 const PAGE_SIZE = 20;
 
-export const toolStatsQueryOptions = (range: DateRange, keyId?: string) =>
+const toolStatsQueryOptions = (range: DateRange, keyId?: string) =>
   queryOptions({
     queryFn: async () => {
       const data = await api.get<ToolDailyStats[]>(

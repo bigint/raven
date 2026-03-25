@@ -26,7 +26,7 @@ export interface ModelRow {
   readonly lastUsed: string | null;
 }
 
-export const modelsQueryOptions = (range: DateRange, keyId?: string) =>
+const modelsQueryOptions = (range: DateRange, keyId?: string) =>
   queryOptions({
     queryFn: () =>
       api.get<ModelRow[]>(

@@ -28,17 +28,7 @@
     "formatter": {
       "trailingCommas": "none"
     },
-    "globals": [
-      "window",
-      "document",
-      "CustomEvent",
-      "fetch",
-      "Intl",
-      "setInterval",
-      "define",
-      "module",
-      "exports"
-    ]
+    "globals": ["window", "document", "fetch", "Intl", "setInterval"]
   },
   "linter": {
     "enabled": true,

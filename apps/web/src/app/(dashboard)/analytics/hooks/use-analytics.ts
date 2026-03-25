@@ -67,7 +67,7 @@ const buildDateParams = (
   return `from=${extendedRangeToFrom(range)}`;
 };
 
-export const analyticsStatsQueryOptions = (
+const analyticsStatsQueryOptions = (
   range: DateRange,
   keyId?: string,
   customFrom?: string,
@@ -81,7 +81,7 @@ export const analyticsStatsQueryOptions = (
     queryKey: ["analytics", "stats", { customFrom, customTo, keyId, range }]
   });
 
-export const analyticsUsageQueryOptions = (
+const analyticsUsageQueryOptions = (
   range: DateRange,
   keyId?: string,
   customFrom?: string,
@@ -95,7 +95,7 @@ export const analyticsUsageQueryOptions = (
     queryKey: ["analytics", "usage", { customFrom, customTo, keyId, range }]
   });
 
-export const analyticsCacheQueryOptions = (
+const analyticsCacheQueryOptions = (
   range: DateRange,
   keyId?: string,
   customFrom?: string,
@@ -171,4 +171,4 @@ export const useAnalytics = (keyId?: string) => {
   };
 };
 
-export type { CacheDailyRow, CacheStats, DateRange, Stats, UsageRow };
+export type { CacheStats, DateRange, Stats, UsageRow };

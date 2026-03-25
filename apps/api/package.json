@@ -13,6 +13,7 @@
     "@ai-sdk/anthropic": "^3.0.64",
     "@ai-sdk/openai": "^3.0.48",
     "@hono/node-server": "^1.19.11",
+    "@paralleldrive/cuid2": "^3.3.0",
     "@hono/zod-validator": "^0.7.6",
     "@raven/auth": "workspace:*",
     "@raven/config": "workspace:*",
