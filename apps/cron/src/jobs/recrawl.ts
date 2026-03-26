@@ -1,7 +1,7 @@
 import { createId } from "@paralleldrive/cuid2";
 import type { Database } from "@raven/db";
 import { knowledgeDocuments } from "@raven/db";
-import { and, eq, lt, sql } from "drizzle-orm";
+import { and, eq, isNotNull, lt, sql } from "drizzle-orm";
 import type { Redis } from "ioredis";
 
 const QUEUE_KEY = "knowledge:jobs";
@@ -22,6 +22,7 @@ export const recrawlDueDocuments = async (
         eq(knowledgeDocuments.recrawlEnabled, true),
         eq(knowledgeDocuments.sourceType, "url"),
         eq(knowledgeDocuments.status, "ready"),
+        isNotNull(knowledgeDocuments.recrawlIntervalHours),
         lt(
           sql`${knowledgeDocuments.lastCrawledAt} + make_interval(hours => ${knowledgeDocuments.recrawlIntervalHours})`,
           sql`now()`
