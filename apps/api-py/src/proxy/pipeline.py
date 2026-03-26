@@ -4,7 +4,6 @@ import time
 from typing import Any
 
 from fastapi import Request
-from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.lib.errors import AppError

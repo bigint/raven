@@ -2,7 +2,7 @@ import enum
 from datetime import datetime
 
 from cuid2 import cuid_wrapper
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Index, String, Text
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Index, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.models.base import Base

@@ -35,16 +35,15 @@ async def _get_webhooks(session: AsyncSession) -> list[Webhook]:
 
 
 async def _deliver(url: str, payload: str, signature: str) -> None:
-    async with _semaphore:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            await client.post(
-                url,
-                content=payload,
-                headers={
-                    "Content-Type": "application/json",
-                    "X-Raven-Signature": signature,
-                },
-            )
+    async with _semaphore, httpx.AsyncClient(timeout=10.0) as client:
+        await client.post(
+            url,
+            content=payload,
+            headers={
+                "Content-Type": "application/json",
+                "X-Raven-Signature": signature,
+            },
+        )
 
 
 async def dispatch_webhook(

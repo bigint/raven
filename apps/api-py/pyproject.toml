@@ -32,3 +32,8 @@ select = ["E", "F", "I", "N", "W", "UP", "B", "SIM", "TCH"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["src"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.7",
+]

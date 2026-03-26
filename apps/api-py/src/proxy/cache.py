@@ -1,12 +1,9 @@
 import hashlib
 import json
-import time
 from typing import Any
 
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.proxy.logger import log_request
 
 DEFAULT_TTL_SECONDS = 3600
 
