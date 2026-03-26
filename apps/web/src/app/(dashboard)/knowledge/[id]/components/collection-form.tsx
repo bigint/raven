@@ -17,10 +17,9 @@ const EMBEDDING_MODEL_OPTIONS = [
 ];
 
 const CHUNK_STRATEGY_OPTIONS = [
-  { label: "Fixed Size", value: "fixed" },
-  { label: "Sentence", value: "sentence" },
-  { label: "Paragraph", value: "paragraph" },
-  { label: "Recursive", value: "recursive" }
+  { label: "Hybrid (recommended)", value: "hybrid" },
+  { label: "Semantic", value: "semantic" },
+  { label: "Fixed Size", value: "fixed" }
 ];
 
 interface FormState {
@@ -40,7 +39,7 @@ interface FormState {
 const DEFAULT_FORM: FormState = {
   chunkOverlap: "20",
   chunkSize: "512",
-  chunkStrategy: "recursive",
+  chunkStrategy: "hybrid",
   description: "",
   embeddingModel: "text-embedding-3-small",
   isDefault: false,
