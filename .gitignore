@@ -8,6 +8,12 @@ dist/
 out/
 *.tsbuildinfo
 
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
 # Environment
 .env
 .env.local
@@ -35,9 +41,8 @@ coverage/
 # Logs
 *.log
 
-# Drizzle (keep packages/db/drizzle/ tracked for migrations)
+# Drizzle (legacy, removed)
 drizzle/
-!packages/db/drizzle/
 
 # Secrets & credentials
 *.key
