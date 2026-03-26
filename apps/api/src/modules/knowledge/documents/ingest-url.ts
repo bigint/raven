@@ -28,6 +28,7 @@ export const ingestUrl =
       .insert(knowledgeDocuments)
       .values({
         collectionId,
+        metadata: { crawlLimit: body.crawlLimit },
         mimeType: "text/html",
         recrawlEnabled: body.recrawlEnabled,
         recrawlIntervalHours: body.recrawlIntervalHours,

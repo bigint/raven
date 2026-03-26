@@ -2,7 +2,7 @@ import { Readability } from "@mozilla/readability";
 import { parseHTML } from "linkedom";
 import { log } from "@/lib/logger";
 
-const MAX_PAGES = 1000;
+const DEFAULT_MAX_PAGES = 50;
 const FETCH_TIMEOUT = 15_000;
 
 const fetchPage = async (url: string): Promise<string | null> => {
@@ -65,7 +65,8 @@ const extractLinks = (html: string, baseUrl: URL): string[] => {
   return [...new Set(links)];
 };
 
-export const parseUrl = async (url: string): Promise<string> => {
+export const parseUrl = async (url: string, maxPages?: number): Promise<string> => {
+  const MAX_PAGES = maxPages ?? DEFAULT_MAX_PAGES;
   const baseUrl = new URL(url);
   const visited = new Set<string>();
   const queue: string[] = [url.replace(/\/+$/, "")];

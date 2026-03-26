@@ -82,6 +82,7 @@ export const useIngestUrl = (collectionId: string) => {
     mutationFn: (data: {
       url: string;
       title?: string;
+      crawlLimit?: number;
       recrawlEnabled?: boolean;
       recrawlIntervalHours?: number;
     }) => {

@@ -13,11 +13,13 @@ interface UrlIngestModalProps {
 interface FormState {
   url: string;
   title: string;
+  crawlLimit: string;
   recrawlEnabled: boolean;
   recrawlIntervalHours: string;
 }
 
 const DEFAULT_FORM: FormState = {
+  crawlLimit: "50",
   recrawlEnabled: false,
   recrawlIntervalHours: "24",
   title: "",
@@ -54,6 +56,7 @@ const UrlIngestModal = ({
 
     try {
       await ingestUrl.mutateAsync({
+        crawlLimit: Number(form.crawlLimit) || 50,
         recrawlEnabled: form.recrawlEnabled,
         recrawlIntervalHours: form.recrawlEnabled
           ? Number(form.recrawlIntervalHours)
@@ -98,6 +101,19 @@ const UrlIngestModal = ({
           onChange={(e) => update("title", e.target.value)}
           placeholder="Page title"
           value={form.title}
+        />
+
+        <Input
+          autoComplete="off"
+          id="url-ingest-crawl-limit"
+          label="Crawl page limit"
+          max="1000"
+          min="1"
+          name="crawlLimit"
+          onChange={(e) => update("crawlLimit", e.target.value)}
+          placeholder="50"
+          type="number"
+          value={form.crawlLimit}
         />
 
         <Switch

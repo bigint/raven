@@ -47,13 +47,15 @@ const getMimeExtension = (mimeType: string): string => {
 const extractText = async (
   job: IngestionJob,
   mimeType: string,
-  apiKey: string
+  apiKey: string,
+  metadata?: Record<string, unknown> | null
 ): Promise<string> => {
   if (job.type === "url") {
     if (!job.sourceUrl) {
       throw new Error("URL job missing sourceUrl");
     }
-    return parseUrl(job.sourceUrl);
+    const crawlLimit = typeof metadata?.crawlLimit === "number" ? metadata.crawlLimit : undefined;
+    return parseUrl(job.sourceUrl, crawlLimit);
   }
 
   if (job.type === "image") {
@@ -145,7 +147,7 @@ const processJob = async (
   const apiKey = await getOpenAIKey(db, env.ENCRYPTION_SECRET);
 
   // Extract text
-  const text = await extractText(job, document.mimeType, apiKey);
+  const text = await extractText(job, document.mimeType, apiKey, document.metadata);
 
   if (!text || text.trim().length === 0) {
     throw new Error("Extracted text is empty");
