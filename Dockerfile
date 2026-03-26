@@ -20,10 +20,10 @@ FROM python:3.13-slim-bookworm AS python-deps
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 WORKDIR /app
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never
-COPY apps/api-py/pyproject.toml apps/api-py/uv.lock ./api/
+COPY apps/api/pyproject.toml apps/api/uv.lock ./api/
 RUN --mount=type=cache,target=/root/.cache/uv \
     cd api && uv sync --frozen --no-install-project --no-editable --no-dev
-COPY apps/cron-py/pyproject.toml ./cron/
+COPY apps/cron/pyproject.toml ./cron/
 RUN --mount=type=cache,target=/root/.cache/uv \
     cd cron && uv sync --frozen --no-install-project --no-editable --no-dev 2>/dev/null || true
 
@@ -44,12 +44,12 @@ WORKDIR /app
 
 # Copy Python API + venv
 COPY --from=python-deps /app/api/.venv ./api/.venv
-COPY apps/api-py/src ./api/src
-COPY apps/api-py/alembic ./api/alembic
-COPY apps/api-py/alembic.ini ./api/alembic.ini
+COPY apps/api/src ./api/src
+COPY apps/api/alembic ./api/alembic
+COPY apps/api/alembic.ini ./api/alembic.ini
 
 # Copy Python cron
-COPY apps/cron-py/src ./cron/src
+COPY apps/cron/src ./cron/src
 
 # Copy Node.js web (Next.js standalone)
 COPY --from=node-builder /app/apps/web/.next/standalone ./web/
