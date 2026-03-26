@@ -14,13 +14,20 @@ const fetchPage = async (url: string): Promise<string | null> => {
       signal: AbortSignal.timeout(FETCH_TIMEOUT)
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      log.info("Skipped (HTTP error)", { url, status: response.status });
+      return null;
+    }
 
     const contentType = response.headers.get("content-type") ?? "";
-    if (!contentType.includes("text/html")) return null;
+    if (!contentType.includes("text/html")) {
+      log.info("Skipped (non-HTML)", { url, contentType });
+      return null;
+    }
 
     return response.text();
-  } catch {
+  } catch (err) {
+    log.info("Skipped (fetch failed)", { url, error: err instanceof Error ? err.message : String(err) });
     return null;
   }
 };
@@ -80,10 +87,14 @@ export const parseUrl = async (url: string): Promise<string> => {
   const queue: string[] = [url.replace(/\/+$/, "")];
   const allText: string[] = [];
 
+  log.info("Starting crawl", { url, maxPages: MAX_PAGES });
+
   while (queue.length > 0 && visited.size < MAX_PAGES) {
     const currentUrl = queue.shift()!;
     if (visited.has(currentUrl)) continue;
     visited.add(currentUrl);
+
+    log.info("Fetching", { url: currentUrl, visited: visited.size, queued: queue.length });
 
     const html = await fetchPage(currentUrl);
     if (!html) continue;
@@ -91,15 +102,21 @@ export const parseUrl = async (url: string): Promise<string> => {
     const text = extractText(html);
     if (text && text.length > 50) {
       allText.push(`[Source: ${currentUrl}]\n${text}`);
-      log.info("Crawled page", { url: currentUrl, textLength: text.length });
+      log.info("Extracted text", { url: currentUrl, textLength: text.length, pagesWithText: allText.length });
+    } else {
+      log.info("No readable content", { url: currentUrl, textLength: text?.length ?? 0 });
     }
 
-    // Discover more links
     const links = extractLinks(html, baseUrl);
+    let newLinks = 0;
     for (const link of links) {
       if (!visited.has(link) && !queue.includes(link)) {
         queue.push(link);
+        newLinks++;
       }
+    }
+    if (newLinks > 0) {
+      log.info("Discovered links", { from: currentUrl, newLinks, totalQueued: queue.length });
     }
   }
 
@@ -107,6 +124,6 @@ export const parseUrl = async (url: string): Promise<string> => {
     throw new Error("Could not extract readable content from URL or any linked pages");
   }
 
-  log.info("Crawl complete", { url, pagesProcessed: allText.length });
+  log.info("Crawl complete", { url, pagesVisited: visited.size, pagesWithText: allText.length, totalChars: allText.reduce((s, t) => s + t.length, 0) });
   return allText.join("\n\n---\n\n");
 };
