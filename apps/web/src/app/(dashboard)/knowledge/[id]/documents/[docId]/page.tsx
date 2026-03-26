@@ -55,7 +55,13 @@ const DocumentDetailPage = () => {
     isPending,
     isError,
     error
-  } = useQuery(documentDetailQueryOptions(docId));
+  } = useQuery({
+    ...documentDetailQueryOptions(docId),
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      return status === "pending" || status === "processing" ? 2000 : false;
+    }
+  });
 
   const reprocess = useReprocessDocument();
 
