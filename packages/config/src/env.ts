@@ -13,6 +13,8 @@ const envSchema = z.object({
   NODE_ENV: z
     .enum(["development", "production", "test"])
     .default("development"),
+  QDRANT_API_KEY: z.string().optional(),
+  QDRANT_URL: z.string().url().default("http://localhost:6333"),
   REDIS_URL: z.string().url()
 });
 
