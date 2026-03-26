@@ -470,6 +470,14 @@ export const ChatInput = ({
                     </div>
 
                     <div className="flex items-center justify-between">
+                      <span className="text-xs">Knowledge RAG</span>
+                      <Switch
+                        checked={settings.enableKnowledge}
+                        onCheckedChange={(v) => update("enableKnowledge", v)}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
                       <span className="text-xs">Reasoning</span>
                       <Switch
                         checked={settings.enableReasoning}
