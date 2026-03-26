@@ -31,6 +31,53 @@ const STATUS_VARIANT: Record<
   ready: "success"
 };
 
+const StatusCell = ({ doc }: { readonly doc: Document }) => {
+  if (doc.status === "processing") {
+    return (
+      <div className="flex items-center gap-2">
+        <div className="relative flex size-4 items-center justify-center">
+          <div className="absolute size-4 animate-ping rounded-full bg-amber-400/30" />
+          <div className="size-2 rounded-full bg-amber-500" />
+        </div>
+        <div className="text-xs">
+          <span className="font-medium text-amber-600">Processing</span>
+          {(doc.chunkCount > 0 || doc.tokenCount > 0) && (
+            <span className="ml-1 text-muted-foreground tabular-nums">
+              {doc.chunkCount > 0 && `${doc.chunkCount} chunks`}
+              {doc.chunkCount > 0 && doc.tokenCount > 0 && " / "}
+              {doc.tokenCount > 0 && `${doc.tokenCount.toLocaleString()} tokens`}
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (doc.status === "pending") {
+    return (
+      <div className="flex items-center gap-2">
+        <div className="size-2 rounded-full bg-muted-foreground/50" />
+        <span className="text-xs text-muted-foreground">Queued</span>
+      </div>
+    );
+  }
+
+  if (doc.status === "failed") {
+    return (
+      <div className="flex items-center gap-2">
+        <Badge variant={STATUS_VARIANT[doc.status]}>Failed</Badge>
+        {doc.errorMessage && (
+          <span className="max-w-[200px] truncate text-xs text-destructive" title={doc.errorMessage}>
+            {doc.errorMessage}
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  return <Badge variant={STATUS_VARIANT[doc.status]}>Ready</Badge>;
+};
+
 interface DocumentsTabProps {
   readonly collectionId: string;
 }
@@ -103,9 +150,7 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
     {
       header: "Status",
       key: "status",
-      render: (doc) => (
-        <Badge variant={STATUS_VARIANT[doc.status]}>{doc.status}</Badge>
-      )
+      render: (doc) => <StatusCell doc={doc} />
     },
     {
       header: "Added",
