@@ -18,7 +18,7 @@ import { parseImage } from "./parsers/image";
 import { parseMarkdown } from "./parsers/markdown";
 import { parsePdf } from "./parsers/pdf";
 import { crawlUrl, parseUrl } from "./parsers/url";
-import { ensureCollection, upsertVectors } from "./qdrant";
+import { deleteVectorsByDocumentId, ensureCollection, upsertVectors } from "./qdrant";
 import type { IngestionJob } from "./queue";
 import {
   completeJob,
@@ -115,11 +115,17 @@ const processJob = async (
     type: job.type
   });
 
-  // Mark document as processing
+  // Mark document as processing and clear any existing chunks from previous attempts
   await db
     .update(knowledgeDocuments)
-    .set({ status: "processing", updatedAt: new Date() })
+    .set({ chunkCount: 0, status: "processing", tokenCount: 0, updatedAt: new Date() })
     .where(eq(knowledgeDocuments.id, job.documentId));
+
+  await db
+    .delete(knowledgeChunks)
+    .where(eq(knowledgeChunks.documentId, job.documentId));
+
+  await deleteVectorsByDocumentId(qdrant, `knowledge_${job.collectionId}`, job.documentId);
 
   // Load collection config
   const collections = await db
