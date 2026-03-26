@@ -28,30 +28,18 @@ const SOURCE_ICONS = {
   url: Globe
 };
 
-const STATUS_STYLES: Record<
-  string,
-  { bg: string; dot: string; text: string }
-> = {
-  failed: {
-    bg: "bg-red-500/10",
-    dot: "bg-red-500",
-    text: "text-red-600"
-  },
-  pending: {
-    bg: "bg-zinc-500/10",
-    dot: "bg-zinc-400",
-    text: "text-zinc-500"
-  },
-  processing: {
-    bg: "bg-amber-500/10",
-    dot: "bg-amber-500 animate-pulse",
-    text: "text-amber-600"
-  },
-  ready: {
-    bg: "bg-emerald-500/10",
-    dot: "bg-emerald-500",
-    text: "text-emerald-600"
-  }
+const STATUS_DOT: Record<string, string> = {
+  failed: "bg-red-500",
+  pending: "bg-zinc-400",
+  processing: "bg-amber-500",
+  ready: "bg-emerald-500"
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  failed: "Failed",
+  pending: "Queued",
+  processing: "Processing",
+  ready: "Ready"
 };
 
 const PAGE_SIZE = 20;
@@ -104,7 +92,6 @@ const DocumentDetailPage = () => {
   }
 
   const SourceIcon = SOURCE_ICONS[doc.sourceType] ?? FileText;
-  const status = STATUS_STYLES[doc.status] ?? STATUS_STYLES.pending;
   const avgTokens =
     doc.chunkCount > 0 ? Math.round(doc.tokenCount / doc.chunkCount) : 0;
 
@@ -131,13 +118,11 @@ const DocumentDetailPage = () => {
                 {doc.title}
               </h1>
               <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 font-medium ${status.bg} ${status.text}`}
-                >
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-2.5 py-0.5 font-medium">
                   <span
-                    className={`size-1.5 rounded-full ${status.dot}`}
+                    className={`size-1.5 rounded-full ${STATUS_DOT[doc.status] ?? ""} ${doc.status === "processing" ? "animate-pulse" : ""}`}
                   />
-                  {doc.status}
+                  {STATUS_LABEL[doc.status] ?? doc.status}
                 </span>
                 <span className="inline-flex items-center gap-1">
                   <Calendar className="size-3" />
