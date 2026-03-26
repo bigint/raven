@@ -1,14 +1,18 @@
 import { parseEnv } from "@raven/config";
 import { createDatabase } from "@raven/db";
+import Redis from "ioredis";
 import { cleanupExpiredInvitations } from "./jobs/invitations";
 import { deactivateExpiredKeys } from "./jobs/keys";
+import { recrawlDueDocuments } from "./jobs/recrawl";
 import { cleanupRetention } from "./jobs/retention";
 import { cleanupExpiredSessions } from "./jobs/sessions";
 import { cleanupExpiredVerifications } from "./jobs/verifications";
 
 const env = parseEnv();
 const db = createDatabase(env.DATABASE_URL);
+const redis = new Redis(env.REDIS_URL, { lazyConnect: true, maxRetriesPerRequest: 3 });
 
+const FIFTEEN_MINUTES = 15 * 60 * 1000;
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
 
@@ -29,10 +33,17 @@ const runAllJobs = async () => {
   await runJob("verification cleanup", () => cleanupExpiredVerifications(db));
   await runJob("invitation cleanup", () => cleanupExpiredInvitations(db));
   await runJob("key deactivation", () => deactivateExpiredKeys(db));
+  await runJob("url recrawl", () => recrawlDueDocuments(db, redis));
 };
 
 console.log("Raven cron worker started");
 runAllJobs();
+
+// Every 15 minutes: url recrawl
+setInterval(
+  () => runJob("url recrawl", () => recrawlDueDocuments(db, redis)),
+  FIFTEEN_MINUTES
+);
 
 // Hourly: expired key deactivation
 setInterval(
@@ -55,7 +66,12 @@ setInterval(
   DAY
 );
 
+redis.on("error", (err) => {
+  console.error("Redis connection error:", err);
+});
+
 process.on("SIGTERM", () => {
   console.log("Cron worker shutting down");
+  redis.disconnect();
   process.exit(0);
 });
