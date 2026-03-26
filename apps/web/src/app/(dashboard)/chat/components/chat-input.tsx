@@ -648,12 +648,10 @@ const Dropdown = ({
   onClose: () => void;
 }) => (
   <>
-    <Button
-      aria-label="Close"
-      className="fixed inset-0 z-40 cursor-default rounded-none"
+    {/* biome-ignore lint/a11y/useKeyboardEvents: backdrop dismiss */}
+    <div
+      className="fixed inset-0 z-40"
       onClick={onClose}
-      tabIndex={-1}
-      variant="ghost"
     />
     <div className="absolute bottom-full left-0 z-50 mb-1 rounded-lg border border-border bg-popover shadow-sm">
       {children}
