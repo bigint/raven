@@ -4,6 +4,7 @@ import { log } from "../logger";
 
 const DEFAULT_MAX_PAGES = 50;
 const FETCH_TIMEOUT = 15_000;
+const MAX_TEXT_BYTES = 10 * 1024 * 1024; // 10MB cap on total extracted text
 
 const fetchPage = async (url: string): Promise<string | null> => {
   try {
@@ -58,17 +59,13 @@ const extractLinks = (html: string, baseUrl: URL): string[] => {
       if (!href) continue;
 
       const resolved = new URL(href, baseUrl);
-      // Same origin only
       if (resolved.origin !== baseUrl.origin) continue;
-      // Skip fragments, mailto, tel, javascript
       if (resolved.protocol !== "http:" && resolved.protocol !== "https:")
         continue;
 
-      // Normalize: remove fragment, trailing slash
       resolved.hash = "";
       const normalized = resolved.href.replace(/\/+$/, "");
 
-      // Skip non-page resources
       if (/\.(png|jpg|jpeg|gif|svg|webp|ico|css|js|pdf|zip|tar|gz|mp4|mp3|woff2?|ttf|eot)$/i.test(resolved.pathname))
         continue;
 
@@ -85,19 +82,27 @@ export const parseUrl = async (url: string, maxPages?: number): Promise<string> 
   const MAX_PAGES = maxPages ?? DEFAULT_MAX_PAGES;
   const baseUrl = new URL(url);
   const visited = new Set<string>();
-  const queue: string[] = [url.replace(/\/+$/, "")];
-  const allText: string[] = [];
+  const queued = new Set<string>();
+  const queue: string[] = [];
+  const startUrl = url.replace(/\/+$/, "");
+
+  queue.push(startUrl);
+  queued.add(startUrl);
+
+  const resultParts: string[] = [];
+  let totalBytes = 0;
+  let pagesWithText = 0;
 
   log.info("Starting crawl", { url, maxPages: MAX_PAGES });
 
-  while (queue.length > 0 && visited.size < MAX_PAGES) {
+  while (queue.length > 0 && visited.size < MAX_PAGES && totalBytes < MAX_TEXT_BYTES) {
     const currentUrl = queue.shift()!;
     if (visited.has(currentUrl)) continue;
     visited.add(currentUrl);
 
     log.info("Fetching", { url: currentUrl, visited: visited.size, queued: queue.length });
 
-    // Polite delay between requests to avoid hammering the server
+    // Polite delay between requests
     if (visited.size > 1) {
       await new Promise((r) => setTimeout(r, 200));
     }
@@ -107,17 +112,28 @@ export const parseUrl = async (url: string, maxPages?: number): Promise<string> 
 
     const text = extractText(html);
     if (text && text.length > 50) {
-      allText.push(`[Source: ${currentUrl}]\n${text}`);
-      log.info("Extracted text", { url: currentUrl, textLength: text.length, pagesWithText: allText.length });
+      const section = `[Source: ${currentUrl}]\n${text}`;
+      resultParts.push(section);
+      totalBytes += section.length;
+      pagesWithText++;
+      log.info("Extracted text", { url: currentUrl, textLength: text.length, pagesWithText, totalKB: Math.round(totalBytes / 1024) });
+
+      // Stop if we've accumulated enough text
+      if (totalBytes >= MAX_TEXT_BYTES) {
+        log.info("Text size limit reached, stopping crawl", { totalKB: Math.round(totalBytes / 1024) });
+        break;
+      }
     } else {
       log.info("No readable content", { url: currentUrl, textLength: text?.length ?? 0 });
     }
 
+    // Discover links — use Set for O(1) lookup instead of array.includes
     const links = extractLinks(html, baseUrl);
     let newLinks = 0;
     for (const link of links) {
-      if (!visited.has(link) && !queue.includes(link)) {
+      if (!visited.has(link) && !queued.has(link)) {
         queue.push(link);
+        queued.add(link);
         newLinks++;
       }
     }
@@ -126,10 +142,10 @@ export const parseUrl = async (url: string, maxPages?: number): Promise<string> 
     }
   }
 
-  if (allText.length === 0) {
+  if (resultParts.length === 0) {
     throw new Error("Could not extract readable content from URL or any linked pages");
   }
 
-  log.info("Crawl complete", { url, pagesVisited: visited.size, pagesWithText: allText.length, totalChars: allText.reduce((s, t) => s + t.length, 0) });
-  return allText.join("\n\n---\n\n");
+  log.info("Crawl complete", { url, pagesVisited: visited.size, pagesWithText, totalKB: Math.round(totalBytes / 1024) });
+  return resultParts.join("\n\n---\n\n");
 };
