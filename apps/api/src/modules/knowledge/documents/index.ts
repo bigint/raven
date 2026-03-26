@@ -15,7 +15,7 @@ import { uploadDocument } from "./upload";
 export const createDocumentsModule = (
   db: Database,
   redis: Redis,
-  qdrant: QdrantClient
+  _qdrant: QdrantClient
 ) => {
   const app = new Hono();
 
