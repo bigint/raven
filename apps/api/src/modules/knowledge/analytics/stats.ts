@@ -1,5 +1,9 @@
 import type { Database } from "@raven/db";
-import { knowledgeCollections, knowledgeDocuments, knowledgeQueryLogs } from "@raven/db";
+import {
+  knowledgeCollections,
+  knowledgeDocuments,
+  knowledgeQueryLogs
+} from "@raven/db";
 import { avg, count, desc, eq, gte, sum } from "drizzle-orm";
 import { success } from "@/lib/response";
 import type { AuthContext } from "@/lib/types";

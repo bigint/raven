@@ -115,11 +115,7 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
       header: "",
       key: "actions",
       render: (doc) => (
-        <Button
-          onClick={() => setDeleteId(doc.id)}
-          size="sm"
-          variant="ghost"
-        >
+        <Button onClick={() => setDeleteId(doc.id)} size="sm" variant="ghost">
           Delete
         </Button>
       )

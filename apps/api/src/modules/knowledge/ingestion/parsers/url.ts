@@ -9,12 +9,15 @@ export const parseUrl = async (url: string): Promise<string> => {
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch URL: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `Failed to fetch URL: ${response.status} ${response.statusText}`
+    );
   }
 
   const html = await response.text();
-  const { document } = parseHTML(html);
-  const reader = new Readability(document as unknown as Document);
+  const window = parseHTML(html);
+  const document = (window as unknown as { document: Document }).document;
+  const reader = new Readability(document);
   const article = reader.parse();
 
   if (!article?.textContent) {

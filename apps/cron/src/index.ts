@@ -10,7 +10,10 @@ import { cleanupExpiredVerifications } from "./jobs/verifications";
 
 const env = parseEnv();
 const db = createDatabase(env.DATABASE_URL);
-const redis = new Redis(env.REDIS_URL, { lazyConnect: true, maxRetriesPerRequest: 3 });
+const redis = new Redis(env.REDIS_URL, {
+  lazyConnect: true,
+  maxRetriesPerRequest: 3
+});
 
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
 const HOUR = 60 * 60 * 1000;

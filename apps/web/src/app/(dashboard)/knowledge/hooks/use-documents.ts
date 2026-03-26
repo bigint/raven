@@ -37,7 +37,9 @@ import { queryOptions } from "@tanstack/react-query";
 export const documentsQueryOptions = (collectionId: string) =>
   queryOptions({
     queryFn: () =>
-      api.get<Document[]>(`/v1/knowledge/collections/${collectionId}/documents`),
+      api.get<Document[]>(
+        `/v1/knowledge/collections/${collectionId}/documents`
+      ),
     queryKey: ["knowledge-documents", collectionId]
   });
 
@@ -60,8 +62,7 @@ export const useUploadDocument = (collectionId: string) => {
         )
         .json<Document>();
       toast.promise(promise, {
-        error: (err) =>
-          err instanceof Error ? err.message : "Upload failed",
+        error: (err) => (err instanceof Error ? err.message : "Upload failed"),
         loading: "Uploading document...",
         success: "Document uploaded"
       });
@@ -116,8 +117,7 @@ export const useUploadImage = (collectionId: string) => {
         )
         .json<Document>();
       toast.promise(promise, {
-        error: (err) =>
-          err instanceof Error ? err.message : "Upload failed",
+        error: (err) => (err instanceof Error ? err.message : "Upload failed"),
         loading: "Uploading image...",
         success: "Image uploaded"
       });

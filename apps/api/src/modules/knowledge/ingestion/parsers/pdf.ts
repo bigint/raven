@@ -1,8 +1,10 @@
 import { readFile } from "node:fs/promises";
-import pdf from "pdf-parse";
+import { PDFParse } from "pdf-parse";
 
 export const parsePdf = async (filePath: string): Promise<string> => {
   const buffer = await readFile(filePath);
-  const data = await pdf(buffer);
-  return data.text.trim();
+  const parser = new PDFParse({ data: new Uint8Array(buffer) });
+  const result = await parser.getText();
+  await parser.destroy();
+  return result.text.trim();
 };

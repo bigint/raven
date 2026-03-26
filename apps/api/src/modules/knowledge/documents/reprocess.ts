@@ -1,9 +1,9 @@
 import { createId } from "@paralleldrive/cuid2";
+import type { QdrantClient } from "@qdrant/js-client-rest";
 import type { Database } from "@raven/db";
 import { knowledgeChunks, knowledgeDocuments } from "@raven/db";
-import type { QdrantClient } from "@qdrant/js-client-rest";
-import type { Redis } from "ioredis";
 import { eq } from "drizzle-orm";
+import type { Redis } from "ioredis";
 import { NotFoundError } from "@/lib/errors";
 import { success } from "@/lib/response";
 import type { AuthContext } from "@/lib/types";

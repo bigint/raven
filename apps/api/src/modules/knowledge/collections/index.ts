@@ -15,7 +15,11 @@ export const createCollectionsModule = (db: Database, qdrant: QdrantClient) => {
   app.get("/", listCollections(db));
   app.post("/", jsonValidator(createCollectionSchema), createCollection(db));
   app.get("/:id", getCollection(db));
-  app.patch("/:id", jsonValidator(updateCollectionSchema), updateCollection(db));
+  app.patch(
+    "/:id",
+    jsonValidator(updateCollectionSchema),
+    updateCollection(db)
+  );
   app.delete("/:id", deleteCollection(db, qdrant));
 
   return app;

@@ -30,8 +30,9 @@ const KnowledgePage = () => {
   } = useQuery(collectionsQueryOptions());
 
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
-  const [editingCollection, setEditingCollection] =
-    useState<Collection | null>(null);
+  const [editingCollection, setEditingCollection] = useState<Collection | null>(
+    null
+  );
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const deleteMutation = useDeleteCollection();

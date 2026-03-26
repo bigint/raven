@@ -64,9 +64,13 @@ export const retryJob = async (
     return false;
   }
   const retried: IngestionJob = { ...job, attempt: job.attempt + 1 };
-  const delayMs = Math.pow(2, retried.attempt) * 1000;
+  const delayMs = 2 ** retried.attempt * 1000;
   const executeAt = Date.now() + delayMs;
-  await redis.zadd("knowledge:jobs:delayed", executeAt, JSON.stringify(retried));
+  await redis.zadd(
+    "knowledge:jobs:delayed",
+    executeAt,
+    JSON.stringify(retried)
+  );
   return true;
 };
 

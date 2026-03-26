@@ -2,7 +2,10 @@
 
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
 import { useState } from "react";
-import type { Collection, CreateCollectionInput } from "../../hooks/use-collections";
+import type {
+  Collection,
+  CreateCollectionInput
+} from "../../hooks/use-collections";
 import {
   useCreateCollection,
   useUpdateCollection

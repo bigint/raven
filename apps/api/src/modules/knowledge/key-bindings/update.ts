@@ -1,16 +1,15 @@
 import type { Database } from "@raven/db";
 import { knowledgeKeyBindings } from "@raven/db";
 import { eq } from "drizzle-orm";
+import type { z } from "zod";
 import { success } from "@/lib/response";
 import type { AuthContextWithJson } from "@/lib/types";
-import type { z } from "zod";
 import type { updateKeyBindingsSchema } from "./schema";
 
 type UpdateKeyBindingsInput = z.infer<typeof updateKeyBindingsSchema>;
 
 export const updateKeyBindings =
-  (db: Database) =>
-  async (c: AuthContextWithJson<UpdateKeyBindingsInput>) => {
+  (db: Database) => async (c: AuthContextWithJson<UpdateKeyBindingsInput>) => {
     const id = c.req.param("id") as string;
     const bindings = c.req.valid("json");
 

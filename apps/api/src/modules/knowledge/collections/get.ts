@@ -1,5 +1,9 @@
 import type { Database } from "@raven/db";
-import { knowledgeChunks, knowledgeCollections, knowledgeDocuments } from "@raven/db";
+import {
+  knowledgeChunks,
+  knowledgeCollections,
+  knowledgeDocuments
+} from "@raven/db";
 import { count, eq, sum } from "drizzle-orm";
 import { NotFoundError } from "@/lib/errors";
 import { success } from "@/lib/response";

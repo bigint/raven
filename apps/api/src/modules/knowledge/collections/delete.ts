@@ -16,7 +16,10 @@ export const deleteCollection =
     const [deleted] = await db
       .delete(knowledgeCollections)
       .where(eq(knowledgeCollections.id, id))
-      .returning({ id: knowledgeCollections.id, name: knowledgeCollections.name });
+      .returning({
+        id: knowledgeCollections.id,
+        name: knowledgeCollections.name
+      });
 
     if (!deleted) {
       throw new NotFoundError("Collection not found");

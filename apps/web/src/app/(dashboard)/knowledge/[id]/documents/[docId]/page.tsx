@@ -5,11 +5,11 @@ import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { RefreshCw } from "lucide-react";
 import { useParams } from "next/navigation";
-import { ChunkViewer } from "../../components/chunk-viewer";
 import {
   documentDetailQueryOptions,
   useReprocessDocument
 } from "../../../hooks/use-documents";
+import { ChunkViewer } from "../../components/chunk-viewer";
 
 const STATUS_VARIANT: Record<
   string,
@@ -24,9 +24,12 @@ const STATUS_VARIANT: Record<
 const DocumentDetailPage = () => {
   const { docId } = useParams<{ id: string; docId: string }>();
 
-  const { data: document, isPending, isError, error } = useQuery(
-    documentDetailQueryOptions(docId)
-  );
+  const {
+    data: document,
+    isPending,
+    isError,
+    error
+  } = useQuery(documentDetailQueryOptions(docId));
 
   const reprocessMutation = useReprocessDocument();
 

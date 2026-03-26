@@ -8,6 +8,10 @@ import { updateKeyBindings } from "./update";
 export const createKeyBindingsModule = (db: Database) => {
   const app = new Hono();
   app.get("/:id/collections", getKeyBindings(db));
-  app.put("/:id/collections", jsonValidator(updateKeyBindingsSchema), updateKeyBindings(db));
+  app.put(
+    "/:id/collections",
+    jsonValidator(updateKeyBindingsSchema),
+    updateKeyBindings(db)
+  );
   return app;
 };

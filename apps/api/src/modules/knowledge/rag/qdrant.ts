@@ -57,7 +57,7 @@ export const upsertVectors = async (
     await client.upsert(collectionName, {
       points: batch.map((p) => ({
         id: p.id,
-        payload: p.payload as Record<string, unknown>,
+        payload: p.payload as unknown as Record<string, unknown>,
         vector: p.vector
       }))
     });

@@ -69,8 +69,7 @@ export const collectionsQueryOptions = () =>
 
 export const collectionDetailQueryOptions = (id: string) =>
   queryOptions({
-    queryFn: () =>
-      api.get<CollectionDetail>(`/v1/knowledge/collections/${id}`),
+    queryFn: () => api.get<CollectionDetail>(`/v1/knowledge/collections/${id}`),
     queryKey: ["knowledge-collections", id]
   });
 

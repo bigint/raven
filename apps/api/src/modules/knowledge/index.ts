@@ -8,7 +8,6 @@ import {
   createDocumentDetailModule,
   createDocumentsModule
 } from "./documents/index";
-import { createKeyBindingsModule } from "./key-bindings/index";
 import { createSearchModule } from "./search/index";
 
 export const createKnowledgeModule = (

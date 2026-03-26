@@ -1,27 +1,26 @@
 import { unlink } from "node:fs/promises";
+import { createId } from "@paralleldrive/cuid2";
 import type { QdrantClient } from "@qdrant/js-client-rest";
-import type { Database } from "@raven/db";
-import { knowledgeChunks, knowledgeCollections, knowledgeDocuments } from "@raven/db";
 import type { Env } from "@raven/config";
+import type { Database } from "@raven/db";
+import {
+  knowledgeChunks,
+  knowledgeCollections,
+  knowledgeDocuments
+} from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
-import { createId } from "@paralleldrive/cuid2";
 import { log } from "@/lib/logger";
+import { ensureCollection, upsertVectors } from "../rag/qdrant";
 import { chunkText } from "./chunker";
 import { embedTexts, getOpenAIKey } from "./embedder";
-import {
-  completeJob,
-  dequeueJob,
-  promoteDelayedJobs,
-  retryJob
-} from "./queue";
-import type { IngestionJob } from "./queue";
 import { parseDocx } from "./parsers/docx";
 import { parseImage } from "./parsers/image";
 import { parseMarkdown } from "./parsers/markdown";
 import { parsePdf } from "./parsers/pdf";
 import { parseUrl } from "./parsers/url";
-import { ensureCollection, upsertVectors } from "../rag/qdrant";
+import type { IngestionJob } from "./queue";
+import { completeJob, dequeueJob, promoteDelayedJobs, retryJob } from "./queue";
 
 interface WorkerDeps {
   readonly db: Database;
@@ -35,12 +34,12 @@ const getMimeExtension = (mimeType: string): string => {
     "application/pdf": "pdf",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
       "docx",
-    "text/markdown": "md",
-    "text/plain": "txt",
+    "image/gif": "gif",
     "image/jpeg": "jpg",
     "image/png": "png",
-    "image/gif": "gif",
-    "image/webp": "webp"
+    "image/webp": "webp",
+    "text/markdown": "md",
+    "text/plain": "txt"
   };
   return mimeMap[mimeType] ?? "bin";
 };
@@ -172,7 +171,11 @@ const processJob = async (
 
   // Ensure Qdrant collection exists
   const qdrantCollectionName = `knowledge_${job.collectionId}`;
-  await ensureCollection(qdrant, qdrantCollectionName, collection.embeddingDimensions);
+  await ensureCollection(
+    qdrant,
+    qdrantCollectionName,
+    collection.embeddingDimensions
+  );
 
   // Generate chunk IDs and insert to Postgres
   const chunkIds = chunks.map(() => createId());
@@ -268,8 +271,7 @@ export const startWorker = (deps: WorkerDeps): (() => void) => {
 
         if (!willRetry) {
           // Max retries exhausted — mark document as failed
-          const errorMessage =
-            err instanceof Error ? err.message : String(err);
+          const errorMessage = err instanceof Error ? err.message : String(err);
           try {
             await deps.db
               .update(knowledgeDocuments)

@@ -43,10 +43,7 @@ const ChunkViewer = ({ chunks }: ChunkViewerProps) => {
 
       <div className="space-y-3">
         {pageChunks.map((chunk) => (
-          <div
-            className="rounded-xl border border-border p-4"
-            key={chunk.id}
-          >
+          <div className="rounded-xl border border-border p-4" key={chunk.id}>
             <div className="mb-2 flex items-center justify-between">
               <span className="text-xs font-medium text-muted-foreground">
                 Chunk #{chunk.chunkIndex}

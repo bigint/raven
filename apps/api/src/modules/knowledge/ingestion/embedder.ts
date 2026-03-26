@@ -1,7 +1,7 @@
-import OpenAI from "openai";
 import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { eq } from "drizzle-orm";
+import OpenAI from "openai";
 import { decrypt } from "@/lib/crypto";
 import { log } from "@/lib/logger";
 

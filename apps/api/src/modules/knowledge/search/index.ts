@@ -1,9 +1,10 @@
 import type { QdrantClient } from "@qdrant/js-client-rest";
+import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import { knowledgeCollections, knowledgeDocuments } from "@raven/db";
-import type { Env } from "@raven/config";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
+import type { z } from "zod";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { success } from "@/lib/response";
 import type { AuthContextWithJson } from "@/lib/types";
@@ -11,7 +12,6 @@ import { jsonValidator } from "@/lib/validation";
 import { embedQuery, getOpenAIKey } from "../ingestion/embedder";
 import { searchVectors } from "../rag/qdrant";
 import { searchSchema } from "./schema";
-import type { z } from "zod";
 
 type SearchInput = z.infer<typeof searchSchema>;
 
@@ -80,7 +80,10 @@ export const createSearchModule = (
       const documents =
         documentIds.length > 0
           ? await db
-              .select({ id: knowledgeDocuments.id, title: knowledgeDocuments.title })
+              .select({
+                id: knowledgeDocuments.id,
+                title: knowledgeDocuments.title
+              })
               .from(knowledgeDocuments)
               .where(eq(knowledgeDocuments.collectionId, collection.id))
           : [];

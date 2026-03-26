@@ -35,12 +35,16 @@ export const knowledgeCollections = pgTable(
   {
     chunkOverlap: integer("chunk_overlap").notNull().default(50),
     chunkSize: integer("chunk_size").notNull().default(512),
-    chunkStrategy: chunkStrategyEnum("chunk_strategy").notNull().default("hybrid"),
+    chunkStrategy: chunkStrategyEnum("chunk_strategy")
+      .notNull()
+      .default("hybrid"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
     description: text("description"),
-    embeddingDimensions: integer("embedding_dimensions").notNull().default(1536),
+    embeddingDimensions: integer("embedding_dimensions")
+      .notNull()
+      .default(1536),
     embeddingModel: text("embedding_model")
       .notNull()
       .default("text-embedding-3-small"),

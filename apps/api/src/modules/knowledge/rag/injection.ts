@@ -262,9 +262,7 @@ export const performRAGInjection = async (
 
   const latencyMs = Date.now() - startTime;
   const topScore =
-    allChunks.length > 0
-      ? Math.max(...allChunks.map((c) => c.score))
-      : 0;
+    allChunks.length > 0 ? Math.max(...allChunks.map((c) => c.score)) : 0;
 
   const collectionId = collections[0]!.id;
   await input.db

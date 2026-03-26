@@ -19,9 +19,11 @@ const CollectionDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const [tab, setTab] = useState("overview");
 
-  const { data: collection, isLoading, error } = useQuery(
-    collectionDetailQueryOptions(id)
-  );
+  const {
+    data: collection,
+    isLoading,
+    error
+  } = useQuery(collectionDetailQueryOptions(id));
 
   if (isLoading) {
     return (
