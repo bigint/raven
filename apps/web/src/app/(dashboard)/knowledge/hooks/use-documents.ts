@@ -23,13 +23,16 @@ export interface Document {
   readonly updatedAt: string;
 }
 
-export interface DocumentDetail extends Document {
-  readonly chunks: {
-    readonly id: string;
-    readonly chunkIndex: number;
-    readonly content: string;
-    readonly tokenCount: number;
-  }[];
+export interface Chunk {
+  readonly id: string;
+  readonly chunkIndex: number;
+  readonly content: string;
+  readonly tokenCount: number;
+}
+
+export interface ChunksResponse {
+  readonly chunks: Chunk[];
+  readonly total: number;
 }
 
 import { queryOptions } from "@tanstack/react-query";
@@ -45,8 +48,21 @@ export const documentsQueryOptions = (collectionId: string) =>
 
 export const documentDetailQueryOptions = (docId: string) =>
   queryOptions({
-    queryFn: () => api.get<DocumentDetail>(`/v1/knowledge/documents/${docId}`),
+    queryFn: () => api.get<Document>(`/v1/knowledge/documents/${docId}`),
     queryKey: ["knowledge-document", docId]
+  });
+
+export const documentChunksQueryOptions = (
+  docId: string,
+  limit: number,
+  offset: number
+) =>
+  queryOptions({
+    queryFn: () =>
+      api.get<ChunksResponse>(
+        `/v1/knowledge/documents/${docId}/chunks?limit=${limit}&offset=${offset}`
+      ),
+    queryKey: ["knowledge-document-chunks", docId, limit, offset]
   });
 
 export const useUploadDocument = (collectionId: string) => {

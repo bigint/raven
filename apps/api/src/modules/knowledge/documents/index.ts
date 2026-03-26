@@ -4,7 +4,7 @@ import { Hono } from "hono";
 import type { Redis } from "ioredis";
 import { jsonValidator, queryValidator } from "@/lib/validation";
 import { deleteDocument } from "./delete";
-import { getDocument } from "./get";
+import { getDocument, getDocumentChunks } from "./get";
 import { ingestImage } from "./ingest-image";
 import { ingestUrl } from "./ingest-url";
 import { listDocuments } from "./list";
@@ -35,6 +35,7 @@ export const createDocumentDetailModule = (
   const app = new Hono();
 
   app.get("/:id", getDocument(db));
+  app.get("/:id/chunks", getDocumentChunks(db));
   app.post("/:id/reprocess", reprocessDocument(db, redis, qdrant));
   app.delete("/:id", deleteDocument(db, qdrant));
 

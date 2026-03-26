@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input, Spinner } from "@raven/ui";
+import { Button, Spinner } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
 import {
@@ -12,12 +12,12 @@ import {
   Globe,
   Hash,
   ImageIcon,
-  RefreshCw,
-  Search
+  RefreshCw
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
+  documentChunksQueryOptions,
   documentDetailQueryOptions,
   useReprocessDocument
 } from "../../../hooks/use-documents";
@@ -47,7 +47,6 @@ const PAGE_SIZE = 20;
 const DocumentDetailPage = () => {
   const router = useRouter();
   const { id, docId } = useParams<{ id: string; docId: string }>();
-  const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
 
   const {
@@ -63,20 +62,16 @@ const DocumentDetailPage = () => {
     }
   });
 
+  const { data: chunksData } = useQuery({
+    ...documentChunksQueryOptions(docId, PAGE_SIZE, page * PAGE_SIZE),
+    enabled: !!doc && doc.status === "ready"
+  });
+
   const reprocess = useReprocessDocument();
 
-  const filteredChunks = useMemo(() => {
-    if (!doc?.chunks) return [];
-    if (!searchQuery.trim()) return doc.chunks;
-    const q = searchQuery.toLowerCase();
-    return doc.chunks.filter((c) => c.content.toLowerCase().includes(q));
-  }, [doc?.chunks, searchQuery]);
-
-  const totalPages = Math.ceil(filteredChunks.length / PAGE_SIZE);
-  const pageChunks = filteredChunks.slice(
-    page * PAGE_SIZE,
-    (page + 1) * PAGE_SIZE
-  );
+  const pageChunks = chunksData?.chunks ?? [];
+  const totalChunks = chunksData?.total ?? 0;
+  const totalPages = Math.ceil(totalChunks / PAGE_SIZE);
 
   if (isPending) {
     return (
@@ -223,31 +218,18 @@ const DocumentDetailPage = () => {
       )}
 
       {/* Chunks section */}
-      {doc.chunks.length > 0 && (
+      {doc.status === "ready" && totalChunks > 0 && (
         <div className="rounded-xl border border-border">
-          {/* Chunks header */}
-          <div className="flex flex-col gap-3 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <h2 className="text-sm font-semibold">
               Chunks
               <span className="ml-1.5 font-normal text-muted-foreground">
-                {searchQuery
-                  ? `${filteredChunks.length} of ${doc.chunks.length}`
-                  : doc.chunks.length}
+                {totalChunks}
               </span>
             </h2>
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-              <input
-                className="w-full rounded-md border border-input bg-background py-1.5 pl-8 pr-3 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setPage(0);
-                }}
-                placeholder="Search chunks..."
-                type="text"
-                value={searchQuery}
-              />
-            </div>
+            <span className="text-xs text-muted-foreground tabular-nums">
+              Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, totalChunks)}
+            </span>
           </div>
 
           {/* Chunk list */}
