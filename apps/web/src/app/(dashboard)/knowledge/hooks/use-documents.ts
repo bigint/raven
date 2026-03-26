@@ -57,7 +57,7 @@ export const useUploadDocument = (collectionId: string) => {
       formData.append("file", file);
       const promise = ky
         .post(
-          `${API_URL}/v1/knowledge/collections/${collectionId}/documents/file`,
+          `${API_URL}/v1/knowledge/collections/${collectionId}/documents`,
           { body: formData, credentials: "include" }
         )
         .json<Document>();
