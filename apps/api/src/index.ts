@@ -11,6 +11,7 @@ import { AppError } from "./lib/errors";
 import { initEventBus } from "./lib/events";
 import { getInstanceSettings } from "./lib/instance-settings";
 import { log } from "./lib/logger";
+import { getQdrant } from "./lib/qdrant";
 import { getRedis } from "./lib/redis";
 import { sendPasswordResetEmail, sendWelcomeEmail } from "./lib/send-email";
 import { initWebhookDispatcher } from "./lib/webhook-dispatcher";
