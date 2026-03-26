@@ -11,7 +11,7 @@ export const createCollectionSchema = z.object({
   maxContextTokens: z.number().int().min(256).max(128000).default(4096),
   name: z.string().min(1).max(100),
   rerankingEnabled: z.boolean().default(false),
-  similarityThreshold: z.number().min(0).max(1).default(0.7),
+  similarityThreshold: z.number().min(0).max(1).default(0.3),
   topK: z.number().int().min(1).max(100).default(5)
 });
 

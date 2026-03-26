@@ -56,7 +56,7 @@ export const knowledgeCollections = pgTable(
     rerankingEnabled: boolean("reranking_enabled").notNull().default(false),
     similarityThreshold: doublePrecision("similarity_threshold")
       .notNull()
-      .default(0.7),
+      .default(0.3),
     topK: integer("top_k").notNull().default(5),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()

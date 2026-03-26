@@ -46,7 +46,7 @@ const DEFAULT_FORM: FormState = {
   maxContextTokens: "4096",
   name: "",
   rerankingEnabled: false,
-  similarityThreshold: "0.7",
+  similarityThreshold: "0.3",
   topK: "5"
 };
 
