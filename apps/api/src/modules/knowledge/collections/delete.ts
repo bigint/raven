@@ -26,7 +26,7 @@ export const deleteCollection =
     }
 
     // Fire and forget — remove Qdrant collection in the background
-    void deleteQdrantCollection(qdrant, deleted.id);
+    void deleteQdrantCollection(qdrant, `knowledge_${deleted.id}`);
 
     void auditAndPublish(db, user, "collection", "deleted", { resourceId: id });
     return success(c, { success: true });

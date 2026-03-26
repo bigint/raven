@@ -90,6 +90,9 @@ export const searchVectors = async (
   topK: number,
   scoreThreshold: number
 ): Promise<SearchResult[]> => {
+  const exists = await client.collectionExists(collectionName);
+  if (!exists.exists) return [];
+
   const results = await client.search(collectionName, {
     limit: topK,
     score_threshold: scoreThreshold,

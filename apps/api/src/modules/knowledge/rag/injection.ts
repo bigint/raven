@@ -178,7 +178,7 @@ export const performRAGInjection = async (
 
     const results = await searchVectors(
       input.qdrant,
-      collection.id,
+      `knowledge_${collection.id}`,
       queryVector,
       collection.topK,
       collection.similarityThreshold

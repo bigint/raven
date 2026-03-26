@@ -69,7 +69,7 @@ export const createSearchModule = (
 
       const results = await searchVectors(
         qdrant,
-        collection.id,
+        `knowledge_${collection.id}`,
         queryVector,
         limit,
         scoreThreshold
