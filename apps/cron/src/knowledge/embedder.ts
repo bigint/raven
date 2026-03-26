@@ -1,13 +1,9 @@
 import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { eq } from "drizzle-orm";
-import OpenAI from "openai";
 import { decrypt } from "./crypto";
 import { log } from "./logger";
 
-const BATCH_SIZE = 2048;
-
-/** Quick check without decryption — use before accepting ingestion jobs */
 export const hasOpenAIProvider = async (db: Database): Promise<boolean> => {
   const [config] = await db
     .select({ id: providerConfigs.id })
@@ -36,32 +32,44 @@ export const getOpenAIKey = async (
   return decrypt(configs[0]!.apiKey, encryptionSecret);
 };
 
+/**
+ * Embed texts using direct fetch instead of OpenAI SDK to minimize memory overhead.
+ * Processes one text at a time — caller batches externally.
+ */
 export const embedTexts = async (
   apiKey: string,
   texts: string[],
   model: string,
   dimensions: number
 ): Promise<number[][]> => {
-  const client = new OpenAI({ apiKey });
-  const allEmbeddings: number[][] = [];
-  for (let i = 0; i < texts.length; i += BATCH_SIZE) {
-    const batch = texts.slice(i, i + BATCH_SIZE);
-    const response = await client.embeddings.create({
-      dimensions,
-      input: batch,
-      model
+  const results: number[][] = [];
+
+  for (const text of texts) {
+    const response = await fetch("https://api.openai.com/v1/embeddings", {
+      body: JSON.stringify({
+        dimensions,
+        input: text,
+        model
+      }),
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      method: "POST"
     });
-    for (const item of response.data) {
-      allEmbeddings.push(item.embedding);
+
+    if (!response.ok) {
+      const err = await response.text().catch(() => "Unknown error");
+      throw new Error(`OpenAI embeddings API error ${response.status}: ${err}`);
     }
-    if (i + BATCH_SIZE < texts.length) {
-      log.info("Embedding batch progress", {
-        completed: i + BATCH_SIZE,
-        total: texts.length
-      });
-    }
+
+    const data = (await response.json()) as {
+      data: { embedding: number[] }[];
+    };
+    results.push(data.data[0]!.embedding);
   }
-  return allEmbeddings;
+
+  return results;
 };
 
 export const embedQuery = async (

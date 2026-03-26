@@ -174,8 +174,8 @@ const processJob = async (
     const chunks = chunkText(text, chunkOpts);
     if (chunks.length === 0) return 0;
 
-    // Embed in small batches (50 at a time to keep memory low)
-    const EMBED_BATCH = 50;
+    // Embed in small batches to keep memory low
+    const EMBED_BATCH = 5;
     for (let i = 0; i < chunks.length; i += EMBED_BATCH) {
       const batch = chunks.slice(i, i + EMBED_BATCH);
       const batchTexts = batch.map((c) => c.content);
