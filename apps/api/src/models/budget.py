@@ -43,17 +43,17 @@ class Budget(Base):
     __table_args__ = (Index("budgets_entity_idx", "entity_type", "entity_id"),)
 
     id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper)
-    entity_type: Mapped[BudgetEntityType] = mapped_column(budget_entity_type_enum, nullable=False
-    )
+    entity_type: Mapped[BudgetEntityType] = mapped_column(budget_entity_type_enum, nullable=False)
     entity_id: Mapped[str] = mapped_column(Text, nullable=False)
-    limit_amount: Mapped[Decimal] = mapped_column(Numeric(precision=12, scale=2), nullable=False
-    )
+    limit_amount: Mapped[Decimal] = mapped_column(Numeric(precision=12, scale=2), nullable=False)
     period: Mapped[BudgetPeriod] = mapped_column(
         budget_period_enum, nullable=False, default=BudgetPeriod.MONTHLY
     )
-    alert_threshold: Mapped[Decimal] = mapped_column(Numeric(precision=5, scale=2),
+    alert_threshold: Mapped[Decimal] = mapped_column(
+        Numeric(precision=5, scale=2),
         nullable=False,
         default=Decimal("0.80"),
     )
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default="now()"
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default="now()"
     )
