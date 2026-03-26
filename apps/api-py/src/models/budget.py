@@ -9,12 +9,12 @@ from sqlalchemy.orm import Mapped, mapped_column
 from src.models.base import Base
 
 
-class BudgetEntityType(str, enum.Enum):
+class BudgetEntityType(enum.StrEnum):
     GLOBAL = "global"
     KEY = "key"
 
 
-class BudgetPeriod(str, enum.Enum):
+class BudgetPeriod(enum.StrEnum):
     DAILY = "daily"
     MONTHLY = "monthly"
 

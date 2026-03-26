@@ -10,14 +10,14 @@ from sqlalchemy.orm import Mapped, mapped_column
 from src.models.base import Base
 
 
-class GuardrailType(str, enum.Enum):
+class GuardrailType(enum.StrEnum):
     BLOCK_TOPICS = "block_topics"
     PII_DETECTION = "pii_detection"
     CONTENT_FILTER = "content_filter"
     CUSTOM_REGEX = "custom_regex"
 
 
-class GuardrailAction(str, enum.Enum):
+class GuardrailAction(enum.StrEnum):
     BLOCK = "block"
     WARN = "warn"
     LOG = "log"

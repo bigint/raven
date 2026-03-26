@@ -8,7 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from src.models.base import Base
 
 
-class PlatformRole(str, enum.Enum):
+class PlatformRole(enum.StrEnum):
     ADMIN = "admin"
     MEMBER = "member"
     VIEWER = "viewer"

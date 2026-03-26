@@ -13,10 +13,9 @@ def analyze_content(body: dict[str, Any], session_header: str | None = None) -> 
         content = msg.get("content", "")
         if isinstance(content, list):
             for part in content:
-                if isinstance(part, dict):
-                    if part.get("type") == "image_url":
-                        has_images = True
-                        image_count += 1
+                if isinstance(part, dict) and part.get("type") == "image_url":
+                    has_images = True
+                    image_count += 1
 
         if msg.get("role") == "assistant" and msg.get("tool_calls"):
             has_tool_use = True

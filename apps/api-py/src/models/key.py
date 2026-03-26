@@ -8,7 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from src.models.base import Base
 
 
-class KeyEnvironment(str, enum.Enum):
+class KeyEnvironment(enum.StrEnum):
     LIVE = "live"
     TEST = "test"
 
