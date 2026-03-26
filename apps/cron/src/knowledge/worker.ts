@@ -17,7 +17,7 @@ import { parseDocx } from "./parsers/docx";
 import { parseImage } from "./parsers/image";
 import { parseMarkdown } from "./parsers/markdown";
 import { parsePdf } from "./parsers/pdf";
-import { parseUrl } from "./parsers/url";
+import { crawlUrl, parseUrl } from "./parsers/url";
 import { ensureCollection, upsertVectors } from "./qdrant";
 import type { IngestionJob } from "./queue";
 import { completeJob, dequeueJob, promoteDelayedJobs, retryJob } from "./queue";
@@ -146,24 +146,6 @@ const processJob = async (
   // Get OpenAI key
   const apiKey = await getOpenAIKey(db, env.ENCRYPTION_SECRET);
 
-  // Extract text
-  const text = await extractText(job, document.mimeType, apiKey, document.metadata);
-
-  if (!text || text.trim().length === 0) {
-    throw new Error("Extracted text is empty");
-  }
-
-  // Chunk text using collection settings
-  const chunks = chunkText(text, {
-    chunkOverlap: collection.chunkOverlap,
-    chunkSize: collection.chunkSize,
-    strategy: collection.chunkStrategy
-  });
-
-  if (chunks.length === 0) {
-    throw new Error("Chunking produced no chunks");
-  }
-
   // Ensure Qdrant collection exists
   const qdrantCollectionName = `knowledge_${job.collectionId}`;
   await ensureCollection(
@@ -172,66 +154,111 @@ const processJob = async (
     collection.embeddingDimensions
   );
 
-  // Process in batches to avoid OOM on large documents
-  const BATCH_SIZE = 100;
-  for (let batchStart = 0; batchStart < chunks.length; batchStart += BATCH_SIZE) {
-    const batch = chunks.slice(batchStart, batchStart + BATCH_SIZE);
+  const chunkOpts = {
+    chunkOverlap: collection.chunkOverlap,
+    chunkSize: collection.chunkSize,
+    strategy: collection.chunkStrategy
+  };
 
-    log.info("Processing chunk batch", {
-      batch: Math.floor(batchStart / BATCH_SIZE) + 1,
-      batchSize: batch.length,
-      documentId: job.documentId,
-      totalChunks: chunks.length
-    });
+  let totalChunks = 0;
+  let totalTokens = 0;
 
-    // Embed batch
-    const batchTexts = batch.map((c) => c.content);
-    const embeddings = await embedTexts(
-      apiKey,
-      batchTexts,
-      collection.embeddingModel,
-      collection.embeddingDimensions
-    );
+  // Helper: process a single text block — chunk, embed, store, then discard
+  const processTextBlock = async (text: string, chunkOffset: number): Promise<number> => {
+    const chunks = chunkText(text, chunkOpts);
+    if (chunks.length === 0) return 0;
 
-    // Generate IDs and insert to Postgres
-    const batchIds = batch.map(() => createId());
+    // Embed in small batches (50 at a time to keep memory low)
+    const EMBED_BATCH = 50;
+    for (let i = 0; i < chunks.length; i += EMBED_BATCH) {
+      const batch = chunks.slice(i, i + EMBED_BATCH);
+      const batchTexts = batch.map((c) => c.content);
 
-    await db.insert(knowledgeChunks).values(
-      batch.map((chunk, i) => ({
-        chunkIndex: chunk.index,
-        collectionId: job.collectionId,
-        content: chunk.content,
-        documentId: job.documentId,
-        id: batchIds[i]!,
-        tokenCount: chunk.tokenCount
-      }))
-    );
+      const embeddings = await embedTexts(
+        apiKey,
+        batchTexts,
+        collection.embeddingModel,
+        collection.embeddingDimensions
+      );
 
-    // Upsert vectors to Qdrant
-    await upsertVectors(
-      qdrant,
-      qdrantCollectionName,
-      batch.map((chunk, i) => ({
-        id: batchIds[i]!,
-        payload: {
-          chunkIndex: chunk.index,
+      const batchIds = batch.map(() => createId());
+
+      await db.insert(knowledgeChunks).values(
+        batch.map((chunk, j) => ({
+          chunkIndex: chunkOffset + chunk.index + i,
           collectionId: job.collectionId,
           content: chunk.content,
-          documentId: job.documentId
-        },
-        vector: embeddings[i]!
-      }))
-    );
-  }
+          documentId: job.documentId,
+          id: batchIds[j]!,
+          tokenCount: chunk.tokenCount
+        }))
+      );
 
-  // Compute totals
-  const totalTokens = chunks.reduce((sum, c) => sum + c.tokenCount, 0);
+      await upsertVectors(
+        qdrant,
+        qdrantCollectionName,
+        batch.map((chunk, j) => ({
+          id: batchIds[j]!,
+          payload: {
+            chunkIndex: chunkOffset + chunk.index + i,
+            collectionId: job.collectionId,
+            content: chunk.content,
+            documentId: job.documentId
+          },
+          vector: embeddings[j]!
+        }))
+      );
+    }
+
+    const blockTokens = chunks.reduce((sum, c) => sum + c.tokenCount, 0);
+    return blockTokens;
+  };
+
+  // URL jobs: stream page-by-page to keep memory flat
+  if (job.type === "url") {
+    if (!job.sourceUrl) throw new Error("URL job missing sourceUrl");
+    const crawlLimit = typeof document.metadata?.crawlLimit === "number"
+      ? document.metadata.crawlLimit
+      : undefined;
+
+    let pageIndex = 0;
+    for await (const page of crawlUrl(job.sourceUrl, crawlLimit)) {
+      const tokens = await processTextBlock(page.text, totalChunks);
+      totalTokens += tokens;
+      const pageChunks = chunkText(page.text, chunkOpts).length;
+      totalChunks += pageChunks;
+      pageIndex++;
+
+      log.info("Processed page", {
+        documentId: job.documentId,
+        page: pageIndex,
+        pageChunks,
+        totalChunks,
+        url: page.url
+      });
+    }
+
+    if (totalChunks === 0) {
+      throw new Error("Crawl produced no chunks");
+    }
+  } else {
+    // File/image jobs: extract text in one shot (bounded by file size limits)
+    const text = await extractText(job, document.mimeType, apiKey, document.metadata);
+
+    if (!text || text.trim().length === 0) {
+      throw new Error("Extracted text is empty");
+    }
+
+    const tokens = await processTextBlock(text, 0);
+    totalTokens = tokens;
+    totalChunks = chunkText(text, chunkOpts).length;
+  }
 
   // Mark document as ready
   await db
     .update(knowledgeDocuments)
     .set({
-      chunkCount: chunks.length,
+      chunkCount: totalChunks,
       errorMessage: null,
       lastCrawledAt: new Date(),
       status: "ready",
@@ -241,7 +268,7 @@ const processJob = async (
     .where(eq(knowledgeDocuments.id, job.documentId));
 
   log.info("Document ingestion complete", {
-    chunkCount: chunks.length,
+    chunkCount: totalChunks,
     documentId: job.documentId,
     tokenCount: totalTokens
   });

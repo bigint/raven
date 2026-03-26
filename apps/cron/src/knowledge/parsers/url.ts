@@ -4,7 +4,12 @@ import { log } from "../logger";
 
 const DEFAULT_MAX_PAGES = 50;
 const FETCH_TIMEOUT = 15_000;
-const MAX_TEXT_BYTES = 10 * 1024 * 1024; // 10MB cap on total extracted text
+const CRAWL_DELAY_MS = 300;
+
+export interface CrawledPage {
+  readonly url: string;
+  readonly text: string;
+}
 
 const fetchPage = async (url: string): Promise<string | null> => {
   try {
@@ -28,7 +33,10 @@ const fetchPage = async (url: string): Promise<string | null> => {
 
     return response.text();
   } catch (err) {
-    log.info("Skipped (fetch failed)", { url, error: err instanceof Error ? err.message : String(err) });
+    log.info("Skipped (fetch failed)", {
+      error: err instanceof Error ? err.message : String(err),
+      url
+    });
     return null;
   }
 };
@@ -66,7 +74,11 @@ const extractLinks = (html: string, baseUrl: URL): string[] => {
       resolved.hash = "";
       const normalized = resolved.href.replace(/\/+$/, "");
 
-      if (/\.(png|jpg|jpeg|gif|svg|webp|ico|css|js|pdf|zip|tar|gz|mp4|mp3|woff2?|ttf|eot)$/i.test(resolved.pathname))
+      if (
+        /\.(png|jpg|jpeg|gif|svg|webp|ico|css|js|pdf|zip|tar|gz|mp4|mp3|woff2?|ttf|eot)$/i.test(
+          resolved.pathname
+        )
+      )
         continue;
 
       links.push(normalized);
@@ -78,7 +90,15 @@ const extractLinks = (html: string, baseUrl: URL): string[] => {
   return [...new Set(links)];
 };
 
-export const parseUrl = async (url: string, maxPages?: number): Promise<string> => {
+/**
+ * Crawl a URL and yield pages one at a time.
+ * Each page is yielded independently so the caller can process and discard it
+ * before moving to the next — keeping memory flat regardless of site size.
+ */
+export async function* crawlUrl(
+  url: string,
+  maxPages?: number
+): AsyncGenerator<CrawledPage> {
   const MAX_PAGES = maxPages ?? DEFAULT_MAX_PAGES;
   const baseUrl = new URL(url);
   const visited = new Set<string>();
@@ -89,22 +109,23 @@ export const parseUrl = async (url: string, maxPages?: number): Promise<string> 
   queue.push(startUrl);
   queued.add(startUrl);
 
-  const resultParts: string[] = [];
-  let totalBytes = 0;
   let pagesWithText = 0;
 
-  log.info("Starting crawl", { url, maxPages: MAX_PAGES });
+  log.info("Starting crawl", { maxPages: MAX_PAGES, url });
 
-  while (queue.length > 0 && visited.size < MAX_PAGES && totalBytes < MAX_TEXT_BYTES) {
+  while (queue.length > 0 && visited.size < MAX_PAGES) {
     const currentUrl = queue.shift()!;
     if (visited.has(currentUrl)) continue;
     visited.add(currentUrl);
 
-    log.info("Fetching", { url: currentUrl, visited: visited.size, queued: queue.length });
+    log.info("Fetching", {
+      queued: queue.length,
+      url: currentUrl,
+      visited: visited.size
+    });
 
-    // Polite delay between requests
     if (visited.size > 1) {
-      await new Promise((r) => setTimeout(r, 200));
+      await new Promise((r) => setTimeout(r, CRAWL_DELAY_MS));
     }
 
     const html = await fetchPage(currentUrl);
@@ -112,22 +133,20 @@ export const parseUrl = async (url: string, maxPages?: number): Promise<string> 
 
     const text = extractText(html);
     if (text && text.length > 50) {
-      const section = `[Source: ${currentUrl}]\n${text}`;
-      resultParts.push(section);
-      totalBytes += section.length;
       pagesWithText++;
-      log.info("Extracted text", { url: currentUrl, textLength: text.length, pagesWithText, totalKB: Math.round(totalBytes / 1024) });
-
-      // Stop if we've accumulated enough text
-      if (totalBytes >= MAX_TEXT_BYTES) {
-        log.info("Text size limit reached, stopping crawl", { totalKB: Math.round(totalBytes / 1024) });
-        break;
-      }
+      log.info("Extracted text", {
+        pagesWithText,
+        textLength: text.length,
+        url: currentUrl
+      });
+      yield { text: `[Source: ${currentUrl}]\n${text}`, url: currentUrl };
     } else {
-      log.info("No readable content", { url: currentUrl, textLength: text?.length ?? 0 });
+      log.info("No readable content", {
+        textLength: text?.length ?? 0,
+        url: currentUrl
+      });
     }
 
-    // Discover links — use Set for O(1) lookup instead of array.includes
     const links = extractLinks(html, baseUrl);
     let newLinks = 0;
     for (const link of links) {
@@ -138,14 +157,34 @@ export const parseUrl = async (url: string, maxPages?: number): Promise<string> 
       }
     }
     if (newLinks > 0) {
-      log.info("Discovered links", { from: currentUrl, newLinks, totalQueued: queue.length });
+      log.info("Discovered links", {
+        from: currentUrl,
+        newLinks,
+        totalQueued: queue.length
+      });
     }
   }
 
-  if (resultParts.length === 0) {
-    throw new Error("Could not extract readable content from URL or any linked pages");
-  }
+  log.info("Crawl complete", {
+    pagesVisited: visited.size,
+    pagesWithText,
+    url
+  });
+}
 
-  log.info("Crawl complete", { url, pagesVisited: visited.size, pagesWithText, totalKB: Math.round(totalBytes / 1024) });
-  return resultParts.join("\n\n---\n\n");
+/** Legacy single-string API — kept for non-worker callers */
+export const parseUrl = async (
+  url: string,
+  maxPages?: number
+): Promise<string> => {
+  const parts: string[] = [];
+  for await (const page of crawlUrl(url, maxPages)) {
+    parts.push(page.text);
+  }
+  if (parts.length === 0) {
+    throw new Error(
+      "Could not extract readable content from URL or any linked pages"
+    );
+  }
+  return parts.join("\n\n---\n\n");
 };
