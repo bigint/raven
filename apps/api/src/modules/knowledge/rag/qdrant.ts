@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type { QdrantClient } from "@qdrant/js-client-rest";
 import { log } from "@/lib/logger";
 
@@ -56,8 +57,11 @@ export const upsertVectors = async (
     const batch = points.slice(i, i + batchSize);
     await client.upsert(collectionName, {
       points: batch.map((p) => ({
-        id: p.id,
-        payload: p.payload as unknown as Record<string, unknown>,
+        id: randomUUID(),
+        payload: {
+          ...(p.payload as unknown as Record<string, unknown>),
+          chunkDbId: p.id
+        },
         vector: p.vector
       }))
     });
