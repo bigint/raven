@@ -121,7 +121,8 @@ const processJob = async (
     .limit(1);
 
   if (collections.length === 0) {
-    throw new Error(`Collection not found: ${job.collectionId}`);
+    log.info("Collection no longer exists, skipping job", { collectionId: job.collectionId });
+    return;
   }
 
   const collection = collections[0]!;
@@ -134,7 +135,8 @@ const processJob = async (
     .limit(1);
 
   if (documents.length === 0) {
-    throw new Error(`Document not found: ${job.documentId}`);
+    log.info("Document no longer exists, skipping job", { documentId: job.documentId });
+    return;
   }
 
   const document = documents[0]!;
