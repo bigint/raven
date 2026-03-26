@@ -64,6 +64,21 @@ const hybridSplit = (
   return result;
 };
 
+const MIN_CHUNK_WORDS = 5;
+
+const cleanAndFilter = (segments: string[]): string[] =>
+  segments
+    .map((s) =>
+      s
+        .replace(/\n{3,}/g, "\n\n")
+        .replace(/[ \t]+/g, " ")
+        .trim()
+    )
+    .filter((s) => {
+      const words = s.split(/\s+/).length;
+      return words >= MIN_CHUNK_WORDS;
+    });
+
 export const chunkText = (text: string, options: ChunkOptions): Chunk[] => {
   const { strategy, chunkSize, chunkOverlap } = options;
   let segments: string[];
@@ -78,7 +93,7 @@ export const chunkText = (text: string, options: ChunkOptions): Chunk[] => {
       segments = hybridSplit(text, chunkSize, chunkOverlap);
       break;
   }
-  return segments.map((content, index) => ({
+  return cleanAndFilter(segments).map((content, index) => ({
     content,
     index,
     tokenCount: estimateTokens(content)

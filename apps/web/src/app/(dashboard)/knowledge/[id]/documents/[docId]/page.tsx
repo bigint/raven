@@ -258,8 +258,11 @@ const DocumentDetailPage = () => {
                     {chunk.tokenCount} tokens
                   </span>
                 </div>
-                <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
-                  {chunk.content}
+                <p className="text-sm leading-relaxed text-foreground/90">
+                  {chunk.content
+                    .replace(/\n{3,}/g, "\n\n")
+                    .replace(/[ \t]+/g, " ")
+                    .trim()}
                 </p>
               </div>
             ))}
