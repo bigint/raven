@@ -7,9 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  ci:
+  lint-web:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -34,3 +33,27 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+  lint-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Setup Python
+        run: uv python install 3.13
+
+      - name: Install dependencies
+        working-directory: apps/api-py
+        run: uv sync --frozen
+
+      - name: Lint
+        working-directory: apps/api-py
+        run: uv run ruff check src/
+
+      - name: Format check
+        working-directory: apps/api-py
+        run: uv run ruff format --check src/
