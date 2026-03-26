@@ -14,6 +14,7 @@ const VALID_KEYS = new Set([
   "global_rate_limit_rpm",
   "instance_name",
   "instance_url",
+  "knowledge_enabled",
   "log_request_bodies",
   "log_response_bodies",
   "max_request_body_size_mb",
