@@ -2,7 +2,7 @@ import { Readability } from "@mozilla/readability";
 import { parseHTML } from "linkedom";
 import { log } from "../logger";
 
-const MAX_PAGES = 50;
+const MAX_PAGES = 1000;
 const FETCH_TIMEOUT = 15_000;
 
 const fetchPage = async (url: string): Promise<string | null> => {
