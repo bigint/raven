@@ -31,52 +31,40 @@ const STATUS_VARIANT: Record<
   ready: "success"
 };
 
-const StatusCell = ({ doc }: { readonly doc: Document }) => {
-  if (doc.status === "processing") {
-    return (
-      <div className="flex items-center gap-2">
-        <div className="relative flex size-4 items-center justify-center">
-          <div className="absolute size-4 animate-ping rounded-full bg-amber-400/30" />
-          <div className="size-2 rounded-full bg-amber-500" />
-        </div>
-        <div className="text-xs">
-          <span className="font-medium text-amber-600">Processing</span>
-          {(doc.chunkCount > 0 || doc.tokenCount > 0) && (
-            <span className="ml-1 text-muted-foreground tabular-nums">
-              {doc.chunkCount > 0 && `${doc.chunkCount} chunks`}
-              {doc.chunkCount > 0 && doc.tokenCount > 0 && " / "}
-              {doc.tokenCount > 0 && `${doc.tokenCount.toLocaleString()} tokens`}
-            </span>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  if (doc.status === "pending") {
-    return (
-      <div className="flex items-center gap-2">
-        <div className="size-2 rounded-full bg-muted-foreground/50" />
-        <span className="text-xs text-muted-foreground">Queued</span>
-      </div>
-    );
-  }
-
-  if (doc.status === "failed") {
-    return (
-      <div className="flex items-center gap-2">
-        <Badge variant={STATUS_VARIANT[doc.status]}>Failed</Badge>
-        {doc.errorMessage && (
-          <span className="max-w-[200px] truncate text-xs text-destructive" title={doc.errorMessage}>
-            {doc.errorMessage}
-          </span>
-        )}
-      </div>
-    );
-  }
-
-  return <Badge variant={STATUS_VARIANT[doc.status]}>Ready</Badge>;
+const STATUS_DOT: Record<Document["status"], string> = {
+  failed: "bg-red-500",
+  pending: "bg-zinc-400",
+  processing: "bg-amber-500",
+  ready: "bg-emerald-500"
 };
+
+const STATUS_LABEL: Record<Document["status"], string> = {
+  failed: "Failed",
+  pending: "Queued",
+  processing: "Processing",
+  ready: "Ready"
+};
+
+const StatusCell = ({ doc }: { readonly doc: Document }) => (
+  <div className="flex flex-col gap-1">
+    <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-border bg-muted/50 px-2.5 py-0.5 text-xs font-medium">
+      <span className={`size-1.5 rounded-full ${STATUS_DOT[doc.status]} ${doc.status === "processing" ? "animate-pulse" : ""}`} />
+      {STATUS_LABEL[doc.status]}
+    </span>
+    {doc.status === "processing" && (doc.chunkCount > 0 || doc.tokenCount > 0) && (
+      <span className="text-[11px] text-muted-foreground tabular-nums">
+        {doc.chunkCount > 0 && `${doc.chunkCount} chunks`}
+        {doc.chunkCount > 0 && doc.tokenCount > 0 && " · "}
+        {doc.tokenCount > 0 && `${doc.tokenCount.toLocaleString()} tokens`}
+      </span>
+    )}
+    {doc.status === "failed" && doc.errorMessage && (
+      <span className="max-w-[200px] truncate text-[11px] text-destructive" title={doc.errorMessage}>
+        {doc.errorMessage}
+      </span>
+    )}
+  </div>
+);
 
 interface DocumentsTabProps {
   readonly collectionId: string;
