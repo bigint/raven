@@ -2,8 +2,7 @@
 
 import { PageHeader, Spinner, Tabs } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { collectionDetailQueryOptions } from "../hooks/use-collections";
 import { CollectionStats } from "./components/collection-stats";
 import { DocumentsTab } from "./components/documents-tab";
@@ -17,7 +16,20 @@ const TABS = [
 
 const CollectionDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const [tab, setTab] = useState("overview");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab") ?? "overview";
+
+  const setTab = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value === "overview") {
+      params.delete("tab");
+    } else {
+      params.set("tab", value);
+    }
+    const qs = params.toString();
+    router.replace(`?${qs}`, { scroll: false });
+  };
 
   const {
     data: collection,

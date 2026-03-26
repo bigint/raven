@@ -3,8 +3,8 @@
 import { Badge, Button, PageHeader, Spinner } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { RefreshCw } from "lucide-react";
-import { useParams } from "next/navigation";
+import { ArrowLeft, RefreshCw } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
 import {
   documentDetailQueryOptions,
   useReprocessDocument
@@ -22,6 +22,7 @@ const STATUS_VARIANT: Record<
 };
 
 const DocumentDetailPage = () => {
+  const router = useRouter();
   const { docId } = useParams<{ id: string; docId: string }>();
 
   const {
@@ -56,8 +57,25 @@ const DocumentDetailPage = () => {
 
   return (
     <div>
-      <PageHeader
-        actions={
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <button
+              className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+              onClick={() => router.back()}
+              type="button"
+            >
+              <ArrowLeft className="size-5" />
+            </button>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {document.title}
+            </h1>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            View document content and chunk details.
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
           <Button
             disabled={reprocessMutation.isPending}
             onClick={() => reprocessMutation.mutate(document.id)}
@@ -66,10 +84,8 @@ const DocumentDetailPage = () => {
             <RefreshCw className="size-4" />
             {reprocessMutation.isPending ? "Reprocessing..." : "Reprocess"}
           </Button>
-        }
-        description="View document content and chunk details."
-        title={document.title}
-      />
+        </div>
+      </div>
 
       {document.errorMessage && (
         <div
