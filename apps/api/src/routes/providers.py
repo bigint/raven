@@ -101,6 +101,7 @@ async def create_provider(
         is_enabled=body.is_enabled,
     )
     session.add(provider)
+    await session.flush()
 
     await audit_and_publish(
         session,
