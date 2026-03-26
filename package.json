@@ -6,8 +6,6 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.9",
     "@types/node": "^25.5.0",
-    "drizzle-orm": "^0.45.1",
-    "tsx": "^4.21.0",
     "typescript": "^6.0.2"
   },
   "homepage": "https://github.com/bigint/raven",
@@ -17,7 +15,7 @@
     "openai",
     "anthropic",
     "proxy",
-    "typescript",
+    "python",
     "open-source",
     "ai",
     "routing",
@@ -40,16 +38,14 @@
   },
   "scripts": {
     "build": "pnpm -r build",
-    "db:generate": "pnpm --filter @raven/db generate",
-    "db:migrate": "pnpm --filter @raven/db migrate",
-    "db:seed": "tsx --env-file=.env scripts/seed.ts",
-    "db:studio": "pnpm --filter @raven/db studio",
-    "dev": "pnpm -r --parallel dev",
-    "dev:api": "pnpm --filter @raven/api dev",
-    "dev:cron": "pnpm --filter @raven/cron dev",
+    "db:migrate": "cd apps/api-py && uv run alembic upgrade head",
+    "db:revision": "cd apps/api-py && uv run alembic revision --autogenerate -m",
+    "dev": "concurrently \"pnpm dev:api\" \"pnpm dev:web\"",
+    "dev:api": "cd apps/api-py && uv run uvicorn src.main:app --host 0.0.0.0 --port 4000 --reload",
+    "dev:cron": "cd apps/cron-py && uv run python -m src.main",
     "dev:web": "pnpm --filter @raven/web dev",
     "format": "biome format --write .",
-    "lint": "biome check --write .",
+    "lint": "biome check --write . && cd apps/api-py && uv run ruff check src/",
     "typecheck": "pnpm -r typecheck"
   },
   "type": "module"

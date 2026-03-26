@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-const SESSION_COOKIE = "better-auth.session_token";
+const SESSION_COOKIE = "raven_session";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 

@@ -3,6 +3,6 @@ import { redirect } from "next/navigation";
 
 export const GET = async () => {
   const cookieStore = await cookies();
-  cookieStore.delete("better-auth.session_token");
+  cookieStore.delete("raven_session");
   redirect("/sign-in");
 };
