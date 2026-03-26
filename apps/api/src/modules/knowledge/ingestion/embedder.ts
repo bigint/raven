@@ -7,6 +7,16 @@ import { log } from "@/lib/logger";
 
 const BATCH_SIZE = 2048;
 
+/** Quick check without decryption — use before accepting ingestion jobs */
+export const hasOpenAIProvider = async (db: Database): Promise<boolean> => {
+  const [config] = await db
+    .select({ id: providerConfigs.id })
+    .from(providerConfigs)
+    .where(eq(providerConfigs.provider, "openai"))
+    .limit(1);
+  return !!config;
+};
+
 export const getOpenAIKey = async (
   db: Database,
   encryptionSecret: string

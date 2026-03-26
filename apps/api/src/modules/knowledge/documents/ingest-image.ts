@@ -8,6 +8,7 @@ import type { Context } from "hono";
 import type { Redis } from "ioredis";
 import { ValidationError } from "@/lib/errors";
 import { created } from "@/lib/response";
+import { hasOpenAIProvider } from "../ingestion/embedder";
 import { enqueueJob } from "../ingestion/queue";
 
 const ALLOWED_IMAGE_TYPES = new Set([
@@ -22,6 +23,12 @@ const MAX_IMAGE_SIZE = 20 * 1024 * 1024; // 20MB
 export const ingestImage =
   (db: Database, redis: Redis) => async (c: Context) => {
     const collectionId = c.req.param("id") as string;
+
+    if (!(await hasOpenAIProvider(db))) {
+      throw new ValidationError(
+        "No OpenAI provider configured. Add an OpenAI provider before ingesting documents."
+      );
+    }
 
     const body = await c.req.parseBody();
     const file = body["file"];
