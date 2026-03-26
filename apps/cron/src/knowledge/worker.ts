@@ -20,7 +20,13 @@ import { parsePdf } from "./parsers/pdf";
 import { crawlUrl, parseUrl } from "./parsers/url";
 import { ensureCollection, upsertVectors } from "./qdrant";
 import type { IngestionJob } from "./queue";
-import { completeJob, dequeueJob, promoteDelayedJobs, retryJob } from "./queue";
+import {
+  completeJob,
+  dequeueJob,
+  promoteDelayedJobs,
+  recoverStuckJobs,
+  retryJob
+} from "./queue";
 
 interface WorkerDeps {
   readonly db: Database;
@@ -281,6 +287,13 @@ export const startWorker = (deps: WorkerDeps): (() => void) => {
   let running = true;
 
   const loop = async (): Promise<void> => {
+    // On startup, recover any jobs stuck in the processing list from a previous crash
+    try {
+      await recoverStuckJobs(deps.redis);
+    } catch (err) {
+      log.error("Failed to recover stuck jobs", err);
+    }
+
     while (running) {
       try {
         await promoteDelayedJobs(deps.redis);

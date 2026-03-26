@@ -58,6 +58,24 @@ export const retryJob = async (
   return true;
 };
 
+/** Recover stuck jobs from the processing list back to the queue (called on worker startup) */
+export const recoverStuckJobs = async (redis: Redis): Promise<void> => {
+  const stuck = await redis.llen(PROCESSING_KEY);
+  if (stuck === 0) return;
+
+  const items = await redis.lrange(PROCESSING_KEY, 0, -1);
+  if (items.length === 0) return;
+
+  const pipeline = redis.pipeline();
+  for (const item of items) {
+    pipeline.lpush(QUEUE_KEY, item);
+  }
+  pipeline.del(PROCESSING_KEY);
+  await pipeline.exec();
+
+  log.info("Recovered stuck jobs", { count: items.length });
+};
+
 export const promoteDelayedJobs = async (redis: Redis): Promise<void> => {
   const now = Date.now();
   const ready = await redis.zrangebyscore("knowledge:jobs:delayed", 0, now);
