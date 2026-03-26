@@ -77,7 +77,7 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
   const { data: documents = [], isLoading } = useQuery({
     ...documentsQueryOptions(collectionId),
     refetchInterval: (query) =>
-      hasPending(query.state.data ?? []) ? 5000 : false
+      hasPending(query.state.data ?? []) ? 2000 : false
   });
 
   const [uploadOpen, setUploadOpen] = useState(false);

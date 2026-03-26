@@ -235,11 +235,22 @@ const processJob = async (
       totalChunks += pageChunks;
       pageIndex++;
 
+      // Update document with running totals so the UI shows realtime progress
+      await db
+        .update(knowledgeDocuments)
+        .set({
+          chunkCount: totalChunks,
+          tokenCount: totalTokens,
+          updatedAt: new Date()
+        })
+        .where(eq(knowledgeDocuments.id, job.documentId));
+
       log.info("Processed page", {
         documentId: job.documentId,
         page: pageIndex,
         pageChunks,
         totalChunks,
+        totalTokens,
         url: page.url
       });
     }
@@ -258,6 +269,16 @@ const processJob = async (
     const tokens = await processTextBlock(text, 0);
     totalTokens = tokens;
     totalChunks = chunkText(text, chunkOpts).length;
+
+    // Update progress
+    await db
+      .update(knowledgeDocuments)
+      .set({
+        chunkCount: totalChunks,
+        tokenCount: totalTokens,
+        updatedAt: new Date()
+      })
+      .where(eq(knowledgeDocuments.id, job.documentId));
   }
 
   // Mark document as ready
