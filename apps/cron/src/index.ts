@@ -1,3 +1,4 @@
+import { QdrantClient } from "@qdrant/js-client-rest";
 import { parseEnv } from "@raven/config";
 import { createDatabase } from "@raven/db";
 import Redis from "ioredis";
@@ -7,6 +8,7 @@ import { recrawlDueDocuments } from "./jobs/recrawl";
 import { cleanupRetention } from "./jobs/retention";
 import { cleanupExpiredSessions } from "./jobs/sessions";
 import { cleanupExpiredVerifications } from "./jobs/verifications";
+import { startWorker } from "./knowledge/worker";
 
 const env = parseEnv();
 const db = createDatabase(env.DATABASE_URL);
@@ -38,6 +40,9 @@ const runAllJobs = async () => {
   await runJob("key deactivation", () => deactivateExpiredKeys(db));
   await runJob("url recrawl", () => recrawlDueDocuments(db, redis));
 };
+
+const qdrant = new QdrantClient({ url: env.QDRANT_URL, apiKey: env.QDRANT_API_KEY });
+const stopWorker = startWorker({ db, env, qdrant, redis });
 
 console.log("Raven cron worker started");
 runAllJobs();
@@ -75,6 +80,7 @@ redis.on("error", (err) => {
 
 process.on("SIGTERM", () => {
   console.log("Cron worker shutting down");
+  stopWorker();
   redis.disconnect();
   process.exit(0);
 });

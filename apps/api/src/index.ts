@@ -34,7 +34,6 @@ import {
   createKeyBindingsModule,
   createKnowledgeModule
 } from "./modules/knowledge/index";
-import { startWorker } from "./modules/knowledge/ingestion/worker";
 import { listAvailableModels } from "./modules/models/available";
 import { createModelsModule } from "./modules/models/index";
 import { createOpenAICompatModule } from "./modules/openai-compat/index";
@@ -61,7 +60,6 @@ const flushInterval = setInterval(() => {
 }, 60_000);
 
 const instanceSettings = await getInstanceSettings(db, redis);
-const stopWorker = startWorker({ db, env, qdrant, redis });
 
 const auth = createAuth(db, env, {
   onResetPassword: (user, url) => void sendPasswordResetEmail(db, user, url),
@@ -259,7 +257,6 @@ server.setTimeout(0);
 const shutdown = async (): Promise<void> => {
   log.info("Shutting down gracefully");
   server.close();
-  stopWorker();
   clearInterval(flushInterval);
   await flushLogBuffer().catch((err) =>
     log.error("Failed to flush log buffer on shutdown", err)
