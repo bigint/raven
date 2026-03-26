@@ -16,8 +16,9 @@ export const parseUrl = async (url: string): Promise<string> => {
 
   const html = await response.text();
   const window = parseHTML(html);
-  const document = (window as unknown as { document: Document }).document;
-  const reader = new Readability(document);
+  // linkedom returns a DOM-like document; cast to satisfy Readability's expected type
+  const doc = (window as unknown as Record<string, unknown>).document;
+  const reader = new Readability(doc as ConstructorParameters<typeof Readability>[0]);
   const article = reader.parse();
 
   if (!article?.textContent) {
