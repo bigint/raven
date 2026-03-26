@@ -2,7 +2,6 @@ import type { Database } from "@raven/db";
 import { providerConfigs } from "@raven/db";
 import { eq } from "drizzle-orm";
 import { decrypt } from "./crypto";
-import { log } from "./logger";
 
 export const hasOpenAIProvider = async (db: Database): Promise<boolean> => {
   const [config] = await db

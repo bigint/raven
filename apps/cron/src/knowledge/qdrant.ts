@@ -49,3 +49,17 @@ export const upsertVectors = async (
   }
   log.info("Upserted vectors", { collectionName, count: points.length });
 };
+
+export const deleteVectorsByDocumentId = async (
+  client: QdrantClient,
+  collectionName: string,
+  documentId: string
+): Promise<void> => {
+  const exists = await client.collectionExists(collectionName);
+  if (!exists.exists) return;
+  await client.delete(collectionName, {
+    filter: {
+      must: [{ key: "documentId", match: { value: documentId } }]
+    }
+  });
+};
