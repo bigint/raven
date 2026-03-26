@@ -6,7 +6,7 @@ import { success } from "@/lib/response";
 import type { AuthContext } from "@/lib/types";
 
 export const getDocument = (db: Database) => async (c: AuthContext) => {
-  const docId = c.req.param("docId") as string;
+  const docId = c.req.param("id") as string;
 
   const [document] = await db
     .select()
