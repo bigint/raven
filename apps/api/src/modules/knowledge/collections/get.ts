@@ -37,10 +37,8 @@ export const getCollection = (db: Database) => async (c: AuthContext) => {
 
   return success(c, {
     ...collection,
-    stats: {
-      chunkCount: stats?.chunkCount ?? 0,
-      documentCount: stats?.documentCount ?? 0,
-      totalTokens: Number(stats?.totalTokens ?? 0)
-    }
+    chunkCount: stats?.chunkCount ?? 0,
+    documentCount: stats?.documentCount ?? 0,
+    totalTokens: Number(stats?.totalTokens ?? 0)
   });
 };
