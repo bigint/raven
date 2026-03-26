@@ -1,36 +1,61 @@
-FROM node:22-alpine AS deps
+### Stage 1: Node.js dependencies + build (web only)
+FROM node:22-bookworm-slim AS node-deps
 RUN corepack enable && corepack prepare pnpm@10.27.0 --activate
 WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY apps/api/package.json apps/api/
-COPY apps/cron/package.json apps/cron/
 COPY apps/web/package.json apps/web/
-COPY packages/auth/package.json packages/auth/
-COPY packages/config/package.json packages/config/
 COPY packages/data/package.json packages/data/
-COPY packages/db/package.json packages/db/
-COPY packages/email/package.json packages/email/
-COPY packages/types/package.json packages/types/
 COPY packages/ui/package.json packages/ui/
+COPY packages/types/package.json packages/types/
 RUN pnpm install --frozen-lockfile
 
-FROM deps AS builder
-COPY . .
+FROM node-deps AS node-builder
+COPY apps/web/ apps/web/
+COPY packages/ packages/
 ENV NODE_OPTIONS="--max-old-space-size=4096"
-RUN pnpm build
+RUN pnpm --filter @raven/web build
 
-FROM node:22-alpine AS runner
-RUN apk add --no-cache postgresql redis && \
+### Stage 2: Python dependencies
+FROM python:3.13-slim-bookworm AS python-deps
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+WORKDIR /app
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never
+COPY apps/api-py/pyproject.toml apps/api-py/uv.lock ./api/
+RUN --mount=type=cache,target=/root/.cache/uv \
+    cd api && uv sync --frozen --no-install-project --no-editable --no-dev
+COPY apps/cron-py/pyproject.toml ./cron/
+RUN --mount=type=cache,target=/root/.cache/uv \
+    cd cron && uv sync --frozen --no-install-project --no-editable --no-dev 2>/dev/null || true
+
+### Stage 3: Runner
+FROM python:3.13-slim-bookworm AS runner
+
+# Install Node.js 22 + PostgreSQL + Redis
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      curl ca-certificates gnupg postgresql redis-server wget && \
+    curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get install -y --no-install-recommends nodejs && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
     mkdir -p /var/lib/postgresql/data /run/postgresql && \
     chown -R postgres:postgres /var/lib/postgresql /run/postgresql
+
 WORKDIR /app
 
-COPY --from=builder /app/apps/api/dist ./api/
-COPY --from=builder /app/apps/cron/dist ./cron/
-COPY --from=builder /app/apps/web/.next/standalone ./web/
-COPY --from=builder /app/apps/web/.next/static ./web/apps/web/.next/static
-COPY --from=builder /app/packages/db/drizzle ./drizzle/
-COPY --from=builder /app/packages/db/dist/migrate.mjs ./migrate.mjs
+# Copy Python API + venv
+COPY --from=python-deps /app/api/.venv ./api/.venv
+COPY apps/api-py/src ./api/src
+COPY apps/api-py/alembic ./api/alembic
+COPY apps/api-py/alembic.ini ./api/alembic.ini
+
+# Copy Python cron
+COPY apps/cron-py/src ./cron/src
+
+# Copy Node.js web (Next.js standalone)
+COPY --from=node-builder /app/apps/web/.next/standalone ./web/
+COPY --from=node-builder /app/apps/web/.next/static ./web/apps/web/.next/static
+
+# Copy entrypoint
 COPY --chmod=755 docker-entrypoint.sh ./
 
 ENV NODE_ENV=production \
@@ -38,7 +63,7 @@ ENV NODE_ENV=production \
     PORT=3000 \
     API_PORT=4000 \
     APP_URL=http://localhost:3000 \
-    BETTER_AUTH_URL=http://localhost:4000 \
+    AUTH_URL=http://localhost:4000 \
     DATABASE_URL=postgresql://raven:raven@localhost:5432/raven \
     NEXT_PUBLIC_API_URL=http://localhost:4000 \
     REDIS_URL=redis://localhost:6379

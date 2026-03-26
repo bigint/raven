@@ -21,7 +21,7 @@ start_redis() {
   redis-server --daemonize yes
 }
 
-export BETTER_AUTH_SECRET="${BETTER_AUTH_SECRET:-$(head -c 32 /dev/urandom | base64)}"
+export AUTH_SECRET="${AUTH_SECRET:-$(head -c 32 /dev/urandom | base64)}"
 export ENCRYPTION_SECRET="${ENCRYPTION_SECRET:-$(head -c 32 /dev/urandom | base64)}"
 
 case "$DATABASE_URL" in *localhost*|*127.0.0.1*) start_postgres ;; esac
@@ -31,20 +31,20 @@ echo "Starting Raven..."
 
 case "$1" in
   serve)
-    node migrate.mjs
-    node api/index.js &
-    node cron/index.js &
-    node web/apps/web/server.js
+    cd /app/api && .venv/bin/python -m alembic upgrade head
+    cd /app/api && .venv/bin/uvicorn src.main:app --host 0.0.0.0 --port 4000 &
+    cd /app/cron && /app/api/.venv/bin/python -m src.main &
+    node /app/web/apps/web/server.js
     ;;
   api)
-    node migrate.mjs
-    node api/index.js
+    cd /app/api && .venv/bin/python -m alembic upgrade head
+    cd /app/api && .venv/bin/uvicorn src.main:app --host 0.0.0.0 --port 4000
     ;;
   web)
-    node web/apps/web/server.js
+    node /app/web/apps/web/server.js
     ;;
   cron)
-    node cron/index.js
+    cd /app/cron && /app/api/.venv/bin/python -m src.main
     ;;
   *)
     exec "$@"
