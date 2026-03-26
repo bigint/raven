@@ -1,0 +1,21 @@
+{% extends "base.mjml" %}
+{% block preview %}Budget alert: {{ budget_name }} at {{ usage_pct }}%{% endblock %}
+{% block content %}
+<mj-section>
+  <mj-column>
+    <mj-text font-size="22px" font-weight="700" color="#111827" padding-bottom="16px">
+      Budget Alert
+    </mj-text>
+    <mj-text>
+      Your budget <strong>{{ budget_name }}</strong> has reached <strong>{{ usage_pct }}%</strong> of the ${{ limit }} limit.
+    </mj-text>
+    <mj-text>
+      Consider reviewing your usage or adjusting the budget limit to avoid service interruptions.
+    </mj-text>
+    <mj-divider border-color="#e5e7eb" padding-top="16px" />
+    <mj-text font-size="13px" color="#6b7280">
+      You can manage your budgets in the Raven dashboard.
+    </mj-text>
+  </mj-column>
+</mj-section>
+{% endblock %}

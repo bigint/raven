@@ -1,0 +1,24 @@
+{% extends "base.mjml" %}
+{% block preview %}{{ inviter_name }} invited you to Raven{% endblock %}
+{% block content %}
+<mj-section>
+  <mj-column>
+    <mj-text font-size="22px" font-weight="700" color="#111827" padding-bottom="16px">
+      You're Invited
+    </mj-text>
+    <mj-text>
+      <strong>{{ inviter_name }}</strong> has invited you to join their Raven workspace.
+    </mj-text>
+    <mj-text>
+      Raven is an AI gateway that helps teams manage, monitor, and control access to AI models.
+    </mj-text>
+    <mj-button href="{{ invite_url }}">
+      Accept Invitation
+    </mj-button>
+    <mj-divider border-color="#e5e7eb" padding-top="24px" />
+    <mj-text font-size="13px" color="#6b7280">
+      This invitation will expire in 7 days.
+    </mj-text>
+  </mj-column>
+</mj-section>
+{% endblock %}
