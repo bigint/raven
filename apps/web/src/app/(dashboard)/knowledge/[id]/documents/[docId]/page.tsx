@@ -1,38 +1,88 @@
 "use client";
 
-import { Badge, Button, PageHeader, Spinner } from "@raven/ui";
+import { Button, Input, Spinner } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
-import { formatDistanceToNow } from "date-fns";
-import { ArrowLeft, RefreshCw } from "lucide-react";
+import { format, formatDistanceToNow } from "date-fns";
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  ExternalLink,
+  FileText,
+  Globe,
+  Hash,
+  ImageIcon,
+  RefreshCw,
+  Search
+} from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
 import {
   documentDetailQueryOptions,
   useReprocessDocument
 } from "../../../hooks/use-documents";
-import { ChunkViewer } from "../../components/chunk-viewer";
 
-const STATUS_VARIANT: Record<
-  string,
-  "success" | "warning" | "error" | "neutral"
-> = {
-  failed: "error",
-  pending: "neutral",
-  processing: "warning",
-  ready: "success"
+const SOURCE_ICONS = {
+  file: FileText,
+  image: ImageIcon,
+  url: Globe
 };
+
+const STATUS_STYLES: Record<
+  string,
+  { bg: string; dot: string; text: string }
+> = {
+  failed: {
+    bg: "bg-red-500/10",
+    dot: "bg-red-500",
+    text: "text-red-600"
+  },
+  pending: {
+    bg: "bg-zinc-500/10",
+    dot: "bg-zinc-400",
+    text: "text-zinc-500"
+  },
+  processing: {
+    bg: "bg-amber-500/10",
+    dot: "bg-amber-500 animate-pulse",
+    text: "text-amber-600"
+  },
+  ready: {
+    bg: "bg-emerald-500/10",
+    dot: "bg-emerald-500",
+    text: "text-emerald-600"
+  }
+};
+
+const PAGE_SIZE = 20;
 
 const DocumentDetailPage = () => {
   const router = useRouter();
-  const { docId } = useParams<{ id: string; docId: string }>();
+  const { id, docId } = useParams<{ id: string; docId: string }>();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(0);
 
   const {
-    data: document,
+    data: doc,
     isPending,
     isError,
     error
   } = useQuery(documentDetailQueryOptions(docId));
 
-  const reprocessMutation = useReprocessDocument();
+  const reprocess = useReprocessDocument();
+
+  const filteredChunks = useMemo(() => {
+    if (!doc?.chunks) return [];
+    if (!searchQuery.trim()) return doc.chunks;
+    const q = searchQuery.toLowerCase();
+    return doc.chunks.filter((c) => c.content.toLowerCase().includes(q));
+  }, [doc?.chunks, searchQuery]);
+
+  const totalPages = Math.ceil(filteredChunks.length / PAGE_SIZE);
+  const pageChunks = filteredChunks.slice(
+    page * PAGE_SIZE,
+    (page + 1) * PAGE_SIZE
+  );
 
   if (isPending) {
     return (
@@ -42,102 +92,226 @@ const DocumentDetailPage = () => {
     );
   }
 
-  if (isError) {
+  if (isError || !doc) {
     return (
       <div
         className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
         role="alert"
       >
-        {error.message}
+        {error?.message ?? "Document not found"}
       </div>
     );
   }
 
-  const statusVariant = STATUS_VARIANT[document.status] ?? "neutral";
+  const SourceIcon = SOURCE_ICONS[doc.sourceType] ?? FileText;
+  const status = STATUS_STYLES[doc.status] ?? STATUS_STYLES.pending;
+  const avgTokens =
+    doc.chunkCount > 0 ? Math.round(doc.tokenCount / doc.chunkCount) : 0;
 
   return (
-    <div>
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <button
-              className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
-              onClick={() => router.back()}
-              type="button"
-            >
-              <ArrowLeft className="size-5" />
-            </button>
-            <h1 className="text-2xl font-semibold tracking-tight">
-              {document.title}
-            </h1>
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <button
+          className="mb-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          onClick={() => router.push(`/knowledge/${id}`)}
+          type="button"
+        >
+          <ArrowLeft className="size-3.5" />
+          Back to collection
+        </button>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+              <SourceIcon className="size-5 text-muted-foreground" />
+            </div>
+            <div>
+              <h1 className="text-xl font-semibold tracking-tight">
+                {doc.title}
+              </h1>
+              <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 font-medium ${status.bg} ${status.text}`}
+                >
+                  <span
+                    className={`size-1.5 rounded-full ${status.dot}`}
+                  />
+                  {doc.status}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <Calendar className="size-3" />
+                  {format(new Date(doc.createdAt), "MMM d, yyyy")}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <Clock className="size-3" />
+                  {formatDistanceToNow(new Date(doc.createdAt), {
+                    addSuffix: true
+                  })}
+                </span>
+              </div>
+            </div>
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">
-            View document content and chunk details.
-          </p>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
+
           <Button
-            disabled={reprocessMutation.isPending}
-            onClick={() => reprocessMutation.mutate(document.id)}
+            disabled={reprocess.isPending}
+            onClick={() => reprocess.mutate(doc.id)}
             variant="secondary"
           >
-            <RefreshCw className="size-4" />
-            {reprocessMutation.isPending ? "Reprocessing..." : "Reprocess"}
+            <RefreshCw
+              className={`size-4 ${reprocess.isPending ? "animate-spin" : ""}`}
+            />
+            {reprocess.isPending ? "Reprocessing..." : "Reprocess"}
           </Button>
         </div>
       </div>
 
-      {document.errorMessage && (
-        <div
-          className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
-          role="alert"
-        >
-          {document.errorMessage}
+      {/* Error banner */}
+      {doc.errorMessage && (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {doc.errorMessage}
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <div className="rounded-xl border border-border p-4">
-          <p className="text-xs text-muted-foreground">Type</p>
-          <p className="mt-1 text-sm font-medium capitalize">
-            {document.sourceType}
-          </p>
-        </div>
-        <div className="rounded-xl border border-border p-4">
-          <p className="text-xs text-muted-foreground">Status</p>
-          <div className="mt-1">
-            <Badge variant={statusVariant}>{document.status}</Badge>
+      {/* Stats row */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="flex items-center gap-3 rounded-lg border border-border p-3">
+          <Hash className="size-4 text-muted-foreground" />
+          <div>
+            <p className="text-xs text-muted-foreground">Chunks</p>
+            <p className="text-lg font-semibold tabular-nums">
+              {doc.chunkCount}
+            </p>
           </div>
         </div>
-        <div className="rounded-xl border border-border p-4">
-          <p className="text-xs text-muted-foreground">Chunks</p>
-          <p className="mt-1 text-sm font-medium">{document.chunkCount}</p>
+        <div className="flex items-center gap-3 rounded-lg border border-border p-3">
+          <FileText className="size-4 text-muted-foreground" />
+          <div>
+            <p className="text-xs text-muted-foreground">Tokens</p>
+            <p className="text-lg font-semibold tabular-nums">
+              {doc.tokenCount.toLocaleString()}
+            </p>
+          </div>
         </div>
-        <div className="rounded-xl border border-border p-4">
-          <p className="text-xs text-muted-foreground">Added</p>
-          <p className="mt-1 text-sm font-medium">
-            {formatDistanceToNow(new Date(document.createdAt), {
-              addSuffix: true
-            })}
-          </p>
+        <div className="flex items-center gap-3 rounded-lg border border-border p-3">
+          <Hash className="size-4 text-muted-foreground" />
+          <div>
+            <p className="text-xs text-muted-foreground">Avg per chunk</p>
+            <p className="text-lg font-semibold tabular-nums">
+              {avgTokens} tokens
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 rounded-lg border border-border p-3">
+          <FileText className="size-4 text-muted-foreground" />
+          <div>
+            <p className="text-xs text-muted-foreground">File size</p>
+            <p className="text-lg font-semibold tabular-nums">
+              {doc.fileSize
+                ? `${(doc.fileSize / 1024).toFixed(1)} KB`
+                : "N/A"}
+            </p>
+          </div>
         </div>
       </div>
 
-      {document.sourceUrl && (
-        <div className="mt-4">
-          <p className="mb-1 text-xs text-muted-foreground">Source URL</p>
+      {/* Source URL */}
+      {doc.sourceUrl && (
+        <div className="flex items-center gap-2 rounded-lg border border-border px-4 py-3">
+          <Globe className="size-4 shrink-0 text-muted-foreground" />
           <a
-            className="break-all text-sm text-blue-500 underline-offset-4 hover:underline"
-            href={document.sourceUrl}
+            className="min-w-0 truncate text-sm text-primary hover:underline"
+            href={doc.sourceUrl}
             rel="noopener noreferrer"
             target="_blank"
           >
-            {document.sourceUrl}
+            {doc.sourceUrl}
           </a>
+          <ExternalLink className="size-3 shrink-0 text-muted-foreground" />
         </div>
       )}
 
-      <ChunkViewer chunks={document.chunks} />
+      {/* Chunks section */}
+      {doc.chunks.length > 0 && (
+        <div className="rounded-xl border border-border">
+          {/* Chunks header */}
+          <div className="flex flex-col gap-3 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-sm font-semibold">
+              Chunks
+              <span className="ml-1.5 font-normal text-muted-foreground">
+                {searchQuery
+                  ? `${filteredChunks.length} of ${doc.chunks.length}`
+                  : doc.chunks.length}
+              </span>
+            </h2>
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+              <input
+                className="w-full rounded-md border border-input bg-background py-1.5 pl-8 pr-3 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(0);
+                }}
+                placeholder="Search chunks..."
+                type="text"
+                value={searchQuery}
+              />
+            </div>
+          </div>
+
+          {/* Chunk list */}
+          <div className="divide-y divide-border">
+            {pageChunks.map((chunk) => (
+              <div className="px-4 py-3" key={chunk.id}>
+                <div className="mb-1.5 flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                    <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]">
+                      #{chunk.chunkIndex}
+                    </span>
+                  </span>
+                  <span className="text-[11px] tabular-nums text-muted-foreground">
+                    {chunk.tokenCount} tokens
+                  </span>
+                </div>
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
+                  {chunk.content}
+                </p>
+              </div>
+            ))}
+
+            {pageChunks.length === 0 && (
+              <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                No chunks match your search.
+              </div>
+            )}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between border-t border-border px-4 py-2.5">
+              <Button
+                disabled={page === 0}
+                onClick={() => setPage((p) => p - 1)}
+                size="sm"
+                variant="ghost"
+              >
+                Previous
+              </Button>
+              <span className="text-xs text-muted-foreground tabular-nums">
+                Page {page + 1} of {totalPages}
+              </span>
+              <Button
+                disabled={page >= totalPages - 1}
+                onClick={() => setPage((p) => p + 1)}
+                size="sm"
+                variant="ghost"
+              >
+                Next
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
