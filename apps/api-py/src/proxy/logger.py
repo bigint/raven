@@ -70,7 +70,8 @@ async def log_request(
             "latencyMs": latency_ms,
             "cacheHit": cache_hit,
         }
-        await redis.publish("raven:events", json.dumps({"type": "request.completed", "data": event_data}))
+        event = {"type": "request.completed", "data": event_data}
+        await redis.publish("raven:events", json.dumps(event))
 
     except Exception:
         logger.exception("Failed to log request")

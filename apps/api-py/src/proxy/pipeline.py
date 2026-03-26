@@ -43,8 +43,8 @@ async def run_pipeline(
     if body_text:
         try:
             parsed_body = json.loads(body_text)
-        except json.JSONDecodeError:
-            raise AppError("Invalid JSON body", 400, "INVALID_JSON")
+        except json.JSONDecodeError as e:
+            raise AppError("Invalid JSON body", 400, "INVALID_JSON") from e
 
     # 3. Model validation
     requested_model = parsed_body.get("model", "unknown")

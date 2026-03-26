@@ -13,7 +13,9 @@ def _build_cache_key(provider: str, model: str, body: dict[str, Any]) -> str:
     temperature = body.get("temperature")
     system = body.get("system")
     tools = body.get("tools")
-    payload = f"{provider}:{model}:{json.dumps(content)}:{temperature}:{json.dumps(system)}:{json.dumps(tools)}"
+    parts = [provider, model, json.dumps(content), str(temperature)]
+    parts.extend([json.dumps(system), json.dumps(tools)])
+    payload = ":".join(parts)
     hash_hex = hashlib.sha256(payload.encode("utf-8")).hexdigest()
     return f"cache:resp:{hash_hex}"
 
