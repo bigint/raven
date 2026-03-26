@@ -1,24 +1,88 @@
-import { Readability } from "@mozilla/readability";
-import { parseHTML } from "linkedom";
 import { log } from "../logger";
 
 const DEFAULT_MAX_PAGES = 50;
 const FETCH_TIMEOUT = 15_000;
 const CRAWL_DELAY_MS = 300;
-const MAX_HTML_BYTES = 512 * 1024; // 512KB max per page — skip bloated pages
+const MAX_HTML_BYTES = 512 * 1024;
 
 export interface CrawledPage {
   readonly url: string;
   readonly text: string;
 }
 
-/** Strip heavy tags before DOM parsing to save memory */
-const stripHeavyTags = (html: string): string =>
-  html
+/** Strip HTML tags and decode common entities — no DOM parsing needed */
+const htmlToText = (html: string): string => {
+  let cleaned = html
     .replace(/<script[\s\S]*?<\/script>/gi, "")
     .replace(/<style[\s\S]*?<\/style>/gi, "")
     .replace(/<svg[\s\S]*?<\/svg>/gi, "")
-    .replace(/<noscript[\s\S]*?<\/noscript>/gi, "");
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, "")
+    .replace(/<nav[\s\S]*?<\/nav>/gi, "")
+    .replace(/<header[\s\S]*?<\/header>/gi, "")
+    .replace(/<footer[\s\S]*?<\/footer>/gi, "");
+
+  cleaned = cleaned
+    .replace(/<\/?(p|div|br|h[1-6]|li|tr|blockquote|section|article)[^>]*>/gi, "\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&[a-z]+;/gi, " ")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n[ \t]+/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  return cleaned;
+};
+
+const extractTitle = (html: string): string | null => {
+  const match = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(html);
+  return match?.[1]?.replace(/<[^>]+>/g, "").trim() || null;
+};
+
+/** Extract same-origin links using regex — no DOM needed */
+const extractLinks = (html: string, baseUrl: URL): string[] => {
+  const links: string[] = [];
+  const seen = new Set<string>();
+  const hrefRegex = /<a[^>]+href=["']([^"'#]+)["'][^>]*>/gi;
+  let match: RegExpExecArray | null;
+
+  while ((match = hrefRegex.exec(html)) !== null) {
+    try {
+      const href = match[1]!;
+      if (href.startsWith("javascript:") || href.startsWith("mailto:") || href.startsWith("tel:"))
+        continue;
+
+      const resolved = new URL(href, baseUrl);
+      if (resolved.origin !== baseUrl.origin) continue;
+      if (resolved.protocol !== "http:" && resolved.protocol !== "https:")
+        continue;
+
+      resolved.hash = "";
+      const normalized = resolved.href.replace(/\/+$/, "");
+
+      if (
+        /\.(png|jpg|jpeg|gif|svg|webp|ico|css|js|pdf|zip|tar|gz|mp4|mp3|woff2?|ttf|eot)$/i.test(
+          resolved.pathname
+        )
+      )
+        continue;
+
+      if (!seen.has(normalized)) {
+        seen.add(normalized);
+        links.push(normalized);
+      }
+    } catch {
+      // skip
+    }
+  }
+
+  return links;
+};
 
 const fetchPage = async (url: string): Promise<string | null> => {
   try {
@@ -43,7 +107,6 @@ const fetchPage = async (url: string): Promise<string | null> => {
       return null;
     }
 
-    // Check content-length header if available
     const contentLength = response.headers.get("content-length");
     if (contentLength && Number.parseInt(contentLength, 10) > MAX_HTML_BYTES) {
       log.info("Skipped (too large)", {
@@ -53,11 +116,11 @@ const fetchPage = async (url: string): Promise<string | null> => {
       return null;
     }
 
-    // Read body with size limit
     const reader = response.body?.getReader();
     if (!reader) return null;
 
-    const chunks: Uint8Array[] = [];
+    const parts: string[] = [];
+    const decoder = new TextDecoder();
     let totalSize = 0;
 
     while (true) {
@@ -72,12 +135,10 @@ const fetchPage = async (url: string): Promise<string | null> => {
         });
         return null;
       }
-      chunks.push(value);
+      parts.push(decoder.decode(value, { stream: true }));
     }
-
-    const decoder = new TextDecoder();
-    return chunks.map((c) => decoder.decode(c, { stream: true })).join("") +
-      decoder.decode();
+    parts.push(decoder.decode());
+    return parts.join("");
   } catch (err) {
     log.info("Skipped (fetch failed)", {
       error: err instanceof Error ? err.message : String(err),
@@ -85,57 +146,6 @@ const fetchPage = async (url: string): Promise<string | null> => {
     });
     return null;
   }
-};
-
-/**
- * Parse HTML once, extract both readable text and links.
- * Single DOM parse per page to minimize memory usage.
- */
-const parsePage = (
-  html: string,
-  baseUrl: URL
-): { text: string | null; links: string[] } => {
-  const cleaned = stripHeavyTags(html);
-  const { document: doc } = parseHTML(cleaned) as unknown as {
-    document: {
-      querySelectorAll: (s: string) => { href?: string }[];
-      cloneNode: (deep: boolean) => unknown;
-    };
-  };
-
-  // Extract links first (before Readability mutates the DOM)
-  const links: string[] = [];
-  const anchors = doc.querySelectorAll("a[href]");
-  for (const a of anchors) {
-    try {
-      const href = a.href;
-      if (!href) continue;
-      const resolved = new URL(href, baseUrl);
-      if (resolved.origin !== baseUrl.origin) continue;
-      if (resolved.protocol !== "http:" && resolved.protocol !== "https:")
-        continue;
-      resolved.hash = "";
-      const normalized = resolved.href.replace(/\/+$/, "");
-      if (
-        /\.(png|jpg|jpeg|gif|svg|webp|ico|css|js|pdf|zip|tar|gz|mp4|mp3|woff2?|ttf|eot)$/i.test(
-          resolved.pathname
-        )
-      )
-        continue;
-      links.push(normalized);
-    } catch {
-      // skip invalid URLs
-    }
-  }
-
-  // Extract text using a cloned DOM (Readability mutates it)
-  const reader = new Readability(
-    doc.cloneNode(true) as ConstructorParameters<typeof Readability>[0]
-  );
-  const article = reader.parse();
-  const text = article?.textContent?.trim() || null;
-
-  return { links: [...new Set(links)], text };
 };
 
 export async function* crawlUrl(
@@ -174,20 +184,22 @@ export async function* crawlUrl(
     const html = await fetchPage(currentUrl);
     if (!html) continue;
 
-    // Single DOM parse for both text + links
-    const { text, links } = parsePage(html, baseUrl);
+    const text = htmlToText(html);
+    const links = extractLinks(html, baseUrl);
 
-    if (text && text.length > 50) {
+    if (text.length > 50) {
       pagesWithText++;
+      const title = extractTitle(html);
+      const label = title ? `${title} (${currentUrl})` : currentUrl;
       log.info("Extracted text", {
         pagesWithText,
         textLength: text.length,
         url: currentUrl
       });
-      yield { text: `[Source: ${currentUrl}]\n${text}`, url: currentUrl };
+      yield { text: `[Source: ${label}]\n${text}`, url: currentUrl };
     } else {
       log.info("No readable content", {
-        textLength: text?.length ?? 0,
+        textLength: text.length,
         url: currentUrl
       });
     }
@@ -216,7 +228,6 @@ export async function* crawlUrl(
   });
 }
 
-/** Legacy single-string API */
 export const parseUrl = async (
   url: string,
   maxPages?: number
