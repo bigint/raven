@@ -35,10 +35,15 @@ interface DocumentsTabProps {
   readonly collectionId: string;
 }
 
+const hasPending = (docs: Document[]) =>
+  docs.some((d) => d.status === "pending" || d.status === "processing");
+
 const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
-  const { data: documents = [], isLoading } = useQuery(
-    documentsQueryOptions(collectionId)
-  );
+  const { data: documents = [], isLoading } = useQuery({
+    ...documentsQueryOptions(collectionId),
+    refetchInterval: (query) =>
+      hasPending(query.state.data ?? []) ? 5000 : false
+  });
 
   const [uploadOpen, setUploadOpen] = useState(false);
   const [urlOpen, setUrlOpen] = useState(false);
