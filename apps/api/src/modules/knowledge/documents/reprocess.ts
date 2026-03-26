@@ -31,7 +31,11 @@ export const reprocessDocument =
       .where(eq(knowledgeChunks.documentId, docId));
 
     // Delete vectors from Qdrant
-    void deleteVectorsByDocumentId(qdrant, `knowledge_${document.collectionId}`, docId);
+    void deleteVectorsByDocumentId(
+      qdrant,
+      `knowledge_${document.collectionId}`,
+      docId
+    );
 
     // Reset document status to pending
     await db

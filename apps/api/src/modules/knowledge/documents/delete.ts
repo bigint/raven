@@ -27,7 +27,11 @@ export const deleteDocument =
     }
 
     // Fire and forget — remove Qdrant vectors in the background
-    void deleteVectorsByDocumentId(qdrant, `knowledge_${deleted.collectionId}`, deleted.id);
+    void deleteVectorsByDocumentId(
+      qdrant,
+      `knowledge_${deleted.collectionId}`,
+      deleted.id
+    );
 
     void auditAndPublish(db, user, "document", "deleted", {
       metadata: { title: deleted.title },

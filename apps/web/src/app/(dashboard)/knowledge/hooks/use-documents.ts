@@ -72,10 +72,10 @@ export const useUploadDocument = (collectionId: string) => {
       const formData = new FormData();
       formData.append("file", file);
       const promise = ky
-        .post(
-          `${API_URL}/v1/knowledge/collections/${collectionId}/documents`,
-          { body: formData, credentials: "include" }
-        )
+        .post(`${API_URL}/v1/knowledge/collections/${collectionId}/documents`, {
+          body: formData,
+          credentials: "include"
+        })
         .json<Document>();
       toast.promise(promise, {
         error: (err) => (err instanceof Error ? err.message : "Upload failed"),

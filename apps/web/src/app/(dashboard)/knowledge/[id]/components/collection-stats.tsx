@@ -1,19 +1,15 @@
 "use client";
 
 import { Badge } from "@raven/ui";
+import { formatDistanceToNow } from "date-fns";
 import {
   BookOpen,
   Boxes,
   Brain,
   Hash,
-  Layers,
-  Ruler,
   ScanSearch,
-  Settings2,
-  Sparkles,
-  Target
+  Settings2
 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 import type { CollectionDetail } from "../../hooks/use-collections";
 
 interface CollectionStatsProps {
@@ -38,9 +34,7 @@ const StatCard = ({
     <div className="min-w-0">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="mt-0.5 text-xl font-semibold tabular-nums">{value}</p>
-      {sub && (
-        <p className="mt-0.5 text-[11px] text-muted-foreground">{sub}</p>
-      )}
+      {sub && <p className="mt-0.5 text-[11px] text-muted-foreground">{sub}</p>}
     </div>
   </div>
 );
@@ -112,8 +106,8 @@ const CollectionStats = ({ collection }: CollectionStatsProps) => {
         <StatCard
           icon={Brain}
           label="Embedding Model"
-          value={collection.embeddingModel.replace("text-embedding-", "")}
           sub={`${collection.embeddingDimensions}d vectors`}
+          value={collection.embeddingModel.replace("text-embedding-", "")}
         />
       </div>
 
@@ -129,7 +123,7 @@ const CollectionStats = ({ collection }: CollectionStatsProps) => {
             <ConfigRow
               label="Strategy"
               value={
-                <Badge variant="secondary">
+                <Badge variant="neutral">
                   {STRATEGY_LABELS[collection.chunkStrategy] ??
                     collection.chunkStrategy}
                 </Badge>
@@ -201,9 +195,9 @@ const CollectionStats = ({ collection }: CollectionStatsProps) => {
           })}
         </span>
         {collection.isEnabled ? (
-          <Badge variant="secondary">Active</Badge>
+          <Badge variant="neutral">Active</Badge>
         ) : (
-          <Badge variant="destructive">Disabled</Badge>
+          <Badge variant="error">Disabled</Badge>
         )}
       </div>
     </div>

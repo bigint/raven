@@ -41,7 +41,10 @@ const runAllJobs = async () => {
   await runJob("url recrawl", () => recrawlDueDocuments(db, redis));
 };
 
-const qdrant = new QdrantClient({ url: env.QDRANT_URL, apiKey: env.QDRANT_API_KEY });
+const qdrant = new QdrantClient({
+  apiKey: env.QDRANT_API_KEY,
+  url: env.QDRANT_URL
+});
 const stopWorker = startWorker({ db, env, qdrant, redis });
 
 console.log("Raven cron worker started");

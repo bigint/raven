@@ -194,9 +194,7 @@ const DocumentDetailPage = () => {
           <div>
             <p className="text-xs text-muted-foreground">File size</p>
             <p className="text-lg font-semibold tabular-nums">
-              {doc.fileSize
-                ? `${(doc.fileSize / 1024).toFixed(1)} KB`
-                : "N/A"}
+              {doc.fileSize ? `${(doc.fileSize / 1024).toFixed(1)} KB` : "N/A"}
             </p>
           </div>
         </div>
@@ -229,7 +227,8 @@ const DocumentDetailPage = () => {
               </span>
             </h2>
             <span className="text-xs text-muted-foreground tabular-nums">
-              Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, totalChunks)}
+              Showing {page * PAGE_SIZE + 1}–
+              {Math.min((page + 1) * PAGE_SIZE, totalChunks)}
             </span>
           </div>
 

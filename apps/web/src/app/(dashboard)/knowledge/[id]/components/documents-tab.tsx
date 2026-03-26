@@ -1,7 +1,7 @@
 "use client";
 
 import type { Column } from "@raven/ui";
-import { Badge, Button, ConfirmDialog, DataTable } from "@raven/ui";
+import { Button, ConfirmDialog, DataTable } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { FileUp, Globe, ImageIcon, Plus } from "lucide-react";
@@ -21,16 +21,6 @@ const SOURCE_TYPE_ICONS: Record<Document["sourceType"], React.ReactNode> = {
   url: <Globe className="size-3.5" />
 };
 
-const STATUS_VARIANT: Record<
-  Document["status"],
-  "neutral" | "warning" | "success" | "error"
-> = {
-  failed: "error",
-  pending: "neutral",
-  processing: "warning",
-  ready: "success"
-};
-
 const STATUS_DOT: Record<Document["status"], string> = {
   failed: "bg-red-500",
   pending: "bg-zinc-400",
@@ -48,18 +38,24 @@ const STATUS_LABEL: Record<Document["status"], string> = {
 const StatusCell = ({ doc }: { readonly doc: Document }) => (
   <div className="flex flex-col gap-1">
     <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-border bg-muted/50 px-2.5 py-0.5 text-xs font-medium">
-      <span className={`size-1.5 rounded-full ${STATUS_DOT[doc.status]} ${doc.status === "processing" ? "animate-pulse" : ""}`} />
+      <span
+        className={`size-1.5 rounded-full ${STATUS_DOT[doc.status]} ${doc.status === "processing" ? "animate-pulse" : ""}`}
+      />
       {STATUS_LABEL[doc.status]}
     </span>
-    {doc.status === "processing" && (doc.chunkCount > 0 || doc.tokenCount > 0) && (
-      <span className="text-[11px] text-muted-foreground tabular-nums">
-        {doc.chunkCount > 0 && `${doc.chunkCount} chunks`}
-        {doc.chunkCount > 0 && doc.tokenCount > 0 && " · "}
-        {doc.tokenCount > 0 && `${doc.tokenCount.toLocaleString()} tokens`}
-      </span>
-    )}
+    {doc.status === "processing" &&
+      (doc.chunkCount > 0 || doc.tokenCount > 0) && (
+        <span className="text-[11px] text-muted-foreground tabular-nums">
+          {doc.chunkCount > 0 && `${doc.chunkCount} chunks`}
+          {doc.chunkCount > 0 && doc.tokenCount > 0 && " · "}
+          {doc.tokenCount > 0 && `${doc.tokenCount.toLocaleString()} tokens`}
+        </span>
+      )}
     {doc.status === "failed" && doc.errorMessage && (
-      <span className="max-w-[200px] truncate text-[11px] text-destructive" title={doc.errorMessage}>
+      <span
+        className="max-w-[200px] truncate text-[11px] text-destructive"
+        title={doc.errorMessage}
+      >
         {doc.errorMessage}
       </span>
     )}

@@ -649,10 +649,7 @@ const Dropdown = ({
 }) => (
   <>
     {/* biome-ignore lint/a11y/useKeyboardEvents: backdrop dismiss */}
-    <div
-      className="fixed inset-0 z-40"
-      onClick={onClose}
-    />
+    <div className="fixed inset-0 z-40" onClick={onClose} />
     <div className="absolute bottom-full left-0 z-50 mb-1 rounded-lg border border-border bg-popover shadow-sm">
       {children}
     </div>

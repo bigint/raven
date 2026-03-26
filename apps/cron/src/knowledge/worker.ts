@@ -18,7 +18,11 @@ import { parseImage } from "./parsers/image";
 import { parseMarkdown } from "./parsers/markdown";
 import { parsePdf } from "./parsers/pdf";
 import { crawlUrl, parseUrl } from "./parsers/url";
-import { deleteVectorsByDocumentId, ensureCollection, upsertVectors } from "./qdrant";
+import {
+  deleteVectorsByDocumentId,
+  ensureCollection,
+  upsertVectors
+} from "./qdrant";
 import type { IngestionJob } from "./queue";
 import {
   completeJob,
@@ -60,7 +64,10 @@ const extractText = async (
     if (!job.sourceUrl) {
       throw new Error("URL job missing sourceUrl");
     }
-    const crawlLimit = typeof metadata?.crawlLimit === "number" ? metadata.crawlLimit : undefined;
+    const crawlLimit =
+      typeof metadata?.crawlLimit === "number"
+        ? metadata.crawlLimit
+        : undefined;
     return parseUrl(job.sourceUrl, crawlLimit);
   }
 
@@ -118,14 +125,23 @@ const processJob = async (
   // Mark document as processing and clear any existing chunks from previous attempts
   await db
     .update(knowledgeDocuments)
-    .set({ chunkCount: 0, status: "processing", tokenCount: 0, updatedAt: new Date() })
+    .set({
+      chunkCount: 0,
+      status: "processing",
+      tokenCount: 0,
+      updatedAt: new Date()
+    })
     .where(eq(knowledgeDocuments.id, job.documentId));
 
   await db
     .delete(knowledgeChunks)
     .where(eq(knowledgeChunks.documentId, job.documentId));
 
-  await deleteVectorsByDocumentId(qdrant, `knowledge_${job.collectionId}`, job.documentId);
+  await deleteVectorsByDocumentId(
+    qdrant,
+    `knowledge_${job.collectionId}`,
+    job.documentId
+  );
 
   // Load collection config
   const collections = await db
@@ -135,7 +151,9 @@ const processJob = async (
     .limit(1);
 
   if (collections.length === 0) {
-    log.info("Collection no longer exists, skipping job", { collectionId: job.collectionId });
+    log.info("Collection no longer exists, skipping job", {
+      collectionId: job.collectionId
+    });
     return;
   }
 
@@ -149,7 +167,9 @@ const processJob = async (
     .limit(1);
 
   if (documents.length === 0) {
-    log.info("Document no longer exists, skipping job", { documentId: job.documentId });
+    log.info("Document no longer exists, skipping job", {
+      documentId: job.documentId
+    });
     return;
   }
 
@@ -176,7 +196,10 @@ const processJob = async (
   let totalTokens = 0;
 
   // Helper: process a single text block — chunk, embed, store, then discard
-  const processTextBlock = async (text: string, chunkOffset: number): Promise<number> => {
+  const processTextBlock = async (
+    text: string,
+    chunkOffset: number
+  ): Promise<number> => {
     const chunks = chunkText(text, chunkOpts);
     if (chunks.length === 0) return 0;
 
@@ -229,9 +252,10 @@ const processJob = async (
   // URL jobs: stream page-by-page to keep memory flat
   if (job.type === "url") {
     if (!job.sourceUrl) throw new Error("URL job missing sourceUrl");
-    const crawlLimit = typeof document.metadata?.crawlLimit === "number"
-      ? document.metadata.crawlLimit
-      : undefined;
+    const crawlLimit =
+      typeof document.metadata?.crawlLimit === "number"
+        ? document.metadata.crawlLimit
+        : undefined;
 
     let pageIndex = 0;
     for await (const page of crawlUrl(job.sourceUrl, crawlLimit)) {
@@ -266,7 +290,12 @@ const processJob = async (
     }
   } else {
     // File/image jobs: extract text in one shot (bounded by file size limits)
-    const text = await extractText(job, document.mimeType, apiKey, document.metadata);
+    const text = await extractText(
+      job,
+      document.mimeType,
+      apiKey,
+      document.metadata
+    );
 
     if (!text || text.trim().length === 0) {
       throw new Error("Extracted text is empty");

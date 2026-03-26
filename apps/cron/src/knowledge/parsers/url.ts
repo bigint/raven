@@ -22,7 +22,10 @@ const htmlToText = (html: string): string => {
     .replace(/<footer[\s\S]*?<\/footer>/gi, "");
 
   cleaned = cleaned
-    .replace(/<\/?(p|div|br|h[1-6]|li|tr|blockquote|section|article)[^>]*>/gi, "\n")
+    .replace(
+      /<\/?(p|div|br|h[1-6]|li|tr|blockquote|section|article)[^>]*>/gi,
+      "\n"
+    )
     .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;/g, " ")
     .replace(/&amp;/g, "&")
@@ -54,7 +57,11 @@ const extractLinks = (html: string, baseUrl: URL): string[] => {
   while ((match = hrefRegex.exec(html)) !== null) {
     try {
       const href = match[1]!;
-      if (href.startsWith("javascript:") || href.startsWith("mailto:") || href.startsWith("tel:"))
+      if (
+        href.startsWith("javascript:") ||
+        href.startsWith("mailto:") ||
+        href.startsWith("tel:")
+      )
         continue;
 
       const resolved = new URL(href, baseUrl);

@@ -1,14 +1,4 @@
 export const log = {
-  info: (message: string, meta?: Record<string, unknown>): void => {
-    console.log(
-      JSON.stringify({
-        level: "info",
-        message,
-        timestamp: new Date().toISOString(),
-        ...meta
-      })
-    );
-  },
   error: (
     message: string,
     error?: unknown,
@@ -27,6 +17,16 @@ export const log = {
         message,
         timestamp: new Date().toISOString(),
         ...errorMeta
+      })
+    );
+  },
+  info: (message: string, meta?: Record<string, unknown>): void => {
+    console.log(
+      JSON.stringify({
+        level: "info",
+        message,
+        timestamp: new Date().toISOString(),
+        ...meta
       })
     );
   }
