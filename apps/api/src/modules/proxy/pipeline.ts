@@ -1,9 +1,12 @@
+import type { QdrantClient } from "@qdrant/js-client-rest";
 import type { Env } from "@raven/config";
 import { MODEL_CATALOG } from "@raven/data";
 import type { Database } from "@raven/db";
 import type { Redis } from "ioredis";
 import { GuardrailError, ValidationError } from "@/lib/errors";
 import { getInstanceSettings } from "@/lib/instance-settings";
+import { log } from "@/lib/logger";
+import { performRAGInjection } from "../knowledge/rag/injection";
 import { authenticateKey } from "./auth";
 import { checkBudgets } from "./budget-check";
 import { checkCache, serveCacheHit } from "./cache";
@@ -31,6 +34,8 @@ interface PipelineInput {
   readonly upstreamPathOverride?: string;
   readonly skipRouting?: boolean;
   readonly strictBody?: boolean;
+  readonly qdrant?: QdrantClient;
+  readonly knowledgeEnabled?: boolean;
 }
 
 export const runPipeline = async (input: PipelineInput): Promise<Response> => {
@@ -93,7 +98,29 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
       : null
   ]);
 
-  // 5. Extract end-user identity
+  // 5. RAG injection (if enabled)
+  let ragHeaders: Record<string, string> = {};
+  if (input.knowledgeEnabled && input.qdrant && hasMessages) {
+    try {
+      const ragResult = await performRAGInjection({
+        db: input.db,
+        env: input.env,
+        headers: input.incomingHeaders,
+        messages: parsedBody.messages as unknown[],
+        qdrant: input.qdrant,
+        redis: input.redis,
+        virtualKeyId: virtualKey.id
+      });
+      if (ragResult.used) {
+        parsedBody = { ...parsedBody, messages: ragResult.injectedMessages };
+        ragHeaders = ragResult.responseHeaders;
+      }
+    } catch (err) {
+      log.error("RAG injection failed, continuing without context", err);
+    }
+  }
+
+  // 6. Extract end-user identity
   const endUser =
     (input.userIdHeader as string | undefined) ??
     (typeof parsedBody.user === "string" ? parsedBody.user : null) ??
@@ -109,7 +136,7 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
     parsedBody = { ...parsedBody, model: routingResult.model };
   }
 
-  // 6. Cache + provider resolution in parallel
+  // 7. Cache + provider resolution in parallel
   const { providerName: pathProvider } = parseProviderFromPath(
     input.providerPath
   );
@@ -149,7 +176,7 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
     });
   }
 
-  // 7. Parse + execute
+  // 8. Parse + execute
   const parsed = parseIncomingRequest(parsedBody, providerName);
 
   // Apply default max tokens from settings when not specified by client
@@ -176,7 +203,7 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
     decryptedApiKey,
     endUser,
     env: input.env,
-    extraResponseHeaders: input.extraResponseHeaders,
+    extraResponseHeaders: { ...input.extraResponseHeaders, ...ragHeaders },
     guardrailMatches,
     guardrailWarnings,
     incomingHeaders: input.incomingHeaders,
