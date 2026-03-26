@@ -29,6 +29,7 @@ line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "B", "SIM", "TCH"]
+ignore = ["B008"]  # Depends() in defaults is standard FastAPI pattern
 
 [tool.ruff.lint.isort]
 known-first-party = ["src"]
