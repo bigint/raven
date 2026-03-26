@@ -1,3 +1,5 @@
+import { useQuery } from "@tanstack/react-query";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 const authFetch = async <T>(
@@ -50,7 +52,7 @@ export const signOut = async () => {
   await authFetch("/api/auth/sign-out", { method: "POST" });
 };
 
-interface SessionUser {
+export interface SessionUser {
   id: string;
   email: string;
   name: string;
@@ -58,14 +60,31 @@ interface SessionUser {
   avatar_url?: string | null;
 }
 
-export const getSession = async (): Promise<{
+interface SessionData {
   user: SessionUser;
-} | null> => {
+}
+
+export const getSession = async (): Promise<SessionData | null> => {
   try {
-    return await authFetch<{ user: SessionUser }>("/api/auth/session");
+    return await authFetch<SessionData>("/api/auth/session");
   } catch {
     return null;
   }
+};
+
+export const useSession = () => {
+  const query = useQuery({
+    queryKey: ["session"],
+    queryFn: getSession,
+    retry: false,
+    staleTime: 60_000
+  });
+
+  return {
+    data: query.data ?? null,
+    error: query.error ?? null,
+    isPending: query.isLoading
+  };
 };
 
 export const forgetPassword = async ({
