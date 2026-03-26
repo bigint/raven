@@ -97,6 +97,11 @@ export const parseUrl = async (url: string, maxPages?: number): Promise<string> 
 
     log.info("Fetching", { url: currentUrl, visited: visited.size, queued: queue.length });
 
+    // Polite delay between requests to avoid hammering the server
+    if (visited.size > 1) {
+      await new Promise((r) => setTimeout(r, 200));
+    }
+
     const html = await fetchPage(currentUrl);
     if (!html) continue;
 

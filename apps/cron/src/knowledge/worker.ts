@@ -164,15 +164,6 @@ const processJob = async (
     throw new Error("Chunking produced no chunks");
   }
 
-  // Embed all chunks
-  const texts = chunks.map((c) => c.content);
-  const embeddings = await embedTexts(
-    apiKey,
-    texts,
-    collection.embeddingModel,
-    collection.embeddingDimensions
-  );
-
   // Ensure Qdrant collection exists
   const qdrantCollectionName = `knowledge_${job.collectionId}`;
   await ensureCollection(
@@ -181,35 +172,57 @@ const processJob = async (
     collection.embeddingDimensions
   );
 
-  // Generate chunk IDs and insert to Postgres
-  const chunkIds = chunks.map(() => createId());
+  // Process in batches to avoid OOM on large documents
+  const BATCH_SIZE = 100;
+  for (let batchStart = 0; batchStart < chunks.length; batchStart += BATCH_SIZE) {
+    const batch = chunks.slice(batchStart, batchStart + BATCH_SIZE);
 
-  await db.insert(knowledgeChunks).values(
-    chunks.map((chunk, i) => ({
-      chunkIndex: chunk.index,
-      collectionId: job.collectionId,
-      content: chunk.content,
+    log.info("Processing chunk batch", {
+      batch: Math.floor(batchStart / BATCH_SIZE) + 1,
+      batchSize: batch.length,
       documentId: job.documentId,
-      id: chunkIds[i]!,
-      tokenCount: chunk.tokenCount
-    }))
-  );
+      totalChunks: chunks.length
+    });
 
-  // Upsert vectors to Qdrant
-  await upsertVectors(
-    qdrant,
-    qdrantCollectionName,
-    chunks.map((chunk, i) => ({
-      id: chunkIds[i]!,
-      payload: {
+    // Embed batch
+    const batchTexts = batch.map((c) => c.content);
+    const embeddings = await embedTexts(
+      apiKey,
+      batchTexts,
+      collection.embeddingModel,
+      collection.embeddingDimensions
+    );
+
+    // Generate IDs and insert to Postgres
+    const batchIds = batch.map(() => createId());
+
+    await db.insert(knowledgeChunks).values(
+      batch.map((chunk, i) => ({
         chunkIndex: chunk.index,
         collectionId: job.collectionId,
         content: chunk.content,
-        documentId: job.documentId
-      },
-      vector: embeddings[i]!
-    }))
-  );
+        documentId: job.documentId,
+        id: batchIds[i]!,
+        tokenCount: chunk.tokenCount
+      }))
+    );
+
+    // Upsert vectors to Qdrant
+    await upsertVectors(
+      qdrant,
+      qdrantCollectionName,
+      batch.map((chunk, i) => ({
+        id: batchIds[i]!,
+        payload: {
+          chunkIndex: chunk.index,
+          collectionId: job.collectionId,
+          content: chunk.content,
+          documentId: job.documentId
+        },
+        vector: embeddings[i]!
+      }))
+    );
+  }
 
   // Compute totals
   const totalTokens = chunks.reduce((sum, c) => sum + c.tokenCount, 0);
