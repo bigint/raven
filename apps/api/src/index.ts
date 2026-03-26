@@ -29,6 +29,7 @@ import { createBudgetsModule } from "./modules/budgets/index";
 import { createGuardrailsModule } from "./modules/guardrails/index";
 import { createInvitationsModule } from "./modules/invitations/index";
 import { createKeysModule } from "./modules/keys/index";
+import { createKnowledgeAnalyticsModule } from "./modules/knowledge/analytics/index";
 import {
   createKeyBindingsModule,
   createKnowledgeModule
@@ -210,6 +211,7 @@ const adminRoutes = new Hono();
 adminRoutes.use("*", createAuthMiddleware(auth));
 adminRoutes.use("*", platformAdminMiddleware);
 adminRoutes.route("/", createAdminModule(db, env.APP_URL, redis));
+adminRoutes.route("/knowledge", createKnowledgeAnalyticsModule(db));
 app.route("/v1/admin", adminRoutes);
 
 // Protected API routes (session auth + writer middleware for mutations)
