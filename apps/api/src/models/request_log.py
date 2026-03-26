@@ -24,51 +24,42 @@ class RequestLog(Base):
     )
 
     id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper)
-    cached_tokens: Mapped[int] = mapped_column(
-        "cached_tokens", Integer, nullable=False, default=0
+    cached_tokens: Mapped[int] = mapped_column(Integer, nullable=False, default=0
     )
-    cache_hit: Mapped[bool] = mapped_column("cache_hit", Boolean, nullable=False, default=False)
+    cache_hit: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     cost: Mapped[Decimal] = mapped_column(
         Numeric(precision=12, scale=6), nullable=False, default=Decimal("0")
     )
-    created_at: Mapped[datetime] = mapped_column(
-        "created_at", DateTime(timezone=True), nullable=False, server_default="now()"
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default="now()"
     )
-    end_user: Mapped[str | None] = mapped_column("end_user", Text, nullable=True)
-    has_images: Mapped[bool] = mapped_column("has_images", Boolean, nullable=False, default=False)
-    has_tool_use: Mapped[bool] = mapped_column(
-        "has_tool_use", Boolean, nullable=False, default=False
+    end_user: Mapped[str | None] = mapped_column(Text, nullable=True)
+    has_images: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    has_tool_use: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False
     )
-    image_count: Mapped[int] = mapped_column("image_count", Integer, nullable=False, default=0)
-    input_tokens: Mapped[int] = mapped_column("input_tokens", Integer, nullable=False, default=0)
-    is_starred: Mapped[bool] = mapped_column("is_starred", Boolean, nullable=False, default=False)
-    latency_ms: Mapped[int] = mapped_column("latency_ms", Integer, nullable=False, default=0)
+    image_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    input_tokens: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    is_starred: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    latency_ms: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     method: Mapped[str] = mapped_column(Text, nullable=False)
     model: Mapped[str] = mapped_column(Text, nullable=False)
-    output_tokens: Mapped[int] = mapped_column("output_tokens", Integer, nullable=False, default=0)
+    output_tokens: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     path: Mapped[str] = mapped_column(Text, nullable=False)
     provider: Mapped[str] = mapped_column(Text, nullable=False)
-    provider_config_id: Mapped[str | None] = mapped_column(
-        "provider_config_id",
-        Text,
+    provider_config_id: Mapped[str | None] = mapped_column(Text,
         ForeignKey("provider_configs.id", ondelete="SET NULL"),
         nullable=True,
     )
-    reasoning_tokens: Mapped[int] = mapped_column(
-        "reasoning_tokens", Integer, nullable=False, default=0
+    reasoning_tokens: Mapped[int] = mapped_column(Integer, nullable=False, default=0
     )
-    request_body: Mapped[str | None] = mapped_column("request_body", Text, nullable=True)
-    response_body: Mapped[str | None] = mapped_column("response_body", Text, nullable=True)
-    session_id: Mapped[str | None] = mapped_column("session_id", Text, nullable=True)
-    status_code: Mapped[int] = mapped_column("status_code", Integer, nullable=False)
-    tool_count: Mapped[int] = mapped_column("tool_count", Integer, nullable=False, default=0)
-    tool_names: Mapped[list[str] | None] = mapped_column(
-        "tool_names", JSONB, default=list
+    request_body: Mapped[str | None] = mapped_column(Text, nullable=True)
+    response_body: Mapped[str | None] = mapped_column(Text, nullable=True)
+    session_id: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status_code: Mapped[int] = mapped_column(Integer, nullable=False)
+    tool_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    tool_names: Mapped[list[str] | None] = mapped_column(JSONB, default=list
     )
-    user_agent: Mapped[str | None] = mapped_column("user_agent", Text, nullable=True)
-    virtual_key_id: Mapped[str | None] = mapped_column(
-        "virtual_key_id",
-        Text,
+    user_agent: Mapped[str | None] = mapped_column(Text, nullable=True)
+    virtual_key_id: Mapped[str | None] = mapped_column(Text,
         ForeignKey("virtual_keys.id", ondelete="SET NULL"),
         nullable=True,
     )

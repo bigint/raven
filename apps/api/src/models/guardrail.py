@@ -44,7 +44,7 @@ guardrail_action_enum = Enum(
 
 class GuardrailRule(Base):
     __tablename__ = "guardrail_rules"
-    __table_args__ = (Index("guardrail_rules_enabled_idx", "isEnabled"),)
+    __table_args__ = (Index("guardrail_rules_enabled_idx", "is_enabled"),)
 
     id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper)
     type: Mapped[GuardrailType] = mapped_column(guardrail_type_enum, nullable=False)
@@ -53,11 +53,9 @@ class GuardrailRule(Base):
     action: Mapped[GuardrailAction] = mapped_column(
         guardrail_action_enum, nullable=False, default=GuardrailAction.LOG
     )
-    is_enabled: Mapped[bool] = mapped_column("isEnabled", Boolean, nullable=False, default=True)
+    is_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     priority: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    created_at: Mapped[datetime] = mapped_column(
-        "createdAt", DateTime(timezone=True), nullable=False, server_default="now()"
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default="now()"
     )
-    updated_at: Mapped[datetime] = mapped_column(
-        "updatedAt", DateTime(timezone=True), nullable=False, server_default="now()"
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default="now()"
     )

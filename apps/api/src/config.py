@@ -1,15 +1,25 @@
+from pathlib import Path
+
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
+# Resolve root .env (two levels up from apps/api/)
+_root = Path(__file__).resolve().parent.parent.parent.parent
+_env_file = _root / ".env"
+
 
 class Settings(BaseSettings):
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {
+        "env_file": str(_env_file) if _env_file.exists() else ".env",
+        "env_file_encoding": "utf-8",
+        "extra": "ignore",
+    }
 
     API_HOST: str = "0.0.0.0"
     API_PORT: int = 4000
     APP_URL: str
-    AUTH_SECRET: str = Field(min_length=16)
-    AUTH_URL: str = ""
+    AUTH_SECRET: str = Field(default="", alias="BETTER_AUTH_SECRET")
+    AUTH_URL: str = Field(default="", alias="BETTER_AUTH_URL")
     DATABASE_URL: str
     ENCRYPTION_SECRET: str = Field(min_length=32)
     ENCRYPTION_SECRET_PREVIOUS: str | None = None

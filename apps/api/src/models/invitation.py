@@ -17,13 +17,10 @@ class Invitation(Base):
     role: Mapped[PlatformRole] = mapped_column(
         platform_role_enum, nullable=False, default=PlatformRole.MEMBER
     )
-    invited_by: Mapped[str] = mapped_column("invitedBy", Text, nullable=False)
-    expires_at: Mapped[datetime] = mapped_column(
-        "expiresAt", DateTime(timezone=True), nullable=False
+    invited_by: Mapped[str] = mapped_column(Text, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False
     )
-    accepted_at: Mapped[datetime | None] = mapped_column(
-        "acceptedAt", DateTime(timezone=True), nullable=True
+    accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True
     )
-    created_at: Mapped[datetime] = mapped_column(
-        "createdAt", DateTime(timezone=True), nullable=False, server_default="now()"
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default="now()"
     )
