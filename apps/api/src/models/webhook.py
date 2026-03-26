@@ -12,7 +12,7 @@ class Webhook(Base):
     __tablename__ = "webhooks"
     __table_args__ = (Index("webhooks_enabled_idx", "is_enabled"),)
 
-    id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper)
+    id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper())
     url: Mapped[str] = mapped_column(Text, nullable=False)
     secret: Mapped[str] = mapped_column(Text, nullable=False)
     events: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=False)

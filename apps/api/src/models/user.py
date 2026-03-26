@@ -27,7 +27,7 @@ platform_role_enum = Enum(
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper)
+    id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper())
     email: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
     name: Mapped[str] = mapped_column(Text, nullable=False)
     avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True)

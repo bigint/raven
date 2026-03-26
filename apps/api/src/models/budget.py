@@ -42,7 +42,7 @@ class Budget(Base):
     __tablename__ = "budgets"
     __table_args__ = (Index("budgets_entity_idx", "entity_type", "entity_id"),)
 
-    id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper)
+    id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper())
     entity_type: Mapped[BudgetEntityType] = mapped_column(budget_entity_type_enum, nullable=False)
     entity_id: Mapped[str] = mapped_column(Text, nullable=False)
     limit_amount: Mapped[Decimal] = mapped_column(Numeric(precision=12, scale=2), nullable=False)

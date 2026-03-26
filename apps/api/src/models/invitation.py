@@ -11,7 +11,7 @@ from src.models.user import PlatformRole, platform_role_enum
 class Invitation(Base):
     __tablename__ = "invitations"
 
-    id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper)
+    id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper())
     email: Mapped[str] = mapped_column(Text, nullable=False)
     token: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
     role: Mapped[PlatformRole] = mapped_column(

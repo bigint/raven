@@ -18,7 +18,7 @@ class AuditLog(Base):
         Index("audit_logs_actor_idx", "actor_id"),
     )
 
-    id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper)
+    id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper())
     action: Mapped[str] = mapped_column(Text, nullable=False)
     resource_type: Mapped[str] = mapped_column(Text, nullable=False)
     resource_id: Mapped[str] = mapped_column(Text, nullable=False)

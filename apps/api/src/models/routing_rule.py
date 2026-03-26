@@ -11,7 +11,7 @@ class RoutingRule(Base):
     __tablename__ = "routing_rules"
     __table_args__ = (Index("routing_rules_model_enabled_idx", "source_model", "is_enabled"),)
 
-    id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper)
+    id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper())
     name: Mapped[str] = mapped_column(Text, nullable=False)
     source_model: Mapped[str] = mapped_column(Text, nullable=False)
     target_model: Mapped[str] = mapped_column(Text, nullable=False)

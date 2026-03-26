@@ -30,7 +30,7 @@ class VirtualKey(Base):
         Index("virtual_keys_active_idx", "is_active"),
     )
 
-    id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper)
+    id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper())
     key_hash: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
     key_prefix: Mapped[str] = mapped_column(Text, nullable=False)
     name: Mapped[str] = mapped_column(Text, nullable=False)

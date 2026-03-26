@@ -21,7 +21,7 @@ class RequestLog(Base):
         Index("request_logs_enduser_created_idx", "end_user", "created_at"),
     )
 
-    id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper)
+    id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper())
     cached_tokens: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     cache_hit: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     cost: Mapped[Decimal] = mapped_column(

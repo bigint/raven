@@ -12,7 +12,7 @@ class ProviderConfig(Base):
     __tablename__ = "provider_configs"
     __table_args__ = (Index("provider_configs_provider_enabled_idx", "provider", "is_enabled"),)
 
-    id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper)
+    id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper())
     provider: Mapped[str] = mapped_column(Text, nullable=False)
     api_key: Mapped[str] = mapped_column(Text, nullable=False)
     name: Mapped[str | None] = mapped_column(Text, nullable=True)

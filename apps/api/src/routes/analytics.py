@@ -132,53 +132,55 @@ async def get_usage(
         async for db in get_session():
             result = await db.execute(
                 select(
-                    func.date_trunc("day", RequestLog.created_at).label("day"),
-                    func.count().label("requests"),
-                    func.coalesce(
-                        func.sum(
-                            RequestLog.input_tokens + RequestLog.output_tokens
-                        ),
-                        0,
-                    ).label("tokens"),
+                    RequestLog.provider,
+                    RequestLog.model,
+                    func.count().label("total_requests"),
                     func.coalesce(func.sum(RequestLog.cost), Decimal("0")).label(
-                        "cost"
+                        "total_cost"
+                    ),
+                    func.coalesce(func.sum(RequestLog.input_tokens), 0).label(
+                        "total_input_tokens"
+                    ),
+                    func.coalesce(func.sum(RequestLog.output_tokens), 0).label(
+                        "total_output_tokens"
+                    ),
+                    func.coalesce(func.sum(RequestLog.reasoning_tokens), 0).label(
+                        "total_reasoning_tokens"
+                    ),
+                    func.coalesce(func.sum(RequestLog.cached_tokens), 0).label(
+                        "total_cached_tokens"
+                    ),
+                    func.coalesce(func.avg(RequestLog.latency_ms), 0).label(
+                        "avg_latency_ms"
                     ),
                 )
                 .where(
                     RequestLog.created_at >= start,
                     RequestLog.created_at <= end,
                 )
-                .group_by("day")
-                .order_by("day")
+                .group_by(RequestLog.provider, RequestLog.model)
+                .order_by(desc("total_requests"))
             )
             rows = result.all()
-
-            total_requests = 0
-            total_tokens = 0
-            total_cost = Decimal("0")
-            data_points = []
-
-            for row in rows:
-                total_requests += row.requests
-                total_tokens += row.tokens
-                total_cost += row.cost
-                data_points.append({
-                    "date": row.day.date().isoformat(),
-                    "requests": row.requests,
-                    "tokens": row.tokens,
-                    "cost": float(row.cost),
-                })
-
-            return {
-                "data": data_points,
-                "totalRequests": total_requests,
-                "totalTokens": total_tokens,
-                "totalCost": float(total_cost),
-            }
-        return {}
+            return [
+                {
+                    "provider": row.provider,
+                    "model": row.model,
+                    "providerConfigName": None,
+                    "totalRequests": row.total_requests,
+                    "totalCost": str(row.total_cost),
+                    "totalInputTokens": row.total_input_tokens,
+                    "totalOutputTokens": row.total_output_tokens,
+                    "totalReasoningTokens": row.total_reasoning_tokens,
+                    "totalCachedTokens": row.total_cached_tokens,
+                    "avgLatencyMs": str(round(float(row.avg_latency_ms))),
+                }
+                for row in rows
+            ]
+        return []
 
     data = await _cached_or_compute(cache_key, CACHE_SHORT, compute)
-    return data
+    return {"data": data}
 
 
 # --- Cache ---

@@ -46,7 +46,7 @@ class GuardrailRule(Base):
     __tablename__ = "guardrail_rules"
     __table_args__ = (Index("guardrail_rules_enabled_idx", "is_enabled"),)
 
-    id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper)
+    id: Mapped[str] = mapped_column(Text, primary_key=True, default=cuid_wrapper())
     type: Mapped[GuardrailType] = mapped_column(guardrail_type_enum, nullable=False)
     name: Mapped[str] = mapped_column(Text, nullable=False)
     config: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)

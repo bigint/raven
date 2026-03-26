@@ -38,6 +38,26 @@ def _mask_key(api_key: str) -> str:
     return api_key[:8] + "..."
 
 
+AVAILABLE_PROVIDERS = [
+    {"slug": "openai", "name": "OpenAI"},
+    {"slug": "anthropic", "name": "Anthropic"},
+    {"slug": "google", "name": "Google"},
+    {"slug": "azure", "name": "Azure OpenAI"},
+    {"slug": "groq", "name": "Groq"},
+    {"slug": "mistral", "name": "Mistral"},
+    {"slug": "cohere", "name": "Cohere"},
+    {"slug": "together", "name": "Together AI"},
+    {"slug": "fireworks", "name": "Fireworks AI"},
+    {"slug": "perplexity", "name": "Perplexity"},
+    {"slug": "deepseek", "name": "DeepSeek"},
+]
+
+
+@router.get("/available")
+async def list_available_providers():
+    return {"data": AVAILABLE_PROVIDERS}
+
+
 @router.get("/")
 async def list_providers(
     session: AsyncSession = Depends(get_session),
