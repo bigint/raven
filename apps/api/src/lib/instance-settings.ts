@@ -19,6 +19,7 @@ export interface InstanceSettings {
   readonly webhook_timeout_seconds: number;
   readonly webhook_retry_count: number;
   readonly email_notifications_enabled: boolean;
+  readonly knowledge_enabled: boolean;
   readonly notify_on_budget_exceeded: boolean;
   readonly notify_on_provider_error_spike: boolean;
 }
@@ -31,6 +32,7 @@ const DEFAULTS: Record<string, string> = {
   global_rate_limit_rpm: "60",
   instance_name: "Raven",
   instance_url: "",
+  knowledge_enabled: "false",
   log_request_bodies: "true",
   log_response_bodies: "false",
   max_request_body_size_mb: "10",
@@ -60,6 +62,7 @@ const parse = (raw: Record<string, string>): InstanceSettings => ({
   global_rate_limit_rpm: toNum(raw.global_rate_limit_rpm, 60),
   instance_name: raw.instance_name || "Raven",
   instance_url: raw.instance_url || "",
+  knowledge_enabled: toBool(raw.knowledge_enabled),
   log_request_bodies: toBool(raw.log_request_bodies),
   log_response_bodies: toBool(raw.log_response_bodies),
   max_request_body_size_mb: toNum(raw.max_request_body_size_mb, 10),

@@ -11,6 +11,7 @@ import { AppError } from "./lib/errors";
 import { initEventBus } from "./lib/events";
 import { getInstanceSettings } from "./lib/instance-settings";
 import { log } from "./lib/logger";
+import { getQdrant } from "./lib/qdrant";
 import { getRedis } from "./lib/redis";
 import { sendPasswordResetEmail, sendWelcomeEmail } from "./lib/send-email";
 import { initWebhookDispatcher } from "./lib/webhook-dispatcher";
@@ -28,6 +29,11 @@ import { createBudgetsModule } from "./modules/budgets/index";
 import { createGuardrailsModule } from "./modules/guardrails/index";
 import { createInvitationsModule } from "./modules/invitations/index";
 import { createKeysModule } from "./modules/keys/index";
+import { createKnowledgeAnalyticsModule } from "./modules/knowledge/analytics/index";
+import {
+  createKeyBindingsModule,
+  createKnowledgeModule
+} from "./modules/knowledge/index";
 import { listAvailableModels } from "./modules/models/available";
 import { createModelsModule } from "./modules/models/index";
 import { createOpenAICompatModule } from "./modules/openai-compat/index";
@@ -43,6 +49,7 @@ import { createWebhooksModule } from "./modules/webhooks/index";
 const env = parseEnv();
 export const db = createDatabase(env.DATABASE_URL);
 export const redis = getRedis(env.REDIS_URL);
+const qdrant = getQdrant(env.QDRANT_URL, env.QDRANT_API_KEY);
 initEventBus(redis);
 initWebhookDispatcher(db, redis);
 initEmailDispatcher(db, redis);
@@ -147,7 +154,16 @@ app.get("/health", (c) => c.json({ status: "ok" }));
 app.route("/api/auth", createAuthModule(auth, db, redis));
 
 // OpenAI-compatible endpoints (before proxy catch-all)
-app.route("/v1", createOpenAICompatModule(db, redis, env));
+app.route(
+  "/v1",
+  createOpenAICompatModule(
+    db,
+    redis,
+    env,
+    qdrant,
+    instanceSettings.knowledge_enabled
+  )
+);
 
 app.all("/v1/proxy/*", async (c) => {
   const method = c.req.method;
@@ -158,9 +174,11 @@ app.all("/v1/proxy/*", async (c) => {
     db,
     env,
     incomingHeaders: c.req.header(),
+    knowledgeEnabled: instanceSettings.knowledge_enabled,
     method,
     path: c.req.path,
     providerPath: c.req.path,
+    qdrant,
     redis,
     sessionId: c.req.header("x-session-id") ?? null,
     userAgent: c.req.header("user-agent") ?? null,
@@ -191,6 +209,7 @@ const adminRoutes = new Hono();
 adminRoutes.use("*", createAuthMiddleware(auth));
 adminRoutes.use("*", platformAdminMiddleware);
 adminRoutes.route("/", createAdminModule(db, env.APP_URL, redis));
+adminRoutes.route("/knowledge", createKnowledgeAnalyticsModule(db));
 app.route("/v1/admin", adminRoutes);
 
 // Protected API routes (session auth + writer middleware for mutations)
@@ -206,6 +225,8 @@ v1.route("/analytics", createAnalyticsModule(db, redis));
 v1.route("/webhooks", createWebhooksModule(db));
 v1.route("/routing-rules", createRoutingRulesModule(db));
 v1.route("/audit-logs", createAuditLogsModule(db));
+v1.route("/knowledge", createKnowledgeModule(db, redis, qdrant, env));
+v1.route("/keys", createKeyBindingsModule(db));
 app.route("/v1", v1);
 
 app.notFound((c) =>

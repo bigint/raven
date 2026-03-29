@@ -44,6 +44,7 @@ export const useChat = () => {
   } | null>(null);
   const [settings, setSettings] = useState<PlaygroundSettings>({
     chatMemory: 5,
+    enableKnowledge: false,
     enableReasoning: false,
     enableTools: false,
     enableWebSearch: false,
@@ -238,7 +239,10 @@ export const useChat = () => {
             headers: {
               Authorization: `Bearer ${pk.key}`,
               "Content-Type": "application/json",
-              "x-session-id": sessionIdRef.current
+              "x-session-id": sessionIdRef.current,
+              ...(currentSettings.enableKnowledge
+                ? { "X-Knowledge-Enabled": "true" }
+                : {})
             },
             method: "POST",
             signal: abortController.signal

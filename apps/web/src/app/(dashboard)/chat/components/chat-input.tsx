@@ -470,6 +470,14 @@ export const ChatInput = ({
                     </div>
 
                     <div className="flex items-center justify-between">
+                      <span className="text-xs">Knowledge RAG</span>
+                      <Switch
+                        checked={settings.enableKnowledge}
+                        onCheckedChange={(v) => update("enableKnowledge", v)}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
                       <span className="text-xs">Reasoning</span>
                       <Switch
                         checked={settings.enableReasoning}
@@ -640,13 +648,8 @@ const Dropdown = ({
   onClose: () => void;
 }) => (
   <>
-    <Button
-      aria-label="Close"
-      className="fixed inset-0 z-40 cursor-default rounded-none"
-      onClick={onClose}
-      tabIndex={-1}
-      variant="ghost"
-    />
+    {/* biome-ignore lint/a11y/useKeyboardEvents: backdrop dismiss */}
+    <div className="fixed inset-0 z-40" onClick={onClose} />
     <div className="absolute bottom-full left-0 z-50 mb-1 rounded-lg border border-border bg-popover shadow-sm">
       {children}
     </div>
