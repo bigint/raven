@@ -43,10 +43,10 @@ const DEFAULT_FORM: FormState = {
 };
 
 const extractFormFromCollection = (c: Collection): FormState => ({
-  chunkOverlap: String(c.chunkOverlap),
-  chunkSize: String(c.chunkSize),
+  chunkOverlap: DEFAULT_FORM.chunkOverlap,
+  chunkSize: DEFAULT_FORM.chunkSize,
   description: c.description ?? "",
-  embeddingModel: c.embeddingModel,
+  embeddingModel: DEFAULT_FORM.embeddingModel,
   isDefault: c.isDefault,
   maxContextTokens: String(c.maxContextTokens),
   name: c.name,
@@ -100,24 +100,31 @@ const CollectionForm = ({
       return;
     }
 
-    const body: CreateCollectionInput = {
-      chunkOverlap: Number(form.chunkOverlap),
-      chunkSize: Number(form.chunkSize),
-      description: form.description.trim() || undefined,
-      embeddingModel: form.embeddingModel,
-      isDefault: form.isDefault,
-      maxContextTokens: Number(form.maxContextTokens),
-      name: form.name.trim(),
-      rerankingEnabled: form.rerankingEnabled,
-      similarityThreshold: Number(form.similarityThreshold),
-      topK: Number(form.topK)
-    };
-
     try {
       if (isEdit && editingCollection) {
-        await updateMutation.mutateAsync({ id: editingCollection.id, ...body });
+        await updateMutation.mutateAsync({
+          description: form.description.trim() || undefined,
+          id: editingCollection.id,
+          isDefault: form.isDefault,
+          maxContextTokens: Number(form.maxContextTokens),
+          name: form.name.trim(),
+          rerankingEnabled: form.rerankingEnabled,
+          similarityThreshold: Number(form.similarityThreshold),
+          topK: Number(form.topK)
+        });
       } else {
-        await createMutation.mutateAsync(body);
+        await createMutation.mutateAsync({
+          chunkOverlap: Number(form.chunkOverlap),
+          chunkSize: Number(form.chunkSize),
+          description: form.description.trim() || undefined,
+          embeddingModel: form.embeddingModel,
+          isDefault: form.isDefault,
+          maxContextTokens: Number(form.maxContextTokens),
+          name: form.name.trim(),
+          rerankingEnabled: form.rerankingEnabled,
+          similarityThreshold: Number(form.similarityThreshold),
+          topK: Number(form.topK)
+        });
       }
       onSubmit?.();
       handleClose();
@@ -162,45 +169,49 @@ const CollectionForm = ({
           value={form.description}
         />
 
-        <div className="space-y-1.5">
-          <label
-            className="text-sm font-medium"
-            htmlFor="collection-embedding-model"
-          >
-            Embedding Model
-          </label>
-          <Select
-            id="collection-embedding-model"
-            onChange={(v) => update("embeddingModel", v)}
-            options={EMBEDDING_MODEL_OPTIONS}
-            value={form.embeddingModel}
-          />
-        </div>
+        {!isEdit && (
+          <>
+            <div className="space-y-1.5">
+              <label
+                className="text-sm font-medium"
+                htmlFor="collection-embedding-model"
+              >
+                Embedding Model
+              </label>
+              <Select
+                id="collection-embedding-model"
+                onChange={(v) => update("embeddingModel", v)}
+                options={EMBEDDING_MODEL_OPTIONS}
+                value={form.embeddingModel}
+              />
+            </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <Input
-            autoComplete="off"
-            id="collection-chunk-size"
-            label="Chunk Size"
-            min="1"
-            name="chunkSize"
-            onChange={(e) => update("chunkSize", e.target.value)}
-            placeholder="512"
-            type="number"
-            value={form.chunkSize}
-          />
-          <Input
-            autoComplete="off"
-            id="collection-chunk-overlap"
-            label="Chunk Overlap"
-            min="0"
-            name="chunkOverlap"
-            onChange={(e) => update("chunkOverlap", e.target.value)}
-            placeholder="20"
-            type="number"
-            value={form.chunkOverlap}
-          />
-        </div>
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                autoComplete="off"
+                id="collection-chunk-size"
+                label="Chunk Size"
+                min="1"
+                name="chunkSize"
+                onChange={(e) => update("chunkSize", e.target.value)}
+                placeholder="512"
+                type="number"
+                value={form.chunkSize}
+              />
+              <Input
+                autoComplete="off"
+                id="collection-chunk-overlap"
+                label="Chunk Overlap"
+                min="0"
+                name="chunkOverlap"
+                onChange={(e) => update("chunkOverlap", e.target.value)}
+                placeholder="20"
+                type="number"
+                value={form.chunkOverlap}
+              />
+            </div>
+          </>
+        )}
 
         <div className="grid grid-cols-2 gap-4">
           <Input

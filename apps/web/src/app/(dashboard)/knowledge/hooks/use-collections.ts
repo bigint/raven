@@ -8,10 +8,6 @@ export interface Collection {
   readonly id: string;
   readonly name: string;
   readonly description: string | null;
-  readonly embeddingModel: string;
-  readonly embeddingDimensions: number;
-  readonly chunkSize: number;
-  readonly chunkOverlap: number;
   readonly topK: number;
   readonly similarityThreshold: number;
   readonly maxContextTokens: number;
@@ -31,31 +27,30 @@ export interface CollectionDetail extends Collection {
 export interface CreateCollectionInput {
   readonly name: string;
   readonly description?: string;
-  readonly embeddingModel?: string;
-  readonly embeddingDimensions?: number;
-  readonly chunkSize?: number;
+  // bigRAG-specific fields (forwarded to bigRAG, not stored in Raven)
   readonly chunkOverlap?: number;
-  readonly topK?: number;
-  readonly similarityThreshold?: number;
+  readonly chunkSize?: number;
+  readonly dimension?: number;
+  readonly embeddingApiKey?: string;
+  readonly embeddingModel?: string;
+  readonly embeddingProvider?: string;
+  // Raven-specific fields
+  readonly isDefault?: boolean;
   readonly maxContextTokens?: number;
   readonly rerankingEnabled?: boolean;
-  readonly isDefault?: boolean;
-  readonly isEnabled?: boolean;
+  readonly similarityThreshold?: number;
+  readonly topK?: number;
 }
 
 export interface UpdateCollectionInput {
-  readonly name?: string;
   readonly description?: string | null;
-  readonly embeddingModel?: string;
-  readonly embeddingDimensions?: number;
-  readonly chunkSize?: number;
-  readonly chunkOverlap?: number;
-  readonly topK?: number;
-  readonly similarityThreshold?: number;
-  readonly maxContextTokens?: number;
-  readonly rerankingEnabled?: boolean;
   readonly isDefault?: boolean;
   readonly isEnabled?: boolean;
+  readonly maxContextTokens?: number;
+  readonly name?: string;
+  readonly rerankingEnabled?: boolean;
+  readonly similarityThreshold?: number;
+  readonly topK?: number;
 }
 
 export const collectionsQueryOptions = () =>

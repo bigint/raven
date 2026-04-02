@@ -7,13 +7,9 @@ import type { AuthContext } from "@/lib/types";
 export const listCollections = (db: Database) => async (c: AuthContext) => {
   const collections = await db
     .select({
-      chunkOverlap: knowledgeCollections.chunkOverlap,
-      chunkSize: knowledgeCollections.chunkSize,
       createdAt: knowledgeCollections.createdAt,
       description: knowledgeCollections.description,
       documentCount: count(knowledgeDocuments.id),
-      embeddingDimensions: knowledgeCollections.embeddingDimensions,
-      embeddingModel: knowledgeCollections.embeddingModel,
       id: knowledgeCollections.id,
       isDefault: knowledgeCollections.isDefault,
       isEnabled: knowledgeCollections.isEnabled,

@@ -2,8 +2,8 @@ import type { Database } from "@raven/db";
 import { knowledgeCollections } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { z } from "zod";
+import type { BigRAG } from "@bigrag/client";
 import { auditAndPublish } from "@/lib/audit";
-import type { BigRAGClient } from "@/lib/bigrag";
 import { ConflictError } from "@/lib/errors";
 import { log } from "@/lib/logger";
 import { created } from "@/lib/response";
@@ -13,12 +13,23 @@ import type { createCollectionSchema } from "./schema";
 type Body = z.infer<typeof createCollectionSchema>;
 
 export const createCollection =
-  (db: Database, bigrag: BigRAGClient) =>
+  (db: Database, bigrag: BigRAG) =>
   async (c: AuthContextWithJson<Body>) => {
     const user = c.get("user");
     const body = c.req.valid("json");
 
-    if (body.isDefault) {
+    // Extract bigRAG-specific fields (forwarded to bigRAG, not stored in Raven DB)
+    const {
+      chunkOverlap,
+      chunkSize,
+      dimension,
+      embeddingApiKey,
+      embeddingModel,
+      embeddingProvider,
+      ...ravenFields
+    } = body;
+
+    if (ravenFields.isDefault) {
       await db
         .update(knowledgeCollections)
         .set({ isDefault: false })
@@ -29,7 +40,7 @@ export const createCollection =
     try {
       const [inserted] = await db
         .insert(knowledgeCollections)
-        .values(body)
+        .values(ravenFields)
         .returning();
       record = inserted as NonNullable<typeof inserted>;
     } catch (err) {
@@ -42,11 +53,13 @@ export const createCollection =
 
     try {
       await bigrag.createCollection({
-        chunk_overlap: record.chunkOverlap,
-        chunk_size: record.chunkSize,
+        chunk_overlap: chunkOverlap,
+        chunk_size: chunkSize,
         description: record.description ?? undefined,
-        dimension: record.embeddingDimensions,
-        embedding_model: record.embeddingModel,
+        dimension,
+        embedding_api_key: embeddingApiKey,
+        embedding_model: embeddingModel,
+        embedding_provider: embeddingProvider,
         name: record.name
       });
     } catch (err) {

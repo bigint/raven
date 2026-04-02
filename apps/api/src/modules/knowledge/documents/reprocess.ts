@@ -1,14 +1,14 @@
 import type { Database } from "@raven/db";
 import { knowledgeCollections, knowledgeDocuments } from "@raven/db";
 import { eq } from "drizzle-orm";
-import type { BigRAGClient } from "@/lib/bigrag";
+import type { BigRAG } from "@bigrag/client";
 import { NotFoundError } from "@/lib/errors";
 import { log } from "@/lib/logger";
 import { success } from "@/lib/response";
 import type { AuthContext } from "@/lib/types";
 
 export const reprocessDocument =
-  (db: Database, bigrag: BigRAGClient) => async (c: AuthContext) => {
+  (db: Database, bigrag: BigRAG) => async (c: AuthContext) => {
     const docId = c.req.param("id") as string;
 
     const [document] = await db

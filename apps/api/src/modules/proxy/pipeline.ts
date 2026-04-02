@@ -2,7 +2,7 @@ import type { Env } from "@raven/config";
 import { MODEL_CATALOG } from "@raven/data";
 import type { Database } from "@raven/db";
 import type { Redis } from "ioredis";
-import type { BigRAGClient } from "@/lib/bigrag";
+import type { BigRAG } from "@bigrag/client";
 import { GuardrailError, ValidationError } from "@/lib/errors";
 import { getInstanceSettings } from "@/lib/instance-settings";
 import { log } from "@/lib/logger";
@@ -34,7 +34,7 @@ interface PipelineInput {
   readonly upstreamPathOverride?: string;
   readonly skipRouting?: boolean;
   readonly strictBody?: boolean;
-  readonly bigrag?: BigRAGClient;
+  readonly bigrag?: BigRAG;
   readonly knowledgeEnabled?: boolean;
 }
 

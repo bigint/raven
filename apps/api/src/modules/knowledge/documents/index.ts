@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
-import type { BigRAGClient } from "@/lib/bigrag";
+import type { BigRAG } from "@bigrag/client";
 import { queryValidator } from "@/lib/validation";
 import { deleteDocument } from "./delete";
 import { getDocument, getDocumentChunks } from "./get";
@@ -10,7 +10,7 @@ import { reprocessDocument } from "./reprocess";
 import { listDocumentsQuerySchema } from "./schema";
 import { uploadDocument } from "./upload";
 
-export const createDocumentsModule = (db: Database, bigrag: BigRAGClient) => {
+export const createDocumentsModule = (db: Database, bigrag: BigRAG) => {
   const app = new Hono();
 
   app.get("/", queryValidator(listDocumentsQuerySchema), listDocuments(db));
@@ -22,7 +22,7 @@ export const createDocumentsModule = (db: Database, bigrag: BigRAGClient) => {
 
 export const createDocumentDetailModule = (
   db: Database,
-  bigrag: BigRAGClient
+  bigrag: BigRAG
 ) => {
   const app = new Hono();
 

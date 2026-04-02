@@ -1,7 +1,7 @@
 import type { Database } from "@raven/db";
 import { knowledgeCollections, knowledgeDocuments } from "@raven/db";
 import { eq } from "drizzle-orm";
-import type { BigRAGClient } from "@/lib/bigrag";
+import type { BigRAG } from "@bigrag/client";
 import { NotFoundError } from "@/lib/errors";
 import { success } from "@/lib/response";
 import type { AuthContext } from "@/lib/types";
@@ -25,7 +25,7 @@ export const getDocument = (db: Database) => async (c: AuthContext) => {
 
 /** GET /documents/:id/chunks?limit=20&offset=0 — paginated chunks */
 export const getDocumentChunks =
-  (db: Database, bigrag: BigRAGClient) => async (c: AuthContext) => {
+  (db: Database, bigrag: BigRAG) => async (c: AuthContext) => {
     const docId = c.req.param("id") as string;
     const limit = Math.min(Number(c.req.query("limit") ?? "20"), 100);
     const offset = Number(c.req.query("offset") ?? "0");

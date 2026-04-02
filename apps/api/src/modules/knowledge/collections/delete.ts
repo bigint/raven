@@ -2,14 +2,14 @@ import type { Database } from "@raven/db";
 import { knowledgeCollections } from "@raven/db";
 import { eq } from "drizzle-orm";
 import { auditAndPublish } from "@/lib/audit";
-import type { BigRAGClient } from "@/lib/bigrag";
+import type { BigRAG } from "@bigrag/client";
 import { NotFoundError } from "@/lib/errors";
 import { log } from "@/lib/logger";
 import { success } from "@/lib/response";
 import type { AuthContext } from "@/lib/types";
 
 export const deleteCollection =
-  (db: Database, bigrag: BigRAGClient) => async (c: AuthContext) => {
+  (db: Database, bigrag: BigRAG) => async (c: AuthContext) => {
     const user = c.get("user");
     const id = c.req.param("id") as string;
 

@@ -3,7 +3,7 @@ import { MODEL_CATALOG } from "@raven/data";
 import type { Database } from "@raven/db";
 import type { Context } from "hono";
 import type { Redis } from "ioredis";
-import type { BigRAGClient } from "@/lib/bigrag";
+import type { BigRAG } from "@bigrag/client";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { runPipeline } from "../proxy/pipeline";
 
@@ -11,7 +11,7 @@ export const chatCompletionsHandler = (
   db: Database,
   redis: Redis,
   env: Env,
-  bigrag: BigRAGClient,
+  bigrag: BigRAG,
   knowledgeEnabled: boolean
 ) => {
   return async (c: Context): Promise<Response> => {

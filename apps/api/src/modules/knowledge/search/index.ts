@@ -3,7 +3,7 @@ import { knowledgeCollections, knowledgeDocuments } from "@raven/db";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import type { z } from "zod";
-import type { BigRAGClient } from "@/lib/bigrag";
+import type { BigRAG } from "@bigrag/client";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { success } from "@/lib/response";
 import type { AuthContextWithJson } from "@/lib/types";
@@ -12,7 +12,7 @@ import { searchSchema } from "./schema";
 
 type SearchInput = z.infer<typeof searchSchema>;
 
-export const createSearchModule = (db: Database, bigrag: BigRAGClient) => {
+export const createSearchModule = (db: Database, bigrag: BigRAG) => {
   const app = new Hono();
 
   app.post(

@@ -27,18 +27,10 @@ export const documentStatusEnum = pgEnum("document_status", [
 export const knowledgeCollections = pgTable(
   "knowledge_collections",
   {
-    chunkOverlap: integer("chunk_overlap").notNull().default(50),
-    chunkSize: integer("chunk_size").notNull().default(512),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
     description: text("description"),
-    embeddingDimensions: integer("embedding_dimensions")
-      .notNull()
-      .default(1536),
-    embeddingModel: text("embedding_model")
-      .notNull()
-      .default("text-embedding-3-small"),
     id: text("id").primaryKey().$defaultFn(createId),
     isDefault: boolean("is_default").notNull().default(false),
     isEnabled: boolean("is_enabled").notNull().default(true),

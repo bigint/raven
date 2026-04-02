@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
-import type { BigRAGClient } from "@/lib/bigrag";
+import type { BigRAG } from "@bigrag/client";
 import { createCollectionsModule } from "./collections/index";
 import {
   createDocumentDetailModule,
@@ -8,7 +8,7 @@ import {
 } from "./documents/index";
 import { createSearchModule } from "./search/index";
 
-export const createKnowledgeModule = (db: Database, bigrag: BigRAGClient) => {
+export const createKnowledgeModule = (db: Database, bigrag: BigRAG) => {
   const app = new Hono();
   app.route("/collections", createCollectionsModule(db, bigrag));
   app.route("/collections/:id/documents", createDocumentsModule(db, bigrag));

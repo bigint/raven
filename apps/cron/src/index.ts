@@ -6,11 +6,11 @@ import { cleanupRetention } from "./jobs/retention";
 import { cleanupExpiredSessions } from "./jobs/sessions";
 import { syncDocumentStatuses } from "./jobs/sync-statuses";
 import { cleanupExpiredVerifications } from "./jobs/verifications";
-import { BigRAGClient } from "./lib/bigrag";
+import { BigRAG } from "@bigrag/client";
 
 const env = parseEnv();
 const db = createDatabase(env.DATABASE_URL);
-const bigrag = new BigRAGClient(env.BIGRAG_URL, env.BIGRAG_API_KEY);
+const bigrag = new BigRAG({ apiKey: env.BIGRAG_API_KEY, baseUrl: env.BIGRAG_URL });
 
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
 const HOUR = 60 * 60 * 1000;

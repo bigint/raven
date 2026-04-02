@@ -1,11 +1,11 @@
 import type { Database } from "@raven/db";
 import { knowledgeCollections, knowledgeDocuments } from "@raven/db";
 import { and, eq, inArray, isNotNull } from "drizzle-orm";
-import type { BigRAGClient } from "../lib/bigrag";
+import type { BigRAG } from "@bigrag/client";
 
 export const syncDocumentStatuses = async (
   db: Database,
-  bigrag: BigRAGClient
+  bigrag: BigRAG
 ): Promise<void> => {
   // Find documents that are still pending/processing and have a bigRAG document ID
   const docs = await db

@@ -8,13 +8,13 @@ import {
   providerConfigs
 } from "@raven/db";
 import { and, eq, inArray } from "drizzle-orm";
-import type { BigRAGClient } from "@/lib/bigrag";
+import type { BigRAG } from "@bigrag/client";
 import { decrypt } from "@/lib/crypto";
 import { log } from "@/lib/logger";
 import { rerankChunks } from "./reranker";
 
 interface RAGInput {
-  readonly bigrag: BigRAGClient;
+  readonly bigrag: BigRAG;
   readonly db: Database;
   readonly env: Env;
   readonly headers: Readonly<Record<string, string>>;

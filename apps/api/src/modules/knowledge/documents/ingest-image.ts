@@ -2,7 +2,7 @@ import type { Database } from "@raven/db";
 import { knowledgeCollections, knowledgeDocuments } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Context } from "hono";
-import type { BigRAGClient } from "@/lib/bigrag";
+import type { BigRAG } from "@bigrag/client";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { log } from "@/lib/logger";
 import { created } from "@/lib/response";
@@ -20,7 +20,7 @@ const ALLOWED_IMAGE_TYPES = new Set([
 const MAX_IMAGE_SIZE = 500 * 1024 * 1024; // 500MB
 
 export const ingestImage =
-  (db: Database, bigrag: BigRAGClient) => async (c: Context) => {
+  (db: Database, bigrag: BigRAG) => async (c: Context) => {
     const collectionId = c.req.param("id") as string;
 
     const body = await c.req.parseBody();
@@ -52,11 +52,12 @@ export const ingestImage =
 
     const title = (body["title"] as string | undefined) ?? file.name;
 
-    const blob = new Blob([await file.arrayBuffer()], { type: file.type });
+    const uploadFile = new File([await file.arrayBuffer()], file.name, {
+      type: file.type
+    });
     const bigragDoc = await bigrag.uploadDocument(
       collection.name,
-      blob,
-      file.name
+      uploadFile
     );
 
     log.info("Image uploaded to bigRAG", {

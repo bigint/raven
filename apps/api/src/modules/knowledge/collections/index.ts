@@ -1,6 +1,6 @@
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
-import type { BigRAGClient } from "@/lib/bigrag";
+import type { BigRAG } from "@bigrag/client";
 import { jsonValidator } from "@/lib/validation";
 import { createCollection } from "./create";
 import { deleteCollection } from "./delete";
@@ -9,7 +9,7 @@ import { listCollections } from "./list";
 import { createCollectionSchema, updateCollectionSchema } from "./schema";
 import { updateCollection } from "./update";
 
-export const createCollectionsModule = (db: Database, bigrag: BigRAGClient) => {
+export const createCollectionsModule = (db: Database, bigrag: BigRAG) => {
   const app = new Hono();
 
   app.get("/", listCollections(db));

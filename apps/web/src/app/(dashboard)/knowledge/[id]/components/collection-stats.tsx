@@ -2,14 +2,7 @@
 
 import { Badge } from "@raven/ui";
 import { formatDistanceToNow } from "date-fns";
-import {
-  BookOpen,
-  Boxes,
-  Brain,
-  Hash,
-  ScanSearch,
-  Settings2
-} from "lucide-react";
+import { BookOpen, Boxes, Hash, ScanSearch } from "lucide-react";
 import type { CollectionDetail } from "../../hooks/use-collections";
 
 interface CollectionStatsProps {
@@ -66,7 +59,7 @@ const CollectionStats = ({ collection }: CollectionStatsProps) => {
   return (
     <div className="space-y-6">
       {/* Stats grid */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
         <StatCard
           icon={BookOpen}
           label="Documents"
@@ -97,45 +90,20 @@ const CollectionStats = ({ collection }: CollectionStatsProps) => {
           }
           value={collection.totalTokens.toLocaleString()}
         />
-        <StatCard
-          icon={Brain}
-          label="Embedding Model"
-          sub={`${collection.embeddingDimensions}d vectors`}
-          value={collection.embeddingModel.replace("text-embedding-", "")}
-        />
       </div>
 
-      {/* Two-column layout for config + retrieval */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Chunking config */}
-        <div className="rounded-xl border border-border bg-card">
-          <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-            <Settings2 className="size-4 text-muted-foreground" />
-            <h3 className="text-sm font-medium">Chunking Configuration</h3>
-          </div>
-          <div className="divide-y divide-border px-4">
-            <ConfigRow
-              label="Chunk Size"
-              value={`${collection.chunkSize} tokens`}
-            />
-            <ConfigRow
-              label="Chunk Overlap"
-              value={`${collection.chunkOverlap} tokens`}
-            />
-            <ConfigRow
-              label="Max Context Tokens"
-              value={collection.maxContextTokens.toLocaleString()}
-            />
-          </div>
-        </div>
-
-        {/* Retrieval config */}
+      {/* Retrieval & injection config */}
+      <div className="grid gap-4 md:grid-cols-1">
         <div className="rounded-xl border border-border bg-card">
           <div className="flex items-center gap-2 border-b border-border px-4 py-3">
             <ScanSearch className="size-4 text-muted-foreground" />
             <h3 className="text-sm font-medium">Retrieval Settings</h3>
           </div>
           <div className="divide-y divide-border px-4">
+            <ConfigRow
+              label="Max Context Tokens"
+              value={collection.maxContextTokens.toLocaleString()}
+            />
             <ConfigRow label="Top K" value={collection.topK} />
             <ConfigRow
               label="Similarity Threshold"
