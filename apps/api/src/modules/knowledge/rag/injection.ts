@@ -134,11 +134,22 @@ const getOpenAIKeyForReranking = async (
 
     if (configs.length === 0) return null;
 
-    return decrypt(configs[0]!.apiKey, env.ENCRYPTION_SECRET);
+    const config = configs[0];
+    if (!config) return null;
+
+    return decrypt(config.apiKey, env.ENCRYPTION_SECRET);
   } catch {
     return null;
   }
 };
+
+interface ChunkEntry {
+  collectionId: string;
+  content: string;
+  documentId: string;
+  id: string;
+  score: number;
+}
 
 export const performRAGInjection = async (
   input: RAGInput
@@ -159,76 +170,74 @@ export const performRAGInjection = async (
   const queryText = extractQueryText(input.messages);
   if (!queryText) return noop(input.messages);
 
-  const allChunks: {
-    collectionId: string;
-    content: string;
-    documentId: string;
-    id: string;
-    score: number;
-  }[] = [];
-
-  for (const collection of collections) {
-    const response = await input.bigrag.query(collection.name, {
-      min_score: collection.similarityThreshold,
-      query: queryText,
-      top_k: collection.topK
-    });
-
-    // Map bigRAG document_id to Raven document IDs via bigragDocumentId
-    const documents = await input.db
-      .select({
-        bigragDocumentId: knowledgeDocuments.bigragDocumentId,
-        id: knowledgeDocuments.id
-      })
-      .from(knowledgeDocuments)
-      .where(eq(knowledgeDocuments.collectionId, collection.id));
-
-    const bigragToRaven = new Map(
-      documents
-        .filter((d) => d.bigragDocumentId)
-        .map((d) => [d.bigragDocumentId!, d.id])
-    );
-
-    for (const r of response.results) {
-      allChunks.push({
-        collectionId: collection.id,
-        content: r.text,
-        documentId:
-          (r.document_id ? bigragToRaven.get(r.document_id) : undefined) ??
-          r.document_id ??
-          "",
-        id: r.id,
-        score: r.score
+  // Query all collections in parallel
+  const collectionResults = await Promise.all(
+    collections.map(async (collection) => {
+      const response = await input.bigrag.query(collection.name, {
+        min_score: collection.similarityThreshold,
+        query: queryText,
+        top_k: collection.topK
       });
-    }
 
-    if (response.results.length > 0 && collection.rerankingEnabled) {
+      // Map bigRAG document_id to Raven document IDs via bigragDocumentId
+      const ravenDocs = await input.db
+        .select({
+          bigragDocumentId: knowledgeDocuments.bigragDocumentId,
+          id: knowledgeDocuments.id
+        })
+        .from(knowledgeDocuments)
+        .where(eq(knowledgeDocuments.collectionId, collection.id));
+
+      const bigragToRaven = new Map(
+        ravenDocs
+          .filter((d): d is typeof d & { bigragDocumentId: string } =>
+            Boolean(d.bigragDocumentId)
+          )
+          .map((d) => [d.bigragDocumentId, d.id])
+      );
+
+      return { bigragToRaven, collection, response };
+    })
+  );
+
+  // Flatten results and apply per-collection reranking
+  const allChunks: ChunkEntry[] = [];
+
+  for (const { bigragToRaven, collection, response } of collectionResults) {
+    const collectionChunks: ChunkEntry[] = response.results.map((r) => ({
+      collectionId: collection.id,
+      content: r.text,
+      documentId:
+        (r.document_id ? bigragToRaven.get(r.document_id) : undefined) ??
+        r.document_id ??
+        "",
+      id: r.id,
+      score: r.score
+    }));
+
+    if (collectionChunks.length > 0 && collection.rerankingEnabled) {
       const apiKey = await getOpenAIKeyForReranking(input.db, input.env);
 
       if (apiKey) {
-        const toRerank = allChunks
-          .filter((c) => c.collectionId === collection.id)
-          .map((c) => ({
-            content: c.content,
-            id: c.id,
-            originalScore: c.score
-          }));
+        const toRerank = collectionChunks.map((c) => ({
+          content: c.content,
+          id: c.id,
+          originalScore: c.score
+        }));
 
         const reranked = await rerankChunks(apiKey, queryText, toRerank);
-
         const rerankedIds = reranked.map((r) => r.id);
-        const otherChunks = allChunks.filter(
-          (c) => c.collectionId !== collection.id
-        );
         const reorderedChunks = rerankedIds
-          .map((id) => allChunks.find((c) => c.id === id)!)
-          .filter(Boolean);
+          .map((id) => collectionChunks.find((c) => c.id === id))
+          .filter((c): c is ChunkEntry => c !== undefined);
 
-        allChunks.length = 0;
-        allChunks.push(...otherChunks, ...reorderedChunks);
+        allChunks.push(...reorderedChunks);
       } else {
         log.warn("Reranking enabled but no OpenAI key available, skipping");
+        allChunks.push(...collectionChunks);
       }
+    } else {
+      allChunks.push(...collectionChunks);
     }
   }
 
@@ -248,7 +257,7 @@ export const performRAGInjection = async (
 
   const documentMap = new Map(documents.map((d) => [d.id, d.title]));
 
-  const maxTokens = collections[0]!.maxContextTokens;
+  const maxTokens = collections[0]?.maxContextTokens ?? 4096;
   let totalTokens = 0;
   const contextParts: string[] = [];
   let injectedCount = 0;
@@ -278,7 +287,7 @@ export const performRAGInjection = async (
   const topScore =
     allChunks.length > 0 ? Math.max(...allChunks.map((c) => c.score)) : 0;
 
-  const collectionId = collections[0]!.id;
+  const collectionId = collections[0]?.id ?? "";
   await input.db
     .insert(knowledgeQueryLogs)
     .values({
