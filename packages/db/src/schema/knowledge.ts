@@ -11,12 +11,6 @@ import {
   timestamp
 } from "drizzle-orm/pg-core";
 
-export const chunkStrategyEnum = pgEnum("chunk_strategy", [
-  "fixed",
-  "semantic",
-  "hybrid"
-]);
-
 export const documentSourceTypeEnum = pgEnum("document_source_type", [
   "file",
   "url",
@@ -35,9 +29,6 @@ export const knowledgeCollections = pgTable(
   {
     chunkOverlap: integer("chunk_overlap").notNull().default(50),
     chunkSize: integer("chunk_size").notNull().default(512),
-    chunkStrategy: chunkStrategyEnum("chunk_strategy")
-      .notNull()
-      .default("hybrid"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -71,6 +62,7 @@ export const knowledgeCollections = pgTable(
 export const knowledgeDocuments = pgTable(
   "knowledge_documents",
   {
+    bigragDocumentId: text("bigrag_document_id"),
     chunkCount: integer("chunk_count").notNull().default(0),
     collectionId: text("collection_id")
       .notNull()
@@ -98,29 +90,6 @@ export const knowledgeDocuments = pgTable(
   (t) => [
     index("knowledge_documents_collection_idx").on(t.collectionId),
     index("knowledge_documents_status_idx").on(t.status)
-  ]
-);
-
-export const knowledgeChunks = pgTable(
-  "knowledge_chunks",
-  {
-    chunkIndex: integer("chunk_index").notNull(),
-    collectionId: text("collection_id")
-      .notNull()
-      .references(() => knowledgeCollections.id, { onDelete: "cascade" }),
-    content: text("content").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    documentId: text("document_id")
-      .notNull()
-      .references(() => knowledgeDocuments.id, { onDelete: "cascade" }),
-    id: text("id").primaryKey().$defaultFn(createId),
-    tokenCount: integer("token_count").notNull()
-  },
-  (t) => [
-    index("knowledge_chunks_document_idx").on(t.documentId),
-    index("knowledge_chunks_collection_idx").on(t.collectionId)
   ]
 );
 

@@ -5,10 +5,8 @@ export { guardrailRules } from "./guardrail-rules";
 export { invitations } from "./invitations";
 export { virtualKeys } from "./keys";
 export {
-  chunkStrategyEnum,
   documentSourceTypeEnum,
   documentStatusEnum,
-  knowledgeChunks,
   knowledgeCollections,
   knowledgeDocuments,
   knowledgeKeyBindings,
