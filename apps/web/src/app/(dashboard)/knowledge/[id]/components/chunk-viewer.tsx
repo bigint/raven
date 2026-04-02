@@ -7,7 +7,6 @@ interface Chunk {
   readonly id: string;
   readonly chunkIndex: number;
   readonly content: string;
-  readonly tokenCount: number;
 }
 
 interface ChunkViewerProps {
@@ -44,12 +43,9 @@ const ChunkViewer = ({ chunks }: ChunkViewerProps) => {
       <div className="space-y-3">
         {pageChunks.map((chunk) => (
           <div className="rounded-xl border border-border p-4" key={chunk.id}>
-            <div className="mb-2 flex items-center justify-between">
+            <div className="mb-2">
               <span className="text-xs font-medium text-muted-foreground">
                 Chunk #{chunk.chunkIndex}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {chunk.tokenCount} tokens
               </span>
             </div>
             <p className="whitespace-pre-wrap text-sm">{chunk.content}</p>

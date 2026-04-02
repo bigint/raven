@@ -65,16 +65,11 @@ export const knowledgeDocuments = pgTable(
     errorMessage: text("error_message"),
     fileSize: integer("file_size"),
     id: text("id").primaryKey().$defaultFn(createId),
-    lastCrawledAt: timestamp("last_crawled_at", { withTimezone: true }),
     metadata: jsonb("metadata").$type<Record<string, unknown>>(),
     mimeType: text("mime_type").notNull(),
-    recrawlEnabled: boolean("recrawl_enabled").notNull().default(false),
-    recrawlIntervalHours: integer("recrawl_interval_hours"),
     sourceType: documentSourceTypeEnum("source_type").notNull(),
-    sourceUrl: text("source_url"),
     status: documentStatusEnum("status").notNull().default("pending"),
     title: text("title").notNull(),
-    tokenCount: integer("token_count").notNull().default(0),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .defaultNow()

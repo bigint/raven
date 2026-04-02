@@ -42,14 +42,11 @@ const StatusCell = ({ doc }: { readonly doc: Document }) => (
       />
       {STATUS_LABEL[doc.status]}
     </span>
-    {doc.status === "processing" &&
-      (doc.chunkCount > 0 || doc.tokenCount > 0) && (
-        <span className="text-[11px] text-muted-foreground tabular-nums">
-          {doc.chunkCount > 0 && `${doc.chunkCount} chunks`}
-          {doc.chunkCount > 0 && doc.tokenCount > 0 && " · "}
-          {doc.tokenCount > 0 && `${doc.tokenCount.toLocaleString()} tokens`}
-        </span>
-      )}
+    {doc.status === "processing" && doc.chunkCount > 0 && (
+      <span className="text-[11px] text-muted-foreground tabular-nums">
+        {doc.chunkCount} chunks
+      </span>
+    )}
     {doc.status === "failed" && doc.errorMessage && (
       <span
         className="max-w-[200px] truncate text-[11px] text-destructive"
@@ -118,15 +115,6 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
       key: "chunkCount",
       render: (doc) => (
         <span className="text-sm text-muted-foreground">{doc.chunkCount}</span>
-      )
-    },
-    {
-      header: "Tokens",
-      key: "tokenCount",
-      render: (doc) => (
-        <span className="text-sm text-muted-foreground tabular-nums">
-          {doc.tokenCount.toLocaleString()}
-        </span>
       )
     },
     {

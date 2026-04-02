@@ -10,11 +10,9 @@ export interface Document {
   readonly collectionId: string;
   readonly title: string;
   readonly sourceType: "file" | "url" | "image";
-  readonly sourceUrl: string | null;
   readonly mimeType: string;
   readonly fileSize: number | null;
   readonly chunkCount: number;
-  readonly tokenCount: number;
   readonly status: "pending" | "processing" | "ready" | "failed";
   readonly errorMessage: string | null;
   readonly createdAt: string;
@@ -25,7 +23,6 @@ export interface Chunk {
   readonly id: string;
   readonly chunkIndex: number;
   readonly content: string;
-  readonly tokenCount: number;
 }
 
 export interface ChunksResponse {

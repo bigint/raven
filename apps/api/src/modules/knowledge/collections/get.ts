@@ -21,8 +21,7 @@ export const getCollection = (db: Database) => async (c: AuthContext) => {
   const [stats] = await db
     .select({
       chunkCount: sum(knowledgeDocuments.chunkCount),
-      documentCount: count(knowledgeDocuments.id),
-      totalTokens: sum(knowledgeDocuments.tokenCount)
+      documentCount: count(knowledgeDocuments.id)
     })
     .from(knowledgeDocuments)
     .where(eq(knowledgeDocuments.collectionId, id));
@@ -30,7 +29,6 @@ export const getCollection = (db: Database) => async (c: AuthContext) => {
   return success(c, {
     ...collection,
     chunkCount: Number(stats?.chunkCount ?? 0),
-    documentCount: stats?.documentCount ?? 0,
-    totalTokens: Number(stats?.totalTokens ?? 0)
+    documentCount: stats?.documentCount ?? 0
   });
 };

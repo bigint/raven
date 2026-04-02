@@ -16,8 +16,8 @@ export const getKnowledgeStats = (db: Database) => async (c: AuthContext) => {
       db.select({ value: count() }).from(knowledgeCollections),
       db
         .select({
-          totalDocuments: count(),
-          totalTokens: sum(knowledgeDocuments.tokenCount)
+          totalChunks: sum(knowledgeDocuments.chunkCount),
+          totalDocuments: count()
         })
         .from(knowledgeDocuments),
       db
@@ -55,7 +55,7 @@ export const getKnowledgeStats = (db: Database) => async (c: AuthContext) => {
       collectionName: row.collectionName ?? "Unknown",
       queryCount: row.queryCount
     })),
-    totalQueries: queryStats?.totalQueries ?? 0,
-    totalTokens: Number(documentStats?.totalTokens ?? 0)
+    totalChunks: Number(documentStats?.totalChunks ?? 0),
+    totalQueries: queryStats?.totalQueries ?? 0
   });
 };

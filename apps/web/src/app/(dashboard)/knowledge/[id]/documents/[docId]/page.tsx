@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   Calendar,
   Clock,
-  ExternalLink,
   FileText,
   Globe,
   Hash,
@@ -94,8 +93,6 @@ const DocumentDetailPage = () => {
   }
 
   const SourceIcon = SOURCE_ICONS[doc.sourceType] ?? FileText;
-  const avgTokens =
-    doc.chunkCount > 0 ? Math.round(doc.tokenCount / doc.chunkCount) : 0;
 
   return (
     <div className="space-y-6">
@@ -161,31 +158,13 @@ const DocumentDetailPage = () => {
       )}
 
       {/* Stats row */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3">
         <div className="flex items-center gap-3 rounded-lg border border-border p-3">
           <Hash className="size-4 text-muted-foreground" />
           <div>
             <p className="text-xs text-muted-foreground">Chunks</p>
             <p className="text-lg font-semibold tabular-nums">
               {doc.chunkCount}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 rounded-lg border border-border p-3">
-          <FileText className="size-4 text-muted-foreground" />
-          <div>
-            <p className="text-xs text-muted-foreground">Tokens</p>
-            <p className="text-lg font-semibold tabular-nums">
-              {doc.tokenCount.toLocaleString()}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 rounded-lg border border-border p-3">
-          <Hash className="size-4 text-muted-foreground" />
-          <div>
-            <p className="text-xs text-muted-foreground">Avg per chunk</p>
-            <p className="text-lg font-semibold tabular-nums">
-              {avgTokens} tokens
             </p>
           </div>
         </div>
@@ -199,22 +178,6 @@ const DocumentDetailPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Source URL */}
-      {doc.sourceUrl && (
-        <div className="flex items-center gap-2 rounded-lg border border-border px-4 py-3">
-          <Globe className="size-4 shrink-0 text-muted-foreground" />
-          <a
-            className="min-w-0 truncate text-sm text-primary hover:underline"
-            href={doc.sourceUrl}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            {doc.sourceUrl}
-          </a>
-          <ExternalLink className="size-3 shrink-0 text-muted-foreground" />
-        </div>
-      )}
 
       {/* Chunks section */}
       {totalChunks > 0 && (
@@ -241,9 +204,6 @@ const DocumentDetailPage = () => {
                     <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]">
                       #{chunk.chunkIndex}
                     </span>
-                  </span>
-                  <span className="text-[11px] tabular-nums text-muted-foreground">
-                    {chunk.tokenCount} tokens
                   </span>
                 </div>
                 <p className="text-sm leading-relaxed text-foreground/90">
