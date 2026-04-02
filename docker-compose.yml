@@ -17,11 +17,12 @@ services:
       - "8080:8080"
     environment:
       BIGRAG_DATABASE_URL: postgresql://bigrag:bigrag@bigrag-postgres:5432/bigrag
-      BIGRAG_EMBEDDING_MODEL: text-embedding-3-small
-      BIGRAG_EMBEDDING_PROVIDER: openai
+      BIGRAG_EMBEDDING_API_KEY: ${BIGRAG_EMBEDDING_API_KEY}
+      BIGRAG_EMBEDDING_MODEL: ${BIGRAG_EMBEDDING_MODEL:-text-embedding-3-small}
+      BIGRAG_EMBEDDING_PROVIDER: ${BIGRAG_EMBEDDING_PROVIDER:-openai}
       BIGRAG_MASTER_KEY: ${BIGRAG_MASTER_KEY:-raven-bigrag-key}
-      BIGRAG_MILVUS_URL: http://milvus:19530
-      BIGRAG_REDIS_URL: redis://bigrag-redis:6379
+      BIGRAG_MILVUS_URI: http://milvus:19530
+      BIGRAG_REDIS_URL: redis://bigrag-redis:6379/0
     depends_on:
       - bigrag-postgres
       - milvus

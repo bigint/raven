@@ -116,8 +116,8 @@ export class BigRAGClient {
   async getDocumentChunks(
     collectionName: string,
     documentId: string
-  ): Promise<BigRAGChunk[]> {
-    return this.request<BigRAGChunk[]>(
+  ): Promise<{ chunks: BigRAGChunk[]; total: number }> {
+    return this.request<{ chunks: BigRAGChunk[]; total: number }>(
       "GET",
       `/v1/collections/${encodeURIComponent(collectionName)}/documents/${documentId}/chunks`
     );
