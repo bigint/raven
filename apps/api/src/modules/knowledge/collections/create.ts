@@ -63,13 +63,10 @@ export const createCollection =
         embedding_model: embeddingModel,
         embedding_provider: embeddingProvider,
         name: record.name,
-        // Forward reranking config (bigRAG handles natively)
-        ...(rerankingEnabled !== undefined && {
-          reranking_enabled: rerankingEnabled
-        }),
-        ...(rerankingModel && { reranking_model: rerankingModel }),
-        ...(rerankingApiKey && { reranking_api_key: rerankingApiKey })
-      } as Parameters<typeof bigrag.createCollection>[0]);
+        reranking_api_key: rerankingApiKey,
+        reranking_enabled: rerankingEnabled,
+        reranking_model: rerankingModel
+      });
     } catch (err) {
       log.error("Failed to create bigRAG collection, rolling back", err, {
         collectionId: record.id

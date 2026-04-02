@@ -19,7 +19,8 @@ export const createSearchModule = (db: Database, bigrag: BigRAG) => {
     "/",
     jsonValidator(searchSchema),
     async (c: AuthContextWithJson<SearchInput>) => {
-      const { collectionId, query, threshold, topK } = c.req.valid("json");
+      const { collectionId, query, searchMode, threshold, topK } =
+        c.req.valid("json");
 
       let collection: typeof knowledgeCollections.$inferSelect | undefined;
 
@@ -53,6 +54,7 @@ export const createSearchModule = (db: Database, bigrag: BigRAG) => {
       const response = await bigrag.query(collection.name, {
         min_score: scoreThreshold,
         query,
+        search_mode: searchMode,
         top_k: limit
       });
 

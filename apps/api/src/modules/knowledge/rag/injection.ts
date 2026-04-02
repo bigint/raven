@@ -143,53 +143,50 @@ export const performRAGInjection = async (
   const queryText = extractQueryText(input.messages);
   if (!queryText) return noop(input.messages);
 
-  // Query all collections in parallel
-  const collectionResults = await Promise.all(
-    collections.map(async (collection) => {
-      const response = await input.bigrag.query(collection.name, {
-        min_score: collection.similarityThreshold,
-        query: queryText,
-        top_k: collection.topK
-      });
+  const searchMode = input.headers["x-knowledge-search-mode"] as
+    | "hybrid"
+    | "keyword"
+    | "semantic"
+    | undefined;
 
-      // Map bigRAG document_id to Raven document IDs via bigragDocumentId
-      const ravenDocs = await input.db
-        .select({
-          bigragDocumentId: knowledgeDocuments.bigragDocumentId,
-          id: knowledgeDocuments.id
-        })
-        .from(knowledgeDocuments)
-        .where(eq(knowledgeDocuments.collectionId, collection.id));
+  // Query all collections in a single multiQuery call
+  const collectionNames = collections.map((c) => c.name);
+  const response = await input.bigrag.multiQuery({
+    collections: collectionNames,
+    min_score: collections[0]?.similarityThreshold ?? 0.3,
+    query: queryText,
+    search_mode: searchMode,
+    top_k: collections[0]?.topK ?? 5
+  });
 
-      const bigragToRaven = new Map(
-        ravenDocs
-          .filter((d): d is typeof d & { bigragDocumentId: string } =>
-            Boolean(d.bigragDocumentId)
-          )
-          .map((d) => [d.bigragDocumentId, d.id])
-      );
-
-      return { bigragToRaven, collection, response };
+  // Batch-fetch all Raven documents across all resolved collections
+  const collectionIds = collections.map((c) => c.id);
+  const ravenDocs = await input.db
+    .select({
+      bigragDocumentId: knowledgeDocuments.bigragDocumentId,
+      id: knowledgeDocuments.id
     })
+    .from(knowledgeDocuments)
+    .where(inArray(knowledgeDocuments.collectionId, collectionIds));
+
+  const bigragToRaven = new Map(
+    ravenDocs
+      .filter((d): d is typeof d & { bigragDocumentId: string } =>
+        Boolean(d.bigragDocumentId)
+      )
+      .map((d) => [d.bigragDocumentId, d.id])
   );
 
-  // Flatten results (reranking is handled server-side by bigRAG)
-  const allChunks: ChunkEntry[] = [];
-
-  for (const { bigragToRaven, collection, response } of collectionResults) {
-    for (const r of response.results) {
-      allChunks.push({
-        collectionId: collection.id,
-        content: r.text,
-        documentId:
-          (r.document_id ? bigragToRaven.get(r.document_id) : undefined) ??
-          r.document_id ??
-          "",
-        id: r.id,
-        score: r.score
-      });
-    }
-  }
+  const allChunks: ChunkEntry[] = response.results.map((r) => ({
+    collectionId: collections.find((c) => c.name === r.collection)?.id ?? "",
+    content: r.text,
+    documentId:
+      (r.document_id ? bigragToRaven.get(r.document_id) : undefined) ??
+      r.document_id ??
+      "",
+    id: r.id,
+    score: r.score
+  }));
 
   if (allChunks.length === 0) return noop(input.messages);
 
