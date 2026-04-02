@@ -1,28 +1,14 @@
-import { unlink } from "node:fs/promises";
+import { unlink, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { createId } from "@paralleldrive/cuid2";
-import type { QdrantClient } from "@qdrant/js-client-rest";
-import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
-import {
-  knowledgeChunks,
-  knowledgeCollections,
-  knowledgeDocuments
-} from "@raven/db";
+import { knowledgeCollections, knowledgeDocuments } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Redis } from "ioredis";
-import { chunkText } from "./chunker";
-import { embedTexts, getOpenAIKey } from "./embedder";
+import type { BigRAGClient } from "../lib/bigrag";
 import { log } from "./logger";
-import { parseDocx } from "./parsers/docx";
-import { parseImage } from "./parsers/image";
-import { parseMarkdown } from "./parsers/markdown";
-import { parsePdf } from "./parsers/pdf";
-import { crawlUrl, parseUrl } from "./parsers/url";
-import {
-  deleteVectorsByDocumentId,
-  ensureCollection,
-  upsertVectors
-} from "./qdrant";
+import { crawlUrl } from "./parsers/url";
 import type { IngestionJob } from "./queue";
 import {
   completeJob,
@@ -33,73 +19,10 @@ import {
 } from "./queue";
 
 interface WorkerDeps {
+  readonly bigrag: BigRAGClient;
   readonly db: Database;
   readonly redis: Redis;
-  readonly qdrant: QdrantClient;
-  readonly env: Env;
 }
-
-const getMimeExtension = (mimeType: string): string => {
-  const mimeMap: Record<string, string> = {
-    "application/pdf": "pdf",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-      "docx",
-    "image/gif": "gif",
-    "image/jpeg": "jpg",
-    "image/png": "png",
-    "image/webp": "webp",
-    "text/markdown": "md",
-    "text/plain": "txt"
-  };
-  return mimeMap[mimeType] ?? "bin";
-};
-
-const extractText = async (
-  job: IngestionJob,
-  mimeType: string,
-  apiKey: string,
-  metadata?: Record<string, unknown> | null
-): Promise<string> => {
-  if (job.type === "url") {
-    if (!job.sourceUrl) {
-      throw new Error("URL job missing sourceUrl");
-    }
-    const crawlLimit =
-      typeof metadata?.crawlLimit === "number"
-        ? metadata.crawlLimit
-        : undefined;
-    return parseUrl(job.sourceUrl, crawlLimit);
-  }
-
-  if (job.type === "image") {
-    if (!job.filePath) {
-      throw new Error("Image job missing filePath");
-    }
-    return parseImage(job.filePath, apiKey);
-  }
-
-  // type === "file"
-  if (!job.filePath) {
-    throw new Error("File job missing filePath");
-  }
-
-  const ext = getMimeExtension(mimeType).toLowerCase();
-
-  if (ext === "pdf") {
-    return parsePdf(job.filePath);
-  }
-
-  if (ext === "docx") {
-    return parseDocx(job.filePath);
-  }
-
-  if (ext === "md" || ext === "txt") {
-    return parseMarkdown(job.filePath);
-  }
-
-  // Fall back to markdown parser for unknown text-based formats
-  return parseMarkdown(job.filePath);
-};
 
 const cleanupFile = async (filePath?: string): Promise<void> => {
   if (!filePath) return;
@@ -114,7 +37,7 @@ const processJob = async (
   job: IngestionJob,
   deps: WorkerDeps
 ): Promise<void> => {
-  const { db, qdrant, env } = deps;
+  const { bigrag, db } = deps;
 
   log.info("Processing ingestion job", {
     attempt: job.attempt,
@@ -122,7 +45,17 @@ const processJob = async (
     type: job.type
   });
 
-  // Mark document as processing and clear any existing chunks from previous attempts
+  if (job.type !== "url") {
+    throw new Error(
+      `Unexpected job type "${job.type}" — only URL jobs are handled by the cron worker. File/image uploads go directly to bigRAG from the API.`
+    );
+  }
+
+  if (!job.sourceUrl) {
+    throw new Error("URL job missing sourceUrl");
+  }
+
+  // Mark document as processing
   await db
     .update(knowledgeDocuments)
     .set({
@@ -133,17 +66,7 @@ const processJob = async (
     })
     .where(eq(knowledgeDocuments.id, job.documentId));
 
-  await db
-    .delete(knowledgeChunks)
-    .where(eq(knowledgeChunks.documentId, job.documentId));
-
-  await deleteVectorsByDocumentId(
-    qdrant,
-    `knowledge_${job.collectionId}`,
-    job.documentId
-  );
-
-  // Load collection config
+  // Load collection config (need the collection name for bigRAG)
   const collections = await db
     .select()
     .from(knowledgeCollections)
@@ -159,7 +82,7 @@ const processJob = async (
 
   const collection = collections[0]!;
 
-  // Load document for mimeType
+  // Load document for metadata
   const documents = await db
     .select()
     .from(knowledgeDocuments)
@@ -175,168 +98,64 @@ const processJob = async (
 
   const document = documents[0]!;
 
-  // Get OpenAI key
-  const apiKey = await getOpenAIKey(db, env.ENCRYPTION_SECRET);
+  // Crawl the URL
+  const crawlLimit =
+    typeof document.metadata?.crawlLimit === "number"
+      ? document.metadata.crawlLimit
+      : undefined;
 
-  // Ensure Qdrant collection exists
-  const qdrantCollectionName = `knowledge_${job.collectionId}`;
-  await ensureCollection(
-    qdrant,
-    qdrantCollectionName,
-    collection.embeddingDimensions
-  );
+  const pages: string[] = [];
+  let pageCount = 0;
 
-  const chunkOpts = {
-    chunkOverlap: collection.chunkOverlap,
-    chunkSize: collection.chunkSize,
-    strategy: collection.chunkStrategy
-  };
+  for await (const page of crawlUrl(job.sourceUrl, crawlLimit)) {
+    pages.push(`## ${page.url}\n\n${page.text}`);
+    pageCount++;
+    log.info("Crawled page", {
+      documentId: job.documentId,
+      page: pageCount,
+      url: page.url
+    });
+  }
 
-  let totalChunks = 0;
-  let totalTokens = 0;
+  if (pages.length === 0) {
+    throw new Error("Crawl produced no content");
+  }
 
-  // Helper: process a single text block — chunk, embed, store, then discard
-  const processTextBlock = async (
-    text: string,
-    chunkOffset: number
-  ): Promise<number> => {
-    const chunks = chunkText(text, chunkOpts);
-    if (chunks.length === 0) return 0;
+  // Concatenate all pages into one markdown file
+  const markdown = pages.join("\n\n---\n\n");
+  const tempPath = join(tmpdir(), `raven-crawl-${createId()}.md`);
 
-    // Embed in small batches to keep memory low
-    const EMBED_BATCH = 5;
-    for (let i = 0; i < chunks.length; i += EMBED_BATCH) {
-      const batch = chunks.slice(i, i + EMBED_BATCH);
-      const batchTexts = batch.map((c) => c.content);
+  try {
+    await writeFile(tempPath, markdown, "utf-8");
 
-      const embeddings = await embedTexts(
-        apiKey,
-        batchTexts,
-        collection.embeddingModel,
-        collection.embeddingDimensions
-      );
-
-      const batchIds = batch.map(() => createId());
-
-      await db.insert(knowledgeChunks).values(
-        batch.map((chunk, j) => ({
-          chunkIndex: chunkOffset + chunk.index + i,
-          collectionId: job.collectionId,
-          content: chunk.content,
-          documentId: job.documentId,
-          id: batchIds[j]!,
-          tokenCount: chunk.tokenCount
-        }))
-      );
-
-      await upsertVectors(
-        qdrant,
-        qdrantCollectionName,
-        batch.map((chunk, j) => ({
-          id: batchIds[j]!,
-          payload: {
-            chunkIndex: chunkOffset + chunk.index + i,
-            collectionId: job.collectionId,
-            content: chunk.content,
-            documentId: job.documentId
-          },
-          vector: embeddings[j]!
-        }))
-      );
-    }
-
-    const blockTokens = chunks.reduce((sum, c) => sum + c.tokenCount, 0);
-    return blockTokens;
-  };
-
-  // URL jobs: stream page-by-page to keep memory flat
-  if (job.type === "url") {
-    if (!job.sourceUrl) throw new Error("URL job missing sourceUrl");
-    const crawlLimit =
-      typeof document.metadata?.crawlLimit === "number"
-        ? document.metadata.crawlLimit
-        : undefined;
-
-    let pageIndex = 0;
-    for await (const page of crawlUrl(job.sourceUrl, crawlLimit)) {
-      const tokens = await processTextBlock(page.text, totalChunks);
-      totalTokens += tokens;
-      const pageChunks = chunkText(page.text, chunkOpts).length;
-      totalChunks += pageChunks;
-      pageIndex++;
-
-      // Update document with running totals so the UI shows realtime progress
-      await db
-        .update(knowledgeDocuments)
-        .set({
-          chunkCount: totalChunks,
-          tokenCount: totalTokens,
-          updatedAt: new Date()
-        })
-        .where(eq(knowledgeDocuments.id, job.documentId));
-
-      log.info("Processed page", {
-        documentId: job.documentId,
-        page: pageIndex,
-        pageChunks,
-        totalChunks,
-        totalTokens,
-        url: page.url
-      });
-    }
-
-    if (totalChunks === 0) {
-      throw new Error("Crawl produced no chunks");
-    }
-  } else {
-    // File/image jobs: extract text in one shot (bounded by file size limits)
-    const text = await extractText(
-      job,
-      document.mimeType,
-      apiKey,
-      document.metadata
+    // Upload to bigRAG
+    const bigragDoc = await bigrag.uploadDocumentFromPath(
+      collection.name,
+      tempPath,
+      { source_url: job.sourceUrl }
     );
 
-    if (!text || text.trim().length === 0) {
-      throw new Error("Extracted text is empty");
-    }
-
-    const tokens = await processTextBlock(text, 0);
-    totalTokens = tokens;
-    totalChunks = chunkText(text, chunkOpts).length;
-
-    // Update progress
+    // Store the bigRAG document ID and set status to processing (bigRAG processes async)
     await db
       .update(knowledgeDocuments)
       .set({
-        chunkCount: totalChunks,
-        tokenCount: totalTokens,
+        bigragDocumentId: bigragDoc.id,
+        errorMessage: null,
+        lastCrawledAt: new Date(),
+        status: "processing",
         updatedAt: new Date()
       })
       .where(eq(knowledgeDocuments.id, job.documentId));
+
+    log.info("Document uploaded to bigRAG", {
+      bigragDocumentId: bigragDoc.id,
+      documentId: job.documentId,
+      pagesCrawled: pageCount
+    });
+  } finally {
+    // Clean up temp file
+    await cleanupFile(tempPath);
   }
-
-  // Mark document as ready
-  await db
-    .update(knowledgeDocuments)
-    .set({
-      chunkCount: totalChunks,
-      errorMessage: null,
-      lastCrawledAt: new Date(),
-      status: "ready",
-      tokenCount: totalTokens,
-      updatedAt: new Date()
-    })
-    .where(eq(knowledgeDocuments.id, job.documentId));
-
-  log.info("Document ingestion complete", {
-    chunkCount: totalChunks,
-    documentId: job.documentId,
-    tokenCount: totalTokens
-  });
-
-  // Clean up temp file if present
-  await cleanupFile(job.filePath);
 };
 
 export const startWorker = (deps: WorkerDeps): (() => void) => {
@@ -399,9 +218,6 @@ export const startWorker = (deps: WorkerDeps): (() => void) => {
               documentId: job.documentId
             });
           }
-
-          // Clean up temp file even on permanent failure
-          await cleanupFile(job.filePath);
         }
       }
     }

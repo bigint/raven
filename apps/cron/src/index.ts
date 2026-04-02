@@ -1,4 +1,3 @@
-import { QdrantClient } from "@qdrant/js-client-rest";
 import { parseEnv } from "@raven/config";
 import { createDatabase } from "@raven/db";
 import Redis from "ioredis";
@@ -7,7 +6,9 @@ import { deactivateExpiredKeys } from "./jobs/keys";
 import { recrawlDueDocuments } from "./jobs/recrawl";
 import { cleanupRetention } from "./jobs/retention";
 import { cleanupExpiredSessions } from "./jobs/sessions";
+import { syncDocumentStatuses } from "./jobs/sync-statuses";
 import { cleanupExpiredVerifications } from "./jobs/verifications";
+import { BigRAGClient } from "./lib/bigrag";
 import { startWorker } from "./knowledge/worker";
 
 const env = parseEnv();
@@ -16,6 +17,7 @@ const redis = new Redis(env.REDIS_URL, {
   lazyConnect: true,
   maxRetriesPerRequest: 3
 });
+const bigrag = new BigRAGClient(env.BIGRAG_URL, env.BIGRAG_API_KEY);
 
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
 const HOUR = 60 * 60 * 1000;
@@ -39,20 +41,21 @@ const runAllJobs = async () => {
   await runJob("invitation cleanup", () => cleanupExpiredInvitations(db));
   await runJob("key deactivation", () => deactivateExpiredKeys(db));
   await runJob("url recrawl", () => recrawlDueDocuments(db, redis));
+  await runJob("document status sync", () => syncDocumentStatuses(db, bigrag));
 };
 
-const qdrant = new QdrantClient({
-  apiKey: env.QDRANT_API_KEY,
-  url: env.QDRANT_URL
-});
-const stopWorker = startWorker({ db, env, qdrant, redis });
+const stopWorker = startWorker({ bigrag, db, redis });
 
 console.log("Raven cron worker started");
 runAllJobs();
 
-// Every 15 minutes: url recrawl
+// Every 15 minutes: url recrawl + document status sync
 setInterval(
   () => runJob("url recrawl", () => recrawlDueDocuments(db, redis)),
+  FIFTEEN_MINUTES
+);
+setInterval(
+  () => runJob("document status sync", () => syncDocumentStatuses(db, bigrag)),
   FIFTEEN_MINUTES
 );
 
