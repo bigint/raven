@@ -8,8 +8,8 @@ import { cleanupRetention } from "./jobs/retention";
 import { cleanupExpiredSessions } from "./jobs/sessions";
 import { syncDocumentStatuses } from "./jobs/sync-statuses";
 import { cleanupExpiredVerifications } from "./jobs/verifications";
-import { BigRAGClient } from "./lib/bigrag";
 import { startWorker } from "./knowledge/worker";
+import { BigRAGClient } from "./lib/bigrag";
 
 const env = parseEnv();
 const db = createDatabase(env.DATABASE_URL);

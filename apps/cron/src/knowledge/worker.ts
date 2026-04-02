@@ -73,14 +73,13 @@ const processJob = async (
     .where(eq(knowledgeCollections.id, job.collectionId))
     .limit(1);
 
-  if (collections.length === 0) {
+  const collection = collections[0];
+  if (!collection) {
     log.info("Collection no longer exists, skipping job", {
       collectionId: job.collectionId
     });
     return;
   }
-
-  const collection = collections[0]!;
 
   // Load document for metadata
   const documents = await db
@@ -89,14 +88,13 @@ const processJob = async (
     .where(eq(knowledgeDocuments.id, job.documentId))
     .limit(1);
 
-  if (documents.length === 0) {
+  const document = documents[0];
+  if (!document) {
     log.info("Document no longer exists, skipping job", {
       documentId: job.documentId
     });
     return;
   }
-
-  const document = documents[0]!;
 
   // Crawl the URL
   const crawlLimit =

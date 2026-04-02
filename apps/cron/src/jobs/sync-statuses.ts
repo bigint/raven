@@ -35,9 +35,7 @@ export const syncDocumentStatuses = async (
     .from(knowledgeCollections)
     .where(inArray(knowledgeCollections.id, collectionIds));
 
-  const collectionNameMap = new Map(
-    collections.map((c) => [c.id, c.name])
-  );
+  const collectionNameMap = new Map(collections.map((c) => [c.id, c.name]));
 
   for (const doc of docs) {
     const collectionName = collectionNameMap.get(doc.collectionId);
@@ -69,7 +67,8 @@ export const syncDocumentStatuses = async (
         await db
           .update(knowledgeDocuments)
           .set({
-            errorMessage: bigragDoc.error_message ?? "Processing failed in bigRAG",
+            errorMessage:
+              bigragDoc.error_message ?? "Processing failed in bigRAG",
             status: "failed",
             updatedAt: new Date()
           })
