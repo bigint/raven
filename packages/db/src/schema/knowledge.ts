@@ -36,7 +36,6 @@ export const knowledgeCollections = pgTable(
     isEnabled: boolean("is_enabled").notNull().default(true),
     maxContextTokens: integer("max_context_tokens").notNull().default(4096),
     name: text("name").notNull().unique(),
-    rerankingEnabled: boolean("reranking_enabled").notNull().default(false),
     similarityThreshold: doublePrecision("similarity_threshold")
       .notNull()
       .default(0.3),

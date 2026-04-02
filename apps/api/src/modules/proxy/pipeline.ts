@@ -105,7 +105,6 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
       const ragResult = await performRAGInjection({
         bigrag: input.bigrag,
         db: input.db,
-        env: input.env,
         headers: input.incomingHeaders,
         messages: parsedBody.messages as unknown[],
         virtualKeyId: virtualKey.id

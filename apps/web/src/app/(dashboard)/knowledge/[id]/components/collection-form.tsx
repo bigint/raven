@@ -22,7 +22,6 @@ interface FormState {
   topK: string;
   similarityThreshold: string;
   maxContextTokens: string;
-  rerankingEnabled: boolean;
   isDefault: boolean;
 }
 
@@ -34,7 +33,6 @@ const DEFAULT_FORM: FormState = {
   isDefault: false,
   maxContextTokens: "4096",
   name: "",
-  rerankingEnabled: false,
   similarityThreshold: "0.3",
   topK: "5"
 };
@@ -47,7 +45,6 @@ const extractFormFromCollection = (c: Collection): FormState => ({
   isDefault: c.isDefault,
   maxContextTokens: String(c.maxContextTokens),
   name: c.name,
-  rerankingEnabled: c.rerankingEnabled,
   similarityThreshold: String(c.similarityThreshold),
   topK: String(c.topK)
 });
@@ -105,7 +102,6 @@ const CollectionForm = ({
           isDefault: form.isDefault,
           maxContextTokens: Number(form.maxContextTokens),
           name: form.name.trim(),
-          rerankingEnabled: form.rerankingEnabled,
           similarityThreshold: Number(form.similarityThreshold),
           topK: Number(form.topK)
         });
@@ -118,7 +114,6 @@ const CollectionForm = ({
           isDefault: form.isDefault,
           maxContextTokens: Number(form.maxContextTokens),
           name: form.name.trim(),
-          rerankingEnabled: form.rerankingEnabled,
           similarityThreshold: Number(form.similarityThreshold),
           topK: Number(form.topK)
         });
@@ -247,12 +242,6 @@ const CollectionForm = ({
           placeholder="4096"
           type="number"
           value={form.maxContextTokens}
-        />
-
-        <Switch
-          checked={form.rerankingEnabled}
-          label="Reranking Enabled"
-          onCheckedChange={(checked) => update("rerankingEnabled", checked)}
         />
 
         <Switch

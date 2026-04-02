@@ -11,7 +11,6 @@ export interface Collection {
   readonly topK: number;
   readonly similarityThreshold: number;
   readonly maxContextTokens: number;
-  readonly rerankingEnabled: boolean;
   readonly isDefault: boolean;
   readonly isEnabled: boolean;
   readonly documentCount: number;
@@ -37,7 +36,6 @@ export interface CreateCollectionInput {
   // Raven-specific fields
   readonly isDefault?: boolean;
   readonly maxContextTokens?: number;
-  readonly rerankingEnabled?: boolean;
   readonly similarityThreshold?: number;
   readonly topK?: number;
 }
@@ -48,7 +46,6 @@ export interface UpdateCollectionInput {
   readonly isEnabled?: boolean;
   readonly maxContextTokens?: number;
   readonly name?: string;
-  readonly rerankingEnabled?: boolean;
   readonly similarityThreshold?: number;
   readonly topK?: number;
 }

@@ -110,16 +110,6 @@ const CollectionStats = ({ collection }: CollectionStatsProps) => {
               value={`${(collection.similarityThreshold * 100).toFixed(0)}%`}
             />
             <ConfigRow
-              label="Reranking"
-              value={
-                collection.rerankingEnabled ? (
-                  <Badge>Enabled</Badge>
-                ) : (
-                  <span className="text-muted-foreground">Disabled</span>
-                )
-              }
-            />
-            <ConfigRow
               label="Default Collection"
               value={
                 collection.isDefault ? (

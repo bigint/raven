@@ -25,6 +25,9 @@ export const createCollection =
       embeddingApiKey,
       embeddingModel,
       embeddingProvider,
+      rerankingApiKey,
+      rerankingEnabled,
+      rerankingModel,
       ...ravenFields
     } = body;
 
@@ -59,8 +62,12 @@ export const createCollection =
         embedding_api_key: embeddingApiKey,
         embedding_model: embeddingModel,
         embedding_provider: embeddingProvider,
-        name: record.name
-      });
+        name: record.name,
+        // Forward reranking config (bigRAG handles natively)
+        ...(rerankingEnabled !== undefined && { reranking_enabled: rerankingEnabled }),
+        ...(rerankingModel && { reranking_model: rerankingModel }),
+        ...(rerankingApiKey && { reranking_api_key: rerankingApiKey }),
+      } as Parameters<typeof bigrag.createCollection>[0]);
     } catch (err) {
       log.error("Failed to create bigRAG collection, rolling back", err, {
         collectionId: record.id

@@ -1,0 +1,1 @@
+ALTER TABLE "knowledge_collections" DROP COLUMN "reranking_enabled";
