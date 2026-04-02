@@ -35,6 +35,9 @@ importers:
       '@ai-sdk/openai':
         specifier: ^3.0.48
         version: 3.0.48(zod@4.3.6)
+      '@bigrag/client':
+        specifier: ^0.0.1
+        version: 0.0.1
       '@hono/node-server':
         specifier: ^1.19.11
         version: 1.19.11(hono@4.12.9)
@@ -108,6 +111,9 @@ importers:
 
   apps/cron:
     dependencies:
+      '@bigrag/client':
+        specifier: ^0.0.1
+        version: 0.0.1
       '@raven/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -487,6 +493,10 @@ packages:
 
   '@better-fetch/fetch@1.1.21':
     resolution: {integrity: sha512-/ImESw0sskqlVR94jB+5+Pxjf+xBwDZF/N5+y2/q4EqD7IARUTSpPfIo8uf39SYpCxyOCtbyYpUrZ3F/k0zT4A==}
+
+  '@bigrag/client@0.0.1':
+    resolution: {integrity: sha512-I9jyFEV1ghHCzvuJDQDJRtCA47sjczPlHKzER7UgQotuCgRREr0NLcpJ+UWMGUuYcNKSq33PW0HXkF1IM8CD6g==}
+    engines: {node: '>=18'}
 
   '@biomejs/biome@2.4.9':
     resolution: {integrity: sha512-wvZW92FrwitTcacvCBT8xdAbfbxWfDLwjYMmU3djjqQTh7Ni4ZdiWIT/x5VcZ+RQuxiKzIOzi5D+dcyJDFZMsA==}
@@ -2902,6 +2912,8 @@ snapshots:
   '@better-auth/utils@0.3.1': {}
 
   '@better-fetch/fetch@1.1.21': {}
+
+  '@bigrag/client@0.0.1': {}
 
   '@biomejs/biome@2.4.9':
     optionalDependencies:

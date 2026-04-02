@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@bigrag/client": "^0.0.1",
     "@raven/config": "workspace:*",
     "@raven/db": "workspace:*",
     "date-fns": "^4.1.0",
