@@ -1,34 +1,32 @@
-import type { QdrantClient } from "@qdrant/js-client-rest";
 import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import {
   knowledgeCollections,
   knowledgeDocuments,
   knowledgeKeyBindings,
-  knowledgeQueryLogs
+  knowledgeQueryLogs,
+  providerConfigs
 } from "@raven/db";
 import { and, eq, inArray } from "drizzle-orm";
-import type { Redis } from "ioredis";
+import type { BigRAGClient } from "@/lib/bigrag";
+import { decrypt } from "@/lib/crypto";
 import { log } from "@/lib/logger";
-import { embedQuery, getOpenAIKey } from "../ingestion/embedder";
-import { searchVectors } from "./qdrant";
 import { rerankChunks } from "./reranker";
 
 interface RAGInput {
+  readonly bigrag: BigRAGClient;
   readonly db: Database;
-  readonly redis: Redis;
-  readonly qdrant: QdrantClient;
   readonly env: Env;
-  readonly virtualKeyId: string;
-  readonly messages: unknown[];
   readonly headers: Readonly<Record<string, string>>;
+  readonly messages: unknown[];
+  readonly virtualKeyId: string;
 }
 
 interface RAGResult {
-  readonly injectedMessages: unknown[];
-  readonly used: boolean;
   readonly chunksInjected: number;
+  readonly injectedMessages: unknown[];
   readonly responseHeaders: Record<string, string>;
+  readonly used: boolean;
 }
 
 type CollectionRow = typeof knowledgeCollections.$inferSelect;
@@ -123,9 +121,23 @@ const resolveCollections = async (
   return defaults;
 };
 
-const buildCacheKey = (model: string, query: string): string => {
-  const prefix = Buffer.from(query.slice(0, 256)).toString("base64url");
-  return `rag:embed:${model}:${prefix}`;
+const getOpenAIKeyForReranking = async (
+  db: Database,
+  env: Env
+): Promise<string | null> => {
+  try {
+    const configs = await db
+      .select()
+      .from(providerConfigs)
+      .where(eq(providerConfigs.provider, "openai"))
+      .limit(1);
+
+    if (configs.length === 0) return null;
+
+    return decrypt(configs[0]!.apiKey, env.ENCRYPTION_SECRET);
+  } catch {
+    return null;
+  }
 };
 
 export const performRAGInjection = async (
@@ -147,8 +159,6 @@ export const performRAGInjection = async (
   const queryText = extractQueryText(input.messages);
   if (!queryText) return noop(input.messages);
 
-  const apiKey = await getOpenAIKey(input.db, input.env.ENCRYPTION_SECRET);
-
   const allChunks: {
     collectionId: string;
     content: string;
@@ -158,63 +168,64 @@ export const performRAGInjection = async (
   }[] = [];
 
   for (const collection of collections) {
-    const cacheKey = buildCacheKey(collection.embeddingModel, queryText);
-    let queryVector: number[];
+    const response = await input.bigrag.query(collection.name, {
+      min_score: collection.similarityThreshold,
+      query: queryText,
+      top_k: collection.topK
+    });
 
-    const cached = await input.redis.get(cacheKey).catch(() => null);
-    if (cached) {
-      queryVector = JSON.parse(cached) as number[];
-    } else {
-      queryVector = await embedQuery(
-        apiKey,
-        queryText,
-        collection.embeddingModel,
-        collection.embeddingDimensions
-      );
-      await input.redis
-        .set(cacheKey, JSON.stringify(queryVector), "EX", 300)
-        .catch(() => undefined);
-    }
+    // Map bigRAG document_id to Raven document IDs via bigragDocumentId
+    const documents = await input.db
+      .select({
+        bigragDocumentId: knowledgeDocuments.bigragDocumentId,
+        id: knowledgeDocuments.id
+      })
+      .from(knowledgeDocuments)
+      .where(eq(knowledgeDocuments.collectionId, collection.id));
 
-    const results = await searchVectors(
-      input.qdrant,
-      `knowledge_${collection.id}`,
-      queryVector,
-      collection.topK,
-      collection.similarityThreshold
+    const bigragToRaven = new Map(
+      documents
+        .filter((d) => d.bigragDocumentId)
+        .map((d) => [d.bigragDocumentId!, d.id])
     );
 
-    for (const r of results) {
+    for (const r of response.results) {
       allChunks.push({
         collectionId: collection.id,
-        content: r.content,
-        documentId: r.documentId,
+        content: r.text,
+        documentId: bigragToRaven.get(r.document_id) ?? r.document_id,
         id: r.id,
         score: r.score
       });
     }
 
-    if (results.length > 0 && collection.rerankingEnabled) {
-      const toRerank = allChunks
-        .filter((c) => c.collectionId === collection.id)
-        .map((c) => ({
-          content: c.content,
-          id: c.id,
-          originalScore: c.score
-        }));
+    if (response.results.length > 0 && collection.rerankingEnabled) {
+      const apiKey = await getOpenAIKeyForReranking(input.db, input.env);
 
-      const reranked = await rerankChunks(apiKey, queryText, toRerank);
+      if (apiKey) {
+        const toRerank = allChunks
+          .filter((c) => c.collectionId === collection.id)
+          .map((c) => ({
+            content: c.content,
+            id: c.id,
+            originalScore: c.score
+          }));
 
-      const rerankedIds = reranked.map((r) => r.id);
-      const otherChunks = allChunks.filter(
-        (c) => c.collectionId !== collection.id
-      );
-      const reorderedChunks = rerankedIds
-        .map((id) => allChunks.find((c) => c.id === id)!)
-        .filter(Boolean);
+        const reranked = await rerankChunks(apiKey, queryText, toRerank);
 
-      allChunks.length = 0;
-      allChunks.push(...otherChunks, ...reorderedChunks);
+        const rerankedIds = reranked.map((r) => r.id);
+        const otherChunks = allChunks.filter(
+          (c) => c.collectionId !== collection.id
+        );
+        const reorderedChunks = rerankedIds
+          .map((id) => allChunks.find((c) => c.id === id)!)
+          .filter(Boolean);
+
+        allChunks.length = 0;
+        allChunks.push(...otherChunks, ...reorderedChunks);
+      } else {
+        log.warn("Reranking enabled but no OpenAI key available, skipping");
+      }
     }
   }
 

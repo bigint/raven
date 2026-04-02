@@ -1,8 +1,7 @@
-import type { QdrantClient } from "@qdrant/js-client-rest";
-import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
 import type { Redis } from "ioredis";
+import type { BigRAGClient } from "@/lib/bigrag";
 import { createCollectionsModule } from "./collections/index";
 import {
   createDocumentDetailModule,
@@ -13,17 +12,16 @@ import { createSearchModule } from "./search/index";
 export const createKnowledgeModule = (
   db: Database,
   redis: Redis,
-  qdrant: QdrantClient,
-  env: Env
+  bigrag: BigRAGClient
 ) => {
   const app = new Hono();
-  app.route("/collections", createCollectionsModule(db, qdrant));
+  app.route("/collections", createCollectionsModule(db, bigrag));
   app.route(
     "/collections/:id/documents",
-    createDocumentsModule(db, redis, qdrant)
+    createDocumentsModule(db, redis, bigrag)
   );
-  app.route("/documents", createDocumentDetailModule(db, redis, qdrant));
-  app.route("/search", createSearchModule(db, redis, qdrant, env));
+  app.route("/documents", createDocumentDetailModule(db, redis, bigrag));
+  app.route("/search", createSearchModule(db, bigrag));
   return app;
 };
 

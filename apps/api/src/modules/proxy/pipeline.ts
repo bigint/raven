@@ -1,8 +1,8 @@
-import type { QdrantClient } from "@qdrant/js-client-rest";
 import type { Env } from "@raven/config";
 import { MODEL_CATALOG } from "@raven/data";
 import type { Database } from "@raven/db";
 import type { Redis } from "ioredis";
+import type { BigRAGClient } from "@/lib/bigrag";
 import { GuardrailError, ValidationError } from "@/lib/errors";
 import { getInstanceSettings } from "@/lib/instance-settings";
 import { log } from "@/lib/logger";
@@ -34,7 +34,7 @@ interface PipelineInput {
   readonly upstreamPathOverride?: string;
   readonly skipRouting?: boolean;
   readonly strictBody?: boolean;
-  readonly qdrant?: QdrantClient;
+  readonly bigrag?: BigRAGClient;
   readonly knowledgeEnabled?: boolean;
 }
 
@@ -100,15 +100,14 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
 
   // 5. RAG injection (if enabled)
   let ragHeaders: Record<string, string> = {};
-  if (input.knowledgeEnabled && input.qdrant && hasMessages) {
+  if (input.knowledgeEnabled && input.bigrag && hasMessages) {
     try {
       const ragResult = await performRAGInjection({
+        bigrag: input.bigrag,
         db: input.db,
         env: input.env,
         headers: input.incomingHeaders,
         messages: parsedBody.messages as unknown[],
-        qdrant: input.qdrant,
-        redis: input.redis,
         virtualKeyId: virtualKey.id
       });
       if (ragResult.used) {

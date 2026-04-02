@@ -1,26 +1,18 @@
-import type { QdrantClient } from "@qdrant/js-client-rest";
-import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import { knowledgeCollections, knowledgeDocuments } from "@raven/db";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import type { z } from "zod";
+import type { BigRAGClient } from "@/lib/bigrag";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { success } from "@/lib/response";
 import type { AuthContextWithJson } from "@/lib/types";
 import { jsonValidator } from "@/lib/validation";
-import { embedQuery, getOpenAIKey } from "../ingestion/embedder";
-import { searchVectors } from "../rag/qdrant";
 import { searchSchema } from "./schema";
 
 type SearchInput = z.infer<typeof searchSchema>;
 
-export const createSearchModule = (
-  db: Database,
-  _redis: unknown,
-  qdrant: QdrantClient,
-  env: Env
-) => {
+export const createSearchModule = (db: Database, bigrag: BigRAGClient) => {
   const app = new Hono();
 
   app.post(
@@ -55,50 +47,43 @@ export const createSearchModule = (
         throw new ValidationError("Collection is disabled");
       }
 
-      const apiKey = await getOpenAIKey(db, env.ENCRYPTION_SECRET);
-
-      const queryVector = await embedQuery(
-        apiKey,
-        query,
-        collection.embeddingModel,
-        collection.embeddingDimensions
-      );
-
       const scoreThreshold = threshold ?? collection.similarityThreshold;
       const limit = topK ?? collection.topK;
 
-      const results = await searchVectors(
-        qdrant,
-        `knowledge_${collection.id}`,
-        queryVector,
-        limit,
-        scoreThreshold
+      const response = await bigrag.query(collection.name, {
+        min_score: scoreThreshold,
+        query,
+        top_k: limit
+      });
+
+      // Map bigRAG document_id to Raven document IDs via bigragDocumentId
+      const documents = await db
+        .select({
+          bigragDocumentId: knowledgeDocuments.bigragDocumentId,
+          id: knowledgeDocuments.id,
+          title: knowledgeDocuments.title
+        })
+        .from(knowledgeDocuments)
+        .where(eq(knowledgeDocuments.collectionId, collection.id));
+
+      const bigragToRaven = new Map(
+        documents
+          .filter((d) => d.bigragDocumentId)
+          .map((d) => [d.bigragDocumentId!, { id: d.id, title: d.title }])
       );
 
-      const documentIds = [...new Set(results.map((r) => r.documentId))];
-
-      const documents =
-        documentIds.length > 0
-          ? await db
-              .select({
-                id: knowledgeDocuments.id,
-                title: knowledgeDocuments.title
-              })
-              .from(knowledgeDocuments)
-              .where(eq(knowledgeDocuments.collectionId, collection.id))
-          : [];
-
-      const documentMap = new Map(documents.map((d) => [d.id, d.title]));
-
-      const chunks = results.map((r) => ({
-        chunkIndex: r.chunkIndex,
-        content: r.content,
-        documentId: r.documentId,
-        documentTitle: documentMap.get(r.documentId) ?? null,
-        id: r.id,
-        metadata: r.metadata,
-        score: r.score
-      }));
+      const chunks = response.results.map((r) => {
+        const ravenDoc = bigragToRaven.get(r.document_id);
+        return {
+          chunkIndex: r.chunk_index,
+          content: r.text,
+          documentId: ravenDoc?.id ?? r.document_id,
+          documentTitle: ravenDoc?.title ?? null,
+          id: r.id,
+          metadata: r.metadata,
+          score: r.score
+        };
+      });
 
       return success(c, { chunks, collectionId: collection.id });
     }
