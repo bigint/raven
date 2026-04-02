@@ -17,8 +17,6 @@ export interface Document {
   readonly tokenCount: number;
   readonly status: "pending" | "processing" | "ready" | "failed";
   readonly errorMessage: string | null;
-  readonly recrawlEnabled: boolean;
-  readonly recrawlIntervalHours: number | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -81,35 +79,6 @@ export const useUploadDocument = (collectionId: string) => {
         error: (err) => (err instanceof Error ? err.message : "Upload failed"),
         loading: "Uploading document...",
         success: "Document uploaded"
-      });
-      return promise;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["knowledge-documents", collectionId]
-      });
-    }
-  });
-};
-
-export const useIngestUrl = (collectionId: string) => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (data: {
-      url: string;
-      title?: string;
-      crawlLimit?: number;
-      recrawlEnabled?: boolean;
-      recrawlIntervalHours?: number;
-    }) => {
-      const promise = api.post<Document>(
-        `/v1/knowledge/collections/${collectionId}/documents/url`,
-        data
-      );
-      toast.promise(promise, {
-        error: (err) => err.message,
-        loading: "Ingesting URL...",
-        success: "URL ingested"
       });
       return promise;
     },

@@ -3,7 +3,6 @@ import { z } from "zod";
 export const createCollectionSchema = z.object({
   chunkOverlap: z.number().int().min(0).max(200).default(50),
   chunkSize: z.number().int().min(100).max(8192).default(512),
-  chunkStrategy: z.enum(["fixed", "semantic", "hybrid"]).default("hybrid"),
   description: z.string().max(500).optional(),
   embeddingDimensions: z.number().int().default(1536),
   embeddingModel: z.string().default("text-embedding-3-small"),
@@ -18,7 +17,6 @@ export const createCollectionSchema = z.object({
 export const updateCollectionSchema = z.object({
   chunkOverlap: z.number().int().min(0).max(200).optional(),
   chunkSize: z.number().int().min(100).max(8192).optional(),
-  chunkStrategy: z.enum(["fixed", "semantic", "hybrid"]).optional(),
   description: z.string().max(500).optional(),
   embeddingDimensions: z.number().int().optional(),
   embeddingModel: z.string().optional(),

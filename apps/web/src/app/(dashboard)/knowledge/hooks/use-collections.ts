@@ -10,7 +10,6 @@ export interface Collection {
   readonly description: string | null;
   readonly embeddingModel: string;
   readonly embeddingDimensions: number;
-  readonly chunkStrategy: string;
   readonly chunkSize: number;
   readonly chunkOverlap: number;
   readonly topK: number;
@@ -34,7 +33,6 @@ export interface CreateCollectionInput {
   readonly description?: string;
   readonly embeddingModel?: string;
   readonly embeddingDimensions?: number;
-  readonly chunkStrategy?: string;
   readonly chunkSize?: number;
   readonly chunkOverlap?: number;
   readonly topK?: number;
@@ -50,7 +48,6 @@ export interface UpdateCollectionInput {
   readonly description?: string | null;
   readonly embeddingModel?: string;
   readonly embeddingDimensions?: number;
-  readonly chunkStrategy?: string;
   readonly chunkSize?: number;
   readonly chunkOverlap?: number;
   readonly topK?: number;

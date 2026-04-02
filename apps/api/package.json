@@ -16,7 +16,6 @@
     "@hono/node-server": "^1.19.11",
     "@hono/zod-validator": "^0.7.6",
     "@paralleldrive/cuid2": "^3.3.0",
-    "@qdrant/js-client-rest": "^1.17.0",
     "@raven/auth": "workspace:*",
     "@raven/config": "workspace:*",
     "@raven/data": "workspace:*",

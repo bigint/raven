@@ -9,7 +9,6 @@ export const listCollections = (db: Database) => async (c: AuthContext) => {
     .select({
       chunkOverlap: knowledgeCollections.chunkOverlap,
       chunkSize: knowledgeCollections.chunkSize,
-      chunkStrategy: knowledgeCollections.chunkStrategy,
       createdAt: knowledgeCollections.createdAt,
       description: knowledgeCollections.description,
       documentCount: count(knowledgeDocuments.id),

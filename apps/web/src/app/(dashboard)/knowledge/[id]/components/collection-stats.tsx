@@ -52,12 +52,6 @@ const ConfigRow = ({
   </div>
 );
 
-const STRATEGY_LABELS: Record<string, string> = {
-  fixed: "Fixed Size",
-  hybrid: "Hybrid",
-  semantic: "Semantic"
-};
-
 const CollectionStats = ({ collection }: CollectionStatsProps) => {
   const avgTokensPerChunk =
     collection.chunkCount > 0
@@ -120,15 +114,6 @@ const CollectionStats = ({ collection }: CollectionStatsProps) => {
             <h3 className="text-sm font-medium">Chunking Configuration</h3>
           </div>
           <div className="divide-y divide-border px-4">
-            <ConfigRow
-              label="Strategy"
-              value={
-                <Badge variant="neutral">
-                  {STRATEGY_LABELS[collection.chunkStrategy] ??
-                    collection.chunkStrategy}
-                </Badge>
-              }
-            />
             <ConfigRow
               label="Chunk Size"
               value={`${collection.chunkSize} tokens`}

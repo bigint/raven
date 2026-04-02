@@ -9,10 +9,7 @@ import { listCollections } from "./list";
 import { createCollectionSchema, updateCollectionSchema } from "./schema";
 import { updateCollection } from "./update";
 
-export const createCollectionsModule = (
-  db: Database,
-  bigrag: BigRAGClient
-) => {
+export const createCollectionsModule = (db: Database, bigrag: BigRAGClient) => {
   const app = new Hono();
 
   app.get("/", listCollections(db));

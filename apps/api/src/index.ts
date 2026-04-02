@@ -225,7 +225,7 @@ v1.route("/analytics", createAnalyticsModule(db, redis));
 v1.route("/webhooks", createWebhooksModule(db));
 v1.route("/routing-rules", createRoutingRulesModule(db));
 v1.route("/audit-logs", createAuditLogsModule(db));
-v1.route("/knowledge", createKnowledgeModule(db, redis, bigrag));
+v1.route("/knowledge", createKnowledgeModule(db, bigrag));
 v1.route("/keys", createKeyBindingsModule(db));
 app.route("/v1", v1);
 

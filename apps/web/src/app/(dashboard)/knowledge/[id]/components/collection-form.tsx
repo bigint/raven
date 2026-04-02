@@ -16,17 +16,10 @@ const EMBEDDING_MODEL_OPTIONS = [
   { label: "text-embedding-3-large", value: "text-embedding-3-large" }
 ];
 
-const CHUNK_STRATEGY_OPTIONS = [
-  { label: "Hybrid (recommended)", value: "hybrid" },
-  { label: "Semantic", value: "semantic" },
-  { label: "Fixed Size", value: "fixed" }
-];
-
 interface FormState {
   name: string;
   description: string;
   embeddingModel: string;
-  chunkStrategy: string;
   chunkSize: string;
   chunkOverlap: string;
   topK: string;
@@ -39,7 +32,6 @@ interface FormState {
 const DEFAULT_FORM: FormState = {
   chunkOverlap: "20",
   chunkSize: "512",
-  chunkStrategy: "hybrid",
   description: "",
   embeddingModel: "text-embedding-3-small",
   isDefault: false,
@@ -53,7 +45,6 @@ const DEFAULT_FORM: FormState = {
 const extractFormFromCollection = (c: Collection): FormState => ({
   chunkOverlap: String(c.chunkOverlap),
   chunkSize: String(c.chunkSize),
-  chunkStrategy: c.chunkStrategy,
   description: c.description ?? "",
   embeddingModel: c.embeddingModel,
   isDefault: c.isDefault,
@@ -112,7 +103,6 @@ const CollectionForm = ({
     const body: CreateCollectionInput = {
       chunkOverlap: Number(form.chunkOverlap),
       chunkSize: Number(form.chunkSize),
-      chunkStrategy: form.chunkStrategy,
       description: form.description.trim() || undefined,
       embeddingModel: form.embeddingModel,
       isDefault: form.isDefault,
@@ -184,21 +174,6 @@ const CollectionForm = ({
             onChange={(v) => update("embeddingModel", v)}
             options={EMBEDDING_MODEL_OPTIONS}
             value={form.embeddingModel}
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <label
-            className="text-sm font-medium"
-            htmlFor="collection-chunk-strategy"
-          >
-            Chunk Strategy
-          </label>
-          <Select
-            id="collection-chunk-strategy"
-            onChange={(v) => update("chunkStrategy", v)}
-            options={CHUNK_STRATEGY_OPTIONS}
-            value={form.chunkStrategy}
           />
         </div>
 

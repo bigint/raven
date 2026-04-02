@@ -10,20 +10,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@paralleldrive/cuid2": "^2.2.2",
-    "@qdrant/js-client-rest": "^1.17.0",
     "@raven/config": "workspace:*",
     "@raven/db": "workspace:*",
     "date-fns": "^4.1.0",
-    "drizzle-orm": "^0.45.1",
-    "ioredis": "^5.6.1",
-    "mammoth": "^1.12.0",
-    "openai": "^6.33.0",
-    "pdf-parse": "^2.4.5"
+    "drizzle-orm": "^0.45.1"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
-    "@types/pdf-parse": "^1.1.5",
     "esbuild": "^0.27.4",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2"
