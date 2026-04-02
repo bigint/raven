@@ -1,6 +1,6 @@
+import type { BigRAG } from "@bigrag/client";
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
-import type { BigRAG } from "@bigrag/client";
 import { createCollectionsModule } from "./collections/index";
 import {
   createDocumentDetailModule,

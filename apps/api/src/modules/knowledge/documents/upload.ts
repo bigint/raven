@@ -1,8 +1,8 @@
+import type { BigRAG } from "@bigrag/client";
 import type { Database } from "@raven/db";
 import { knowledgeCollections, knowledgeDocuments } from "@raven/db";
 import { eq } from "drizzle-orm";
 import type { Context } from "hono";
-import type { BigRAG } from "@bigrag/client";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { log } from "@/lib/logger";
 import { created } from "@/lib/response";
@@ -61,10 +61,7 @@ export const uploadDocument =
     const uploadFile = new File([await file.arrayBuffer()], file.name, {
       type: file.type
     });
-    const bigragDoc = await bigrag.uploadDocument(
-      collection.name,
-      uploadFile
-    );
+    const bigragDoc = await bigrag.uploadDocument(collection.name, uploadFile);
 
     log.info("Document uploaded to bigRAG", {
       bigragDocumentId: bigragDoc.id,

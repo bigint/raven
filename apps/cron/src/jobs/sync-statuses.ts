@@ -1,7 +1,7 @@
+import type { BigRAG } from "@bigrag/client";
 import type { Database } from "@raven/db";
 import { knowledgeCollections, knowledgeDocuments } from "@raven/db";
 import { and, eq, inArray, isNotNull } from "drizzle-orm";
-import type { BigRAG } from "@bigrag/client";
 
 export const syncDocumentStatuses = async (
   db: Database,

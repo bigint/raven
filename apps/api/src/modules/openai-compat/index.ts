@@ -1,8 +1,8 @@
+import type { BigRAG } from "@bigrag/client";
 import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
 import type { Redis } from "ioredis";
-import type { BigRAG } from "@bigrag/client";
 import { chatCompletionsHandler } from "./handler";
 
 export const createOpenAICompatModule = (

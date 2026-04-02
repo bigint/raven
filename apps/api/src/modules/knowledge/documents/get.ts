@@ -1,7 +1,7 @@
+import type { BigRAG } from "@bigrag/client";
 import type { Database } from "@raven/db";
 import { knowledgeCollections, knowledgeDocuments } from "@raven/db";
 import { eq } from "drizzle-orm";
-import type { BigRAG } from "@bigrag/client";
 import { NotFoundError } from "@/lib/errors";
 import { success } from "@/lib/response";
 import type { AuthContext } from "@/lib/types";

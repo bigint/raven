@@ -1,6 +1,6 @@
 {
-  "id": "c12e676e-a875-4c55-a55d-256a78a11f89",
-  "prevId": "1d4426d8-a7ec-4bed-aa65-463a36b27229",
+  "id": "4027560c-4ee6-4214-96b8-ad9a316f4efc",
+  "prevId": "c12e676e-a875-4c55-a55d-256a78a11f89",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -704,20 +704,6 @@
       "name": "knowledge_collections",
       "schema": "",
       "columns": {
-        "chunk_overlap": {
-          "name": "chunk_overlap",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 50
-        },
-        "chunk_size": {
-          "name": "chunk_size",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 512
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -730,20 +716,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
-        },
-        "embedding_dimensions": {
-          "name": "embedding_dimensions",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1536
-        },
-        "embedding_model": {
-          "name": "embedding_model",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'text-embedding-3-small'"
         },
         "id": {
           "name": "id",

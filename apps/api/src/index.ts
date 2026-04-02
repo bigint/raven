@@ -1,3 +1,4 @@
+import { BigRAG } from "@bigrag/client";
 import { serve } from "@hono/node-server";
 import { createAuth } from "@raven/auth";
 import { parseEnv } from "@raven/config";
@@ -6,7 +7,6 @@ import { Hono } from "hono";
 import { compress } from "hono/compress";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import { BigRAG } from "@bigrag/client";
 import { initEmailDispatcher } from "./lib/email-dispatcher";
 import { AppError } from "./lib/errors";
 import { initEventBus } from "./lib/events";
@@ -49,7 +49,10 @@ import { createWebhooksModule } from "./modules/webhooks/index";
 const env = parseEnv();
 export const db = createDatabase(env.DATABASE_URL);
 export const redis = getRedis(env.REDIS_URL);
-const bigrag = new BigRAG({ apiKey: env.BIGRAG_API_KEY, baseUrl: env.BIGRAG_URL });
+const bigrag = new BigRAG({
+  apiKey: env.BIGRAG_API_KEY,
+  baseUrl: env.BIGRAG_URL
+});
 initEventBus(redis);
 initWebhookDispatcher(db, redis);
 initEmailDispatcher(db, redis);

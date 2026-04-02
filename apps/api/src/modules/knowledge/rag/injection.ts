@@ -1,3 +1,4 @@
+import type { BigRAG } from "@bigrag/client";
 import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import {
@@ -8,7 +9,6 @@ import {
   providerConfigs
 } from "@raven/db";
 import { and, eq, inArray } from "drizzle-orm";
-import type { BigRAG } from "@bigrag/client";
 import { decrypt } from "@/lib/crypto";
 import { log } from "@/lib/logger";
 import { rerankChunks } from "./reranker";
@@ -193,7 +193,10 @@ export const performRAGInjection = async (
       allChunks.push({
         collectionId: collection.id,
         content: r.text,
-        documentId: bigragToRaven.get(r.document_id) ?? r.document_id,
+        documentId:
+          (r.document_id ? bigragToRaven.get(r.document_id) : undefined) ??
+          r.document_id ??
+          "",
         id: r.id,
         score: r.score
       });

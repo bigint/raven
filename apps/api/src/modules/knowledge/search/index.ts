@@ -1,9 +1,9 @@
+import type { BigRAG } from "@bigrag/client";
 import type { Database } from "@raven/db";
 import { knowledgeCollections, knowledgeDocuments } from "@raven/db";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import type { z } from "zod";
-import type { BigRAG } from "@bigrag/client";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import { success } from "@/lib/response";
 import type { AuthContextWithJson } from "@/lib/types";
@@ -73,11 +73,13 @@ export const createSearchModule = (db: Database, bigrag: BigRAG) => {
       );
 
       const chunks = response.results.map((r) => {
-        const ravenDoc = bigragToRaven.get(r.document_id);
+        const ravenDoc = r.document_id
+          ? bigragToRaven.get(r.document_id)
+          : undefined;
         return {
           chunkIndex: r.chunk_index,
           content: r.text,
-          documentId: ravenDoc?.id ?? r.document_id,
+          documentId: ravenDoc?.id ?? r.document_id ?? "",
           documentTitle: ravenDoc?.title ?? null,
           id: r.id,
           metadata: r.metadata,

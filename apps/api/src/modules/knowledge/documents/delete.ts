@@ -1,8 +1,8 @@
+import type { BigRAG } from "@bigrag/client";
 import type { Database } from "@raven/db";
 import { knowledgeCollections, knowledgeDocuments } from "@raven/db";
 import { eq } from "drizzle-orm";
 import { auditAndPublish } from "@/lib/audit";
-import type { BigRAG } from "@bigrag/client";
 import { NotFoundError } from "@/lib/errors";
 import { log } from "@/lib/logger";
 import { success } from "@/lib/response";

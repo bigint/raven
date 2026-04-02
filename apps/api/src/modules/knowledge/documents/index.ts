@@ -1,6 +1,6 @@
+import type { BigRAG } from "@bigrag/client";
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
-import type { BigRAG } from "@bigrag/client";
 import { queryValidator } from "@/lib/validation";
 import { deleteDocument } from "./delete";
 import { getDocument, getDocumentChunks } from "./get";
@@ -20,10 +20,7 @@ export const createDocumentsModule = (db: Database, bigrag: BigRAG) => {
   return app;
 };
 
-export const createDocumentDetailModule = (
-  db: Database,
-  bigrag: BigRAG
-) => {
+export const createDocumentDetailModule = (db: Database, bigrag: BigRAG) => {
   const app = new Hono();
 
   app.get("/:id", getDocument(db));
