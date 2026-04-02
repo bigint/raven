@@ -1,6 +1,6 @@
-import type { QdrantClient } from "@qdrant/js-client-rest";
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
+import type { BigRAGClient } from "@/lib/bigrag";
 import { jsonValidator } from "@/lib/validation";
 import { createCollection } from "./create";
 import { deleteCollection } from "./delete";
@@ -9,18 +9,25 @@ import { listCollections } from "./list";
 import { createCollectionSchema, updateCollectionSchema } from "./schema";
 import { updateCollection } from "./update";
 
-export const createCollectionsModule = (db: Database, qdrant: QdrantClient) => {
+export const createCollectionsModule = (
+  db: Database,
+  bigrag: BigRAGClient
+) => {
   const app = new Hono();
 
   app.get("/", listCollections(db));
-  app.post("/", jsonValidator(createCollectionSchema), createCollection(db));
+  app.post(
+    "/",
+    jsonValidator(createCollectionSchema),
+    createCollection(db, bigrag)
+  );
   app.get("/:id", getCollection(db));
   app.patch(
     "/:id",
     jsonValidator(updateCollectionSchema),
     updateCollection(db)
   );
-  app.delete("/:id", deleteCollection(db, qdrant));
+  app.delete("/:id", deleteCollection(db, bigrag));
 
   return app;
 };

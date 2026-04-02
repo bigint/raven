@@ -1,9 +1,5 @@
 import type { Database } from "@raven/db";
-import {
-  knowledgeChunks,
-  knowledgeCollections,
-  knowledgeDocuments
-} from "@raven/db";
+import { knowledgeCollections, knowledgeDocuments } from "@raven/db";
 import { count, eq, sum } from "drizzle-orm";
 import { NotFoundError } from "@/lib/errors";
 import { success } from "@/lib/response";
@@ -24,20 +20,16 @@ export const getCollection = (db: Database) => async (c: AuthContext) => {
 
   const [stats] = await db
     .select({
-      chunkCount: count(knowledgeChunks.id),
+      chunkCount: sum(knowledgeDocuments.chunkCount),
       documentCount: count(knowledgeDocuments.id),
       totalTokens: sum(knowledgeDocuments.tokenCount)
     })
     .from(knowledgeDocuments)
-    .leftJoin(
-      knowledgeChunks,
-      eq(knowledgeChunks.documentId, knowledgeDocuments.id)
-    )
     .where(eq(knowledgeDocuments.collectionId, id));
 
   return success(c, {
     ...collection,
-    chunkCount: stats?.chunkCount ?? 0,
+    chunkCount: Number(stats?.chunkCount ?? 0),
     documentCount: stats?.documentCount ?? 0,
     totalTokens: Number(stats?.totalTokens ?? 0)
   });

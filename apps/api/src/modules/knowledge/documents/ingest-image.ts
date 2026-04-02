@@ -1,34 +1,27 @@
-import * as fs from "node:fs/promises";
-import * as os from "node:os";
-import * as path from "node:path";
-import { createId } from "@paralleldrive/cuid2";
 import type { Database } from "@raven/db";
-import { knowledgeDocuments } from "@raven/db";
+import { knowledgeCollections, knowledgeDocuments } from "@raven/db";
+import { eq } from "drizzle-orm";
 import type { Context } from "hono";
-import type { Redis } from "ioredis";
-import { ValidationError } from "@/lib/errors";
+import type { BigRAGClient } from "@/lib/bigrag";
+import { NotFoundError, ValidationError } from "@/lib/errors";
+import { log } from "@/lib/logger";
 import { created } from "@/lib/response";
-import { hasOpenAIProvider } from "../ingestion/embedder";
-import { enqueueJob } from "../ingestion/queue";
 
 const ALLOWED_IMAGE_TYPES = new Set([
+  "image/bmp",
+  "image/gif",
   "image/jpeg",
   "image/jpg",
   "image/png",
+  "image/tiff",
   "image/webp"
 ]);
 
-const MAX_IMAGE_SIZE = 20 * 1024 * 1024; // 20MB
+const MAX_IMAGE_SIZE = 500 * 1024 * 1024; // 500MB
 
 export const ingestImage =
-  (db: Database, redis: Redis) => async (c: Context) => {
+  (db: Database, bigrag: BigRAGClient) => async (c: Context) => {
     const collectionId = c.req.param("id") as string;
-
-    if (!(await hasOpenAIProvider(db))) {
-      throw new ValidationError(
-        "No OpenAI provider configured. Add an OpenAI provider before ingesting documents."
-      );
-    }
 
     const body = await c.req.parseBody();
     const file = body["file"];
@@ -39,44 +32,50 @@ export const ingestImage =
 
     if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
       throw new ValidationError(
-        "Unsupported image type. Allowed: PNG, JPEG, WebP"
+        "Unsupported image type. Allowed: PNG, JPEG, WebP, GIF, TIFF, BMP"
       );
     }
 
     if (file.size > MAX_IMAGE_SIZE) {
-      throw new ValidationError("Image exceeds the 20MB size limit");
+      throw new ValidationError("Image exceeds the 500MB size limit");
     }
 
-    const uploadDir = path.join(os.tmpdir(), "raven-uploads");
-    await fs.mkdir(uploadDir, { recursive: true });
+    const [collection] = await db
+      .select({ name: knowledgeCollections.name })
+      .from(knowledgeCollections)
+      .where(eq(knowledgeCollections.id, collectionId))
+      .limit(1);
 
-    const fileId = createId();
-    const ext = path.extname(file.name) || ".jpg";
-    const filePath = path.join(uploadDir, `${fileId}${ext}`);
-
-    const buffer = await file.arrayBuffer();
-    await fs.writeFile(filePath, Buffer.from(buffer));
+    if (!collection) {
+      throw new NotFoundError("Collection not found");
+    }
 
     const title = (body["title"] as string | undefined) ?? file.name;
+
+    const blob = new Blob([await file.arrayBuffer()], { type: file.type });
+    const bigragDoc = await bigrag.uploadDocument(
+      collection.name,
+      blob,
+      file.name
+    );
+
+    log.info("Image uploaded to bigRAG", {
+      bigragDocumentId: bigragDoc.id,
+      collectionName: collection.name
+    });
 
     const [document] = await db
       .insert(knowledgeDocuments)
       .values({
+        bigragDocumentId: bigragDoc.id,
         collectionId,
         fileSize: file.size,
         mimeType: file.type,
         sourceType: "image",
+        status: "processing",
         title
       })
       .returning();
-
-    await enqueueJob(redis, {
-      collectionId,
-      documentId: (document as NonNullable<typeof document>).id,
-      filePath,
-      id: createId(),
-      type: "image"
-    });
 
     return created(c, document);
   };
