@@ -8,15 +8,32 @@ import {
   useUpdateCollection
 } from "../../hooks/use-collections";
 
-const EMBEDDING_MODEL_OPTIONS = [
+const EMBEDDING_PROVIDER_OPTIONS = [
+  { label: "OpenAI", value: "openai" },
+  { label: "Cohere", value: "cohere" }
+];
+
+const OPENAI_MODEL_OPTIONS = [
   { label: "text-embedding-3-small", value: "text-embedding-3-small" },
   { label: "text-embedding-3-large", value: "text-embedding-3-large" }
+];
+
+const COHERE_MODEL_OPTIONS = [
+  { label: "embed-english-v3.0", value: "embed-english-v3.0" },
+  { label: "embed-multilingual-v3.0", value: "embed-multilingual-v3.0" },
+  { label: "embed-english-light-v3.0", value: "embed-english-light-v3.0" },
+  {
+    label: "embed-multilingual-light-v3.0",
+    value: "embed-multilingual-light-v3.0"
+  }
 ];
 
 interface FormState {
   name: string;
   description: string;
+  embeddingProvider: string;
   embeddingModel: string;
+  embeddingApiKey: string;
   chunkSize: string;
   chunkOverlap: string;
   topK: string;
@@ -29,7 +46,9 @@ const DEFAULT_FORM: FormState = {
   chunkOverlap: "20",
   chunkSize: "512",
   description: "",
+  embeddingApiKey: "",
   embeddingModel: "text-embedding-3-small",
+  embeddingProvider: "openai",
   isDefault: false,
   maxContextTokens: "4096",
   name: "",
@@ -41,7 +60,9 @@ const extractFormFromCollection = (c: Collection): FormState => ({
   chunkOverlap: DEFAULT_FORM.chunkOverlap,
   chunkSize: DEFAULT_FORM.chunkSize,
   description: c.description ?? "",
+  embeddingApiKey: "",
   embeddingModel: DEFAULT_FORM.embeddingModel,
+  embeddingProvider: DEFAULT_FORM.embeddingProvider,
   isDefault: c.isDefault,
   maxContextTokens: String(c.maxContextTokens),
   name: c.name,
@@ -110,7 +131,9 @@ const CollectionForm = ({
           chunkOverlap: Number(form.chunkOverlap),
           chunkSize: Number(form.chunkSize),
           description: form.description.trim() || undefined,
+          embeddingApiKey: form.embeddingApiKey || undefined,
           embeddingModel: form.embeddingModel,
+          embeddingProvider: form.embeddingProvider,
           isDefault: form.isDefault,
           maxContextTokens: Number(form.maxContextTokens),
           name: form.name.trim(),
@@ -163,20 +186,59 @@ const CollectionForm = ({
 
         {!isEdit && (
           <>
-            <div className="space-y-1.5">
-              <label
-                className="text-sm font-medium"
-                htmlFor="collection-embedding-model"
-              >
-                Embedding Model
-              </label>
-              <Select
-                id="collection-embedding-model"
-                onChange={(v) => update("embeddingModel", v)}
-                options={EMBEDDING_MODEL_OPTIONS}
-                value={form.embeddingModel}
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label
+                  className="text-sm font-medium"
+                  htmlFor="collection-embedding-provider"
+                >
+                  Embedding Provider
+                </label>
+                <Select
+                  id="collection-embedding-provider"
+                  onChange={(v) => {
+                    update("embeddingProvider", v);
+                    update(
+                      "embeddingModel",
+                      v === "openai"
+                        ? "text-embedding-3-small"
+                        : "embed-english-v3.0"
+                    );
+                  }}
+                  options={EMBEDDING_PROVIDER_OPTIONS}
+                  value={form.embeddingProvider}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label
+                  className="text-sm font-medium"
+                  htmlFor="collection-embedding-model"
+                >
+                  Embedding Model
+                </label>
+                <Select
+                  id="collection-embedding-model"
+                  onChange={(v) => update("embeddingModel", v)}
+                  options={
+                    form.embeddingProvider === "cohere"
+                      ? COHERE_MODEL_OPTIONS
+                      : OPENAI_MODEL_OPTIONS
+                  }
+                  value={form.embeddingModel}
+                />
+              </div>
             </div>
+
+            <Input
+              autoComplete="off"
+              id="collection-embedding-api-key"
+              label="Embedding API Key"
+              name="embeddingApiKey"
+              onChange={(e) => update("embeddingApiKey", e.target.value)}
+              placeholder="sk-... or your Cohere API key"
+              type="password"
+              value={form.embeddingApiKey}
+            />
 
             <div className="grid grid-cols-2 gap-4">
               <Input
