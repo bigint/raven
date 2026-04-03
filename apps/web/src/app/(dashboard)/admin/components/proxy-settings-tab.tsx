@@ -10,7 +10,7 @@ export const ProxySettingsTab = () => {
 
   const [rateLimitRpm, setRateLimitRpm] = useState(60);
   const [rateLimitRpd, setRateLimitRpd] = useState(1000);
-  const [maxBodySize, setMaxBodySize] = useState(10);
+  const [maxBodySize, setMaxBodySize] = useState(1);
   const [requestTimeout, setRequestTimeout] = useState(300);
   const [defaultMaxTokens, setDefaultMaxTokens] = useState(4096);
 
@@ -18,7 +18,7 @@ export const ProxySettingsTab = () => {
     if (settings) {
       setRateLimitRpm(Number(settings.global_rate_limit_rpm) || 60);
       setRateLimitRpd(Number(settings.global_rate_limit_rpd) || 1000);
-      setMaxBodySize(Number(settings.max_request_body_size_mb) || 10);
+      setMaxBodySize(Number(settings.max_request_body_size_gb) || 1);
       setRequestTimeout(Number(settings.request_timeout_seconds) || 300);
       setDefaultMaxTokens(Number(settings.default_max_tokens) || 4096);
     }
@@ -45,7 +45,7 @@ export const ProxySettingsTab = () => {
       default_max_tokens: String(defaultMaxTokens),
       global_rate_limit_rpd: String(rateLimitRpd),
       global_rate_limit_rpm: String(rateLimitRpm),
-      max_request_body_size_mb: String(maxBodySize),
+      max_request_body_size_gb: String(maxBodySize),
       request_timeout_seconds: String(requestTimeout)
     });
   };
@@ -54,7 +54,7 @@ export const ProxySettingsTab = () => {
     settings !== undefined &&
     (rateLimitRpm !== (Number(settings.global_rate_limit_rpm) || 60) ||
       rateLimitRpd !== (Number(settings.global_rate_limit_rpd) || 1000) ||
-      maxBodySize !== (Number(settings.max_request_body_size_mb) || 10) ||
+      maxBodySize !== (Number(settings.max_request_body_size_gb) || 1) ||
       requestTimeout !== (Number(settings.request_timeout_seconds) || 300) ||
       defaultMaxTokens !== (Number(settings.default_max_tokens) || 4096));
 
@@ -86,8 +86,8 @@ export const ProxySettingsTab = () => {
 
       <Input
         autoComplete="off"
-        description="Maximum allowed request body size in megabytes"
-        label="Max Request Body Size (MB)"
+        description="Maximum allowed request body size in gigabytes"
+        label="Max Request Body Size (GB)"
         min={1}
         name="maxBodySize"
         onChange={(e) => setMaxBodySize(Number(e.target.value))}

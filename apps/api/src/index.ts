@@ -1,3 +1,4 @@
+import { BigRAG } from "@bigrag/client";
 import { serve } from "@hono/node-server";
 import { createAuth } from "@raven/auth";
 import { parseEnv } from "@raven/config";
@@ -11,7 +12,6 @@ import { AppError } from "./lib/errors";
 import { initEventBus } from "./lib/events";
 import { getInstanceSettings } from "./lib/instance-settings";
 import { log } from "./lib/logger";
-import { getQdrant } from "./lib/qdrant";
 import { getRedis } from "./lib/redis";
 import { sendPasswordResetEmail, sendWelcomeEmail } from "./lib/send-email";
 import { initWebhookDispatcher } from "./lib/webhook-dispatcher";
@@ -49,7 +49,10 @@ import { createWebhooksModule } from "./modules/webhooks/index";
 const env = parseEnv();
 export const db = createDatabase(env.DATABASE_URL);
 export const redis = getRedis(env.REDIS_URL);
-const qdrant = getQdrant(env.QDRANT_URL, env.QDRANT_API_KEY);
+const bigrag = new BigRAG({
+  apiSecret: env.BIGRAG_API_SECRET,
+  baseUrl: env.BIGRAG_URL
+});
 initEventBus(redis);
 initWebhookDispatcher(db, redis);
 initEmailDispatcher(db, redis);
@@ -74,9 +77,12 @@ if (env.NODE_ENV !== "production") {
   app.use("*", logger());
 }
 
-// Request body size limit
-const maxBodyBytes = instanceSettings.max_request_body_size_mb * 1024 * 1024;
+// Request body size limit (skip knowledge document uploads — bigRAG handles its own limits)
+const maxBodyBytes = instanceSettings.max_request_body_size_gb * 1024 * 1024 * 1024;
 app.use("*", async (c, next) => {
+  if (c.req.path.includes("/v1/knowledge/")) {
+    return next();
+  }
   const contentLength = c.req.header("content-length");
   if (contentLength && Number.parseInt(contentLength, 10) > maxBodyBytes) {
     return c.json(
@@ -160,7 +166,7 @@ app.route(
     db,
     redis,
     env,
-    qdrant,
+    bigrag,
     instanceSettings.knowledge_enabled
   )
 );
@@ -170,6 +176,7 @@ app.all("/v1/proxy/*", async (c) => {
   const hasBody = method !== "GET" && method !== "HEAD";
   return runPipeline({
     authHeader: c.req.header("Authorization") ?? "",
+    bigrag,
     bodyText: hasBody ? await c.req.text() : undefined,
     db,
     env,
@@ -178,7 +185,6 @@ app.all("/v1/proxy/*", async (c) => {
     method,
     path: c.req.path,
     providerPath: c.req.path,
-    qdrant,
     redis,
     sessionId: c.req.header("x-session-id") ?? null,
     userAgent: c.req.header("user-agent") ?? null,
@@ -225,7 +231,7 @@ v1.route("/analytics", createAnalyticsModule(db, redis));
 v1.route("/webhooks", createWebhooksModule(db));
 v1.route("/routing-rules", createRoutingRulesModule(db));
 v1.route("/audit-logs", createAuditLogsModule(db));
-v1.route("/knowledge", createKnowledgeModule(db, redis, qdrant, env));
+v1.route("/knowledge", createKnowledgeModule(db, bigrag));
 v1.route("/keys", createKeyBindingsModule(db));
 app.route("/v1", v1);
 

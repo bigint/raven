@@ -35,6 +35,9 @@ importers:
       '@ai-sdk/openai':
         specifier: ^3.0.48
         version: 3.0.48(zod@4.3.6)
+      '@bigrag/client':
+        specifier: ^0.0.3
+        version: 0.0.3
       '@hono/node-server':
         specifier: ^1.19.11
         version: 1.19.11(hono@4.12.9)
@@ -44,9 +47,6 @@ importers:
       '@paralleldrive/cuid2':
         specifier: ^3.3.0
         version: 3.3.0
-      '@qdrant/js-client-rest':
-        specifier: ^1.17.0
-        version: 1.17.0(typescript@6.0.2)
       '@raven/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -111,6 +111,9 @@ importers:
 
   apps/cron:
     dependencies:
+      '@bigrag/client':
+        specifier: ^0.0.3
+        version: 0.0.3
       '@paralleldrive/cuid2':
         specifier: ^3.3.0
         version: 3.3.0
@@ -145,9 +148,6 @@ importers:
       '@types/node':
         specifier: ^25.5.0
         version: 25.5.0
-      '@types/pdf-parse':
-        specifier: ^1.1.5
-        version: 1.1.5
       esbuild:
         specifier: ^0.27.4
         version: 0.27.4
@@ -511,6 +511,10 @@ packages:
 
   '@better-fetch/fetch@1.1.21':
     resolution: {integrity: sha512-/ImESw0sskqlVR94jB+5+Pxjf+xBwDZF/N5+y2/q4EqD7IARUTSpPfIo8uf39SYpCxyOCtbyYpUrZ3F/k0zT4A==}
+
+  '@bigrag/client@0.0.3':
+    resolution: {integrity: sha512-o3wIyUDeUfwcjI0cKrUB3q1LfNfIF0GT0Oto1X88xQdprCZ/MzqDMFXq2GwjSxCOW94ZABITFMgZG3Fr6Xs0Ow==}
+    engines: {node: '>=18'}
 
   '@biomejs/biome@2.4.9':
     resolution: {integrity: sha512-wvZW92FrwitTcacvCBT8xdAbfbxWfDLwjYMmU3djjqQTh7Ni4ZdiWIT/x5VcZ+RQuxiKzIOzi5D+dcyJDFZMsA==}
@@ -1798,9 +1802,6 @@ packages:
 
   '@types/node@25.5.0':
     resolution: {integrity: sha512-jp2P3tQMSxWugkCUKLRPVUpGaL5MVFwF8RDuSRztfwgN1wmqJeMSbKlnEtQqU8UrhTmzEmZdu2I6v2dpp7XIxw==}
-
-  '@types/pdf-parse@1.1.5':
-    resolution: {integrity: sha512-kBfrSXsloMnUJOKi25s3+hRmkycHfLK6A09eRGqF/N8BkQoPUmaCr+q8Cli5FnfohEz/rsv82zAiPz/LXtOGhA==}
 
   '@types/prismjs@1.26.6':
     resolution: {integrity: sha512-vqlvI7qlMvcCBbVe0AKAb4f97//Hy0EBTaiW8AalRnG/xAN5zOiWWyrNqNXeq8+KAuvRewjCVY1+IPxk4RdNYw==}
@@ -3100,6 +3101,8 @@ snapshots:
 
   '@better-fetch/fetch@1.1.21': {}
 
+  '@bigrag/client@0.0.3': {}
+
   '@biomejs/biome@2.4.9':
     optionalDependencies:
       '@biomejs/cli-darwin-arm64': 2.4.9
@@ -3955,10 +3958,6 @@ snapshots:
   '@types/node@25.5.0':
     dependencies:
       undici-types: 7.18.2
-
-  '@types/pdf-parse@1.1.5':
-    dependencies:
-      '@types/node': 25.5.0
 
   '@types/prismjs@1.26.6': {}
 

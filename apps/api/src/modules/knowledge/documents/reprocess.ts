@@ -1,18 +1,14 @@
-import { createId } from "@paralleldrive/cuid2";
-import type { QdrantClient } from "@qdrant/js-client-rest";
+import type { BigRAG } from "@bigrag/client";
 import type { Database } from "@raven/db";
-import { knowledgeChunks, knowledgeDocuments } from "@raven/db";
+import { knowledgeCollections, knowledgeDocuments } from "@raven/db";
 import { eq } from "drizzle-orm";
-import type { Redis } from "ioredis";
 import { NotFoundError } from "@/lib/errors";
+import { log } from "@/lib/logger";
 import { success } from "@/lib/response";
 import type { AuthContext } from "@/lib/types";
-import { enqueueJob } from "../ingestion/queue";
-import { deleteVectorsByDocumentId } from "../rag/qdrant";
 
 export const reprocessDocument =
-  (db: Database, redis: Redis, qdrant: QdrantClient) =>
-  async (c: AuthContext) => {
+  (db: Database, bigrag: BigRAG) => async (c: AuthContext) => {
     const docId = c.req.param("id") as string;
 
     const [document] = await db
@@ -25,33 +21,34 @@ export const reprocessDocument =
       throw new NotFoundError("Document not found");
     }
 
-    // Delete existing chunks from Postgres
-    await db
-      .delete(knowledgeChunks)
-      .where(eq(knowledgeChunks.documentId, docId));
+    if (!document.bigragDocumentId) {
+      throw new NotFoundError(
+        "Document has no bigRAG reference and cannot be reprocessed"
+      );
+    }
 
-    // Delete vectors from Qdrant
-    void deleteVectorsByDocumentId(
-      qdrant,
-      `knowledge_${document.collectionId}`,
-      docId
-    );
+    const [collection] = await db
+      .select({ name: knowledgeCollections.name })
+      .from(knowledgeCollections)
+      .where(eq(knowledgeCollections.id, document.collectionId))
+      .limit(1);
 
-    // Reset document status to pending
+    if (!collection) {
+      throw new NotFoundError("Collection not found");
+    }
+
+    await bigrag.reprocessDocument(collection.name, document.bigragDocumentId);
+
+    log.info("Document reprocess requested via bigRAG", {
+      bigragDocumentId: document.bigragDocumentId,
+      collectionName: collection.name,
+      documentId: docId
+    });
+
     await db
       .update(knowledgeDocuments)
-      .set({ chunkCount: 0, errorMessage: null, status: "pending" })
+      .set({ chunkCount: 0, errorMessage: null, status: "processing" })
       .where(eq(knowledgeDocuments.id, docId));
-
-    // Re-enqueue ingestion job
-    await enqueueJob(redis, {
-      collectionId: document.collectionId,
-      documentId: docId,
-      filePath: undefined,
-      id: createId(),
-      sourceUrl: document.sourceUrl ?? undefined,
-      type: document.sourceType
-    });
 
     return success(c, { success: true });
   };

@@ -1,5 +1,4 @@
-import type { QdrantClient } from "@qdrant/js-client-rest";
-import type { Env } from "@raven/config";
+import type { BigRAG } from "@bigrag/client";
 import type { Database } from "@raven/db";
 import {
   knowledgeCollections,
@@ -8,27 +7,21 @@ import {
   knowledgeQueryLogs
 } from "@raven/db";
 import { and, eq, inArray } from "drizzle-orm";
-import type { Redis } from "ioredis";
 import { log } from "@/lib/logger";
-import { embedQuery, getOpenAIKey } from "../ingestion/embedder";
-import { searchVectors } from "./qdrant";
-import { rerankChunks } from "./reranker";
 
 interface RAGInput {
+  readonly bigrag: BigRAG;
   readonly db: Database;
-  readonly redis: Redis;
-  readonly qdrant: QdrantClient;
-  readonly env: Env;
-  readonly virtualKeyId: string;
-  readonly messages: unknown[];
   readonly headers: Readonly<Record<string, string>>;
+  readonly messages: unknown[];
+  readonly virtualKeyId: string;
 }
 
 interface RAGResult {
-  readonly injectedMessages: unknown[];
-  readonly used: boolean;
   readonly chunksInjected: number;
+  readonly injectedMessages: unknown[];
   readonly responseHeaders: Record<string, string>;
+  readonly used: boolean;
 }
 
 type CollectionRow = typeof knowledgeCollections.$inferSelect;
@@ -123,10 +116,13 @@ const resolveCollections = async (
   return defaults;
 };
 
-const buildCacheKey = (model: string, query: string): string => {
-  const prefix = Buffer.from(query.slice(0, 256)).toString("base64url");
-  return `rag:embed:${model}:${prefix}`;
-};
+interface ChunkEntry {
+  collectionId: string;
+  content: string;
+  documentId: string;
+  id: string;
+  score: number;
+}
 
 export const performRAGInjection = async (
   input: RAGInput
@@ -147,76 +143,50 @@ export const performRAGInjection = async (
   const queryText = extractQueryText(input.messages);
   if (!queryText) return noop(input.messages);
 
-  const apiKey = await getOpenAIKey(input.db, input.env.ENCRYPTION_SECRET);
+  const searchMode = input.headers["x-knowledge-search-mode"] as
+    | "hybrid"
+    | "keyword"
+    | "semantic"
+    | undefined;
 
-  const allChunks: {
-    collectionId: string;
-    content: string;
-    documentId: string;
-    id: string;
-    score: number;
-  }[] = [];
+  // Query all collections in a single multiQuery call
+  const collectionNames = collections.map((c) => c.name);
+  const response = await input.bigrag.multiQuery({
+    collections: collectionNames,
+    min_score: collections[0]?.similarityThreshold ?? 0.3,
+    query: queryText,
+    search_mode: searchMode,
+    top_k: collections[0]?.topK ?? 5
+  });
 
-  for (const collection of collections) {
-    const cacheKey = buildCacheKey(collection.embeddingModel, queryText);
-    let queryVector: number[];
+  // Batch-fetch all Raven documents across all resolved collections
+  const collectionIds = collections.map((c) => c.id);
+  const ravenDocs = await input.db
+    .select({
+      bigragDocumentId: knowledgeDocuments.bigragDocumentId,
+      id: knowledgeDocuments.id
+    })
+    .from(knowledgeDocuments)
+    .where(inArray(knowledgeDocuments.collectionId, collectionIds));
 
-    const cached = await input.redis.get(cacheKey).catch(() => null);
-    if (cached) {
-      queryVector = JSON.parse(cached) as number[];
-    } else {
-      queryVector = await embedQuery(
-        apiKey,
-        queryText,
-        collection.embeddingModel,
-        collection.embeddingDimensions
-      );
-      await input.redis
-        .set(cacheKey, JSON.stringify(queryVector), "EX", 300)
-        .catch(() => undefined);
-    }
+  const bigragToRaven = new Map(
+    ravenDocs
+      .filter((d): d is typeof d & { bigragDocumentId: string } =>
+        Boolean(d.bigragDocumentId)
+      )
+      .map((d) => [d.bigragDocumentId, d.id])
+  );
 
-    const results = await searchVectors(
-      input.qdrant,
-      `knowledge_${collection.id}`,
-      queryVector,
-      collection.topK,
-      collection.similarityThreshold
-    );
-
-    for (const r of results) {
-      allChunks.push({
-        collectionId: collection.id,
-        content: r.content,
-        documentId: r.documentId,
-        id: r.id,
-        score: r.score
-      });
-    }
-
-    if (results.length > 0 && collection.rerankingEnabled) {
-      const toRerank = allChunks
-        .filter((c) => c.collectionId === collection.id)
-        .map((c) => ({
-          content: c.content,
-          id: c.id,
-          originalScore: c.score
-        }));
-
-      const reranked = await rerankChunks(apiKey, queryText, toRerank);
-
-      const rerankedIds = reranked.map((r) => r.id);
-      const otherChunks = allChunks.filter(
-        (c) => c.collectionId !== collection.id
-      );
-      const reorderedChunks = rerankedIds
-        .map((id) => allChunks.find((c) => c.id === id)!)
-        .filter(Boolean);
-
-      allChunks.length = 0;
-      allChunks.push(...otherChunks, ...reorderedChunks);
-    }
-  }
+  const allChunks: ChunkEntry[] = response.results.map((r) => ({
+    collectionId: collections.find((c) => c.name === r.collection)?.id ?? "",
+    content: r.text,
+    documentId:
+      (r.document_id ? bigragToRaven.get(r.document_id) : undefined) ??
+      r.document_id ??
+      "",
+    id: r.id,
+    score: r.score
+  }));
 
   if (allChunks.length === 0) return noop(input.messages);
 
@@ -234,7 +204,7 @@ export const performRAGInjection = async (
 
   const documentMap = new Map(documents.map((d) => [d.id, d.title]));
 
-  const maxTokens = collections[0]!.maxContextTokens;
+  const maxTokens = collections[0]?.maxContextTokens ?? 4096;
   let totalTokens = 0;
   const contextParts: string[] = [];
   let injectedCount = 0;
@@ -264,7 +234,7 @@ export const performRAGInjection = async (
   const topScore =
     allChunks.length > 0 ? Math.max(...allChunks.map((c) => c.score)) : 0;
 
-  const collectionId = collections[0]!.id;
+  const collectionId = collections[0]?.id ?? "";
   await input.db
     .insert(knowledgeQueryLogs)
     .values({

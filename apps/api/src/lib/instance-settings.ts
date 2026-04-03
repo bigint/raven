@@ -11,7 +11,7 @@ export interface InstanceSettings {
   readonly password_min_length: number;
   readonly global_rate_limit_rpm: number;
   readonly global_rate_limit_rpd: number;
-  readonly max_request_body_size_mb: number;
+  readonly max_request_body_size_gb: number;
   readonly request_timeout_seconds: number;
   readonly default_max_tokens: number;
   readonly log_request_bodies: boolean;
@@ -35,7 +35,7 @@ const DEFAULTS: Record<string, string> = {
   knowledge_enabled: "false",
   log_request_bodies: "true",
   log_response_bodies: "false",
-  max_request_body_size_mb: "10",
+  max_request_body_size_gb: "1",
   notify_on_budget_exceeded: "true",
   notify_on_provider_error_spike: "true",
   password_min_length: "8",
@@ -65,7 +65,7 @@ const parse = (raw: Record<string, string>): InstanceSettings => ({
   knowledge_enabled: toBool(raw.knowledge_enabled),
   log_request_bodies: toBool(raw.log_request_bodies),
   log_response_bodies: toBool(raw.log_response_bodies),
-  max_request_body_size_mb: toNum(raw.max_request_body_size_mb, 10),
+  max_request_body_size_gb: toNum(raw.max_request_body_size_gb, 1),
   notify_on_budget_exceeded: toBool(raw.notify_on_budget_exceeded),
   notify_on_provider_error_spike: toBool(raw.notify_on_provider_error_spike),
   password_min_length: toNum(raw.password_min_length, 8),

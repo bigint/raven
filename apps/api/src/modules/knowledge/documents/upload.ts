@@ -1,34 +1,33 @@
-import * as fs from "node:fs/promises";
-import * as os from "node:os";
-import * as path from "node:path";
-import { createId } from "@paralleldrive/cuid2";
+import type { BigRAG } from "@bigrag/client";
 import type { Database } from "@raven/db";
-import { knowledgeDocuments } from "@raven/db";
+import { knowledgeCollections, knowledgeDocuments } from "@raven/db";
+import { eq } from "drizzle-orm";
 import type { Context } from "hono";
-import type { Redis } from "ioredis";
-import { ValidationError } from "@/lib/errors";
+import { NotFoundError, ValidationError } from "@/lib/errors";
+import { log } from "@/lib/logger";
 import { created } from "@/lib/response";
-import { hasOpenAIProvider } from "../ingestion/embedder";
-import { enqueueJob } from "../ingestion/queue";
 
 const ALLOWED_MIME_TYPES = new Set([
+  "application/json",
   "application/pdf",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/xml",
+  "text/csv",
+  "text/html",
   "text/markdown",
-  "text/plain"
+  "text/plain",
+  "text/tab-separated-values",
+  "text/xml"
 ]);
 
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB
 
 export const uploadDocument =
-  (db: Database, redis: Redis) => async (c: Context) => {
+  (db: Database, bigrag: BigRAG) => async (c: Context) => {
     const collectionId = c.req.param("id") as string;
-
-    if (!(await hasOpenAIProvider(db))) {
-      throw new ValidationError(
-        "No OpenAI provider configured. Add an OpenAI provider before ingesting documents."
-      );
-    }
 
     const body = await c.req.parseBody();
     const file = body["file"];
@@ -39,44 +38,48 @@ export const uploadDocument =
 
     if (!ALLOWED_MIME_TYPES.has(file.type)) {
       throw new ValidationError(
-        "Unsupported file type. Allowed: PDF, plain text, markdown, DOCX"
+        "Unsupported file type. Allowed: PDF, DOCX, PPTX, XLSX, HTML, MD, TXT, CSV, TSV, XML, JSON"
       );
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      throw new ValidationError("File exceeds the 50MB size limit");
+      throw new ValidationError("File exceeds the 500MB size limit");
     }
 
-    const uploadDir = path.join(os.tmpdir(), "raven-uploads");
-    await fs.mkdir(uploadDir, { recursive: true });
+    const [collection] = await db
+      .select({ name: knowledgeCollections.name })
+      .from(knowledgeCollections)
+      .where(eq(knowledgeCollections.id, collectionId))
+      .limit(1);
 
-    const fileId = createId();
-    const ext = path.extname(file.name);
-    const filePath = path.join(uploadDir, `${fileId}${ext}`);
-
-    const buffer = await file.arrayBuffer();
-    await fs.writeFile(filePath, Buffer.from(buffer));
+    if (!collection) {
+      throw new NotFoundError("Collection not found");
+    }
 
     const title = (body["title"] as string | undefined) ?? file.name;
+
+    const uploadFile = new File([await file.arrayBuffer()], file.name, {
+      type: file.type
+    });
+    const bigragDoc = await bigrag.uploadDocument(collection.name, uploadFile);
+
+    log.info("Document uploaded to bigRAG", {
+      bigragDocumentId: bigragDoc.id,
+      collectionName: collection.name
+    });
 
     const [document] = await db
       .insert(knowledgeDocuments)
       .values({
+        bigragDocumentId: bigragDoc.id,
         collectionId,
         fileSize: file.size,
         mimeType: file.type,
         sourceType: "file",
+        status: "processing",
         title
       })
       .returning();
-
-    await enqueueJob(redis, {
-      collectionId,
-      documentId: (document as NonNullable<typeof document>).id,
-      filePath,
-      id: createId(),
-      type: "file"
-    });
 
     return created(c, document);
   };

@@ -11,12 +11,6 @@ import {
   timestamp
 } from "drizzle-orm/pg-core";
 
-export const chunkStrategyEnum = pgEnum("chunk_strategy", [
-  "fixed",
-  "semantic",
-  "hybrid"
-]);
-
 export const documentSourceTypeEnum = pgEnum("document_source_type", [
   "file",
   "url",
@@ -33,27 +27,15 @@ export const documentStatusEnum = pgEnum("document_status", [
 export const knowledgeCollections = pgTable(
   "knowledge_collections",
   {
-    chunkOverlap: integer("chunk_overlap").notNull().default(50),
-    chunkSize: integer("chunk_size").notNull().default(512),
-    chunkStrategy: chunkStrategyEnum("chunk_strategy")
-      .notNull()
-      .default("hybrid"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
     description: text("description"),
-    embeddingDimensions: integer("embedding_dimensions")
-      .notNull()
-      .default(1536),
-    embeddingModel: text("embedding_model")
-      .notNull()
-      .default("text-embedding-3-small"),
     id: text("id").primaryKey().$defaultFn(createId),
     isDefault: boolean("is_default").notNull().default(false),
     isEnabled: boolean("is_enabled").notNull().default(true),
     maxContextTokens: integer("max_context_tokens").notNull().default(4096),
     name: text("name").notNull().unique(),
-    rerankingEnabled: boolean("reranking_enabled").notNull().default(false),
     similarityThreshold: doublePrecision("similarity_threshold")
       .notNull()
       .default(0.3),
@@ -71,6 +53,7 @@ export const knowledgeCollections = pgTable(
 export const knowledgeDocuments = pgTable(
   "knowledge_documents",
   {
+    bigragDocumentId: text("bigrag_document_id"),
     chunkCount: integer("chunk_count").notNull().default(0),
     collectionId: text("collection_id")
       .notNull()
@@ -81,16 +64,11 @@ export const knowledgeDocuments = pgTable(
     errorMessage: text("error_message"),
     fileSize: integer("file_size"),
     id: text("id").primaryKey().$defaultFn(createId),
-    lastCrawledAt: timestamp("last_crawled_at", { withTimezone: true }),
     metadata: jsonb("metadata").$type<Record<string, unknown>>(),
     mimeType: text("mime_type").notNull(),
-    recrawlEnabled: boolean("recrawl_enabled").notNull().default(false),
-    recrawlIntervalHours: integer("recrawl_interval_hours"),
     sourceType: documentSourceTypeEnum("source_type").notNull(),
-    sourceUrl: text("source_url"),
     status: documentStatusEnum("status").notNull().default("pending"),
     title: text("title").notNull(),
-    tokenCount: integer("token_count").notNull().default(0),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .defaultNow()
@@ -98,29 +76,6 @@ export const knowledgeDocuments = pgTable(
   (t) => [
     index("knowledge_documents_collection_idx").on(t.collectionId),
     index("knowledge_documents_status_idx").on(t.status)
-  ]
-);
-
-export const knowledgeChunks = pgTable(
-  "knowledge_chunks",
-  {
-    chunkIndex: integer("chunk_index").notNull(),
-    collectionId: text("collection_id")
-      .notNull()
-      .references(() => knowledgeCollections.id, { onDelete: "cascade" }),
-    content: text("content").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    documentId: text("document_id")
-      .notNull()
-      .references(() => knowledgeDocuments.id, { onDelete: "cascade" }),
-    id: text("id").primaryKey().$defaultFn(createId),
-    tokenCount: integer("token_count").notNull()
-  },
-  (t) => [
-    index("knowledge_chunks_document_idx").on(t.documentId),
-    index("knowledge_chunks_collection_idx").on(t.collectionId)
   ]
 );
 

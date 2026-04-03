@@ -2,64 +2,70 @@
 
 import { Button, Input, Modal, Select, Switch } from "@raven/ui";
 import { useState } from "react";
-import type {
-  Collection,
-  CreateCollectionInput
-} from "../../hooks/use-collections";
+import type { Collection } from "../../hooks/use-collections";
 import {
   useCreateCollection,
   useUpdateCollection
 } from "../../hooks/use-collections";
 
-const EMBEDDING_MODEL_OPTIONS = [
+const EMBEDDING_PROVIDER_OPTIONS = [
+  { label: "OpenAI", value: "openai" },
+  { label: "Cohere", value: "cohere" }
+];
+
+const OPENAI_MODEL_OPTIONS = [
   { label: "text-embedding-3-small", value: "text-embedding-3-small" },
   { label: "text-embedding-3-large", value: "text-embedding-3-large" }
 ];
 
-const CHUNK_STRATEGY_OPTIONS = [
-  { label: "Hybrid (recommended)", value: "hybrid" },
-  { label: "Semantic", value: "semantic" },
-  { label: "Fixed Size", value: "fixed" }
+const COHERE_MODEL_OPTIONS = [
+  { label: "embed-english-v3.0", value: "embed-english-v3.0" },
+  { label: "embed-multilingual-v3.0", value: "embed-multilingual-v3.0" },
+  { label: "embed-english-light-v3.0", value: "embed-english-light-v3.0" },
+  {
+    label: "embed-multilingual-light-v3.0",
+    value: "embed-multilingual-light-v3.0"
+  }
 ];
 
 interface FormState {
   name: string;
   description: string;
+  embeddingProvider: string;
   embeddingModel: string;
-  chunkStrategy: string;
+  embeddingApiKey: string;
   chunkSize: string;
   chunkOverlap: string;
   topK: string;
   similarityThreshold: string;
   maxContextTokens: string;
-  rerankingEnabled: boolean;
   isDefault: boolean;
 }
 
 const DEFAULT_FORM: FormState = {
   chunkOverlap: "20",
   chunkSize: "512",
-  chunkStrategy: "hybrid",
   description: "",
+  embeddingApiKey: "",
   embeddingModel: "text-embedding-3-small",
+  embeddingProvider: "openai",
   isDefault: false,
   maxContextTokens: "4096",
   name: "",
-  rerankingEnabled: false,
   similarityThreshold: "0.3",
   topK: "5"
 };
 
 const extractFormFromCollection = (c: Collection): FormState => ({
-  chunkOverlap: String(c.chunkOverlap),
-  chunkSize: String(c.chunkSize),
-  chunkStrategy: c.chunkStrategy,
+  chunkOverlap: DEFAULT_FORM.chunkOverlap,
+  chunkSize: DEFAULT_FORM.chunkSize,
   description: c.description ?? "",
-  embeddingModel: c.embeddingModel,
+  embeddingApiKey: "",
+  embeddingModel: DEFAULT_FORM.embeddingModel,
+  embeddingProvider: DEFAULT_FORM.embeddingProvider,
   isDefault: c.isDefault,
   maxContextTokens: String(c.maxContextTokens),
   name: c.name,
-  rerankingEnabled: c.rerankingEnabled,
   similarityThreshold: String(c.similarityThreshold),
   topK: String(c.topK)
 });
@@ -109,25 +115,31 @@ const CollectionForm = ({
       return;
     }
 
-    const body: CreateCollectionInput = {
-      chunkOverlap: Number(form.chunkOverlap),
-      chunkSize: Number(form.chunkSize),
-      chunkStrategy: form.chunkStrategy,
-      description: form.description.trim() || undefined,
-      embeddingModel: form.embeddingModel,
-      isDefault: form.isDefault,
-      maxContextTokens: Number(form.maxContextTokens),
-      name: form.name.trim(),
-      rerankingEnabled: form.rerankingEnabled,
-      similarityThreshold: Number(form.similarityThreshold),
-      topK: Number(form.topK)
-    };
-
     try {
       if (isEdit && editingCollection) {
-        await updateMutation.mutateAsync({ id: editingCollection.id, ...body });
+        await updateMutation.mutateAsync({
+          description: form.description.trim() || undefined,
+          id: editingCollection.id,
+          isDefault: form.isDefault,
+          maxContextTokens: Number(form.maxContextTokens),
+          name: form.name.trim(),
+          similarityThreshold: Number(form.similarityThreshold),
+          topK: Number(form.topK)
+        });
       } else {
-        await createMutation.mutateAsync(body);
+        await createMutation.mutateAsync({
+          chunkOverlap: Number(form.chunkOverlap),
+          chunkSize: Number(form.chunkSize),
+          description: form.description.trim() || undefined,
+          embeddingApiKey: form.embeddingApiKey || undefined,
+          embeddingModel: form.embeddingModel,
+          embeddingProvider: form.embeddingProvider,
+          isDefault: form.isDefault,
+          maxContextTokens: Number(form.maxContextTokens),
+          name: form.name.trim(),
+          similarityThreshold: Number(form.similarityThreshold),
+          topK: Number(form.topK)
+        });
       }
       onSubmit?.();
       handleClose();
@@ -172,60 +184,88 @@ const CollectionForm = ({
           value={form.description}
         />
 
-        <div className="space-y-1.5">
-          <label
-            className="text-sm font-medium"
-            htmlFor="collection-embedding-model"
-          >
-            Embedding Model
-          </label>
-          <Select
-            id="collection-embedding-model"
-            onChange={(v) => update("embeddingModel", v)}
-            options={EMBEDDING_MODEL_OPTIONS}
-            value={form.embeddingModel}
-          />
-        </div>
+        {!isEdit && (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label
+                  className="text-sm font-medium"
+                  htmlFor="collection-embedding-provider"
+                >
+                  Embedding Provider
+                </label>
+                <Select
+                  id="collection-embedding-provider"
+                  onChange={(v) => {
+                    update("embeddingProvider", v);
+                    update(
+                      "embeddingModel",
+                      v === "openai"
+                        ? "text-embedding-3-small"
+                        : "embed-english-v3.0"
+                    );
+                  }}
+                  options={EMBEDDING_PROVIDER_OPTIONS}
+                  value={form.embeddingProvider}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label
+                  className="text-sm font-medium"
+                  htmlFor="collection-embedding-model"
+                >
+                  Embedding Model
+                </label>
+                <Select
+                  id="collection-embedding-model"
+                  onChange={(v) => update("embeddingModel", v)}
+                  options={
+                    form.embeddingProvider === "cohere"
+                      ? COHERE_MODEL_OPTIONS
+                      : OPENAI_MODEL_OPTIONS
+                  }
+                  value={form.embeddingModel}
+                />
+              </div>
+            </div>
 
-        <div className="space-y-1.5">
-          <label
-            className="text-sm font-medium"
-            htmlFor="collection-chunk-strategy"
-          >
-            Chunk Strategy
-          </label>
-          <Select
-            id="collection-chunk-strategy"
-            onChange={(v) => update("chunkStrategy", v)}
-            options={CHUNK_STRATEGY_OPTIONS}
-            value={form.chunkStrategy}
-          />
-        </div>
+            <Input
+              autoComplete="off"
+              id="collection-embedding-api-key"
+              label="Embedding API Key"
+              name="embeddingApiKey"
+              onChange={(e) => update("embeddingApiKey", e.target.value)}
+              placeholder="sk-... or your Cohere API key"
+              type="password"
+              value={form.embeddingApiKey}
+            />
 
-        <div className="grid grid-cols-2 gap-4">
-          <Input
-            autoComplete="off"
-            id="collection-chunk-size"
-            label="Chunk Size"
-            min="1"
-            name="chunkSize"
-            onChange={(e) => update("chunkSize", e.target.value)}
-            placeholder="512"
-            type="number"
-            value={form.chunkSize}
-          />
-          <Input
-            autoComplete="off"
-            id="collection-chunk-overlap"
-            label="Chunk Overlap"
-            min="0"
-            name="chunkOverlap"
-            onChange={(e) => update("chunkOverlap", e.target.value)}
-            placeholder="20"
-            type="number"
-            value={form.chunkOverlap}
-          />
-        </div>
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                autoComplete="off"
+                id="collection-chunk-size"
+                label="Chunk Size"
+                min="1"
+                name="chunkSize"
+                onChange={(e) => update("chunkSize", e.target.value)}
+                placeholder="512"
+                type="number"
+                value={form.chunkSize}
+              />
+              <Input
+                autoComplete="off"
+                id="collection-chunk-overlap"
+                label="Chunk Overlap"
+                min="0"
+                name="chunkOverlap"
+                onChange={(e) => update("chunkOverlap", e.target.value)}
+                placeholder="20"
+                type="number"
+                value={form.chunkOverlap}
+              />
+            </div>
+          </>
+        )}
 
         <div className="grid grid-cols-2 gap-4">
           <Input
@@ -264,12 +304,6 @@ const CollectionForm = ({
           placeholder="4096"
           type="number"
           value={form.maxContextTokens}
-        />
-
-        <Switch
-          checked={form.rerankingEnabled}
-          label="Reranking Enabled"
-          onCheckedChange={(checked) => update("rerankingEnabled", checked)}
         />
 
         <Switch

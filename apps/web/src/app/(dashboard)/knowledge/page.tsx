@@ -76,15 +76,6 @@ const KnowledgePage = () => {
       )
     },
     {
-      header: "Embedding Model",
-      key: "embeddingModel",
-      render: (collection) => (
-        <span className="text-sm text-muted-foreground">
-          {collection.embeddingModel}
-        </span>
-      )
-    },
-    {
       header: "Default",
       key: "isDefault",
       render: (collection) =>

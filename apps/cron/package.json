@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@bigrag/client": "^0.0.3",
     "@paralleldrive/cuid2": "^3.3.0",
     "@qdrant/js-client-rest": "^1.17.0",
     "@raven/config": "workspace:*",
@@ -23,7 +24,6 @@
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
-    "@types/pdf-parse": "^1.1.5",
     "esbuild": "^0.27.4",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2"

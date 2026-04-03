@@ -1,15 +1,15 @@
-import type { QdrantClient } from "@qdrant/js-client-rest";
+import type { BigRAG } from "@bigrag/client";
 import type { Database } from "@raven/db";
 import { knowledgeCollections } from "@raven/db";
 import { eq } from "drizzle-orm";
 import { auditAndPublish } from "@/lib/audit";
 import { NotFoundError } from "@/lib/errors";
+import { log } from "@/lib/logger";
 import { success } from "@/lib/response";
 import type { AuthContext } from "@/lib/types";
-import { deleteCollection as deleteQdrantCollection } from "../rag/qdrant";
 
 export const deleteCollection =
-  (db: Database, qdrant: QdrantClient) => async (c: AuthContext) => {
+  (db: Database, bigrag: BigRAG) => async (c: AuthContext) => {
     const user = c.get("user");
     const id = c.req.param("id") as string;
 
@@ -25,8 +25,13 @@ export const deleteCollection =
       throw new NotFoundError("Collection not found");
     }
 
-    // Fire and forget — remove Qdrant collection in the background
-    void deleteQdrantCollection(qdrant, `knowledge_${deleted.id}`);
+    // Fire and forget — remove bigRAG collection in the background
+    void bigrag.deleteCollection(deleted.name).catch((err) => {
+      log.error("Failed to delete bigRAG collection", err, {
+        collectionId: deleted.id,
+        name: deleted.name
+      });
+    });
 
     void auditAndPublish(db, user, "collection", "deleted", { resourceId: id });
     return success(c, { success: true });

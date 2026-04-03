@@ -1,43 +1,38 @@
-import type { QdrantClient } from "@qdrant/js-client-rest";
+import type { BigRAG } from "@bigrag/client";
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
-import type { Redis } from "ioredis";
-import { jsonValidator, queryValidator } from "@/lib/validation";
+import { queryValidator } from "@/lib/validation";
 import { deleteDocument } from "./delete";
 import { getDocument, getDocumentChunks } from "./get";
 import { ingestImage } from "./ingest-image";
-import { ingestUrl } from "./ingest-url";
 import { listDocuments } from "./list";
+import { streamDocumentProgress } from "./progress";
 import { reprocessDocument } from "./reprocess";
-import { ingestUrlSchema, listDocumentsQuerySchema } from "./schema";
+import { listDocumentsQuerySchema } from "./schema";
 import { uploadDocument } from "./upload";
 
-export const createDocumentsModule = (
-  db: Database,
-  redis: Redis,
-  _qdrant: QdrantClient
-) => {
+export const createDocumentsModule = (db: Database, bigrag: BigRAG) => {
   const app = new Hono();
 
-  app.get("/", queryValidator(listDocumentsQuerySchema), listDocuments(db));
-  app.post("/", uploadDocument(db, redis));
-  app.post("/url", jsonValidator(ingestUrlSchema), ingestUrl(db, redis));
-  app.post("/image", ingestImage(db, redis));
+  app.get(
+    "/",
+    queryValidator(listDocumentsQuerySchema),
+    listDocuments(db, bigrag)
+  );
+  app.post("/", uploadDocument(db, bigrag));
+  app.post("/image", ingestImage(db, bigrag));
 
   return app;
 };
 
-export const createDocumentDetailModule = (
-  db: Database,
-  redis: Redis,
-  qdrant: QdrantClient
-) => {
+export const createDocumentDetailModule = (db: Database, bigrag: BigRAG) => {
   const app = new Hono();
 
-  app.get("/:id", getDocument(db));
-  app.get("/:id/chunks", getDocumentChunks(db));
-  app.post("/:id/reprocess", reprocessDocument(db, redis, qdrant));
-  app.delete("/:id", deleteDocument(db, qdrant));
+  app.get("/:id", getDocument(db, bigrag));
+  app.get("/:id/chunks", getDocumentChunks(db, bigrag));
+  app.get("/:id/progress", streamDocumentProgress(db, bigrag));
+  app.post("/:id/reprocess", reprocessDocument(db, bigrag));
+  app.delete("/:id", deleteDocument(db, bigrag));
 
   return app;
 };

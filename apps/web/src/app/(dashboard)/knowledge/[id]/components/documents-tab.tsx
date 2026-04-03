@@ -4,7 +4,7 @@ import type { Column } from "@raven/ui";
 import { Button, ConfirmDialog, DataTable } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { FileUp, Globe, ImageIcon, Plus } from "lucide-react";
+import { FileUp, Globe, ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import type { Document } from "../../hooks/use-documents";
@@ -13,7 +13,6 @@ import {
   useDeleteDocument
 } from "../../hooks/use-documents";
 import { UploadModal } from "./upload-modal";
-import { UrlIngestModal } from "./url-ingest-modal";
 
 const SOURCE_TYPE_ICONS: Record<Document["sourceType"], React.ReactNode> = {
   file: <FileUp className="size-3.5" />,
@@ -43,14 +42,11 @@ const StatusCell = ({ doc }: { readonly doc: Document }) => (
       />
       {STATUS_LABEL[doc.status]}
     </span>
-    {doc.status === "processing" &&
-      (doc.chunkCount > 0 || doc.tokenCount > 0) && (
-        <span className="text-[11px] text-muted-foreground tabular-nums">
-          {doc.chunkCount > 0 && `${doc.chunkCount} chunks`}
-          {doc.chunkCount > 0 && doc.tokenCount > 0 && " · "}
-          {doc.tokenCount > 0 && `${doc.tokenCount.toLocaleString()} tokens`}
-        </span>
-      )}
+    {doc.status === "processing" && doc.chunkCount > 0 && (
+      <span className="text-[11px] text-muted-foreground tabular-nums">
+        {doc.chunkCount} chunks
+      </span>
+    )}
     {doc.status === "failed" && doc.errorMessage && (
       <span
         className="max-w-[200px] truncate text-[11px] text-destructive"
@@ -77,7 +73,6 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
   });
 
   const [uploadOpen, setUploadOpen] = useState(false);
-  const [urlOpen, setUrlOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const deleteMutation = useDeleteDocument(collectionId);
@@ -123,15 +118,6 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
       )
     },
     {
-      header: "Tokens",
-      key: "tokenCount",
-      render: (doc) => (
-        <span className="text-sm text-muted-foreground tabular-nums">
-          {doc.tokenCount.toLocaleString()}
-        </span>
-      )
-    },
-    {
       header: "Status",
       key: "status",
       render: (doc) => <StatusCell doc={doc} />
@@ -159,10 +145,6 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
   return (
     <div>
       <div className="mb-4 flex justify-end gap-2">
-        <Button onClick={() => setUrlOpen(true)} variant="secondary">
-          <Plus className="size-4" />
-          Add URL
-        </Button>
         <Button onClick={() => setUploadOpen(true)}>
           <FileUp className="size-4" />
           Upload File
@@ -182,12 +164,6 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
         collectionId={collectionId}
         onClose={() => setUploadOpen(false)}
         open={uploadOpen}
-      />
-
-      <UrlIngestModal
-        collectionId={collectionId}
-        onClose={() => setUrlOpen(false)}
-        open={urlOpen}
       />
 
       <ConfirmDialog

@@ -1,4 +1,4 @@
-import type { QdrantClient } from "@qdrant/js-client-rest";
+import type { BigRAG } from "@bigrag/client";
 import type { Env } from "@raven/config";
 import { MODEL_CATALOG } from "@raven/data";
 import type { Database } from "@raven/db";
@@ -11,7 +11,7 @@ export const chatCompletionsHandler = (
   db: Database,
   redis: Redis,
   env: Env,
-  qdrant: QdrantClient,
+  bigrag: BigRAG,
   knowledgeEnabled: boolean
 ) => {
   return async (c: Context): Promise<Response> => {
@@ -39,6 +39,7 @@ export const chatCompletionsHandler = (
 
     return runPipeline({
       authHeader: c.req.header("Authorization") ?? "",
+      bigrag,
       bodyText,
       db,
       env,
@@ -51,7 +52,6 @@ export const chatCompletionsHandler = (
       method: "POST",
       path: c.req.path,
       providerPath: `/v1/proxy/${providerName}/chat/completions`,
-      qdrant,
       redis,
       sessionId: c.req.header("x-session-id") ?? null,
       skipRouting: true,
