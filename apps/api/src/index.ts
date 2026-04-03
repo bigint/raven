@@ -80,7 +80,7 @@ if (env.NODE_ENV !== "production") {
 // Request body size limit (skip knowledge document uploads — bigRAG handles its own limits)
 const maxBodyBytes = instanceSettings.max_request_body_size_gb * 1024 * 1024 * 1024;
 app.use("*", async (c, next) => {
-  if (c.req.path.match(/\/v1\/knowledge\/collections\/[^/]+\/documents$/)) {
+  if (c.req.path.includes("/v1/knowledge/")) {
     return next();
   }
   const contentLength = c.req.header("content-length");
