@@ -13,7 +13,6 @@ services:
   bigrag:
     image: yoginth/bigrag:latest
     ports:
-      - "5000:5000"
       - "6000:6000"
     environment:
       BIGRAG_AUTH_REQUIRED: "false"
@@ -35,6 +34,15 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    restart: unless-stopped
+
+  bigrag-ui:
+    image: yoginth/bigrag-ui:latest
+    ports:
+      - "5000:5000"
+    depends_on:
+      bigrag:
+        condition: service_healthy
     restart: unless-stopped
 
   bigrag-postgres:
