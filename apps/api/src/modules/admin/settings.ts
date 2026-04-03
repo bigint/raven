@@ -17,7 +17,7 @@ const VALID_KEYS = new Set([
   "knowledge_enabled",
   "log_request_bodies",
   "log_response_bodies",
-  "max_request_body_size_mb",
+  "max_request_body_size_gb",
   "notify_on_budget_exceeded",
   "notify_on_provider_error_spike",
   "password_min_length",

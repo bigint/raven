@@ -29,7 +29,7 @@ interface AdminSettings {
   // Proxy
   readonly global_rate_limit_rpm: string;
   readonly global_rate_limit_rpd: string;
-  readonly max_request_body_size_mb: string;
+  readonly max_request_body_size_gb: string;
   readonly request_timeout_seconds: string;
   readonly default_max_tokens: string;
   // Logging
