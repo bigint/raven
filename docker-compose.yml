@@ -8,7 +8,10 @@ services:
       BIGRAG_API_SECRET: ${BIGRAG_API_SECRET:-raven-bigrag-secret}
       BIGRAG_URL: http://bigrag:6000
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - raven_data:/var/lib/postgresql/data
+    depends_on:
+      bigrag:
+        condition: service_healthy
     restart: unless-stopped
 
   bigrag:
@@ -107,4 +110,4 @@ volumes:
   bigrag_redis_data:
   etcd_data:
   milvus_data:
-  postgres_data:
+  raven_data:
