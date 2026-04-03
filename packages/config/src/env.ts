@@ -6,7 +6,6 @@ const envSchema = z.object({
   APP_URL: z.string().url(),
   BETTER_AUTH_SECRET: z.string().min(16),
   BETTER_AUTH_URL: z.string().url(),
-  BIGRAG_API_KEY: z.string(),
   BIGRAG_URL: z.string().url().default("http://localhost:8080"),
   DATABASE_URL: z.string().url(),
   ENCRYPTION_SECRET: z.string().min(32),

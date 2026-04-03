@@ -49,10 +49,7 @@ import { createWebhooksModule } from "./modules/webhooks/index";
 const env = parseEnv();
 export const db = createDatabase(env.DATABASE_URL);
 export const redis = getRedis(env.REDIS_URL);
-const bigrag = new BigRAG({
-  apiKey: env.BIGRAG_API_KEY,
-  baseUrl: env.BIGRAG_URL
-});
+const bigrag = new BigRAG({ baseUrl: env.BIGRAG_URL });
 initEventBus(redis);
 initWebhookDispatcher(db, redis);
 initEmailDispatcher(db, redis);
