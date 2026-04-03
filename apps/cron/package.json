@@ -11,10 +11,16 @@
   },
   "dependencies": {
     "@bigrag/client": "^0.0.3",
+    "@paralleldrive/cuid2": "^3.3.0",
+    "@qdrant/js-client-rest": "^1.17.0",
     "@raven/config": "workspace:*",
     "@raven/db": "workspace:*",
     "date-fns": "^4.1.0",
-    "drizzle-orm": "^0.45.1"
+    "drizzle-orm": "^0.45.2",
+    "ioredis": "^5.10.1",
+    "mammoth": "^1.12.0",
+    "openai": "^6.33.0",
+    "pdf-parse": "^2.4.5"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
