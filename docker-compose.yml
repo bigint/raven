@@ -17,12 +17,13 @@ services:
   bigrag:
     image: yoginth/bigrag:latest
     ports:
-      - "6000:6000"
+      - "6100:6000"
     environment:
       BIGRAG_API_SECRET: ${BIGRAG_API_SECRET:-raven-bigrag-secret}
       BIGRAG_DATABASE_URL: postgres://raven:raven@postgres:5432/bigrag?sslmode=disable
       BIGRAG_MILVUS_URI: http://milvus:19530
       BIGRAG_REDIS_URL: redis://redis:6379/0
+      BIGRAG_SECRET_KEY: ${BIGRAG_SECRET_KEY:-raven-bigrag-encryption-key-change-me}
       BIGRAG_UPLOAD_DIR: /data/uploads
     volumes:
       - bigrag_data:/data

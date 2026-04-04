@@ -186,47 +186,45 @@ const CollectionForm = ({
 
         {!isEdit && (
           <>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label
-                  className="text-sm font-medium"
-                  htmlFor="collection-embedding-provider"
-                >
-                  Embedding Provider
-                </label>
-                <Select
-                  id="collection-embedding-provider"
-                  onChange={(v) => {
-                    update("embeddingProvider", v);
-                    update(
-                      "embeddingModel",
-                      v === "openai"
-                        ? "text-embedding-3-small"
-                        : "embed-english-v3.0"
-                    );
-                  }}
-                  options={EMBEDDING_PROVIDER_OPTIONS}
-                  value={form.embeddingProvider}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label
-                  className="text-sm font-medium"
-                  htmlFor="collection-embedding-model"
-                >
-                  Embedding Model
-                </label>
-                <Select
-                  id="collection-embedding-model"
-                  onChange={(v) => update("embeddingModel", v)}
-                  options={
-                    form.embeddingProvider === "cohere"
-                      ? COHERE_MODEL_OPTIONS
-                      : OPENAI_MODEL_OPTIONS
-                  }
-                  value={form.embeddingModel}
-                />
-              </div>
+            <div className="space-y-1.5">
+              <label
+                className="text-sm font-medium"
+                htmlFor="collection-embedding-provider"
+              >
+                Embedding Provider
+              </label>
+              <Select
+                id="collection-embedding-provider"
+                onChange={(v) => {
+                  update("embeddingProvider", v);
+                  update(
+                    "embeddingModel",
+                    v === "openai"
+                      ? "text-embedding-3-small"
+                      : "embed-english-v3.0"
+                  );
+                }}
+                options={EMBEDDING_PROVIDER_OPTIONS}
+                value={form.embeddingProvider}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label
+                className="text-sm font-medium"
+                htmlFor="collection-embedding-model"
+              >
+                Embedding Model
+              </label>
+              <Select
+                id="collection-embedding-model"
+                onChange={(v) => update("embeddingModel", v)}
+                options={
+                  form.embeddingProvider === "cohere"
+                    ? COHERE_MODEL_OPTIONS
+                    : OPENAI_MODEL_OPTIONS
+                }
+                value={form.embeddingModel}
+              />
             </div>
 
             <Input
@@ -235,7 +233,7 @@ const CollectionForm = ({
               label="Embedding API Key"
               name="embeddingApiKey"
               onChange={(e) => update("embeddingApiKey", e.target.value)}
-              placeholder="sk-... or your Cohere API key"
+              placeholder="Enter your embedding API key"
               type="password"
               value={form.embeddingApiKey}
             />

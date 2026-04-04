@@ -26,7 +26,7 @@ interface SelectProps {
 }
 
 const TRIGGER_CLASS =
-  "flex h-9 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50";
+  "flex h-9 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50";
 
 const ChevronIcon = () => (
   <svg
@@ -254,12 +254,12 @@ const StandardSelect = ({
           {(val: string) => {
             const match = options.find((o) => o.value === val);
             return match ? (
-              <span className="flex items-center gap-2">
+              <span className="flex min-w-0 items-center gap-2">
                 {match.icon}
-                {match.label}
+                <span className="truncate">{match.label}</span>
               </span>
             ) : (
-              val
+              <span className="truncate">{val}</span>
             );
           }}
         </BaseSelect.Value>

@@ -84,11 +84,11 @@ const CollectionStats = ({ collection }: CollectionStatsProps) => {
           icon={Hash}
           label="Total Tokens"
           sub={
-            collection.totalTokens > 1_000_000
-              ? `${(collection.totalTokens / 1_000_000).toFixed(1)}M`
+            (collection.totalTokens ?? 0) > 1_000_000
+              ? `${((collection.totalTokens ?? 0) / 1_000_000).toFixed(1)}M`
               : undefined
           }
-          value={collection.totalTokens.toLocaleString()}
+          value={(collection.totalTokens ?? 0).toLocaleString()}
         />
       </div>
 
