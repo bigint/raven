@@ -20,7 +20,6 @@ export interface Collection {
 
 export interface CollectionDetail extends Collection {
   readonly chunkCount: number;
-  readonly totalTokens: number;
 }
 
 export interface CreateCollectionInput {

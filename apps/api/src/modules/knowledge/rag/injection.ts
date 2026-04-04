@@ -7,7 +7,12 @@ import {
   knowledgeQueryLogs
 } from "@raven/db";
 import { and, eq, inArray } from "drizzle-orm";
+
 import { log } from "@/lib/logger";
+import {
+  buildDocumentIdMap,
+  resolveDocumentId
+} from "../documents/map-ids";
 
 interface RAGInput {
   readonly bigrag: BigRAG;
@@ -159,31 +164,13 @@ export const performRAGInjection = async (
     top_k: collections[0]?.topK ?? 5
   });
 
-  // Batch-fetch all Raven documents across all resolved collections
   const collectionIds = collections.map((c) => c.id);
-  const ravenDocs = await input.db
-    .select({
-      bigragDocumentId: knowledgeDocuments.bigragDocumentId,
-      id: knowledgeDocuments.id
-    })
-    .from(knowledgeDocuments)
-    .where(inArray(knowledgeDocuments.collectionId, collectionIds));
-
-  const bigragToRaven = new Map(
-    ravenDocs
-      .filter((d): d is typeof d & { bigragDocumentId: string } =>
-        Boolean(d.bigragDocumentId)
-      )
-      .map((d) => [d.bigragDocumentId, d.id])
-  );
+  const idMap = await buildDocumentIdMap(input.db, collectionIds);
 
   const allChunks: ChunkEntry[] = response.results.map((r) => ({
     collectionId: collections.find((c) => c.name === r.collection)?.id ?? "",
     content: r.text,
-    documentId:
-      (r.document_id ? bigragToRaven.get(r.document_id) : undefined) ??
-      r.document_id ??
-      "",
+    documentId: resolveDocumentId(idMap, r.document_id),
     id: r.id,
     score: r.score
   }));

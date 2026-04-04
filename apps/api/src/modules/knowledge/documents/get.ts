@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { NotFoundError } from "@/lib/errors";
 import { success } from "@/lib/response";
 import type { AuthContext } from "@/lib/types";
+import { syncDocumentStatus } from "./sync-status";
 
 /** GET /documents/:id — document metadata only (no chunks) */
 export const getDocument =
@@ -21,60 +22,8 @@ export const getDocument =
       throw new NotFoundError("Document not found");
     }
 
-    // Inline status sync: fetch fresh status from bigRAG for in-progress docs
-    if (
-      (document.status === "pending" || document.status === "processing") &&
-      document.bigragDocumentId
-    ) {
-      const [collection] = await db
-        .select({ name: knowledgeCollections.name })
-        .from(knowledgeCollections)
-        .where(eq(knowledgeCollections.id, document.collectionId))
-        .limit(1);
-
-      if (collection) {
-        try {
-          const bigragDoc = await bigrag.getDocument(
-            collection.name,
-            document.bigragDocumentId
-          );
-
-          if (bigragDoc.status === "ready") {
-            const updates = {
-              chunkCount: bigragDoc.chunk_count,
-              errorMessage: null,
-              status: "ready" as const,
-              updatedAt: new Date()
-            };
-            await db
-              .update(knowledgeDocuments)
-              .set(updates)
-              .where(eq(knowledgeDocuments.id, docId));
-
-            return success(c, { ...document, ...updates });
-          }
-
-          if (bigragDoc.status === "failed") {
-            const updates = {
-              errorMessage:
-                bigragDoc.error_message ?? "Processing failed in bigRAG",
-              status: "failed" as const,
-              updatedAt: new Date()
-            };
-            await db
-              .update(knowledgeDocuments)
-              .set(updates)
-              .where(eq(knowledgeDocuments.id, docId));
-
-            return success(c, { ...document, ...updates });
-          }
-        } catch {
-          // On error, return cached status
-        }
-      }
-    }
-
-    return success(c, document);
+    const patch = await syncDocumentStatus(db, bigrag, document);
+    return success(c, patch ? { ...document, ...patch } : document);
   };
 
 /** GET /documents/:id/chunks?limit=20&offset=0 — paginated chunks */

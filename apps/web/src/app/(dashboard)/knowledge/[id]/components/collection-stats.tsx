@@ -2,7 +2,7 @@
 
 import { Badge } from "@raven/ui";
 import { formatDistanceToNow } from "date-fns";
-import { BookOpen, Boxes, Hash, ScanSearch } from "lucide-react";
+import { BookOpen, Boxes, ScanSearch } from "lucide-react";
 import type { CollectionDetail } from "../../hooks/use-collections";
 
 interface CollectionStatsProps {
@@ -46,11 +46,6 @@ const ConfigRow = ({
 );
 
 const CollectionStats = ({ collection }: CollectionStatsProps) => {
-  const avgTokensPerChunk =
-    collection.chunkCount > 0
-      ? Math.round(collection.totalTokens / collection.chunkCount)
-      : 0;
-
   const avgChunksPerDoc =
     collection.documentCount > 0
       ? Math.round(collection.chunkCount / collection.documentCount)
@@ -59,7 +54,7 @@ const CollectionStats = ({ collection }: CollectionStatsProps) => {
   return (
     <div className="space-y-6">
       {/* Stats grid */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3">
         <StatCard
           icon={BookOpen}
           label="Documents"
@@ -73,22 +68,7 @@ const CollectionStats = ({ collection }: CollectionStatsProps) => {
         <StatCard
           icon={Boxes}
           label="Chunks"
-          sub={
-            avgTokensPerChunk > 0
-              ? `~${avgTokensPerChunk} tokens avg`
-              : undefined
-          }
           value={collection.chunkCount.toLocaleString()}
-        />
-        <StatCard
-          icon={Hash}
-          label="Total Tokens"
-          sub={
-            (collection.totalTokens ?? 0) > 1_000_000
-              ? `${((collection.totalTokens ?? 0) / 1_000_000).toFixed(1)}M`
-              : undefined
-          }
-          value={(collection.totalTokens ?? 0).toLocaleString()}
         />
       </div>
 

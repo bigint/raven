@@ -23,7 +23,7 @@ const KnowledgeAnalyticsPage = () => {
     error: logsError
   } = useQuery(queryLogsQueryOptions());
 
-  const topCollection = stats?.queries.topCollections[0];
+  const topCollection = stats?.topCollections[0];
 
   const columns: Column<QueryLog>[] = [
     {
@@ -115,7 +115,7 @@ const KnowledgeAnalyticsPage = () => {
               <div className="h-7 w-16 animate-pulse rounded-md bg-muted" />
             ) : (
               <p className="text-2xl font-bold tabular-nums">
-                {stats?.collections ?? 0}
+                {stats?.collectionCount ?? 0}
               </p>
             )}
           </div>
@@ -127,19 +127,19 @@ const KnowledgeAnalyticsPage = () => {
               <div className="h-7 w-16 animate-pulse rounded-md bg-muted" />
             ) : (
               <p className="text-2xl font-bold tabular-nums">
-                {stats?.documents ?? 0}
+                {stats?.documentCount ?? 0}
               </p>
             )}
           </div>
         </div>
         <div className="rounded-xl border border-border p-5">
-          <p className="text-sm text-muted-foreground">Total Tokens</p>
+          <p className="text-sm text-muted-foreground">Total Chunks</p>
           <div className="mt-3">
             {statsLoading ? (
               <div className="h-7 w-16 animate-pulse rounded-md bg-muted" />
             ) : (
               <p className="text-2xl font-bold tabular-nums">
-                {(stats?.totalTokens ?? 0).toLocaleString()}
+                {(stats?.totalChunks ?? 0).toLocaleString()}
               </p>
             )}
           </div>
@@ -151,7 +151,7 @@ const KnowledgeAnalyticsPage = () => {
               <div className="h-7 w-16 animate-pulse rounded-md bg-muted" />
             ) : (
               <p className="text-2xl font-bold tabular-nums">
-                {stats?.queries.total ?? 0}
+                {stats?.totalQueries ?? 0}
               </p>
             )}
           </div>
@@ -166,7 +166,7 @@ const KnowledgeAnalyticsPage = () => {
               <div className="h-7 w-16 animate-pulse rounded-md bg-muted" />
             ) : (
               <p className="text-2xl font-bold tabular-nums">
-                {(stats?.queries.avgChunksPerQuery ?? 0).toFixed(1)}
+                {(stats?.avgChunksPerQuery ?? 0).toFixed(1)}
               </p>
             )}
           </div>
@@ -178,7 +178,7 @@ const KnowledgeAnalyticsPage = () => {
               <div className="h-7 w-16 animate-pulse rounded-md bg-muted" />
             ) : (
               <p className="text-2xl font-bold tabular-nums">
-                {((stats?.queries.avgSimilarityScore ?? 0) * 100).toFixed(1)}%
+                {((stats?.avgSimilarityScore ?? 0) * 100).toFixed(1)}%
               </p>
             )}
           </div>

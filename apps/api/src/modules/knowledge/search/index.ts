@@ -8,6 +8,7 @@ import { NotFoundError, ValidationError } from "@/lib/errors";
 import { success } from "@/lib/response";
 import type { AuthContextWithJson } from "@/lib/types";
 import { jsonValidator } from "@/lib/validation";
+import { buildDocumentIdMap } from "../documents/map-ids";
 import { searchSchema } from "./schema";
 
 type SearchInput = z.infer<typeof searchSchema>;
@@ -58,7 +59,9 @@ export const createSearchModule = (db: Database, bigrag: BigRAG) => {
         top_k: limit
       });
 
-      // Map bigRAG document_id to Raven document IDs via bigragDocumentId
+      const idMap = await buildDocumentIdMap(db, [collection.id]);
+
+      // Fetch titles for resolved document IDs
       const documents = await db
         .select({
           bigragDocumentId: knowledgeDocuments.bigragDocumentId,
@@ -68,21 +71,19 @@ export const createSearchModule = (db: Database, bigrag: BigRAG) => {
         .from(knowledgeDocuments)
         .where(eq(knowledgeDocuments.collectionId, collection.id));
 
-      const bigragToRaven = new Map(
-        documents
-          .filter((d) => d.bigragDocumentId)
-          .map((d) => [d.bigragDocumentId!, { id: d.id, title: d.title }])
+      const titleMap = new Map(
+        documents.map((d) => [d.id, d.title])
       );
 
       const chunks = response.results.map((r) => {
-        const ravenDoc = r.document_id
-          ? bigragToRaven.get(r.document_id)
-          : undefined;
+        const ravenId = r.document_id
+          ? (idMap.get(r.document_id) ?? r.document_id)
+          : "";
         return {
           chunkIndex: r.chunk_index,
           content: r.text,
-          documentId: ravenDoc?.id ?? r.document_id ?? "",
-          documentTitle: ravenDoc?.title ?? null,
+          documentId: ravenId,
+          documentTitle: titleMap.get(ravenId) ?? null,
           id: r.id,
           metadata: r.metadata,
           score: r.score

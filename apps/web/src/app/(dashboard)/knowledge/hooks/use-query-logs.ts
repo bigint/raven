@@ -4,19 +4,17 @@ import { queryOptions } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
 export interface KnowledgeStats {
-  readonly collections: number;
-  readonly documents: number;
-  readonly totalTokens: number;
-  readonly queries: {
-    readonly total: number;
-    readonly avgChunksPerQuery: number;
-    readonly avgSimilarityScore: number;
-    readonly topCollections: {
-      readonly collectionId: string;
-      readonly collectionName: string;
-      readonly queryCount: number;
-    }[];
-  };
+  readonly collectionCount: number;
+  readonly documentCount: number;
+  readonly totalChunks: number;
+  readonly totalQueries: number;
+  readonly avgChunksPerQuery: number;
+  readonly avgSimilarityScore: number;
+  readonly topCollections: {
+    readonly collectionId: string;
+    readonly collectionName: string;
+    readonly queryCount: number;
+  }[];
 }
 
 export interface QueryLog {
