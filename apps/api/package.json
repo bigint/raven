@@ -10,11 +10,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.64",
-    "@ai-sdk/google": "^3.0.53",
-    "@ai-sdk/openai": "^3.0.48",
+    "@ai-sdk/anthropic": "^3.0.66",
+    "@ai-sdk/google": "^3.0.58",
+    "@ai-sdk/openai": "^3.0.50",
     "@bigrag/client": "^0.0.6",
-    "@hono/node-server": "^1.19.11",
+    "@hono/node-server": "^1.19.12",
     "@hono/zod-validator": "^0.7.6",
     "@paralleldrive/cuid2": "^3.3.0",
     "@raven/auth": "workspace:*",
@@ -23,20 +23,20 @@
     "@raven/db": "workspace:*",
     "@raven/email": "workspace:*",
     "@raven/types": "workspace:*",
-    "ai": "^6.0.141",
+    "ai": "^6.0.146",
     "better-auth": "^1.5.6",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.45.2",
-    "hono": "^4.12.9",
+    "hono": "^4.12.10",
     "ioredis": "^5.10.1",
     "openai": "^6.33.0",
     "p-retry": "^8.0.0",
-    "rate-limiter-flexible": "^10.0.1",
+    "rate-limiter-flexible": "^11.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@types/node": "^25.5.0",
-    "esbuild": "^0.27.4",
+    "@types/node": "^25.5.2",
+    "esbuild": "^0.28.0",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2"
   }
