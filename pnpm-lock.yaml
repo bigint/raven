@@ -36,8 +36,8 @@ importers:
         specifier: ^3.0.48
         version: 3.0.48(zod@4.3.6)
       '@bigrag/client':
-        specifier: ^0.0.3
-        version: 0.0.3
+        specifier: ^0.0.6
+        version: 0.0.6
       '@hono/node-server':
         specifier: ^1.19.11
         version: 1.19.11(hono@4.12.9)
@@ -514,6 +514,10 @@ packages:
 
   '@bigrag/client@0.0.3':
     resolution: {integrity: sha512-o3wIyUDeUfwcjI0cKrUB3q1LfNfIF0GT0Oto1X88xQdprCZ/MzqDMFXq2GwjSxCOW94ZABITFMgZG3Fr6Xs0Ow==}
+    engines: {node: '>=18'}
+
+  '@bigrag/client@0.0.6':
+    resolution: {integrity: sha512-OwP+qgV4tsmALjqpU+sYmJZRdebr05USt/B9scPXCTv6DFxuvfTv4h45IOkzv8HTQVntyRlTSJQR9SuzHws0GA==}
     engines: {node: '>=18'}
 
   '@biomejs/biome@2.4.9':
@@ -3102,6 +3106,8 @@ snapshots:
   '@better-fetch/fetch@1.1.21': {}
 
   '@bigrag/client@0.0.3': {}
+
+  '@bigrag/client@0.0.6': {}
 
   '@biomejs/biome@2.4.9':
     optionalDependencies:

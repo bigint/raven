@@ -13,7 +13,7 @@
     "@ai-sdk/anthropic": "^3.0.64",
     "@ai-sdk/google": "^3.0.53",
     "@ai-sdk/openai": "^3.0.48",
-    "@bigrag/client": "^0.0.3",
+    "@bigrag/client": "^0.0.6",
     "@hono/node-server": "^1.19.11",
     "@hono/zod-validator": "^0.7.6",
     "@paralleldrive/cuid2": "^3.3.0",
