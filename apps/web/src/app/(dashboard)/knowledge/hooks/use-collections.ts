@@ -16,8 +16,20 @@ export interface Collection {
   readonly updatedAt: string;
 }
 
+export interface BigRAGCollectionConfig {
+  readonly embeddingProvider: string;
+  readonly embeddingModel: string;
+  readonly dimension: number;
+  readonly chunkSize: number;
+  readonly chunkOverlap: number;
+  readonly defaultTopK: number;
+  readonly defaultMinScore: number | null;
+  readonly defaultSearchMode: string;
+}
+
 export interface CollectionDetail extends Collection {
   readonly chunkCount: number;
+  readonly bigrag: BigRAGCollectionConfig | null;
 }
 
 export interface CreateCollectionInput {

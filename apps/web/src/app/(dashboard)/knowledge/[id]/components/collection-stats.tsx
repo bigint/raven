@@ -2,7 +2,7 @@
 
 import { Badge } from "@raven/ui";
 import { formatDistanceToNow } from "date-fns";
-import { BookOpen, Boxes, ScanSearch } from "lucide-react";
+import { BookOpen, Boxes, Cpu, ScanSearch, Settings } from "lucide-react";
 import type { CollectionDetail } from "../../hooks/use-collections";
 
 interface CollectionStatsProps {
@@ -51,6 +51,8 @@ const CollectionStats = ({ collection }: CollectionStatsProps) => {
       ? Math.round(collection.chunkCount / collection.documentCount)
       : 0;
 
+  const bigrag = collection.bigrag;
+
   return (
     <div className="space-y-6">
       {/* Stats grid */}
@@ -72,29 +74,68 @@ const CollectionStats = ({ collection }: CollectionStatsProps) => {
         />
       </div>
 
-      {/* Retrieval & injection config */}
-      <div className="grid gap-4 md:grid-cols-1">
-        <div className="rounded-xl border border-border bg-card">
-          <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-            <ScanSearch className="size-4 text-muted-foreground" />
-            <h3 className="text-sm font-medium">Retrieval Settings</h3>
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Embedding config */}
+        {bigrag && (
+          <div className="rounded-xl border border-border bg-card">
+            <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+              <Cpu className="size-4 text-muted-foreground" />
+              <h3 className="text-sm font-medium">Embedding</h3>
+            </div>
+            <div className="divide-y divide-border px-4">
+              <ConfigRow label="Provider" value={bigrag.embeddingProvider} />
+              <ConfigRow label="Model" value={bigrag.embeddingModel} />
+              <ConfigRow label="Dimension" value={bigrag.dimension} />
+              <ConfigRow label="Chunk Size" value={bigrag.chunkSize} />
+              <ConfigRow label="Chunk Overlap" value={bigrag.chunkOverlap} />
+            </div>
           </div>
-          <div className="divide-y divide-border px-4">
-            <ConfigRow
-              label="Max Context Tokens"
-              value={collection.maxContextTokens.toLocaleString()}
-            />
-            <ConfigRow
-              label="Default Collection"
-              value={
-                collection.isDefault ? (
-                  <Badge>Yes</Badge>
-                ) : (
-                  <span className="text-muted-foreground">No</span>
-                )
-              }
-            />
+        )}
+
+        {/* Search defaults */}
+        {bigrag && (
+          <div className="rounded-xl border border-border bg-card">
+            <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+              <ScanSearch className="size-4 text-muted-foreground" />
+              <h3 className="text-sm font-medium">Search Defaults</h3>
+            </div>
+            <div className="divide-y divide-border px-4">
+              <ConfigRow label="Top K" value={bigrag.defaultTopK} />
+              <ConfigRow
+                label="Min Score"
+                value={
+                  bigrag.defaultMinScore !== null
+                    ? bigrag.defaultMinScore
+                    : <span className="text-muted-foreground">None</span>
+                }
+              />
+              <ConfigRow label="Search Mode" value={bigrag.defaultSearchMode} />
+            </div>
           </div>
+        )}
+      </div>
+
+      {/* Raven retrieval config */}
+      <div className="rounded-xl border border-border bg-card">
+        <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+          <Settings className="size-4 text-muted-foreground" />
+          <h3 className="text-sm font-medium">Injection Settings</h3>
+        </div>
+        <div className="divide-y divide-border px-4">
+          <ConfigRow
+            label="Max Context Tokens"
+            value={collection.maxContextTokens.toLocaleString()}
+          />
+          <ConfigRow
+            label="Default Collection"
+            value={
+              collection.isDefault ? (
+                <Badge>Yes</Badge>
+              ) : (
+                <span className="text-muted-foreground">No</span>
+              )
+            }
+          />
         </div>
       </div>
 
