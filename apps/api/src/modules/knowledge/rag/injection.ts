@@ -118,7 +118,19 @@ const resolveCollections = async (
       )
     );
 
-  return defaults;
+  if (defaults.length > 0) return defaults;
+
+  // When explicitly requested via header but no defaults exist,
+  // fall back to all enabled collections
+  const explicitlyEnabled = headers["x-knowledge-enabled"] === "true";
+  if (explicitlyEnabled) {
+    return db
+      .select()
+      .from(knowledgeCollections)
+      .where(eq(knowledgeCollections.isEnabled, true));
+  }
+
+  return [];
 };
 
 interface ChunkEntry {
