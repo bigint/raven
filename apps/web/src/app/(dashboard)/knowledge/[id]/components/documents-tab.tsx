@@ -147,7 +147,7 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
       <div className="mb-4 flex justify-end gap-2">
         <Button onClick={() => setUploadOpen(true)}>
           <FileUp className="size-4" />
-          Upload File
+          Upload Files
         </Button>
       </div>
 

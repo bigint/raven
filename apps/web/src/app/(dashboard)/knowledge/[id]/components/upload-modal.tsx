@@ -16,39 +16,46 @@ interface UploadModalProps {
 
 const UploadModal = ({ open, onClose, collectionId }: UploadModalProps) => {
   const [dragging, setDragging] = useState(false);
+  const [uploading, setUploading] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const uploadDocument = useUploadDocument(collectionId);
   const uploadImage = useUploadImage(collectionId);
 
-  const isUploading = uploadDocument.isPending || uploadImage.isPending;
+  const isUploading = uploading > 0;
 
-  const handleFile = async (file: File) => {
-    const mutation = IMAGE_TYPES.includes(file.type)
-      ? uploadImage
-      : uploadDocument;
-    try {
-      await mutation.mutateAsync(file);
+  const handleFiles = async (files: File[]) => {
+    if (files.length === 0) return;
+    setUploading(files.length);
+    const results = await Promise.allSettled(
+      files.map((file) => {
+        const mutation = IMAGE_TYPES.includes(file.type)
+          ? uploadImage
+          : uploadDocument;
+        return mutation.mutateAsync(file);
+      })
+    );
+    setUploading(0);
+    if (results.every((r) => r.status === "fulfilled")) {
       onClose();
-    } catch {
-      // Error is handled by toast.promise in the mutation hook
     }
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
+    handleFiles(Array.from(e.dataTransfer.files));
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleFile(file);
+    if (e.target.files?.length) {
+      handleFiles(Array.from(e.target.files));
+    }
+    e.target.value = "";
   };
 
   return (
-    <Modal onClose={onClose} open={open} title="Upload File">
+    <Modal onClose={onClose} open={open} title="Upload Files">
       <div className="space-y-4">
         <div
           className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed p-10 transition-colors ${
@@ -67,7 +74,7 @@ const UploadModal = ({ open, onClose, collectionId }: UploadModalProps) => {
           <Upload className="size-8 text-muted-foreground" />
           <div className="text-center">
             <p className="text-sm font-medium">
-              Drag and drop a file here, or{" "}
+              Drag and drop files here, or{" "}
               <span className="text-primary">browse</span>
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -77,6 +84,7 @@ const UploadModal = ({ open, onClose, collectionId }: UploadModalProps) => {
           <input
             accept={ACCEPT}
             className="sr-only"
+            multiple
             onChange={handleChange}
             ref={inputRef}
             type="file"
@@ -91,7 +99,7 @@ const UploadModal = ({ open, onClose, collectionId }: UploadModalProps) => {
             disabled={isUploading}
             onClick={() => inputRef.current?.click()}
           >
-            {isUploading ? "Uploading..." : "Browse Files"}
+            {isUploading ? `Uploading ${uploading} file${uploading > 1 ? "s" : ""}...` : "Browse Files"}
           </Button>
         </div>
       </div>
