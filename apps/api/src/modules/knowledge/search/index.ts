@@ -49,14 +49,11 @@ export const createSearchModule = (db: Database, bigrag: BigRAG) => {
         throw new ValidationError("Collection is disabled");
       }
 
-      const scoreThreshold = threshold ?? collection.similarityThreshold;
-      const limit = topK ?? collection.topK;
-
       const response = await bigrag.query(collection.name, {
-        min_score: scoreThreshold,
         query,
-        search_mode: searchMode,
-        top_k: limit
+        ...(topK ? { top_k: topK } : {}),
+        ...(threshold ? { min_score: threshold } : {}),
+        ...(searchMode ? { search_mode: searchMode } : {})
       });
 
       const idMap = await buildDocumentIdMap(db, [collection.id]);

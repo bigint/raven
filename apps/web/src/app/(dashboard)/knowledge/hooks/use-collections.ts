@@ -8,8 +8,6 @@ export interface Collection {
   readonly id: string;
   readonly name: string;
   readonly description: string | null;
-  readonly topK: number;
-  readonly similarityThreshold: number;
   readonly maxContextTokens: number;
   readonly isDefault: boolean;
   readonly isEnabled: boolean;
@@ -28,6 +26,9 @@ export interface CreateCollectionInput {
   // bigRAG-specific fields (forwarded to bigRAG, not stored in Raven)
   readonly chunkOverlap?: number;
   readonly chunkSize?: number;
+  readonly defaultMinScore?: number;
+  readonly defaultSearchMode?: string;
+  readonly defaultTopK?: number;
   readonly dimension?: number;
   readonly embeddingApiKey?: string;
   readonly embeddingModel?: string;
@@ -35,8 +36,6 @@ export interface CreateCollectionInput {
   // Raven-specific fields
   readonly isDefault?: boolean;
   readonly maxContextTokens?: number;
-  readonly similarityThreshold?: number;
-  readonly topK?: number;
 }
 
 export interface UpdateCollectionInput {
@@ -45,8 +44,6 @@ export interface UpdateCollectionInput {
   readonly isEnabled?: boolean;
   readonly maxContextTokens?: number;
   readonly name?: string;
-  readonly similarityThreshold?: number;
-  readonly topK?: number;
 }
 
 export const collectionsQueryOptions = () =>

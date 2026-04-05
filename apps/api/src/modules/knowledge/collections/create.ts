@@ -21,6 +21,9 @@ export const createCollection =
     const {
       chunkOverlap,
       chunkSize,
+      defaultMinScore,
+      defaultSearchMode,
+      defaultTopK,
       dimension,
       embeddingApiKey,
       embeddingModel,
@@ -57,9 +60,9 @@ export const createCollection =
       await bigrag.createCollection({
         chunk_overlap: chunkOverlap,
         chunk_size: chunkSize,
-        default_min_score: record.similarityThreshold,
-        default_search_mode: "semantic",
-        default_top_k: record.topK,
+        default_min_score: defaultMinScore,
+        default_search_mode: defaultSearchMode,
+        default_top_k: defaultTopK,
         description: record.description ?? undefined,
         dimension,
         embedding_api_key: embeddingApiKey,

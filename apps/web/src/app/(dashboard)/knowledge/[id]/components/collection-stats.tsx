@@ -84,11 +84,6 @@ const CollectionStats = ({ collection }: CollectionStatsProps) => {
               label="Max Context Tokens"
               value={collection.maxContextTokens.toLocaleString()}
             />
-            <ConfigRow label="Top K" value={collection.topK} />
-            <ConfigRow
-              label="Similarity Threshold"
-              value={`${(collection.similarityThreshold * 100).toFixed(0)}%`}
-            />
             <ConfigRow
               label="Default Collection"
               value={

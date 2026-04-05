@@ -15,8 +15,6 @@ export const listCollections = (db: Database) => async (c: AuthContext) => {
       isEnabled: knowledgeCollections.isEnabled,
       maxContextTokens: knowledgeCollections.maxContextTokens,
       name: knowledgeCollections.name,
-      similarityThreshold: knowledgeCollections.similarityThreshold,
-      topK: knowledgeCollections.topK,
       updatedAt: knowledgeCollections.updatedAt
     })
     .from(knowledgeCollections)

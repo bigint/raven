@@ -22,7 +22,7 @@ export const createCollectionsModule = (db: Database, bigrag: BigRAG) => {
   app.patch(
     "/:id",
     jsonValidator(updateCollectionSchema),
-    updateCollection(db, bigrag)
+    updateCollection(db)
   );
   app.delete("/:id", deleteCollection(db, bigrag));
 

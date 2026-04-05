@@ -28,6 +28,12 @@ const COHERE_MODEL_OPTIONS = [
   }
 ];
 
+const SEARCH_MODE_OPTIONS = [
+  { label: "Semantic", value: "semantic" },
+  { label: "Keyword", value: "keyword" },
+  { label: "Hybrid", value: "hybrid" }
+];
+
 interface FormState {
   name: string;
   description: string;
@@ -36,8 +42,9 @@ interface FormState {
   embeddingApiKey: string;
   chunkSize: string;
   chunkOverlap: string;
-  topK: string;
-  similarityThreshold: string;
+  defaultTopK: string;
+  defaultMinScore: string;
+  defaultSearchMode: string;
   maxContextTokens: string;
   isDefault: boolean;
 }
@@ -45,29 +52,31 @@ interface FormState {
 const DEFAULT_FORM: FormState = {
   chunkOverlap: "20",
   chunkSize: "512",
+  defaultMinScore: "",
+  defaultSearchMode: "semantic",
+  defaultTopK: "10",
   description: "",
   embeddingApiKey: "",
   embeddingModel: "text-embedding-3-small",
   embeddingProvider: "openai",
   isDefault: false,
   maxContextTokens: "4096",
-  name: "",
-  similarityThreshold: "0.3",
-  topK: "5"
+  name: ""
 };
 
 const extractFormFromCollection = (c: Collection): FormState => ({
   chunkOverlap: DEFAULT_FORM.chunkOverlap,
   chunkSize: DEFAULT_FORM.chunkSize,
+  defaultMinScore: DEFAULT_FORM.defaultMinScore,
+  defaultSearchMode: DEFAULT_FORM.defaultSearchMode,
+  defaultTopK: DEFAULT_FORM.defaultTopK,
   description: c.description ?? "",
   embeddingApiKey: "",
   embeddingModel: DEFAULT_FORM.embeddingModel,
   embeddingProvider: DEFAULT_FORM.embeddingProvider,
   isDefault: c.isDefault,
   maxContextTokens: String(c.maxContextTokens),
-  name: c.name,
-  similarityThreshold: String(c.similarityThreshold),
-  topK: String(c.topK)
+  name: c.name
 });
 
 interface CollectionFormProps {
@@ -127,23 +136,26 @@ const CollectionForm = ({
           id: editingCollection.id,
           isDefault: form.isDefault,
           maxContextTokens: Number(form.maxContextTokens),
-          name: form.name.trim(),
-          similarityThreshold: Number(form.similarityThreshold),
-          topK: Number(form.topK)
+          name: form.name.trim()
         });
       } else {
         await createMutation.mutateAsync({
           chunkOverlap: Number(form.chunkOverlap),
           chunkSize: Number(form.chunkSize),
+          defaultMinScore: form.defaultMinScore
+            ? Number(form.defaultMinScore)
+            : undefined,
+          defaultSearchMode: form.defaultSearchMode || undefined,
+          defaultTopK: form.defaultTopK
+            ? Number(form.defaultTopK)
+            : undefined,
           description: form.description.trim() || undefined,
           embeddingApiKey: form.embeddingApiKey || undefined,
           embeddingModel: form.embeddingModel,
           embeddingProvider: form.embeddingProvider,
           isDefault: form.isDefault,
           maxContextTokens: Number(form.maxContextTokens),
-          name: form.name.trim(),
-          similarityThreshold: Number(form.similarityThreshold),
-          topK: Number(form.topK)
+          name: form.name.trim()
         });
       }
       onSubmit?.();
@@ -267,35 +279,50 @@ const CollectionForm = ({
                 value={form.chunkOverlap}
               />
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                autoComplete="off"
+                id="collection-default-top-k"
+                label="Default Top K"
+                min="1"
+                name="defaultTopK"
+                onChange={(e) => update("defaultTopK", e.target.value)}
+                placeholder="10"
+                type="number"
+                value={form.defaultTopK}
+              />
+              <Input
+                autoComplete="off"
+                id="collection-default-min-score"
+                label="Min Similarity Score"
+                max="1"
+                min="0"
+                name="defaultMinScore"
+                onChange={(e) => update("defaultMinScore", e.target.value)}
+                placeholder="Optional"
+                step="0.01"
+                type="number"
+                value={form.defaultMinScore}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label
+                className="text-sm font-medium"
+                htmlFor="collection-search-mode"
+              >
+                Search Mode
+              </label>
+              <Select
+                id="collection-search-mode"
+                onChange={(v) => update("defaultSearchMode", v)}
+                options={SEARCH_MODE_OPTIONS}
+                value={form.defaultSearchMode}
+              />
+            </div>
           </>
         )}
-
-        <div className="grid grid-cols-2 gap-4">
-          <Input
-            autoComplete="off"
-            id="collection-top-k"
-            label="Top K"
-            min="1"
-            name="topK"
-            onChange={(e) => update("topK", e.target.value)}
-            placeholder="5"
-            type="number"
-            value={form.topK}
-          />
-          <Input
-            autoComplete="off"
-            id="collection-similarity-threshold"
-            label="Similarity Threshold"
-            max="1"
-            min="0"
-            name="similarityThreshold"
-            onChange={(e) => update("similarityThreshold", e.target.value)}
-            placeholder="0.7"
-            step="0.01"
-            type="number"
-            value={form.similarityThreshold}
-          />
-        </div>
 
         <Input
           autoComplete="off"
