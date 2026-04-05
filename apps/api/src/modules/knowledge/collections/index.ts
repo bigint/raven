@@ -19,7 +19,7 @@ export const createCollectionsModule = (db: Database, bigrag: BigRAG) => {
     createCollection(db, bigrag)
   );
   app.get("/:id", getCollection(db, bigrag));
-  app.patch(
+  app.put(
     "/:id",
     jsonValidator(updateCollectionSchema),
     updateCollection(db)
