@@ -204,6 +204,43 @@ const KnowledgeAnalyticsPage = () => {
         </div>
       </div>
 
+      {stats?.platform && (
+        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div className="rounded-xl border border-border p-5">
+            <p className="text-sm text-muted-foreground">Queue Pending</p>
+            <div className="mt-3">
+              <p className="text-2xl font-bold tabular-nums">
+                {stats.platform.queue.pending}
+              </p>
+            </div>
+          </div>
+          <div className="rounded-xl border border-border p-5">
+            <p className="text-sm text-muted-foreground">Queue Processing</p>
+            <div className="mt-3">
+              <p className="text-2xl font-bold tabular-nums">
+                {stats.platform.queue.processing}
+              </p>
+            </div>
+          </div>
+          <div className="rounded-xl border border-border p-5">
+            <p className="text-sm text-muted-foreground">Queue Completed</p>
+            <div className="mt-3">
+              <p className="text-2xl font-bold tabular-nums">
+                {stats.platform.queue.completed.toLocaleString()}
+              </p>
+            </div>
+          </div>
+          <div className="rounded-xl border border-border p-5">
+            <p className="text-sm text-muted-foreground">Queue Failed</p>
+            <div className="mt-3">
+              <p className="text-2xl font-bold tabular-nums">
+                {stats.platform.queue.failed}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {logsError && (
         <div
           className="mt-6 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"

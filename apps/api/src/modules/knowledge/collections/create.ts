@@ -57,6 +57,9 @@ export const createCollection =
       await bigrag.createCollection({
         chunk_overlap: chunkOverlap,
         chunk_size: chunkSize,
+        default_min_score: record.similarityThreshold,
+        default_search_mode: "semantic",
+        default_top_k: record.topK,
         description: record.description ?? undefined,
         dimension,
         embedding_api_key: embeddingApiKey,

@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@bigrag/client": "^0.0.8",
+    "@bigrag/client": "^0.0.9",
     "@paralleldrive/cuid2": "^3.3.0",
     "@qdrant/js-client-rest": "^1.17.0",
     "@raven/config": "workspace:*",

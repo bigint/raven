@@ -1,3 +1,4 @@
+import type { BigRAG } from "@bigrag/client";
 import type { Database } from "@raven/db";
 import {
   knowledgeCollections,
@@ -5,14 +6,21 @@ import {
   knowledgeQueryLogs
 } from "@raven/db";
 import { avg, count, desc, eq, gte, sum } from "drizzle-orm";
+import { log } from "@/lib/logger";
 import { success } from "@/lib/response";
 import type { AuthContext } from "@/lib/types";
 
-export const getKnowledgeStats = (db: Database) => async (c: AuthContext) => {
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+export const getKnowledgeStats =
+  (db: Database, bigrag: BigRAG) => async (c: AuthContext) => {
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
-  const [[collectionCount], [documentStats], [queryStats], topCollections] =
-    await Promise.all([
+    const [
+      [collectionCount],
+      [documentStats],
+      [queryStats],
+      topCollections,
+      platformStats
+    ] = await Promise.all([
       db.select({ value: count() }).from(knowledgeCollections),
       db
         .select({
@@ -42,20 +50,25 @@ export const getKnowledgeStats = (db: Database) => async (c: AuthContext) => {
         .where(gte(knowledgeQueryLogs.createdAt, thirtyDaysAgo))
         .groupBy(knowledgeQueryLogs.collectionId, knowledgeCollections.name)
         .orderBy(desc(count()))
-        .limit(10)
+        .limit(10),
+      bigrag.getStats().catch((err) => {
+        log.error("Failed to fetch bigRAG platform stats", err);
+        return null;
+      })
     ]);
 
-  return success(c, {
-    avgChunksPerQuery: Number(queryStats?.avgChunksPerQuery ?? 0),
-    avgSimilarityScore: Number(queryStats?.avgSimilarityScore ?? 0),
-    collectionCount: collectionCount?.value ?? 0,
-    documentCount: documentStats?.totalDocuments ?? 0,
-    topCollections: topCollections.map((row) => ({
-      collectionId: row.collectionId,
-      collectionName: row.collectionName ?? "Unknown",
-      queryCount: row.queryCount
-    })),
-    totalChunks: Number(documentStats?.totalChunks ?? 0),
-    totalQueries: queryStats?.totalQueries ?? 0
-  });
-};
+    return success(c, {
+      avgChunksPerQuery: Number(queryStats?.avgChunksPerQuery ?? 0),
+      avgSimilarityScore: Number(queryStats?.avgSimilarityScore ?? 0),
+      collectionCount: collectionCount?.value ?? 0,
+      documentCount: documentStats?.totalDocuments ?? 0,
+      platform: platformStats ?? null,
+      topCollections: topCollections.map((row) => ({
+        collectionId: row.collectionId,
+        collectionName: row.collectionName ?? "Unknown",
+        queryCount: row.queryCount
+      })),
+      totalChunks: Number(documentStats?.totalChunks ?? 0),
+      totalQueries: queryStats?.totalQueries ?? 0
+    });
+  };

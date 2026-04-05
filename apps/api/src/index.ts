@@ -220,7 +220,7 @@ const adminRoutes = new Hono();
 adminRoutes.use("*", createAuthMiddleware(auth));
 adminRoutes.use("*", platformAdminMiddleware);
 adminRoutes.route("/", createAdminModule(db, env.APP_URL, redis));
-adminRoutes.route("/knowledge", createKnowledgeAnalyticsModule(db));
+adminRoutes.route("/knowledge", createKnowledgeAnalyticsModule(db, bigrag));
 app.route("/v1/admin", adminRoutes);
 
 // Protected API routes (session auth + writer middleware for mutations)

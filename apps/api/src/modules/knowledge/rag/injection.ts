@@ -166,14 +166,12 @@ export const performRAGInjection = async (
     | "semantic"
     | undefined;
 
-  // Query all collections in a single multiQuery call
+  // Query all collections — omit top_k/min_score to use bigRAG collection defaults
   const collectionNames = collections.map((c) => c.name);
   const response = await input.bigrag.multiQuery({
     collections: collectionNames,
-    min_score: collections[0]?.similarityThreshold ?? 0.3,
     query: queryText,
-    search_mode: searchMode,
-    top_k: collections[0]?.topK ?? 5
+    ...(searchMode ? { search_mode: searchMode } : {})
   });
 
   const collectionIds = collections.map((c) => c.id);

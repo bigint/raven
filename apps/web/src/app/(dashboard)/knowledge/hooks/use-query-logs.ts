@@ -3,6 +3,26 @@
 import { queryOptions } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
+export interface PlatformStats {
+  readonly collections: number;
+  readonly documents: {
+    readonly total: number;
+    readonly ready: number;
+    readonly pending: number;
+    readonly processing: number;
+    readonly failed: number;
+    readonly total_chunks: number;
+    readonly total_size_bytes: number;
+  };
+  readonly queue: {
+    readonly queued: number;
+    readonly completed: number;
+    readonly failed: number;
+    readonly pending: number;
+    readonly processing: number;
+  };
+}
+
 export interface KnowledgeStats {
   readonly collectionCount: number;
   readonly documentCount: number;
@@ -10,6 +30,7 @@ export interface KnowledgeStats {
   readonly totalQueries: number;
   readonly avgChunksPerQuery: number;
   readonly avgSimilarityScore: number;
+  readonly platform: PlatformStats | null;
   readonly topCollections: {
     readonly collectionId: string;
     readonly collectionName: string;
