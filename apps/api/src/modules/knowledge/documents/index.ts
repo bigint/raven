@@ -9,6 +9,7 @@ import { deleteDocument } from "./delete";
 import { getDocument, getDocumentChunks } from "./get";
 import { ingestImage } from "./ingest-image";
 import { listDocuments } from "./list";
+import { getPendingStatus } from "./pending-status";
 import { streamDocumentProgress } from "./progress";
 import { reprocessDocument } from "./reprocess";
 import { listDocumentsQuerySchema } from "./schema";
@@ -24,6 +25,7 @@ export const createDocumentsModule = (db: Database, bigrag: BigRAG) => {
   );
   app.post("/", uploadDocument(db, bigrag));
   app.post("/image", ingestImage(db, bigrag));
+  app.get("/pending", getPendingStatus(db, bigrag));
   app.post("/batch/upload", batchUploadDocuments(db, bigrag));
   app.post("/batch/status", batchGetDocumentStatus(db, bigrag));
   app.post("/batch/delete", batchDeleteDocuments(db, bigrag));
