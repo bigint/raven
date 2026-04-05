@@ -73,3 +73,70 @@ export const syncDocumentStatus = async (
     return null;
   }
 };
+
+/**
+ * Batch-sync status for multiple pending/processing documents in a single
+ * bigRAG call. Returns a map of document ID → patch for documents that
+ * have transitioned to ready/failed.
+ */
+export const syncDocumentStatusBatch = async (
+  db: Database,
+  bigrag: BigRAG,
+  docs: DocumentRow[],
+  collectionName: string
+): Promise<Map<string, StatusPatch>> => {
+  const pendingDocs = docs.filter(
+    (d) =>
+      (d.status === "pending" || d.status === "processing") &&
+      d.bigragDocumentId
+  );
+
+  const updateMap = new Map<string, StatusPatch>();
+  if (pendingDocs.length === 0) return updateMap;
+
+  try {
+    const statusResult = await bigrag.batchGetStatus(
+      collectionName,
+      pendingDocs.map((d) => d.bigragDocumentId!)
+    );
+
+    const remoteMap = new Map(
+      statusResult.documents.map((d) => [d.id, d])
+    );
+
+    for (const doc of pendingDocs) {
+      const remote = remoteMap.get(doc.bigragDocumentId!);
+      if (!remote) continue;
+
+      let patch: StatusPatch | null = null;
+
+      if (remote.status === "ready") {
+        patch = {
+          chunkCount: remote.chunk_count ?? 0,
+          errorMessage: null,
+          status: "ready",
+          updatedAt: new Date()
+        };
+      } else if (remote.status === "failed") {
+        patch = {
+          errorMessage:
+            remote.error_message ?? "Processing failed in bigRAG",
+          status: "failed",
+          updatedAt: new Date()
+        };
+      }
+
+      if (patch) {
+        await db
+          .update(knowledgeDocuments)
+          .set(patch)
+          .where(eq(knowledgeDocuments.id, doc.id));
+        updateMap.set(doc.id, patch);
+      }
+    }
+  } catch {
+    // If batch status call fails, return empty map (use stale DB state)
+  }
+
+  return updateMap;
+};

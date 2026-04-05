@@ -1,12 +1,12 @@
 import type { BigRAG } from "@bigrag/client";
 import type { Database } from "@raven/db";
-import { knowledgeDocuments } from "@raven/db";
+import { knowledgeCollections, knowledgeDocuments } from "@raven/db";
 import { and, desc, eq } from "drizzle-orm";
 import type { z } from "zod";
 import { success } from "@/lib/response";
 import type { AuthContextWithQuery } from "@/lib/types";
 import type { listDocumentsQuerySchema } from "./schema";
-import { syncDocumentStatus } from "./sync-status";
+import { syncDocumentStatusBatch } from "./sync-status";
 
 type Query = z.infer<typeof listDocumentsQuerySchema>;
 
@@ -28,27 +28,31 @@ export const listDocuments =
       .limit(limit)
       .offset(offset);
 
-    const pendingDocs = documents.filter(
+    const hasPending = documents.some(
       (d) =>
         (d.status === "pending" || d.status === "processing") &&
         d.bigragDocumentId
     );
 
-    if (pendingDocs.length === 0) {
+    if (!hasPending) {
       return success(c, documents);
     }
 
-    const patches = await Promise.all(
-      pendingDocs.map(async (doc) => {
-        const patch = await syncDocumentStatus(db, bigrag, doc);
-        return patch ? { id: doc.id, patch } : null;
-      })
-    );
+    const [collection] = await db
+      .select({ name: knowledgeCollections.name })
+      .from(knowledgeCollections)
+      .where(eq(knowledgeCollections.id, collectionId))
+      .limit(1);
 
-    const updateMap = new Map(
-      patches
-        .filter((p): p is NonNullable<typeof p> => p !== null)
-        .map((p) => [p.id, p.patch])
+    if (!collection) {
+      return success(c, documents);
+    }
+
+    const updateMap = await syncDocumentStatusBatch(
+      db,
+      bigrag,
+      documents,
+      collection.name
     );
 
     if (updateMap.size === 0) {
