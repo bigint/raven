@@ -6,7 +6,7 @@ services:
       - "4000:4000"
     environment:
       BIGRAG_API_SECRET: ${BIGRAG_API_SECRET:-raven-bigrag-secret}
-      BIGRAG_URL: http://bigrag:6000
+      BIGRAG_URL: http://bigrag:6100
     volumes:
       - raven_data:/var/lib/postgresql/data
     depends_on:
@@ -17,7 +17,7 @@ services:
   bigrag:
     image: yoginth/bigrag:latest
     ports:
-      - "6100:6000"
+      - "6100:6100"
     environment:
       BIGRAG_API_SECRET: ${BIGRAG_API_SECRET:-raven-bigrag-secret}
       BIGRAG_DATABASE_URL: postgres://raven:raven@postgres:5432/bigrag?sslmode=disable
@@ -35,7 +35,7 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:6000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:6100/health"]
       interval: 30s
       timeout: 10s
       retries: 3
