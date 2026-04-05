@@ -7,7 +7,6 @@ import { createCrudHooks } from "@/lib/crud-hooks";
 export interface Collection {
   readonly id: string;
   readonly name: string;
-  readonly description: string | null;
   readonly maxContextTokens: number;
   readonly isDefault: boolean;
   readonly isEnabled: boolean;
@@ -28,6 +27,7 @@ export interface BigRAGCollectionConfig {
 }
 
 export interface CollectionDetail extends Collection {
+  readonly description: string | null;
   readonly chunkCount: number;
   readonly bigrag: BigRAGCollectionConfig | null;
 }
@@ -55,7 +55,6 @@ export interface UpdateCollectionInput {
   readonly isDefault?: boolean;
   readonly isEnabled?: boolean;
   readonly maxContextTokens?: number;
-  readonly name?: string;
 }
 
 export const collectionsQueryOptions = () =>

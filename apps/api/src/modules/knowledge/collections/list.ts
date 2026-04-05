@@ -8,7 +8,6 @@ export const listCollections = (db: Database) => async (c: AuthContext) => {
   const collections = await db
     .select({
       createdAt: knowledgeCollections.createdAt,
-      description: knowledgeCollections.description,
       documentCount: count(knowledgeDocuments.id),
       id: knowledgeCollections.id,
       isDefault: knowledgeCollections.isDefault,

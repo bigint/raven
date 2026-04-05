@@ -30,7 +30,6 @@ export const knowledgeCollections = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
-    description: text("description"),
     id: text("id").primaryKey().$defaultFn(createId),
     isDefault: boolean("is_default").notNull().default(false),
     isEnabled: boolean("is_enabled").notNull().default(true),

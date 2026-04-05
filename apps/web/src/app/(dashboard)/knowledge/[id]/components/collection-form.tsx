@@ -64,7 +64,7 @@ const DEFAULT_FORM: FormState = {
   name: ""
 };
 
-const extractFormFromCollection = (c: Collection): FormState => ({
+const extractFormFromCollection = (c: Collection & { description?: string | null }): FormState => ({
   chunkOverlap: DEFAULT_FORM.chunkOverlap,
   chunkSize: DEFAULT_FORM.chunkSize,
   defaultMinScore: DEFAULT_FORM.defaultMinScore,
@@ -81,7 +81,7 @@ const extractFormFromCollection = (c: Collection): FormState => ({
 
 interface CollectionFormProps {
   readonly mode: "create" | "edit" | null;
-  readonly editingCollection: Collection | null;
+  readonly editingCollection: (Collection & { description?: string | null }) | null;
   readonly onClose: () => void;
   readonly onSubmit?: () => void;
 }
@@ -135,8 +135,7 @@ const CollectionForm = ({
           description: form.description.trim() || undefined,
           id: editingCollection.id,
           isDefault: form.isDefault,
-          maxContextTokens: Number(form.maxContextTokens),
-          name: form.name.trim()
+          maxContextTokens: Number(form.maxContextTokens)
         });
       } else {
         await createMutation.mutateAsync({
@@ -183,6 +182,7 @@ const CollectionForm = ({
 
         <Input
           autoComplete="off"
+          disabled={isEdit}
           id="collection-name"
           label="Name"
           name="name"

@@ -40,6 +40,7 @@ export const getCollection =
 
     return success(c, {
       ...collection,
+      description: bigragCollection?.description ?? null,
       bigrag: bigragCollection
         ? {
             chunkOverlap: bigragCollection.chunk_overlap,

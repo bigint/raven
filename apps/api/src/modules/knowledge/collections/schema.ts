@@ -26,6 +26,5 @@ export const updateCollectionSchema = z.object({
   description: z.string().max(500).optional(),
   isDefault: z.boolean().optional(),
   isEnabled: z.boolean().optional(),
-  maxContextTokens: z.number().int().min(256).max(128000).optional(),
-  name: z.string().min(1).max(100).regex(/^[a-zA-Z0-9_]+$/, "Name must only contain letters, numbers, and underscores").optional()
+  maxContextTokens: z.number().int().min(256).max(128000).optional()
 });
