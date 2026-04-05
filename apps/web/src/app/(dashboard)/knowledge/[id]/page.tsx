@@ -2,13 +2,14 @@
 
 import { Button, ConfirmDialog, PageHeader, Spinner, Tabs } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import {
   collectionDetailQueryOptions,
   useDeleteCollection
 } from "../hooks/use-collections";
+import { CollectionForm } from "./components/collection-form";
 import { CollectionStats } from "./components/collection-stats";
 import { DocumentsTab } from "./components/documents-tab";
 import { SearchTab } from "./components/search-tab";
@@ -25,6 +26,7 @@ const CollectionDetailPage = () => {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab") ?? "overview";
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const deleteMutation = useDeleteCollection();
 
   const setTab = (value: string) => {
@@ -76,10 +78,16 @@ const CollectionDetailPage = () => {
     <div>
       <PageHeader
         actions={
-          <Button onClick={() => setDeleteOpen(true)} variant="destructive">
-            <Trash2 className="size-4" />
-            Delete
-          </Button>
+          <>
+            <Button onClick={() => setEditOpen(true)} variant="secondary">
+              <Pencil className="size-4" />
+              Edit
+            </Button>
+            <Button onClick={() => setDeleteOpen(true)} variant="destructive">
+              <Trash2 className="size-4" />
+              Delete
+            </Button>
+          </>
         }
         description={collection.description ?? undefined}
         title={collection.name}
@@ -90,6 +98,13 @@ const CollectionDetailPage = () => {
       {tab === "overview" && <CollectionStats collection={collection} />}
       {tab === "documents" && <DocumentsTab collectionId={id} />}
       {tab === "search" && <SearchTab collectionId={id} />}
+
+      <CollectionForm
+        editingCollection={collection}
+        key={editOpen ? "edit" : "closed"}
+        mode={editOpen ? "edit" : null}
+        onClose={() => setEditOpen(false)}
+      />
 
       <ConfirmDialog
         confirmLabel={deleteMutation.isPending ? "Deleting..." : "Delete"}
