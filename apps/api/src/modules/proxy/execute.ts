@@ -191,7 +191,17 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     guardHeaders["X-Guardrail-Warnings"] = guardrailWarnings.join("; ");
   }
 
-  const responseHeaders = { ...guardHeaders, ...extraResponseHeaders };
+  const customHeaderKeys = [
+    ...Object.keys(guardHeaders),
+    ...Object.keys(extraResponseHeaders ?? {})
+  ];
+  const responseHeaders: Record<string, string> = {
+    ...guardHeaders,
+    ...extraResponseHeaders,
+    ...(customHeaderKeys.length > 0
+      ? { "Access-Control-Expose-Headers": customHeaderKeys.join(", ") }
+      : {})
+  };
 
   // Build AI SDK params
   const passthroughHeaders = filterPassthroughHeaders(incomingHeaders);

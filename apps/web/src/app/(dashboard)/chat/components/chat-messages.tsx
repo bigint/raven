@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@raven/ui";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronRight } from "lucide-react";
 import { memo, useEffect, useRef, useState } from "react";
 import { match } from "ts-pattern";
 import { ExamplePrompts } from "./example-prompts";
@@ -82,6 +82,19 @@ const MessageBubble = memo(
 
     return (
       <div className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}>
+        {!isUser &&
+          message.meta?.knowledgeCollections &&
+          message.meta.knowledgeCollections.length > 0 && (
+            <div className="mb-1.5 flex items-center gap-1.5 rounded-md border border-border/50 bg-muted/50 px-2.5 py-1 text-[11px] text-muted-foreground">
+              <BookOpen className="size-3 shrink-0" />
+              <span>
+                Fetched {message.meta.knowledgeChunks ?? 0} chunks from{" "}
+                <span className="font-medium text-foreground">
+                  {message.meta.knowledgeCollections.join(", ")}
+                </span>
+              </span>
+            </div>
+          )}
         <div
           className={`max-w-[80%] rounded-xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
             isUser

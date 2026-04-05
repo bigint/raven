@@ -16,6 +16,8 @@ interface ResponseMeta {
   readonly routingStrategy?: string;
   readonly taskType?: string;
   readonly toolCalls?: number;
+  readonly knowledgeCollections?: string[];
+  readonly knowledgeChunks?: number;
 }
 
 interface ResponseMetadataProps {
@@ -66,6 +68,11 @@ const ResponseMetadata = ({ meta, show }: ResponseMetadataProps) => {
           {meta.toolCalls !== undefined && meta.toolCalls > 0 && (
             <Badge variant="neutral">
               {meta.toolCalls} tool call{meta.toolCalls > 1 ? "s" : ""}
+            </Badge>
+          )}
+          {meta.knowledgeCollections && meta.knowledgeCollections.length > 0 && (
+            <Badge variant="info">
+              RAG: {meta.knowledgeCollections.join(", ")} ({meta.knowledgeChunks ?? 0} chunks)
             </Badge>
           )}
           {meta.guardrailWarnings && meta.guardrailWarnings.length > 0 && (

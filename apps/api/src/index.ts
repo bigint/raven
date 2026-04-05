@@ -105,6 +105,11 @@ app.use(
   "*",
   cors({
     credentials: true,
+    exposeHeaders: [
+      "X-Knowledge-Chunks",
+      "X-Knowledge-Collections",
+      "X-Knowledge-Used"
+    ],
     origin: [env.APP_URL]
   })
 );

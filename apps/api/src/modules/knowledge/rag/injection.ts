@@ -254,6 +254,7 @@ export const performRAGInjection = async (
     injectedMessages,
     responseHeaders: {
       "X-Knowledge-Chunks": String(injectedCount),
+      "X-Knowledge-Collections": collections.map((c) => c.name).join(","),
       "X-Knowledge-Used": "true"
     },
     used: true

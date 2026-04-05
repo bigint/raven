@@ -267,6 +267,18 @@ export const useChat = () => {
           );
         }
 
+        // Extract RAG headers from response
+        const knowledgeUsed = response.headers.get("X-Knowledge-Used") === "true";
+        const knowledgeChunks = knowledgeUsed
+          ? Number(response.headers.get("X-Knowledge-Chunks") ?? "0")
+          : undefined;
+        const knowledgeCollections = knowledgeUsed
+          ? (response.headers.get("X-Knowledge-Collections") ?? "")
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : undefined;
+
         if (currentSettings.stream && response.body) {
           const reader = response.body.getReader();
           let finalUsage:
@@ -323,6 +335,8 @@ export const useChat = () => {
           const elapsedMs = Math.round(performance.now() - startTime);
           const meta: ResponseMeta = {
             inputTokens: finalUsage?.prompt_tokens,
+            knowledgeChunks,
+            knowledgeCollections,
             latencyMs: elapsedMs,
             outputTokens: finalUsage?.completion_tokens
           };
@@ -347,6 +361,8 @@ export const useChat = () => {
           const elapsedMs = Math.round(performance.now() - startTime);
           const meta: ResponseMeta = {
             inputTokens: (usage?.prompt_tokens as number) ?? 0,
+            knowledgeChunks,
+            knowledgeCollections,
             latencyMs: elapsedMs,
             outputTokens: (usage?.completion_tokens as number) ?? 0
           };
