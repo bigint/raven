@@ -36,8 +36,8 @@ importers:
         specifier: ^3.0.48
         version: 3.0.48(zod@4.3.6)
       '@bigrag/client':
-        specifier: ^0.0.6
-        version: 0.0.6
+        specifier: ^0.0.8
+        version: 0.0.8
       '@hono/node-server':
         specifier: ^1.19.11
         version: 1.19.11(hono@4.12.9)
@@ -112,8 +112,8 @@ importers:
   apps/cron:
     dependencies:
       '@bigrag/client':
-        specifier: ^0.0.3
-        version: 0.0.3
+        specifier: ^0.0.8
+        version: 0.0.8
       '@paralleldrive/cuid2':
         specifier: ^3.3.0
         version: 3.3.0
@@ -512,12 +512,8 @@ packages:
   '@better-fetch/fetch@1.1.21':
     resolution: {integrity: sha512-/ImESw0sskqlVR94jB+5+Pxjf+xBwDZF/N5+y2/q4EqD7IARUTSpPfIo8uf39SYpCxyOCtbyYpUrZ3F/k0zT4A==}
 
-  '@bigrag/client@0.0.3':
-    resolution: {integrity: sha512-o3wIyUDeUfwcjI0cKrUB3q1LfNfIF0GT0Oto1X88xQdprCZ/MzqDMFXq2GwjSxCOW94ZABITFMgZG3Fr6Xs0Ow==}
-    engines: {node: '>=18'}
-
-  '@bigrag/client@0.0.6':
-    resolution: {integrity: sha512-OwP+qgV4tsmALjqpU+sYmJZRdebr05USt/B9scPXCTv6DFxuvfTv4h45IOkzv8HTQVntyRlTSJQR9SuzHws0GA==}
+  '@bigrag/client@0.0.8':
+    resolution: {integrity: sha512-Fhi+ZW756dlMpea7o92W5ENtXf9lQNK4JFamD0T6ElapMw1TBSIXKtO+z7r+dIbB0jMvt2DPl0CML4h7pi4Rew==}
     engines: {node: '>=18'}
 
   '@biomejs/biome@2.4.9':
@@ -3105,9 +3101,7 @@ snapshots:
 
   '@better-fetch/fetch@1.1.21': {}
 
-  '@bigrag/client@0.0.3': {}
-
-  '@bigrag/client@0.0.6': {}
+  '@bigrag/client@0.0.8': {}
 
   '@biomejs/biome@2.4.9':
     optionalDependencies:

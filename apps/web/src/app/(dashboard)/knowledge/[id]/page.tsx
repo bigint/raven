@@ -1,9 +1,14 @@
 "use client";
 
-import { PageHeader, Spinner, Tabs } from "@raven/ui";
+import { Button, ConfirmDialog, PageHeader, Spinner, Tabs } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
+import { Trash2 } from "lucide-react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { collectionDetailQueryOptions } from "../hooks/use-collections";
+import { useState } from "react";
+import {
+  collectionDetailQueryOptions,
+  useDeleteCollection
+} from "../hooks/use-collections";
 import { CollectionStats } from "./components/collection-stats";
 import { DocumentsTab } from "./components/documents-tab";
 import { SearchTab } from "./components/search-tab";
@@ -19,6 +24,8 @@ const CollectionDetailPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab") ?? "overview";
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const deleteMutation = useDeleteCollection();
 
   const setTab = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -29,6 +36,15 @@ const CollectionDetailPage = () => {
     }
     const qs = params.toString();
     router.replace(`?${qs}`, { scroll: false });
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteMutation.mutateAsync(id);
+      router.push("/knowledge");
+    } catch {
+      // Error is handled by toast in the mutation hook
+    }
   };
 
   const {
@@ -59,6 +75,12 @@ const CollectionDetailPage = () => {
   return (
     <div>
       <PageHeader
+        actions={
+          <Button onClick={() => setDeleteOpen(true)} variant="destructive">
+            <Trash2 className="size-4" />
+            Delete
+          </Button>
+        }
         description={collection.description ?? undefined}
         title={collection.name}
       />
@@ -68,6 +90,16 @@ const CollectionDetailPage = () => {
       {tab === "overview" && <CollectionStats collection={collection} />}
       {tab === "documents" && <DocumentsTab collectionId={id} />}
       {tab === "search" && <SearchTab collectionId={id} />}
+
+      <ConfirmDialog
+        confirmLabel={deleteMutation.isPending ? "Deleting..." : "Delete"}
+        description="Are you sure you want to delete this collection? All documents and chunks will be permanently removed. This action cannot be undone."
+        loading={deleteMutation.isPending}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={handleDelete}
+        open={deleteOpen}
+        title="Delete Collection"
+      />
     </div>
   );
 };

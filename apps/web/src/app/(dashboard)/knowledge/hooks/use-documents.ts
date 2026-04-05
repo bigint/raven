@@ -114,6 +114,59 @@ export const useUploadImage = (collectionId: string) => {
   });
 };
 
+export const useBatchUploadDocuments = (collectionId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (files: File[]) => {
+      const formData = new FormData();
+      for (const file of files) {
+        formData.append("files", file);
+      }
+      const promise = ky
+        .post(
+          `${API_URL}/v1/knowledge/collections/${collectionId}/documents/batch/upload`,
+          { body: formData, credentials: "include", timeout: 300_000 }
+        )
+        .json<{ data: Document[] }>();
+      toast.promise(promise, {
+        error: (err) =>
+          err instanceof Error ? err.message : "Batch upload failed",
+        loading: `Uploading ${files.length} file${files.length > 1 ? "s" : ""}...`,
+        success: `${files.length} file${files.length > 1 ? "s" : ""} uploaded`
+      });
+      return promise;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["knowledge-documents", collectionId]
+      });
+    }
+  });
+};
+
+export const useBatchDeleteDocuments = (collectionId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (documentIds: string[]) => {
+      const promise = api.post<{ deleted: number; errors: unknown[] }>(
+        `/v1/knowledge/collections/${collectionId}/documents/batch/delete`,
+        { document_ids: documentIds }
+      );
+      toast.promise(promise, {
+        error: (err) => err.message,
+        loading: `Deleting ${documentIds.length} document${documentIds.length > 1 ? "s" : ""}...`,
+        success: `${documentIds.length} document${documentIds.length > 1 ? "s" : ""} deleted`
+      });
+      return promise;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["knowledge-documents", collectionId]
+      });
+    }
+  });
+};
+
 export const useDeleteDocument = (collectionId: string) => {
   const queryClient = useQueryClient();
   return useMutation({

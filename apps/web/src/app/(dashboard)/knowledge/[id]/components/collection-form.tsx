@@ -115,6 +115,11 @@ const CollectionForm = ({
       return;
     }
 
+    if (!/^[a-zA-Z0-9_]+$/.test(form.name.trim())) {
+      setFormError("Name must only contain letters, numbers, and underscores");
+      return;
+    }
+
     try {
       if (isEdit && editingCollection) {
         await updateMutation.mutateAsync({
@@ -170,7 +175,7 @@ const CollectionForm = ({
           label="Name"
           name="name"
           onChange={(e) => update("name", e.target.value)}
-          placeholder="e.g. Product Documentation"
+          placeholder="e.g. product_docs"
           value={form.name}
         />
 

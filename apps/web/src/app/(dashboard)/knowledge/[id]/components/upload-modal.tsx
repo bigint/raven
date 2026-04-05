@@ -3,9 +3,8 @@
 import { Button, Modal } from "@raven/ui";
 import { Upload } from "lucide-react";
 import { useRef, useState } from "react";
-import { useUploadDocument, useUploadImage } from "../../hooks/use-documents";
+import { useBatchUploadDocuments } from "../../hooks/use-documents";
 
-const IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
 const ACCEPT = ".pdf,.md,.txt,.docx,.png,.jpg,.jpeg,.webp";
 
 interface UploadModalProps {
@@ -16,28 +15,17 @@ interface UploadModalProps {
 
 const UploadModal = ({ open, onClose, collectionId }: UploadModalProps) => {
   const [dragging, setDragging] = useState(false);
-  const [uploading, setUploading] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const uploadDocument = useUploadDocument(collectionId);
-  const uploadImage = useUploadImage(collectionId);
-
-  const isUploading = uploading > 0;
+  const batchUpload = useBatchUploadDocuments(collectionId);
+  const isUploading = batchUpload.isPending;
 
   const handleFiles = async (files: File[]) => {
     if (files.length === 0) return;
-    setUploading(files.length);
-    const results = await Promise.allSettled(
-      files.map((file) => {
-        const mutation = IMAGE_TYPES.includes(file.type)
-          ? uploadImage
-          : uploadDocument;
-        return mutation.mutateAsync(file);
-      })
-    );
-    setUploading(0);
-    if (results.every((r) => r.status === "fulfilled")) {
+    try {
+      await batchUpload.mutateAsync(files);
       onClose();
+    } catch {
+      // Error handled by toast in the mutation hook
     }
   };
 
@@ -99,7 +87,7 @@ const UploadModal = ({ open, onClose, collectionId }: UploadModalProps) => {
             disabled={isUploading}
             onClick={() => inputRef.current?.click()}
           >
-            {isUploading ? `Uploading ${uploading} file${uploading > 1 ? "s" : ""}...` : "Browse Files"}
+            {isUploading ? "Uploading..." : "Browse Files"}
           </Button>
         </div>
       </div>

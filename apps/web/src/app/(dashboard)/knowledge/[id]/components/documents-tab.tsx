@@ -1,15 +1,16 @@
 "use client";
 
 import type { Column } from "@raven/ui";
-import { Button, ConfirmDialog, DataTable } from "@raven/ui";
+import { Button, Checkbox, ConfirmDialog, DataTable } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { FileUp, Globe, ImageIcon } from "lucide-react";
+import { FileUp, Globe, ImageIcon, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import type { Document } from "../../hooks/use-documents";
 import {
   documentsQueryOptions,
+  useBatchDeleteDocuments,
   useDeleteDocument
 } from "../../hooks/use-documents";
 import { UploadModal } from "./upload-modal";
@@ -74,8 +75,11 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
 
   const [uploadOpen, setUploadOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
 
   const deleteMutation = useDeleteDocument(collectionId);
+  const batchDeleteMutation = useBatchDeleteDocuments(collectionId);
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -87,7 +91,54 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
     }
   };
 
+  const handleBatchDelete = async () => {
+    if (selected.size === 0) return;
+    try {
+      await batchDeleteMutation.mutateAsync(Array.from(selected));
+      setSelected(new Set());
+      setBatchDeleteOpen(false);
+    } catch {
+      // Error is handled by toast in the mutation hook
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selected.size === documents.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(documents.map((d) => d.id)));
+    }
+  };
+
+  const allSelected = documents.length > 0 && selected.size === documents.length;
+  const someSelected = selected.size > 0 && selected.size < documents.length;
+
   const columns: Column<Document>[] = [
+    {
+      header: "",
+      key: "select",
+      headerClassName: "w-10",
+      className: "w-10",
+      render: (doc) => (
+        <Checkbox
+          aria-label={`Select ${doc.title}`}
+          checked={selected.has(doc.id)}
+          onCheckedChange={() => toggleSelect(doc.id)}
+        />
+      )
+    },
     {
       header: "Title",
       key: "title",
@@ -144,7 +195,27 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
 
   return (
     <div>
-      <div className="mb-4 flex justify-end gap-2">
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          {documents.length > 0 && (
+            <Checkbox
+              aria-label="Select all documents"
+              checked={allSelected}
+              indeterminate={someSelected}
+              onCheckedChange={toggleSelectAll}
+            />
+          )}
+          {selected.size > 0 && (
+            <Button
+              onClick={() => setBatchDeleteOpen(true)}
+              size="sm"
+              variant="destructive"
+            >
+              <Trash2 className="size-3.5" />
+              Delete {selected.size} selected
+            </Button>
+          )}
+        </div>
         <Button onClick={() => setUploadOpen(true)}>
           <FileUp className="size-4" />
           Upload Files
@@ -174,6 +245,18 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
         onConfirm={handleDelete}
         open={deleteId !== null}
         title="Delete Document"
+      />
+
+      <ConfirmDialog
+        confirmLabel={
+          batchDeleteMutation.isPending ? "Deleting..." : `Delete ${selected.size} documents`
+        }
+        description={`Are you sure you want to delete ${selected.size} document${selected.size > 1 ? "s" : ""}? All associated chunks will be permanently removed. This action cannot be undone.`}
+        loading={batchDeleteMutation.isPending}
+        onClose={() => setBatchDeleteOpen(false)}
+        onConfirm={handleBatchDelete}
+        open={batchDeleteOpen}
+        title="Delete Documents"
       />
     </div>
   );
