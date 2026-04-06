@@ -14,8 +14,10 @@ const STRIPPED_HEADERS = new Set([
   "authorization",
   "connection",
   "content-length",
+  "cookie",
   "host",
   "origin",
+  "proxy-authorization",
   "referer",
   "sec-ch-ua",
   "sec-ch-ua-mobile",
@@ -23,8 +25,12 @@ const STRIPPED_HEADERS = new Set([
   "sec-fetch-dest",
   "sec-fetch-mode",
   "sec-fetch-site",
+  "set-cookie",
   "transfer-encoding",
-  "user-agent"
+  "user-agent",
+  "x-forwarded-for",
+  "x-forwarded-host",
+  "x-real-ip"
 ]);
 
 export const filterPassthroughHeaders = (

@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import type { z } from "zod";
 import { success } from "@/lib/response";
+import { assertPublicURL } from "@/lib/safe-fetch";
 import type { AuthContextWithJson } from "@/lib/types";
 import type { testWebhookSchema } from "./schema";
 
@@ -23,6 +24,9 @@ export const testWebhook = () => async (c: AuthContextWithJson<Body>) => {
     .digest("hex");
 
   try {
+    // Re-validate DNS at fetch time to prevent DNS rebinding attacks
+    await assertPublicURL(url);
+
     const response = await fetch(url, {
       body: payload,
       headers: {

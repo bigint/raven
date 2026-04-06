@@ -6,6 +6,7 @@ import type { Redis } from "ioredis";
 import pRetry from "p-retry";
 import { getInstanceSettings } from "./instance-settings";
 import { log } from "./logger";
+import { assertPublicURL } from "./safe-fetch";
 
 interface EventPayload {
   data: unknown;
@@ -94,6 +95,9 @@ const deliverWebhook = async (
 
   await pRetry(
     async () => {
+      // Re-validate DNS at delivery time to prevent DNS rebinding attacks
+      await assertPublicURL(url);
+
       const response = await fetch(url, {
         body,
         headers: {
