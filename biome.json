@@ -16,9 +16,9 @@
       "apps/**/*.{ts,tsx,js,jsx,mjs}",
       "packages/**/*.{ts,tsx,js,jsx,mjs}",
       "*.{ts,tsx,js,jsx,json,mjs}",
-      "!**/node_modules",
-      "!**/.next",
-      "!**/dist"
+      "!!**/node_modules",
+      "!!**/.next",
+      "!!**/dist"
     ]
   },
   "formatter": {
