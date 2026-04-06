@@ -43,27 +43,6 @@ export const documentsQueryOptions = (collectionId: string) =>
     queryKey: ["knowledge-documents", collectionId]
   });
 
-interface PendingStatusDoc {
-  readonly id: string;
-  readonly status: Document["status"];
-  readonly chunk_count: number;
-  readonly error_message: string | null;
-}
-
-export interface PendingStatusResponse {
-  readonly documents: PendingStatusDoc[];
-  readonly total: number;
-}
-
-export const pendingStatusQueryOptions = (collectionId: string) =>
-  queryOptions({
-    queryFn: () =>
-      api.get<PendingStatusResponse>(
-        `/v1/knowledge/collections/${collectionId}/documents/pending`
-      ),
-    queryKey: ["knowledge-documents-pending", collectionId]
-  });
-
 export const documentDetailQueryOptions = (docId: string) =>
   queryOptions({
     queryFn: () => api.get<Document>(`/v1/knowledge/documents/${docId}`),

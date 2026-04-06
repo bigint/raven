@@ -2,7 +2,7 @@
 
 import type { Column } from "@raven/ui";
 import { Button, Checkbox, ConfirmDialog, DataTable } from "@raven/ui";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { FileUp, Globe, ImageIcon, Trash2 } from "lucide-react";
 import Link from "next/link";
@@ -10,7 +10,6 @@ import { useState } from "react";
 import type { Document } from "../../hooks/use-documents";
 import {
   documentsQueryOptions,
-  pendingStatusQueryOptions,
   useBatchDeleteDocuments,
   useDeleteDocument
 } from "../../hooks/use-documents";
@@ -74,42 +73,10 @@ const hasPending = (docs: Document[]) =>
   docs.some((d) => d.status === "pending" || d.status === "processing");
 
 const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
-  const queryClient = useQueryClient();
-  const { data: documents = [], isLoading } = useQuery(
-    documentsQueryOptions(collectionId)
-  );
-
-  // Poll only pending documents via lightweight endpoint
-  useQuery({
-    ...pendingStatusQueryOptions(collectionId),
-    enabled: hasPending(documents),
-    refetchInterval: 2000,
-    select: (data) => {
-      if (data.documents.length === 0) {
-        // All pending docs are done — refresh the full list once
-        queryClient.invalidateQueries({
-          queryKey: ["knowledge-documents", collectionId]
-        });
-        return data;
-      }
-      // Merge status updates into the cached document list
-      const statusMap = new Map(data.documents.map((d) => [d.id, d]));
-      queryClient.setQueryData<Document[]>(
-        ["knowledge-documents", collectionId],
-        (old) =>
-          old?.map((doc) => {
-            const update = statusMap.get(doc.id);
-            if (!update) return doc;
-            return {
-              ...doc,
-              chunk_count: update.chunk_count,
-              error_message: update.error_message,
-              status: update.status
-            };
-          })
-      );
-      return data;
-    }
+  const { data: documents = [], isLoading } = useQuery({
+    ...documentsQueryOptions(collectionId),
+    refetchInterval: (query) =>
+      hasPending(query.state.data ?? []) ? 3000 : false
   });
 
   const [uploadOpen, setUploadOpen] = useState(false);
