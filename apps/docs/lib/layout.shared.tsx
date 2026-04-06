@@ -1,10 +1,29 @@
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
 
+function RavenLogo() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="size-6"
+      fill="none"
+      viewBox="0 0 32 32"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect fill="currentColor" height="32" rx="8" width="32" />
+      <path d="M8 12L16 6L24 12V20L16 26L8 20V12Z" fill="white" opacity="0.9" />
+      <path d="M16 6L24 12L16 18L8 12L16 6Z" fill="white" />
+    </svg>
+  );
+}
+
 export function baseOptions(): BaseLayoutProps {
   return {
     nav: {
       title: (
-        <span className="font-semibold tracking-tight">Raven</span>
+        <div className="flex items-center gap-2">
+          <RavenLogo />
+          <span className="font-semibold tracking-tight">Raven</span>
+        </div>
       ),
       transparentMode: "top",
     },
