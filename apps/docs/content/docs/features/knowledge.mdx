@@ -1,0 +1,172 @@
+---
+title: Knowledge Base
+description: RAG-powered knowledge collections for augmenting LLM responses with your documents.
+---
+
+import { Tabs, Tab } from "fumadocs-ui/components/tabs";
+
+Raven integrates with [BigRAG](https://bigrag.dev) to provide retrieval-augmented generation (RAG). Upload documents to collections, and Raven automatically injects relevant context into LLM requests.
+
+## How It Works
+
+1. **Create a collection** with embedding and chunking configuration
+2. **Upload documents** (PDF, DOCX, Markdown, etc.) to the collection
+3. **Bind collections** to virtual keys or pass the `X-Knowledge-Collection` header
+4. When a chat request arrives, Raven queries matching collections and injects relevant chunks as system context
+
+## Collections
+
+Collections group related documents and define how they are embedded and searched.
+
+### List Collections
+
+```
+GET /v1/knowledge/collections?name=prefix&limit=100&offset=0
+```
+
+Filter by name prefix (case-insensitive) with pagination. Returns collections and a total count.
+
+### Create a Collection
+
+```
+POST /v1/knowledge/collections
+```
+
+```json
+{
+  "name": "product_docs",
+  "description": "Product documentation",
+  "embeddingProvider": "openai",
+  "embeddingModel": "text-embedding-3-small",
+  "chunkSize": 512,
+  "chunkOverlap": 50,
+  "defaultTopK": 10,
+  "defaultSearchMode": "hybrid",
+  "isDefault": true
+}
+```
+
+Setting `isDefault` to `true` clears the default flag from any other collection.
+
+### Default Collection
+
+```
+GET /v1/knowledge/collections/default
+```
+
+Returns the collection marked as default, if one exists.
+
+### Collection Stats
+
+```
+GET /v1/knowledge/collections/{name}/stats
+```
+
+Returns detailed statistics for a collection:
+
+```json
+{
+  "document_count": 42,
+  "total_chunks": 1580,
+  "total_tokens": 892000,
+  "total_size_bytes": 15728640,
+  "status_counts": {
+    "ready": 40,
+    "processing": 1,
+    "failed": 1
+  }
+}
+```
+
+## Documents
+
+### List Documents
+
+```
+GET /v1/knowledge/collections/{name}/documents?status=ready&limit=50&offset=0
+```
+
+Filter by processing status with pagination.
+
+### Upload Documents
+
+```
+POST /v1/knowledge/collections/{name}/documents
+Content-Type: multipart/form-data
+```
+
+Supported file types: PDF, DOCX, PPTX, XLSX, HTML, Markdown, plain text, CSV, TSV, XML, JSON, and images.
+
+Max file size: 500 MB per file.
+
+### Batch Upload
+
+```
+POST /v1/knowledge/collections/{name}/documents/batch/upload
+Content-Type: multipart/form-data
+```
+
+Upload up to 100 files in a single request.
+
+### Batch Get Documents
+
+```
+POST /v1/knowledge/collections/{name}/documents/batch/get
+```
+
+```json
+{
+  "document_ids": ["doc_abc", "doc_def"]
+}
+```
+
+Returns full document objects for up to 100 IDs.
+
+### Batch Get Status
+
+```
+POST /v1/knowledge/collections/{name}/documents/batch/status
+```
+
+```json
+{
+  "document_ids": ["doc_abc", "doc_def"]
+}
+```
+
+Returns processing status for up to 100 documents.
+
+## Search
+
+```
+POST /v1/knowledge/search
+```
+
+```json
+{
+  "collectionName": "product_docs",
+  "query": "How do I configure rate limiting?",
+  "topK": 5,
+  "searchMode": "hybrid"
+}
+```
+
+Search modes: `semantic`, `keyword`, `hybrid`.
+
+## RAG Injection Headers
+
+Control knowledge injection per request using headers on chat completion requests:
+
+| Header | Description |
+|--------|-------------|
+| `X-Knowledge-Collection` | Comma-separated collection names to query |
+| `X-Knowledge-Enabled` | `true` to query all collections, `false` to disable |
+| `X-Knowledge-Search-Mode` | `semantic`, `keyword`, or `hybrid` |
+
+Response headers when knowledge is used:
+
+| Header | Description |
+|--------|-------------|
+| `X-Knowledge-Used` | `true` if context was injected |
+| `X-Knowledge-Chunks` | Number of chunks injected |
+| `X-Knowledge-Collections` | Collections that were queried |

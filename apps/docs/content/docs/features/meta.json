@@ -9,6 +9,7 @@
     "chat",
     "guardrails",
     "budgets",
+    "knowledge",
     "analytics",
     "audit-logs",
     "webhooks"

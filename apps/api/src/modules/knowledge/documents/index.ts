@@ -2,6 +2,7 @@ import type { BigRAG } from "@bigrag/client";
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
 import { batchDeleteDocuments } from "./batch-delete";
+import { batchGetDocuments } from "./batch-get";
 import { batchGetDocumentStatus } from "./batch-status";
 import { batchUploadDocuments } from "./batch-upload";
 import { deleteDocument } from "./delete";
@@ -18,6 +19,7 @@ export const createDocumentsModule = (db: Database, bigrag: BigRAG) => {
   app.get("/", listDocuments(bigrag));
   app.post("/", uploadDocument(db, bigrag));
   app.post("/image", ingestImage(db, bigrag));
+  app.post("/batch/get", batchGetDocuments(bigrag));
   app.post("/batch/upload", batchUploadDocuments(db, bigrag));
   app.post("/batch/status", batchGetDocumentStatus(bigrag));
   app.post("/batch/delete", batchDeleteDocuments(db, bigrag));

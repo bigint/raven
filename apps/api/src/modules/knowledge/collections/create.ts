@@ -24,6 +24,7 @@ export const createCollection =
       embedding_api_key: body.embeddingApiKey,
       embedding_model: body.embeddingModel,
       embedding_provider: body.embeddingProvider,
+      is_default: body.isDefault,
       name: body.name,
       reranking_api_key: body.rerankingApiKey,
       reranking_enabled: body.rerankingEnabled,
