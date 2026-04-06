@@ -90,12 +90,10 @@ The stream terminates with `data: [DONE]`.
 
 When a streaming request arrives:
 
-```mermaid
-sequenceDiagram
+<Mermaid chart="sequenceDiagram
   participant App
   participant Raven
   participant Provider
-
   App->>Raven: POST /v1/chat/completions (stream: true)
   Raven->>Raven: Auth + Rate Limit + Guardrails
   Raven->>Provider: Forward request
@@ -106,8 +104,7 @@ sequenceDiagram
   end
   Provider-->>Raven: data: [DONE]
   Raven-->>App: data: [DONE]
-  Raven->>Raven: Log request + cost
-```
+  Raven->>Raven: Log request + cost" />
 
 <Steps>
 <Step>
