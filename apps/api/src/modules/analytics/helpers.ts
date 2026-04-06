@@ -5,7 +5,7 @@ import { eq, gte, lte } from "drizzle-orm";
 
 import { ValidationError } from "@/lib/errors";
 
-export const getRetentionDays = async (db: Database): Promise<number> => {
+const getRetentionDays = async (db: Database): Promise<number> => {
   const [row] = await db
     .select({ value: settings.value })
     .from(settings)

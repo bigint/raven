@@ -15,21 +15,19 @@ export interface Collection {
   readonly updatedAt: string;
 }
 
-export interface BigragCollectionConfig {
-  readonly embeddingProvider: string;
-  readonly embeddingModel: string;
-  readonly dimension: number;
-  readonly chunkSize: number;
-  readonly chunkOverlap: number;
-  readonly defaultTopK: number;
-  readonly defaultMinScore: number | null;
-  readonly defaultSearchMode: string;
-}
-
 export interface CollectionDetail extends Collection {
   readonly description: string | null;
   readonly chunkCount: number;
-  readonly bigrag: BigragCollectionConfig | null;
+  readonly bigrag: {
+    readonly embeddingProvider: string;
+    readonly embeddingModel: string;
+    readonly dimension: number;
+    readonly chunkSize: number;
+    readonly chunkOverlap: number;
+    readonly defaultTopK: number;
+    readonly defaultMinScore: number | null;
+    readonly defaultSearchMode: string;
+  } | null;
 }
 
 export interface CreateCollectionInput {
