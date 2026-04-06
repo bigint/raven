@@ -45,7 +45,6 @@ interface FormState {
   defaultTopK: string;
   defaultMinScore: string;
   defaultSearchMode: string;
-  maxContextTokens: string;
   isDefault: boolean;
 }
 
@@ -60,7 +59,6 @@ const DEFAULT_FORM: FormState = {
   embeddingModel: "text-embedding-3-small",
   embeddingProvider: "openai",
   isDefault: false,
-  maxContextTokens: "4096",
   name: ""
 };
 
@@ -76,8 +74,7 @@ const extractFormFromCollection = (
   embeddingApiKey: "",
   embeddingModel: DEFAULT_FORM.embeddingModel,
   embeddingProvider: DEFAULT_FORM.embeddingProvider,
-  isDefault: c.isDefault,
-  maxContextTokens: String(c.maxContextTokens),
+  isDefault: c.is_default,
   name: c.name
 });
 
@@ -137,25 +134,25 @@ const CollectionForm = ({
       if (isEdit && editingCollection) {
         await updateMutation.mutateAsync({
           description: form.description.trim() || undefined,
-          id: editingCollection.id,
-          isDefault: form.isDefault,
-          maxContextTokens: Number(form.maxContextTokens)
+          id: editingCollection.name,
+          is_default: form.isDefault
         });
       } else {
         await createMutation.mutateAsync({
-          chunkOverlap: Number(form.chunkOverlap),
-          chunkSize: Number(form.chunkSize),
-          defaultMinScore: form.defaultMinScore
+          chunk_overlap: Number(form.chunkOverlap),
+          chunk_size: Number(form.chunkSize),
+          default_min_score: form.defaultMinScore
             ? Number(form.defaultMinScore)
             : undefined,
-          defaultSearchMode: form.defaultSearchMode || undefined,
-          defaultTopK: form.defaultTopK ? Number(form.defaultTopK) : undefined,
+          default_search_mode: form.defaultSearchMode || undefined,
+          default_top_k: form.defaultTopK
+            ? Number(form.defaultTopK)
+            : undefined,
           description: form.description.trim() || undefined,
-          embeddingApiKey: form.embeddingApiKey || undefined,
-          embeddingModel: form.embeddingModel,
-          embeddingProvider: form.embeddingProvider,
-          isDefault: form.isDefault,
-          maxContextTokens: Number(form.maxContextTokens),
+          embedding_api_key: form.embeddingApiKey || undefined,
+          embedding_model: form.embeddingModel,
+          embedding_provider: form.embeddingProvider,
+          is_default: form.isDefault,
           name: form.name.trim()
         });
       }
@@ -325,18 +322,6 @@ const CollectionForm = ({
             </div>
           </>
         )}
-
-        <Input
-          autoComplete="off"
-          id="collection-max-context-tokens"
-          label="Max Context Tokens"
-          min="1"
-          name="maxContextTokens"
-          onChange={(e) => update("maxContextTokens", e.target.value)}
-          placeholder="4096"
-          type="number"
-          value={form.maxContextTokens}
-        />
 
         <Switch
           checked={form.isDefault}

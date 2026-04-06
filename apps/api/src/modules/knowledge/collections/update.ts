@@ -14,10 +14,7 @@ export const updateCollection =
     const name = c.req.param("name") as string;
     const body = c.req.valid("json");
 
-    const collection = await bigrag.updateCollection(name, {
-      description: body.description,
-      is_default: body.isDefault
-    });
+    const collection = await bigrag.updateCollection(name, body);
 
     void auditAndPublish(db, user, "collection", "updated", {
       metadata: { description: body.description },

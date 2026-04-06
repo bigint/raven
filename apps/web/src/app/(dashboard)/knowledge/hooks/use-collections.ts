@@ -7,50 +7,44 @@ import { createCrudHooks } from "@/lib/crud-hooks";
 export interface Collection {
   readonly id: string;
   readonly name: string;
-  readonly maxContextTokens: number;
-  readonly isDefault: boolean;
-  readonly documentCount: number;
-  readonly createdAt: string;
-  readonly updatedAt: string;
-}
-
-export interface CollectionDetail extends Collection {
-  readonly description: string | null;
-  readonly chunkCount: number;
-  readonly bigrag: {
-    readonly embeddingProvider: string;
-    readonly embeddingModel: string;
-    readonly dimension: number;
-    readonly chunkSize: number;
-    readonly chunkOverlap: number;
-    readonly defaultTopK: number;
-    readonly defaultMinScore: number | null;
-    readonly defaultSearchMode: string;
-  } | null;
+  readonly description: string;
+  readonly embedding_provider: string;
+  readonly embedding_model: string;
+  readonly dimension: number;
+  readonly chunk_size: number;
+  readonly chunk_overlap: number;
+  readonly document_count: number;
+  readonly has_api_key: boolean;
+  readonly reranking_enabled: boolean;
+  readonly reranking_model: string;
+  readonly has_reranking_api_key: boolean;
+  readonly default_top_k: number;
+  readonly default_min_score: number | null;
+  readonly default_search_mode: string;
+  readonly is_default: boolean;
+  readonly metadata: Record<string, unknown>;
+  readonly created_at: string;
+  readonly updated_at: string;
 }
 
 export interface CreateCollectionInput {
   readonly name: string;
   readonly description?: string;
-  // bigRAG-specific fields (forwarded to bigRAG, not stored in Raven)
-  readonly chunkOverlap?: number;
-  readonly chunkSize?: number;
-  readonly defaultMinScore?: number;
-  readonly defaultSearchMode?: string;
-  readonly defaultTopK?: number;
+  readonly chunk_overlap?: number;
+  readonly chunk_size?: number;
+  readonly default_min_score?: number;
+  readonly default_search_mode?: string;
+  readonly default_top_k?: number;
   readonly dimension?: number;
-  readonly embeddingApiKey?: string;
-  readonly embeddingModel?: string;
-  readonly embeddingProvider?: string;
-  // Raven-specific fields
-  readonly isDefault?: boolean;
-  readonly maxContextTokens?: number;
+  readonly embedding_api_key?: string;
+  readonly embedding_model?: string;
+  readonly embedding_provider?: string;
+  readonly is_default?: boolean;
 }
 
 export interface UpdateCollectionInput {
   readonly description?: string | null;
-  readonly isDefault?: boolean;
-  readonly maxContextTokens?: number;
+  readonly is_default?: boolean;
 }
 
 export const collectionsQueryOptions = () =>
@@ -59,10 +53,10 @@ export const collectionsQueryOptions = () =>
     queryKey: ["knowledge-collections"]
   });
 
-export const collectionDetailQueryOptions = (id: string) =>
+export const collectionDetailQueryOptions = (name: string) =>
   queryOptions({
-    queryFn: () => api.get<CollectionDetail>(`/v1/knowledge/collections/${id}`),
-    queryKey: ["knowledge-collections", id]
+    queryFn: () => api.get<Collection>(`/v1/knowledge/collections/${name}`),
+    queryKey: ["knowledge-collections", name]
   });
 
 const {

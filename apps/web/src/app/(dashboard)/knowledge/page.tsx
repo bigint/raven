@@ -57,7 +57,7 @@ const KnowledgePage = () => {
       render: (collection) => (
         <Link
           className="font-medium hover:underline"
-          href={`/knowledge/${collection.id}`}
+          href={`/knowledge/${collection.name}`}
         >
           {collection.name}
         </Link>
@@ -65,18 +65,18 @@ const KnowledgePage = () => {
     },
     {
       header: "Documents",
-      key: "documentCount",
+      key: "document_count",
       render: (collection) => (
         <span className="text-sm text-muted-foreground">
-          {collection.documentCount}
+          {collection.document_count}
         </span>
       )
     },
     {
       header: "Default",
-      key: "isDefault",
+      key: "is_default",
       render: (collection) =>
-        collection.isDefault ? (
+        collection.is_default ? (
           <Badge variant="success">Default</Badge>
         ) : (
           <span className="text-muted-foreground/50">{"\u2014"}</span>
