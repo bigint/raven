@@ -1,0 +1,101 @@
+---
+title: Comparison
+description: How Raven compares to other AI gateways and LLM proxy solutions.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+Choosing an AI gateway affects how you manage costs, secure prompts, and operate across providers. Here's how Raven stacks up against the alternatives.
+
+## At a Glance
+
+| Feature | Raven | Portkey | LiteLLM | Helicone | Keywords AI |
+|---------|-------|---------|---------|----------|-------------|
+| **Open Source** | MIT | No | Yes (proxy only) | No | No |
+| **Self-Hosted** | Yes | Enterprise only | Yes | Enterprise only | No |
+| **OpenAI-Compatible API** | Yes | Yes | Yes | Yes | Yes |
+| **Multi-Provider Routing** | Yes | Yes | Yes | Limited | Yes |
+| **Built-in Guardrails** | Yes | Yes | No | No | No |
+| **Budget Controls** | Yes | No | Yes | No | Yes |
+| **Rate Limiting** | Per-key RPM/RPD | Global | Per-key | No | Global |
+| **Response Caching** | Built-in (Redis) | Yes | Yes | No | No |
+| **Analytics Dashboard** | Yes | Yes | No | Yes | Yes |
+| **Audit Logs** | Yes | Yes | No | No | No |
+| **Webhooks** | Yes | Yes | No | No | No |
+| **Chat Playground** | Yes | Yes | No | Yes | Yes |
+| **Deployment** | Single Docker image | Cloud / Enterprise | Docker + Redis | Cloud / Enterprise | Cloud only |
+| **Primary Language** | TypeScript | — | Python | — | — |
+
+## Raven vs Portkey
+
+[Portkey](https://portkey.ai) is a managed AI gateway with a strong feature set. The primary difference is deployment model.
+
+**Choose Raven if:**
+
+- You need to self-host on your own infrastructure
+- You want full control over your data and prompts
+- You prefer open-source with no vendor lock-in
+- You want a single Docker image deployment
+
+**Choose Portkey if:**
+
+- You prefer a managed cloud service
+- You need enterprise support and SLAs
+
+## Raven vs LiteLLM
+
+[LiteLLM](https://github.com/BerriAI/litellm) is a popular open-source Python proxy for LLM providers.
+
+**Choose Raven if:**
+
+- You want a complete platform with a dashboard, analytics, and team management
+- You need built-in guardrails (PII detection, prompt injection, content filtering)
+- You want audit logs and webhooks out of the box
+- You prefer a single-binary Docker deployment over managing Python dependencies
+
+**Choose LiteLLM if:**
+
+- You want maximum provider coverage (100+ providers)
+- Your stack is Python-centric and you want a Python library
+- You need only the proxy layer without a UI
+
+## Raven vs Helicone
+
+[Helicone](https://helicone.ai) is an observability platform for LLM applications.
+
+**Choose Raven if:**
+
+- You need an actual proxy (routing, caching, guardrails), not just logging
+- You want budget controls and rate limiting on API keys
+- You want to self-host for free
+
+**Choose Helicone if:**
+
+- Your primary need is observability and analytics
+- You want a managed service with minimal setup
+- You need advanced prompt evaluation tools
+
+## Raven vs Keywords AI
+
+[Keywords AI](https://keywordsai.co) is a managed LLM monitoring and proxy service.
+
+**Choose Raven if:**
+
+- You need to self-host and control your data
+- You want open-source software you can audit and modify
+- You need guardrails and content filtering
+
+**Choose Keywords AI if:**
+
+- You prefer a managed service with no infrastructure to maintain
+- You need built-in prompt evaluation and A/B testing
+
+## Why Self-Hosting Matters
+
+With managed AI gateways, every prompt and response passes through a third-party server. For teams handling sensitive data, regulated industries, or internal-only applications, this creates unnecessary risk.
+
+Raven runs entirely on your infrastructure. Your prompts, API keys, and response data never leave your servers. You get the same gateway capabilities without the data exposure.
+
+<Callout type="info">
+  Raven deploys as a single Docker image with PostgreSQL and Redis. See the [Self-Hosting guide](/docs/guides/self-hosting) to get started in under 5 minutes.
+</Callout>
