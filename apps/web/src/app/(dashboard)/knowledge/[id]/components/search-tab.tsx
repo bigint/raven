@@ -5,17 +5,40 @@ import { Search } from "lucide-react";
 import { useState } from "react";
 import { useKnowledgeSearch } from "../../hooks/use-search";
 
+const highlightTerms = (text: string, query: string): React.ReactNode => {
+  const words = query
+    .split(/\s+/)
+    .filter((w) => w.length >= 2)
+    .map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  if (words.length === 0) return text;
+
+  const pattern = new RegExp(`(${words.join("|")})`, "gi");
+  const parts = text.split(pattern);
+
+  return parts.map((part, i) =>
+    pattern.test(part) ? (
+      <mark className="rounded-sm bg-primary/20 px-0.5 text-foreground" key={i}>
+        {part}
+      </mark>
+    ) : (
+      part
+    )
+  );
+};
+
 interface SearchTabProps {
   readonly collectionId: string;
 }
 
 const SearchTab = ({ collectionId }: SearchTabProps) => {
   const [query, setQuery] = useState("");
+  const [searchedQuery, setSearchedQuery] = useState("");
   const search = useKnowledgeSearch();
 
   const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!query.trim()) return;
+    setSearchedQuery(query.trim());
     search.mutate({ collectionName: collectionId, query: query.trim() });
   };
 
@@ -69,7 +92,7 @@ const SearchTab = ({ collectionId }: SearchTabProps) => {
                   </span>
                 </div>
                 <p className="text-sm leading-relaxed text-muted-foreground">
-                  {result.text}
+                  {highlightTerms(result.text, searchedQuery)}
                 </p>
                 {result.chunk_index !== null && (
                   <p className="mt-2 text-xs text-muted-foreground/60">
