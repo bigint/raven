@@ -16,7 +16,7 @@ const SearchTab = ({ collectionId }: SearchTabProps) => {
   const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!query.trim()) return;
-    search.mutate({ collectionId, query: query.trim() });
+    search.mutate({ collectionName: collectionId, query: query.trim() });
   };
 
   return (
@@ -53,30 +53,29 @@ const SearchTab = ({ collectionId }: SearchTabProps) => {
 
       {search.data && (
         <div className="space-y-3">
-          {search.data.chunks.length === 0 ? (
+          {search.data.results.length === 0 ? (
             <p className="text-center text-sm text-muted-foreground">
               No results found.
             </p>
           ) : (
-            search.data.chunks.map((chunk) => (
+            search.data.results.map((result) => (
               <div
                 className="rounded-xl border border-border bg-card p-4"
-                key={chunk.id}
+                key={result.id}
               >
                 <div className="mb-2 flex items-center justify-between gap-2">
-                  <span className="text-sm font-medium">
-                    {chunk.documentTitle}
-                  </span>
                   <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                    {Math.round(chunk.score * 100)}% match
+                    {Math.round(result.score * 100)}% match
                   </span>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {chunk.content}
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {result.text}
                 </p>
-                <p className="mt-2 text-xs text-muted-foreground/60">
-                  Chunk #{chunk.chunkIndex + 1}
-                </p>
+                {result.chunk_index !== null && (
+                  <p className="mt-2 text-xs text-muted-foreground/60">
+                    Chunk #{result.chunk_index + 1}
+                  </p>
+                )}
               </div>
             ))
           )}

@@ -4,19 +4,21 @@ import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
 export interface SearchResult {
-  readonly chunks: {
+  readonly results: {
     readonly id: string;
-    readonly content: string;
+    readonly text: string;
     readonly score: number;
-    readonly documentId: string;
-    readonly documentTitle: string;
-    readonly chunkIndex: number;
+    readonly document_id: string | null;
+    readonly chunk_index: number | null;
+    readonly metadata: Record<string, unknown>;
   }[];
-  readonly collectionId: string;
+  readonly query: string;
+  readonly collection: string;
+  readonly total: number;
 }
 
 export const useKnowledgeSearch = () =>
   useMutation({
-    mutationFn: (data: { query: string; collectionId?: string }) =>
+    mutationFn: (data: { query: string; collectionName?: string }) =>
       api.post<SearchResult>("/v1/knowledge/search", data)
   });

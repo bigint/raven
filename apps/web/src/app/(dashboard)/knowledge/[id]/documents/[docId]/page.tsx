@@ -8,9 +8,7 @@ import {
   Calendar,
   Clock,
   FileText,
-  Globe,
   Hash,
-  ImageIcon,
   RefreshCw
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -20,12 +18,6 @@ import {
   documentDetailQueryOptions,
   useReprocessDocument
 } from "../../../hooks/use-documents";
-
-const SOURCE_ICONS = {
-  file: FileText,
-  image: ImageIcon,
-  url: Globe
-};
 
 const STATUS_DOT: Record<string, string> = {
   failed: "bg-red-500",
@@ -63,7 +55,7 @@ const DocumentDetailPage = () => {
 
   const { data: chunksData } = useQuery({
     ...documentChunksQueryOptions(docId, PAGE_SIZE, page * PAGE_SIZE),
-    enabled: !!doc && doc.chunkCount > 0,
+    enabled: !!doc && doc.chunk_count > 0,
     refetchInterval: doc?.status === "processing" ? 3000 : false
   });
 
@@ -92,14 +84,12 @@ const DocumentDetailPage = () => {
     );
   }
 
-  const SourceIcon = SOURCE_ICONS[doc.sourceType] ?? FileText;
-
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
         <button
-          className="mb-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="mb-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           onClick={() => router.push(`/knowledge/${id}`)}
           type="button"
         >
@@ -110,11 +100,11 @@ const DocumentDetailPage = () => {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-3">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted">
-              <SourceIcon className="size-5 text-muted-foreground" />
+              <FileText className="size-5 text-muted-foreground" />
             </div>
             <div>
               <h1 className="text-xl font-semibold tracking-tight">
-                {doc.title}
+                {doc.filename}
               </h1>
               <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-2.5 py-0.5 font-medium">
@@ -125,11 +115,11 @@ const DocumentDetailPage = () => {
                 </span>
                 <span className="inline-flex items-center gap-1">
                   <Calendar className="size-3" />
-                  {format(new Date(doc.createdAt), "MMM d, yyyy")}
+                  {format(new Date(doc.created_at), "MMM d, yyyy")}
                 </span>
                 <span className="inline-flex items-center gap-1">
                   <Clock className="size-3" />
-                  {formatDistanceToNow(new Date(doc.createdAt), {
+                  {formatDistanceToNow(new Date(doc.created_at), {
                     addSuffix: true
                   })}
                 </span>
@@ -151,9 +141,9 @@ const DocumentDetailPage = () => {
       </div>
 
       {/* Error banner */}
-      {doc.errorMessage && (
+      {doc.error_message && (
         <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {doc.errorMessage}
+          {doc.error_message}
         </div>
       )}
 
@@ -164,7 +154,7 @@ const DocumentDetailPage = () => {
           <div>
             <p className="text-xs text-muted-foreground">Chunks</p>
             <p className="text-lg font-semibold tabular-nums">
-              {doc.chunkCount}
+              {doc.chunk_count}
             </p>
           </div>
         </div>
@@ -173,7 +163,9 @@ const DocumentDetailPage = () => {
           <div>
             <p className="text-xs text-muted-foreground">File size</p>
             <p className="text-lg font-semibold tabular-nums">
-              {doc.fileSize ? `${(doc.fileSize / 1024).toFixed(1)} KB` : "N/A"}
+              {doc.file_size
+                ? `${(doc.file_size / 1024).toFixed(1)} KB`
+                : "N/A"}
             </p>
           </div>
         </div>
@@ -195,19 +187,18 @@ const DocumentDetailPage = () => {
             </span>
           </div>
 
-          {/* Chunk list */}
           <div className="divide-y divide-border">
             {pageChunks.map((chunk) => (
               <div className="px-4 py-3" key={chunk.id}>
                 <div className="mb-1.5 flex items-center justify-between">
                   <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                     <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]">
-                      #{chunk.chunkIndex}
+                      #{chunk.chunk_index}
                     </span>
                   </span>
                 </div>
                 <p className="text-sm leading-relaxed text-foreground/90">
-                  {chunk.content
+                  {chunk.text
                     .replace(/\n{3,}/g, "\n\n")
                     .replace(/[ \t]+/g, " ")
                     .trim()}
@@ -222,7 +213,6 @@ const DocumentDetailPage = () => {
             )}
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between border-t border-border px-4 py-2.5">
               <Button

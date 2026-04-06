@@ -7,22 +7,22 @@ import { API_URL, api } from "@/lib/api";
 
 export interface Document {
   readonly id: string;
-  readonly collectionId: string;
-  readonly title: string;
-  readonly sourceType: "file" | "url" | "image";
-  readonly mimeType: string;
-  readonly fileSize: number | null;
-  readonly chunkCount: number;
+  readonly collection_id: string;
+  readonly filename: string;
+  readonly file_type: string;
+  readonly file_size: number;
+  readonly chunk_count: number;
   readonly status: "pending" | "processing" | "ready" | "failed";
-  readonly errorMessage: string | null;
-  readonly createdAt: string;
-  readonly updatedAt: string;
+  readonly error_message: string | null;
+  readonly metadata: Record<string, unknown>;
+  readonly created_at: string;
+  readonly updated_at: string;
 }
 
 export interface Chunk {
   readonly id: string;
-  readonly chunkIndex: number;
-  readonly content: string;
+  readonly chunk_index: number;
+  readonly text: string;
 }
 
 export interface ChunksResponse {
@@ -34,18 +34,20 @@ import { queryOptions } from "@tanstack/react-query";
 
 export const documentsQueryOptions = (collectionId: string) =>
   queryOptions({
-    queryFn: () =>
-      api.get<Document[]>(
+    queryFn: async () => {
+      const res = await api.get<{ documents: Document[]; total: number }>(
         `/v1/knowledge/collections/${collectionId}/documents`
-      ),
+      );
+      return res.documents;
+    },
     queryKey: ["knowledge-documents", collectionId]
   });
 
 interface PendingStatusDoc {
   readonly id: string;
   readonly status: Document["status"];
-  readonly chunkCount: number;
-  readonly errorMessage: string | null;
+  readonly chunk_count: number;
+  readonly error_message: string | null;
 }
 
 export interface PendingStatusResponse {

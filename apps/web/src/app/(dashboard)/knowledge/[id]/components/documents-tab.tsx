@@ -16,10 +16,16 @@ import {
 } from "../../hooks/use-documents";
 import { UploadModal } from "./upload-modal";
 
-const SOURCE_TYPE_ICONS: Record<Document["sourceType"], React.ReactNode> = {
-  file: <FileUp className="size-3.5" />,
-  image: <ImageIcon className="size-3.5" />,
-  url: <Globe className="size-3.5" />
+const FILE_TYPE_ICONS: Record<string, React.ReactNode> = {
+  csv: <FileUp className="size-3.5" />,
+  docx: <FileUp className="size-3.5" />,
+  html: <Globe className="size-3.5" />,
+  json: <FileUp className="size-3.5" />,
+  md: <FileUp className="size-3.5" />,
+  pdf: <FileUp className="size-3.5" />,
+  png: <ImageIcon className="size-3.5" />,
+  txt: <FileUp className="size-3.5" />,
+  xml: <FileUp className="size-3.5" />
 };
 
 const STATUS_DOT: Record<Document["status"], string> = {
@@ -44,17 +50,17 @@ const StatusCell = ({ doc }: { readonly doc: Document }) => (
       />
       {STATUS_LABEL[doc.status]}
     </span>
-    {doc.status === "processing" && doc.chunkCount > 0 && (
+    {doc.status === "processing" && doc.chunk_count > 0 && (
       <span className="text-[11px] text-muted-foreground tabular-nums">
-        {doc.chunkCount} chunks
+        {doc.chunk_count} chunks
       </span>
     )}
-    {doc.status === "failed" && doc.errorMessage && (
+    {doc.status === "failed" && doc.error_message && (
       <span
         className="max-w-[200px] truncate text-[11px] text-destructive"
-        title={doc.errorMessage}
+        title={doc.error_message}
       >
-        {doc.errorMessage}
+        {doc.error_message}
       </span>
     )}
   </div>
@@ -96,8 +102,8 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
             if (!update) return doc;
             return {
               ...doc,
-              chunkCount: update.chunkCount,
-              errorMessage: update.errorMessage,
+              chunk_count: update.chunk_count,
+              error_message: update.error_message,
               status: update.status
             };
           })
@@ -167,39 +173,39 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
       key: "select",
       render: (doc) => (
         <Checkbox
-          aria-label={`Select ${doc.title}`}
+          aria-label={`Select ${doc.filename}`}
           checked={selected.has(doc.id)}
           onCheckedChange={() => toggleSelect(doc.id)}
         />
       )
     },
     {
-      header: "Title",
-      key: "title",
+      header: "Filename",
+      key: "filename",
       render: (doc) => (
         <Link
           className="font-medium hover:underline"
           href={`/knowledge/${collectionId}/documents/${doc.id}`}
         >
-          {doc.title}
+          {doc.filename}
         </Link>
       )
     },
     {
-      header: "Source",
-      key: "sourceType",
+      header: "Type",
+      key: "file_type",
       render: (doc) => (
         <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-          {SOURCE_TYPE_ICONS[doc.sourceType]}
-          {doc.sourceType}
+          {FILE_TYPE_ICONS[doc.file_type] ?? <FileUp className="size-3.5" />}
+          {doc.file_type}
         </span>
       )
     },
     {
       header: "Chunks",
-      key: "chunkCount",
+      key: "chunk_count",
       render: (doc) => (
-        <span className="text-sm text-muted-foreground">{doc.chunkCount}</span>
+        <span className="text-sm text-muted-foreground">{doc.chunk_count}</span>
       )
     },
     {
@@ -209,10 +215,10 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
     },
     {
       header: "Added",
-      key: "createdAt",
+      key: "created_at",
       render: (doc) => (
         <span className="text-sm text-muted-foreground">
-          {formatDistanceToNow(new Date(doc.createdAt), { addSuffix: true })}
+          {formatDistanceToNow(new Date(doc.created_at), { addSuffix: true })}
         </span>
       )
     },
