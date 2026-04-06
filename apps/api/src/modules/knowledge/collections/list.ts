@@ -13,5 +13,5 @@ export const listCollections = (bigrag: BigRAG) => async (c: AuthContext) => {
     ...(offset ? { offset: Number(offset) } : {})
   });
 
-  return success(c, result);
+  return success(c, result.collections);
 };
