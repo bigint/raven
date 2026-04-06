@@ -15,7 +15,7 @@ export interface Collection {
   readonly updatedAt: string;
 }
 
-export interface BigRAGCollectionConfig {
+export interface BigragCollectionConfig {
   readonly embeddingProvider: string;
   readonly embeddingModel: string;
   readonly dimension: number;
@@ -29,7 +29,7 @@ export interface BigRAGCollectionConfig {
 export interface CollectionDetail extends Collection {
   readonly description: string | null;
   readonly chunkCount: number;
-  readonly bigrag: BigRAGCollectionConfig | null;
+  readonly bigrag: BigragCollectionConfig | null;
 }
 
 export interface CreateCollectionInput {
