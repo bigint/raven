@@ -1,0 +1,83 @@
+---
+title: Caching
+description: Reduce costs and latency with automatic response caching.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+Raven automatically caches non-streaming responses in Redis. When an identical request is made, the cached response is returned instantly -- saving you tokens, cost, and latency.
+
+## How It Works
+
+When a non-streaming request completes successfully, Raven stores the response in Redis with a configurable TTL. Subsequent requests with the same parameters return the cached response without hitting the upstream provider.
+
+<Mermaid chart="graph TD
+  A[Request]:::input --> B{Cache Hit?}
+  B -->|Yes| C[Return Cached Response]:::cache
+  B -->|No| D[Forward to Provider]:::provider
+  D --> E[Store Response in Cache]
+  E --> F[Return Response]
+  classDef input stroke-width:2px
+  classDef cache stroke-width:1px
+  classDef provider stroke-width:1px" />
+
+## Cache Key
+
+The cache key is a SHA-256 hash built from:
+
+| Component | Description |
+|-----------|-------------|
+| **Provider** | The resolved provider name |
+| **Model** | The requested model ID |
+| **Messages** | The full message array |
+| **Temperature** | Sampling temperature (if set) |
+| **System prompt** | System message content (if set) |
+| **Tools** | Tool/function definitions (if set) |
+
+Two requests with identical values for all of these components will share the same cache entry.
+
+## TTL (Time to Live)
+
+Cached responses expire after **1 hour** (3600 seconds) by default. After expiry, the next request for that cache key will hit the upstream provider and refresh the cache.
+
+## What Gets Cached
+
+| Request Type | Cached? |
+|-------------|---------|
+| Non-streaming (`stream: false` or omitted) | Yes |
+| Streaming (`stream: true`) | No |
+
+<Callout type="info">
+  Streaming requests are never cached because they produce incremental chunks rather than a single response body.
+</Callout>
+
+## Cache Hit Behavior
+
+When a cache hit occurs:
+
+- The cached response is returned immediately with a `200` status
+- **Cost is $0** -- no tokens are consumed at the provider
+- The request is logged with `cacheHit: true` in analytics
+- Guardrail warnings (if any from the original evaluation) are still included
+- The virtual key's "last used" timestamp is updated
+
+## Monitoring
+
+Cache performance is visible in the [Analytics](/docs/features/analytics) dashboard:
+
+- **Cache hit rate** -- Percentage of requests served from cache
+- **Cost savings** -- Estimated spend avoided by cache hits
+- **Latency improvement** -- Average response time reduction from cached responses
+
+Cache hit/miss status is also recorded in the request logs for each individual request.
+
+## Cache Invalidation
+
+Cache entries are automatically invalidated when the TTL expires. There is no manual cache invalidation -- if you need fresh responses immediately, you can:
+
+- Change a request parameter (e.g., adjust `temperature` slightly)
+- Wait for the TTL to expire
+
+<Callout type="info">
+  Caching is always enabled and requires no configuration. It works automatically for all non-streaming requests across all providers.
+</Callout>

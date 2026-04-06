@@ -4,7 +4,6 @@ description: Defend against prompt injection attacks with multi-layer detection.
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
-import { Tabs, Tab } from "fumadocs-ui/components/tabs";
 
 Prompt injection is an attack where a user crafts input that manipulates an LLM into ignoring its instructions, leaking its system prompt, or performing unintended actions. Raven detects these attacks before requests reach your LLM provider.
 
@@ -157,54 +156,21 @@ base = min(matchCount * 0.15 + 0.50, 0.99)
 final = hasCompound ? min(base + 0.20, 0.99) : base
 ```
 
-## Integration with Policies
+## Integration with Guardrails
 
-Prompt injection detection integrates with Raven's policy engine. You can create policies that:
+Prompt injection detection is built into Raven's [guardrail system](/docs/features/guardrails). You can create guardrails that:
 
-- **Block** requests with injection confidence above a threshold
+- **Block** requests when injection is detected
 - **Warn** via response headers when injection is suspected
 - **Log** all injection attempts for audit review
 
-<Tabs items={["Block High-Confidence Injections", "Warn on Suspicious Content"]}>
-<Tab value="Block High-Confidence Injections">
-```json
-{
-  "name": "Block prompt injection",
-  "conditions": [
-    {
-      "field": "prompt_injection.confidence",
-      "operator": "greater_than",
-      "value": 0.7
-    }
-  ],
-  "action": "block",
-  "message": "Request blocked: prompt injection detected"
-}
-```
-</Tab>
-<Tab value="Warn on Suspicious Content">
-```json
-{
-  "name": "Warn on injection attempts",
-  "conditions": [
-    {
-      "field": "prompt_injection.detected",
-      "operator": "equals",
-      "value": true
-    }
-  ],
-  "action": "warn"
-}
-```
-</Tab>
-</Tabs>
+Configure the action and sensitivity level in the guardrail settings. See [Guardrails](/docs/features/guardrails) for details on creating and managing rules.
 
 ## Monitoring
 
 Injection events are surfaced through multiple channels:
 
 - **Dashboard** -- View injection attempts in the request logs with matched patterns
-- **Prometheus** -- `raven_guardrail_triggers_total{rule="prompt_injection"}` counter
 - **Events** -- `guardrail.triggered` events with injection details
 - **Webhooks** -- Receive real-time notifications of blocked injection attempts
 

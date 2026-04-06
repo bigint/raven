@@ -5,11 +5,12 @@
     "virtual-keys",
     "models",
     "routing-rules",
+    "caching",
     "chat",
     "guardrails",
-    "audit-logs",
-    "webhooks",
     "budgets",
-    "analytics"
+    "analytics",
+    "audit-logs",
+    "webhooks"
   ]
 }

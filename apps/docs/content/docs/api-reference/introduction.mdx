@@ -15,14 +15,12 @@ http://localhost:4000
 
 ## Two APIs, One Gateway
 
-```mermaid
-graph LR
+<Mermaid chart='graph LR
   A[Your App] -->|"/v1/chat/completions"| B[Proxy API]
   C[Dashboard] -->|"/providers, /keys"| D[Management API]
   B --> E[Raven Gateway]
   D --> E
-  E --> F[LLM Providers]
-```
+  E --> F[LLM Providers]' />
 
 Raven has two distinct API surfaces:
 

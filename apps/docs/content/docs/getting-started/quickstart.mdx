@@ -10,7 +10,14 @@ import { Tabs, Tab } from "fumadocs-ui/components/tabs";
 
 ## 1. Deploy Raven
 
-Follow the [Self-Hosting guide](/docs/guides/self-hosting) to deploy Raven on your infrastructure with Docker Compose. Once running, open [http://localhost:3000](http://localhost:3000) and create your account.
+Start Raven with Docker Compose:
+
+```bash
+curl -O https://raw.githubusercontent.com/bigint/raven/main/docker-compose.yml
+docker compose up -d
+```
+
+Once running, open [http://localhost:3000](http://localhost:3000) and create your account. See the [Self-Hosting guide](/docs/guides/self-hosting) for production deployments and environment variable configuration.
 
 ## 2. Add a Provider
 

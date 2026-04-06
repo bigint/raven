@@ -66,8 +66,9 @@ Every response from Raven includes security headers to protect against common we
 | `Strict-Transport-Security` | `max-age=31536000` | Forces HTTPS |
 | `X-Content-Type-Options` | `nosniff` | Prevents MIME sniffing |
 | `X-Frame-Options` | `DENY` | Prevents clickjacking |
-| `X-XSS-Protection` | `1; mode=block` | Legacy XSS protection |
+| `X-XSS-Protection` | `0` | Disables legacy XSS filter (modern best practice) |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Limits referrer leakage |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=()` | Restricts browser feature access |
 
 ## Request Body Size Limits
 

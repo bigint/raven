@@ -145,7 +145,7 @@ When the stream completes (the TransformStream `flush` fires), Raven logs the fu
 </Steps>
 
 <Callout type="info">
-  Guardrails and policies are evaluated **before** the stream begins. If a guardrail blocks the request, you receive a synchronous error response instead of a stream.
+  Guardrails are evaluated **before** the stream begins. If a guardrail blocks the request, you receive a synchronous error response instead of a stream.
 </Callout>
 
 ## Provider-Specific Normalization
@@ -221,37 +221,6 @@ for await (const chunk of stream) {
   }
 }
 ```
-
-## Streaming with the Raven SDK
-
-The `@raven/sdk` provides a `streamText` method with built-in token accumulation:
-
-```typescript
-import { RavenClient } from "@raven/sdk";
-
-const raven = new RavenClient({
-  apiKey: "rk_live_...",
-  baseUrl: "http://localhost:4000"
-});
-
-const stream = await raven.streamText({
-  model: "gpt-4o",
-  provider: "openai",
-  messages: [{ role: "user", content: "Hello" }]
-});
-
-// Iterate over text deltas
-for await (const text of stream) {
-  process.stdout.write(text);
-}
-
-// After iteration, get accumulated results
-const fullText = await stream.text;
-const usage = await stream.usage;
-const finishReason = await stream.finishReason;
-```
-
-See [TypeScript SDK](/docs/guides/sdk) for more details.
 
 ## Error Handling
 

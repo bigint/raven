@@ -18,10 +18,6 @@ Budgets can be attached to different levels of your organization hierarchy.
 | `team` | Requests from a specific team | Limit engineering team to $500/month |
 | `key` | Requests using a specific virtual key | Cap a staging key at $10/day |
 
-<Callout type="info">
-  Agent identities also support per-agent budgets through the agent configuration. See Agent Identities for details.
-</Callout>
-
 ## Budget Periods
 
 | Period | Reset Schedule |
@@ -73,18 +69,16 @@ Configure the percentage at which to trigger an alert (default: 80%).
 
 ## Budget Hierarchy
 
-Budgets are checked hierarchically from organization down to agent. If **any** level in the chain would be exceeded, the request is blocked.
+Budgets are checked hierarchically from organization down to key. If **any** level in the chain would be exceeded, the request is blocked.
 
 <Mermaid chart='graph TD
   A["Organization — $1,000/mo"]:::org --> B["Engineering — $500/mo"]:::team
   A --> C["Research — $300/mo"]:::team
   B --> D["prod-api — $200/mo"]:::key
   B --> E["staging — $10/day"]:::key
-  D --> F["support-bot — $50/mo"]:::agent
   classDef org stroke-width:2px
   classDef team stroke-width:1px
-  classDef key stroke-width:1px
-  classDef agent stroke-width:1px,stroke-dasharray:5 5' />
+  classDef key stroke-width:1px' />
 
 The check flow for each request:
 
@@ -92,9 +86,8 @@ The check flow for each request:
 2. Check organization budget -- block if exceeded
 3. Check team budget (if applicable) -- block if exceeded
 4. Check key budget -- block if exceeded
-5. Check agent budget (if applicable) -- block if exceeded
-6. If all checks pass, forward the request to the provider
-7. After completion, update spend at all levels
+5. If all checks pass, forward the request to the provider
+6. After completion, update spend at all levels
 
 ## Alert Thresholds
 

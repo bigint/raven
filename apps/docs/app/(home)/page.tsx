@@ -191,7 +191,8 @@ export default function Page() {
                     <Terminal className="size-4 text-fd-foreground" />
                   </div>
                   <span>
-                    Works with OpenAI, Anthropic, and any OpenAI-compatible SDK
+                    Works with OpenAI, Anthropic, Google, and any
+                    OpenAI-compatible SDK
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -207,7 +208,8 @@ export default function Page() {
                     <BookOpen className="size-4 text-fd-foreground" />
                   </div>
                   <span>
-                    Official TypeScript SDK with streaming and error types
+                    Full API reference with streaming, function calling, and
+                    error handling
                   </span>
                 </div>
               </div>

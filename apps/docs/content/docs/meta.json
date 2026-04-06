@@ -3,8 +3,8 @@
     "index",
     "getting-started",
     "features",
-    "security",
     "guides",
-    "api-reference"
+    "api-reference",
+    "security"
   ]
 }

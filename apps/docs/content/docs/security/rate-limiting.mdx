@@ -126,7 +126,7 @@ Rate limits and [budgets](/docs/features/budgets) serve different purposes:
 |---------|-------------|---------|
 | **Unit** | Request count | Dollar amount |
 | **Scope** | Per virtual key | Org, team, or key |
-| **Window** | Minute / day | Day / week / month |
+| **Window** | Minute / day | Day / month |
 | **Purpose** | Throughput control | Cost control |
 
 Use rate limits to prevent traffic spikes. Use budgets to prevent cost overruns.
@@ -135,8 +135,7 @@ Use rate limits to prevent traffic spikes. Use budgets to prevent cost overruns.
 
 Rate limit events are tracked in Raven's observability layer:
 
-- **Prometheus** -- `raven_rate_limit_exceeded_total` counter with `key_id` label
-- **Events** -- `key.rate_limited` events are emitted and available via the event stream
+- **Events** -- `key.rate_limited` events are emitted and available via [webhooks](/docs/features/webhooks)
 - **Analytics** -- Rate-limited requests appear in the dashboard analytics with a `429` status code
 
 ## Best Practices
@@ -152,6 +151,6 @@ Give each application or team its own virtual key with appropriate limits. This 
 Begin with lower limits and increase them based on observed usage patterns in the analytics dashboard.
 </Accordion>
 <Accordion title="Handle 429s gracefully in your application">
-Implement exponential backoff in your client code. The Raven SDK handles this automatically.
+Implement exponential backoff in your client code.
 </Accordion>
 </Accordions>

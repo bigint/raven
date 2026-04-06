@@ -22,7 +22,7 @@ Raven is an open-source AI gateway that sits between your apps and LLM providers
 
 **Ship faster without losing control.** Teams building with LLMs need more than raw API access -- they need visibility, safety, and cost management. Raven gives you all three without touching your existing code.
 
-- **Unified API** -- Use OpenAI, Anthropic, and more through a single endpoint. Switch providers by changing a model name, not your codebase.
+- **Unified API** -- Use OpenAI, Anthropic, Google, and more through a single endpoint. Switch providers by changing a model name, not your codebase.
 - **Real-time Cost Tracking** -- See spending per key, per user, and per model as it happens. No more end-of-month surprises.
 - **Budgets & Rate Limits** -- Create virtual API keys with spending caps. Give your team access without giving away the farm.
 - **Built-in Guardrails** -- Detect prompt injection and filter harmful content before it reaches your models.
@@ -74,7 +74,7 @@ curl http://localhost:4000/v1/chat/completions \
 
 Raven runs anywhere Docker runs. The `docker-compose.yml` includes everything you need: the app, PostgreSQL, and Redis.
 
-For production deployments, environment variables, and scaling, see the [self-hosting docs](https://raven.yoginth.com).
+For production deployments, environment variables, and scaling, see the [self-hosting guide](https://raven.yoginth.com/docs/guides/self-hosting).
 
 ## Documentation
 
