@@ -1,15 +1,9 @@
 import type { BigRAG } from "@bigrag/client";
 import type { Database } from "@raven/db";
-import {
-  knowledgeCollections,
-  knowledgeDocuments,
-  knowledgeKeyBindings,
-  knowledgeQueryLogs
-} from "@raven/db";
-import { and, eq, inArray } from "drizzle-orm";
+import { knowledgeKeyBindings, knowledgeQueryLogs } from "@raven/db";
+import { and, eq } from "drizzle-orm";
 
 import { log } from "@/lib/logger";
-import { buildDocumentIdMap, resolveDocumentId } from "../documents/map-ids";
 
 interface RAGInput {
   readonly bigrag: BigRAG;
@@ -25,8 +19,6 @@ interface RAGResult {
   readonly responseHeaders: Record<string, string>;
   readonly used: boolean;
 }
-
-type CollectionRow = typeof knowledgeCollections.$inferSelect;
 
 const NOOP: RAGResult = {
   chunksInjected: 0,
@@ -60,29 +52,22 @@ const extractQueryText = (messages: unknown[]): string | null => {
 
 const estimateTokens = (text: string): number => Math.ceil(text.length / 4);
 
-const resolveCollections = async (
+const DEFAULT_MAX_CONTEXT_TOKENS = 4096;
+
+const resolveCollectionNames = async (
   db: Database,
+  bigrag: BigRAG,
   headers: Readonly<Record<string, string>>,
   virtualKeyId: string
-): Promise<CollectionRow[]> => {
+): Promise<string[]> => {
   const collectionHeader = headers["x-knowledge-collection"];
 
   if (collectionHeader) {
-    const names = collectionHeader.split(",").map((n) => n.trim());
-    const found = await db
-      .select()
-      .from(knowledgeCollections)
-      .where(
-        and(
-          inArray(knowledgeCollections.name, names),
-          eq(knowledgeCollections.isEnabled, true)
-        )
-      );
-    return found;
+    return collectionHeader.split(",").map((n) => n.trim());
   }
 
   const bindings = await db
-    .select()
+    .select({ collectionName: knowledgeKeyBindings.collectionName })
     .from(knowledgeKeyBindings)
     .where(
       and(
@@ -92,51 +77,17 @@ const resolveCollections = async (
     );
 
   if (bindings.length > 0) {
-    const collectionIds = bindings.map((b) => b.collectionId);
-    const found = await db
-      .select()
-      .from(knowledgeCollections)
-      .where(
-        and(
-          inArray(knowledgeCollections.id, collectionIds),
-          eq(knowledgeCollections.isEnabled, true)
-        )
-      );
-    return found;
+    return bindings.map((b) => b.collectionName);
   }
 
-  const defaults = await db
-    .select()
-    .from(knowledgeCollections)
-    .where(
-      and(
-        eq(knowledgeCollections.isDefault, true),
-        eq(knowledgeCollections.isEnabled, true)
-      )
-    );
-
-  if (defaults.length > 0) return defaults;
-
-  // When explicitly requested via header but no defaults exist,
-  // fall back to all enabled collections
   const explicitlyEnabled = headers["x-knowledge-enabled"] === "true";
   if (explicitlyEnabled) {
-    return db
-      .select()
-      .from(knowledgeCollections)
-      .where(eq(knowledgeCollections.isEnabled, true));
+    const result = await bigrag.listCollections();
+    return result.collections.map((c) => c.name);
   }
 
   return [];
 };
-
-interface ChunkEntry {
-  collectionId: string;
-  content: string;
-  documentId: string;
-  id: string;
-  score: number;
-}
 
 export const performRAGInjection = async (
   input: RAGInput
@@ -146,13 +97,14 @@ export const performRAGInjection = async (
   const enabledHeader = input.headers["x-knowledge-enabled"];
   if (enabledHeader === "false") return noop(input.messages);
 
-  const collections = await resolveCollections(
+  const collectionNames = await resolveCollectionNames(
     input.db,
+    input.bigrag,
     input.headers,
     input.virtualKeyId
   );
 
-  if (collections.length === 0) return noop(input.messages);
+  if (collectionNames.length === 0) return noop(input.messages);
 
   const queryText = extractQueryText(input.messages);
   if (!queryText) return noop(input.messages);
@@ -163,49 +115,21 @@ export const performRAGInjection = async (
     | "semantic"
     | undefined;
 
-  // Query all collections — omit top_k/min_score to use bigRAG collection defaults
-  const collectionNames = collections.map((c) => c.name);
   const response = await input.bigrag.multiQuery({
     collections: collectionNames,
     query: queryText,
     ...(searchMode ? { search_mode: searchMode } : {})
   });
 
-  const collectionIds = collections.map((c) => c.id);
-  const idMap = await buildDocumentIdMap(input.db, collectionIds);
+  if (response.results.length === 0) return noop(input.messages);
 
-  const allChunks: ChunkEntry[] = response.results.map((r) => ({
-    collectionId: collections.find((c) => c.name === r.collection)?.id ?? "",
-    content: r.text,
-    documentId: resolveDocumentId(idMap, r.document_id),
-    id: r.id,
-    score: r.score
-  }));
-
-  if (allChunks.length === 0) return noop(input.messages);
-
-  const documentIds = [...new Set(allChunks.map((c) => c.documentId))];
-  const documents =
-    documentIds.length > 0
-      ? await input.db
-          .select({
-            id: knowledgeDocuments.id,
-            title: knowledgeDocuments.title
-          })
-          .from(knowledgeDocuments)
-          .where(inArray(knowledgeDocuments.id, documentIds))
-      : [];
-
-  const documentMap = new Map(documents.map((d) => [d.id, d.title]));
-
-  const maxTokens = collections[0]?.maxContextTokens ?? 4096;
+  const maxTokens = DEFAULT_MAX_CONTEXT_TOKENS;
   let totalTokens = 0;
   const contextParts: string[] = [];
   let injectedCount = 0;
 
-  for (const chunk of allChunks) {
-    const docTitle = documentMap.get(chunk.documentId) ?? "Unknown";
-    const part = `---\n[Source: ${docTitle}]\n${chunk.content}\n---`;
+  for (const chunk of response.results) {
+    const part = `---\n${chunk.text}\n---`;
     const partTokens = estimateTokens(part);
 
     if (totalTokens + partTokens > maxTokens) break;
@@ -226,19 +150,21 @@ export const performRAGInjection = async (
 
   const latencyMs = Date.now() - startTime;
   const topScore =
-    allChunks.length > 0 ? Math.max(...allChunks.map((c) => c.score)) : 0;
+    response.results.length > 0
+      ? Math.max(...response.results.map((c) => c.score))
+      : 0;
 
-  const collectionId = collections[0]?.id ?? "";
+  const collectionName = collectionNames[0] ?? "";
   await input.db
     .insert(knowledgeQueryLogs)
     .values({
-      chunkIds: allChunks.slice(0, injectedCount).map((c) => ({
+      chunkIds: response.results.slice(0, injectedCount).map((c) => ({
         id: c.id,
         score: c.score
       })),
       chunksInjected: injectedCount,
-      chunksRetrieved: allChunks.length,
-      collectionId,
+      chunksRetrieved: response.results.length,
+      collectionName,
       latencyMs,
       queryText,
       topSimilarityScore: topScore,
@@ -250,8 +176,8 @@ export const performRAGInjection = async (
 
   log.info("RAG injection complete", {
     chunksInjected: injectedCount,
-    chunksRetrieved: allChunks.length,
-    collectionCount: collections.length,
+    chunksRetrieved: response.results.length,
+    collectionCount: collectionNames.length,
     latencyMs,
     topScore
   });
@@ -261,7 +187,7 @@ export const performRAGInjection = async (
     injectedMessages,
     responseHeaders: {
       "X-Knowledge-Chunks": String(injectedCount),
-      "X-Knowledge-Collections": collections.map((c) => c.name).join(","),
+      "X-Knowledge-Collections": collectionNames.join(","),
       "X-Knowledge-Used": "true"
     },
     used: true

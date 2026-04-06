@@ -1,10 +1,8 @@
 import type { BigRAG } from "@bigrag/client";
 import type { Database } from "@raven/db";
-import { knowledgeCollections, knowledgeDocuments } from "@raven/db";
-import { eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { NotFoundError, ValidationError } from "@/lib/errors";
-import { log } from "@/lib/logger";
+import { auditAndPublish } from "@/lib/audit";
+import { ValidationError } from "@/lib/errors";
 import { created } from "@/lib/response";
 
 const ALLOWED_MIME_TYPES = new Set([
@@ -30,22 +28,13 @@ const ALLOWED_MIME_TYPES = new Set([
   "text/xml"
 ]);
 
-const IMAGE_MIME_TYPES = new Set([
-  "image/bmp",
-  "image/gif",
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-  "image/tiff",
-  "image/webp"
-]);
-
-const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB
+const MAX_FILE_SIZE = 500 * 1024 * 1024;
 const MAX_BATCH_SIZE = 100;
 
 export const batchUploadDocuments =
   (db: Database, bigrag: BigRAG) => async (c: Context) => {
-    const collectionId = c.req.param("id") as string;
+    const user = c.get("user");
+    const collectionName = c.req.param("name") as string;
 
     const body = await c.req.parseBody({ all: true });
     const rawFiles = body["files"];
@@ -78,16 +67,6 @@ export const batchUploadDocuments =
       }
     }
 
-    const [collection] = await db
-      .select({ name: knowledgeCollections.name })
-      .from(knowledgeCollections)
-      .where(eq(knowledgeCollections.id, collectionId))
-      .limit(1);
-
-    if (!collection) {
-      throw new NotFoundError("Collection not found");
-    }
-
     const uploadFiles = await Promise.all(
       validFiles.map(
         async (file) =>
@@ -95,35 +74,17 @@ export const batchUploadDocuments =
       )
     );
 
-    const batchResult = await bigrag.batchUploadDocuments(
-      collection.name,
+    const result = await bigrag.batchUploadDocuments(
+      collectionName,
       uploadFiles
     );
 
-    log.info("Batch uploaded to bigRAG", {
-      collectionName: collection.name,
-      count: batchResult.documents.length
-    });
+    for (const doc of result.documents) {
+      void auditAndPublish(db, user, "document", "created", {
+        metadata: { collection: collectionName },
+        resourceId: doc.id
+      });
+    }
 
-    const documents = await db
-      .insert(knowledgeDocuments)
-      .values(
-        batchResult.documents.map((bigragDoc, i) => {
-          const file = validFiles[i] as File;
-          return {
-            bigragDocumentId: bigragDoc.id,
-            collectionId,
-            fileSize: file.size,
-            mimeType: file.type,
-            sourceType: IMAGE_MIME_TYPES.has(file.type)
-              ? ("image" as const)
-              : ("file" as const),
-            status: "processing" as const,
-            title: file.name
-          };
-        })
-      )
-      .returning();
-
-    return created(c, documents);
+    return created(c, result);
   };

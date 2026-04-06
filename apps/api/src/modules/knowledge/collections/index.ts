@@ -12,19 +12,19 @@ import { updateCollection } from "./update";
 export const createCollectionsModule = (db: Database, bigrag: BigRAG) => {
   const app = new Hono();
 
-  app.get("/", listCollections(db));
+  app.get("/", listCollections(bigrag));
   app.post(
     "/",
     jsonValidator(createCollectionSchema),
     createCollection(db, bigrag)
   );
-  app.get("/:id", getCollection(db, bigrag));
+  app.get("/:name", getCollection(bigrag));
   app.put(
-    "/:id",
+    "/:name",
     jsonValidator(updateCollectionSchema),
     updateCollection(db, bigrag)
   );
-  app.delete("/:id", deleteCollection(db, bigrag));
+  app.delete("/:name", deleteCollection(db, bigrag));
 
   return app;
 };

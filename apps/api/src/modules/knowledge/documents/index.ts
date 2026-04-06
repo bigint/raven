@@ -1,7 +1,6 @@
 import type { BigRAG } from "@bigrag/client";
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
-import { queryValidator } from "@/lib/validation";
 import { batchDeleteDocuments } from "./batch-delete";
 import { batchGetDocumentStatus } from "./batch-status";
 import { batchUploadDocuments } from "./batch-upload";
@@ -9,25 +8,18 @@ import { deleteDocument } from "./delete";
 import { getDocument, getDocumentChunks } from "./get";
 import { ingestImage } from "./ingest-image";
 import { listDocuments } from "./list";
-import { getPendingStatus } from "./pending-status";
 import { streamDocumentProgress } from "./progress";
 import { reprocessDocument } from "./reprocess";
-import { listDocumentsQuerySchema } from "./schema";
 import { uploadDocument } from "./upload";
 
 export const createDocumentsModule = (db: Database, bigrag: BigRAG) => {
   const app = new Hono();
 
-  app.get(
-    "/",
-    queryValidator(listDocumentsQuerySchema),
-    listDocuments(db, bigrag)
-  );
+  app.get("/", listDocuments(bigrag));
   app.post("/", uploadDocument(db, bigrag));
   app.post("/image", ingestImage(db, bigrag));
-  app.get("/pending", getPendingStatus(db, bigrag));
   app.post("/batch/upload", batchUploadDocuments(db, bigrag));
-  app.post("/batch/status", batchGetDocumentStatus(db, bigrag));
+  app.post("/batch/status", batchGetDocumentStatus(bigrag));
   app.post("/batch/delete", batchDeleteDocuments(db, bigrag));
 
   return app;
@@ -36,11 +28,11 @@ export const createDocumentsModule = (db: Database, bigrag: BigRAG) => {
 export const createDocumentDetailModule = (db: Database, bigrag: BigRAG) => {
   const app = new Hono();
 
-  app.get("/:id", getDocument(db, bigrag));
-  app.get("/:id/chunks", getDocumentChunks(db, bigrag));
-  app.get("/:id/progress", streamDocumentProgress(db, bigrag));
-  app.post("/:id/reprocess", reprocessDocument(db, bigrag));
-  app.delete("/:id", deleteDocument(db, bigrag));
+  app.get("/:docId", getDocument(bigrag));
+  app.get("/:docId/chunks", getDocumentChunks(bigrag));
+  app.get("/:docId/progress", streamDocumentProgress(bigrag));
+  app.post("/:docId/reprocess", reprocessDocument(bigrag));
+  app.delete("/:docId", deleteDocument(db, bigrag));
 
   return app;
 };

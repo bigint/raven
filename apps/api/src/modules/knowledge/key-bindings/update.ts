@@ -23,7 +23,7 @@ export const updateKeyBindings =
             .insert(knowledgeKeyBindings)
             .values(
               bindings.map((b) => ({
-                collectionId: b.collectionId,
+                collectionName: b.collectionName,
                 ragEnabled: b.ragEnabled,
                 virtualKeyId: id
               }))

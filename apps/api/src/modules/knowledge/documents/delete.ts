@@ -1,55 +1,20 @@
 import type { BigRAG } from "@bigrag/client";
 import type { Database } from "@raven/db";
-import { knowledgeCollections, knowledgeDocuments } from "@raven/db";
-import { eq } from "drizzle-orm";
+import type { Context } from "hono";
 import { auditAndPublish } from "@/lib/audit";
-import { NotFoundError } from "@/lib/errors";
-import { log } from "@/lib/logger";
 import { success } from "@/lib/response";
-import type { AuthContext } from "@/lib/types";
 
 export const deleteDocument =
-  (db: Database, bigrag: BigRAG) => async (c: AuthContext) => {
+  (db: Database, bigrag: BigRAG) => async (c: Context) => {
     const user = c.get("user");
-    const docId = c.req.param("id") as string;
+    const collectionName = c.req.param("name") as string;
+    const docId = c.req.param("docId") as string;
 
-    const [deleted] = await db
-      .delete(knowledgeDocuments)
-      .where(eq(knowledgeDocuments.id, docId))
-      .returning({
-        bigragDocumentId: knowledgeDocuments.bigragDocumentId,
-        collectionId: knowledgeDocuments.collectionId,
-        id: knowledgeDocuments.id,
-        title: knowledgeDocuments.title
-      });
-
-    if (!deleted) {
-      throw new NotFoundError("Document not found");
-    }
-
-    if (deleted.bigragDocumentId) {
-      const [collection] = await db
-        .select({ name: knowledgeCollections.name })
-        .from(knowledgeCollections)
-        .where(eq(knowledgeCollections.id, deleted.collectionId))
-        .limit(1);
-
-      if (collection) {
-        // Fire and forget — remove bigRAG document in the background
-        void bigrag
-          .deleteDocument(collection.name, deleted.bigragDocumentId)
-          .catch((err) => {
-            log.error("Failed to delete bigRAG document", err, {
-              bigragDocumentId: deleted.bigragDocumentId,
-              collectionName: collection.name
-            });
-          });
-      }
-    }
+    await bigrag.deleteDocument(collectionName, docId);
 
     void auditAndPublish(db, user, "document", "deleted", {
-      metadata: { title: deleted.title },
-      resourceId: deleted.id
+      metadata: { collection: collectionName },
+      resourceId: docId
     });
 
     return success(c, { success: true });
