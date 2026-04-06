@@ -2,13 +2,14 @@
 
 import type { Column } from "@raven/ui";
 import { Button, Checkbox, ConfirmDialog, DataTable } from "@raven/ui";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { FileUp, Globe, ImageIcon, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import type { Document } from "../../hooks/use-documents";
 import {
+  batchStatusQueryOptions,
   documentsQueryOptions,
   useBatchDeleteDocuments,
   useDeleteDocument
@@ -69,14 +70,51 @@ interface DocumentsTabProps {
   readonly collectionId: string;
 }
 
-const hasPending = (docs: Document[]) =>
-  docs.some((d) => d.status === "pending" || d.status === "processing");
-
 const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
-  const { data: documents = [], isLoading } = useQuery({
-    ...documentsQueryOptions(collectionId),
-    refetchInterval: (query) =>
-      hasPending(query.state.data ?? []) ? 3000 : false
+  const queryClient = useQueryClient();
+  const { data: documents = [], isLoading } = useQuery(
+    documentsQueryOptions(collectionId)
+  );
+
+  const pendingIds = documents
+    .filter((d) => d.status === "pending" || d.status === "processing")
+    .map((d) => d.id);
+
+  useQuery({
+    ...batchStatusQueryOptions(collectionId, pendingIds),
+    enabled: pendingIds.length > 0,
+    refetchInterval: 2000,
+    select: (data) => {
+      const statuses = data.statuses;
+      if (statuses.length === 0) return data;
+
+      const allDone = statuses.every(
+        (s) => s.status !== "pending" && s.status !== "processing"
+      );
+
+      if (allDone) {
+        queryClient.invalidateQueries({
+          queryKey: ["knowledge-documents", collectionId]
+        });
+      } else {
+        const statusMap = new Map(statuses.map((s) => [s.id, s]));
+        queryClient.setQueryData<Document[]>(
+          ["knowledge-documents", collectionId],
+          (old) =>
+            old?.map((doc) => {
+              const update = statusMap.get(doc.id);
+              if (!update) return doc;
+              return {
+                ...doc,
+                chunk_count: update.chunk_count,
+                error_message: update.error_message,
+                status: update.status
+              };
+            })
+        );
+      }
+      return data;
+    }
   });
 
   const [uploadOpen, setUploadOpen] = useState(false);

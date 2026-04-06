@@ -43,6 +43,19 @@ export const documentsQueryOptions = (collectionId: string) =>
     queryKey: ["knowledge-documents", collectionId]
   });
 
+export const batchStatusQueryOptions = (
+  collectionId: string,
+  documentIds: string[]
+) =>
+  queryOptions({
+    queryFn: () =>
+      api.post<{ statuses: Document[] }>(
+        `/v1/knowledge/collections/${collectionId}/documents/batch/status`,
+        { document_ids: documentIds }
+      ),
+    queryKey: ["knowledge-documents-status", collectionId, documentIds]
+  });
+
 export const documentDetailQueryOptions = (docId: string) =>
   queryOptions({
     queryFn: () => api.get<Document>(`/v1/knowledge/documents/${docId}`),
