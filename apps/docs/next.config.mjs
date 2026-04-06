@@ -4,15 +4,7 @@ const withMDX = createMDX();
 
 /** @type {import('next').NextConfig} */
 const config = {
-  reactStrictMode: true,
-  async rewrites() {
-    return [
-      {
-        source: "/docs/context7.json",
-        destination: "/context7.json"
-      }
-    ];
-  }
+  reactStrictMode: true
 };
 
 export default withMDX(config);
