@@ -6,7 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { FileUp, Globe, ImageIcon, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Document } from "../../hooks/use-documents";
 import {
   batchStatusQueryOptions,
@@ -76,46 +76,39 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
     documentsQueryOptions(collectionId)
   );
 
-  const pendingIds = documents
-    .filter((d) => d.status === "pending" || d.status === "processing")
-    .map((d) => d.id);
+  const pendingIds = useMemo(
+    () =>
+      documents
+        .filter((d) => d.status === "pending" || d.status === "processing")
+        .map((d) => d.id),
+    [documents]
+  );
 
-  useQuery({
+  const { data: statusData } = useQuery({
     ...batchStatusQueryOptions(collectionId, pendingIds),
     enabled: pendingIds.length > 0,
-    refetchInterval: 2000,
-    select: (data) => {
-      const statuses = data.statuses;
-      if (statuses.length === 0) return data;
-
-      const allDone = statuses.every(
-        (s) => s.status !== "pending" && s.status !== "processing"
-      );
-
-      if (allDone) {
-        queryClient.invalidateQueries({
-          queryKey: ["knowledge-documents", collectionId]
-        });
-      } else {
-        const statusMap = new Map(statuses.map((s) => [s.id, s]));
-        queryClient.setQueryData<Document[]>(
-          ["knowledge-documents", collectionId],
-          (old) =>
-            old?.map((doc) => {
-              const update = statusMap.get(doc.id);
-              if (!update) return doc;
-              return {
-                ...doc,
-                chunk_count: update.chunk_count,
-                error_message: update.error_message,
-                status: update.status
-              };
-            })
-        );
-      }
-      return data;
-    }
+    refetchInterval: 2000
   });
+
+  useEffect(() => {
+    if (!statusData?.statuses?.length) return;
+
+    const statusMap = new Map(statusData.statuses.map((s) => [s.id, s]));
+    queryClient.setQueryData<Document[]>(
+      ["knowledge-documents", collectionId],
+      (old) =>
+        old?.map((doc) => {
+          const update = statusMap.get(doc.id);
+          if (!update) return doc;
+          return {
+            ...doc,
+            chunk_count: update.chunk_count,
+            error_message: update.error_message,
+            status: update.status
+          };
+        })
+    );
+  }, [statusData, collectionId, queryClient]);
 
   const [uploadOpen, setUploadOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
