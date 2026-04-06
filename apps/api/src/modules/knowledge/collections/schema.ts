@@ -11,7 +11,6 @@ export const createCollectionSchema = z.object({
   embedding_api_key: z.string().optional(),
   embedding_model: z.string().optional(),
   embedding_provider: z.string().optional(),
-  is_default: z.boolean().optional(),
   name: z
     .string()
     .min(1)
@@ -26,6 +25,5 @@ export const createCollectionSchema = z.object({
 });
 
 export const updateCollectionSchema = z.object({
-  description: z.string().max(500).optional(),
-  is_default: z.boolean().optional()
+  description: z.string().max(500).optional()
 });

@@ -2,7 +2,6 @@
 
 import type { Column } from "@raven/ui";
 import {
-  Badge,
   Button,
   ConfirmDialog,
   DataTable,
@@ -71,16 +70,6 @@ const KnowledgePage = () => {
           {collection.document_count}
         </span>
       )
-    },
-    {
-      header: "Default",
-      key: "is_default",
-      render: (collection) =>
-        collection.is_default ? (
-          <Badge variant="success">Default</Badge>
-        ) : (
-          <span className="text-muted-foreground/50">{"\u2014"}</span>
-        )
     }
   ];
 

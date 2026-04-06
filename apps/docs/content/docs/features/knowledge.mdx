@@ -41,20 +41,9 @@ POST /v1/knowledge/collections
   "chunkSize": 512,
   "chunkOverlap": 50,
   "defaultTopK": 10,
-  "defaultSearchMode": "hybrid",
-  "isDefault": true
+  "defaultSearchMode": "hybrid"
 }
 ```
-
-Setting `isDefault` to `true` clears the default flag from any other collection.
-
-### Default Collection
-
-```
-GET /v1/knowledge/collections/default
-```
-
-Returns the collection marked as default, if one exists.
 
 ### Collection Stats
 

@@ -21,7 +21,6 @@ export interface Collection {
   readonly default_top_k: number;
   readonly default_min_score: number | null;
   readonly default_search_mode: string;
-  readonly is_default: boolean;
   readonly metadata: Record<string, unknown>;
   readonly created_at: string;
   readonly updated_at: string;
@@ -39,12 +38,10 @@ export interface CreateCollectionInput {
   readonly embedding_api_key?: string;
   readonly embedding_model?: string;
   readonly embedding_provider?: string;
-  readonly is_default?: boolean;
 }
 
 export interface UpdateCollectionInput {
   readonly description?: string | null;
-  readonly is_default?: boolean;
 }
 
 export const collectionsQueryOptions = () =>

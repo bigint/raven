@@ -1,8 +1,7 @@
 "use client";
 
-import { Badge } from "@raven/ui";
 import { formatDistanceToNow } from "date-fns";
-import { BookOpen, Cpu, ScanSearch, Settings } from "lucide-react";
+import { BookOpen, Cpu, ScanSearch } from "lucide-react";
 import type { Collection } from "../../hooks/use-collections";
 
 interface CollectionStatsProps {
@@ -96,26 +95,6 @@ const CollectionStats = ({ collection }: CollectionStatsProps) => {
               value={collection.default_search_mode}
             />
           </div>
-        </div>
-      </div>
-
-      {/* Default collection */}
-      <div className="rounded-xl border border-border bg-card">
-        <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-          <Settings className="size-4 text-muted-foreground" />
-          <h3 className="text-sm font-medium">Settings</h3>
-        </div>
-        <div className="divide-y divide-border px-4">
-          <ConfigRow
-            label="Default Collection"
-            value={
-              collection.is_default ? (
-                <Badge>Yes</Badge>
-              ) : (
-                <span className="text-muted-foreground">No</span>
-              )
-            }
-          />
         </div>
       </div>
 

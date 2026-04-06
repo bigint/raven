@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input, Modal, Select, Switch } from "@raven/ui";
+import { Button, Input, Modal, Select } from "@raven/ui";
 import { useState } from "react";
 import type { Collection } from "../../hooks/use-collections";
 import {
@@ -45,7 +45,6 @@ interface FormState {
   defaultTopK: string;
   defaultMinScore: string;
   defaultSearchMode: string;
-  isDefault: boolean;
 }
 
 const DEFAULT_FORM: FormState = {
@@ -58,7 +57,6 @@ const DEFAULT_FORM: FormState = {
   embeddingApiKey: "",
   embeddingModel: "text-embedding-3-small",
   embeddingProvider: "openai",
-  isDefault: false,
   name: ""
 };
 
@@ -74,7 +72,6 @@ const extractFormFromCollection = (
   embeddingApiKey: "",
   embeddingModel: DEFAULT_FORM.embeddingModel,
   embeddingProvider: DEFAULT_FORM.embeddingProvider,
-  isDefault: c.is_default,
   name: c.name
 });
 
@@ -134,8 +131,7 @@ const CollectionForm = ({
       if (isEdit && editingCollection) {
         await updateMutation.mutateAsync({
           description: form.description.trim() || undefined,
-          id: editingCollection.name,
-          is_default: form.isDefault
+          id: editingCollection.name
         });
       } else {
         await createMutation.mutateAsync({
@@ -152,7 +148,6 @@ const CollectionForm = ({
           embedding_api_key: form.embeddingApiKey || undefined,
           embedding_model: form.embeddingModel,
           embedding_provider: form.embeddingProvider,
-          is_default: form.isDefault,
           name: form.name.trim()
         });
       }
@@ -322,12 +317,6 @@ const CollectionForm = ({
             </div>
           </>
         )}
-
-        <Switch
-          checked={form.isDefault}
-          label="Default Collection"
-          onCheckedChange={(checked) => update("isDefault", checked)}
-        />
 
         <div className="flex justify-end gap-2 pt-1">
           <Button onClick={handleClose} type="button" variant="secondary">
