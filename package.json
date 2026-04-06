@@ -7,6 +7,7 @@
     "@biomejs/biome": "^2.4.9",
     "@types/node": "^25.5.0",
     "drizzle-orm": "^0.45.2",
+    "husky": "^9.1.7",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2"
   },
@@ -51,6 +52,7 @@
     "dev:web": "pnpm --filter @raven/web dev",
     "format": "biome format --write .",
     "lint": "biome check --write .",
+    "prepare": "husky",
     "typecheck": "pnpm -r typecheck"
   },
   "type": "module"

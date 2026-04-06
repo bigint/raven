@@ -26,7 +26,9 @@ const parseIPv4 = (ip: string): number | null => {
 const isPrivateIPv4 = (ip: string): boolean => {
   const num = parseIPv4(ip);
   if (num === null) return false;
-  return PRIVATE_IPV4_RANGES.some(({ mask, prefix }) => (num & mask) === prefix);
+  return PRIVATE_IPV4_RANGES.some(
+    ({ mask, prefix }) => (num & mask) === prefix
+  );
 };
 
 const isPrivateIPv6 = (ip: string): boolean => {

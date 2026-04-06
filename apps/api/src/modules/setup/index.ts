@@ -62,9 +62,7 @@ export const createSetupModule = (db: Database, auth: Auth) => {
         }
       });
     } finally {
-      await db.execute(
-        sql`SELECT pg_advisory_unlock(${SETUP_LOCK_ID})`
-      );
+      await db.execute(sql`SELECT pg_advisory_unlock(${SETUP_LOCK_ID})`);
     }
   });
 
