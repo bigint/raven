@@ -89,6 +89,7 @@ const CollectionDetailPage = () => {
             </Button>
           </>
         }
+        backHref="/knowledge"
         description={collection.description ?? undefined}
         title={collection.name}
       />

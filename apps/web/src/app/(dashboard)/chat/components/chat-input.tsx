@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Switch, Textarea, Tooltip } from "@raven/ui";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowUp,
   ChevronDown,
@@ -19,6 +20,7 @@ import {
   useState
 } from "react";
 import { ProviderIcon } from "@/components/model-icon";
+import { collectionsQueryOptions } from "../../knowledge/hooks/use-collections";
 import {
   ACCEPTED_IMAGE_TYPES,
   compressImage,
@@ -477,6 +479,13 @@ export const ChatInput = ({
                       />
                     </div>
 
+                    {settings.enableKnowledge && (
+                      <CollectionSelector
+                        selected={settings.knowledgeCollections}
+                        onChange={(v) => update("knowledgeCollections", v)}
+                      />
+                    )}
+
                     <div className="flex items-center justify-between">
                       <span className="text-xs">Reasoning</span>
                       <Switch
@@ -634,6 +643,51 @@ const ModelSelector = ({
           </div>
         </Dropdown>
       )}
+    </div>
+  );
+};
+
+const CollectionSelector = ({
+  selected,
+  onChange
+}: {
+  readonly selected: string[];
+  readonly onChange: (value: string[]) => void;
+}) => {
+  const { data: collections = [] } = useQuery(collectionsQueryOptions());
+  const enabled = collections.filter((c) => c.isEnabled);
+
+  if (enabled.length === 0) return null;
+
+  const toggle = (name: string) => {
+    onChange(
+      selected.includes(name)
+        ? selected.filter((n) => n !== name)
+        : [...selected, name]
+    );
+  };
+
+  return (
+    <div className="space-y-1.5 rounded-md bg-muted px-3 py-2">
+      <span className="text-[10px] font-medium text-muted-foreground">
+        Collections {selected.length === 0 && "(using default)"}
+      </span>
+      <div className="flex flex-wrap gap-1">
+        {enabled.map((c) => (
+          <button
+            className={`rounded-md border px-2 py-0.5 text-[11px] transition-colors ${
+              selected.includes(c.name)
+                ? "border-primary bg-primary/10 text-foreground"
+                : "border-border text-muted-foreground hover:border-foreground/30"
+            }`}
+            key={c.id}
+            onClick={() => toggle(c.name)}
+            type="button"
+          >
+            {c.name}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };

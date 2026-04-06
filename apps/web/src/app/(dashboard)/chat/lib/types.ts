@@ -7,6 +7,7 @@ export interface PlaygroundSettings {
   readonly enableWebSearch: boolean;
   readonly enableReasoning: boolean;
   readonly enableKnowledge: boolean;
+  readonly knowledgeCollections: string[];
   readonly reasoningBudget: number;
   readonly chatMemory: number;
 }

@@ -46,6 +46,7 @@ export const useChat = () => {
     chatMemory: 5,
     enableKnowledge: false,
     enableReasoning: false,
+    knowledgeCollections: [],
     enableTools: false,
     enableWebSearch: false,
     maxTokens: 4096,
@@ -241,7 +242,15 @@ export const useChat = () => {
               "Content-Type": "application/json",
               "x-session-id": sessionIdRef.current,
               ...(currentSettings.enableKnowledge
-                ? { "X-Knowledge-Enabled": "true" }
+                ? {
+                    "X-Knowledge-Enabled": "true",
+                    ...(currentSettings.knowledgeCollections.length > 0
+                      ? {
+                          "X-Knowledge-Collection":
+                            currentSettings.knowledgeCollections.join(",")
+                        }
+                      : {})
+                  }
                 : {})
             },
             method: "POST",
