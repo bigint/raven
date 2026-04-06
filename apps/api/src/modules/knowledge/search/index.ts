@@ -68,9 +68,7 @@ export const createSearchModule = (db: Database, bigrag: BigRAG) => {
         .from(knowledgeDocuments)
         .where(eq(knowledgeDocuments.collectionId, collection.id));
 
-      const titleMap = new Map(
-        documents.map((d) => [d.id, d.title])
-      );
+      const titleMap = new Map(documents.map((d) => [d.id, d.title]));
 
       const chunks = response.results.map((r) => {
         const ravenId = r.document_id

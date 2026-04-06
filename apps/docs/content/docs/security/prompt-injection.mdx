@@ -13,15 +13,21 @@ Prompt injection is an attack where a user crafts input that manipulates an LLM 
 Raven uses two detection layers that run in sequence. Layer 1 is deterministic and sub-millisecond. Layer 2 applies heuristic analysis when Layer 1 finds no matches.
 
 <Mermaid chart="graph TD
-  A[User Message] --> B[Layer 1: Pattern Matching]
-  B -->|Match found| C[Detection Result]
+  A[User Message]:::input --> B[Layer 1: Pattern Matching]
+  B -->|Match| C[Detection Result]:::detect
   B -->|No match| D[Layer 2: Heuristic Analysis]
   D -->|Suspicious| C
-  D -->|Clean| E[Pass to Provider]
+  D -->|Clean| E[Pass to Provider]:::pass
   C --> F{Action}
-  F -->|Block| G[Reject Request]
-  F -->|Warn| H[Forward + Warning]
-  F -->|Log| I[Forward + Log]" />
+  F -->|Block| G[Reject]:::block
+  F -->|Warn| H[Forward + Warning]:::warn
+  F -->|Log| I[Forward + Log]:::log
+  classDef input stroke-width:2px
+  classDef detect stroke-width:2px
+  classDef pass stroke-width:1px
+  classDef block stroke-width:2px,stroke-dasharray:5 5
+  classDef warn stroke-width:1px
+  classDef log stroke-width:1px" />
 
 ### Layer 1: Deterministic Pattern Matching
 

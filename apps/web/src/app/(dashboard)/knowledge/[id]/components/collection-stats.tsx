@@ -104,9 +104,11 @@ const CollectionStats = ({ collection }: CollectionStatsProps) => {
               <ConfigRow
                 label="Min Score"
                 value={
-                  bigrag.defaultMinScore !== null
-                    ? bigrag.defaultMinScore
-                    : <span className="text-muted-foreground">None</span>
+                  bigrag.defaultMinScore === null ? (
+                    <span className="text-muted-foreground">None</span>
+                  ) : (
+                    bigrag.defaultMinScore
+                  )
                 }
               />
               <ConfigRow label="Search Mode" value={bigrag.defaultSearchMode} />

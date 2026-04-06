@@ -46,9 +46,9 @@ export const useChat = () => {
     chatMemory: 5,
     enableKnowledge: false,
     enableReasoning: false,
-    knowledgeCollections: [],
     enableTools: false,
     enableWebSearch: false,
+    knowledgeCollections: [],
     maxTokens: 4096,
     reasoningBudget: 8192,
     showMetadata: true,
@@ -277,7 +277,8 @@ export const useChat = () => {
         }
 
         // Extract RAG headers from response
-        const knowledgeUsed = response.headers.get("X-Knowledge-Used") === "true";
+        const knowledgeUsed =
+          response.headers.get("X-Knowledge-Used") === "true";
         const knowledgeChunks = knowledgeUsed
           ? Number(response.headers.get("X-Knowledge-Chunks") ?? "0")
           : undefined;

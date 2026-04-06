@@ -9,10 +9,7 @@ import {
 import { and, eq, inArray } from "drizzle-orm";
 
 import { log } from "@/lib/logger";
-import {
-  buildDocumentIdMap,
-  resolveDocumentId
-} from "../documents/map-ids";
+import { buildDocumentIdMap, resolveDocumentId } from "../documents/map-ids";
 
 interface RAGInput {
   readonly bigrag: BigRAG;

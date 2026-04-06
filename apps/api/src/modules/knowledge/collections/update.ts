@@ -26,7 +26,9 @@ export const updateCollection =
         .where(eq(knowledgeCollections.isDefault, true));
     }
 
-    const hasRavenUpdates = Object.keys(filterUndefined(ravenFields as Record<string, unknown>)).length > 0;
+    const hasRavenUpdates =
+      Object.keys(filterUndefined(ravenFields as Record<string, unknown>))
+        .length > 0;
 
     const [updated] = hasRavenUpdates
       ? await db
@@ -62,7 +64,10 @@ export const updateCollection =
 
     void auditAndPublish(db, user, "collection", "updated", {
       data: updated,
-      metadata: filterUndefined({ description, ...ravenFields } as Record<string, unknown>),
+      metadata: filterUndefined({ description, ...ravenFields } as Record<
+        string,
+        unknown
+      >),
       resourceId: id
     });
     return success(c, updated);

@@ -10,13 +10,16 @@ Routing rules let you dynamically redirect requests to different models based on
 When a request arrives, Raven evaluates routing rules in priority order. The first matching rule determines where the request is sent. If no rules match, the original model in the request is used.
 
 <Mermaid chart="graph TD
-  A[Incoming Request] --> B{Rule 1 match?}
-  B -->|Yes| C[Target Model A]
-  B -->|No| D{Rule 2 match?}
-  D -->|Yes| E[Target Model B]
-  D -->|No| F{Rule 3 match?}
-  F -->|Yes| G[Target Model C]
-  F -->|No| H[Original Model]" />
+  A[Incoming Request]:::input --> B{Rule 1}
+  B -->|Match| C[Model A]:::target
+  B -->|Skip| D{Rule 2}
+  D -->|Match| E[Model B]:::target
+  D -->|Skip| F{Rule 3}
+  F -->|Match| G[Model C]:::target
+  F -->|No match| H[Original Model]:::fallback
+  classDef input stroke-width:2px
+  classDef target stroke-width:1px
+  classDef fallback stroke-width:1px,stroke-dasharray:5 5" />
 
 ## Creating a Routing Rule
 

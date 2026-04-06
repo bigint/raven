@@ -64,7 +64,9 @@ const DEFAULT_FORM: FormState = {
   name: ""
 };
 
-const extractFormFromCollection = (c: Collection & { description?: string | null }): FormState => ({
+const extractFormFromCollection = (
+  c: Collection & { description?: string | null }
+): FormState => ({
   chunkOverlap: DEFAULT_FORM.chunkOverlap,
   chunkSize: DEFAULT_FORM.chunkSize,
   defaultMinScore: DEFAULT_FORM.defaultMinScore,
@@ -81,7 +83,9 @@ const extractFormFromCollection = (c: Collection & { description?: string | null
 
 interface CollectionFormProps {
   readonly mode: "create" | "edit" | null;
-  readonly editingCollection: (Collection & { description?: string | null }) | null;
+  readonly editingCollection:
+    | (Collection & { description?: string | null })
+    | null;
   readonly onClose: () => void;
   readonly onSubmit?: () => void;
 }
@@ -145,9 +149,7 @@ const CollectionForm = ({
             ? Number(form.defaultMinScore)
             : undefined,
           defaultSearchMode: form.defaultSearchMode || undefined,
-          defaultTopK: form.defaultTopK
-            ? Number(form.defaultTopK)
-            : undefined,
+          defaultTopK: form.defaultTopK ? Number(form.defaultTopK) : undefined,
           description: form.description.trim() || undefined,
           embeddingApiKey: form.embeddingApiKey || undefined,
           embeddingModel: form.embeddingModel,

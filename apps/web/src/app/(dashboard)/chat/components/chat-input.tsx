@@ -481,8 +481,8 @@ export const ChatInput = ({
 
                     {settings.enableKnowledge && (
                       <CollectionSelector
-                        selected={settings.knowledgeCollections}
                         onChange={(v) => update("knowledgeCollections", v)}
+                        selected={settings.knowledgeCollections}
                       />
                     )}
 

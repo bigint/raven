@@ -40,7 +40,6 @@ export const getCollection =
 
     return success(c, {
       ...collection,
-      description: bigragCollection?.description ?? null,
       bigrag: bigragCollection
         ? {
             chunkOverlap: bigragCollection.chunk_overlap,
@@ -55,6 +54,7 @@ export const getCollection =
           }
         : null,
       chunkCount: Number(stats?.chunkCount ?? 0),
+      description: bigragCollection?.description ?? null,
       documentCount: stats?.documentCount ?? 0
     });
   };

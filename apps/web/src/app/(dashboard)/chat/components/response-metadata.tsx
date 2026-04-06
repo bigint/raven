@@ -70,11 +70,13 @@ const ResponseMetadata = ({ meta, show }: ResponseMetadataProps) => {
               {meta.toolCalls} tool call{meta.toolCalls > 1 ? "s" : ""}
             </Badge>
           )}
-          {meta.knowledgeCollections && meta.knowledgeCollections.length > 0 && (
-            <Badge variant="info">
-              RAG: {meta.knowledgeCollections.join(", ")} ({meta.knowledgeChunks ?? 0} chunks)
-            </Badge>
-          )}
+          {meta.knowledgeCollections &&
+            meta.knowledgeCollections.length > 0 && (
+              <Badge variant="info">
+                RAG: {meta.knowledgeCollections.join(", ")} (
+                {meta.knowledgeChunks ?? 0} chunks)
+              </Badge>
+            )}
           {meta.guardrailWarnings && meta.guardrailWarnings.length > 0 && (
             <Badge variant="warning">
               {meta.guardrailWarnings.length} guardrail warning(s)

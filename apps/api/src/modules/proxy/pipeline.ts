@@ -102,7 +102,11 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
   let ragHeaders: Record<string, string> = {};
   const ragRequestEnabled =
     input.incomingHeaders["x-knowledge-enabled"] === "true";
-  if ((input.knowledgeEnabled || ragRequestEnabled) && input.bigrag && hasMessages) {
+  if (
+    (input.knowledgeEnabled || ragRequestEnabled) &&
+    input.bigrag &&
+    hasMessages
+  ) {
     try {
       const ragResult = await performRAGInjection({
         bigrag: input.bigrag,

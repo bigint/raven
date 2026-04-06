@@ -54,8 +54,7 @@ export const syncDocumentStatus = async (
       };
     } else if (bigragDoc.status === "failed") {
       patch = {
-        errorMessage:
-          bigragDoc.error_message ?? "Processing failed in bigRAG",
+        errorMessage: bigragDoc.error_message ?? "Processing failed in bigRAG",
         status: "failed",
         updatedAt: new Date()
       };
@@ -100,9 +99,7 @@ export const syncDocumentStatusBatch = async (
       pendingDocs.map((d) => d.bigragDocumentId!)
     );
 
-    const remoteMap = new Map(
-      statusResult.documents.map((d) => [d.id, d])
-    );
+    const remoteMap = new Map(statusResult.documents.map((d) => [d.id, d]));
 
     for (const doc of pendingDocs) {
       const remote = remoteMap.get(doc.bigragDocumentId!);
@@ -119,8 +116,7 @@ export const syncDocumentStatusBatch = async (
         };
       } else if (remote.status === "failed") {
         patch = {
-          errorMessage:
-            remote.error_message ?? "Processing failed in bigRAG",
+          errorMessage: remote.error_message ?? "Processing failed in bigRAG",
           status: "failed",
           updatedAt: new Date()
         };

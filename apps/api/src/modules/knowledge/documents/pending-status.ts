@@ -49,9 +49,7 @@ export const getPendingStatus =
           syncable.map((d) => d.bigragDocumentId!)
         );
 
-        const statusMap = new Map(
-          statusResult.documents.map((d) => [d.id, d])
-        );
+        const statusMap = new Map(statusResult.documents.map((d) => [d.id, d]));
 
         for (const doc of syncable) {
           const remote = statusMap.get(doc.bigragDocumentId!);

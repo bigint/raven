@@ -87,9 +87,7 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
         return data;
       }
       // Merge status updates into the cached document list
-      const statusMap = new Map(
-        data.documents.map((d) => [d.id, d])
-      );
+      const statusMap = new Map(data.documents.map((d) => [d.id, d]));
       queryClient.setQueryData<Document[]>(
         ["knowledge-documents", collectionId],
         (old) =>
@@ -157,15 +155,16 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
     }
   };
 
-  const allSelected = documents.length > 0 && selected.size === documents.length;
+  const allSelected =
+    documents.length > 0 && selected.size === documents.length;
   const someSelected = selected.size > 0 && selected.size < documents.length;
 
   const columns: Column<Document>[] = [
     {
-      header: "",
-      key: "select",
-      headerClassName: "w-10",
       className: "w-10",
+      header: "",
+      headerClassName: "w-10",
+      key: "select",
       render: (doc) => (
         <Checkbox
           aria-label={`Select ${doc.title}`}
@@ -284,7 +283,9 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
 
       <ConfirmDialog
         confirmLabel={
-          batchDeleteMutation.isPending ? "Deleting..." : `Delete ${selected.size} documents`
+          batchDeleteMutation.isPending
+            ? "Deleting..."
+            : `Delete ${selected.size} documents`
         }
         description={`Are you sure you want to delete ${selected.size} document${selected.size > 1 ? "s" : ""}? All associated chunks will be permanently removed. This action cannot be undone.`}
         loading={batchDeleteMutation.isPending}

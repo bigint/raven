@@ -86,12 +86,14 @@ Every virtual key can have independent rate limits. See [Rate Limiting](/docs/se
 Requests pass through multiple security layers before reaching a provider:
 
 <Mermaid chart="graph TD
-  A[Incoming Request] --> B[TLS Termination]
+  A[Incoming Request]:::input --> B[TLS Termination]
   B --> C[Authentication]
   C --> D[Rate Limiting]
   D --> E[Budget Check]
-  E --> F[Guardrail Evaluation]
-  F --> G[Provider Forwarding]" />
+  E --> F[Guardrails]
+  F --> G[Provider Forwarding]:::output
+  classDef input stroke-width:2px
+  classDef output stroke-width:2px" />
 
 <Steps>
 <Step>

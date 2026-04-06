@@ -11,10 +11,13 @@ import { Steps, Step } from "fumadocs-ui/components/steps";
 Raven is an open-source AI gateway you [self-host](/docs/guides/self-hosting) on your own infrastructure. It acts as an intelligent proxy between your application and LLM providers. Every request flows through a pipeline of modules that handle authentication, routing, guardrails, caching, and logging.
 
 <Mermaid chart="graph LR
-  A[Your App] --> B[Raven Gateway]
-  B --> C[OpenAI]
-  B --> D[Anthropic]
-  B --> E[Other Providers]" />
+  A[Your App]:::input --> B[Raven Gateway]:::gateway
+  B --> C[OpenAI]:::provider
+  B --> D[Anthropic]:::provider
+  B --> E[Others]:::provider
+  classDef input stroke-width:2px
+  classDef gateway stroke-width:2px
+  classDef provider stroke-width:1px" />
 
 ## Organizations
 

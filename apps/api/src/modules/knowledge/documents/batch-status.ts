@@ -53,9 +53,7 @@ export const batchGetDocumentStatus =
           pendingDocs.map((d) => d.bigragDocumentId!)
         );
 
-        const statusMap = new Map(
-          statusResult.documents.map((d) => [d.id, d])
-        );
+        const statusMap = new Map(statusResult.documents.map((d) => [d.id, d]));
 
         for (const doc of pendingDocs) {
           const remote = statusMap.get(doc.bigragDocumentId!);

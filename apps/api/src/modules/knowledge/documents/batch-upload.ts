@@ -50,7 +50,11 @@ export const batchUploadDocuments =
     const body = await c.req.parseBody({ all: true });
     const rawFiles = body["files"];
 
-    const files = Array.isArray(rawFiles) ? rawFiles : rawFiles ? [rawFiles] : [];
+    const files = Array.isArray(rawFiles)
+      ? rawFiles
+      : rawFiles
+        ? [rawFiles]
+        : [];
     const validFiles = files.filter((f): f is File => f instanceof File);
 
     if (validFiles.length === 0) {
@@ -85,8 +89,9 @@ export const batchUploadDocuments =
     }
 
     const uploadFiles = await Promise.all(
-      validFiles.map(async (file) =>
-        new File([await file.arrayBuffer()], file.name, { type: file.type })
+      validFiles.map(
+        async (file) =>
+          new File([await file.arrayBuffer()], file.name, { type: file.type })
       )
     );
 
