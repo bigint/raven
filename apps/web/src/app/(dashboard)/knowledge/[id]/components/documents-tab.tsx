@@ -10,6 +10,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Document } from "../../hooks/use-documents";
 import {
   batchStatusQueryOptions,
+  type DocumentsResponse,
   documentsQueryOptions,
   useBatchDeleteDocuments,
   useDeleteDocument
@@ -70,11 +71,18 @@ interface DocumentsTabProps {
   readonly collectionId: string;
 }
 
+const PAGE_SIZE = 50;
+
 const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
   const queryClient = useQueryClient();
-  const { data: documents = [], isLoading } = useQuery(
-    documentsQueryOptions(collectionId)
+  const [page, setPage] = useState(0);
+
+  const { data, isLoading } = useQuery(
+    documentsQueryOptions(collectionId, page)
   );
+  const documents = data?.documents ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   const pendingIds = useMemo(
     () =>
@@ -94,21 +102,24 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
     if (!statusData?.statuses?.length) return;
 
     const statusMap = new Map(statusData.statuses.map((s) => [s.id, s]));
-    queryClient.setQueryData<Document[]>(
-      ["knowledge-documents", collectionId],
+    queryClient.setQueryData<DocumentsResponse>(
+      ["knowledge-documents", collectionId, page],
       (old) =>
-        old?.map((doc) => {
-          const update = statusMap.get(doc.id);
-          if (!update) return doc;
-          return {
-            ...doc,
-            chunk_count: update.chunk_count,
-            error_message: update.error_message,
-            status: update.status
-          };
-        })
+        old && {
+          ...old,
+          documents: old.documents.map((doc) => {
+            const update = statusMap.get(doc.id);
+            if (!update) return doc;
+            return {
+              ...doc,
+              chunk_count: update.chunk_count,
+              error_message: update.error_message,
+              status: update.status
+            };
+          })
+        }
     );
-  }, [statusData, collectionId, queryClient]);
+  }, [statusData, collectionId, page, queryClient]);
 
   const [uploadOpen, setUploadOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -268,6 +279,33 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
         loading={isLoading}
         loadingMessage="Loading documents..."
       />
+
+      {totalPages > 1 && (
+        <div className="mt-3 flex items-center justify-between">
+          <span className="text-xs text-muted-foreground tabular-nums">
+            {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, total)} of{" "}
+            {total}
+          </span>
+          <div className="flex gap-1.5">
+            <Button
+              disabled={page === 0}
+              onClick={() => setPage((p) => p - 1)}
+              size="sm"
+              variant="ghost"
+            >
+              Previous
+            </Button>
+            <Button
+              disabled={page >= totalPages - 1}
+              onClick={() => setPage((p) => p + 1)}
+              size="sm"
+              variant="ghost"
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
 
       <UploadModal
         collectionId={collectionId}

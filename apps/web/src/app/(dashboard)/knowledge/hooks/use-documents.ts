@@ -32,15 +32,20 @@ export interface ChunksResponse {
 
 import { queryOptions } from "@tanstack/react-query";
 
-export const documentsQueryOptions = (collectionId: string) =>
+export interface DocumentsResponse {
+  readonly documents: Document[];
+  readonly total: number;
+}
+
+const DOCUMENTS_PAGE_SIZE = 50;
+
+export const documentsQueryOptions = (collectionId: string, page: number = 0) =>
   queryOptions({
-    queryFn: async () => {
-      const res = await api.get<{ documents: Document[]; total: number }>(
-        `/v1/knowledge/collections/${collectionId}/documents`
-      );
-      return res.documents;
-    },
-    queryKey: ["knowledge-documents", collectionId]
+    queryFn: () =>
+      api.get<DocumentsResponse>(
+        `/v1/knowledge/collections/${collectionId}/documents?limit=${DOCUMENTS_PAGE_SIZE}&offset=${page * DOCUMENTS_PAGE_SIZE}`
+      ),
+    queryKey: ["knowledge-documents", collectionId, page]
   });
 
 export const batchStatusQueryOptions = (
