@@ -29,7 +29,7 @@ const UploadModal = ({ open, onClose, collectionId }: UploadModalProps) => {
     }
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = (e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setDragging(false);
     handleFiles(Array.from(e.dataTransfer.files));
