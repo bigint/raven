@@ -7,8 +7,7 @@ import {
   ConfirmDialog,
   DataTable,
   EmptyState,
-  PageHeader,
-  Switch
+  PageHeader
 } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { BookOpen, Plus } from "lucide-react";
@@ -18,8 +17,7 @@ import { CollectionForm } from "./[id]/components/collection-form";
 import {
   type Collection,
   collectionsQueryOptions,
-  useDeleteCollection,
-  useUpdateCollection
+  useDeleteCollection
 } from "./hooks/use-collections";
 
 const KnowledgePage = () => {
@@ -36,7 +34,6 @@ const KnowledgePage = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const deleteMutation = useDeleteCollection();
-  const updateMutation = useUpdateCollection();
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -84,18 +81,6 @@ const KnowledgePage = () => {
         ) : (
           <span className="text-muted-foreground/50">{"\u2014"}</span>
         )
-    },
-    {
-      header: "Enabled",
-      key: "isEnabled",
-      render: (collection) => (
-        <Switch
-          checked={collection.isEnabled}
-          onCheckedChange={(checked) =>
-            updateMutation.mutate({ id: collection.id, isEnabled: checked })
-          }
-        />
-      )
     }
   ];
 

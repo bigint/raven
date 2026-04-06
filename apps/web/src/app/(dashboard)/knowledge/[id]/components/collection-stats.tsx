@@ -155,11 +155,6 @@ const CollectionStats = ({ collection }: CollectionStatsProps) => {
             addSuffix: true
           })}
         </span>
-        {collection.isEnabled ? (
-          <Badge variant="neutral">Active</Badge>
-        ) : (
-          <Badge variant="error">Disabled</Badge>
-        )}
       </div>
     </div>
   );

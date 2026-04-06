@@ -653,9 +653,8 @@ const CollectionSelector = ({
   readonly onChange: (value: string[]) => void;
 }) => {
   const { data: collections = [] } = useQuery(collectionsQueryOptions());
-  const enabled = collections.filter((c) => c.isEnabled);
 
-  if (enabled.length === 0) return null;
+  if (collections.length === 0) return null;
 
   const toggle = (name: string) => {
     onChange(
@@ -671,7 +670,7 @@ const CollectionSelector = ({
         Collections {selected.length === 0 && "(using default)"}
       </span>
       <div className="flex flex-wrap gap-1">
-        {enabled.map((c) => (
+        {collections.map((c) => (
           <button
             className={`rounded-md border px-2 py-0.5 text-[11px] transition-colors ${
               selected.includes(c.name)

@@ -9,7 +9,6 @@ export interface Collection {
   readonly name: string;
   readonly maxContextTokens: number;
   readonly isDefault: boolean;
-  readonly isEnabled: boolean;
   readonly documentCount: number;
   readonly createdAt: string;
   readonly updatedAt: string;
@@ -51,7 +50,6 @@ export interface CreateCollectionInput {
 export interface UpdateCollectionInput {
   readonly description?: string | null;
   readonly isDefault?: boolean;
-  readonly isEnabled?: boolean;
   readonly maxContextTokens?: number;
 }
 
