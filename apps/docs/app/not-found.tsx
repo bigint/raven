@@ -8,8 +8,8 @@ export default function NotFound() {
         This page could not be found.
       </p>
       <Link
-        href="/docs"
         className="inline-flex h-10 items-center rounded-lg bg-fd-primary px-5 text-sm font-medium text-fd-primary-foreground transition-all hover:opacity-90"
+        href="/docs"
       >
         Back to docs
       </Link>

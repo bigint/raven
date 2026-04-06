@@ -12,14 +12,14 @@ export function Mermaid({ chart }: { chart: string }) {
     const render = async () => {
       const { default: mermaid } = await import("mermaid");
       mermaid.initialize({
+        fontFamily: "inherit",
         startOnLoad: false,
         theme: document.documentElement.classList.contains("dark")
           ? "dark"
           : "neutral",
-        fontFamily: "inherit",
         themeVariables: {
-          fontSize: "14px",
-        },
+          fontSize: "14px"
+        }
       });
 
       // Abort if a newer render was triggered (Strict Mode double-mount)
@@ -46,8 +46,8 @@ export function Mermaid({ chart }: { chart: string }) {
 
   return (
     <div
-      ref={ref}
       className="my-6 flex justify-center overflow-x-auto [&_svg]:max-w-full"
+      ref={ref}
     />
   );
 }

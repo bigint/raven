@@ -60,16 +60,6 @@ More providers are being added. See the [Providers](/docs/features/providers) pa
 
 Every request that hits the Raven gateway goes through this pipeline:
 
-<Mermaid chart="graph TD
-  A[Request] --> B[Auth]
-  B --> C[Rate Limit]
-  C --> D[Budget Check]
-  D --> E[Guardrails]
-  E --> F[Cache Check]
-  F --> G[Routing]
-  G --> H[Provider]
-  H --> I[Log & Respond]" />
-
 <Steps>
 <Step>
 
