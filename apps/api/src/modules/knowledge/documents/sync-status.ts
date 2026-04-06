@@ -96,13 +96,13 @@ export const syncDocumentStatusBatch = async (
   try {
     const statusResult = await bigrag.batchGetStatus(
       collectionName,
-      pendingDocs.map((d) => d.bigragDocumentId!)
+      pendingDocs.map((d) => d.bigragDocumentId as string)
     );
 
     const remoteMap = new Map(statusResult.documents.map((d) => [d.id, d]));
 
     for (const doc of pendingDocs) {
-      const remote = remoteMap.get(doc.bigragDocumentId!);
+      const remote = remoteMap.get(doc.bigragDocumentId as string);
       if (!remote) continue;
 
       let patch: StatusPatch | null = null;

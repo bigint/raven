@@ -46,13 +46,13 @@ export const getPendingStatus =
       try {
         const statusResult = await bigrag.batchGetStatus(
           collection.name,
-          syncable.map((d) => d.bigragDocumentId!)
+          syncable.map((d) => d.bigragDocumentId as string)
         );
 
         const statusMap = new Map(statusResult.documents.map((d) => [d.id, d]));
 
         for (const doc of syncable) {
-          const remote = statusMap.get(doc.bigragDocumentId!);
+          const remote = statusMap.get(doc.bigragDocumentId as string);
           if (!remote) continue;
 
           if (remote.status === "ready") {

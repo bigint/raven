@@ -50,13 +50,13 @@ export const batchGetDocumentStatus =
       try {
         const statusResult = await bigrag.batchGetStatus(
           collection.name,
-          pendingDocs.map((d) => d.bigragDocumentId!)
+          pendingDocs.map((d) => d.bigragDocumentId as string)
         );
 
         const statusMap = new Map(statusResult.documents.map((d) => [d.id, d]));
 
         for (const doc of pendingDocs) {
-          const remote = statusMap.get(doc.bigragDocumentId!);
+          const remote = statusMap.get(doc.bigragDocumentId as string);
           if (!remote) continue;
 
           if (remote.status === "ready") {

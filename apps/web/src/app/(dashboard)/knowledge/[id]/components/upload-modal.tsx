@@ -52,6 +52,11 @@ const UploadModal = ({ open, onClose, collectionId }: UploadModalProps) => {
               : "border-border hover:border-primary/50 hover:bg-muted/30"
           }`}
           onClick={() => inputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") inputRef.current?.click();
+          }}
+          role="button"
+          tabIndex={0}
           onDragLeave={() => setDragging(false)}
           onDragOver={(e) => {
             e.preventDefault();

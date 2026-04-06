@@ -109,7 +109,7 @@ export const batchUploadDocuments =
       .insert(knowledgeDocuments)
       .values(
         batchResult.documents.map((bigragDoc, i) => {
-          const file = validFiles[i]!;
+          const file = validFiles[i] as File;
           return {
             bigragDocumentId: bigragDoc.id,
             collectionId,
