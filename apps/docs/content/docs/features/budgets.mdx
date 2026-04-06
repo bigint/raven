@@ -75,18 +75,13 @@ Configure the percentage at which to trigger an alert (default: 80%).
 
 Budgets are checked hierarchically from organization down to agent. If **any** level in the chain would be exceeded, the request is blocked.
 
-```
-Organization Budget ($1,000/mo)
-  |
-  +-- Team "Engineering" ($500/mo)
-  |     |
-  |     +-- Key "prod-api" ($200/mo)
-  |     |     |
-  |     |     +-- Agent "support-bot" ($50/mo)
-  |     |
-  |     +-- Key "staging" ($10/day)
-  |
-  +-- Team "Research" ($300/mo)
+```mermaid
+graph TD
+  A["Organization — $1,000/mo"] --> B["Team: Engineering — $500/mo"]
+  A --> C["Team: Research — $300/mo"]
+  B --> D["Key: prod-api — $200/mo"]
+  B --> E["Key: staging — $10/day"]
+  D --> F["Agent: support-bot — $50/mo"]
 ```
 
 The check flow for each request:

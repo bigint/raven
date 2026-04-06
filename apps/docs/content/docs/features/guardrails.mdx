@@ -153,8 +153,14 @@ Guardrails are evaluated in ascending priority order. A guardrail with priority 
 
 When a request arrives at the Raven proxy:
 
-```
-Request --> Auth --> Rate Limit --> Guardrails --> Route --> Provider
+```mermaid
+graph LR
+  A[Request] --> B[Auth]
+  B --> C[Rate Limit]
+  C --> D[Guardrails]
+  D -->|Pass| E[Route → Provider]
+  D -->|Block| F[Reject]
+  style F fill:#dc2626,color:#fff
 ```
 
 1. All enabled guardrails for the organization are loaded, sorted by priority.
