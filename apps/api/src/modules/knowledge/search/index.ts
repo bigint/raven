@@ -58,7 +58,6 @@ export const createSearchModule = (db: Database, bigrag: BigRAG) => {
 
       const idMap = await buildDocumentIdMap(db, [collection.id]);
 
-      // Fetch titles for resolved document IDs
       const documents = await db
         .select({
           bigragDocumentId: knowledgeDocuments.bigragDocumentId,

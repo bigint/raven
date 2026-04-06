@@ -34,7 +34,6 @@ export const checkRateLimit = async (
 ): Promise<void> => {
   if (rpm === null && rpd === null) return;
 
-  // Check RPM first
   if (rpm !== null) {
     try {
       await getLimiter(redis, "rl:rpm", rpm, 60).consume(keyId);
@@ -43,7 +42,6 @@ export const checkRateLimit = async (
     }
   }
 
-  // Check RPD second; if it fails, reward the RPM token back
   if (rpd !== null) {
     try {
       await getLimiter(redis, "rl:rpd", rpd, SECONDS_PER_DAY).consume(keyId);

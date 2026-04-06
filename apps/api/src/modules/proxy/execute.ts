@@ -38,8 +38,6 @@ const estimateCost = (
   );
 };
 
-// Types
-
 export interface ExecuteInput {
   readonly db: Database;
   readonly redis: Redis;
@@ -68,8 +66,6 @@ export interface ExecuteInput {
   readonly bodyText?: string;
 }
 
-// Tool building
-
 const buildTools = (tools: ParsedRequest["tools"]): ToolSet | undefined => {
   if (!tools) return undefined;
 
@@ -86,8 +82,6 @@ const buildTools = (tools: ParsedRequest["tools"]): ToolSet | undefined => {
     ])
   ) as ToolSet;
 };
-
-// Execute
 
 export const execute = async (input: ExecuteInput): Promise<Response> => {
   const {
@@ -290,8 +284,6 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
     });
   }
 
-  // -- Streaming --------------------------------------------------------
-
   function doStream(model: LanguageModel): Response {
     const result = streamText({ ...baseParams, model } as Parameters<
       typeof streamText
@@ -322,8 +314,6 @@ export const execute = async (input: ExecuteInput): Promise<Response> => {
       status: 200
     });
   }
-
-  // -- Buffered ---------------------------------------------------------
 
   async function doBuffered(model: LanguageModel): Promise<Response> {
     const result = await generateText({ ...baseParams, model } as Parameters<

@@ -10,13 +10,11 @@ import { setupCompleteSchema } from "./schema";
 export const createSetupModule = (db: Database, auth: Auth) => {
   const app = new Hono();
 
-  // Public: check if instance needs setup
   app.get("/status", async (c) => {
     const [result] = await db.select({ value: count() }).from(users);
     return success(c, { needsSetup: result?.value === 0 });
   });
 
-  // Public: complete initial setup (create admin account)
   app.post("/complete", async (c) => {
     const body = await c.req.json();
     const parsed = setupCompleteSchema.safeParse(body);
@@ -40,7 +38,6 @@ export const createSetupModule = (db: Database, auth: Auth) => {
     }
 
     try {
-      // Guard: reject if any users already exist
       const [userCount] = await db.select({ value: count() }).from(users);
       if (userCount && userCount.value > 0) {
         throw new ConflictError("Setup has already been completed");

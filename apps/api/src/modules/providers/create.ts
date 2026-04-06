@@ -33,7 +33,6 @@ export const createProvider =
 
     const safe = record as NonNullable<typeof record>;
 
-    // Invalidate provider configs cache for this provider
     void redis.del(cacheKeys.providerConfigs(provider));
 
     const masked = maskApiKey(safe.apiKey);

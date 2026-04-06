@@ -32,8 +32,6 @@ type Message = {
 
 const PLAYGROUND_KEY_TTL_MS = 3_600_000; // 1 hour
 
-// Hook
-
 export const useChat = () => {
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -138,7 +136,6 @@ export const useChat = () => {
       try {
         const pk = await ensureKey();
 
-        // Build messages array
         const allMessages: Message[] = [...currentMessages, userMessage].map(
           (m) => {
             if (m.images && m.images.length > 0) {
@@ -276,7 +273,6 @@ export const useChat = () => {
           );
         }
 
-        // Extract RAG headers from response
         const knowledgeUsed =
           response.headers.get("X-Knowledge-Used") === "true";
         const knowledgeChunks = knowledgeUsed

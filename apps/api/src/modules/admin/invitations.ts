@@ -28,7 +28,6 @@ export const createInvitation =
     const { email, role } = parsed.data;
     const currentUser = c.get("user");
 
-    // Check if user already exists
     const [existingUser] = await db
       .select({ id: users.id })
       .from(users)
@@ -39,7 +38,6 @@ export const createInvitation =
       throw new ConflictError("User with this email already exists");
     }
 
-    // Check if there's already a pending invitation for this email
     const [existingInvite] = await db
       .select({ id: invitations.id })
       .from(invitations)

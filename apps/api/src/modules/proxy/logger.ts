@@ -39,7 +39,6 @@ export interface LogData {
   }[];
 }
 
-// --- Write buffer for batching log inserts ---
 const FLUSH_INTERVAL = 2000;
 const MAX_BUFFER = 100;
 

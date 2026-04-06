@@ -5,10 +5,6 @@ import { Check, Clipboard } from "lucide-react";
 import { Highlight, themes } from "prism-react-renderer";
 import { useCallback, useState } from "react";
 
-// ---------------------------------------------------------------------------
-// Copy button for code blocks
-// ---------------------------------------------------------------------------
-
 const CopyButton = ({ text }: { readonly text: string }) => {
   const [copied, setCopied] = useState(false);
 
@@ -40,10 +36,6 @@ const CopyButton = ({ text }: { readonly text: string }) => {
     </Button>
   );
 };
-
-// ---------------------------------------------------------------------------
-// Code block with syntax highlighting
-// ---------------------------------------------------------------------------
 
 export const CodeBlock = ({
   code,

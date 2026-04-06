@@ -7,8 +7,6 @@ import type {
 import type { TokenUsage } from "./usage-mapper";
 import { mapUsage } from "./usage-mapper";
 
-// Helpers
-
 const mapFinishReason = (reason: string | undefined | null): string => {
   switch (reason) {
     case "stop":
@@ -43,8 +41,6 @@ const buildOpenAIUsage = (usage: TokenUsage): Record<string, unknown> => ({
       }
     : {})
 });
-
-// Buffered response
 
 interface BufferedResult {
   text: string;
@@ -111,8 +107,6 @@ export const formatBufferedResponse = (
     usage: tokenUsage
   };
 };
-
-// Streaming response
 
 const encoder = new TextEncoder();
 
@@ -299,8 +293,6 @@ export const formatStreamingResponse = (
     }
   });
 };
-
-// Error response
 
 /**
  * Format an AI SDK error into an OpenAI-compatible error response.

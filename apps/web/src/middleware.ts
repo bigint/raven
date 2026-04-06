@@ -44,19 +44,15 @@ export const middleware = async (
   const { pathname } = request.nextUrl;
   const hasSession = request.cookies.has(SESSION_COOKIE);
 
-  // Session cookie present → setup is definitely done, skip check
   if (hasSession) {
-    // Redirect away from /setup if already set up
     if (pathname === "/setup" || pathname.startsWith("/setup/")) {
       return NextResponse.redirect(new URL("/overview", request.url));
     }
 
-    // Root: redirect to dashboard
     if (pathname === "/") {
       return NextResponse.redirect(new URL("/overview", request.url));
     }
 
-    // Redirect authenticated users away from auth routes
     const isAuthRoute = AUTH_ROUTES.some(
       (route) => pathname === route || pathname.startsWith(`${route}/`)
     );
@@ -67,10 +63,8 @@ export const middleware = async (
     return NextResponse.next();
   }
 
-  // No session cookie — check if setup is needed
   const needsSetup = await checkSetupNeeded();
 
-  // Handle /setup route: allow through if setup is needed or API is unreachable
   if (pathname === "/setup" || pathname.startsWith("/setup/")) {
     if (needsSetup !== false) {
       return NextResponse.next();
@@ -82,7 +76,6 @@ export const middleware = async (
     return NextResponse.redirect(new URL("/setup", request.url));
   }
 
-  // Setup is done but no session — normal auth routing
   if (pathname === "/") {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }

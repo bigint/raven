@@ -67,7 +67,6 @@ export const updateProvider =
 
     const record = updated as NonNullable<typeof updated>;
 
-    // Invalidate provider configs cache
     void redis.del(cacheKeys.providerConfigs(record.provider));
 
     const masked = maskApiKey(record.apiKey);

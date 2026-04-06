@@ -7,8 +7,6 @@ import {
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 
-// --- Types ---
-
 interface AdminUser {
   readonly id: string;
   readonly name: string;
@@ -64,8 +62,6 @@ interface CreateInvitationResponse {
   readonly inviteUrl: string;
 }
 
-// --- Query Options ---
-
 export const adminUsersQueryOptions = () =>
   queryOptions({
     queryFn: () => api.get<AdminUser[]>("/v1/admin/users"),
@@ -84,16 +80,12 @@ export const adminInvitationsQueryOptions = () =>
     queryKey: ["admin", "invitations"]
   });
 
-// --- Query Hooks ---
-
 export const useAdminUsers = () => useQuery(adminUsersQueryOptions());
 
 export const useAdminSettings = () => useQuery(adminSettingsQueryOptions());
 
 export const useAdminInvitations = () =>
   useQuery(adminInvitationsQueryOptions());
-
-// --- Mutations ---
 
 export const useUpdateSettings = () => {
   const queryClient = useQueryClient();

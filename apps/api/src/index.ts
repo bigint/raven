@@ -72,7 +72,6 @@ const auth = createAuth(db, env, {
 
 const app = new Hono();
 
-// Global middleware — disable request logger in production to reduce noise
 if (env.NODE_ENV !== "production") {
   app.use("*", logger());
 }
@@ -125,7 +124,6 @@ app.use("*", async (c, next) => {
   return compress()(c, next);
 });
 
-// Security headers
 app.use("*", async (c, next) => {
   await next();
   c.header("X-Content-Type-Options", "nosniff");
@@ -135,7 +133,6 @@ app.use("*", async (c, next) => {
   c.header("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
 });
 
-// Global error handler (RFC 9457 Problem Details)
 app.onError((err, c) => {
   const instance = c.req.path;
 
@@ -159,13 +156,10 @@ app.onError((err, c) => {
   );
 });
 
-// Health check
 app.get("/health", (c) => c.json({ status: "ok" }));
 
-// Auth routes (no auth middleware)
 app.route("/api/auth", createAuthModule(auth, db, redis));
 
-// OpenAI-compatible endpoints (before proxy catch-all)
 app.route(
   "/v1",
   createOpenAICompatModule(
@@ -198,25 +192,19 @@ app.all("/v1/proxy/*", async (c) => {
   });
 });
 
-// Public models catalog (no auth required)
 app.route("/v1/models", createModelsModule(db));
 
-// Public settings (no auth required)
 app.get("/v1/settings/public", getPublicSettings(db));
 
-// Public invitation validation (no auth required)
 app.route("/v1/invitations", createInvitationsModule(db));
 
-// Public setup (no auth required)
 app.route("/v1/setup", createSetupModule(db, auth));
 
-// User-level routes (session auth)
 const userRoutes = new Hono();
 userRoutes.use("*", createAuthMiddleware(auth));
 userRoutes.route("/", createUserModule(db));
 app.route("/v1/user", userRoutes);
 
-// Admin routes (session auth + platform admin check)
 const adminRoutes = new Hono();
 adminRoutes.use("*", createAuthMiddleware(auth));
 adminRoutes.use("*", platformAdminMiddleware);
@@ -224,7 +212,6 @@ adminRoutes.route("/", createAdminModule(db, env.APP_URL, redis));
 adminRoutes.route("/knowledge", createKnowledgeAnalyticsModule(db, bigrag));
 app.route("/v1/admin", adminRoutes);
 
-// Protected API routes (session auth + writer middleware for mutations)
 const v1 = new Hono();
 v1.use("*", createAuthMiddleware(auth));
 v1.use("*", createWriterMiddleware());

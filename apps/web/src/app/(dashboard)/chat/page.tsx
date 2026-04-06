@@ -30,7 +30,6 @@ const ChatPage = () => {
     catalogModelsQueryOptions()
   );
 
-  // Filter to chat-capable models for the playground
   const chatModels = useMemo(
     () => allModels.filter((m) => m.capabilities.includes("chat")),
     [allModels]
@@ -44,7 +43,6 @@ const ChatPage = () => {
     systemPrompt
   });
 
-  // Check if the selected model supports vision (image uploads)
   const selectedModelData = useMemo(
     () => chatModels.find((m) => m.slug === selectedModel?.model),
     [chatModels, selectedModel?.model]

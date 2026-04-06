@@ -8,7 +8,6 @@ import { success } from "@/lib/response";
 export const createInvitationsModule = (db: Database) => {
   const app = new Hono();
 
-  // Public: validate an invitation token
   app.get("/:token", async (c) => {
     const token = c.req.param("token") as string;
 
@@ -39,7 +38,6 @@ export const createInvitationsModule = (db: Database) => {
     });
   });
 
-  // Public: accept an invitation (called after signup)
   app.post("/:token/accept", async (c) => {
     const token = c.req.param("token") as string;
     const { email } = await c.req.json<{ email: string }>();
@@ -61,7 +59,6 @@ export const createInvitationsModule = (db: Database) => {
       throw new NotFoundError("Invalid or expired invitation");
     }
 
-    // Mark invitation as accepted
     await db
       .update(invitations)
       .set({ acceptedAt: new Date() })

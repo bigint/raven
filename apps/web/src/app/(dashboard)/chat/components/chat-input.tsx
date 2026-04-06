@@ -555,8 +555,6 @@ export const ChatInput = ({
   );
 };
 
-// Shared components
-
 const ModelSelector = ({
   model,
   modelOptions,

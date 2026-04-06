@@ -11,10 +11,6 @@
 import { memo, type ReactNode } from "react";
 import { CodeBlock } from "./code-block";
 
-// ---------------------------------------------------------------------------
-// Safe URL check — only http(s) and mailto links are allowed
-// ---------------------------------------------------------------------------
-
 const SAFE_URL_RE = /^(https?:|mailto:)/i;
 
 const isSafeHref = (url: string): boolean => {
@@ -25,10 +21,6 @@ const isSafeHref = (url: string): boolean => {
     return false;
   }
 };
-
-// ---------------------------------------------------------------------------
-// Inline parser
-// ---------------------------------------------------------------------------
 
 const parseInline = (text: string): ReactNode[] => {
   const result: ReactNode[] = [];
@@ -125,10 +117,6 @@ const parseInline = (text: string): ReactNode[] => {
   return result;
 };
 
-// ---------------------------------------------------------------------------
-// Table parser helpers
-// ---------------------------------------------------------------------------
-
 const TABLE_SEPARATOR_RE = /^\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/;
 
 const parseTableRow = (line: string): string[] => {
@@ -139,10 +127,6 @@ const parseTableRow = (line: string): string[] => {
 
 const isTableSeparator = (line: string): boolean =>
   TABLE_SEPARATOR_RE.test(line);
-
-// ---------------------------------------------------------------------------
-// Main Markdown component
-// ---------------------------------------------------------------------------
 
 const Markdown = memo(function Markdown({
   content

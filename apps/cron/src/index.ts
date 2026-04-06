@@ -22,7 +22,6 @@ const runJob = async (name: string, fn: () => Promise<void>) => {
   }
 };
 
-// Run all jobs on startup
 const runAllJobs = async () => {
   await runJob("retention cleanup", () => cleanupRetention(db));
   await runJob("session cleanup", () => cleanupExpiredSessions(db));
@@ -34,13 +33,11 @@ const runAllJobs = async () => {
 console.log("Raven cron worker started");
 runAllJobs();
 
-// Hourly: expired key deactivation
 setInterval(
   () => runJob("key deactivation", () => deactivateExpiredKeys(db)),
   HOUR
 );
 
-// Daily: cleanup jobs
 setInterval(() => runJob("retention cleanup", () => cleanupRetention(db)), DAY);
 setInterval(
   () => runJob("session cleanup", () => cleanupExpiredSessions(db)),

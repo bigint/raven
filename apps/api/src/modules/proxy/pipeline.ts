@@ -41,13 +41,11 @@ interface PipelineInput {
 export const runPipeline = async (input: PipelineInput): Promise<Response> => {
   const startTime = Date.now();
 
-  // 1. Auth + settings
   const [{ virtualKey }, cfg] = await Promise.all([
     authenticateKey(input.db, input.authHeader, input.redis),
     getInstanceSettings(input.db, input.redis)
   ]);
 
-  // 2. Parse body (sync — no await needed)
   let parsedBody: Record<string, unknown> = {};
   if (input.bodyText) {
     try {
@@ -59,7 +57,6 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
     }
   }
 
-  // 3. Model validation (sync — fast bail before any async work)
   const messages = Array.isArray(parsedBody.messages)
     ? parsedBody.messages
     : [];
@@ -78,7 +75,6 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
     );
   }
 
-  // 4. Gate checks + guardrails + routing — all in parallel
   const rpm = virtualKey.rateLimitRpm ?? cfg.global_rate_limit_rpm;
   const rpd = virtualKey.rateLimitRpd ?? cfg.global_rate_limit_rpd;
 
@@ -98,7 +94,6 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
       : null
   ]);
 
-  // 5. RAG injection (if enabled)
   let ragHeaders: Record<string, string> = {};
   const ragRequestEnabled =
     input.incomingHeaders["x-knowledge-enabled"] === "true";
@@ -124,7 +119,6 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
     }
   }
 
-  // 6. Extract end-user identity
   const endUser =
     (input.userIdHeader as string | undefined) ??
     (typeof parsedBody.user === "string" ? parsedBody.user : null) ??
@@ -140,7 +134,6 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
     parsedBody = { ...parsedBody, model: routingResult.model };
   }
 
-  // 7. Cache + provider resolution in parallel
   const { providerName: pathProvider } = parseProviderFromPath(
     input.providerPath
   );
@@ -180,7 +173,6 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
     });
   }
 
-  // 8. Parse + execute
   const parsed = parseIncomingRequest(parsedBody, providerName);
 
   // Apply default max tokens from settings when not specified by client

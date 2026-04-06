@@ -21,7 +21,6 @@ const DEFAULT_SETTINGS = [
 async function seed() {
   console.log('Seeding database...\n')
 
-  // Create users
   for (const user of SEED_USERS) {
     try {
       const result = await auth.api.signUpEmail({
@@ -45,7 +44,6 @@ async function seed() {
     }
   }
 
-  // Insert default settings
   console.log('\nSettings:')
   for (const setting of DEFAULT_SETTINGS) {
     await db

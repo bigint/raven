@@ -28,7 +28,6 @@ export const deleteProvider =
 
     await db.delete(providerConfigs).where(eq(providerConfigs.id, id));
 
-    // Invalidate provider configs cache
     void redis.del(cacheKeys.providerConfigs(existing.provider));
 
     void auditAndPublish(db, user, "provider", "deleted", { resourceId: id });
