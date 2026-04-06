@@ -45,24 +45,20 @@ const UploadModal = ({ open, onClose, collectionId }: UploadModalProps) => {
   return (
     <Modal onClose={onClose} open={open} title="Upload Files">
       <div className="space-y-4">
-        <div
-          className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed p-10 transition-colors ${
+        <button
+          className={`flex w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed p-10 transition-colors ${
             dragging
               ? "border-primary bg-primary/5"
               : "border-border hover:border-primary/50 hover:bg-muted/30"
           }`}
           onClick={() => inputRef.current?.click()}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") inputRef.current?.click();
-          }}
-          role="button"
-          tabIndex={0}
           onDragLeave={() => setDragging(false)}
           onDragOver={(e) => {
             e.preventDefault();
             setDragging(true);
           }}
           onDrop={handleDrop}
+          type="button"
         >
           <Upload className="size-8 text-muted-foreground" />
           <div className="text-center">
@@ -82,7 +78,7 @@ const UploadModal = ({ open, onClose, collectionId }: UploadModalProps) => {
             ref={inputRef}
             type="file"
           />
-        </div>
+        </button>
 
         <div className="flex justify-end gap-2">
           <Button disabled={isUploading} onClick={onClose} variant="secondary">
