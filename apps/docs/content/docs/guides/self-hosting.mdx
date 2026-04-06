@@ -1,0 +1,293 @@
+---
+title: Self-Hosting
+description: Deploy Raven on your own infrastructure with Docker in under 5 minutes. Full control over your data, no vendor lock-in.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Tabs, Tab } from "fumadocs-ui/components/tabs";
+
+Raven is designed to be self-hosted. Deploy it on your own infrastructure and keep full control over your API keys, request logs, and usage data. This guide covers deploying with Docker Compose, the recommended approach for most deployments.
+
+## Prerequisites
+
+- **Docker** 20.10+ and **Docker Compose** v2+
+- A machine with at least **1 GB RAM** and **1 vCPU**
+- A domain name (optional, but recommended for production)
+
+## Quick Start
+
+### 1. Download the Compose File
+
+```bash
+curl -O https://raw.githubusercontent.com/bigint/raven/main/docker-compose.yml
+```
+
+### 2. Configure Environment Variables
+
+Create an `.env` file and generate your secrets:
+
+```bash
+# Generate BETTER_AUTH_SECRET (session encryption)
+openssl rand -base64 32
+
+# Generate ENCRYPTION_SECRET (provider key encryption, must be 32-byte hex)
+openssl rand -hex 32
+```
+
+Edit `.env` and set these values:
+
+```bash
+# Required
+DATABASE_URL=postgresql://raven:raven@postgres:5432/raven
+REDIS_URL=redis://redis:6379
+BETTER_AUTH_SECRET=<your-generated-secret>
+BETTER_AUTH_URL=http://localhost:4000
+ENCRYPTION_SECRET=<your-generated-32-byte-hex>
+
+# App URLs
+APP_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:4000
+API_PORT=4000
+```
+
+### 3. Start Raven
+
+```bash
+docker compose up -d
+```
+
+This starts four services:
+
+| Service | Description | Port |
+|---------|-------------|------|
+| **raven** | Web dashboard + API server | 3000, 4000 |
+| **raven-cron** | Background job processor | -- |
+| **postgres** | PostgreSQL 17 database | 5432 |
+| **redis** | Redis 7 cache | 6379 |
+
+Database migrations run automatically on startup.
+
+### 4. Access the Dashboard
+
+Open [http://localhost:3000](http://localhost:3000) and create your first account.
+
+## Environment Variables
+
+### Required
+
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `REDIS_URL` | Redis connection string |
+| `BETTER_AUTH_SECRET` | Secret key for session encryption. Generate with `openssl rand -base64 32` |
+| `ENCRYPTION_SECRET` | 32-byte hex key for encrypting provider API keys at rest. Generate with `openssl rand -hex 32` |
+| `BETTER_AUTH_URL` | The URL of the API server (used internally by auth) |
+| `APP_URL` | Public URL of the web dashboard |
+| `NEXT_PUBLIC_API_URL` | Public URL of the API server (used by the browser) |
+
+### Optional
+
+| Variable | Description |
+|----------|-------------|
+| `API_PORT` | API server port (default: `4000`) |
+| `ENCRYPTION_SECRET_PREVIOUS` | Previous encryption key for zero-downtime key rotation |
+
+## Production Deployment
+
+### Use a Reverse Proxy
+
+For production, place a reverse proxy like **Nginx** or **Caddy** in front of Raven to handle TLS termination and domain routing.
+
+<Tabs items={["Caddy", "Nginx"]}>
+<Tab value="Caddy">
+Caddy automatically provisions TLS certificates via Let's Encrypt.
+
+```
+raven.example.com {
+    reverse_proxy localhost:3000
+}
+
+api.raven.example.com {
+    reverse_proxy localhost:4000
+}
+```
+</Tab>
+<Tab value="Nginx">
+```nginx
+server {
+    listen 443 ssl;
+    server_name raven.example.com;
+
+    ssl_certificate /etc/letsencrypt/live/raven.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/raven.example.com/privkey.pem;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name api.raven.example.com;
+
+    ssl_certificate /etc/letsencrypt/live/api.raven.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api.raven.example.com/privkey.pem;
+
+    location / {
+        proxy_pass http://localhost:4000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Required for streaming responses
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 300s;
+    }
+}
+```
+</Tab>
+</Tabs>
+
+### Update Environment for Your Domain
+
+When deploying with a custom domain, update these variables:
+
+```bash
+BETTER_AUTH_URL=https://api.raven.example.com
+APP_URL=https://raven.example.com
+NEXT_PUBLIC_API_URL=https://api.raven.example.com
+```
+
+### Secure the Database
+
+For production, use strong credentials and restrict network access:
+
+```yaml
+# docker-compose.override.yml
+services:
+  postgres:
+    environment:
+      POSTGRES_USER: raven
+      POSTGRES_PASSWORD: <strong-random-password>
+    ports: [] # Remove external port exposure
+  redis:
+    ports: [] # Remove external port exposure
+```
+
+Update `DATABASE_URL` to match the new credentials.
+
+### Persist Data
+
+The default `docker-compose.yml` uses named volumes for PostgreSQL and Redis data. These persist across container restarts. For additional safety:
+
+- Set up automated **PostgreSQL backups** using `pg_dump` or a managed backup solution
+- Configure Redis with **AOF persistence** for durability
+
+## Building from Source
+
+If you prefer to build locally instead of using Docker:
+
+### Prerequisites
+
+- **Node.js 22+**
+- **pnpm 10.27+**
+- **PostgreSQL 17+**
+- **Redis 7+**
+
+### Steps
+
+```bash
+# Install dependencies
+pnpm install
+
+# Set up environment
+cp .env.example .env
+# Edit .env with your database and Redis connection strings
+
+# Run database migrations
+pnpm db:migrate
+
+# Build all packages and apps
+pnpm build
+
+# Start the API server
+node apps/api/dist/index.js &
+
+# Start the web dashboard
+node apps/web/.next/standalone/server.js &
+
+# Start the cron processor
+node apps/cron/dist/index.js &
+```
+
+## Upgrading
+
+To upgrade to a newer version:
+
+```bash
+# Pull the latest image
+docker compose pull
+
+# Restart (migrations run automatically)
+docker compose up -d
+```
+
+<Callout type="warn">
+  Always back up your database before upgrading. While migrations are designed to be safe, it's good practice to have a rollback plan.
+</Callout>
+
+## Email Configuration
+
+Email is optional but required for features like member invitations and password resets. Raven uses [Resend](https://resend.com) as the email provider.
+
+1. Create an account at [resend.com](https://resend.com)
+2. Generate an API key
+3. Go to **Instance Settings** in the admin dashboard and enter your Resend API key and from email address
+
+Without email configured, you can still use Raven — users just need to sign up directly instead of being invited.
+
+## Encryption Key Rotation
+
+Raven supports zero-downtime rotation of the `ENCRYPTION_SECRET` used to encrypt provider API keys:
+
+1. Set `ENCRYPTION_SECRET_PREVIOUS` to the current `ENCRYPTION_SECRET` value
+2. Generate a new `ENCRYPTION_SECRET` with `openssl rand -hex 32`
+3. Restart Raven — it will re-encrypt data with the new key while still being able to decrypt data encrypted with the previous key
+
+## Troubleshooting
+
+### Raven won't start
+
+Check the logs:
+
+```bash
+docker compose logs raven
+```
+
+Common issues:
+- **Database not ready** -- The health check ensures PostgreSQL is ready before Raven starts. If it times out, check PostgreSQL logs with `docker compose logs postgres`
+- **Invalid ENCRYPTION_SECRET** -- Must be a valid 32-byte hex string (64 hex characters)
+- **Port conflict** -- Ensure ports 3000 and 4000 are not in use
+
+### Database migration fails
+
+```bash
+# Check migration logs
+docker compose logs raven | grep -i migration
+
+# Manually run migrations
+docker compose exec raven npx drizzle-kit migrate
+```
+
+### Reset everything
+
+```bash
+docker compose down -v  # Warning: this deletes all data
+docker compose up -d
+```

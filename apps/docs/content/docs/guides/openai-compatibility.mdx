@@ -1,0 +1,263 @@
+---
+title: OpenAI Compatibility
+description: Use Raven as a drop-in replacement for the OpenAI API.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Tabs, Tab } from "fumadocs-ui/components/tabs";
+
+Raven provides a fully OpenAI-compatible API endpoint at `/v1/chat/completions`. This means you can switch to Raven by changing just two configuration values -- your base URL and API key. No other code changes are required.
+
+## Drop-in Replacement
+
+### Before (Direct OpenAI)
+
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "sk-..."
+});
+```
+
+### After (Through Raven)
+
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "rk_live_...",                // Your Raven virtual key
+  baseURL: "http://localhost:4000/v1"   // Raven endpoint
+});
+```
+
+Everything else stays exactly the same. `client.chat.completions.create()`, streaming, function calling -- all work identically.
+
+## The `/v1/chat/completions` Endpoint
+
+Raven's primary proxy endpoint is fully compatible with OpenAI's Chat Completions API:
+
+```
+POST http://localhost:4000/v1/chat/completions
+```
+
+When you send a request:
+
+1. Raven authenticates your virtual key
+2. Resolves the `model` field to the correct provider
+3. Translates the request format if needed (e.g., OpenAI format to Anthropic's native format)
+4. Forwards the request to the upstream provider
+5. Normalizes the response back to OpenAI format
+6. Returns it to your application
+
+<Callout type="info">
+  This means you can use `model: "claude-sonnet-4-20250514"` with the OpenAI SDK and Raven handles the translation automatically.
+</Callout>
+
+## Auto Model-to-Provider Resolution
+
+Raven automatically resolves model names to the correct provider. You do not need to specify which provider to use -- just set the model:
+
+```typescript
+// Routes to OpenAI
+await client.chat.completions.create({
+  model: "gpt-4o",
+  messages: [{ role: "user", content: "Hello" }]
+});
+
+// Routes to Anthropic
+await client.chat.completions.create({
+  model: "claude-sonnet-4-20250514",
+  messages: [{ role: "user", content: "Hello" }]
+});
+```
+
+## Supported Parameters
+
+All standard OpenAI Chat Completions parameters are supported:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `model` | string | Model ID (required) |
+| `messages` | array | Array of message objects (required) |
+| `stream` | boolean | Enable SSE streaming |
+| `temperature` | number | Sampling temperature (0-2) |
+| `top_p` | number | Nucleus sampling parameter |
+| `max_tokens` | integer | Maximum tokens to generate |
+| `stop` | string/array | Stop sequences |
+| `tools` | array | Function/tool definitions |
+| `tool_choice` | string/object | Tool selection strategy |
+| `response_format` | object | Response format (e.g., JSON mode) |
+
+## Streaming
+
+Streaming works identically to OpenAI. Set `stream: true` and consume SSE chunks:
+
+```typescript
+const stream = await client.chat.completions.create({
+  model: "gpt-4o",
+  messages: [{ role: "user", content: "Write a haiku" }],
+  stream: true
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content || "");
+}
+```
+
+Raven normalizes streaming output from all providers to the OpenAI SSE format, so even Anthropic streams arrive in the same format. See [Streaming](/docs/guides/streaming) for details.
+
+## Function Calling
+
+Function/tool calling works exactly as it does with OpenAI:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: "gpt-4o",
+  messages: [{ role: "user", content: "What's the weather in Paris?" }],
+  tools: [
+    {
+      type: "function",
+      function: {
+        name: "get_weather",
+        description: "Get current weather for a city",
+        parameters: {
+          type: "object",
+          properties: {
+            city: { type: "string", description: "City name" }
+          },
+          required: ["city"]
+        }
+      }
+    }
+  ]
+});
+```
+
+## Compatible SDKs
+
+Any SDK that supports custom base URLs works with Raven:
+
+<Tabs items={["OpenAI Node.js", "OpenAI Python", "cURL"]}>
+<Tab value="OpenAI Node.js">
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "rk_live_abc123def456",
+  baseURL: "http://localhost:4000/v1"
+});
+
+const response = await client.chat.completions.create({
+  model: "gpt-4o",
+  messages: [
+    { role: "system", content: "You are a helpful assistant." },
+    { role: "user", content: "Explain quantum computing in one paragraph." }
+  ],
+  temperature: 0.7,
+  max_tokens: 500
+});
+
+console.log(response.choices[0].message.content);
+```
+</Tab>
+<Tab value="OpenAI Python">
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="rk_live_abc123def456",
+    base_url="http://localhost:4000/v1"
+)
+
+response = client.chat.completions.create(
+    model="claude-sonnet-4-20250514",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Explain quantum computing in one paragraph."}
+    ],
+    temperature=0.7,
+    max_tokens=500
+)
+
+print(response.choices[0].message.content)
+```
+</Tab>
+<Tab value="cURL">
+```bash
+curl -X POST http://localhost:4000/v1/chat/completions \
+  -H "Authorization: Bearer rk_live_abc123def456" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "Explain quantum computing in one paragraph."}
+    ],
+    "temperature": 0.7,
+    "max_tokens": 500
+  }'
+```
+</Tab>
+</Tabs>
+
+## Using Non-OpenAI Models
+
+The power of Raven is that you use the **same OpenAI-compatible API** to access any provider:
+
+```typescript
+// Access Anthropic models through the OpenAI SDK
+const response = await client.chat.completions.create({
+  model: "claude-sonnet-4-20250514",
+  messages: [{ role: "user", content: "Hello" }]
+});
+```
+
+Raven automatically resolves the model to the correct provider and translates the request format.
+
+## Feature Support
+
+| Feature | Support |
+|---------|---------|
+| Chat completions | Full |
+| Streaming | Full |
+| Function/tool calling | Full |
+| Vision (image inputs) | Full |
+| System messages | Full |
+| Temperature, top_p, etc. | Full |
+| Stop sequences | Full |
+| Max tokens | Full |
+| Response format (JSON) | Full |
+
+## Raven-Specific Response Headers
+
+Raven adds informational headers to every response:
+
+| Header | Description |
+|--------|-------------|
+| `X-Raven-Provider` | The provider that handled the request |
+| `X-Raven-Model` | The model that was used |
+| `X-Raven-Latency-Ms` | Total request latency in milliseconds |
+| `X-Guardrail-Warnings` | Guardrail warnings, if any were triggered |
+
+These headers are additive and do not break OpenAI SDK compatibility.
+
+## Vercel AI SDK
+
+You can also use Raven with the [Vercel AI SDK](/docs/guides/vercel-ai-sdk) for `generateText`, `streamText`, and `useChat`:
+
+```typescript
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { generateText } from "ai";
+
+const raven = createOpenAICompatible({
+  name: "raven",
+  apiKey: "rk_live_...",
+  baseURL: "http://localhost:4000/v1",
+});
+
+const { text } = await generateText({
+  model: raven("gpt-4o"),
+  prompt: "Hello!",
+});
+```

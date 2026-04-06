@@ -1,0 +1,15 @@
+{
+  "title": "Features",
+  "pages": [
+    "providers",
+    "virtual-keys",
+    "models",
+    "routing-rules",
+    "chat",
+    "guardrails",
+    "audit-logs",
+    "webhooks",
+    "budgets",
+    "analytics"
+  ]
+}

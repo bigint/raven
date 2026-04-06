@@ -1,0 +1,124 @@
+---
+title: Budgets
+description: Set spending limits to control AI costs across your organization.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Steps, Step } from "fumadocs-ui/components/steps";
+
+Budgets let you set hard spending limits at the organization, team, or virtual key level. When a budget is exceeded, requests are blocked before they reach the provider -- preventing unexpected costs.
+
+## Budget Entities
+
+Budgets can be attached to different levels of your organization hierarchy.
+
+| Entity | Scope | Example |
+|--------|-------|---------|
+| `organization` | All requests in the org | Cap total org spend at $1,000/month |
+| `team` | Requests from a specific team | Limit engineering team to $500/month |
+| `key` | Requests using a specific virtual key | Cap a staging key at $10/day |
+
+<Callout type="info">
+  Agent identities also support per-agent budgets through the agent configuration. See Agent Identities for details.
+</Callout>
+
+## Budget Periods
+
+| Period | Reset Schedule |
+|--------|---------------|
+| `daily` | Resets at midnight UTC each day |
+| `monthly` | Resets on the 1st of each month at midnight UTC |
+
+## Creating a Budget
+
+### Via the Dashboard
+
+<Steps>
+<Step>
+
+### Navigate to Budgets
+
+Go to **Budgets** in the dashboard sidebar.
+
+</Step>
+<Step>
+
+### Click Create Budget
+
+Select the entity type (organization, team, or key) and the specific entity.
+
+</Step>
+<Step>
+
+### Set the Limit
+
+Enter the maximum spend amount in USD.
+
+</Step>
+<Step>
+
+### Choose the Period
+
+Select daily or monthly reset.
+
+</Step>
+<Step>
+
+### Set Alert Threshold
+
+Configure the percentage at which to trigger an alert (default: 80%).
+
+</Step>
+</Steps>
+
+## Budget Hierarchy
+
+Budgets are checked hierarchically from organization down to agent. If **any** level in the chain would be exceeded, the request is blocked.
+
+```
+Organization Budget ($1,000/mo)
+  |
+  +-- Team "Engineering" ($500/mo)
+  |     |
+  |     +-- Key "prod-api" ($200/mo)
+  |     |     |
+  |     |     +-- Agent "support-bot" ($50/mo)
+  |     |
+  |     +-- Key "staging" ($10/day)
+  |
+  +-- Team "Research" ($300/mo)
+```
+
+The check flow for each request:
+
+1. Estimate the request cost based on model pricing
+2. Check organization budget -- block if exceeded
+3. Check team budget (if applicable) -- block if exceeded
+4. Check key budget -- block if exceeded
+5. Check agent budget (if applicable) -- block if exceeded
+6. If all checks pass, forward the request to the provider
+7. After completion, update spend at all levels
+
+## Alert Thresholds
+
+When spend reaches the configured alert threshold, Raven emits a `budget.threshold.reached` event. You can subscribe to this event via [Webhooks](/docs/features/webhooks) to receive notifications.
+
+| Event | Trigger |
+|-------|---------|
+| `budget.threshold.reached` | Spend hits the alert threshold percentage |
+| `budget.exceeded` | Spend exceeds the budget limit (request blocked) |
+| `budget.reset` | Budget resets at the start of a new period |
+
+## Soft vs Hard Limits
+
+Raven budgets are **hard limits** -- when the estimated cost of a request would push spend over the limit, the request is blocked with details about which budget was exceeded.
+
+```json
+{
+  "error": "Budget exceeded for organization. Current: $498.50, Max: $500.00, Estimated: $2.35"
+}
+```
+
+<Callout type="info">
+  Budgets use estimated costs based on model pricing to make the decision before the request is sent. Actual costs are tracked after the response is received.
+</Callout>

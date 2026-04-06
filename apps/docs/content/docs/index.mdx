@@ -1,0 +1,62 @@
+---
+title: Documentation
+description: Learn how to deploy, configure, and use Raven — the open-source AI gateway.
+---
+
+import { Cards, Card } from "fumadocs-ui/components/card";
+
+## Getting Started
+
+New to Raven? Start here.
+
+<Cards>
+  <Card title="Quickstart" href="/docs/getting-started/quickstart">
+    Set up providers, create keys, and make your first request in under 5 minutes.
+  </Card>
+  <Card title="Core Concepts" href="/docs/getting-started/concepts">
+    Understand the key building blocks — organizations, virtual keys, providers, and the request pipeline.
+  </Card>
+  <Card title="Self-Hosting" href="/docs/guides/self-hosting">
+    Deploy Raven on your own infrastructure with Docker Compose.
+  </Card>
+</Cards>
+
+## Core Features
+
+<Cards>
+  <Card title="Providers" href="/docs/features/providers">
+    Connect and manage LLM provider credentials.
+  </Card>
+  <Card title="Virtual Keys" href="/docs/features/virtual-keys">
+    Scoped API keys with rate limits, budgets, and environments.
+  </Card>
+  <Card title="Routing Rules" href="/docs/features/routing-rules">
+    Route requests to different models based on conditions.
+  </Card>
+  <Card title="Guardrails" href="/docs/features/guardrails">
+    Content filtering, PII detection, and custom rules.
+  </Card>
+  <Card title="Budgets" href="/docs/features/budgets">
+    Set spending limits at the org, team, or key level.
+  </Card>
+  <Card title="Analytics" href="/docs/features/analytics">
+    Monitor usage, costs, and performance in real-time.
+  </Card>
+</Cards>
+
+## Integrations
+
+<Cards>
+  <Card title="OpenAI Compatibility" href="/docs/guides/openai-compatibility">
+    Drop-in replacement for the OpenAI SDK — change one line.
+  </Card>
+  <Card title="Vercel AI SDK" href="/docs/guides/vercel-ai-sdk">
+    Use generateText, streamText, and useChat with Raven.
+  </Card>
+  <Card title="TypeScript SDK" href="/docs/guides/sdk">
+    Type-safe client for the Raven gateway API.
+  </Card>
+  <Card title="API Reference" href="/docs/api-reference/introduction">
+    Complete REST API documentation with examples.
+  </Card>
+</Cards>

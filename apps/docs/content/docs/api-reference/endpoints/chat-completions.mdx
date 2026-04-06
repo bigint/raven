@@ -1,0 +1,354 @@
+---
+title: Chat Completions
+description: Send chat completion requests through Raven.
+---
+
+import { Tabs, Tab } from "fumadocs-ui/components/tabs";
+
+## Create Chat Completion
+
+```
+POST /v1/chat/completions
+```
+
+Creates a chat completion using the specified model. This endpoint is fully compatible with the OpenAI Chat Completions API. Raven automatically resolves the model to the correct provider, translates the request, and returns the response in OpenAI format.
+
+## Authentication
+
+```http
+Authorization: Bearer rk_live_...
+```
+
+Optionally pass your own provider key:
+
+```http
+X-Provider-Key: sk-your-provider-key
+```
+
+## Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | Model ID (e.g., `gpt-4o`, `claude-sonnet-4-20250514`) |
+| `messages` | array | Yes | Array of message objects |
+| `stream` | boolean | No | Enable SSE streaming (default: `false`) |
+| `temperature` | number | No | Sampling temperature (0-2, default varies by model) |
+| `top_p` | number | No | Nucleus sampling parameter (0-1) |
+| `max_tokens` | integer | No | Maximum tokens to generate |
+| `stop` | string or array | No | Up to 4 stop sequences |
+| `tools` | array | No | Function/tool definitions |
+| `tool_choice` | string or object | No | `auto`, `none`, `required`, or specific function |
+| `response_format` | object | No | Response format (e.g., `{"type": "json_object"}`) |
+
+### Message Object
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `role` | string | Yes | `system`, `user`, `assistant`, or `tool` |
+| `content` | string or array | Yes | Message content (text or multimodal parts) |
+| `name` | string | No | Optional name for the message author |
+| `tool_calls` | array | No | Tool calls (for assistant messages) |
+| `tool_call_id` | string | No | Tool call ID (for tool result messages) |
+
+### Content Parts (Multimodal)
+
+When `content` is an array, each element is a content part:
+
+```json
+{
+  "role": "user",
+  "content": [
+    { "type": "text", "text": "What is in this image?" },
+    {
+      "type": "image_url",
+      "image_url": { "url": "https://example.com/photo.jpg" }
+    }
+  ]
+}
+```
+
+### Tool Definition
+
+```json
+{
+  "type": "function",
+  "function": {
+    "name": "get_weather",
+    "description": "Get current weather for a city",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "city": { "type": "string", "description": "City name" }
+      },
+      "required": ["city"]
+    }
+  }
+}
+```
+
+## Examples
+
+### Basic Request
+
+<Tabs items={["cURL", "Python", "Node.js"]}>
+<Tab value="cURL">
+```bash
+curl -X POST http://localhost:4000/v1/chat/completions \
+  -H "Authorization: Bearer rk_live_abc123..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "What is the capital of France?"}
+    ],
+    "temperature": 0.7,
+    "max_tokens": 500
+  }'
+```
+</Tab>
+<Tab value="Python">
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="rk_live_abc123...",
+    base_url="http://localhost:4000/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "What is the capital of France?"}
+    ],
+    temperature=0.7,
+    max_tokens=500
+)
+
+print(response.choices[0].message.content)
+```
+</Tab>
+<Tab value="Node.js">
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "rk_live_abc123...",
+  baseURL: "http://localhost:4000/v1"
+});
+
+const response = await client.chat.completions.create({
+  model: "gpt-4o",
+  messages: [
+    { role: "system", content: "You are a helpful assistant." },
+    { role: "user", content: "What is the capital of France?" }
+  ],
+  temperature: 0.7,
+  max_tokens: 500
+});
+
+console.log(response.choices[0].message.content);
+```
+</Tab>
+</Tabs>
+
+### Response
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1705312800,
+  "model": "gpt-4o",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "The capital of France is Paris."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 25,
+    "completion_tokens": 8,
+    "total_tokens": 33
+  }
+}
+```
+
+### Streaming Request
+
+<Tabs items={["cURL", "Python", "Node.js"]}>
+<Tab value="cURL">
+```bash
+curl -X POST http://localhost:4000/v1/chat/completions \
+  -H "Authorization: Bearer rk_live_abc123..." \
+  -H "Content-Type: application/json" \
+  -N \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello"}],
+    "stream": true
+  }'
+```
+</Tab>
+<Tab value="Python">
+```python
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello"}],
+    stream=True
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="")
+```
+</Tab>
+<Tab value="Node.js">
+```typescript
+const stream = await client.chat.completions.create({
+  model: "gpt-4o",
+  messages: [{ role: "user", content: "Hello" }],
+  stream: true
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content || "");
+}
+```
+</Tab>
+</Tabs>
+
+### Streaming Response Format
+
+Each chunk follows the SSE format:
+
+```
+data: {"id":"chatcmpl-abc123","object":"chat.completion.chunk","created":1705312800,"model":"gpt-4o","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc123","object":"chat.completion.chunk","created":1705312800,"model":"gpt-4o","choices":[{"index":0,"delta":{"content":"Hello"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc123","object":"chat.completion.chunk","created":1705312800,"model":"gpt-4o","choices":[{"index":0,"delta":{"content":"!"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc123","object":"chat.completion.chunk","created":1705312800,"model":"gpt-4o","choices":[{"index":0,"delta":{},"finish_reason":"stop"},"usage":{"prompt_tokens":9,"completion_tokens":2,"total_tokens":11}}]}
+
+data: [DONE]
+```
+
+### Function Calling
+
+```bash
+curl -X POST http://localhost:4000/v1/chat/completions \
+  -H "Authorization: Bearer rk_live_abc123..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "user", "content": "What is the weather in Paris?"}
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "get_weather",
+          "description": "Get current weather",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "city": {"type": "string"}
+            },
+            "required": ["city"]
+          }
+        }
+      }
+    ],
+    "tool_choice": "auto"
+  }'
+```
+
+**Response with tool call:**
+
+```json
+{
+  "id": "chatcmpl-def456",
+  "object": "chat.completion",
+  "model": "gpt-4o",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": null,
+        "tool_calls": [
+          {
+            "id": "call_abc123",
+            "type": "function",
+            "function": {
+              "name": "get_weather",
+              "arguments": "{\"city\": \"Paris\"}"
+            }
+          }
+        ]
+      },
+      "finish_reason": "tool_calls"
+    }
+  ]
+}
+```
+
+## Raven-Specific Response Headers
+
+Every response from the chat completions endpoint includes these additional headers:
+
+| Header | Example | Description |
+|--------|---------|-------------|
+| `X-Raven-Provider` | `openai` | Provider that handled the request |
+| `X-Raven-Model` | `gpt-4o` | Model that was used |
+| `X-Raven-Latency-Ms` | `450` | Total request latency in milliseconds |
+| `X-Guardrail-Warnings` | `PII detected in input` | Guardrail warnings (only if triggered) |
+
+## Error Responses
+
+### Model Not Found
+
+```json
+{
+  "error": {
+    "code": "MODEL_NOT_SUPPORTED",
+    "message": "Model \"gpt-5-turbo\" is not supported in Raven. Please contact us at support@raven.ai."
+  }
+}
+```
+
+Status: `400 Bad Request`
+
+### Rate Limited
+
+```json
+{
+  "error": {
+    "message": "Rate limit exceeded (requests per minute)",
+    "code": "RATE_LIMITED"
+  }
+}
+```
+
+Status: `429 Too Many Requests`
+
+### Budget Exceeded
+
+```json
+{
+  "error": {
+    "message": "Budget exceeded for this organization",
+    "code": "BUDGET_EXCEEDED"
+  }
+}
+```
+
+Status: `402 Payment Required`

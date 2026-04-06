@@ -1,0 +1,186 @@
+---
+title: Webhooks
+description: Receive real-time notifications for events in your Raven organization.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Steps, Step } from "fumadocs-ui/components/steps";
+import { Tabs, Tab } from "fumadocs-ui/components/tabs";
+
+Webhooks send HTTP POST requests to your endpoints when specific events occur in Raven. Use them to trigger alerts, sync data to external systems, or build custom automation workflows.
+
+## Creating a Webhook
+
+<Steps>
+<Step>
+
+### Navigate to Webhooks
+
+Go to **Webhooks** in the dashboard sidebar.
+
+</Step>
+<Step>
+
+### Click Create Webhook
+
+Enter the endpoint URL where you want to receive events.
+
+</Step>
+<Step>
+
+### Select Events
+
+Choose which event types to subscribe to.
+
+</Step>
+<Step>
+
+### Copy the Secret
+
+Save the webhook secret for signature verification. This is only shown once.
+
+</Step>
+</Steps>
+
+## Event Types
+
+Subscribe to any combination of events across the system.
+
+### Request Events
+
+| Event | Description |
+|-------|-------------|
+| `request.started` | A request began processing |
+| `request.completed` | A request was successfully completed |
+| `request.failed` | A request failed |
+| `request.cached` | A request was served from cache |
+| `request.fallback` | A request used a fallback provider |
+
+### Guardrail Events
+
+| Event | Description |
+|-------|-------------|
+| `guardrail.triggered` | A guardrail rule matched content |
+| `guardrail.blocked` | A request was blocked by a guardrail |
+| `guardrail.warned` | A guardrail issued a warning |
+
+### Budget Events
+
+| Event | Description |
+|-------|-------------|
+| `budget.threshold.reached` | A budget reached its alert threshold |
+| `budget.exceeded` | A budget limit was exceeded |
+| `budget.reset` | A budget was reset for a new period |
+
+### Key Events
+
+| Event | Description |
+|-------|-------------|
+| `key.created` | A virtual key was created |
+| `key.revoked` | A virtual key was revoked |
+| `key.rate_limited` | A key hit its rate limit |
+| `key.expired` | A virtual key expired |
+
+### Provider Events
+
+| Event | Description |
+|-------|-------------|
+| `provider.health.degraded` | A provider's health degraded |
+| `provider.health.recovered` | A provider recovered from degraded health |
+| `provider.outage.detected` | A provider outage was detected |
+
+## Webhook Payload
+
+Each webhook delivers a JSON payload with the event details:
+
+```json
+{
+  "webhookId": "wh_abc123",
+  "event": "budget.threshold.reached",
+  "timestamp": "2026-03-15T10:30:00Z",
+  "data": {
+    "budgetId": "bud_xyz789",
+    "budgetName": "Production API",
+    "currentSpend": 450.00,
+    "limit": 500.00,
+    "percentage": 90
+  }
+}
+```
+
+## Signature Verification
+
+Every webhook request includes an `X-Raven-Signature` header containing an HMAC-SHA256 signature. Verify it to ensure the webhook came from Raven.
+
+<Tabs items={["TypeScript", "Python"]}>
+<Tab value="TypeScript">
+```typescript
+import crypto from "node:crypto";
+
+function verifyWebhook(payload: string, signature: string, secret: string): boolean {
+  const expected = crypto
+    .createHmac("sha256", secret)
+    .update(payload)
+    .digest("hex");
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expected)
+  );
+}
+
+// In your webhook handler
+app.post("/webhooks/raven", (req, res) => {
+  const signature = req.headers["x-raven-signature"];
+  const isValid = verifyWebhook(JSON.stringify(req.body), signature, WEBHOOK_SECRET);
+
+  if (!isValid) {
+    return res.status(401).send("Invalid signature");
+  }
+
+  // Process the event
+  console.log("Event:", req.body.event);
+  res.status(200).send("OK");
+});
+```
+</Tab>
+<Tab value="Python">
+```python
+import hmac
+import hashlib
+
+def verify_webhook(payload: str, signature: str, secret: str) -> bool:
+    expected = hmac.new(
+        secret.encode(),
+        payload.encode(),
+        hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(signature, expected)
+```
+</Tab>
+</Tabs>
+
+<Callout type="warn">
+  Always verify webhook signatures before processing events. Without verification, an attacker could send fake events to your endpoint.
+</Callout>
+
+## Retry Logic
+
+Failed webhook deliveries are retried with exponential backoff:
+
+| Attempt | Delay |
+|---------|-------|
+| 1 | Immediate |
+| 2 | 1 second |
+| 3 | 2 seconds |
+| 4 | 4 seconds |
+
+After 4 retries (3 retries + the initial attempt), the delivery is abandoned and logged as failed. Each attempt has a 10-second timeout.
+
+## Testing Webhooks
+
+Use the dashboard to send test events to your webhook endpoint:
+
+1. Navigate to the webhook in the dashboard
+2. Click **Send Test Event**
+3. Select the event type to simulate
+4. Check your endpoint for the test payload

@@ -1,0 +1,81 @@
+---
+title: Virtual Keys
+description: Create scoped API keys with rate limits, budgets, and environment separation.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Steps, Step } from "fumadocs-ui/components/steps";
+
+Virtual keys are the API keys your applications use to authenticate with Raven. They map to your configured providers and give you fine-grained control over access.
+
+## Creating a Key
+
+Go to **Keys** in the dashboard and click **Create Key**.
+
+### Key Options
+
+| Option | Description |
+|--------|-------------|
+| **Name** | A descriptive name for the key (e.g., "Production App", "Staging") |
+| **Environment** | `live` or `test` — determines the key prefix |
+| **Rate Limit (RPM)** | Maximum requests per minute |
+| **Rate Limit (RPD)** | Maximum requests per day |
+| **Expiration** | Optional date when the key automatically expires |
+
+## Key Format
+
+Virtual keys use a clear prefix format:
+
+```
+rk_live_abc123...  → Live/production environment
+rk_test_xyz789...  → Test/development environment
+```
+
+<Callout type="warn">
+  Virtual keys are shown in full only once at creation time. Store them securely — you cannot retrieve the full key later.
+</Callout>
+
+## Using Virtual Keys
+
+Pass your virtual key in the `Authorization` header:
+
+```
+Authorization: Bearer rk_live_abc123...
+```
+
+## Rate Limiting
+
+Each virtual key can have its own rate limits:
+
+- **RPM (Requests Per Minute)** — Protects against burst traffic
+- **RPD (Requests Per Day)** — Controls daily usage
+
+When a limit is exceeded, Raven returns a `429 Too Many Requests` response with a `Retry-After` header.
+
+## Key Rotation
+
+Rotate a key to generate a new secret while keeping the same configuration. The old key is immediately invalidated.
+
+<Steps>
+<Step>
+
+### Go to Keys
+
+Navigate to the key you want to rotate.
+
+</Step>
+<Step>
+
+### Click Rotate
+
+Confirm the rotation. The old key stops working immediately.
+
+</Step>
+<Step>
+
+### Update Your Application
+
+Replace the old key with the new one in your application.
+
+</Step>
+</Steps>

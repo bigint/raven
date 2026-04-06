@@ -1,0 +1,63 @@
+---
+title: Providers
+description: Connect and manage your LLM provider credentials.
+---
+
+import { Steps, Step } from "fumadocs-ui/components/steps";
+
+Providers are configured connections to LLM services. You store your provider API keys once in Raven, and it handles routing requests to the correct provider based on the model requested.
+
+## Adding a Provider
+
+<Steps>
+<Step>
+
+### Navigate to Providers
+
+Go to **Providers** in the dashboard sidebar.
+
+</Step>
+<Step>
+
+### Click Add Provider
+
+Select your provider from the list of supported services.
+
+</Step>
+<Step>
+
+### Enter Credentials
+
+Paste your provider API key. Raven encrypts it at rest using AES encryption.
+
+</Step>
+<Step>
+
+### Configure Options
+
+Optionally set a display name and enable/disable the provider.
+
+</Step>
+</Steps>
+
+## Supported Providers
+
+| Provider | Models | Notes |
+|----------|--------|-------|
+| **OpenAI** | GPT-4.1, GPT-4o, o3, o4-mini | Full support including function calling and vision |
+| **Anthropic** | Claude Opus 4.6, Claude Sonnet 4.5/4.6, Claude Haiku 4.5 | Supports extended thinking |
+
+More providers are being added.
+
+## Managing Providers
+
+### Enable/Disable
+
+Toggle a provider on or off without deleting it. Disabled providers won't receive requests but their configuration is preserved.
+
+### Multiple Configurations
+
+You can add the same provider multiple times with different API keys. This is useful for:
+
+- **Fallback credentials** — Use a backup key if the primary is rate-limited
+- **Region-specific keys** — Use different keys for different regions

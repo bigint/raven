@@ -1,0 +1,55 @@
+---
+title: Models
+description: Browse, filter, and understand available LLM models.
+---
+
+Raven maintains a catalog of available models across all providers. The catalog includes pricing, capabilities, and context window information to help you choose the right model.
+
+## Model Catalog
+
+Navigate to **Models** in the dashboard to browse all available models. You can filter by:
+
+- **Provider** — Show models from specific providers
+- **Capability** — Filter by chat, function calling, vision, etc.
+- **Context window** — Filter by minimum context length
+
+## Model Metadata
+
+Each model in the catalog includes:
+
+| Field | Description |
+|-------|-------------|
+| **Provider** | The LLM provider (e.g., OpenAI, Anthropic) |
+| **Model ID** | The identifier used in API requests |
+| **Input Price** | Cost per 1M input tokens |
+| **Output Price** | Cost per 1M output tokens |
+| **Context Window** | Maximum token capacity |
+| **Capabilities** | Supported features (chat, vision, tools) |
+
+## Using Models
+
+Specify the model in your API request:
+
+```json
+{
+  "model": "gpt-4o",
+  "messages": [{"role": "user", "content": "Hello"}]
+}
+```
+
+Raven automatically routes the request to the provider that serves that model. If you have multiple providers configured for the same model, routing rules determine which one is used.
+
+## Model Syncing
+
+Raven periodically syncs its model catalog from providers to stay up to date with the latest models and pricing. You can also trigger a manual sync from the admin panel.
+
+## Cost Tracking
+
+Every request logs the model used along with token counts:
+
+- **Input tokens** — Tokens in the prompt
+- **Output tokens** — Tokens in the response
+- **Reasoning tokens** — Tokens used for extended thinking (e.g., Claude)
+- **Cached tokens** — Tokens served from provider-level cache
+
+Costs are calculated using the model's current pricing and displayed in the analytics dashboard.

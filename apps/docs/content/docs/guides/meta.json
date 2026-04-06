@@ -1,0 +1,10 @@
+{
+  "title": "Guides",
+  "pages": [
+    "self-hosting",
+    "openai-compatibility",
+    "vercel-ai-sdk",
+    "streaming",
+    "sdk"
+  ]
+}
