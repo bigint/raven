@@ -45,7 +45,7 @@
     "db:migrate": "pnpm --filter @raven/db migrate",
     "db:seed": "tsx --env-file=.env scripts/seed.ts",
     "db:studio": "pnpm --filter @raven/db studio",
-    "dev": "pnpm -r --parallel dev",
+    "dev": "pnpm -r --parallel --filter '!@raven/docs' dev",
     "dev:api": "pnpm --filter @raven/api dev",
     "dev:cron": "pnpm --filter @raven/cron dev",
     "dev:docs": "pnpm --filter @raven/docs dev",
