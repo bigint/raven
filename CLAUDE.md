@@ -17,3 +17,7 @@ Pages to keep in sync:
 - `security/` — authentication, permissions, and security features
 
 If a feature is removed, remove it from the docs too. Never leave stale references.
+
+## BigRAG
+
+BigRAG is the RAG engine used in Raven. Documentation is available at **https://bigrag.yoginth.com** and via the **Context7 MCP server**. Always consult BigRAG docs (via Context7 or the docs site) when working with or referring to BigRAG functionality.
