@@ -11,6 +11,7 @@ import { ingestImage } from "./ingest-image";
 import { listDocuments } from "./list";
 import { streamDocumentProgress } from "./progress";
 import { reprocessDocument } from "./reprocess";
+import { s3Ingest } from "./s3-ingest";
 import { uploadDocument } from "./upload";
 
 export const createDocumentsModule = (db: Database, bigrag: BigRAG) => {
@@ -23,6 +24,7 @@ export const createDocumentsModule = (db: Database, bigrag: BigRAG) => {
   app.post("/batch/upload", batchUploadDocuments(db, bigrag));
   app.post("/batch/status", batchGetDocumentStatus(bigrag));
   app.post("/batch/delete", batchDeleteDocuments(db, bigrag));
+  app.post("/s3", s3Ingest(db, bigrag));
 
   return app;
 };
