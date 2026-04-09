@@ -34,16 +34,14 @@ export const s3Ingest =
       secret_key: body.secret_key?.trim() || undefined
     });
 
-    for (const doc of result.documents) {
-      void auditAndPublish(db, user, "document", "created", {
-        metadata: {
-          collection: collectionName,
-          s3_bucket: body.bucket,
-          source: "s3"
-        },
-        resourceId: doc.id
-      });
-    }
+    void auditAndPublish(db, user, "document", "created", {
+      metadata: {
+        collection: collectionName,
+        s3_bucket: body.bucket,
+        source: "s3"
+      },
+      resourceId: collectionName
+    });
 
     return created(c, result);
   };

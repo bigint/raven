@@ -232,10 +232,12 @@ export interface S3IngestParams {
   readonly endpoint_url?: string;
   readonly access_key?: string;
   readonly secret_key?: string;
+  readonly file_types?: string[];
 }
 
 export interface S3IngestResponse {
   readonly status: string;
+  readonly message: string;
   readonly documents: Document[];
   readonly total: number;
   readonly skipped: string[];
@@ -255,8 +257,8 @@ export const useS3Ingest = (collectionId: string) => {
         error: (err) =>
           err instanceof Error ? err.message : "S3 import failed",
         loading: "Importing from S3...",
-        success: (data) =>
-          `${data.total} document${data.total === 1 ? "" : "s"} imported from S3`
+        success:
+          "S3 import started — documents will appear as they are processed"
       });
       return promise;
     },

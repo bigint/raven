@@ -12,6 +12,7 @@ import { listDocuments } from "./list";
 import { streamDocumentProgress } from "./progress";
 import { reprocessDocument } from "./reprocess";
 import { s3Ingest } from "./s3-ingest";
+import { deleteS3Job, listS3Jobs, resyncS3Job } from "./s3-jobs";
 import { uploadDocument } from "./upload";
 
 export const createDocumentsModule = (db: Database, bigrag: BigRAG) => {
@@ -25,6 +26,9 @@ export const createDocumentsModule = (db: Database, bigrag: BigRAG) => {
   app.post("/batch/status", batchGetDocumentStatus(bigrag));
   app.post("/batch/delete", batchDeleteDocuments(db, bigrag));
   app.post("/s3", s3Ingest(db, bigrag));
+  app.get("/s3-jobs", listS3Jobs(bigrag));
+  app.delete("/s3-jobs/:jobId", deleteS3Job(bigrag));
+  app.post("/s3-jobs/:jobId/resync", resyncS3Job(bigrag));
 
   return app;
 };

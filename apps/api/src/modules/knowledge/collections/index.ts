@@ -8,6 +8,7 @@ import { getCollection } from "./get";
 import { listCollections } from "./list";
 import { createCollectionSchema, updateCollectionSchema } from "./schema";
 import { getCollectionStats } from "./stats";
+import { truncateCollection } from "./truncate";
 import { updateCollection } from "./update";
 
 export const createCollectionsModule = (db: Database, bigrag: BigRAG) => {
@@ -27,6 +28,7 @@ export const createCollectionsModule = (db: Database, bigrag: BigRAG) => {
     updateCollection(db, bigrag)
   );
   app.delete("/:name", deleteCollection(db, bigrag));
+  app.post("/:name/truncate", truncateCollection(db, bigrag));
 
   return app;
 };

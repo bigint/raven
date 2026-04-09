@@ -1,6 +1,11 @@
 "use client";
 
-import { queryOptions } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQueryClient
+} from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { createCrudHooks } from "@/lib/crud-hooks";
 
@@ -70,4 +75,29 @@ const {
   queryKey: ["knowledge-collections"]
 });
 
-export { useCreateCollection, useDeleteCollection, useUpdateCollection };
+const useTruncateCollection = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (name: string) => {
+      const promise = api.post(`/v1/knowledge/collections/${name}/truncate`);
+      toast.promise(promise, {
+        error: (err) => err.message,
+        loading: "Truncating collection...",
+        success: "Collection truncated"
+      });
+      return promise;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["knowledge-collections"] });
+      queryClient.invalidateQueries({ queryKey: ["knowledge-documents"] });
+      queryClient.invalidateQueries({ queryKey: ["knowledge-s3-jobs"] });
+    }
+  });
+};
+
+export {
+  useCreateCollection,
+  useDeleteCollection,
+  useTruncateCollection,
+  useUpdateCollection
+};
