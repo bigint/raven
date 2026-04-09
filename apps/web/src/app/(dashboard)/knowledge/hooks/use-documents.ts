@@ -224,3 +224,44 @@ export const useReprocessDocument = () => {
     }
   });
 };
+
+export interface S3IngestParams {
+  readonly bucket: string;
+  readonly prefix?: string;
+  readonly region?: string;
+  readonly endpoint_url?: string;
+  readonly access_key?: string;
+  readonly secret_key?: string;
+}
+
+export interface S3IngestResponse {
+  readonly status: string;
+  readonly documents: Document[];
+  readonly total: number;
+  readonly skipped: string[];
+}
+
+export const useS3Ingest = (collectionId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (params: S3IngestParams) => {
+      const promise = api.post<S3IngestResponse>(
+        `/v1/knowledge/collections/${collectionId}/documents/s3`,
+        params
+      );
+      toast.promise(promise, {
+        error: (err) =>
+          err instanceof Error ? err.message : "S3 import failed",
+        loading: "Importing from S3...",
+        success: (data) =>
+          `${data.total} document${data.total === 1 ? "" : "s"} imported from S3`
+      });
+      return promise;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["knowledge-documents", collectionId]
+      });
+    }
+  });
+};
