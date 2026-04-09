@@ -4,8 +4,8 @@
   },
   "description": "Open-source AI gateway for routing, managing, and observing LLM API traffic",
   "devDependencies": {
-    "@biomejs/biome": "^2.4.9",
-    "@types/node": "^25.5.0",
+    "@biomejs/biome": "^2.4.11",
+    "@types/node": "^25.5.2",
     "drizzle-orm": "^0.45.2",
     "husky": "^9.1.7",
     "tsx": "^4.21.0",
