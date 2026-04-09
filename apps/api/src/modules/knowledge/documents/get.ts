@@ -4,20 +4,12 @@ import { success } from "@/lib/response";
 
 export const getDocument = (bigrag: BigRAG) => async (c: Context) => {
   const docId = c.req.param("docId") as string;
-
-  const document = await bigrag._request(
-    "GET",
-    `/v1/documents/${encodeURIComponent(docId)}`
-  );
+  const document = await bigrag.documents.getById(docId);
   return success(c, document);
 };
 
 export const getDocumentChunks = (bigrag: BigRAG) => async (c: Context) => {
   const docId = c.req.param("docId") as string;
-
-  const result = await bigrag._request(
-    "GET",
-    `/v1/documents/${encodeURIComponent(docId)}/chunks`
-  );
+  const result = await bigrag.documents.getChunksById(docId);
   return success(c, result);
 };

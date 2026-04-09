@@ -9,10 +9,7 @@ export const truncateCollection =
     const user = c.get("user");
     const name = c.req.param("name") as string;
 
-    const result = await bigrag._request(
-      "POST",
-      `/v1/collections/${encodeURIComponent(name)}/truncate`
-    );
+    const result = await bigrag.collections.truncate(name);
 
     void auditAndPublish(db, user, "collection", "truncated", {
       resourceId: name

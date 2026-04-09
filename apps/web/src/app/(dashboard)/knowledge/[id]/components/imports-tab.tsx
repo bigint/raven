@@ -62,11 +62,18 @@ const ProgressCell = ({ job }: { readonly job: S3Job }) => {
     return <span className="text-xs text-muted-foreground">Waiting...</span>;
   }
 
+  if (job.status === "complete" && job.total_found === 0) {
+    return (
+      <span className="text-xs text-muted-foreground">No files found</span>
+    );
+  }
+
   if (job.total_found === 0) {
     return <span className="text-xs text-muted-foreground">—</span>;
   }
 
-  const pct = Math.round((job.total_ingested / job.total_found) * 100);
+  const done = job.total_ingested + job.total_skipped;
+  const pct = Math.round((done / job.total_found) * 100);
 
   return (
     <div className="flex flex-col gap-1">

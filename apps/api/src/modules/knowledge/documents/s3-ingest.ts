@@ -17,6 +17,7 @@ export const s3Ingest =
       endpoint_url?: string;
       access_key?: string;
       secret_key?: string;
+      file_types?: string[];
       metadata?: Record<string, unknown>;
     }>();
 
@@ -28,6 +29,7 @@ export const s3Ingest =
       access_key: body.access_key?.trim() || undefined,
       bucket: body.bucket.trim(),
       endpoint_url: body.endpoint_url?.trim() || undefined,
+      file_types: body.file_types,
       metadata: body.metadata,
       prefix: body.prefix?.trim(),
       region: body.region?.trim() || undefined,

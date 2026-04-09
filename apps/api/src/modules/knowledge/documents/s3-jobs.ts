@@ -3,30 +3,21 @@ import type { Context } from "hono";
 import { success } from "@/lib/response";
 
 export const listS3Jobs = (bigrag: BigRAG) => async (c: Context) => {
-  const collectionName = c.req.param("name") as string;
-  const result = await bigrag._request(
-    "GET",
-    `/v1/collections/${encodeURIComponent(collectionName)}/s3-jobs`
-  );
+  const name = c.req.param("name") as string;
+  const result = await bigrag.documents.listS3Jobs(name);
   return success(c, result);
 };
 
 export const deleteS3Job = (bigrag: BigRAG) => async (c: Context) => {
-  const collectionName = c.req.param("name") as string;
+  const name = c.req.param("name") as string;
   const jobId = c.req.param("jobId") as string;
-  const result = await bigrag._request(
-    "DELETE",
-    `/v1/collections/${encodeURIComponent(collectionName)}/s3-jobs/${encodeURIComponent(jobId)}`
-  );
+  const result = await bigrag.documents.deleteS3Job(name, jobId);
   return success(c, result);
 };
 
 export const resyncS3Job = (bigrag: BigRAG) => async (c: Context) => {
-  const collectionName = c.req.param("name") as string;
+  const name = c.req.param("name") as string;
   const jobId = c.req.param("jobId") as string;
-  const result = await bigrag._request(
-    "POST",
-    `/v1/collections/${encodeURIComponent(collectionName)}/s3-jobs/${encodeURIComponent(jobId)}/resync`
-  );
+  const result = await bigrag.documents.resyncS3Job(name, jobId);
   return success(c, result);
 };
