@@ -2,7 +2,7 @@
 
 import { Switch as BaseSwitch } from "@base-ui/react/switch";
 import { useId } from "react";
-import { cn } from "../cn";
+import { cn } from "../../cn";
 
 interface SwitchProps {
   checked: boolean;

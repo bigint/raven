@@ -1,36 +1,38 @@
 "use client";
 
 import { Field } from "@base-ui/react/field";
-import type { InputHTMLAttributes, Ref } from "react";
-import { cn } from "../cn";
+import type { Ref, TextareaHTMLAttributes } from "react";
+import { cn } from "../../cn";
 
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string | null;
   description?: string;
 }
 
-const Input = ({
+const Textarea = ({
   className,
   label,
   error,
   description,
+  id,
   ref,
   ...props
-}: InputProps & { ref?: Ref<HTMLInputElement> }) => (
+}: TextareaProps & { ref?: Ref<HTMLTextAreaElement> }) => (
   <Field.Root invalid={!!error}>
     {label && (
-      <Field.Label className="mb-1 block text-sm font-medium">
+      <Field.Label className="mb-1.5 block text-sm font-medium" htmlFor={id}>
         {label}
       </Field.Label>
     )}
-    <Field.Control
+    <textarea
       className={cn(
-        "w-full rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-[invalid]:border-destructive data-[invalid]:focus-visible:ring-destructive",
+        "w-full resize-y rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[80px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        error && "border-destructive focus-visible:ring-destructive",
         className
       )}
+      id={id}
       ref={ref}
-      render={<input />}
       {...props}
     />
     {description && !error && (
@@ -46,5 +48,5 @@ const Input = ({
   </Field.Root>
 );
 
-export type { InputProps };
-export { Input };
+export type { TextareaProps };
+export { Textarea };

@@ -2,7 +2,7 @@
 
 import { AlertDialog } from "@base-ui/react/alert-dialog";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Button } from "./button";
+import { Button } from "../button";
 
 interface ConfirmDialogProps {
   readonly open: boolean;

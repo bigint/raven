@@ -3,7 +3,7 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
-import { cn } from "../cn";
+import { cn } from "../../cn";
 
 interface ModalProps {
   open: boolean;

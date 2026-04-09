@@ -4,7 +4,7 @@ import { Popover } from "@base-ui/react/popover";
 import { Select as BaseSelect } from "@base-ui/react/select";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { cn } from "../cn";
+import { cn } from "../../cn";
 
 interface SelectOption {
   value: string;

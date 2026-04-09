@@ -2,7 +2,7 @@
 
 import { Tabs } from "@base-ui/react/tabs";
 import type { ReactNode } from "react";
-import { cn } from "../cn";
+import { cn } from "../../cn";
 
 interface PillTabOption<T extends string = string> {
   readonly value: T;

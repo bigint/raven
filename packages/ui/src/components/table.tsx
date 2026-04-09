@@ -5,8 +5,8 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import type { ReactNode } from "react";
 import { cn } from "../cn";
-import { Checkbox } from "./checkbox";
-import { EmptyState } from "./empty-state";
+import { EmptyState } from "./empty";
+import { Checkbox } from "./form/checkbox";
 import { Spinner } from "./spinner";
 
 interface Column<T> {
