@@ -104,7 +104,9 @@ POST /v1/knowledge/collections/{name}/documents/s3
 Content-Type: application/json
 ```
 
-Import supported files directly from an S3-compatible bucket. Supports AWS S3, MinIO, Cloudflare R2, and other S3-compatible services. Public buckets do not require credentials.
+Import files directly from an S3-compatible bucket. Recursively scans folders and subfolders for supported file types. Supports AWS S3, MinIO, Cloudflare R2, and other S3-compatible services. Public buckets do not require credentials.
+
+Supported file types: PDF, DOCX, PPTX, XLSX, HTML, Markdown, plain text, CSV, TSV, XML, JSON, and images (PNG, JPG, TIFF, BMP, GIF). Archives (tar, zip, gz) are not supported — upload individual files or point to a folder prefix.
 
 ```json
 {
@@ -120,14 +122,15 @@ Import supported files directly from an S3-compatible bucket. Supports AWS S3, M
 | Field | Required | Description |
 |-------|----------|-------------|
 | `bucket` | Yes | S3 bucket name |
-| `prefix` | No | Filter objects by key prefix |
+| `prefix` | No | Filter objects by key prefix (recursively scans subfolders) |
 | `region` | No | AWS region (default: `us-east-1`) |
 | `endpoint_url` | No | Custom endpoint for S3-compatible services |
 | `access_key` | No | AWS access key (omit for public buckets) |
 | `secret_key` | No | AWS secret key (omit for public buckets) |
+| `file_types` | No | Array of file extensions to include (default: all supported types) |
 | `metadata` | No | Additional metadata for all ingested documents |
 
-Up to 100 files per request. Unsupported file types are skipped.
+Unsupported file types are skipped. Import runs in the background — documents appear with "pending" status and update as they are processed.
 
 ### Batch Get Documents
 
