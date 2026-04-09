@@ -10,7 +10,7 @@ Raven integrates with [bigRAG](https://bigrag.dev) to provide retrieval-augmente
 ## How It Works
 
 1. **Create a collection** with embedding and chunking configuration
-2. **Upload documents** (PDF, DOCX, Markdown, etc.) to the collection
+2. **Upload documents** (PDF, DOCX, Markdown, etc.) or **import from S3** buckets
 3. **Bind collections** to virtual keys or pass the `X-Knowledge-Collection` header
 4. When a chat request arrives, Raven queries matching collections and injects relevant chunks as system context
 
@@ -96,6 +96,38 @@ Content-Type: multipart/form-data
 ```
 
 Upload up to 100 files in a single request.
+
+### Import from S3
+
+```
+POST /v1/knowledge/collections/{name}/documents/s3
+Content-Type: application/json
+```
+
+Import supported files directly from an S3-compatible bucket. Supports AWS S3, MinIO, Cloudflare R2, and other S3-compatible services. Public buckets do not require credentials.
+
+```json
+{
+  "bucket": "my-docs-bucket",
+  "prefix": "reports/2026/",
+  "region": "us-east-1",
+  "endpoint_url": "https://s3.amazonaws.com",
+  "access_key": "AKIA...",
+  "secret_key": "..."
+}
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `bucket` | Yes | S3 bucket name |
+| `prefix` | No | Filter objects by key prefix |
+| `region` | No | AWS region (default: `us-east-1`) |
+| `endpoint_url` | No | Custom endpoint for S3-compatible services |
+| `access_key` | No | AWS access key (omit for public buckets) |
+| `secret_key` | No | AWS secret key (omit for public buckets) |
+| `metadata` | No | Additional metadata for all ingested documents |
+
+Up to 100 files per request. Unsupported file types are skipped.
 
 ### Batch Get Documents
 
