@@ -4,7 +4,7 @@ import type { Column } from "@raven/ui";
 import { Button, Checkbox, ConfirmDialog, DataTable } from "@raven/ui";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { FileUp, Globe, ImageIcon, Trash2 } from "lucide-react";
+import { CloudDownload, FileUp, Globe, ImageIcon, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { Document } from "../../hooks/use-documents";
@@ -15,6 +15,7 @@ import {
   useBatchDeleteDocuments,
   useDeleteDocument
 } from "../../hooks/use-documents";
+import { S3ImportModal } from "./s3-import-modal";
 import { UploadModal } from "./upload-modal";
 
 const FILE_TYPE_ICONS: Record<string, React.ReactNode> = {
@@ -122,6 +123,7 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
   }, [statusData, collectionId, page, queryClient]);
 
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [s3ImportOpen, setS3ImportOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
@@ -265,10 +267,16 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
             </Button>
           )}
         </div>
-        <Button onClick={() => setUploadOpen(true)}>
-          <FileUp className="size-4" />
-          Upload Files
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={() => setS3ImportOpen(true)} variant="secondary">
+            <CloudDownload className="size-4" />
+            Import from S3
+          </Button>
+          <Button onClick={() => setUploadOpen(true)}>
+            <FileUp className="size-4" />
+            Upload Files
+          </Button>
+        </div>
       </div>
 
       <DataTable
@@ -311,6 +319,12 @@ const DocumentsTab = ({ collectionId }: DocumentsTabProps) => {
         collectionId={collectionId}
         onClose={() => setUploadOpen(false)}
         open={uploadOpen}
+      />
+
+      <S3ImportModal
+        collectionId={collectionId}
+        onClose={() => setS3ImportOpen(false)}
+        open={s3ImportOpen}
       />
 
       <ConfirmDialog
