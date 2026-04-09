@@ -245,10 +245,12 @@ export const useS3Ingest = (collectionId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (params: S3IngestParams) => {
-      const promise = api.post<S3IngestResponse>(
-        `/v1/knowledge/collections/${collectionId}/documents/s3`,
-        params
-      );
+      const promise = ky
+        .post(
+          `${API_URL}/v1/knowledge/collections/${collectionId}/documents/s3`,
+          { credentials: "include", json: params, timeout: 300_000 }
+        )
+        .json<S3IngestResponse>();
       toast.promise(promise, {
         error: (err) =>
           err instanceof Error ? err.message : "S3 import failed",
