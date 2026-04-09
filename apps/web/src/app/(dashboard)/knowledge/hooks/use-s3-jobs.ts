@@ -5,8 +5,10 @@ import {
   useMutation,
   useQueryClient
 } from "@tanstack/react-query";
+import ky from "ky";
 import { toast } from "sonner";
-import { api } from "@/lib/api";
+import { API_URL, api } from "@/lib/api";
+import type { Document } from "./use-documents";
 
 export interface S3Job {
   readonly id: string;
@@ -80,6 +82,54 @@ export const useDeleteS3Job = (collectionId: string) => {
       return promise;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["knowledge-s3-jobs", collectionId]
+      });
+    }
+  });
+};
+
+export interface S3IngestParams {
+  readonly bucket: string;
+  readonly prefix?: string;
+  readonly region?: string;
+  readonly endpoint_url?: string;
+  readonly access_key?: string;
+  readonly secret_key?: string;
+  readonly file_types?: string[];
+}
+
+interface S3IngestResponse {
+  readonly status: string;
+  readonly message: string;
+  readonly documents: Document[];
+  readonly total: number;
+  readonly skipped: readonly string[];
+}
+
+export const useS3Ingest = (collectionId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (params: S3IngestParams) => {
+      const promise = ky
+        .post(
+          `${API_URL}/v1/knowledge/collections/${collectionId}/documents/s3`,
+          { credentials: "include", json: params, timeout: 300_000 }
+        )
+        .json<S3IngestResponse>();
+      toast.promise(promise, {
+        error: (err) =>
+          err instanceof Error ? err.message : "S3 import failed",
+        loading: "Importing from S3...",
+        success:
+          "S3 import started — documents will appear as they are processed"
+      });
+      return promise;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["knowledge-documents", collectionId]
+      });
       queryClient.invalidateQueries({
         queryKey: ["knowledge-s3-jobs", collectionId]
       });

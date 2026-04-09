@@ -19,31 +19,25 @@ const client = ky.create({
   credentials: "include",
   hooks: {
     beforeError: [
-      async ({ error }) => {
-        if ("response" in error && error.response instanceof Response) {
-          const body = await error.response
-            .json()
-            .catch(() => ({}) as Record<string, unknown>);
-          const parsed = body as Record<string, unknown>;
-          const detail =
-            typeof parsed?.detail === "string" ? parsed.detail : undefined;
-          const nested = parsed?.error as Record<string, unknown> | undefined;
-          error.message =
-            detail ??
-            (typeof nested?.message === "string"
-              ? nested.message
-              : undefined) ??
-            (typeof parsed?.message === "string"
-              ? parsed.message
-              : undefined) ??
-            "Request failed";
-        }
+      async (error) => {
+        const body = await error.response
+          .json()
+          .catch(() => ({}) as Record<string, unknown>);
+        const parsed = body as Record<string, unknown>;
+        const detail =
+          typeof parsed?.detail === "string" ? parsed.detail : undefined;
+        const nested = parsed?.error as Record<string, unknown> | undefined;
+        error.message =
+          detail ??
+          (typeof nested?.message === "string" ? nested.message : undefined) ??
+          (typeof parsed?.message === "string" ? parsed.message : undefined) ??
+          "Request failed";
         return error;
       }
     ],
     beforeRequest: []
   },
-  prefix: API_URL
+  prefixUrl: API_URL
 });
 
 const request = async <T>(

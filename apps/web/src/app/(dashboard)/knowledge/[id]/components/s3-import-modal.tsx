@@ -3,7 +3,8 @@
 import { Button, Checkbox, Input, Modal } from "@raven/ui";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
-import { useS3Ingest } from "../../hooks/use-documents";
+import type { S3IngestParams } from "../../hooks/use-s3-jobs";
+import { useS3Ingest } from "../../hooks/use-s3-jobs";
 
 const FILE_TYPE_GROUPS = [
   {
@@ -22,6 +23,131 @@ const FILE_TYPE_GROUPS = [
 
 const ALL_FILE_TYPES = FILE_TYPE_GROUPS.flatMap((g) => g.types);
 
+interface FileTypeSelectorProps {
+  readonly selectedTypes: ReadonlySet<string>;
+  readonly onToggle: (type: string) => void;
+  readonly onToggleAll: () => void;
+}
+
+const FileTypeSelector = ({
+  selectedTypes,
+  onToggle,
+  onToggleAll
+}: FileTypeSelectorProps) => {
+  const isAllSelected = selectedTypes.size === ALL_FILE_TYPES.length;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium">File Types</span>
+        <button
+          className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+          onClick={onToggleAll}
+          type="button"
+        >
+          {isAllSelected ? "Deselect All" : "Select All"}
+        </button>
+      </div>
+      <div className="space-y-3 rounded-md border border-border p-3">
+        {FILE_TYPE_GROUPS.map((group) => (
+          <div key={group.label}>
+            <span className="mb-1.5 block text-xs font-medium text-muted-foreground">
+              {group.label}
+            </span>
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+              {group.types.map((type) => (
+                <Checkbox
+                  checked={selectedTypes.has(type)}
+                  key={type}
+                  label={`.${type}`}
+                  onCheckedChange={() => onToggle(type)}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+interface AuthSectionProps {
+  readonly accessKey: string;
+  readonly secretKey: string;
+  readonly onAccessKeyChange: (value: string) => void;
+  readonly onSecretKeyChange: (value: string) => void;
+}
+
+const AuthSection = ({
+  accessKey,
+  secretKey,
+  onAccessKeyChange,
+  onSecretKeyChange
+}: AuthSectionProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div>
+      <button
+        className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+        onClick={() => setIsOpen(!isOpen)}
+        type="button"
+      >
+        {isOpen ? (
+          <ChevronDown className="size-4" />
+        ) : (
+          <ChevronRight className="size-4" />
+        )}
+        Authentication
+        <span className="text-xs font-normal">
+          (optional for public buckets)
+        </span>
+      </button>
+
+      {isOpen && (
+        <div className="mt-3 space-y-4">
+          <Input
+            label="Access Key"
+            onChange={(e) => onAccessKeyChange(e.target.value)}
+            placeholder="AKIA..."
+            value={accessKey}
+          />
+          <Input
+            label="Secret Key"
+            onChange={(e) => onSecretKeyChange(e.target.value)}
+            placeholder="Secret key"
+            type="password"
+            value={secretKey}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
+const INITIAL_TYPES = () => new Set<string>(ALL_FILE_TYPES);
+
+const buildParams = (form: {
+  readonly accessKey: string;
+  readonly bucket: string;
+  readonly endpointUrl: string;
+  readonly prefix: string;
+  readonly region: string;
+  readonly secretKey: string;
+  readonly selectedTypes: ReadonlySet<string>;
+}): S3IngestParams => ({
+  access_key: form.accessKey.trim() || undefined,
+  bucket: form.bucket.trim(),
+  endpoint_url: form.endpointUrl.trim() || undefined,
+  file_types:
+    form.selectedTypes.size === ALL_FILE_TYPES.length
+      ? undefined
+      : [...form.selectedTypes],
+  prefix: form.prefix.trim() || undefined,
+  region: form.region.trim() || undefined,
+  secret_key: form.secretKey.trim() || undefined
+});
+
 interface S3ImportModalProps {
   readonly open: boolean;
   readonly onClose: () => void;
@@ -35,52 +161,25 @@ const S3ImportModal = ({ open, onClose, collectionId }: S3ImportModalProps) => {
   const [endpointUrl, setEndpointUrl] = useState("");
   const [accessKey, setAccessKey] = useState("");
   const [secretKey, setSecretKey] = useState("");
-  const [showAuth, setShowAuth] = useState(false);
-  const [selectedTypes, setSelectedTypes] = useState<Set<string>>(
-    new Set(ALL_FILE_TYPES)
-  );
+  const [selectedTypes, setSelectedTypes] =
+    useState<Set<string>>(INITIAL_TYPES);
 
   const s3Ingest = useS3Ingest(collectionId);
   const isLoading = s3Ingest.isPending;
 
-  const allSelected = selectedTypes.size === ALL_FILE_TYPES.length;
-
   const toggleType = (type: string) => {
     setSelectedTypes((prev) => {
       const next = new Set(prev);
-      if (next.has(type)) {
-        next.delete(type);
-      } else {
-        next.add(type);
-      }
+      if (next.has(type)) next.delete(type);
+      else next.add(type);
       return next;
     });
   };
 
   const toggleAll = () => {
-    if (allSelected) {
-      setSelectedTypes(new Set());
-    } else {
-      setSelectedTypes(new Set(ALL_FILE_TYPES));
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await s3Ingest.mutateAsync({
-        access_key: accessKey.trim() || undefined,
-        bucket: bucket.trim(),
-        endpoint_url: endpointUrl.trim() || undefined,
-        file_types: allSelected ? undefined : [...selectedTypes],
-        prefix: prefix.trim() || undefined,
-        region: region.trim() || undefined,
-        secret_key: secretKey.trim() || undefined
-      });
-      handleClose();
-    } catch {
-      // Error handled by toast in the mutation hook
-    }
+    setSelectedTypes(
+      selectedTypes.size === ALL_FILE_TYPES.length ? new Set() : INITIAL_TYPES()
+    );
   };
 
   const handleClose = () => {
@@ -90,9 +189,27 @@ const S3ImportModal = ({ open, onClose, collectionId }: S3ImportModalProps) => {
     setEndpointUrl("");
     setAccessKey("");
     setSecretKey("");
-    setShowAuth(false);
-    setSelectedTypes(new Set(ALL_FILE_TYPES));
+    setSelectedTypes(INITIAL_TYPES);
     onClose();
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const params = buildParams({
+        accessKey,
+        bucket,
+        endpointUrl,
+        prefix,
+        region,
+        secretKey,
+        selectedTypes
+      });
+      await s3Ingest.mutateAsync(params);
+      handleClose();
+    } catch {
+      // Error handled by toast in the mutation hook
+    }
   };
 
   return (
@@ -126,73 +243,18 @@ const S3ImportModal = ({ open, onClose, collectionId }: S3ImportModalProps) => {
           value={endpointUrl}
         />
 
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">File Types</span>
-            <button
-              className="text-xs text-muted-foreground transition-colors hover:text-foreground"
-              onClick={toggleAll}
-              type="button"
-            >
-              {allSelected ? "Deselect All" : "Select All"}
-            </button>
-          </div>
-          <div className="space-y-3 rounded-md border border-border p-3">
-            {FILE_TYPE_GROUPS.map((group) => (
-              <div key={group.label}>
-                <span className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                  {group.label}
-                </span>
-                <div className="flex flex-wrap gap-x-4 gap-y-1.5">
-                  {group.types.map((type) => (
-                    <Checkbox
-                      checked={selectedTypes.has(type)}
-                      key={type}
-                      label={`.${type}`}
-                      onCheckedChange={() => toggleType(type)}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <FileTypeSelector
+          onToggle={toggleType}
+          onToggleAll={toggleAll}
+          selectedTypes={selectedTypes}
+        />
 
-        <div>
-          <button
-            className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            onClick={() => setShowAuth(!showAuth)}
-            type="button"
-          >
-            {showAuth ? (
-              <ChevronDown className="size-4" />
-            ) : (
-              <ChevronRight className="size-4" />
-            )}
-            Authentication
-            <span className="text-xs font-normal">
-              (optional for public buckets)
-            </span>
-          </button>
-
-          {showAuth && (
-            <div className="mt-3 space-y-4">
-              <Input
-                label="Access Key"
-                onChange={(e) => setAccessKey(e.target.value)}
-                placeholder="AKIA..."
-                value={accessKey}
-              />
-              <Input
-                label="Secret Key"
-                onChange={(e) => setSecretKey(e.target.value)}
-                placeholder="Secret key"
-                type="password"
-                value={secretKey}
-              />
-            </div>
-          )}
-        </div>
+        <AuthSection
+          accessKey={accessKey}
+          onAccessKeyChange={setAccessKey}
+          onSecretKeyChange={setSecretKey}
+          secretKey={secretKey}
+        />
 
         <div className="flex justify-end gap-2 pt-2">
           <Button
