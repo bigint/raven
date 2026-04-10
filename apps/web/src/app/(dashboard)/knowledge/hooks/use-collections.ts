@@ -82,6 +82,30 @@ export const collectionStatsQueryOptions = (name: string) =>
     queryKey: ["knowledge-collection-stats", name]
   });
 
+export interface PeriodStats {
+  readonly query_count: number;
+  readonly avg_latency_ms: number;
+  readonly avg_score: number;
+  readonly avg_result_count: number;
+}
+
+export interface CollectionAnalytics {
+  readonly collection: string;
+  readonly period_24h: PeriodStats;
+  readonly period_7d: PeriodStats;
+  readonly period_30d: PeriodStats;
+  readonly top_queries: { readonly query: string; readonly count: number }[];
+}
+
+export const collectionAnalyticsQueryOptions = (name: string) =>
+  queryOptions({
+    queryFn: () =>
+      api.get<CollectionAnalytics>(
+        `/v1/knowledge/collections/${name}/analytics`
+      ),
+    queryKey: ["knowledge-collection-analytics", name]
+  });
+
 const {
   useCreate: useCreateCollection,
   useUpdate: useUpdateCollection,

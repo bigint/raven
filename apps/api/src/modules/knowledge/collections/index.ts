@@ -2,6 +2,7 @@ import type { BigRAG } from "@bigrag/client";
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
 import { jsonValidator } from "@/lib/validation";
+import { getCollectionAnalytics } from "./analytics";
 import { createCollection } from "./create";
 import { deleteCollection } from "./delete";
 import { streamCollectionEvents } from "./events";
@@ -23,6 +24,7 @@ export const createCollectionsModule = (db: Database, bigrag: BigRAG) => {
   );
   app.get("/:name", getCollection(bigrag));
   app.get("/:name/stats", getCollectionStats(bigrag));
+  app.get("/:name/analytics", getCollectionAnalytics(bigrag));
   app.get("/:name/events", streamCollectionEvents(bigrag));
   app.put(
     "/:name",

@@ -2,7 +2,8 @@
 
 import { Button, ConfirmDialog, PageHeader, Spinner, Tabs } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
-import { Eraser, Pencil, Terminal, Trash2 } from "lucide-react";
+import { Eraser, MessageSquare, Pencil, Terminal, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import {
@@ -11,6 +12,7 @@ import {
   useTruncateCollection
 } from "../hooks/use-collections";
 import { useLiveLogs } from "../hooks/use-live-logs";
+import { AnalyticsTab } from "./components/analytics-tab";
 import { CollectionForm } from "./components/collection-form";
 import { CollectionStats } from "./components/collection-stats";
 import { DocumentsTab } from "./components/documents-tab";
@@ -22,7 +24,8 @@ const TABS = [
   { label: "Overview", value: "overview" },
   { label: "Documents", value: "documents" },
   { label: "Imports", value: "imports" },
-  { label: "Search", value: "search" }
+  { label: "Search", value: "search" },
+  { label: "Analytics", value: "analytics" }
 ];
 
 const CollectionDetailPage = () => {
@@ -92,6 +95,13 @@ const CollectionDetailPage = () => {
       <PageHeader
         actions={
           <>
+            <Link
+              className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+              href={`/chat?kb=${encodeURIComponent(id)}`}
+            >
+              <MessageSquare className="size-4" />
+              Playground
+            </Link>
             <Button onClick={() => setLogsOpen(true)} variant="secondary">
               <Terminal className="size-4" />
               Live Logs
@@ -121,6 +131,7 @@ const CollectionDetailPage = () => {
       {tab === "documents" && <DocumentsTab collectionId={id} />}
       {tab === "imports" && <ImportsTab collectionId={id} />}
       {tab === "search" && <SearchTab collectionId={id} />}
+      {tab === "analytics" && <AnalyticsTab collectionId={id} />}
 
       <LiveLogsModal
         connected={connected}
