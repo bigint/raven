@@ -8,6 +8,13 @@ export const listS3Jobs = (bigrag: BigRAG) => async (c: Context) => {
   return success(c, result);
 };
 
+export const getS3Job = (bigrag: BigRAG) => async (c: Context) => {
+  const name = c.req.param("name") as string;
+  const jobId = c.req.param("jobId") as string;
+  const result = await bigrag.documents.getS3Job(name, jobId);
+  return success(c, result);
+};
+
 export const deleteS3Job = (bigrag: BigRAG) => async (c: Context) => {
   const name = c.req.param("name") as string;
   const jobId = c.req.param("jobId") as string;

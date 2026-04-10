@@ -45,11 +45,11 @@ const ChatPage = () => {
   });
 
   const searchParams = useSearchParams();
-  const kbApplied = useRef(false);
+  const lastKb = useRef<string | null>(null);
   useEffect(() => {
     const kb = searchParams.get("kb");
-    if (kb && !kbApplied.current) {
-      kbApplied.current = true;
+    if (kb && kb !== lastKb.current) {
+      lastKb.current = kb;
       setSettings((prev) => ({
         ...prev,
         enableKnowledge: true,

@@ -47,6 +47,17 @@ const buildColumns = (
     render: (job) => <ProgressCell job={job} />
   },
   {
+    header: "File Types",
+    key: "file_types",
+    render: (job) => (
+      <span className="text-xs text-muted-foreground">
+        {job.file_types.length > 0
+          ? job.file_types.map((t) => `.${t}`).join(", ")
+          : "All"}
+      </span>
+    )
+  },
+  {
     header: "Started",
     key: "created_at",
     render: (job) => (
