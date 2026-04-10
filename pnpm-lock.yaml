@@ -39,8 +39,8 @@ importers:
         specifier: ^3.0.52
         version: 3.0.52(zod@4.3.6)
       '@bigrag/client':
-        specifier: ^0.0.12
-        version: 0.0.12
+        specifier: file:../../../bigrag/sdks/typescript
+        version: file:../bigrag/sdks/typescript
       '@hono/node-server':
         specifier: ^1.19.13
         version: 1.19.13(hono@4.12.12)
@@ -545,8 +545,8 @@ packages:
   '@better-fetch/fetch@1.1.21':
     resolution: {integrity: sha512-/ImESw0sskqlVR94jB+5+Pxjf+xBwDZF/N5+y2/q4EqD7IARUTSpPfIo8uf39SYpCxyOCtbyYpUrZ3F/k0zT4A==}
 
-  '@bigrag/client@0.0.12':
-    resolution: {integrity: sha512-wHGfwjvG0FLHlExFJpwSxbc2LaLNRIXw3K6QNI843OY2GO3qjwUWZ8WlAGf0h1Pq+OsFNb93bcIhGWETbBga0g==}
+  '@bigrag/client@file:../bigrag/sdks/typescript':
+    resolution: {directory: ../bigrag/sdks/typescript, type: directory}
     engines: {node: '>=18'}
 
   '@biomejs/biome@2.4.11':
@@ -4855,7 +4855,7 @@ snapshots:
 
   '@better-fetch/fetch@1.1.21': {}
 
-  '@bigrag/client@0.0.12': {}
+  '@bigrag/client@file:../bigrag/sdks/typescript': {}
 
   '@biomejs/biome@2.4.11':
     optionalDependencies:

@@ -11,13 +11,14 @@ interface ModalProps {
   title: string;
   children: ReactNode;
   footer?: ReactNode;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 const sizeMap = {
   lg: "max-w-lg",
   md: "max-w-md",
-  sm: "max-w-sm"
+  sm: "max-w-sm",
+  xl: "max-w-6xl"
 };
 
 const Modal = ({

@@ -2,7 +2,7 @@
 
 import { Button, ConfirmDialog, PageHeader, Spinner, Tabs } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
-import { Eraser, Pencil, Trash2 } from "lucide-react";
+import { Eraser, Pencil, Terminal, Trash2 } from "lucide-react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import {
@@ -10,10 +10,12 @@ import {
   useDeleteCollection,
   useTruncateCollection
 } from "../hooks/use-collections";
+import { useLiveLogs } from "../hooks/use-live-logs";
 import { CollectionForm } from "./components/collection-form";
 import { CollectionStats } from "./components/collection-stats";
 import { DocumentsTab } from "./components/documents-tab";
 import { ImportsTab } from "./components/imports-tab";
+import { LiveLogsModal } from "./components/live-logs-modal";
 import { SearchTab } from "./components/search-tab";
 
 const TABS = [
@@ -31,6 +33,7 @@ const CollectionDetailPage = () => {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [truncateOpen, setTruncateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [logsOpen, setLogsOpen] = useState(false);
   const deleteMutation = useDeleteCollection();
   const truncateMutation = useTruncateCollection();
 
@@ -59,6 +62,11 @@ const CollectionDetailPage = () => {
     isLoading,
     error
   } = useQuery(collectionDetailQueryOptions(id));
+  const {
+    logs,
+    connected,
+    clear: clearLogs
+  } = useLiveLogs(collection?.name ?? "", logsOpen);
 
   if (isLoading) {
     return (
@@ -84,6 +92,10 @@ const CollectionDetailPage = () => {
       <PageHeader
         actions={
           <>
+            <Button onClick={() => setLogsOpen(true)} variant="secondary">
+              <Terminal className="size-4" />
+              Live Logs
+            </Button>
             <Button onClick={() => setEditOpen(true)} variant="secondary">
               <Pencil className="size-4" />
               Edit
@@ -109,6 +121,14 @@ const CollectionDetailPage = () => {
       {tab === "documents" && <DocumentsTab collectionId={id} />}
       {tab === "imports" && <ImportsTab collectionId={id} />}
       {tab === "search" && <SearchTab collectionId={id} />}
+
+      <LiveLogsModal
+        connected={connected}
+        logs={logs}
+        onClear={clearLogs}
+        onClose={() => setLogsOpen(false)}
+        open={logsOpen}
+      />
 
       <CollectionForm
         editingCollection={collection}

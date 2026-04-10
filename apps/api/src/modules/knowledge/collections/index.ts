@@ -4,6 +4,7 @@ import { Hono } from "hono";
 import { jsonValidator } from "@/lib/validation";
 import { createCollection } from "./create";
 import { deleteCollection } from "./delete";
+import { streamCollectionEvents } from "./events";
 import { getCollection } from "./get";
 import { listCollections } from "./list";
 import { createCollectionSchema, updateCollectionSchema } from "./schema";
@@ -22,6 +23,7 @@ export const createCollectionsModule = (db: Database, bigrag: BigRAG) => {
   );
   app.get("/:name", getCollection(bigrag));
   app.get("/:name/stats", getCollectionStats(bigrag));
+  app.get("/:name/events", streamCollectionEvents(bigrag));
   app.put(
     "/:name",
     jsonValidator(updateCollectionSchema),
