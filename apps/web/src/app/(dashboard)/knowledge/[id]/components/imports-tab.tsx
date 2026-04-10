@@ -4,7 +4,7 @@ import type { Column } from "@raven/ui";
 import { Button, ConfirmDialog, DataTable } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { RefreshCw, Trash2 } from "lucide-react";
+import { Pencil, RefreshCw, Trash2 } from "lucide-react";
 import { useState } from "react";
 import type { S3Job } from "../../hooks/use-s3-jobs";
 import {
@@ -12,6 +12,7 @@ import {
   useDeleteS3Job,
   useResyncS3Job
 } from "../../hooks/use-s3-jobs";
+import { EditS3JobModal } from "./edit-s3-job-modal";
 import { ProgressCell, StatusCell } from "./s3-job-cells";
 
 const isTerminal = (status: S3Job["status"]): boolean =>
@@ -20,6 +21,7 @@ const isTerminal = (status: S3Job["status"]): boolean =>
 const buildColumns = (
   onResync: (id: string) => void,
   isResyncing: boolean,
+  onEdit: (job: S3Job) => void,
   onDelete: (job: S3Job) => void
 ): Column<S3Job>[] => [
   {
@@ -58,6 +60,14 @@ const buildColumns = (
     key: "actions",
     render: (job) => (
       <div className="flex items-center gap-1">
+        <Button
+          onClick={() => onEdit(job)}
+          size="sm"
+          title="Edit file types"
+          variant="ghost"
+        >
+          <Pencil className="size-3.5 text-muted-foreground" />
+        </Button>
         {isTerminal(job.status) && (
           <Button
             disabled={isResyncing}
@@ -93,10 +103,12 @@ const ImportsTab = ({ collectionId }: ImportsTabProps) => {
   const deleteMutation = useDeleteS3Job(collectionId);
   const resyncMutation = useResyncS3Job(collectionId);
   const [deleteTarget, setDeleteTarget] = useState<S3Job | null>(null);
+  const [editTarget, setEditTarget] = useState<S3Job | null>(null);
 
   const columns = buildColumns(
     (id) => resyncMutation.mutate(id),
     resyncMutation.isPending,
+    setEditTarget,
     setDeleteTarget
   );
 
@@ -109,6 +121,13 @@ const ImportsTab = ({ collectionId }: ImportsTabProps) => {
         keyExtractor={(job) => job.id}
         loading={isLoading}
         loadingMessage="Loading imports..."
+      />
+
+      <EditS3JobModal
+        collectionId={collectionId}
+        job={editTarget}
+        onClose={() => setEditTarget(null)}
+        open={!!editTarget}
       />
 
       <ConfirmDialog

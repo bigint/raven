@@ -15,6 +15,14 @@ export const deleteS3Job = (bigrag: BigRAG) => async (c: Context) => {
   return success(c, result);
 };
 
+export const updateS3Job = (bigrag: BigRAG) => async (c: Context) => {
+  const name = c.req.param("name") as string;
+  const jobId = c.req.param("jobId") as string;
+  const body = await c.req.json();
+  const result = await bigrag.documents.updateS3Job(name, jobId, body);
+  return success(c, result);
+};
+
 export const resyncS3Job = (bigrag: BigRAG) => async (c: Context) => {
   const name = c.req.param("name") as string;
   const jobId = c.req.param("jobId") as string;

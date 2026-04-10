@@ -16,6 +16,8 @@ export interface S3Job {
   readonly bucket: string;
   readonly prefix: string;
   readonly region: string;
+  readonly endpoint_url: string | null;
+  readonly file_types: string[];
   readonly status: "pending" | "listing" | "ingesting" | "complete" | "failed";
   readonly total_found: number;
   readonly total_ingested: number;
@@ -78,6 +80,35 @@ export const useDeleteS3Job = (collectionId: string) => {
         error: (err) => err.message,
         loading: "Deleting import...",
         success: "Import deleted"
+      });
+      return promise;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["knowledge-s3-jobs", collectionId]
+      });
+    }
+  });
+};
+
+export const useUpdateS3Job = (collectionId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      jobId,
+      fileTypes
+    }: {
+      jobId: string;
+      fileTypes: string[];
+    }) => {
+      const promise = api.patch<S3Job>(
+        `/v1/knowledge/collections/${collectionId}/documents/s3-jobs/${jobId}`,
+        { file_types: fileTypes }
+      );
+      toast.promise(promise, {
+        error: (err) => err.message,
+        loading: "Updating import...",
+        success: "Import updated"
       });
       return promise;
     },
