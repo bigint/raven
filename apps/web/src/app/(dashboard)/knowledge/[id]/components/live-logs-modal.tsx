@@ -39,6 +39,8 @@ const STEP_STYLE: Record<string, { color: string; Icon: LucideIcon }> = {
   s3_listing: { color: "text-blue-400", Icon: Search },
   s3_skipped: { color: "text-zinc-500", Icon: MinusCircle },
   s3_started: { color: "text-blue-400", Icon: Cloud },
+  search: { color: "text-sky-400", Icon: Search },
+  search_complete: { color: "text-sky-400", Icon: Check },
   text_extracted: { color: "text-amber-400", Icon: FileText }
 };
 
