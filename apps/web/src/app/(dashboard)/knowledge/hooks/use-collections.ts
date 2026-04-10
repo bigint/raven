@@ -61,6 +61,27 @@ export const collectionDetailQueryOptions = (name: string) =>
     queryKey: ["knowledge-collections", name]
   });
 
+export interface CollectionStats {
+  readonly collection: string;
+  readonly document_count: number;
+  readonly total_chunks: number;
+  readonly total_tokens: number;
+  readonly total_size_bytes: number;
+  readonly status_counts: {
+    readonly ready: number;
+    readonly pending: number;
+    readonly processing: number;
+    readonly failed: number;
+  };
+}
+
+export const collectionStatsQueryOptions = (name: string) =>
+  queryOptions({
+    queryFn: () =>
+      api.get<CollectionStats>(`/v1/knowledge/collections/${name}/stats`),
+    queryKey: ["knowledge-collection-stats", name]
+  });
+
 const {
   useCreate: useCreateCollection,
   useUpdate: useUpdateCollection,

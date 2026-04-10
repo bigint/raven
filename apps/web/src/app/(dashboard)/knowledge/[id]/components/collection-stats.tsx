@@ -1,12 +1,35 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { BookOpen, Cpu, ScanSearch } from "lucide-react";
+import {
+  BookOpen,
+  Cpu,
+  Database,
+  HardDrive,
+  Hash,
+  ScanSearch
+} from "lucide-react";
 import type { Collection } from "../../hooks/use-collections";
+import { collectionStatsQueryOptions } from "../../hooks/use-collections";
 
 interface CollectionStatsProps {
   readonly collection: Collection;
 }
+
+const formatBytes = (bytes: number): string => {
+  if (bytes === 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return `${(bytes / 1024 ** i).toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+};
+
+const formatNumber = (n: number): string =>
+  n >= 1_000_000
+    ? `${(n / 1_000_000).toFixed(1)}M`
+    : n >= 1_000
+      ? `${(n / 1_000).toFixed(1)}K`
+      : String(n);
 
 const StatCard = ({
   icon: Icon,
@@ -45,19 +68,41 @@ const ConfigRow = ({
 );
 
 const CollectionStats = ({ collection }: CollectionStatsProps) => {
+  const { data: stats } = useQuery(
+    collectionStatsQueryOptions(collection.name)
+  );
+
+  const statusSub = stats
+    ? `${stats.status_counts.ready} ready, ${stats.status_counts.pending + stats.status_counts.processing} processing, ${stats.status_counts.failed} failed`
+    : undefined;
+
   return (
     <div className="space-y-6">
-      {/* Stats grid */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard
           icon={BookOpen}
           label="Documents"
+          sub={statusSub}
           value={collection.document_count}
+        />
+        <StatCard
+          icon={Hash}
+          label="Chunks"
+          value={stats ? formatNumber(stats.total_chunks) : "-"}
+        />
+        <StatCard
+          icon={Database}
+          label="Tokens"
+          value={stats ? formatNumber(stats.total_tokens) : "-"}
+        />
+        <StatCard
+          icon={HardDrive}
+          label="Size"
+          value={stats ? formatBytes(stats.total_size_bytes) : "-"}
         />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {/* Embedding config */}
         <div className="rounded-xl border border-border bg-card">
           <div className="flex items-center gap-2 border-b border-border px-4 py-3">
             <Cpu className="size-4 text-muted-foreground" />
@@ -72,7 +117,6 @@ const CollectionStats = ({ collection }: CollectionStatsProps) => {
           </div>
         </div>
 
-        {/* Search defaults */}
         <div className="rounded-xl border border-border bg-card">
           <div className="flex items-center gap-2 border-b border-border px-4 py-3">
             <ScanSearch className="size-4 text-muted-foreground" />
@@ -98,7 +142,6 @@ const CollectionStats = ({ collection }: CollectionStatsProps) => {
         </div>
       </div>
 
-      {/* Footer meta */}
       <div className="flex items-center gap-4 text-xs text-muted-foreground">
         <span>
           Created{" "}
