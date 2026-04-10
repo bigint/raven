@@ -33,7 +33,7 @@ const STATUS_LABEL: Record<string, string> = {
   ready: "Ready"
 };
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 50;
 
 const DocumentDetailPage = () => {
   const router = useRouter();

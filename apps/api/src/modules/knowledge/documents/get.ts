@@ -10,6 +10,8 @@ export const getDocument = (bigrag: BigRAG) => async (c: Context) => {
 
 export const getDocumentChunks = (bigrag: BigRAG) => async (c: Context) => {
   const docId = c.req.param("docId") as string;
-  const result = await bigrag.documents.getChunksById(docId);
+  const limit = Number(c.req.query("limit") ?? 50);
+  const offset = Number(c.req.query("offset") ?? 0);
+  const result = await bigrag.documents.getChunksById(docId, { limit, offset });
   return success(c, result);
 };
