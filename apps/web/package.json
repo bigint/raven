@@ -17,6 +17,7 @@
     "@raven/ui": "workspace:*",
     "@tanstack/react-query": "^5.97.0",
     "date-fns": "^4.1.0",
+    "geist": "^1.7.0",
     "ky": "^2.0.0",
     "lucide-react": "^1.8.0",
     "motion": "^12.38.0",
