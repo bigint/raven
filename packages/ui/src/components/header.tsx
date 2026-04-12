@@ -4,6 +4,7 @@ import { Fragment, type ReactNode } from "react";
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
+  /** @deprecated Use `subtitle` instead. */
   description?: string;
   breadcrumb?: ReactNode[];
   actions?: ReactNode;

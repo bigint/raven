@@ -30,11 +30,11 @@ interface AuditLog {
 
 const ACTION_VERBS: Record<
   string,
-  { label: string; variant: "solid" | "subtle" }
+  { label: string; variant: "solid" | "outline" | "subtle" }
 > = {
   created: { label: "Created", variant: "solid" },
   deleted: { label: "Deleted", variant: "subtle" },
-  updated: { label: "Updated", variant: "solid" }
+  updated: { label: "Updated", variant: "outline" }
 };
 
 const RESOURCE_ICONS: Record<string, typeof Key> = {

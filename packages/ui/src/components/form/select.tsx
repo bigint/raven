@@ -213,7 +213,7 @@ const SearchableSelect = ({
         </Popover.Portal>
       </Popover.Root>
 
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {error && <p className="text-xs font-medium text-foreground">{error}</p>}
     </div>
   );
 };
@@ -296,7 +296,7 @@ const StandardSelect = ({
         </BaseSelect.Positioner>
       </BaseSelect.Portal>
     </BaseSelect.Root>
-    {error && <p className="text-xs text-destructive">{error}</p>}
+    {error && <p className="text-xs font-medium text-foreground">{error}</p>}
   </div>
 );
 

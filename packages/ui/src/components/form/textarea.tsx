@@ -30,7 +30,7 @@ const Textarea = ({
     )}
     <textarea
       className={cn(
-        "w-full min-h-[80px] rounded-md border border-input bg-background px-2.5 py-2 text-sm text-foreground placeholder:text-muted-foreground transition-colors hover:border-input focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring resize-y data-[invalid]:border-foreground data-[invalid]:ring-1 data-[invalid]:ring-foreground",
+        "w-full min-h-[80px] rounded-md border border-input bg-background px-2.5 py-2 text-sm text-foreground placeholder:text-muted-foreground transition-colors hover:border-input focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring resize-y",
         error && "border-foreground ring-1 ring-foreground",
         className
       )}

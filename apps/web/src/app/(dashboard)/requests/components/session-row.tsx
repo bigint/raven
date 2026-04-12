@@ -19,7 +19,7 @@ const getStatusBadge = (statusCode: number) => {
     statusCode >= 500
       ? "subtle"
       : statusCode >= 400
-        ? "subtle"
+        ? "outline"
         : statusCode >= 200 && statusCode < 300
           ? "solid"
           : "outline";
