@@ -1,7 +1,7 @@
 "use client";
 
 import { Menu } from "@base-ui/react/menu";
-import { ChevronDown, LogOut, Moon, Settings, Sun } from "lucide-react";
+import { ChevronsUpDown, LogOut, Moon, Settings, Sun } from "lucide-react";
 import Link from "next/link";
 import { signOut } from "@/lib/auth-client";
 import { useThemeStore } from "@/stores/theme";
@@ -21,58 +21,63 @@ export const UserMenu = ({ user }: UserMenuProps) => {
     window.location.href = "/";
   };
 
+  const initial = (user.name ?? user.email ?? "U").slice(0, 1).toUpperCase();
+
   return (
-    <div className="border-t border-border px-3 py-3">
-      <Menu.Root modal={false}>
-        <Menu.Trigger
-          className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors hover:bg-accent"
-          render={<button type="button" />}
-        >
-          <div className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-xs font-medium">
-            {user.name?.charAt(0)?.toUpperCase() ?? "?"}
+    <Menu.Root modal={false}>
+      <Menu.Trigger
+        className="w-full flex items-center gap-2 p-1.5 rounded-md hover:bg-accent/60 transition-colors text-left"
+        render={<button type="button" />}
+      >
+        <div className="size-6 rounded-full bg-accent flex items-center justify-center text-foreground text-[11px] font-medium shrink-0">
+          {initial}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-[12.5px] font-medium text-foreground truncate">
+            {user.name ?? "User"}
           </div>
-          <div className="min-w-0 flex-1 text-left">
-            <p className="truncate text-sm font-medium">{user.name}</p>
-            <p className="truncate text-xs text-muted-foreground">
-              {user.email}
-            </p>
+          <div className="text-[11px] text-muted-foreground truncate">
+            {user.email ?? ""}
           </div>
-          <ChevronDown className="size-4 text-muted-foreground" />
-        </Menu.Trigger>
-        <Menu.Portal>
-          <Menu.Positioner align="start" side="top" sideOffset={4}>
-            <Menu.Popup className="min-w-[calc(var(--anchor-width))] rounded-md border border-border bg-popover py-1 shadow-md outline-none">
-              <Menu.Item
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground outline-none select-none transition-colors data-highlighted:bg-accent data-highlighted:text-accent-foreground"
-                closeOnClick
-                render={<Link href="/profile" />}
-              >
-                <Settings className="size-4" />
-                Profile
-              </Menu.Item>
-              <Menu.Item
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground outline-none select-none transition-colors data-highlighted:bg-accent data-highlighted:text-accent-foreground"
-                onClick={toggleTheme}
-              >
-                {theme === "light" ? (
-                  <Moon className="size-4" />
-                ) : (
-                  <Sun className="size-4" />
-                )}
-                {theme === "light" ? "Dark mode" : "Light mode"}
-              </Menu.Item>
-              <div className="my-1 border-t border-border" />
-              <Menu.Item
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive outline-none select-none transition-colors data-highlighted:bg-destructive/10 data-highlighted:text-destructive"
-                onClick={handleSignOut}
-              >
-                <LogOut className="size-4" />
-                Sign out
-              </Menu.Item>
-            </Menu.Popup>
-          </Menu.Positioner>
-        </Menu.Portal>
-      </Menu.Root>
-    </div>
+        </div>
+        <ChevronsUpDown
+          className="size-3 text-muted-foreground shrink-0"
+          strokeWidth={1.5}
+        />
+      </Menu.Trigger>
+      <Menu.Portal>
+        <Menu.Positioner align="start" side="top" sideOffset={4}>
+          <Menu.Popup className="min-w-[calc(var(--anchor-width))] bg-popover border border-border rounded-lg shadow-md p-1 outline-none">
+            <Menu.Item
+              className="flex items-center gap-2.5 px-2.5 h-8 rounded-md text-sm text-muted-foreground outline-none select-none transition-colors hover:bg-accent hover:text-foreground data-highlighted:bg-accent data-highlighted:text-foreground"
+              closeOnClick
+              render={<Link href="/profile" />}
+            >
+              <Settings className="size-3.5" strokeWidth={1.5} />
+              Profile
+            </Menu.Item>
+            <Menu.Item
+              className="flex items-center gap-2.5 px-2.5 h-8 rounded-md text-sm text-muted-foreground outline-none select-none transition-colors hover:bg-accent hover:text-foreground data-highlighted:bg-accent data-highlighted:text-foreground"
+              onClick={toggleTheme}
+            >
+              {theme === "light" ? (
+                <Moon className="size-3.5" strokeWidth={1.5} />
+              ) : (
+                <Sun className="size-3.5" strokeWidth={1.5} />
+              )}
+              {theme === "light" ? "Dark mode" : "Light mode"}
+            </Menu.Item>
+            <div className="my-1 border-t border-border" />
+            <Menu.Item
+              className="flex items-center gap-2.5 px-2.5 h-8 rounded-md text-sm text-destructive outline-none select-none transition-colors hover:bg-destructive/10 hover:text-destructive data-highlighted:bg-destructive/10 data-highlighted:text-destructive"
+              onClick={handleSignOut}
+            >
+              <LogOut className="size-3.5" strokeWidth={1.5} />
+              Sign out
+            </Menu.Item>
+          </Menu.Popup>
+        </Menu.Positioner>
+      </Menu.Portal>
+    </Menu.Root>
   );
 };
