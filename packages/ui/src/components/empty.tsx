@@ -7,6 +7,7 @@ interface EmptyStateProps {
   description?: string;
   action?: ReactNode;
   bordered?: boolean;
+  compact?: boolean;
 }
 
 const EmptyState = ({
@@ -14,22 +15,32 @@ const EmptyState = ({
   title,
   description,
   action,
-  bordered = true
+  bordered = true,
+  compact = false
 }: EmptyStateProps) => (
   <div
     className={cn(
-      "p-12 text-center",
+      compact
+        ? "py-8 px-4 flex flex-col items-center text-center"
+        : "py-14 px-6 flex flex-col items-center text-center",
       bordered && "rounded-xl border border-border"
     )}
   >
     {icon && (
-      <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
+      <div
+        className={cn(
+          "flex items-center justify-center rounded-full bg-muted text-muted-foreground",
+          compact ? "size-8 mb-2" : "size-10 mb-3"
+        )}
+      >
         {icon}
       </div>
     )}
-    <h2 className="font-medium text-foreground text-base">{title}</h2>
+    <h2 className="text-sm font-medium text-foreground">{title}</h2>
     {description && (
-      <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+      <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+        {description}
+      </p>
     )}
     {action && <div className="mt-4">{action}</div>}
   </div>
