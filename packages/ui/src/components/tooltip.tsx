@@ -19,12 +19,12 @@ const Tooltip = ({
   if (!content) return <>{children}</>;
 
   return (
-    <BaseTooltip.Provider>
+    <BaseTooltip.Provider delay={200}>
       <BaseTooltip.Root>
         <BaseTooltip.Trigger render={children as React.JSX.Element} />
         <BaseTooltip.Portal>
           <BaseTooltip.Positioner align={align} side={side} sideOffset={6}>
-            <BaseTooltip.Popup className="rounded-md bg-foreground px-2.5 py-1.5 text-xs text-background shadow-md">
+            <BaseTooltip.Popup className="rounded-sm bg-foreground px-2 py-1 text-[11px] font-medium text-background shadow-sm">
               {content}
             </BaseTooltip.Popup>
           </BaseTooltip.Positioner>

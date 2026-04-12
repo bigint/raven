@@ -6,16 +6,16 @@ interface SpinnerProps {
 }
 
 const sizeMap = {
-  lg: "size-8",
-  md: "size-6",
-  sm: "size-4"
+  lg: "size-6",
+  md: "size-4",
+  sm: "size-3"
 };
 
 const Spinner = ({ className, size = "md" }: SpinnerProps) => (
   <div
     aria-label="Loading"
     className={cn(
-      "animate-spin rounded-full border-2 border-muted-foreground border-t-transparent",
+      "animate-spin rounded-full border border-border border-t-foreground",
       sizeMap[size],
       className
     )}
