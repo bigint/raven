@@ -43,6 +43,10 @@ interface AdminSettings {
   // Email
   readonly resend_api_key: string;
   readonly resend_from_email: string;
+  // Knowledge / RAG
+  readonly knowledge_enabled: string;
+  readonly bigrag_url: string;
+  readonly bigrag_api_key: string;
 }
 
 interface Invitation {

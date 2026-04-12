@@ -26,6 +26,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "@/lib/auth-client";
+import { useKnowledgeEnabled } from "@/lib/use-public-settings";
 import { UserMenu } from "./user-menu";
 
 const useLockBodyScroll = (isLocked: boolean) => {
@@ -44,7 +45,7 @@ interface NavItem {
   readonly icon: LucideIcon;
 }
 
-const NAV_ITEMS: NavItem[] = [
+const NAV_ITEMS: (NavItem & { gated?: "knowledge" })[] = [
   { href: "/overview", icon: LayoutDashboard, label: "Overview" },
   { href: "/chat", icon: SquareTerminal, label: "Playground" },
   { href: "/analytics", icon: BarChart3, label: "Analytics" },
@@ -55,7 +56,12 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/requests", icon: Activity, label: "Requests" },
   { href: "/budgets", icon: CreditCard, label: "Budgets" },
   { href: "/guardrails", icon: Shield, label: "Guardrails" },
-  { href: "/knowledge", icon: BookOpen, label: "Knowledge" },
+  {
+    gated: "knowledge",
+    href: "/knowledge",
+    icon: BookOpen,
+    label: "Knowledge"
+  },
   { href: "/audit-logs", icon: ScrollText, label: "Audit Logs" },
   { href: "/webhooks", icon: Webhook, label: "Webhooks" }
 ];
@@ -72,6 +78,10 @@ export const Sidebar = ({ user }: SidebarProps) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { data: session } = useSession();
   const isAdmin = session?.user?.role === "admin";
+  const knowledgeEnabled = useKnowledgeEnabled();
+  const visibleNav = NAV_ITEMS.filter(
+    (item) => item.gated !== "knowledge" || knowledgeEnabled
+  );
 
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
@@ -83,7 +93,7 @@ export const Sidebar = ({ user }: SidebarProps) => {
 
   const navLinks = (
     <>
-      {NAV_ITEMS.map((item) => {
+      {visibleNav.map((item) => {
         const isActive = pathname === item.href;
         const Icon = item.icon;
         return (

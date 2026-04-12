@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { useSession } from "@/lib/auth-client";
 import { EmailSettingsTab } from "../admin/components/email-settings-tab";
 import { GeneralSettingsTab } from "../admin/components/general-settings-tab";
+import { KnowledgeSettingsTab } from "../admin/components/knowledge-settings-tab";
 import { LoggingSettingsTab } from "../admin/components/logging-settings-tab";
 import { NotificationsSettingsTab } from "../admin/components/notifications-settings-tab";
 import { ProxySettingsTab } from "../admin/components/proxy-settings-tab";
@@ -16,6 +17,7 @@ const TABS = [
   { label: "General", value: "general" },
   { label: "Security", value: "security" },
   { label: "Proxy", value: "proxy" },
+  { label: "Knowledge", value: "knowledge" },
   { label: "Logging", value: "logging" },
   { label: "Webhooks", value: "webhooks" },
   { label: "Notifications", value: "notifications" },
@@ -25,6 +27,7 @@ const TABS = [
 const TAB_COMPONENTS: Record<string, React.FC> = {
   email: EmailSettingsTab,
   general: GeneralSettingsTab,
+  knowledge: KnowledgeSettingsTab,
   logging: LoggingSettingsTab,
   notifications: NotificationsSettingsTab,
   proxy: ProxySettingsTab,

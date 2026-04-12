@@ -11,7 +11,7 @@ export const chatCompletionsHandler = (
   db: Database,
   redis: Redis,
   env: Env,
-  bigrag: BigRAG,
+  bigrag: BigRAG | null,
   knowledgeEnabled: boolean
 ) => {
   return async (c: Context): Promise<Response> => {
@@ -39,7 +39,7 @@ export const chatCompletionsHandler = (
 
     return runPipeline({
       authHeader: c.req.header("Authorization") ?? "",
-      bigrag,
+      bigrag: bigrag ?? undefined,
       bodyText,
       db,
       env,

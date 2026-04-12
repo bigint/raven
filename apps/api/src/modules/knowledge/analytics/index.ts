@@ -11,5 +11,9 @@ export const createKnowledgeAnalyticsModule = (
   const app = new Hono();
   app.get("/analytics", getKnowledgeStats(db, bigrag));
   app.get("/query-logs", getQueryLogs(db));
+  app.get("/health", async (c) => {
+    const res = await bigrag.health();
+    return c.json(res);
+  });
   return app;
 };

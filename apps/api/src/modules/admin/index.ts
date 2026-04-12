@@ -7,7 +7,7 @@ import {
   deleteInvitation,
   listInvitations
 } from "./invitations";
-import { getSettings, updateSettings } from "./settings";
+import { getSettings, testBigRAGConnection, updateSettings } from "./settings";
 import { getAdminStats } from "./stats";
 import { deleteUser, getAdminUsers, updateUserRole } from "./users";
 
@@ -27,5 +27,6 @@ export const createAdminModule = (
   app.get("/audit-logs", getAdminAuditLogs(db));
   app.get("/settings", getSettings(db));
   app.put("/settings", updateSettings(db, redis));
+  app.post("/settings/bigrag-test", testBigRAGConnection(db, redis));
   return app;
 };

@@ -1,4 +1,3 @@
-import { BigRAG } from "@bigrag/client";
 import { serve } from "@hono/node-server";
 import { createAuth } from "@raven/auth";
 import { parseEnv } from "@raven/config";
@@ -7,6 +6,7 @@ import { Hono } from "hono";
 import { compress } from "hono/compress";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import { resolveBigRAGClient } from "./lib/bigrag";
 import { initEmailDispatcher } from "./lib/email-dispatcher";
 import { AppError } from "./lib/errors";
 import { initEventBus } from "./lib/events";
@@ -49,10 +49,6 @@ import { createWebhooksModule } from "./modules/webhooks/index";
 const env = parseEnv();
 export const db = createDatabase(env.DATABASE_URL);
 export const redis = getRedis(env.REDIS_URL);
-const bigrag = new BigRAG({
-  apiKey: env.BIGRAG_API_SECRET,
-  baseUrl: env.BIGRAG_URL
-});
 initEventBus(redis);
 initWebhookDispatcher(db, redis);
 initEmailDispatcher(db, redis);
@@ -63,6 +59,13 @@ const flushInterval = setInterval(() => {
 }, 60_000);
 
 const instanceSettings = await getInstanceSettings(db, redis);
+const bigrag = resolveBigRAGClient(instanceSettings);
+if (instanceSettings.knowledge_enabled && !bigrag) {
+  log.warn(
+    "knowledge_enabled is on but bigrag_url or bigrag_api_key is empty — " +
+      "RAG routes will return 503 until Settings → Knowledge is filled in."
+  );
+}
 
 const auth = createAuth(db, env, {
   onResetPassword: (user, url) => void sendPasswordResetEmail(db, user, url),
@@ -176,7 +179,7 @@ app.all("/v1/proxy/*", async (c) => {
   const hasBody = method !== "GET" && method !== "HEAD";
   return runPipeline({
     authHeader: c.req.header("Authorization") ?? "",
-    bigrag,
+    bigrag: bigrag ?? undefined,
     bodyText: hasBody ? await c.req.text() : undefined,
     db,
     env,
@@ -209,7 +212,9 @@ const adminRoutes = new Hono();
 adminRoutes.use("*", createAuthMiddleware(auth));
 adminRoutes.use("*", platformAdminMiddleware);
 adminRoutes.route("/", createAdminModule(db, env.APP_URL, redis));
-adminRoutes.route("/knowledge", createKnowledgeAnalyticsModule(db, bigrag));
+if (bigrag) {
+  adminRoutes.route("/knowledge", createKnowledgeAnalyticsModule(db, bigrag));
+}
 app.route("/v1/admin", adminRoutes);
 
 const v1 = new Hono();
@@ -224,7 +229,23 @@ v1.route("/analytics", createAnalyticsModule(db, redis));
 v1.route("/webhooks", createWebhooksModule(db));
 v1.route("/routing-rules", createRoutingRulesModule(db));
 v1.route("/audit-logs", createAuditLogsModule(db));
-v1.route("/knowledge", createKnowledgeModule(db, bigrag));
+if (bigrag) {
+  v1.route("/knowledge", createKnowledgeModule(db, bigrag));
+} else {
+  v1.all("/knowledge/*", (c) =>
+    c.json(
+      {
+        detail:
+          "Knowledge / RAG is disabled. Enable it in Admin → Settings → Knowledge and configure a bigRAG URL and API key.",
+        instance: c.req.path,
+        status: 503,
+        title: "RAG disabled",
+        type: "about:blank"
+      },
+      { headers: { "Content-Type": "application/problem+json" }, status: 503 }
+    )
+  );
+}
 v1.route("/keys", createKeyBindingsModule(db));
 app.route("/v1", v1);
 

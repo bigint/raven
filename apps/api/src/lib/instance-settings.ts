@@ -20,12 +20,16 @@ export interface InstanceSettings {
   readonly webhook_retry_count: number;
   readonly email_notifications_enabled: boolean;
   readonly knowledge_enabled: boolean;
+  readonly bigrag_url: string;
+  readonly bigrag_api_key: string;
   readonly notify_on_budget_exceeded: boolean;
   readonly notify_on_provider_error_spike: boolean;
 }
 
 const DEFAULTS: Record<string, string> = {
   analytics_retention_days: "365",
+  bigrag_api_key: "",
+  bigrag_url: "",
   default_max_tokens: "4096",
   email_notifications_enabled: "false",
   global_rate_limit_rpd: "1000",
@@ -56,6 +60,8 @@ const toNum = (v: string | undefined, fallback: number): number => {
 
 const parse = (raw: Record<string, string>): InstanceSettings => ({
   analytics_retention_days: toNum(raw.analytics_retention_days, 365),
+  bigrag_api_key: raw.bigrag_api_key || "",
+  bigrag_url: raw.bigrag_url || "",
   default_max_tokens: toNum(raw.default_max_tokens, 4096),
   email_notifications_enabled: toBool(raw.email_notifications_enabled),
   global_rate_limit_rpd: toNum(raw.global_rate_limit_rpd, 1000),

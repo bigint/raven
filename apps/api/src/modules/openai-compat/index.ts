@@ -9,7 +9,7 @@ export const createOpenAICompatModule = (
   db: Database,
   redis: Redis,
   env: Env,
-  bigrag: BigRAG,
+  bigrag: BigRAG | null,
   knowledgeEnabled: boolean
 ) => {
   const app = new Hono();
