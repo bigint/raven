@@ -41,7 +41,7 @@ const ConfirmDialog = ({
               render={
                 <motion.div
                   animate={{ opacity: 1 }}
-                  className="fixed inset-0 z-50 bg-black/50"
+                  className="fixed inset-0 z-50 bg-background/70 backdrop-blur-sm"
                   exit={{ opacity: 0 }}
                   initial={isReduced ? { opacity: 1 } : { opacity: 0 }}
                   transition={{ duration: isReduced ? 0 : 0.15 }}
@@ -52,7 +52,7 @@ const ConfirmDialog = ({
               render={
                 <motion.div
                   animate={{ opacity: 1, scale: 1 }}
-                  className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-background shadow-xl"
+                  className="fixed left-1/2 top-1/2 z-50 w-full max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-popover text-popover-foreground shadow-lg"
                   exit={
                     isReduced ? { opacity: 0 } : { opacity: 0, scale: 0.95 }
                   }
@@ -69,15 +69,15 @@ const ConfirmDialog = ({
                 />
               }
             >
-              <div className="px-6 py-5">
-                <AlertDialog.Title className="text-base font-semibold">
+              <div className="p-5">
+                <AlertDialog.Title className="text-base font-semibold tracking-tight">
                   {title}
                 </AlertDialog.Title>
                 <AlertDialog.Description className="mt-2 text-sm text-muted-foreground">
                   {description}
                 </AlertDialog.Description>
               </div>
-              <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
+              <div className="px-5 py-3 border-t border-border flex gap-2 justify-end">
                 <AlertDialog.Close
                   disabled={loading}
                   render={<Button variant="secondary">Cancel</Button>}

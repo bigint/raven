@@ -45,7 +45,7 @@ const Modal = ({
               render={
                 <motion.div
                   animate={{ opacity: 1 }}
-                  className="fixed inset-0 z-50 bg-black/50"
+                  className="fixed inset-0 z-50 bg-background/70 backdrop-blur-sm"
                   exit={{ opacity: 0 }}
                   initial={isReduced ? { opacity: 1 } : { opacity: 0 }}
                   transition={{ duration: isReduced ? 0 : 0.15 }}
@@ -57,7 +57,7 @@ const Modal = ({
                 <motion.div
                   animate={{ opacity: 1, scale: 1 }}
                   className={cn(
-                    "fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-background shadow-xl max-h-[calc(100vh-4rem)] overflow-y-auto",
+                    "fixed left-1/2 top-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-popover text-popover-foreground shadow-lg max-h-[calc(100vh-4rem)] overflow-y-auto",
                     sizeMap[size]
                   )}
                   exit={
@@ -76,13 +76,13 @@ const Modal = ({
                 />
               }
             >
-              <div className="flex items-center justify-between border-b border-border px-6 py-4">
-                <Dialog.Title className="text-base font-semibold">
+              <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+                <Dialog.Title className="text-base font-semibold tracking-tight">
                   {title}
                 </Dialog.Title>
                 <Dialog.Close
                   aria-label="Close"
-                  className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                  className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                 >
                   <svg
                     aria-hidden="true"
@@ -100,9 +100,9 @@ const Modal = ({
                   </svg>
                 </Dialog.Close>
               </div>
-              <div className="px-6 py-5">{children}</div>
+              <div className="p-5 text-sm">{children}</div>
               {footer && (
-                <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
+                <div className="px-5 py-3 border-t border-border flex gap-2 justify-end">
                   {footer}
                 </div>
               )}
