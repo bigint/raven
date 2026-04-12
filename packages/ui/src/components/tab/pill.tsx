@@ -29,15 +29,16 @@ const PillTabs = <T extends string = string>({
     <Tabs.List
       activateOnFocus
       className={cn(
-        "relative flex h-9 w-fit items-center gap-1 overflow-x-auto rounded-md border border-border px-1",
+        "inline-flex border border-border rounded-md overflow-hidden",
         className
       )}
     >
       {options.map((opt) => (
         <Tabs.Tab
           className={cn(
-            "relative z-0 shrink-0 cursor-pointer rounded-md px-3 py-1 text-sm font-medium transition-colors",
-            "text-muted-foreground hover:text-foreground data-active:text-background",
+            "shrink-0 cursor-pointer px-2.5 h-7 text-xs font-medium transition-colors border-l border-border first:border-l-0",
+            "bg-background text-muted-foreground hover:text-foreground hover:bg-muted",
+            "data-active:bg-accent data-active:text-foreground",
             opt.disabled && "cursor-not-allowed opacity-50"
           )}
           disabled={opt.disabled}
@@ -45,13 +46,10 @@ const PillTabs = <T extends string = string>({
           title={opt.tooltip}
           value={opt.value}
         >
-          <span className="relative z-10">
-            {opt.label}
-            {opt.extra}
-          </span>
+          {opt.label}
+          {opt.extra}
         </Tabs.Tab>
       ))}
-      <Tabs.Indicator className="absolute top-[var(--active-tab-top)] left-[var(--active-tab-left)] h-[var(--active-tab-height)] w-[var(--active-tab-width)] -z-1 rounded-md bg-foreground transition-all duration-300 ease-[cubic-bezier(0.65,0,0.35,1)]" />
     </Tabs.List>
   </Tabs.Root>
 );
