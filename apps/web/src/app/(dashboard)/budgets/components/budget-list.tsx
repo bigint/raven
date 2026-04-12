@@ -20,7 +20,7 @@ const columns: Column<Budget>[] = [
     header: "Entity Type",
     key: "entityType",
     render: (budget) => (
-      <Badge variant="neutral">
+      <Badge variant="outline">
         {ENTITY_TYPE_LABELS[budget.entityType] ?? budget.entityType}
       </Badge>
     )

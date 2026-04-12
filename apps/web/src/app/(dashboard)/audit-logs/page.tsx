@@ -30,11 +30,11 @@ interface AuditLog {
 
 const ACTION_VERBS: Record<
   string,
-  { label: string; variant: "success" | "info" | "error" }
+  { label: string; variant: "solid" | "subtle" }
 > = {
-  created: { label: "Created", variant: "success" },
-  deleted: { label: "Deleted", variant: "error" },
-  updated: { label: "Updated", variant: "info" }
+  created: { label: "Created", variant: "solid" },
+  deleted: { label: "Deleted", variant: "subtle" },
+  updated: { label: "Updated", variant: "solid" }
 };
 
 const RESOURCE_ICONS: Record<string, typeof Key> = {
@@ -67,7 +67,7 @@ const parseAction = (action: string) => {
 const ActionBadge = ({ action }: { action: string }) => {
   const { verb } = parseAction(action);
   const meta = ACTION_VERBS[verb];
-  if (!meta) return <Badge variant="neutral">{action}</Badge>;
+  if (!meta) return <Badge variant="outline">{action}</Badge>;
 
   const Icon = verb === "created" ? Plus : verb === "deleted" ? Trash2 : Pencil;
 

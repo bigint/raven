@@ -19,12 +19,12 @@ interface RequestTableProps {
 const getStatusBadge = (statusCode: number) => {
   const variant =
     statusCode >= 500
-      ? "error"
+      ? "subtle"
       : statusCode >= 400
-        ? "warning"
+        ? "subtle"
         : statusCode >= 200 && statusCode < 300
-          ? "success"
-          : "neutral";
+          ? "solid"
+          : "outline";
   return <Badge variant={variant}>{statusCode}</Badge>;
 };
 
@@ -93,9 +93,9 @@ const columns: Column<RequestLog>[] = [
     key: "cache",
     render: (req) =>
       req.cacheHit ? (
-        <Badge variant="success">Hit</Badge>
+        <Badge variant="solid">Hit</Badge>
       ) : (
-        <Badge variant="neutral">Miss</Badge>
+        <Badge variant="outline">Miss</Badge>
       )
   }
 ];

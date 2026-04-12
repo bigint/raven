@@ -105,7 +105,7 @@ const ProviderList = ({
             onClick={() => onToggleEnabled(provider)}
             variant="ghost"
           >
-            <Badge dot variant={provider.isEnabled ? "success" : "neutral"}>
+            <Badge dot variant={provider.isEnabled ? "solid" : "outline"}>
               {provider.isEnabled ? (
                 <>
                   <Check aria-hidden="true" className="size-3" />

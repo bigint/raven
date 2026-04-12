@@ -47,38 +47,40 @@ const ResponseMetadata = ({ meta, show }: ResponseMetadataProps) => {
 
       {expanded && (
         <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-          {meta.provider && <Badge variant="neutral">{meta.provider}</Badge>}
-          {meta.model && <Badge variant="neutral">{meta.model}</Badge>}
+          {meta.provider && <Badge variant="outline">{meta.provider}</Badge>}
+          {meta.model && <Badge variant="outline">{meta.model}</Badge>}
           {meta.latencyMs !== undefined && (
-            <Badge variant="neutral">{meta.latencyMs}ms</Badge>
+            <Badge variant="outline">{meta.latencyMs}ms</Badge>
           )}
           {meta.inputTokens !== undefined && (
-            <Badge variant="neutral">
+            <Badge variant="outline">
               {meta.inputTokens}&#8594;{meta.outputTokens ?? 0} tokens
             </Badge>
           )}
           {meta.cost !== undefined && meta.cost > 0 && (
-            <Badge variant="neutral">${meta.cost.toFixed(4)}</Badge>
+            <Badge variant="outline">${meta.cost.toFixed(4)}</Badge>
           )}
-          {meta.cacheHit && <Badge variant="success">cached</Badge>}
+          {meta.cacheHit && <Badge variant="solid">cached</Badge>}
           {meta.routingStrategy && (
-            <Badge variant="info">route: {meta.routingStrategy}</Badge>
+            <Badge variant="solid">route: {meta.routingStrategy}</Badge>
           )}
-          {meta.taskType && <Badge variant="info">task: {meta.taskType}</Badge>}
+          {meta.taskType && (
+            <Badge variant="solid">task: {meta.taskType}</Badge>
+          )}
           {meta.toolCalls !== undefined && meta.toolCalls > 0 && (
-            <Badge variant="neutral">
+            <Badge variant="outline">
               {meta.toolCalls} tool call{meta.toolCalls > 1 ? "s" : ""}
             </Badge>
           )}
           {meta.knowledgeCollections &&
             meta.knowledgeCollections.length > 0 && (
-              <Badge variant="info">
+              <Badge variant="solid">
                 RAG: {meta.knowledgeCollections.join(", ")} (
                 {meta.knowledgeChunks ?? 0} chunks)
               </Badge>
             )}
           {meta.guardrailWarnings && meta.guardrailWarnings.length > 0 && (
-            <Badge variant="warning">
+            <Badge variant="subtle">
               {meta.guardrailWarnings.length} guardrail warning(s)
             </Badge>
           )}

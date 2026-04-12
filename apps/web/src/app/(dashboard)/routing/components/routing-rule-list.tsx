@@ -39,7 +39,7 @@ const columns: Column<RoutingRule>[] = [
     header: "Condition",
     key: "condition",
     render: (rule) => (
-      <Badge variant="neutral">
+      <Badge variant="outline">
         {CONDITION_LABELS[rule.condition] ?? rule.condition}
       </Badge>
     )
@@ -60,7 +60,7 @@ const columns: Column<RoutingRule>[] = [
     header: "Enabled",
     key: "isEnabled",
     render: (rule) => (
-      <Badge variant={rule.isEnabled ? "success" : "neutral"}>
+      <Badge variant={rule.isEnabled ? "solid" : "outline"}>
         <TextMorph>{rule.isEnabled ? "Yes" : "No"}</TextMorph>
       </Badge>
     )

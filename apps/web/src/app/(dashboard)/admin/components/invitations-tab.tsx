@@ -24,7 +24,7 @@ export const InvitationsTab = () => {
       header: "Role",
       key: "role",
       render: (invitation) => (
-        <Badge variant="neutral">
+        <Badge variant="outline">
           {invitation.role.charAt(0).toUpperCase() + invitation.role.slice(1)}
         </Badge>
       )

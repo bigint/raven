@@ -29,7 +29,7 @@ const columns: Column<Webhook>[] = [
     header: "Events",
     key: "events",
     render: (webhook) => (
-      <Badge variant="neutral">
+      <Badge variant="outline">
         {webhook.events.length}{" "}
         {webhook.events.length === 1 ? "event" : "events"}
       </Badge>
@@ -46,7 +46,7 @@ const columns: Column<Webhook>[] = [
     header: "Enabled",
     key: "isEnabled",
     render: (webhook) => (
-      <Badge variant={webhook.isEnabled ? "success" : "neutral"}>
+      <Badge variant={webhook.isEnabled ? "solid" : "outline"}>
         <TextMorph>{webhook.isEnabled ? "Enabled" : "Disabled"}</TextMorph>
       </Badge>
     )

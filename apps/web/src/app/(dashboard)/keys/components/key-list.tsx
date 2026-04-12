@@ -36,7 +36,7 @@ const KeyList = ({
           header: "Environment",
           key: "environment",
           render: (key) => (
-            <Badge variant={key.environment === "live" ? "success" : "warning"}>
+            <Badge variant={key.environment === "live" ? "solid" : "subtle"}>
               {key.environment === "live" ? "Live" : "Test"}
             </Badge>
           )
@@ -90,7 +90,7 @@ const KeyList = ({
           header: "Status",
           key: "status",
           render: (key) => (
-            <Badge variant={key.isActive ? "success" : "neutral"}>
+            <Badge variant={key.isActive ? "solid" : "outline"}>
               {key.isActive ? (
                 <>
                   <Check aria-hidden="true" className="size-3" />

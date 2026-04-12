@@ -44,11 +44,11 @@ const CAPABILITY_ICONS: Record<string, typeof MessageSquare> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  balanced: "info",
-  embedding: "neutral",
-  fast: "success",
-  flagship: "primary",
-  reasoning: "warning"
+  balanced: "solid",
+  embedding: "outline",
+  fast: "solid",
+  flagship: "solid",
+  reasoning: "subtle"
 };
 
 const formatContext = (tokens: number): string =>
@@ -138,12 +138,7 @@ const ModelCard = memo(function ModelCard({
         </div>
         <Badge
           variant={
-            CATEGORY_COLORS[model.category] as
-              | "info"
-              | "neutral"
-              | "primary"
-              | "success"
-              | "warning"
+            CATEGORY_COLORS[model.category] as "outline" | "solid" | "subtle"
           }
         >
           {categoryMeta.label}

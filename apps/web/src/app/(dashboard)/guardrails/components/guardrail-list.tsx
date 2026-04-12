@@ -16,10 +16,10 @@ interface GuardrailListProps {
   readonly onDelete: (id: string) => void;
 }
 
-const ACTION_VARIANTS: Record<string, "error" | "warning" | "neutral"> = {
-  block: "error",
-  log: "neutral",
-  warn: "warning"
+const ACTION_VARIANTS: Record<string, "subtle" | "outline"> = {
+  block: "subtle",
+  log: "outline",
+  warn: "subtle"
 };
 
 const columns: Column<Guardrail>[] = [
@@ -33,7 +33,7 @@ const columns: Column<Guardrail>[] = [
     header: "Type",
     key: "type",
     render: (guardrail) => (
-      <Badge variant="neutral">
+      <Badge variant="outline">
         {TYPE_LABELS[guardrail.type] ?? guardrail.type}
       </Badge>
     )
@@ -42,7 +42,7 @@ const columns: Column<Guardrail>[] = [
     header: "Action",
     key: "action",
     render: (guardrail) => (
-      <Badge variant={ACTION_VARIANTS[guardrail.action] ?? "neutral"}>
+      <Badge variant={ACTION_VARIANTS[guardrail.action] ?? "outline"}>
         {ACTION_LABELS[guardrail.action] ?? guardrail.action}
       </Badge>
     )
@@ -57,7 +57,7 @@ const columns: Column<Guardrail>[] = [
     header: "Enabled",
     key: "isEnabled",
     render: (guardrail) => (
-      <Badge variant={guardrail.isEnabled ? "success" : "neutral"}>
+      <Badge variant={guardrail.isEnabled ? "solid" : "outline"}>
         <TextMorph>{guardrail.isEnabled ? "On" : "Off"}</TextMorph>
       </Badge>
     )

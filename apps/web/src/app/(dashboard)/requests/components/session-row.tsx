@@ -17,12 +17,12 @@ interface SessionRowProps {
 const getStatusBadge = (statusCode: number) => {
   const variant =
     statusCode >= 500
-      ? "error"
+      ? "subtle"
       : statusCode >= 400
-        ? "warning"
+        ? "subtle"
         : statusCode >= 200 && statusCode < 300
-          ? "success"
-          : "neutral";
+          ? "solid"
+          : "outline";
   return <Badge variant={variant}>{statusCode}</Badge>;
 };
 
@@ -66,11 +66,11 @@ export const SessionRow = ({ session, onRequestClick }: SessionRowProps) => {
         </td>
         <td className="px-5 py-4 text-center">
           {session.errorCount > 0 ? (
-            <Badge variant="error">
+            <Badge variant="subtle">
               {session.errorCount} error{session.errorCount > 1 ? "s" : ""}
             </Badge>
           ) : (
-            <Badge variant="success">OK</Badge>
+            <Badge variant="solid">OK</Badge>
           )}
         </td>
         <td className="px-5 py-4 text-right tabular-nums">
