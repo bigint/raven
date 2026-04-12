@@ -30,16 +30,16 @@ const Switch = ({
         aria-labelledby={label ? labelId : undefined}
         checked={checked}
         className={cn(
-          "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-          checked ? "bg-primary" : "bg-input"
+          "relative inline-flex w-[26px] h-3.5 shrink-0 cursor-pointer items-center rounded-full border border-input bg-transparent transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground",
+          checked && "bg-foreground border-foreground"
         )}
         disabled={disabled}
         onCheckedChange={onCheckedChange}
       >
         <BaseSwitch.Thumb
           className={cn(
-            "pointer-events-none inline-block size-4 rounded-full bg-background shadow-sm ring-1 ring-border/10 transition-transform duration-150",
-            checked ? "translate-x-4" : "translate-x-0"
+            "pointer-events-none inline-block size-2.5 rounded-full bg-muted-foreground transition-transform data-[state=checked]:translate-x-[11px] data-[state=checked]:bg-background",
+            checked ? "translate-x-[11px] bg-background" : "translate-x-0.5"
           )}
         />
       </BaseSwitch.Root>

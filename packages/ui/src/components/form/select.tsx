@@ -26,12 +26,12 @@ interface SelectProps {
 }
 
 const TRIGGER_CLASS =
-  "flex h-9 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50";
+  "flex h-8 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-2.5 text-left text-sm text-foreground transition-colors hover:border-input focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50";
 
 const ChevronIcon = () => (
   <svg
     aria-hidden="true"
-    className="size-4 shrink-0 text-muted-foreground"
+    className="size-3 shrink-0 text-muted-foreground"
     fill="none"
     stroke="currentColor"
     strokeWidth={2}
@@ -139,8 +139,8 @@ const SearchableSelect = ({
           aria-labelledby={id ? `${id}-label` : undefined}
           className={cn(
             TRIGGER_CLASS,
-            error && "border-destructive focus-visible:ring-destructive",
-            !selected && "text-muted-foreground"
+            error && "border-foreground ring-1 ring-foreground",
+            !selected && "!text-muted-foreground"
           )}
           disabled={disabled}
           id={id}
@@ -246,7 +246,7 @@ const StandardSelect = ({
       <BaseSelect.Trigger
         className={cn(
           TRIGGER_CLASS,
-          error && "border-destructive focus-visible:ring-destructive"
+          error && "border-foreground ring-1 ring-foreground"
         )}
         id={id}
       >

@@ -38,21 +38,19 @@ const Checkbox = ({
         aria-label={ariaLabel}
         checked={checked}
         className={cn(
-          "flex size-4 shrink-0 items-center justify-center rounded border border-input transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-          checked || indeterminate
-            ? "border-primary bg-primary text-primary-foreground"
-            : "bg-background"
+          "flex size-3.5 shrink-0 items-center justify-center rounded-sm border border-input bg-background transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground",
+          (checked || indeterminate) && "bg-foreground border-foreground"
         )}
         disabled={disabled}
         id={checkboxId}
         indeterminate={indeterminate}
         onCheckedChange={onCheckedChange}
       >
-        <BaseCheckbox.Indicator className="flex items-center justify-center">
+        <BaseCheckbox.Indicator className="flex items-center justify-center text-background">
           {indeterminate ? (
-            <MinusIcon aria-hidden="true" className="size-3" />
+            <MinusIcon aria-hidden="true" className="size-2.5" />
           ) : (
-            <CheckIcon aria-hidden="true" className="size-3" />
+            <CheckIcon aria-hidden="true" className="size-2.5" />
           )}
         </BaseCheckbox.Indicator>
       </BaseCheckbox.Root>

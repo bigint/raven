@@ -21,14 +21,17 @@ const Textarea = ({
 }: TextareaProps & { ref?: Ref<HTMLTextAreaElement> }) => (
   <Field.Root invalid={!!error}>
     {label && (
-      <Field.Label className="mb-1.5 block text-sm font-medium" htmlFor={id}>
+      <Field.Label
+        className="mb-1.5 block text-[10px] font-medium text-muted-foreground uppercase tracking-[0.08em]"
+        htmlFor={id}
+      >
         {label}
       </Field.Label>
     )}
     <textarea
       className={cn(
-        "w-full resize-y rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[80px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-        error && "border-destructive focus-visible:ring-destructive",
+        "w-full min-h-[80px] rounded-md border border-input bg-background px-2.5 py-2 text-sm text-foreground placeholder:text-muted-foreground transition-colors hover:border-input focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring resize-y data-[invalid]:border-foreground data-[invalid]:ring-1 data-[invalid]:ring-foreground",
+        error && "border-foreground ring-1 ring-foreground",
         className
       )}
       id={id}
@@ -41,7 +44,7 @@ const Textarea = ({
       </Field.Description>
     )}
     {error && (
-      <Field.Error className="mt-1.5 text-xs text-destructive">
+      <Field.Error className="mt-1.5 text-xs font-medium text-foreground">
         {error}
       </Field.Error>
     )}
