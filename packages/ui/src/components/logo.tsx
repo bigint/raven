@@ -13,9 +13,9 @@ export const RavenLogo = ({ className }: RavenLogoProps) => (
     <rect fill="currentColor" height="32" rx="8" width="32" />
     <path
       d="M8 12L16 6L24 12V20L16 26L8 20V12Z"
-      fill="currentColor"
+      fill="var(--color-background)"
       opacity="0.9"
     />
-    <path d="M16 6L24 12L16 18L8 12L16 6Z" fill="currentColor" />
+    <path d="M16 6L24 12L16 18L8 12L16 6Z" fill="var(--color-background)" />
   </svg>
 );
