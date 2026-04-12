@@ -14,7 +14,8 @@ const statusDotVariants = cva("inline-block shrink-0 rounded-full", {
       sm: "size-1"
     },
     variant: {
-      error: "bg-foreground",
+      error:
+        "bg-foreground ring-[1.5px] ring-offset-[1px] ring-foreground ring-offset-background",
       filled: "bg-foreground",
       ring: "bg-transparent border-[1.5px] border-muted-foreground",
       striped:

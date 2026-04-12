@@ -21,7 +21,8 @@ const UsageMeter = ({
   resetsAt,
   ...props
 }: UsageMeterProps) => {
-  const percent = Math.min(100, Math.round((used / total) * 100));
+  const percent =
+    total > 0 ? Math.min(100, Math.round((used / total) * 100)) : 0;
   return (
     <div className={cn("flex flex-col gap-1.5", className)} {...props}>
       <div className="flex items-center justify-between">

@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog } from "@base-ui/react/dialog";
-import { Kbd } from "@raven/ui";
+import { Kbd, SectionLabel } from "@raven/ui";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -105,9 +105,9 @@ const CommandPalette = ({
             )}
             {grouped.map(([section, items]) => (
               <div key={section}>
-                <div className="px-3.5 pt-2 pb-1 text-[10px] uppercase tracking-[0.08em] font-medium text-muted-foreground">
+                <SectionLabel className="px-3.5 pt-2 pb-1">
                   {section}
-                </div>
+                </SectionLabel>
                 {items.map((action) => {
                   const isActive = flatIndex === activeIndex;
                   const currentIndex = flatIndex++;
