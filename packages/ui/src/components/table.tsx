@@ -15,6 +15,8 @@ interface Column<T> {
   readonly sortable?: boolean;
   readonly className?: string;
   readonly headerClassName?: string;
+  readonly numeric?: boolean;
+  readonly width?: string | number;
   readonly render: (item: T, index: number) => ReactNode;
 }
 
@@ -104,10 +106,10 @@ const DataTable = <T,>({
           </Popover.Root>
         </div>
       )}
-      <div className="rounded-xl border border-border overflow-hidden overflow-x-auto">
+      <div className="border border-border rounded-lg overflow-hidden bg-card overflow-x-auto">
         <table className="w-full min-w-[600px] border-collapse text-sm">
           <thead>
-            <tr className="border-b border-border">
+            <tr className="bg-muted border-b border-border">
               {visibleColumns.map((col) => {
                 const isSortable = col.sortable && onSort;
                 const isActiveSort = sortKey === col.key;
@@ -121,10 +123,12 @@ const DataTable = <T,>({
                 return (
                   <th
                     className={cn(
-                      "px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground sm:px-5 sm:py-3",
+                      "text-[10px] uppercase tracking-[0.08em] font-medium text-muted-foreground px-3 py-2 text-left",
+                      col.numeric && "text-right",
                       col.headerClassName
                     )}
                     key={col.key}
+                    style={col.width ? { width: col.width } : undefined}
                   >
                     {isSortable ? (
                       <button
@@ -137,7 +141,7 @@ const DataTable = <T,>({
                         <SortIcon
                           aria-hidden="true"
                           className={cn(
-                            "size-3.5",
+                            "size-3",
                             isActiveSort
                               ? "text-foreground"
                               : "text-muted-foreground/50"
@@ -161,8 +165,7 @@ const DataTable = <T,>({
                   <motion.tr
                     animate={{ opacity: 1, y: 0 }}
                     className={cn(
-                      "transition-colors hover:bg-muted/30",
-                      "border-b border-border last:border-b-0"
+                      "border-b border-border last:border-b-0 hover:bg-muted/50 transition-colors"
                     )}
                     {...(isLargeDataset
                       ? {}
@@ -176,7 +179,9 @@ const DataTable = <T,>({
                     {visibleColumns.map((col) => (
                       <td
                         className={cn(
-                          "px-3 py-3 tabular-nums sm:px-5 sm:py-4",
+                          "px-3 py-2.5 text-foreground",
+                          col.numeric &&
+                            "font-mono text-[12.5px] tabular-nums text-right",
                           col.className
                         )}
                         key={col.key}
@@ -191,15 +196,16 @@ const DataTable = <T,>({
               displayData.map((item, idx) => (
                 <tr
                   className={cn(
-                    "transition-colors hover:bg-muted/30",
-                    idx !== displayData.length - 1 && "border-b border-border"
+                    "border-b border-border last:border-b-0 hover:bg-muted/50 transition-colors"
                   )}
                   key={keyExtractor(item)}
                 >
                   {visibleColumns.map((col) => (
                     <td
                       className={cn(
-                        "px-3 py-3 tabular-nums sm:px-5 sm:py-4",
+                        "px-3 py-2.5 text-foreground",
+                        col.numeric &&
+                          "font-mono text-[12.5px] tabular-nums text-right",
                         col.className
                       )}
                       key={col.key}
