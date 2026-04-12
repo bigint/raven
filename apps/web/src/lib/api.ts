@@ -37,7 +37,7 @@ const client = ky.create({
     ],
     beforeRequest: []
   },
-  prefixUrl: API_URL
+  prefix: API_URL
 });
 
 const request = async <T>(
