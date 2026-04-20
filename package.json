@@ -4,12 +4,12 @@
   },
   "description": "Open-source AI gateway for routing, managing, and observing LLM API traffic",
   "devDependencies": {
-    "@biomejs/biome": "^2.4.11",
-    "@types/node": "^25.5.2",
+    "@biomejs/biome": "^2.4.12",
+    "@types/node": "^25.6.0",
     "drizzle-orm": "^0.45.2",
     "husky": "^9.1.7",
     "tsx": "^4.21.0",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.3"
   },
   "homepage": "https://github.com/bigint/raven",
   "keywords": [
