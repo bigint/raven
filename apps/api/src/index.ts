@@ -6,7 +6,6 @@ import { Hono } from "hono";
 import { compress } from "hono/compress";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import { resolveBigRAGClient } from "./lib/bigrag";
 import { initEmailDispatcher } from "./lib/email-dispatcher";
 import { AppError } from "./lib/errors";
 import { initEventBus } from "./lib/events";
@@ -29,11 +28,6 @@ import { createBudgetsModule } from "./modules/budgets/index";
 import { createGuardrailsModule } from "./modules/guardrails/index";
 import { createInvitationsModule } from "./modules/invitations/index";
 import { createKeysModule } from "./modules/keys/index";
-import { createKnowledgeAnalyticsModule } from "./modules/knowledge/analytics/index";
-import {
-  createKeyBindingsModule,
-  createKnowledgeModule
-} from "./modules/knowledge/index";
 import { listAvailableModels } from "./modules/models/available";
 import { createModelsModule } from "./modules/models/index";
 import { createOpenAICompatModule } from "./modules/openai-compat/index";
@@ -59,13 +53,6 @@ const flushInterval = setInterval(() => {
 }, 60_000);
 
 const instanceSettings = await getInstanceSettings(db, redis);
-const bigrag = resolveBigRAGClient(instanceSettings);
-if (instanceSettings.knowledge_enabled && !bigrag) {
-  log.warn(
-    "knowledge_enabled is on but bigrag_url or bigrag_api_key is empty — " +
-      "RAG routes will return 503 until Settings → Knowledge is filled in."
-  );
-}
 
 const auth = createAuth(db, env, {
   onResetPassword: (user, url) => void sendPasswordResetEmail(db, user, url),
@@ -79,13 +66,9 @@ if (env.NODE_ENV !== "production") {
   app.use("*", logger());
 }
 
-// Request body size limit (skip knowledge document uploads — bigRAG handles its own limits)
 const maxBodyBytes =
   instanceSettings.max_request_body_size_gb * 1024 * 1024 * 1024;
 app.use("*", async (c, next) => {
-  if (c.req.path.includes("/v1/knowledge/")) {
-    return next();
-  }
   const contentLength = c.req.header("content-length");
   if (contentLength && Number.parseInt(contentLength, 10) > maxBodyBytes) {
     return c.json(
@@ -108,11 +91,6 @@ app.use(
   "*",
   cors({
     credentials: true,
-    exposeHeaders: [
-      "X-Knowledge-Chunks",
-      "X-Knowledge-Collections",
-      "X-Knowledge-Used"
-    ],
     origin: [env.APP_URL]
   })
 );
@@ -163,28 +141,17 @@ app.get("/health", (c) => c.json({ status: "ok" }));
 
 app.route("/api/auth", createAuthModule(auth, db, redis));
 
-app.route(
-  "/v1",
-  createOpenAICompatModule(
-    db,
-    redis,
-    env,
-    bigrag,
-    instanceSettings.knowledge_enabled
-  )
-);
+app.route("/v1", createOpenAICompatModule(db, redis, env));
 
 app.all("/v1/proxy/*", async (c) => {
   const method = c.req.method;
   const hasBody = method !== "GET" && method !== "HEAD";
   return runPipeline({
     authHeader: c.req.header("Authorization") ?? "",
-    bigrag: bigrag ?? undefined,
     bodyText: hasBody ? await c.req.text() : undefined,
     db,
     env,
     incomingHeaders: c.req.header(),
-    knowledgeEnabled: instanceSettings.knowledge_enabled,
     method,
     path: c.req.path,
     providerPath: c.req.path,
@@ -212,9 +179,6 @@ const adminRoutes = new Hono();
 adminRoutes.use("*", createAuthMiddleware(auth));
 adminRoutes.use("*", platformAdminMiddleware);
 adminRoutes.route("/", createAdminModule(db, env.APP_URL, redis));
-if (bigrag) {
-  adminRoutes.route("/knowledge", createKnowledgeAnalyticsModule(db, bigrag));
-}
 app.route("/v1/admin", adminRoutes);
 
 const v1 = new Hono();
@@ -229,24 +193,6 @@ v1.route("/analytics", createAnalyticsModule(db, redis));
 v1.route("/webhooks", createWebhooksModule(db));
 v1.route("/routing-rules", createRoutingRulesModule(db));
 v1.route("/audit-logs", createAuditLogsModule(db));
-if (bigrag) {
-  v1.route("/knowledge", createKnowledgeModule(db, bigrag));
-} else {
-  v1.all("/knowledge/*", (c) =>
-    c.json(
-      {
-        detail:
-          "Knowledge / RAG is disabled. Enable it in Admin → Settings → Knowledge and configure a bigRAG URL and API key.",
-        instance: c.req.path,
-        status: 503,
-        title: "RAG disabled",
-        type: "about:blank"
-      },
-      { headers: { "Content-Type": "application/problem+json" }, status: 503 }
-    )
-  );
-}
-v1.route("/keys", createKeyBindingsModule(db));
 app.route("/v1", v1);
 
 app.notFound((c) =>

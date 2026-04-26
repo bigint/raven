@@ -1,4 +1,3 @@
-import type { BigRAG } from "@bigrag/client";
 import type { Env } from "@raven/config";
 import type { Database } from "@raven/db";
 import { Hono } from "hono";
@@ -8,14 +7,9 @@ import { chatCompletionsHandler } from "./handler";
 export const createOpenAICompatModule = (
   db: Database,
   redis: Redis,
-  env: Env,
-  bigrag: BigRAG | null,
-  knowledgeEnabled: boolean
+  env: Env
 ) => {
   const app = new Hono();
-  app.post(
-    "/chat/completions",
-    chatCompletionsHandler(db, redis, env, bigrag, knowledgeEnabled)
-  );
+  app.post("/chat/completions", chatCompletionsHandler(db, redis, env));
   return app;
 };

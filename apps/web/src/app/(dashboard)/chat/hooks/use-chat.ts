@@ -42,11 +42,9 @@ export const useChat = () => {
   } | null>(null);
   const [settings, setSettings] = useState<PlaygroundSettings>({
     chatMemory: 5,
-    enableKnowledge: false,
     enableReasoning: false,
     enableTools: false,
     enableWebSearch: false,
-    knowledgeCollections: [],
     maxTokens: 4096,
     reasoningBudget: 8192,
     showMetadata: true,
@@ -237,18 +235,7 @@ export const useChat = () => {
             headers: {
               Authorization: `Bearer ${pk.key}`,
               "Content-Type": "application/json",
-              "x-session-id": sessionIdRef.current,
-              ...(currentSettings.enableKnowledge
-                ? {
-                    "X-Knowledge-Enabled": "true",
-                    ...(currentSettings.knowledgeCollections.length > 0
-                      ? {
-                          "X-Knowledge-Collection":
-                            currentSettings.knowledgeCollections.join(",")
-                        }
-                      : {})
-                  }
-                : {})
+              "x-session-id": sessionIdRef.current
             },
             method: "POST",
             signal: abortController.signal
@@ -272,18 +259,6 @@ export const useChat = () => {
               `Request failed with status ${response.status}`
           );
         }
-
-        const knowledgeUsed =
-          response.headers.get("X-Knowledge-Used") === "true";
-        const knowledgeChunks = knowledgeUsed
-          ? Number(response.headers.get("X-Knowledge-Chunks") ?? "0")
-          : undefined;
-        const knowledgeCollections = knowledgeUsed
-          ? (response.headers.get("X-Knowledge-Collections") ?? "")
-              .split(",")
-              .map((s) => s.trim())
-              .filter(Boolean)
-          : undefined;
 
         if (currentSettings.stream && response.body) {
           const reader = response.body.getReader();
@@ -341,8 +316,6 @@ export const useChat = () => {
           const elapsedMs = Math.round(performance.now() - startTime);
           const meta: ResponseMeta = {
             inputTokens: finalUsage?.prompt_tokens,
-            knowledgeChunks,
-            knowledgeCollections,
             latencyMs: elapsedMs,
             outputTokens: finalUsage?.completion_tokens
           };
@@ -367,8 +340,6 @@ export const useChat = () => {
           const elapsedMs = Math.round(performance.now() - startTime);
           const meta: ResponseMeta = {
             inputTokens: (usage?.prompt_tokens as number) ?? 0,
-            knowledgeChunks,
-            knowledgeCollections,
             latencyMs: elapsedMs,
             outputTokens: (usage?.completion_tokens as number) ?? 0
           };
