@@ -38,9 +38,6 @@ importers:
       '@ai-sdk/openai':
         specifier: ^3.0.52
         version: 3.0.52(zod@4.3.6)
-      '@bigrag/client':
-        specifier: file:../../../bigrag/sdks/typescript
-        version: file:../bigrag/sdks/typescript
       '@hono/node-server':
         specifier: ^1.19.13
         version: 1.19.13(hono@4.12.12)
@@ -544,10 +541,6 @@ packages:
 
   '@better-fetch/fetch@1.1.21':
     resolution: {integrity: sha512-/ImESw0sskqlVR94jB+5+Pxjf+xBwDZF/N5+y2/q4EqD7IARUTSpPfIo8uf39SYpCxyOCtbyYpUrZ3F/k0zT4A==}
-
-  '@bigrag/client@file:../bigrag/sdks/typescript':
-    resolution: {directory: ../bigrag/sdks/typescript, type: directory}
-    engines: {node: '>=18'}
 
   '@biomejs/biome@2.4.11':
     resolution: {integrity: sha512-nWxHX8tf3Opb/qRgZpBbsTOqOodkbrkJ7S+JxJAruxOReaDPPmPuLBAGQ8vigyUgo0QBB+oQltNEAvalLcjggA==}
@@ -2153,6 +2146,7 @@ packages:
   '@react-email/components@1.0.12':
     resolution: {integrity: sha512-tH18JhPDWgE+3jnYkzyB6ZrZdfNnEsFe4PwmuXmlOw4NGIysP8wPY5aXZg++pTG9qUabXg1nzX/FGHGkObH8xQ==}
     engines: {node: '>=20.0.0'}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
 
@@ -4854,8 +4848,6 @@ snapshots:
       '@noble/hashes': 2.0.1
 
   '@better-fetch/fetch@1.1.21': {}
-
-  '@bigrag/client@file:../bigrag/sdks/typescript': {}
 
   '@biomejs/biome@2.4.11':
     optionalDependencies:
