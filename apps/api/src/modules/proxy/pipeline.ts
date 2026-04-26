@@ -1,12 +1,9 @@
-import type { BigRAG } from "@bigrag/client";
 import type { Env } from "@raven/config";
 import { MODEL_CATALOG } from "@raven/data";
 import type { Database } from "@raven/db";
 import type { Redis } from "ioredis";
 import { GuardrailError, ValidationError } from "@/lib/errors";
 import { getInstanceSettings } from "@/lib/instance-settings";
-import { log } from "@/lib/logger";
-import { performRAGInjection } from "../knowledge/rag/injection";
 import { authenticateKey } from "./auth";
 import { checkBudgets } from "./budget-check";
 import { checkCache, serveCacheHit } from "./cache";
@@ -34,8 +31,6 @@ interface PipelineInput {
   readonly upstreamPathOverride?: string;
   readonly skipRouting?: boolean;
   readonly strictBody?: boolean;
-  readonly bigrag?: BigRAG;
-  readonly knowledgeEnabled?: boolean;
 }
 
 export const runPipeline = async (input: PipelineInput): Promise<Response> => {
@@ -93,31 +88,6 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
       ? evaluateRoutingRules(input.db, parsedBody.model as string, parsedBody)
       : null
   ]);
-
-  let ragHeaders: Record<string, string> = {};
-  const ragRequestEnabled =
-    input.incomingHeaders["x-knowledge-enabled"] === "true";
-  if (
-    (input.knowledgeEnabled || ragRequestEnabled) &&
-    input.bigrag &&
-    hasMessages
-  ) {
-    try {
-      const ragResult = await performRAGInjection({
-        bigrag: input.bigrag,
-        db: input.db,
-        headers: input.incomingHeaders,
-        messages: parsedBody.messages as unknown[],
-        virtualKeyId: virtualKey.id
-      });
-      if (ragResult.used) {
-        parsedBody = { ...parsedBody, messages: ragResult.injectedMessages };
-        ragHeaders = ragResult.responseHeaders;
-      }
-    } catch (err) {
-      log.error("RAG injection failed, continuing without context", err);
-    }
-  }
 
   const endUser =
     (input.userIdHeader as string | undefined) ??
@@ -199,7 +169,7 @@ export const runPipeline = async (input: PipelineInput): Promise<Response> => {
     decryptedApiKey,
     endUser,
     env: input.env,
-    extraResponseHeaders: { ...input.extraResponseHeaders, ...ragHeaders },
+    extraResponseHeaders: input.extraResponseHeaders,
     guardrailMatches,
     guardrailWarnings,
     incomingHeaders: input.incomingHeaders,

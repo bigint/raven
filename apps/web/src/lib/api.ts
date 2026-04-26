@@ -1,4 +1,4 @@
-import ky from "ky";
+import ky, { isHTTPError } from "ky";
 
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
@@ -19,7 +19,8 @@ const client = ky.create({
   credentials: "include",
   hooks: {
     beforeError: [
-      async (error) => {
+      async ({ error }) => {
+        if (!isHTTPError(error)) return error;
         const body = await error.response
           .json()
           .catch(() => ({}) as Record<string, unknown>);

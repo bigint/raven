@@ -1,4 +1,3 @@
-import type { BigRAG } from "@bigrag/client";
 import type { Env } from "@raven/config";
 import { MODEL_CATALOG } from "@raven/data";
 import type { Database } from "@raven/db";
@@ -10,9 +9,7 @@ import { runPipeline } from "../proxy/pipeline";
 export const chatCompletionsHandler = (
   db: Database,
   redis: Redis,
-  env: Env,
-  bigrag: BigRAG | null,
-  knowledgeEnabled: boolean
+  env: Env
 ) => {
   return async (c: Context): Promise<Response> => {
     const bodyText = await c.req.text();
@@ -39,7 +36,6 @@ export const chatCompletionsHandler = (
 
     return runPipeline({
       authHeader: c.req.header("Authorization") ?? "",
-      bigrag: bigrag ?? undefined,
       bodyText,
       db,
       env,
@@ -48,7 +44,6 @@ export const chatCompletionsHandler = (
         "X-Raven-Provider": providerName
       },
       incomingHeaders: c.req.header(),
-      knowledgeEnabled,
       method: "POST",
       path: c.req.path,
       providerPath: `/v1/proxy/${providerName}/chat/completions`,

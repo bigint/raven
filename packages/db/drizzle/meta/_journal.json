@@ -50,6 +50,13 @@
       "when": 1775155068401,
       "tag": "0006_dear_corsair",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1777214948431,
+      "tag": "0007_optimal_makkari",
+      "breakpoints": true
     }
   ]
 }

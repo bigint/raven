@@ -4,8 +4,7 @@ import { Button, EmptyState } from "@raven/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Network, RotateCcw } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { catalogModelsQueryOptions } from "@/lib/use-models";
 import { ChatInput } from "./components/chat-input";
 import { ChatMessages } from "./components/chat-messages";
@@ -43,20 +42,6 @@ const ChatPage = () => {
     setSystemPrompt,
     systemPrompt
   });
-
-  const searchParams = useSearchParams();
-  const lastKb = useRef<string | null>(null);
-  useEffect(() => {
-    const kb = searchParams.get("kb");
-    if (kb && kb !== lastKb.current) {
-      lastKb.current = kb;
-      setSettings((prev) => ({
-        ...prev,
-        enableKnowledge: true,
-        knowledgeCollections: [kb]
-      }));
-    }
-  }, [searchParams, setSettings]);
 
   const selectedModelData = useMemo(
     () => chatModels.find((m) => m.slug === selectedModel?.model),

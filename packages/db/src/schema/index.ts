@@ -4,7 +4,6 @@ export { budgets } from "./budgets";
 export { guardrailRules } from "./guardrail-rules";
 export { invitations } from "./invitations";
 export { virtualKeys } from "./keys";
-export { knowledgeKeyBindings, knowledgeQueryLogs } from "./knowledge";
 export { providerConfigs } from "./providers";
 export { requestLogs } from "./request-logs";
 export { routingRules } from "./routing-rules";
